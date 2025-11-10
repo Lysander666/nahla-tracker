@@ -1,4 +1,4 @@
-    <!DOCTYPE html>
+        <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -188,28 +188,28 @@
             transition: transform 0.2s, border-color 0.2s;
         }
         
-        .gallery-item:hover {
-            transform: scale(1.05);
-            border-color: #61dafb;
+        .gallery-item {
+            position: relative;
+            display: flex;
+            flex-direction: column;
         }
-        
+
         .gallery-item img {
+            flex: 1;
             width: 100%;
-            height: 100%;
             object-fit: cover;
         }
-        
+
         .gallery-caption {
-            width: 100%;
-            height: 40px;                 /* give the caption area a fixed height */
-            display: flex;                /* enable flexbox */
-            align-items: center;          /* vertical center */
-            justify-content: center;      /* horizontal center */
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             background-color: #222;
             color: #ccc;
             font-size: 0.85rem;
-            border-radius: 0 0 6px 6px;   /* optional: makes bottom corners round nicely */
         }
+
 
         
         /* --- Lightbox Modal --- */
@@ -430,20 +430,25 @@
             
         </div>
 
-         <div id="gallery-section">
-            <h2>📸 Gallery - Observations from Nahla</h2>
-            <div class="gallery-container">
-                <div class="gallery-item" onclick="openLightbox('galaxy_map.png')">
-                    <div class="gallery-tooltip">Galactic Position Map</div>
-                    <img src="galaxy_map.png" alt="Galactic Position">
-                    <div class="gallery-caption">Galactic Position Map</div>
-                </div>
+     <div id="gallery-section">
+        <h2>📸 Gallery - Observations from Nahla</h2>
+             <div class="gallery-container">
 
-                <div class="gallery-item" onclick="openLightbox('Rebekah-from-Nahla.jpg')">
-                    <div class="gallery-tooltip">Rebekah from Nahla</div>
-                    <img src="Rebekah-from-Nahla.jpg" alt="Rebekah from Nahla">
-                    <div class="gallery-caption">Rebekah from Nahla</div>
-                </div>
+        <div class="gallery-item" onclick="openLightbox('galaxy_map.png')">
+            <div class="gallery-tooltip">Galactic Position Map</div>
+            <img src="galaxy_map.png" alt="Galactic Position">
+            <div class="gallery-caption">Galactic Position Map</div>
+        </div>
+
+        <div class="gallery-item" onclick="openLightbox('Rebekah-from-Nahla.jpg')">
+            <div class="gallery-tooltip">Rebekah from Nahla</div>
+            <img src="Rebekah-from-Nahla.jpg" alt="Rebekah from Nahla">
+            <div class="gallery-caption">Rebekah from Nahla</div>
+        </div>
+
+    </div>
+</div>
+
                 <!-- Add more gallery items here with your screenshots -->
                 <!-- Example template:
                 <div class="gallery-item" onclick="openLightbox('your-image.jpg')">
