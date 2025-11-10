@@ -200,12 +200,14 @@
         }
         
         .gallery-caption {
-            text-align: center;
             display: block;
-            padding: 8px;
+            width: 100%;              /* match image width */
+            text-align: center;       /* center the text */
+            padding: 8px 0;           /* vertical padding only */
             background-color: #222;
             color: #ccc;
             font-size: 0.85rem;
+            box-sizing: border-box;   /* ensures padding doesn't change width */
         }
         
         /* --- Lightbox Modal --- */
