@@ -178,6 +178,8 @@
         }
         
         .gallery-item {
+            display: flex;           /* NEW */
+            flex-direction: column;  /* NEW */
             flex-shrink: 0;
             width: 300px;
             height: 220px;
@@ -187,16 +189,11 @@
             cursor: pointer;
             transition: transform 0.2s, border-color 0.2s;
         }
-        
-        .gallery-item {
-            position: relative;
-            display: flex;
-            flex-direction: column;
-        }
 
         .gallery-item img {
             flex: 1;
             width: 100%;
+            height: auto;        /* ← allow image to take only the remaining space */
             object-fit: cover;
         }
 
