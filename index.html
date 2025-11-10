@@ -192,10 +192,9 @@
         }
 
         .gallery-item img {
-            flex: 1;
             width: 100%;
-            height: auto;        /* ← allow image to take only the remaining space */
-            object-fit: cover;
+            height: calc(100% - 36px); /* 100% of container minus caption height */
+            object-fit: cover;         /* keeps the image nicely cropped */
         }
 
         .gallery-caption {
