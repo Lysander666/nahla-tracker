@@ -200,15 +200,17 @@
         }
         
         .gallery-caption {
-            display: block;
-            width: 100%;              /* match image width */
-            text-align: center;       /* center the text */
-            padding: 8px 0;           /* vertical padding only */
+            width: 100%;
+            height: 40px;                 /* give the caption area a fixed height */
+            display: flex;                /* enable flexbox */
+            align-items: center;          /* vertical center */
+            justify-content: center;      /* horizontal center */
             background-color: #222;
             color: #ccc;
             font-size: 0.85rem;
-            box-sizing: border-box;   /* ensures padding doesn't change width */
+            border-radius: 0 0 6px 6px;   /* optional: makes bottom corners round nicely */
         }
+
         
         /* --- Lightbox Modal --- */
         .lightbox {
