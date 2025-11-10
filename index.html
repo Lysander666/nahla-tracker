@@ -281,6 +281,22 @@
             opacity: 1;
         }
 
+        /* Hide scrollbars everywhere, but keep scroll functionality */
+        .celestial-body::-webkit-scrollbar,
+        #map-panel::-webkit-scrollbar,
+        #manifest-panel::-webkit-scrollbar,
+        .gallery-container::-webkit-scrollbar {
+            display: none;
+        }
+
+        .celestial-body,
+        #map-panel,
+        #manifest-panel,
+        .gallery-container {
+            scrollbar-width: none; /* Firefox */
+        }
+
+
 
     </style>
 </head>
