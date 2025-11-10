@@ -122,7 +122,7 @@
                 <ul>
                     <li><strong>Type:</strong> Rocky Sulphur Moon</li>
                      <li><strong>Mass:</strong> 0.0458 Earths</li>
-                    <li><strong>Atmopshere:</strong> None</li>
+                    <li><strong>Atmosphere:</strong> None</li>
                     <li><strong>Gravity:</strong> 0.31 G</li>
                     <li><strong>Temp:</strong> ~273 K (Observed)</li>
                     <li><strong>Volcanism:</strong> Metallic Magma</li>
@@ -260,7 +260,7 @@
 
         function get_sky_arc_indicator(progress, is_daytime) {
             if (is_daytime) {
-                const positions = ["🌅", "☀️ ", "☀️ ", "☀️ ", "☀️ ", "🌇"];
+                const positions = ["🌅", "☀️", "☀️", "☀️", "☀️", "🌇"];
                 const index = Math.floor(progress * (positions.length - 1));
                 let arc = ["─", "─", "─", "─", "─", "─"];
                 arc[index] = positions[index];
