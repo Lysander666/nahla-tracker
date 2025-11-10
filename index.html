@@ -47,7 +47,7 @@
             border-radius: 8px;
             padding: 0 20px 20px 20px;
             background-color: #222;
-            height: 500px; /* Fixed height to match map panel THIS IS THE REFERENCE BOX SIZE FOR ALL BOXES*/
+            height: 550px; /* Fixed height to match map panel THIS IS THE REFERENCE BOX SIZE FOR ALL BOXES*/
             overflow-y: auto; /* Enable scrolling for all boxes */
         }
         
@@ -177,10 +177,15 @@
             background: #555;
         }
         
-        .gallery-item img {
-            width: 100%;
-            height: calc(100% - 32px); /* subtract caption height */
-            object-fit: cover;
+        .gallery-item {
+            flex-shrink: 0;
+            width: 300px;
+            height: 220px;
+            border: 2px solid #444;
+            border-radius: 8px;
+            overflow: visible;
+            cursor: pointer;
+            transition: transform 0.2s, border-color 0.2s;
         }
         
         .gallery-item:hover {
@@ -195,14 +200,14 @@
         }
         
         .gallery-caption {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 32px;              /* fixed height for clean centering */
+            display: block;
+            width: 100%;              /* match image width */
+            text-align: center;       /* center the text */
+            padding: 8px 0;           /* vertical padding only */
             background-color: #222;
             color: #ccc;
             font-size: 0.85rem;
-            text-align: center;
+            box-sizing: border-box;   /* ensures padding doesn't change width */
         }
         
         /* --- Lightbox Modal --- */
