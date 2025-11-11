@@ -657,10 +657,10 @@ setInterval(() => {
             data.rebekah = get_rebekah_status(current_time);
 
             // Update the HTML
-            document.getElementById("status").innerText = data.status;
-            document.getElementById("hope").innerText = data.hope;
-            document.getElementById("band").innerText = data.band;
-            document.getElementById("rebekah").innerText = data.rebekah;
+            document.getElementById("status").innerHTML = data.status;
+            document.getElementById("hope").innerHTML = data.hope;
+            document.getElementById("band").innerHTML = data.band;
+            document.getElementById("rebekah").innerHTML = data.rebekah;
         }
 
 function get_moon_clock() {
