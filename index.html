@@ -97,7 +97,23 @@
           opacity: 0.6;
         }
 
-        
+        .gallery-container {
+  display: flex;
+  gap: 14px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  white-space: nowrap;
+  padding: 12px 0;
+  scroll-behavior: smooth;
+  scrollbar-color: #333 #1a1a1a; /* keeps the dark scrollbar theme */
+}
+.gallery-item {
+  flex: 0 0 auto;
+  width: 360px; /* whatever width you were using */
+  border-radius: 6px;
+  overflow: hidden;
+}
+
         /* --- Main 5-Column Layout --- */
         #system-info-container {
             display: flex;
@@ -516,7 +532,7 @@
 
              <div class="gallery-container">
 
-        <div class="gallery-item" onclick="openLightbox('galaxy_map.png')">
+        <div class="" onclick="openLightbox('galaxy_map.png')">
             <div class="gallery-tooltip">Galactic Position Map</div>
             <img src="galaxy_map.png" alt="Galactic Position">
             <div class="gallery-caption">Galactic Position Map</div>
