@@ -62,6 +62,10 @@
     letter-spacing: 2px;
 }
 
+.time-highlight {
+  color: #61dafb;   /* cyan, same tone as your UI highlights */
+  font-weight: bold;
+}
 
 
         
@@ -630,14 +634,14 @@
                 // Daytime
                 const day_progress = current_cycle_seconds / half_solar_day_seconds;
                 const time_until_sunset = half_solar_day_seconds - current_cycle_seconds;
-                data.status = `☀️  DAY on ${MOON_NAME} | Sunset in: ${format_timedelta(time_until_sunset)} | ${hours_into_moon_day.toFixed(2)}h into solar day`;
+                data.status = `☀️  DAY on ${MOON_NAME} | Sunset in: <span class="time-highlight">${format_timedelta(time_until_sunset)}</span> | <span class="time-highlight">${hours_into_moon_day.toFixed(2)}h</span> into solar day`;
                 data.hope = get_sky_arc_indicator(day_progress, true);
                 data.band = get_galactic_band_indicator(current_time, true);
             } else {
                 // Nighttime
                 const night_progress = (current_cycle_seconds - half_solar_day_seconds) / half_solar_day_seconds;
                 const time_until_sunrise = SOLAR_DAY_LENGTH_SECONDS - current_cycle_seconds;
-                data.status = `🌙 NIGHT on ${MOON_NAME} | Sunrise in: ${format_timedelta(time_until_sunrise)} | ${hours_into_moon_day.toFixed(2)}h into solar day`;
+                data.status = `🌙 NIGHT on ${MOON_NAME} | Sunrise in: <span class="time-highlight">${format_timedelta(time_until_sunrise)}</span> | <span class="time-highlight">${hours_into_moon_day.toFixed(2)}h</span> into solar day`;
                 data.hope = get_sky_arc_indicator(night_progress, false);
                 data.band = get_galactic_band_indicator(current_time, false);
             }
