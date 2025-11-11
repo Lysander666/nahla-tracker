@@ -81,11 +81,16 @@
     justify-content: center;
     gap: 20px;
     margin-bottom: 15px;
+    position: relative
 }
 
 .gallery-header h2 {
     color: #61dafb;
     margin: 0;
+    position: absolute;  /* <-- ADD THIS */
+    left: 50%;           /* <-- ADD THIS */
+    transform: translateX(-50%);  /* <-- ADD THIS */
+        
 }
 
 .gallery-btn {
