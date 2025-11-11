@@ -1,696 +1,549 @@
-        <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    
-    <title>Nahla Tracker</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=VT323&display=swap">
+  <meta charset="UTF-8">
+  <title>Nahla Tracker</title>
 
+  <!-- Google font for the clocks -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
 
-        <!-- Open Graph -->
-<meta property="og:type" content="website">
-<meta property="og:title" content="Nahla Tracker">
-<meta property="og:description" content="Live day/night tracker and gallery for Nahla, a remote Elite Dangerous moon.">
-<meta property="og:url" content="https://lysander666.github.io/nahla-tracker/">
-<meta property="og:image" content="https://lysander666.github.io/nahla-tracker/social-card.jpg">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
+  <!-- Social cards (optional) -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Nahla Tracker">
+  <meta property="og:description" content="Live day/night tracker and gallery for Nahla, a remote Elite Dangerous moon.">
+  <meta property="og:url" content="https://lysander666.github.io/nahla-tracker/">
+  <meta property="og:image" content="https://lysander666.github.io/nahla-tracker/social-card.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Nahla Tracker">
+  <meta name="twitter:description" content="Live day/night tracker and gallery for Nahla, a remote Elite Dangerous moon.">
+  <meta name="twitter:image" content="https://lysander666.github.io/nahla-tracker/social-card.jpg">
 
-<!-- Twitter -->
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Nahla Tracker">
-<meta name="twitter:description" content="Live day/night tracker and gallery for Nahla, a remote Elite Dangerous moon.">
-<meta name="twitter:image" content="https://lysander666.github.io/nahla-tracker/social-card.jpg">
+  <link id="favicon" rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='80'>🌕</text></svg>">
 
+  <style>
+    body {
+      background-color: #1a1a1a;
+      color: #e0e0e0;
+      font-family: monospace;
+      font-size: 1.1rem;
+      line-height: 1.6;
+      padding: 20px;
+    }
+    .container {
+      max-width: 1800px;
+      margin: 0 auto;
+    }
+    h2 { text-align: center; }
 
-    <link id="favicon" rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='80'>🌕</text></svg>">
-    
-    <style>
-        body { 
-            background-color: #1a1a1a; 
-            color: #e0e0e0; 
-            font-family: monospace; 
-            font-size: 1.1rem; 
-            line-height: 1.6; 
-            padding: 20px;
-        }
-        .container {
-            max-width: 1800px;
-            margin: 0 auto;
-        }
-        
-        h2 {
-            text-align: center;
-        }
-        
-        #tracker { 
-            padding: 20px; 
-            border: 1px solid #444; 
-            background-color: #2a2a2a;
-            border-radius: 8px;
-            margin-bottom: 25px;
-            text-align: center; 
-        }
+    #tracker {
+      padding: 20px;
+      border: 1px solid #444;
+      background-color: #2a2a2a;
+      border-radius: 8px;
+      margin-bottom: 25px;
+      text-align: center;
+    }
 
-#moonclock {
-    font-family: "Consolas", "Courier New", monospace;
-    font-size: 1.2rem;
-    color: #3af2ff;
-    text-shadow: 0 0 8px #3af2ff, 0 0 14px #007a85;
-    text-align: center;
-    margin-top: 8px;
-    letter-spacing: 2px;
-}
+    /* Clocks row */
+    #moonclocks {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-top: 14px;
+    }
+    .clock {
+      font-family: 'VT323', monospace;
+      font-size: 2.2rem;
+      letter-spacing: 1px;
+      background: #1f1f1f;
+      border: 1px solid #444;
+      border-radius: 8px;
+      padding: 10px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 58px;
+      text-shadow: 0 0 6px rgba(140,200,255,0.25);
+    }
+    .clock small {
+      font-size: 0.9rem;
+      opacity: 0.8;
+      margin-right: 10px;
+      letter-spacing: 0;
+    }
+    /* Color accents */
+    #clock-nst { color: #9cd6ff; }   /* blue-cyan */
+    #clock-nlt { color: #ff9ccc; }   /* pink-lilac */
 
+    /* --- Main 5-Column Layout --- */
+    #system-info-container {
+      display: flex;
+      gap: 20px;
+      align-items: flex-start; /* top align */
+    }
+    .celestial-body, #map-panel, #manifest-panel {
+      flex: 1;
+      border: 1px solid #444;
+      border-radius: 8px;
+      padding: 0 20px 20px 20px;
+      background-color: #222;
+      /* Heights are set dynamically via JS to match #map-panel */
+      overflow: hidden; /* default; we’ll enable scroll on the ones we constrain */
+    }
+    .celestial-body h3, #map-panel h3, #manifest-panel h3 {
+      color: #61dafb;
+      border-bottom: 1px solid #444;
+      padding-bottom: 10px;
+      margin: 0;
+      padding-top: 20px;
+      position: sticky;
+      top: 0;
+      background: #222;
+      z-index: 1;
+    }
+    .celestial-body ul, #map-panel ul {
+      list-style-type: none;
+      padding-left: 0;
+      font-size: 0.9rem;
+      color: #ccc;
+    }
+    .celestial-body li, #map-panel li { margin-bottom: 8px; }
+    .celestial-body li strong, #map-panel li strong { color: #bbb; }
+    #map-panel h4 { margin-bottom: 10px; color: #bbb; }
 
+    /* Dark scrollbars for scrollable boxes */
+    .scrollable {
+      overflow-y: auto;
+    }
+    .scrollable::-webkit-scrollbar { width: 10px; }
+    .scrollable::-webkit-scrollbar-track {
+      background: #1a1a1a;
+      border-radius: 4px;
+    }
+    .scrollable::-webkit-scrollbar-thumb {
+      background: #444;
+      border-radius: 4px;
+    }
+    .scrollable::-webkit-scrollbar-thumb:hover { background: #555; }
+    .scrollable { scrollbar-width: thin; scrollbar-color: #444 #1a1a1a; } /* Firefox */
 
-        
-        /* --- Main 5-Column Layout --- */
-        #system-info-container {
-            display: flex;
-            gap: 20px;
-            align-items: flex-start;
-        }
-        
-        .celestial-body, #map-panel, #manifest-panel {
-            flex: 1;
-            border: 1px solid #444;
-            border-radius: 8px;
-            padding: 0 20px 20px 20px;
-            background-color: #222;
-            height: 550px; /* Fixed height to match map panel THIS IS THE REFERENCE BOX SIZE FOR ALL BOXES*/
-            overflow-y: auto; /* Enable scrolling for all boxes */
-        }
-        
-        .celestial-body h3, #map-panel h3, #manifest-panel h3 {
-            color: #61dafb;
-            border-bottom: 1px solid #444;
-            padding-bottom: 10px;
-            position: sticky;
-            top: 0;
-            background-color: #222;
-            margin: 0;
-            padding-top: 20px;
-        }
-        
-        .celestial-body ul, #map-panel ul {
-            list-style-type: none;
-            padding-left: 0;
-            font-size: 0.9rem;
-            color: #ccc;
-        }
-        .celestial-body li, #map-panel li {
-            margin-bottom: 8px;
-        }
-        .celestial-body li strong, #map-panel li strong {
-            color: #bbb;
-        }
+    /* --- Manifest List Styling --- */
+    .manifest-list {
+      list-style-type: none;
+      padding-left: 0;
+      font-size: 0.85rem;
+    }
+    .manifest-list li { margin-bottom: 5px; color: #aaa; }
+    .manifest-list strong {
+      color: #ddd;
+      min-width: 40px;
+      display: inline-block;
+    }
+    .manifest-list ul {
+      list-style-type: square;
+      color: #888;
+      padding-left: 20px;
+      margin-top: 5px;
+    }
 
-        #map-panel h4 {
-            margin-bottom: 10px;
-            color: #bbb;
-        }
-        
-        /* --- Dark Scrollbar Styling --- */
-        .celestial-body::-webkit-scrollbar,
-        #map-panel::-webkit-scrollbar,
-        #manifest-panel::-webkit-scrollbar {
-            width: 10px;
-        }
-        
-        .celestial-body::-webkit-scrollbar-track,
-        #map-panel::-webkit-scrollbar-track,
-        #manifest-panel::-webkit-scrollbar-track {
-            background: #1a1a1a;
-            border-radius: 4px;
-        }
-        
-        .celestial-body::-webkit-scrollbar-thumb,
-        #map-panel::-webkit-scrollbar-thumb,
-        #manifest-panel::-webkit-scrollbar-thumb {
-            background: #444;
-            border-radius: 4px;
-        }
-        
-        .celestial-body::-webkit-scrollbar-thumb:hover,
-        #map-panel::-webkit-scrollbar-thumb:hover,
-        #manifest-panel::-webkit-scrollbar-thumb:hover {
-            background: #555;
-        }
-        
-        /* --- Manifest List Styling --- */
-        .manifest-list {
-            list-style-type: none;
-            padding-left: 0;
-            font-size: 0.85rem;
-        }
-        .manifest-list li {
-            margin-bottom: 5px;
-            color: #aaa;
-        }
-        .manifest-list strong {
-            color: #ddd;
-            min-width: 40px;
-            display: inline-block;
-        }
-        .manifest-list ul {
-            list-style-type: square;
-            color: #888;
-            padding-left: 20px;
-            margin-top: 5px;
-        }
+    /* Highlights */
+    .hl-landable { color: #8f9; }
+    .hl-terraform { color: #61dafb; font-weight: bold; }
+    .hl-earthlike { color: #61fbb0; font-weight: bold; text-transform: uppercase; }
+    .hl-life { color: #fbd061; font-weight: bold; }
 
-        #manifest-panel::-webkit-scrollbar {
-                display: none;
-        }
+    /* --- Gallery Section --- */
+    #gallery-section {
+      margin-top: 30px;
+      border: 1px solid #444;
+      border-radius: 8px;
+      padding: 20px;
+      background-color: #2a2a2a;
+    }
+    #gallery-section h2 {
+      color: #61dafb;
+      margin-top: 0;
+      margin-bottom: 15px;
+    }
+    .gallery-container {
+      display: flex;
+      gap: 15px;
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding: 10px 0;
+      height: 250px;
+      scrollbar-width: none;
+    }
+    .gallery-container::-webkit-scrollbar { height: 10px; }
+    .gallery-container::-webkit-scrollbar-track { background: #1a1a1a; border-radius: 4px; }
+    .gallery-container::-webkit-scrollbar-thumb { background: #444; border-radius: 4px; }
+    .gallery-container::-webkit-scrollbar-thumb:hover { background: #555; }
 
-        #manifest-panel {
-                scrollbar-width: none; /* Firefox */
-        }
- 
-        
-        /* Highlight special bodies */
-        .hl-landable { color: #8f9; }
-        .hl-terraform { color: #61dafb; font-weight: bold; }
-        .hl-earthlike { color: #61fbb0; font-weight: bold; text-transform: uppercase; }
-        .hl-life { color: #fbd061; font-weight: bold; }
+    .gallery-item {
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      width: 300px;
+      height: 220px;
+      border: 2px solid #444;
+      border-radius: 8px;
+      overflow: visible;
+      cursor: pointer;
+      transition: transform 0.2s, border-color 0.2s;
+      position: relative;
+    }
+    .gallery-item img {
+      width: 100%;
+      height: calc(100% - 36px);
+      object-fit: cover;
+    }
+    .gallery-caption {
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #222;
+      color: #ccc;
+      font-size: 0.85rem;
+    }
+    .gallery-tooltip {
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(30,30,30,0.95);
+      color: #ddd;
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.1s ease-out;
+      margin-bottom: 6px;
+      z-index: 50;
+    }
+    .gallery-item:hover .gallery-tooltip { opacity: 1; }
 
-        /* --- Gallery Section --- */
-        #gallery-section {
-            margin-top: 30px;
-            border: 1px solid #444;
-            border-radius: 8px;
-            padding: 20px;
-            background-color: #2a2a2a;
-        }
-        
-        #gallery-section h2 {
-            color: #61dafb;
-            margin-top: 0;
-            margin-bottom: 15px;
-        }
-        
-        .gallery-container {
-            display: flex;
-            gap: 15px;
-            overflow-x: auto;
-            overflow-y: hidden;
-            padding: 10px 0;
-            height: 250px;
-        }
-        
-        .gallery-container::-webkit-scrollbar {
-            height: 10px;
-        }
-        
-        .gallery-container::-webkit-scrollbar-track {
-            background: #1a1a1a;
-            border-radius: 4px;
-        }
-        
-        .gallery-container::-webkit-scrollbar-thumb {
-            background: #444;
-            border-radius: 4px;
-        }
-        
-        .gallery-container::-webkit-scrollbar-thumb:hover {
-            background: #555;
-        }
-        
-        .gallery-item {
-            display: flex;           /* NEW */
-            flex-direction: column;  /* NEW */
-            flex-shrink: 0;
-            width: 300px;
-            height: 220px;
-            border: 2px solid #444;
-            border-radius: 8px;
-            overflow: visible;
-            cursor: pointer;
-            transition: transform 0.2s, border-color 0.2s;
-            position: relative; /* add this (replaces the one we removed) */
-        }
-
-        .gallery-item img {
-            width: 100%;
-            height: calc(100% - 36px); /* 100% of container minus caption height */
-            object-fit: cover;         /* keeps the image nicely cropped */
-        }
-
-        .gallery-caption {
-            height: 36px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background-color: #222;
-            color: #ccc;
-            font-size: 0.85rem;
-        }
-
-
-        
-        /* --- Lightbox Modal --- */
-        .lightbox {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.9);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-        }
-        
-        .lightbox.active {
-            display: flex;
-        }
-        
-        .lightbox img {
-            max-width: 90%;
-            max-height: 90%;
-            border-radius: 8px;
-            box-shadow: 0 0 30px rgba(97, 218, 251, 0.3);
-        }
-        
-        .lightbox-close {
-            position: absolute;
-            top: 30px;
-            right: 40px;
-            color: #fff;
-            font-size: 40px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: color 0.2s;
-        }
-        
-        .lightbox-close:hover {
-            color: #61dafb;
-        }
-            
-        .gallery-tooltip {
-            position: absolute;
-            bottom: 100%;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(30, 30, 30, 0.95);
-            color: #ddd;
-            padding: 6px 10px;
-            border-radius: 6px;
-            font-size: 0.8rem;
-            white-space: nowrap;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.1s ease-out;
-            margin-bottom: 6px;
-            z-index: 50;
-        }
-
-        .gallery-item:hover .gallery-tooltip {
-            opacity: 1;
-        }
-
-        /* Hide scrollbars everywhere, but keep scroll functionality */
-        .celestial-body::-webkit-scrollbar,
-        #map-panel::-webkit-scrollbar,
-        #manifest-panel::-webkit-scrollbar,
-        .gallery-container::-webkit-scrollbar {
-            display: none;
-        }
-
-        .celestial-body,
-        #map-panel,
-        #manifest-panel,
-        .gallery-container {
-            scrollbar-width: none; /* Firefox */
-        }
-
-
-
-    </style>
+    /* Hide gallery scrollbar on some UAs but keep scroll */
+    .gallery-container::-webkit-scrollbar { display: none; }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h2>Nahla Day/Night Cycle Tracker - LIVE</h2>
-        <div id="tracker">
-            <div id="status">Loading...</div>
-            <div id="hope">...</div>
-            <div id="band">...</div>
-            <div id="rebekah">...</div>
-            <div id="moonclock">...</div>
-            
-            <div style="font-size: 0.9rem; color: #aaa; margin-top: 15px;">
-                <a href="https://inara.cz/elite/cmdr/440263/" 
-                    style="color: inherit; text-decoration: none;" 
-                    target="_blank" 
-                    rel="noopener noreferrer">
-                    Living and studying on a remote moon since July 2025. By CMDR Lysander666 on Inara.
-                </a>
-            </div>
+  <div class="container">
+    <h2>Nahla Day/Night Cycle Tracker - LIVE</h2>
 
-        </div>
+    <div id="tracker">
+      <div id="status">Loading...</div>
+      <div id="hope">...</div>
+      <div id="band">...</div>
+      <div id="rebekah">...</div>
 
-        <h2>System Information</h2>
+      <div id="moonclocks">
+        <div class="clock" id="clock-nst"><small>NST</small><span id="moonclock-nst">--:--:--</span></div>
+        <div class="clock" id="clock-nlt"><small>NLT</small><span id="moonclock-nlt">--:--:--</span></div>
+      </div>
 
-        <div id="system-info-container">
-            
-            <div class="celestial-body" id="nahla-info">
-                <h3>Nahla (Moon)</h3>
-                <ul>
-                    <li><strong>Type:</strong> Rocky Sulphur Moon</li>
-                    <li><strong>Mass:</strong> 0.0458 Earths</li>
-                    <li><strong>Radius: 2,469 km</strong></li>
-                    <li><strong>Atmosphere:</strong> None</li>
-                    <li><strong>Gravity:</strong> 0.31 G</li>
-                    <li><strong>Temp:</strong> Max ~275 K / 2C (Observed)</li>
-                    <li><strong>Volcanism:</strong> Metallic magma, gas vents, fumaroles</li>
-                    <li><strong>Orbital Period:</strong> 1.1 Earth days</li>
-                    <li><strong>Rotation:</strong> 1.1 Earth days (Tidally Locked)</li>
-                    <li><strong>Observation post:</strong> Miley (Mandalay) at Natalja's Pass (39.2, 104.3)</li>
-                </ul>
-            </div>
-
-            <div class="celestial-body" id="rebekah-info">
-                <h3>Rebekah (Parent)</h3>
-                <ul>
-                    <li><strong>Type:</strong> Class IV Gas Giant, ringed</li>
-                    <li><strong>Mass:</strong> 3202.37 Earths</li>
-                    <li><strong>Radius:</strong> 66,809 km</li>
-                    <li><strong>Gravity:</strong> 29.19 G</li>
-                    <li><strong>Temp:</strong> 908 K / 635C</li>
-                    <li><strong>Atmosphere:</strong> H<sub>2</sub> (72.89%), He (27.11%)</li>
-                    <li><strong>Distance from Primary:</strong> 2,885 ls </li>
-                    <li><strong>Orbital Period:</strong> 555.2 Earth days</li>
-                    <li><strong>Rotation:</strong> 0.4 Earth days</li>
-                </ul>
-            </div>
-
-            <div class="celestial-body" id="hope-info">
-                <h3>Hope (Primary Star)</h3>
-                <ul>
-                    <li><strong>Type:</strong> A5 Vb Blue-White Star</li>
-                    <li><strong>Mass:</strong> 1.6758 Solar</li>
-                    <li><strong>Radius:</strong> 1.427 Solar<li>
-                    <li><strong>Temp:</strong> 8,631 K / 8,358 C</li>
-                    <li><strong>Absolute magnitude:</strong> 2.3165 </li>
-                    <li><strong>Age:</strong> 800 million years</li>
-                    <li><strong>Rotation:</strong> 1.0 Earth days</li>
-                    <li><strong>&nbsp;</strong></li> <li><strong>&nbsp;</strong></li> </ul>
-            </div>
-
-            <div id="map-panel">
-                <h3>Hypi Bra EV-P d5-78</h3>
-                <ul>
-                    <li><strong>Dist. to Sol:</strong> 43,895.24 ly</li>
-                    <li><strong>Dist. to Colonia:</strong> 22,698.70 ly</li>
-                </ul>
-                <h4>Galactic Position</h4>
-                <img src="galaxy_map.png" alt="Galactic Position" style="width: 100%; max-width: 200px; margin: 10px auto; display: block; border-radius: 4px;">
-            </div>
-
-            <div id="manifest-panel">
-                <h3>Full System Manifest</h3>
-                <ul class="manifest-list">
-                   <li><strong>A</strong> Blue-White Star (Hope) (Scoopable)</span>
-                    </li>
-
-                    <li><strong>A Belt</strong> Rocky Belt (Bellatrix)</li>
-
-                    <li><strong>1</strong> Metal-rich body (Simone) (3,835 K)</span>
-                    </li>
-
-                    <li><strong>2</strong>Class III gas giant (Marika)
-                        <ul>
-                            <li><strong>2a</strong>Rocky body (Abelina) <span class="hl-landable">(L)</span></li>
-                            <li><strong>2b</strong>Rocky body (Jana) <span class="hl-landable">(L)</span></li>
-                            <li><strong>2c</strong>Rocky body (Mira) <span class="hl-landable">(L)</span></li>
-                            <li><strong>2d</strong>Rocky body (Maria) <span class="hl-landable">(L)</span>
-                                <ul><li><strong>2da</strong>Rocky body (Theresa) <span class="hl-landable">(L)</span></li></ul>
-                            </li>
-                            <li><strong>2e</strong>Rocky body (Bunika) <span class="hl-landable">(L)</span></li>
-                        </ul>
-                    </li>
-                    <li><strong>3</strong>High metal content (Ružena) (1,077 K)</span>
-                    </li>
-                    <li><strong>4</strong>Y (Brown dwarf) Star (Rayne)
-                        <ul>
-                            <li><strong>4a</strong>Rocky body (Ferril) <span class="hl-landable">(L)</span></li>
-                        </ul>
-                    </li>
-                    <li><strong>5</strong><span class="hl-terraform">High metal content (Báthory) (Terraform Candidate)</span>
-                    </li>
-                    <li><strong>6</strong>Class IV gas giant (Rebekah)
-                        <ul>
-                            <li><strong>6a</strong>Rocky body <span class="hl-landable">(L / Nahla)</span></li>
-                            <li><strong>6b</strong>Icy body (Elena) </li>
-                        </ul>
-                    </li>
-                    <li><strong>7</strong><span class="hl-life">Gas giant with water-based life (Aeoga)</span>
-                    </li>
-                        <ul>
-                            <li><strong>7a</strong>Rocky body (Herbst9) <span class="hl-landable">(L)</span></li>
-                            <li><strong>7b</strong>Rocky body (Asmorod) <span class="hl-landable">(L)</span></li>
-                            <li><strong>7c</strong>Rocky body (Troum) <span class="hl-landable">(L)</span></li>
-                        </ul>
-                    </li>
-                    <li><strong>8</strong><span class="hl-earthlike">*** Earth-like world *** (Skaði) </span></li>
-                    <li><strong>9</strong>Class IV gas giant (Draupadi)
-                        <ul>
-                            <li><strong>9a</strong>Rocky body (Sarasvati) <span class="hl-landable">(L)</span></li>
-                            <li><strong>9b</strong>Rocky body (Gauri) <span class="hl-landable">(L)</span></li>
-                            <li><strong>9c</strong>Rocky body (Chaumunda) <span class="hl-landable">(L)</span></li>
-                            <li><strong>9d</strong>Rocky body (Rati) <span class="hl-landable">(L)</span>
-                                <ul><li><strong>9da</strong>Rocky body (Kali) <span class="hl-landable">(L)</span></li></ul>
-                            </li>
-                        </ul>
-                    </li>
-                    <li><strong>10</strong>High metal content (Sita)</li>
-                    <li><strong>11</strong>High metal content (Ariana)</li>
-                    <li><strong>12</strong>High metal content (Anneke)</li>
-                </ul>
-            </div>
-            
-        </div>
-
-     <div id="gallery-section">
-        <h2>< Gallery ></Gallery></h2>
-             <div class="gallery-container">
-
-        <div class="gallery-item" onclick="openLightbox('galaxy_map.png')">
-            <div class="gallery-tooltip">Galactic Position Map</div>
-            <img src="galaxy_map.png" alt="Galactic Position">
-            <div class="gallery-caption">Galactic Position Map</div>
-        </div>
-
-        <div class="gallery-item" onclick="openLightbox('Nahla.jpg')">
-            <div class="gallery-tooltip">Nahla</div>
-            <img src="Nahla.jpg" alt="Nahla">
-            <div class="gallery-caption">Nahla</div>
-        </div>             
-
-        <div class="gallery-item" onclick="openLightbox('Rebekah-from-Nahla.jpg')">
-            <div class="gallery-tooltip">Rebekah seen from Nahla</div>
-            <img src="Rebekah-from-Nahla.jpg" alt="Rebekah seen from Nahla">
-            <div class="gallery-caption">Rebekah seen from Nahla</div>
-        </div>
-                     
-        <div class="gallery-item" onclick="openLightbox('Pate-Sablee-Overhead.jpg')">
-            <div class="gallery-tooltip">Pâte Sablée crater</div>
-            <img src="Pate-Sablee-Overhead.jpg" alt="Pâte Sablée crater">
-            <div class="gallery-caption">Pâte Sablée crater</div>
-        </div>     
-
-        <div class="gallery-item" onclick="openLightbox('galactic-band.jpg')">
-            <div class="gallery-tooltip">Galactic band</div>
-            <img src="galactic-band.jpg" alt="Galactic band">
-            <div class="gallery-caption">Galactic band</div>
-        </div>
-                
-        <div class="gallery-item" onclick="openLightbox('Natalja.jpg')">
-            <div class="gallery-tooltip">Natalja's Pass</div>
-            <img src="Natalja.jpg" alt="Natalja's Pass">
-            <div class="gallery-caption">Natalja's Pass</div>
-        </div>
-
-        <div class="gallery-item" onclick="openLightbox('night.jpg')">
-            <div class="gallery-tooltip">Night</div>
-            <img src="night.jpg" alt="Night">
-            <div class="gallery-caption">Night</div>
-        </div>
-                
-        <div class="gallery-item" onclick="openLightbox('hope.jpg')">
-            <div class="gallery-tooltip">Hope</div>
-            <img src="hope.jpg" alt="Hope">
-            <div class="gallery-caption">Hope</div>
-        </div>                      
-                          
+      <div style="font-size: 0.9rem; color: #aaa; margin-top: 15px;">
+        <a href="https://inara.cz/elite/cmdr/440263/" style="color: inherit; text-decoration: none;" target="_blank" rel="noopener noreferrer">
+          Living and studying on a remote moon since July 2025. By CMDR Lysander666 on Inara.
+        </a>
+      </div>
     </div>
-</div>
 
-                <!-- Add more gallery items here with your screenshots -->
-                <!-- Example template:
-                <div class="gallery-item" onclick="openLightbox('your-image.jpg')">
-                    <img src="your-image.jpg" alt="Description">
-                    <div class="gallery-caption">Your Caption Here</div>
-                </div>
-                -->
-            </div>
+    <h2>System Information</h2>
+
+    <div id="system-info-container">
+      <div class="celestial-body" id="nahla-info">
+        <h3>Nahla (Moon)</h3>
+        <ul>
+          <li><strong>Type:</strong> Rocky Sulphur Moon</li>
+          <li><strong>Mass:</strong> 0.0458 Earths</li>
+          <li><strong>Atmosphere:</strong> None</li>
+          <li><strong>Gravity:</strong> 0.31 G</li>
+          <li><strong>Temp:</strong> ~273 K (Observed)</li>
+          <li><strong>Volcanism:</strong> Metallic Magma</li>
+          <li><strong>Orbital Period:</strong> 1.1 Earth days</li>
+          <li><strong>Rotation:</strong> 1.1 Earth days (Tidally Locked)</li>
+        </ul>
+      </div>
+
+      <div class="celestial-body" id="rebekah-info">
+        <h3>Rebekah (Parent)</h3>
+        <ul>
+          <li><strong>Type:</strong> Class IV Gas Giant, ringed</li>
+          <li><strong>Mass:</strong> 3202.37 Earths</li>
+          <li><strong>Gravity:</strong> 29.19 G</li>
+          <li><strong>Temp:</strong> 908 K</li>
+          <li><strong>Atmosphere:</strong> H<sub>2</sub> (72.89%), He (27.11%)</li>
+          <li><strong>Orbital Period:</strong> 555.2 Earth days</li>
+          <li><strong>Rotation:</strong> 0.4 Earth days</li>
+        </ul>
+      </div>
+
+      <div class="celestial-body" id="hope-info">
+        <h3>Hope (Primary Star)</h3>
+        <ul>
+          <li><strong>Type:</strong> A5 Vb Blue-White Star</li>
+          <li><strong>Mass:</strong> 1.6758 Solar</li>
+          <li><strong>Temp:</strong> 8,631 K</li>
+          <li><strong>Age:</strong> 800 million years</li>
+          <li><strong>Rotation:</strong> 1.0 Earth days</li>
+          <li><strong>&nbsp;</strong></li><li><strong>&nbsp;</strong></li>
+        </ul>
+      </div>
+
+      <div id="map-panel">
+        <h3>Hypi Bra EV-P d5-78</h3>
+        <ul>
+          <li><strong>Dist. to Sol:</strong> 43,895.24 ly</li>
+          <li><strong>Dist. to Colonia:</strong> 22,698.70 ly</li>
+        </ul>
+        <h4>Galactic Position</h4>
+        <img id="galaxy-map-img" src="galaxy_map.png" alt="Galactic Position"
+             style="width: 100%; max-width: 200px; margin: 10px auto; display: block; border-radius: 4px;">
+      </div>
+
+      <div id="manifest-panel">
+        <h3>Full System Manifest</h3>
+        <ul class="manifest-list">
+          <li><strong>A</strong> Blue-White Star (Scoopable)</li>
+          <li><strong>A Belt</strong> Rocky Belt</li>
+          <li><strong>1</strong> Metal-rich body (3,835 K)</li>
+          <li><strong>2</strong> Class III gas giant
+            <ul>
+              <li><strong>2a</strong> Rocky body <span class="hl-landable">(Landable)</span></li>
+              <li><strong>2b</strong> Rocky body <span class="hl-landable">(Landable)</span></li>
+              <li><strong>2c</strong> Rocky body <span class="hl-landable">(Landable)</span></li>
+              <li><strong>2d</strong> Rocky body <span class="hl-landable">(Landable)</span>
+                <ul><li><strong>2da</strong> Rocky body <span class="hl-landable">(Landable)</span></li></ul>
+              </li>
+              <li><strong>2e</strong> Rocky body <span class="hl-landable">(Landable)</span></li>
+            </ul>
+          </li>
+          <li><strong>3</strong> High metal content (1,077 K)</li>
+          <li><strong>4</strong> Y (Brown dwarf) Star
+            <ul>
+              <li><strong>4a</strong> Rocky body <span class="hl-landable">(Landable)</span></li>
+            </ul>
+          </li>
+          <li><strong>5</strong> <span class="hl-terraform">High metal content (Terraform Candidate)</span></li>
+          <li><strong>6</strong> Class IV gas giant (Rebekah)
+            <ul>
+              <li><strong>6a</strong> Rocky body <span class="hl-landable">(Landable / Nahla)</span></li>
+              <li><strong>6b</strong> Icy body</li>
+            </ul>
+          </li>
+          <li><strong>7</strong> <span class="hl-life">Gas giant with water-based life</span>
+            <ul>
+              <li><strong>7a</strong> Rocky body <span class="hl-landable">(Landable)</span></li>
+              <li><strong>7b</strong> Rocky body <span class="hl-landable">(Landable)</span></li>
+              <li><strong>7c</strong> Rocky body <span class="hl-landable">(Landable)</span></li>
+            </ul>
+          </li>
+          <li><strong>8</strong> <span class="hl-earthlike">*** Earth-like world ***</span></li>
+          <li><strong>9</strong> Class IV gas giant
+            <ul>
+              <li><strong>9a</strong> Rocky body <span class="hl-landable">(Landable)</span></li>
+              <li><strong>9b</strong> Rocky body <span class="hl-landable">(Landable)</span></li>
+              <li><strong>9c</strong> Rocky body <span class="hl-landable">(Landable)</span></li>
+              <li><strong>9d</strong> Rocky body <span class="hl-landable">(Landable)</span>
+                <ul><li><strong>9da</strong> Rocky body <span class="hl-landable">(Landable)</span></li></ul>
+              </li>
+            </ul>
+          </li>
+          <li><strong>10</strong> High metal content (241 K)</li>
+          <li><strong>11</strong> High metal content (432 K)</li>
+          <li><strong>12</strong> High metal content (163 K)</li>
+        </ul>
+      </div>
+    </div>
+
+    <div id="gallery-section">
+      <h2>&lt; Gallery &gt;</h2>
+      <div class="gallery-container">
+        <div class="gallery-item" onclick="openLightbox('galaxy_map.png')">
+          <div class="gallery-tooltip">Galactic Position Map</div>
+          <img src="galaxy_map.png" alt="Galactic Position">
+          <div class="gallery-caption">Galactic Position Map</div>
         </div>
+        <!-- Add more items as you like -->
+      </div>
+    </div>
 
-        <!-- Lightbox Modal -->
-        <div class="lightbox" id="lightbox" onclick="closeLightbox()">
-            <span class="lightbox-close">&times;</span>
-            <img id="lightbox-image" src="" alt="Enlarged view">
-        </div>
+    <!-- Lightbox Modal -->
+    <div class="lightbox" id="lightbox" onclick="closeLightbox()">
+      <span class="lightbox-close">&times;</span>
+      <img id="lightbox-image" src="" alt="Enlarged view">
+    </div>
+  </div>
 
+  <script>
+    // --- Constants ---
+    const MOON_NAME = "Nahla";
+    const SOLAR_DAY_LENGTH_EARTH_DAYS = 1.1;               // 1.1 Earth days
+    const REBEKAH_LAST_RISE = new Date("2025-11-09T21:30:00");
+    const GALACTIC_BAND_PEAK = new Date("2025-11-09T23:00:00");
+    const LAST_SUNRISE = new Date("2025-11-09T20:00:00");
 
-    </div> <script>
-        // --- All your constants, ported to JavaScript ---
-        const MOON_NAME = "Nahla";
-        const SOLAR_DAY_LENGTH_EARTH_DAYS = 1.1;
-        // NOTE: JavaScript needs 'T' for ISO date format
-        const REBEKAH_LAST_RISE = new Date("2025-11-09T21:30:00"); 
-        const GALACTIC_BAND_PEAK = new Date("2025-11-09T23:00:00");
-        const LAST_SUNRISE = new Date("2025-11-09T20:00:00");
-        
-        const SECONDS_IN_EARTH_DAY = 24 * 60 * 60;
-        const SOLAR_DAY_LENGTH_SECONDS = SOLAR_DAY_LENGTH_EARTH_DAYS * SECONDS_IN_EARTH_DAY;
+    const SECONDS_IN_EARTH_DAY = 24 * 60 * 60;
+    const SOLAR_DAY_LENGTH_SECONDS = SOLAR_DAY_LENGTH_EARTH_DAYS * SECONDS_IN_EARTH_DAY; // 95,040 s
 
-        // --- All your helper functions, ported to JavaScript ---
-        
-        function format_timedelta(total_seconds) {
-            const hours = Math.floor(total_seconds / 3600);
-            const minutes = Math.floor((total_seconds % 3600) / 60);
-            const seconds = Math.floor(total_seconds % 60);
-            // padStart adds leading zeros
-            return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-        }
+    // --- Helpers ---
+    function format_timedelta(total_seconds) {
+      const hours = Math.floor(total_seconds / 3600);
+      const minutes = Math.floor((total_seconds % 3600) / 60);
+      const seconds = Math.floor(total_seconds % 60);
+      return `${String(hours).padStart(2,'0')}:${String(minutes).padStart(2,'0')}:${String(seconds).padStart(2,'0')}`;
+    }
 
-        function get_rebekah_status(current_time) {
-            // Date subtraction in JS gives milliseconds
-            const time_since_rise = (current_time - REBEKAH_LAST_RISE) / 1000; // in seconds
-            const current_cycle_seconds = time_since_rise % SOLAR_DAY_LENGTH_SECONDS;
-            const half_rotation = SOLAR_DAY_LENGTH_SECONDS / 2;
+    function get_rebekah_status(current_time) {
+      const time_since_rise = (current_time - REBEKAH_LAST_RISE) / 1000;
+      const current_cycle_seconds = ((time_since_rise % SOLAR_DAY_LENGTH_SECONDS) + SOLAR_DAY_LENGTH_SECONDS) % SOLAR_DAY_LENGTH_SECONDS;
+      const half_rotation = SOLAR_DAY_LENGTH_SECONDS / 2;
+      if (current_cycle_seconds < half_rotation) {
+        const time_until_set = half_rotation - current_cycle_seconds;
+        return `Rebekah: 🪐 VISIBLE | Est. set in: ${format_timedelta(time_until_set)} (ESTIMATE)`;
+      } else {
+        const time_until_rise = SOLAR_DAY_LENGTH_SECONDS - current_cycle_seconds;
+        return `Rebekah: ─ below horizon | Est. rise in: ${format_timedelta(time_until_rise)} (ESTIMATE)`;
+      }
+    }
 
-            if (current_cycle_seconds < half_rotation) {
-                const time_until_set = half_rotation - current_cycle_seconds;
-                return `Rebekah: 🪐 VISIBLE | Est. set in: ${format_timedelta(time_until_set)} (ESTIMATE)`;
-            } else {
-                const time_until_rise = SOLAR_DAY_LENGTH_SECONDS - current_cycle_seconds;
-                return `Rebekah: ─ below horizon | Est. rise in: ${format_timedelta(time_until_rise)} (ESTIMATE)`;
-            }
-        }
+    function get_sky_arc_indicator(progress, is_daytime) {
+      if (is_daytime) {
+        const positions = ["🌅","☀️","☀️","☀️","☀️","🌇"];
+        const index = Math.floor(progress * (positions.length - 1));
+        let arc = ["─","─","─","─","─","─"];
+        arc[index] = positions[index];
+        return `Hope: [${arc.join("")}]`;
+      } else {
+        return "Hope: [────────] (below horizon)";
+      }
+    }
 
-        function get_sky_arc_indicator(progress, is_daytime) {
-            if (is_daytime) {
-                const positions = ["🌅", "☀️", "☀️", "☀️", "☀️", "🌇"];
-                const index = Math.floor(progress * (positions.length - 1));
-                let arc = ["─", "─", "─", "─", "─", "─"];
-                arc[index] = positions[index];
-                return `Hope: [${arc.join("")}]`;
-            } else {
-                return "Hope: [────────] (below horizon)";
-            }
-        }
+    function get_galactic_band_indicator(current_time, is_daytime) {
+      const time_since_peak = (current_time - GALACTIC_BAND_PEAK) / 1000;
+      const current_cycle_seconds = ((time_since_peak % SOLAR_DAY_LENGTH_SECONDS) + SOLAR_DAY_LENGTH_SECONDS) % SOLAR_DAY_LENGTH_SECONDS;
+      const hours_since_peak = current_cycle_seconds / 3600;
+      if (is_daytime) return "Galactic Band: 🌌 present (washed out by Hope's light, low angle)";
+      if (hours_since_peak < 1.5 || hours_since_peak > 24.9) return "Galactic Band: 🌌✨ PEAK BRIGHTNESS (~70° angle, highest elevation)";
+      if (hours_since_peak < 4.0 || hours_since_peak > 22.4) return "Galactic Band: 🌌 BRIGHT (prominent, high angle)";
+      if (10.0 < hours_since_peak && hours_since_peak < 16.4) return "Galactic Band: 🌌 visible (moderate, lower angle/near horizon)";
+      return "Galactic Band: 🌌 visible (rising/setting through rotation)";
+    }
 
-        function get_galactic_band_indicator(current_time, is_daytime) {
-            const time_since_peak = (current_time - GALACTIC_BAND_PEAK) / 1000; // in seconds
-            const current_cycle_seconds = time_since_peak % SOLAR_DAY_LENGTH_SECONDS;
-            const hours_since_peak = current_cycle_seconds / 3600;
+    // Clocks: NST (true 26:24 day) and NLT (normalized 26:00 day)
+    function get_moon_clocks(current_time) {
+      const s = ((current_time - LAST_SUNRISE) / 1000);
+      const cycle = ((s % SOLAR_DAY_LENGTH_SECONDS) + SOLAR_DAY_LENGTH_SECONDS) % SOLAR_DAY_LENGTH_SECONDS;
 
-            if (is_daytime) {
-                return "Galactic Band: 🌌 present (washed out by Hope's light, low angle)";
-            }
-            if (hours_since_peak < 1.5 || hours_since_peak > 24.9) {
-                return "Galactic Band: 🌌✨ PEAK BRIGHTNESS (~70° angle, highest elevation)";
-            } else if (hours_since_peak < 4.0 || hours_since_peak > 22.4) {
-                return "Galactic Band: 🌌 BRIGHT (prominent, high angle)";
-            } else if (10.0 < hours_since_peak && hours_since_peak < 16.4) {
-                return "Galactic Band: 🌌 visible (moderate, lower angle/near horizon)";
-            } else {
-                return "Galactic Band: 🌌 visible (rising/setting through rotation)";
-            }
-        }
+      // NST: 26:24:00 (95,040 s total)
+      const nst_h = Math.floor(cycle / 3600);
+      const nst_m = Math.floor((cycle % 3600) / 60);
+      const nst_s = Math.floor(cycle % 60);
+      const NST = `${String(nst_h).padStart(2,'0')}:${String(nst_m).padStart(2,'0')}:${String(nst_s).padStart(2,'0')}`;
 
-        // --- The main update loop ---
-        function updateDisplay() {
-            const current_time = new Date();
-            const time_since_sunrise = (current_time - LAST_SUNRISE) / 1000; // in seconds
-            const current_cycle_seconds = time_since_sunrise % SOLAR_DAY_LENGTH_SECONDS;
-            const half_solar_day_seconds = SOLAR_DAY_LENGTH_SECONDS / 2;
-            const moon_time_progress = current_cycle_seconds / SOLAR_DAY_LENGTH_SECONDS;
-            
-            const hours_into_moon_day = moon_time_progress * SOLAR_DAY_LENGTH_EARTH_DAYS * 24;
+      // NLT: normalized to exactly 26:00:00 (93,600 s)
+      const frac = cycle / SOLAR_DAY_LENGTH_SECONDS;
+      const nlt_total = frac * (26 * 3600);
+      const nlt_h = Math.floor(nlt_total / 3600);
+      const nlt_m = Math.floor((nlt_total % 3600) / 60);
+      const nlt_s = Math.floor(nlt_total % 60);
+      const NLT = `${String(nlt_h).padStart(2,'0')}:${String(nlt_m).padStart(2,'0')}:${String(nlt_s).padStart(2,'0')}`;
 
-            let data = {};
+      return { NST, NLT };
+    }
 
-            if (current_cycle_seconds < half_solar_day_seconds) {
-                // Daytime
-                const day_progress = current_cycle_seconds / half_solar_day_seconds;
-                const time_until_sunset = half_solar_day_seconds - current_cycle_seconds;
-                data.status = `☀️  DAY on ${MOON_NAME} | Sunset in: ${format_timedelta(time_until_sunset)} | ${hours_into_moon_day.toFixed(2)}h into solar day`;
-                data.hope = get_sky_arc_indicator(day_progress, true);
-                data.band = get_galactic_band_indicator(current_time, true);
-            } else {
-                // Nighttime
-                const night_progress = (current_cycle_seconds - half_solar_day_seconds) / half_solar_day_seconds;
-                const time_until_sunrise = SOLAR_DAY_LENGTH_SECONDS - current_cycle_seconds;
-                data.status = `🌙 NIGHT on ${MOON_NAME} | Sunrise in: ${format_timedelta(time_until_sunrise)} | ${hours_into_moon_day.toFixed(2)}h into solar day`;
-                data.hope = get_sky_arc_indicator(night_progress, false);
-                data.band = get_galactic_band_indicator(current_time, false);
-            }
+    // --- Equal height sync: match the 4th box (#map-panel) ---
+    function syncHeights() {
+      const ref = document.getElementById('map-panel');
+      if (!ref) return;
+      const targetH = ref.getBoundingClientRect().height;
 
-       
-        data.moonclock = get_moon_clock(current_time);
-         document.getElementById("moonclock").innerText = data.moonclock;
+      // Make the other four scrollable within this height
+      document.querySelectorAll('.celestial-body, #manifest-panel').forEach(el => {
+        el.classList.add('scrollable');
+        el.style.height = targetH + 'px';
+        el.style.maxHeight = targetH + 'px';
+      });
 
+      // Ensure the reference box itself isn’t forced/changed
+      ref.classList.remove('scrollable');
+      ref.style.height = 'auto';
+      ref.style.maxHeight = 'none';
+      ref.style.overflow = 'visible';
+    }
 
-            data.rebekah = get_rebekah_status(current_time);
+    // --- Main update loop ---
+    function updateDisplay() {
+      const current_time = new Date();
+      const time_since_sunrise = (current_time - LAST_SUNRISE) / 1000;
+      const current_cycle_seconds = ((time_since_sunrise % SOLAR_DAY_LENGTH_SECONDS) + SOLAR_DAY_LENGTH_SECONDS) % SOLAR_DAY_LENGTH_SECONDS;
+      const half_solar_day_seconds = SOLAR_DAY_LENGTH_SECONDS / 2;
+      const moon_time_progress = current_cycle_seconds / SOLAR_DAY_LENGTH_SECONDS;
+      const hours_into_moon_day = moon_time_progress * SOLAR_DAY_LENGTH_EARTH_DAYS * 24;
 
-            // Update the HTML
-            document.getElementById("status").innerText = data.status;
-            document.getElementById("hope").innerText = data.hope;
-            document.getElementById("band").innerText = data.band;
-            document.getElementById("rebekah").innerText = data.rebekah;
-        }
+      let data = {};
 
-            function get_moon_clock(current_time) {
-    const time_since_sunrise = (current_time - LAST_SUNRISE) / 1000; 
-    const current_cycle_seconds = time_since_sunrise % SOLAR_DAY_LENGTH_SECONDS;
+      if (current_cycle_seconds < half_solar_day_seconds) {
+        const day_progress = current_cycle_seconds / half_solar_day_seconds;
+        const time_until_sunset = half_solar_day_seconds - current_cycle_seconds;
+        data.status = `☀️  DAY on ${MOON_NAME} | Sunset in: ${format_timedelta(time_until_sunset)} | ${hours_into_moon_day.toFixed(2)}h into solar day`;
+        data.hope = get_sky_arc_indicator(day_progress, true);
+        data.band = get_galactic_band_indicator(current_time, true);
+      } else {
+        const night_progress = (current_cycle_seconds - half_solar_day_seconds) / half_solar_day_seconds;
+        const time_until_sunrise = SOLAR_DAY_LENGTH_SECONDS - current_cycle_seconds;
+        data.status = `🌙 NIGHT on ${MOON_NAME} | Sunrise in: ${format_timedelta(time_until_sunrise)} | ${hours_into_moon_day.toFixed(2)}h into solar day`;
+        data.hope = get_sky_arc_indicator(night_progress, false);
+        data.band = get_galactic_band_indicator(current_time, false);
+      }
 
-    const total_nahla_minutes = current_cycle_seconds / 60;
-    const hours = Math.floor(total_nahla_minutes / 60);
-    const minutes = Math.floor(total_nahla_minutes % 60);
+      data.rebekah = get_rebekah_status(current_time);
 
-    return `Local Moon Time (Moonclock): ${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')} (out of 26:24)`;
-}
+      // Update text
+      document.getElementById("status").innerText = data.status;
+      document.getElementById("hope").innerText   = data.hope;
+      document.getElementById("band").innerText   = data.band;
+      document.getElementById("rebekah").innerText= data.rebekah;
 
+      // Update clocks
+      const clocks = get_moon_clocks(current_time);
+      document.getElementById("moonclock-nst").innerText = clocks.NST;
+      document.getElementById("moonclock-nlt").innerText = clocks.NLT;
+    }
 
-        // Run the update function once immediately, then every second
-        updateDisplay();
-        setInterval(updateDisplay, 1000);
+    // Lightbox
+    function openLightbox(imageSrc) {
+      const lightbox = document.getElementById('lightbox');
+      const lightboxImage = document.getElementById('lightbox-image');
+      lightboxImage.src = imageSrc;
+      lightbox.classList.add('active');
+    }
+    function closeLightbox() {
+      document.getElementById('lightbox').classList.remove('active');
+    }
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
 
-        // --- Gallery Lightbox Functions ---
-        function openLightbox(imageSrc) {
-            const lightbox = document.getElementById('lightbox');
-            const lightboxImage = document.getElementById('lightbox-image');
-            lightboxImage.src = imageSrc;
-            lightbox.classList.add('active');
-        }
-        
-        function closeLightbox() {
-            const lightbox = document.getElementById('lightbox');
-            lightbox.classList.remove('active');
-        }
-        
-        // Close lightbox with ESC key
-        document.addEventListener('keydown', function(event) {
-            if (event.key === 'Escape') {
-                closeLightbox();
-            }
-        });
-    </script>
+    // Boot
+    document.addEventListener('DOMContentLoaded', () => {
+      updateDisplay();
+      setInterval(updateDisplay, 1000);
+
+      // Sync heights after layout and whenever the ref image loads / window resizes
+      syncHeights();
+      const mapImg = document.getElementById('galaxy-map-img');
+      if (mapImg) {
+        if (mapImg.complete) syncHeights();
+        mapImg.addEventListener('load', syncHeights);
+      }
+      window.addEventListener('resize', syncHeights);
+    });
+  </script>
 </body>
 </html>
