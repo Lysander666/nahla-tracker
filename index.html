@@ -641,6 +641,9 @@
                 data.hope = get_sky_arc_indicator(night_progress, false);
                 data.band = get_galactic_band_indicator(current_time, false);
             }
+setInterval(() => {
+    document.getElementById('moonclock').textContent = get_moon_clock();
+}, 50); // update ~20 times/sec
 
        
         data.moonclock = get_moon_clock(current_time);
@@ -656,16 +659,18 @@
             document.getElementById("rebekah").innerText = data.rebekah;
         }
 
-           function get_moon_clock(current_time) {
-    const time_since_sunrise = (current_time - LAST_SUNRISE) / 1000; 
+function get_moon_clock() {
+    const now = performance.now(); // high-resolution timestamp (ms)
+    const time_since_sunrise = (now - LAST_SUNRISE) / 1000; // convert to seconds
     const current_cycle_seconds = time_since_sunrise % SOLAR_DAY_LENGTH_SECONDS;
 
     const hours = Math.floor(current_cycle_seconds / 3600);
     const minutes = Math.floor((current_cycle_seconds % 3600) / 60);
     const seconds = Math.floor(current_cycle_seconds % 60);
+
     const ms = Math.floor((current_cycle_seconds - Math.floor(current_cycle_seconds)) * 1000);
 
-    return `Nahla Local Time (Moonclock): ${String(hours).padStart(2, '0')}:` +
+    return `Local Moon Time (Moonclock): ${String(hours).padStart(2, '0')}:` +
            `${String(minutes).padStart(2, '0')}:` +
            `${String(seconds).padStart(2, '0')}.` +
            `${String(ms).padStart(3, '0')} (out of 26:24:00)`;
