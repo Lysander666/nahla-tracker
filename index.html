@@ -5,10 +5,6 @@
     
     <title>Nahla Tracker</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=VT323&display=swap">
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
-
 
 
         <!-- Open Graph -->
@@ -56,36 +52,15 @@
             text-align: center; 
         }
 
-/* Clocks row */
-#moonclocks {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-  margin-top: 14px;
+#moonclock {
+    font-family: "Consolas", "Courier New", monospace;
+    font-size: 1.2rem;
+    color: #3af2ff;
+    text-shadow: 0 0 8px #3af2ff, 0 0 14px #007a85;
+    text-align: center;
+    margin-top: 8px;
+    letter-spacing: 2px;
 }
-.clock {
-  font-family: 'VT323', monospace;
-  font-size: 2.2rem;
-  letter-spacing: 1px;
-  background: #1f1f1f;
-  border: 1px solid #444;
-  border-radius: 8px;
-  padding: 10px 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 58px;
-  text-shadow: 0 0 6px rgba(140,200,255,0.25);
-}
-.clock small {
-  font-size: 0.9rem;
-  opacity: 0.8;
-  margin-right: 10px;
-  letter-spacing: 0;
-}
-/* Color accents */
-#clock-nst { color: #9cd6ff; }   /* blue-cyan */
-#clock-nlt { color: #ff9ccc; }   /* pink-lilac */
 
 
 
@@ -364,11 +339,7 @@
             <div id="hope">...</div>
             <div id="band">...</div>
             <div id="rebekah">...</div>
-            
-            <div id="moonclocks">
-                  <div class="clock" id="clock-nst"><small>NST</small><span id="moonclock-nst">--:--:--</span></div>
-                  <div class="clock" id="clock-nlt"><small>NLT</small><span id="moonclock-nlt">--:--:--</span></div>
-            </div>
+            <div id="moonclock">...</div>
             
             <div style="font-size: 0.9rem; color: #aaa; margin-top: 15px;">
                 <a href="https://inara.cz/elite/cmdr/440263/" 
@@ -672,28 +643,28 @@
             }
 
        
-function get_moon_clocks(current_time) {
-    const SOLAR_DAY_LENGTH_SECONDS = 1.1 * 24 * 3600; // 26h 24m = 95,040s
-    const NLT_DAY_SECONDS = 26 * 3600; // Normalized day = 26 hours
+        data.moonclock = get_moon_clock(current_time);
+         document.getElementById("moonclock").innerText = data.moonclock;
 
-    const time_since_sunrise = (current_time - LAST_SUNRISE) / 1000;
-    const s = ((time_since_sunrise % SOLAR_DAY_LENGTH_SECONDS) + SOLAR_DAY_LENGTH_SECONDS) % SOLAR_DAY_LENGTH_SECONDS;
 
-    // NST (real 26:24 day)
-    const nst_hours = Math.floor(s / 3600);
-    const nst_min   = Math.floor((s % 3600) / 60);
-    const nst_sec   = Math.floor(s % 60);
-    const NST = `${String(nst_hours).padStart(2,'0')}:${String(nst_min).padStart(2,'0')}:${String(nst_sec).padStart(2,'0')}`;
+            data.rebekah = get_rebekah_status(current_time);
 
-    // NLT (normalized 26:00 day)
-    const frac = s / SOLAR_DAY_LENGTH_SECONDS;
-    const nlt_total = frac * NLT_DAY_SECONDS;
-    const nlt_hours = Math.floor(nlt_total / 3600);
-    const nlt_min   = Math.floor((nlt_total % 3600) / 60);
-    const nlt_sec   = Math.floor(nlt_total % 60);
-    const NLT = `${String(nlt_hours).padStart(2,'0')}:${String(nlt_min).padStart(2,'0')}:${String(nlt_sec).padStart(2,'0')}`;
+            // Update the HTML
+            document.getElementById("status").innerText = data.status;
+            document.getElementById("hope").innerText = data.hope;
+            document.getElementById("band").innerText = data.band;
+            document.getElementById("rebekah").innerText = data.rebekah;
+        }
 
-    return { NST, NLT };
+            function get_moon_clock(current_time) {
+    const time_since_sunrise = (current_time - LAST_SUNRISE) / 1000; 
+    const current_cycle_seconds = time_since_sunrise % SOLAR_DAY_LENGTH_SECONDS;
+
+    const total_nahla_minutes = current_cycle_seconds / 60;
+    const hours = Math.floor(total_nahla_minutes / 60);
+    const minutes = Math.floor(total_nahla_minutes % 60);
+
+    return `Local Moon Time (Moonclock): ${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')} (out of 26:24)`;
 }
 
 
@@ -713,18 +684,12 @@ function get_moon_clocks(current_time) {
             const lightbox = document.getElementById('lightbox');
             lightbox.classList.remove('active');
         }
-
-                const clocks = get_moon_clocks(current_time);
-document.getElementById("moonclock-nst").innerText = clocks.NST;
-document.getElementById("moonclock-nlt").innerText = clocks.NLT;
-
         
         // Close lightbox with ESC key
         document.addEventListener('keydown', function(event) {
             if (event.key === 'Escape') {
                 closeLightbox();
             }
-
         });
     </script>
 </body>
