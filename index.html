@@ -669,12 +669,13 @@ function get_moon_clock() {
     const seconds = Math.floor(current_cycle_seconds % 60);
 
     // High-resolution milliseconds based on performance.now()
-    const ms = Math.floor(performance.now() % 1000);
+const ms = Math.floor((performance.now() % 1000) / 10);
 
-    return `Nahla Local Time: ${String(hours).padStart(2, '0')}:` +
-           `${String(minutes).padStart(2, '0')}:` +
-           `${String(seconds).padStart(2, '0')}.` +
-           `${String(ms).padStart(3, '0')} (out of 26:24:00)`;
+return `Nahla Local Time: ${String(hours).padStart(2, '0')}:` +
+       `${String(minutes).padStart(2, '0')}:` +
+       `${String(seconds).padStart(2, '0')}.` +
+       `${String(ms).padStart(2, '0')} (out of 26:24:00)`;
+
 
 }
 
