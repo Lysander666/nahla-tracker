@@ -573,18 +573,19 @@
         }
 
         function get_rebekah_status(current_time) {
-            // Date subtraction in JS gives milliseconds
-            const time_since_rise = (current_time - REBEKAH_LAST_RISE) / 1000; // in seconds
-            const current_cycle_seconds = time_since_rise % SOLAR_DAY_LENGTH_SECONDS;
-            const half_rotation = SOLAR_DAY_LENGTH_SECONDS / 2;
+          const time_since_rise = (current_time - REBEKAH_LAST_RISE) / 1000;
+          const current_cycle_seconds = ((time_since_rise % SOLAR_DAY_LENGTH_SECONDS) + SOLAR_DAY_LENGTH_SECONDS) % SOLAR_DAY_LENGTH_SECONDS;
+          const half_rotation = SOLAR_DAY_LENGTH_SECONDS / 2;
 
-            if (current_cycle_seconds < half_rotation) {
-                const time_until_set = half_rotation - current_cycle_seconds;
-                return `Rebekah: 🪐 VISIBLE | Est. set in: ${format_timedelta(time_until_set)} (ESTIMATE)`;
-            } else {
-                const time_until_rise = SOLAR_DAY_LENGTH_SECONDS - current_cycle_seconds;
-                return `Rebekah: ─ below horizon | Est. rise in: ${format_timedelta(time_until_rise)} (ESTIMATE)`;
-            }
+          if (current_cycle_seconds < half_rotation) {
+            const time_until_set = half_rotation - current_cycle_seconds;
+            return `Rebekah: 🪐 VISIBLE | Est. set in: <span class="time-highlight">${format_timedelta(time_until_set)}</span> (ESTIMATE)`;
+          } else {
+            const time_until_rise = SOLAR_DAY_LENGTH_SECONDS - current_cycle_seconds;
+            return `Rebekah: ─ below horizon | Est. rise in: <span class="time-highlight">${format_timedelta(time_until_rise)}</span> (ESTIMATE)`;
+  
+        }
+
         }
 
         function get_sky_arc_indicator(progress, is_daytime) {
