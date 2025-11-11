@@ -644,10 +644,10 @@
 
           if (current_cycle_seconds < half_rotation) {
             const time_until_set = half_rotation - current_cycle_seconds;
-            return `Rebekah: 🪐 VISIBLE | Est. set in: <span class="time-highlight">${format_timedelta(time_until_set)}</span> (ESTIMATE)`;
+            return `<strong>Rebekah:</strong> 🪐 VISIBLE | Est. set in: <span class="time-highlight">${format_timedelta(time_until_set)}</span> (ESTIMATE)`;
           } else {
             const time_until_rise = SOLAR_DAY_LENGTH_SECONDS - current_cycle_seconds;
-            return `Rebekah: ─ below horizon | Est. rise in: <span class="time-highlight">${format_timedelta(time_until_rise)}</span> (ESTIMATE)`;
+            return `<strong>Rebekah:</strong> ─ below horizon | Est. rise in: <span class="time-highlight">${format_timedelta(time_until_rise)}</span> (ESTIMATE)`;
   
         }
 
@@ -659,9 +659,9 @@
                 const index = Math.floor(progress * (positions.length - 1));
                 let arc = ["─", "─", "─", "─", "─", "─"];
                 arc[index] = positions[index];
-                return `Hope: [${arc.join("")}]`;
+                return `<strong>Hope:</strong> [${arc.join("")}]`;
             } else {
-                return "Hope: [────────] (below horizon)";
+                return "<strong>Hope:</strong> [────────] (below horizon)";
             }
         }
 
@@ -671,16 +671,16 @@
             const hours_since_peak = current_cycle_seconds / 3600;
 
             if (is_daytime) {
-                return "Galactic Band: 🌌 present (washed out by Hope's light, low angle)";
+                return "<strong>Galactic Band</strong>: 🌌 present (washed out by Hope's light, low angle)";
             }
             if (hours_since_peak < 1.5 || hours_since_peak > 24.9) {
-                return "Galactic Band: 🌌✨ PEAK BRIGHTNESS (~70° angle, highest elevation)";
+                return "<strong>Galactic Band:</strong> 🌌✨ PEAK BRIGHTNESS (~70° angle, highest elevation)";
             } else if (hours_since_peak < 4.0 || hours_since_peak > 22.4) {
-                return "Galactic Band: 🌌 BRIGHT (prominent, high angle)";
+                return "<strong>Galactic Band:</strong> 🌌 BRIGHT (prominent, high angle)";
             } else if (10.0 < hours_since_peak && hours_since_peak < 16.4) {
-                return "Galactic Band: 🌌 visible (moderate, lower angle/near horizon)";
+                return "<strong>Galactic Band:</strong> 🌌 visible (moderate, lower angle/near horizon)";
             } else {
-                return "Galactic Band: 🌌 visible (rising/setting through rotation)";
+                return "<strong>Galactic Band:</strong> 🌌 visible (rising/setting through rotation)";
             }
         }
 
