@@ -671,10 +671,10 @@ function get_moon_clock() {
     // High-resolution milliseconds based on performance.now()
     const ms = Math.floor(performance.now() % 1000);
 
-    return `Local Moon Time (Moonclock): ${String(hours).padStart(2, '0')}:` +
+    return `Nahla Local Time: ${String(hours).padStart(2, '0')}:` +
            `${String(minutes).padStart(2, '0')}:` +
            `${String(seconds).padStart(2, '0')}.` +
-           `${String(ms).padStart(3, '0')} (out of 26:24:00)`;
+           `${String(ms).padStart(2, '0')} (out of 26:24:00)`;
 
 }
 
