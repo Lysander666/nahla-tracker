@@ -323,6 +323,7 @@
             <div id="status">Loading...</div>
             <div id="hope">...</div>
             <div id="band">...</div>
+            <div id="moonclock">...</div>
             <div id="rebekah">...</div>
             
             <div style="font-size: 0.9rem; color: #aaa; margin-top: 15px;">
@@ -626,6 +627,11 @@
                 data.band = get_galactic_band_indicator(current_time, false);
             }
 
+       
+        data.moonclock = get_moon_clock(current_time);
+         document.getElementById("moonclock").innerText = data.moonclock;
+
+
             data.rebekah = get_rebekah_status(current_time);
 
             // Update the HTML
@@ -634,6 +640,18 @@
             document.getElementById("band").innerText = data.band;
             document.getElementById("rebekah").innerText = data.rebekah;
         }
+
+            function get_moon_clock(current_time) {
+    const time_since_sunrise = (current_time - LAST_SUNRISE) / 1000; 
+    const current_cycle_seconds = time_since_sunrise % SOLAR_DAY_LENGTH_SECONDS;
+
+    const total_nahla_minutes = current_cycle_seconds / 60;
+    const hours = Math.floor(total_nahla_minutes / 60);
+    const minutes = Math.floor(total_nahla_minutes % 60);
+
+    return `Local Moon Time: ${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')} (out of 26:24)`;
+}
+
 
         // Run the update function once immediately, then every second
         updateDisplay();
