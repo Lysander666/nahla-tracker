@@ -656,15 +656,19 @@
             document.getElementById("rebekah").innerText = data.rebekah;
         }
 
-            function get_moon_clock(current_time) {
+           function get_moon_clock(current_time) {
     const time_since_sunrise = (current_time - LAST_SUNRISE) / 1000; 
     const current_cycle_seconds = time_since_sunrise % SOLAR_DAY_LENGTH_SECONDS;
 
-    const total_nahla_minutes = current_cycle_seconds / 60;
-    const hours = Math.floor(total_nahla_minutes / 60);
-    const minutes = Math.floor(total_nahla_minutes % 60);
+    const hours = Math.floor(current_cycle_seconds / 3600);
+    const minutes = Math.floor((current_cycle_seconds % 3600) / 60);
+    const seconds = Math.floor(current_cycle_seconds % 60);
+    const ms = Math.floor((current_cycle_seconds - Math.floor(current_cycle_seconds)) * 1000);
 
-    return `Local Moon Time (Moonclock): ${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')} (out of 26:24)`;
+    return `Nahla Local Time (Moonclock): ${String(hours).padStart(2, '0')}:` +
+           `${String(minutes).padStart(2, '0')}:` +
+           `${String(seconds).padStart(2, '0')}.` +
+           `${String(ms).padStart(3, '0')} (out of 26:24:00)`;
 }
 
 
