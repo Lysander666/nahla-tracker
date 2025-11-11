@@ -660,15 +660,16 @@ setInterval(() => {
         }
 
 function get_moon_clock() {
-    const now = performance.now(); // high-resolution timestamp (ms)
-    const time_since_sunrise = (now - LAST_SUNRISE) / 1000; // convert to seconds
+    const now_ms = Date.now(); // absolute timestamp (ms since epoch)
+    const time_since_sunrise = (now_ms - LAST_SUNRISE) / 1000; 
     const current_cycle_seconds = time_since_sunrise % SOLAR_DAY_LENGTH_SECONDS;
 
     const hours = Math.floor(current_cycle_seconds / 3600);
     const minutes = Math.floor((current_cycle_seconds % 3600) / 60);
     const seconds = Math.floor(current_cycle_seconds % 60);
 
-    const ms = Math.floor((current_cycle_seconds - Math.floor(current_cycle_seconds)) * 1000);
+    // High-resolution milliseconds based on performance.now()
+    const ms = Math.floor(performance.now() % 1000);
 
     return `Local Moon Time (Moonclock): ${String(hours).padStart(2, '0')}:` +
            `${String(minutes).padStart(2, '0')}:` +
