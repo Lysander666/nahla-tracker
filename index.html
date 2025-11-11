@@ -311,6 +311,15 @@
             color: #ccc;
             font-size: 0.85rem;
         }
+        #map-panel img {
+            width: 100%;        /* responsive scaling */
+            max-width: 275px;   /* make it bigger (was 200px) */
+            margin-top: 25px;   /* move it down slightly */
+            margin-left: auto;
+            margin-right: auto;
+            display: block;     /* keeps it centered */
+            border-radius: 6px; /* optional, just looks nicer */
+        }
 
 
         
@@ -472,7 +481,7 @@
                     <li><strong>Dist. to Colonia:</strong> 22,698.70 ly</li>
                 </ul>
                 <h4>Galactic Position</h4>
-                <img src="galaxy_map.png" alt="Galactic Position" style="width: 100%; max-width: 200px; margin: 10px auto; display: block; border-radius: 4px;">
+                <img src="galaxy_map.png" alt="Galactic Position">
             </div>
 
             <div id="manifest-panel">
