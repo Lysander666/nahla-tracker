@@ -42,6 +42,20 @@
         h2 {
             text-align: center;
         }
+
+            .page-title {
+          display: flex;
+          align-items: center;
+          justify-content: center;   /* centers the flex items horizontally */
+          gap: 10px;
+          text-align: center;
+        }
+
+        #moon-logo {
+          width: 80px;
+          height: auto;
+        }
+
         
         #tracker { 
             padding: 20px; 
@@ -449,10 +463,11 @@
 </head>
 <body>
     <div class="container">
-        <h2 style="display: flex; align-items: center; gap: 10px;">
-  <img src="amber-moonclock.svg" alt="Nahla Tracker Logo" width="80" id="moon-logo">
-  Nahla Tracker – LIVE – v0.2
+        <h2 class="page-title">
+  <img src="amber-moonclock.svg" alt="Nahla Tracker Logo" id="moon-logo">
+  Nahla Tracker – day/night cycle tracker - LIVE – v0.2
         </h2>
+
 
         <div id="tracker">
             <div id="status">Loading...</div>
