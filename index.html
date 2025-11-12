@@ -777,26 +777,7 @@ return `Nahla Local Time: ${String(hours).padStart(2, '0')}:` +
 
 }
 
-function get_nahla_standard_time() {
-    const now_ms = Date.now();
-    const time_since_sunrise = (now_ms - LAST_SUNRISE) / 1000; 
-    const current_cycle_seconds = time_since_sunrise % SOLAR_DAY_LENGTH_SECONDS;
 
-    // Scale 26.4h down to 24h
-    const scaled_seconds = current_cycle_seconds * (24 / (26.4 * 3600)) * (24 * 3600);
-
-    const hours = Math.floor(scaled_seconds / 3600);
-    const minutes = Math.floor((scaled_seconds % 3600) / 60);
-    const seconds = Math.floor(scaled_seconds % 60);
-
-    // milliseconds: 2 decimal places (0–99)
-    const ms = Math.floor((performance.now() % 1000) / 10);
-
-    return `Nahla Coordinated Time: ${String(hours).padStart(2, '0')}:` +
-           `${String(minutes).padStart(2, '0')}:` +
-           `${String(seconds).padStart(2, '0')}.` +
-           `${String(ms).padStart(2, '0')} (out of 24:00:00)`;
-}
 function get_nahla_coordinated_time() {
     const now_ms = Date.now();
     const time_since_sunrise = (now_ms - LAST_SUNRISE) / 1000; 
