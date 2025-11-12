@@ -62,7 +62,7 @@
             letter-spacing: 2px;
         }
 
-        #moonclock-standard {
+        #moonclock-coordinated {
             font-family: "Consolas", "Courier New", monospace;
             font-size: 1.2rem;
             color: #ff61c7;
@@ -428,6 +428,8 @@
             <div id="band">...</div>
             <div id="rebekah">...</div>
             <div id="moonclock">...</div>
+            <div id="moonclock-coordinated">...</div>
+
             
             <div style="font-size: 0.9rem; color: #aaa; margin-top: 15px;">
                 <a href="https://inara.cz/elite/cmdr/440263/" 
@@ -741,6 +743,8 @@ setInterval(() => {
        
         data.moonclock = get_moon_clock(current_time);
          document.getElementById("moonclock").innerText = data.moonclock;
+         document.getElementById("moonclock-coordinated").innerText = get_nahla_coordinated_time();
+
 
 
             data.rebekah = get_rebekah_status(current_time);
@@ -751,8 +755,6 @@ setInterval(() => {
             document.getElementById("band").innerHTML = data.band;
             document.getElementById("rebekah").innerHTML = data.rebekah;
         }
-
-document.getElementById("moonclock-coordinated").innerText = get_nahla_coordinated_time();
 
 
 function get_moon_clock() {
