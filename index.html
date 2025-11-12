@@ -738,7 +738,9 @@
             }
 setInterval(() => {
     document.getElementById('moonclock').textContent = get_moon_clock();
-}, 50); // update ~20 times/sec
+    document.getElementById('moonclock-coordinated').textContent = get_nahla_coordinated_time();
+}, 50); // update both clocks ~20 times/sec
+
 
        
         data.moonclock = get_moon_clock(current_time);
