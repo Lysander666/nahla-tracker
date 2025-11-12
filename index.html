@@ -743,6 +743,8 @@ setInterval(() => {
        
         data.moonclock = get_moon_clock(current_time);
          document.getElementById("moonclock").innerText = data.moonclock;
+         document.getElementById("moonclock-coordinated").innerText = get_nahla_coordinated_time(current_time);
+
 
 
             data.rebekah = get_rebekah_status(current_time);
@@ -765,9 +767,9 @@ function get_moon_clock() {
     const seconds = Math.floor(current_cycle_seconds % 60);
 
     // High-resolution milliseconds based on performance.now()
-const ms = Math.floor((performance.now() % 1000) / 10);
+        const ms = Math.floor((Date.now() % 1000) / 10);
 
-return `Nahla Local Time: ${String(hours).padStart(2, '0')}:` +
+        return `Nahla Local Time: ${String(hours).padStart(2, '0')}:` +
        `${String(minutes).padStart(2, '0')}:` +
        `${String(seconds).padStart(2, '0')}.` +
        `${String(ms).padStart(2, '0')} (out of 26:24:00)`;
@@ -776,25 +778,25 @@ return `Nahla Local Time: ${String(hours).padStart(2, '0')}:` +
 }
 
 
-function get_nahla_coordinated_time() {
-  const now_ms = Date.now();
-  const time_since_sunrise = (now_ms - LAST_SUNRISE) / 1000;
-  const current_cycle_seconds = time_since_sunrise % SOLAR_DAY_LENGTH_SECONDS;
+function get_nahla_coordinated_time(current_time) {
+    const now_ms = Date.now();
+    const time_since_sunrise = (now_ms - LAST_SUNRISE) / 1000; 
+    const current_cycle_seconds = time_since_sunrise % SOLAR_DAY_LENGTH_SECONDS;
 
-  // 26.4h -> 24h
-  const scaled_seconds = current_cycle_seconds * (24 / 26.4);
+    // Scale 26.4h → 24h accurately
+    const scaled_seconds = current_cycle_seconds * (24 / 26.4);
 
-  const hours   = Math.floor(scaled_seconds / 3600);
-  const minutes = Math.floor((scaled_seconds % 3600) / 60);
-  const seconds = Math.floor(scaled_seconds % 60);
+    const hours = Math.floor(scaled_seconds / 3600);
+    const minutes = Math.floor((scaled_seconds % 3600) / 60);
+    const seconds = Math.floor(scaled_seconds % 60);
 
-  // two-digit millis (00–99)
-  const ms = Math.floor((performance.now() % 1000) / 10);
+    // Two-digit milliseconds, synced visually with NLT
+        const ms = Math.floor((Date.now() % 1000) / 10);
 
-  return `Nahla Coordinated Time: ${String(hours).padStart(2, '0')}:` +
-         `${String(minutes).padStart(2, '0')}:` +
-         `${String(seconds).padStart(2, '0')}.` +
-         `${String(ms).padStart(2, '0')} (out of 24:00:00)`;
+    return `Nahla Coordinated Time: ${String(hours).padStart(2, '0')}:` +
+           `${String(minutes).padStart(2, '0')}:` +
+           `${String(seconds).padStart(2, '0')}.` +
+           `${String(ms).padStart(2, '0')} (out of 24:00:00)`;
 }
 
 
