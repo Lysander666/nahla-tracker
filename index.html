@@ -785,8 +785,8 @@ function get_nahla_coordinated_time() {
     const time_since_sunrise = (now_ms - LAST_SUNRISE) / 1000;
     const current_cycle_seconds = time_since_sunrise % SOLAR_DAY_LENGTH_SECONDS;
 
-    // exaggerate the slowness a bit for cosmetic reasons, but still accurate
-    const scaled_seconds = current_cycle_seconds * (23.5 / 26.4);
+        const SCALE = 24 / 26.4;                  // exact scaling
+        const scaled_seconds = current_cycle_seconds * SCALE;
 
     const hours   = Math.floor(scaled_seconds / 3600);
     const minutes = Math.floor((scaled_seconds % 3600) / 60);
