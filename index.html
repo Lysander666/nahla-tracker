@@ -670,9 +670,9 @@
         <div id="notes-box">
     <h2>Notes</h2>
     <div id="notes">
-        <p>— Observations logged 12 Nov 3301 —</p>
-        <p>Hope’s light unusually sharp today. Galactic band barely visible before dawn. 
-        Adjust tracking algorithm before next rotation.</p>
+         <p><em>Clarification:</em> Nahla Coordinated time [NCT] isn’t truly 24 Earth hours long. It’s a compressed version of Nahla’s 26 h 24 m solar day—scaled so we can live by a familiar 24-hour rhythm. 
+Every NCT 'second' lasts roughtly 1.1 real seconds, allowing habitats to simulate a stable day/night cycle even as the Nahla’s sunlight drifts.</p>
+
     </div>
 </div>
 
@@ -812,7 +812,7 @@ function get_moon_clock() {
         return `Nahla Local Time: ${String(hours).padStart(2, '0')}:` +
        `${String(minutes).padStart(2, '0')}:` +
        `${String(seconds).padStart(2, '0')}.` +
-       `${String(ms).padStart(2, '0')} (26 hr, 24 m moonclock)`;
+       `${String(ms).padStart(2, '0')} (out of 26:24:00)`;
 
 
 }
@@ -837,7 +837,7 @@ function get_nahla_coordinated_time() {
     return `Nahla Coordinated Time: ${String(hours).padStart(2, '0')}:` +
            `${String(minutes).padStart(2, '0')}:` +
            `${String(seconds).padStart(2, '0')}.` +
-           `${String(ms).padStart(2, '0')} (24 hr clock, scaled)`;
+           `${String(ms).padStart(2, '0')} (out of 24:00:00, scaled)`;
 }
 
 
