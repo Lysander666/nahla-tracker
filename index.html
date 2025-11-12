@@ -43,15 +43,19 @@
             text-align: center;
         }
 
-    #title-bar {
+#title-bar {
   display: flex;
-  justify-content: center;  /* centers the group horizontally */
-  align-items: center;      /* vertically align logo and text */
-  gap: 12px;                /* space between logo and text */
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
   text-align: center;
   width: 100%;
   margin: 0 auto;
+  position: relative;
+  left: 50%;
+  transform: translateX(-50%);
 }
+
 
 #title-bar h2 {
   margin: 0;
