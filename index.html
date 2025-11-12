@@ -43,18 +43,26 @@
             text-align: center;
         }
 
-            .page-title {
-          display: flex;
-          align-items: center;
-          justify-content: center;   /* centers the flex items horizontally */
-          gap: 10px;
-          text-align: center;
-        }
+    #title-bar {
+  display: flex;
+  justify-content: center;  /* centers the group horizontally */
+  align-items: center;      /* vertically align logo and text */
+  gap: 12px;                /* space between logo and text */
+  text-align: center;
+  width: 100%;
+  margin: 0 auto;
+}
 
-        #moon-logo {
-          width: 80px;
-          height: auto;
-        }
+#title-bar h2 {
+  margin: 0;
+  color: #61dafb; /* or whatever your heading colour is */
+}
+
+#moon-logo {
+  width: 60px;
+  height: auto;
+}
+
 
         
         #tracker { 
@@ -462,11 +470,11 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <h2 class="page-title">
+    <div id="title-bar">
   <img src="amber-moonclock.svg" alt="Nahla Tracker Logo" id="moon-logo">
-  Nahla Tracker – day/night cycle tracker - LIVE – v0.2
-        </h2>
+  <h2>Nahla Tracker – LIVE – v0.2</h2>
+</div>
+
 
 
         <div id="tracker">
