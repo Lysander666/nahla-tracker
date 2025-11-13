@@ -461,14 +461,16 @@
   background: none;
   border: none;
   color: #61dafb;
-  font-size: 1.2rem;
+  font-size: 18px;      /* FIXED SIZE — prevents wrapping */
   cursor: pointer;
-  padding: 0 4px;
-  transition: color 0.2s ease;
+  display: inline-flex; /* keeps it on the same line */
+  align-items: center;
+  vertical-align: middle;
+  padding: 0;
 }
 
-.audio-btn:hover {
-  color: #3af2ff;
+.audio-btn:active {
+  transform: scale(0.9);
 }
 
 
@@ -520,7 +522,9 @@
                     <li>
                   <strong>Nahla ambience audio:</strong>
                   <button id="audio-btn" class="audio-btn">▶</button>
+                  <audio id="nahla-audio" src="nahla-ambience.mp3"></audio>
                 </li>
+
 
                 </ul>
             </div>
@@ -955,28 +959,19 @@ scrollRightBtn.addEventListener('click', () => {
     });
 });
 
-  const audio = new Audio('nahla-ambience.mp3'); // change file name if needed
-  const audioBtn = document.getElementById('audio-btn');
+const audio = document.getElementById("nahla-audio");
+const btn = document.getElementById("audio-btn");
 
-  let isPlaying = false;
+btn.addEventListener("click", () => {
+  if (audio.paused) {
+    audio.play();
+    btn.textContent = "⏸";  // Pause icon
+  } else {
+    audio.pause();
+    btn.textContent = "▶";  // Play icon
+  }
+});
 
-  audioBtn.addEventListener('click', () => {
-    if (!isPlaying) {
-      audio.play();
-      audioBtn.textContent = '⏸';
-      isPlaying = true;
-    } else {
-      audio.pause();
-      audioBtn.textContent = '▶';
-      isPlaying = false;
-    }
-  });
-
-  // Reset icon when audio finishes
-  audio.addEventListener('ended', () => {
-    audioBtn.textContent = '▶';
-    isPlaying = false;
-  });
             
 
     </script>
