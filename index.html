@@ -457,19 +457,18 @@
             scrollbar-width: none; /* Firefox */
         }
 
-            #audio-button {
-          font-size: 1.4rem;
-          cursor: pointer;
-          color: #3af2ff;
-          text-shadow: 0 0 8px #3af2ff;
-          margin-top: 10px;
-          text-align: center;
-          user-select: none;
-        }
+#audio-icon {
+    cursor: pointer;
+    font-size: 1.2rem;
+    margin-left: 6px;
+    color: #61dafb;
+    text-shadow: 0 0 6px #3af2ff;
+    transition: transform 0.15s ease;
+}
 
-        #audio-button:hover {
-          opacity: 0.8;
-        }
+#audio-icon:hover {
+    transform: scale(1.2);
+}
 
 
 
@@ -516,7 +515,11 @@
                     <li><strong>Orbital Period:</strong> 1.1 Earth days</li>
                     <li><strong>Rotation:</strong> 1.1 Earth days (Tidally Locked)</li>
                     <li><strong>Observation post:</strong> Miley (Mandalay) at Natalja's Pass (39.2, 104.3)</li>
-                    <li><strong>Nahla ambience audio:</strong> 🔊</li>    
+                    <li><strong>Nahla ambience audio:</strong> 
+                    <audio id="nahla-audio" src="nahla-ambience.mp3"></audio>
+                    <span id="audio-icon">🔊</span>
+</li>
+    
                 </ul>
             </div>
 
