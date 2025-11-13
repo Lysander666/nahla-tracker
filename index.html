@@ -457,18 +457,20 @@
             scrollbar-width: none; /* Firefox */
         }
 
-#audio-icon {
-    cursor: pointer;
-    font-size: 1.2rem;
-    margin-left: 6px;
-    color: #61dafb;
-    text-shadow: 0 0 6px #3af2ff;
-    transition: transform 0.15s ease;
+.audio-btn {
+  background: none;
+  border: none;
+  color: #61dafb;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0 4px;
+  transition: color 0.2s ease;
 }
 
-#audio-icon:hover {
-    transform: scale(1.2);
+.audio-btn:hover {
+  color: #3af2ff;
 }
+
 
 
 
@@ -515,11 +517,11 @@
                     <li><strong>Orbital Period:</strong> 1.1 Earth days</li>
                     <li><strong>Rotation:</strong> 1.1 Earth days (Tidally Locked)</li>
                     <li><strong>Observation post:</strong> Miley (Mandalay) at Natalja's Pass (39.2, 104.3)</li>
-                    <li><strong>Nahla ambience audio:</strong> 
-                    <audio id="nahla-audio" src="nahla-ambience.mp3"></audio>
-                    <span id="audio-icon">🔊</span>
-</li>
-    
+                    <li>
+                  <strong>Nahla ambience audio:</strong>
+                  <button id="audio-btn" class="audio-btn">▶</button>
+                </li>
+
                 </ul>
             </div>
 
@@ -953,22 +955,28 @@ scrollRightBtn.addEventListener('click', () => {
     });
 });
 
-const audio = document.getElementById("nahla-audio");
-const btn = document.getElementById("audio-button");
+  const audio = new Audio('nahla-ambience.mp3'); // change file name if needed
+  const audioBtn = document.getElementById('audio-btn');
 
-let playing = false;
+  let isPlaying = false;
 
-btn.addEventListener("click", () => {
-    if (!playing) {
-        audio.play();
-        btn.textContent = "🔈"; // change icon to 'playing'
-        playing = true;
+  audioBtn.addEventListener('click', () => {
+    if (!isPlaying) {
+      audio.play();
+      audioBtn.textContent = '⏸';
+      isPlaying = true;
     } else {
-        audio.pause();
-        btn.textContent = "🔊"; // change icon to 'paused'
-        playing = false;
+      audio.pause();
+      audioBtn.textContent = '▶';
+      isPlaying = false;
     }
-});
+  });
+
+  // Reset icon when audio finishes
+  audio.addEventListener('ended', () => {
+    audioBtn.textContent = '▶';
+    isPlaying = false;
+  });
             
 
     </script>
