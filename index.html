@@ -454,7 +454,7 @@
 </head>
 <body>
     <div class="container">
-        <h2>Nahla Day/Night Cycle Tracker - LIVE - v0.2</h2>
+        <h2>Nahla Day/Night Cycle Tracker - LIVE - v0.3</h2>
         <div id="tracker">
             <div id="status">Loading...</div>
             <div id="hope">...</div>
@@ -518,7 +518,7 @@
                 <ul>
                     <li><strong>Type:</strong> A5 Vb Blue-White Star</li>
                     <li><strong>Mass:</strong> 1.6758 Solar</li>
-                    <li><strong>Radius:</strong> 1.427 Solar<li>
+                    <li><strong>Radius:</strong> 1.427 Solar</li>
                     <li><strong>Temp:</strong> 8,631 K / 8,358 C</li>
                     <li><strong>Absolute magnitude:</strong> 2.3165 </li>
                     <li><strong>Age:</strong> 800 million years</li>
@@ -682,9 +682,9 @@ Every NCT 'second' lasts roughly 1.1 Earth seconds. Here we live by GMT. </p>
             // Add future Rebekah rise observations here
         ];
 
-        const GALACTIC_PEAK_OBS = [
-            "2025-11-09T21:30:00"
-            // Add future galactic band peak observations here
+        const GALACTIC_VERTICAL_OBS = [
+            "2025-11-15T15:00:00"  // Band at 90° vertical (half above, half below horizon)
+            // Add future vertical band observations here
         ];
 
         // 2. Helper functions
@@ -709,7 +709,7 @@ Every NCT 'second' lasts roughly 1.1 Earth seconds. Here we live by GMT. </p>
         // 3. Auto-calibrated anchors
         const LAST_SUNRISE = anchor(SUNRISE_OBS);
         const REBEKAH_LAST_RISE = anchor(REBEKAH_RISE_OBS);
-        const GALACTIC_BAND_PEAK = anchor(GALACTIC_PEAK_OBS);
+        const GALACTIC_BAND_VERTICAL = anchor(GALACTIC_VERTICAL_OBS);
 
         // 4. Auto-calibrated solar day length
         // Uses averaged period if available, otherwise falls back to original 1.1 days
@@ -758,22 +758,14 @@ Every NCT 'second' lasts roughly 1.1 Earth seconds. Here we live by GMT. </p>
         }
 
         function get_galactic_band_indicator(current_time, is_daytime) {
-            const time_since_peak = (current_time - GALACTIC_BAND_PEAK) / 1000;
-            const current_cycle_seconds = time_since_peak % SOLAR_DAY_LENGTH_SECONDS;
-            const hours_since_peak = current_cycle_seconds / 3600;
-
-            if (is_daytime) {
-                return "<strong>Galactic Band</strong>: 🌌 present (lower angle)";
-            }
-            if (hours_since_peak < 1.5 || hours_since_peak > 24.9) {
-                return "<strong>Galactic Band:</strong> 🌌✨ PEAK BRIGHTNESS (~70° angle, highest elevation)";
-            } else if (hours_since_peak < 4.0 || hours_since_peak > 22.4) {
-                return "<strong>Galactic Band:</strong> 🌌 BRIGHT (prominent, high angle)";
-            } else if (10.0 < hours_since_peak && hours_since_peak < 16.4) {
-                return "<strong>Galactic Band:</strong> 🌌 visible (moderate, lower angle/near horizon)";
-            } else {
-                return "<strong>Galactic Band:</strong> 🌌 visible (rising/setting through rotation)";
-            }
+            const time_since_vertical = (current_time - GALACTIC_BAND_VERTICAL) / 1000;
+            const current_cycle_seconds = ((time_since_vertical % SOLAR_DAY_LENGTH_SECONDS) + SOLAR_DAY_LENGTH_SECONDS) % SOLAR_DAY_LENGTH_SECONDS;
+            
+            // Calculate current angle (90° = vertical band with Hope above, 3pm reference)
+            const degrees_per_second = 360 / SOLAR_DAY_LENGTH_SECONDS;
+            const current_angle = (90 + (current_cycle_seconds * degrees_per_second)) % 360;
+            
+            return `<strong>Galactic Band:</strong> 🌌 at ${current_angle.toFixed(1)}° (from 90° vertical reference)`;
         }
 
         function get_moon_clock() {
@@ -820,7 +812,6 @@ Every NCT 'second' lasts roughly 1.1 Earth seconds. Here we live by GMT. </p>
             const half_solar_day_seconds = SOLAR_DAY_LENGTH_SECONDS / 2;
             const moon_time_progress = current_cycle_seconds / SOLAR_DAY_LENGTH_SECONDS;
             
-            // FIXED: Use SOLAR_DAY_LENGTH_SECONDS directly instead of missing constant
             const hours_into_moon_day = moon_time_progress * (SOLAR_DAY_LENGTH_SECONDS / 3600);
 
             let data = {};
