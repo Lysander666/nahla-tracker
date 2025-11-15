@@ -731,16 +731,54 @@ Every NCT 'second' lasts roughly 1.1 Earth seconds. Here we live by GMT. </p>
 
 
     </div> <script>
-        // --- All your constants, ported to JavaScript ---
-        const MOON_NAME = "Nahla";
-        const SOLAR_DAY_LENGTH_EARTH_DAYS = 1.1;
-        // NOTE: JavaScript needs 'T' for ISO date format
-        const REBEKAH_LAST_RISE = new Date("2025-11-09T21:30:00"); 
-        const GALACTIC_BAND_PEAK = new Date("2025-11-09T23:00:00");
-        const LAST_SUNRISE = new Date("2025-11-09T20:00:00");
-        
-        const SECONDS_IN_EARTH_DAY = 24 * 60 * 60;
-        const SOLAR_DAY_LENGTH_SECONDS = SOLAR_DAY_LENGTH_EARTH_DAYS * SECONDS_IN_EARTH_DAY;
+
+        // === MULTI-OBSERVATION SUPPORT =================================
+
+// 1. Observation arrays — add more timestamps as you observe them
+const SUNRISE_OBS = [
+    "2025-11-09T20:00:00"
+];
+
+const REBEKAH_RISE_OBS = [
+    "2025-11-09T21:30:00"
+];
+
+const GALACTIC_PEAK_OBS = [
+    "2025-11-09T21:30:00"
+];
+
+// 2. Helpers
+function toDates(list) {
+    return list.map(x => new Date(x));
+}
+
+function averagePeriod(list) {
+    if (list.length < 2) return null;
+    const dates = toDates(list).sort((a, b) => a - b);
+    const diffs = [];
+    for (let i = 1; i < dates.length; i++) {
+        diffs.push(dates[i] - dates[i - 1]); // ms
+    }
+    return diffs.reduce((a, b) => a + b, 0) / diffs.length; // mean in ms
+}
+
+function anchor(list) {
+    return new Date(Math.min(...toDates(list))); // FIRST observation = anchor
+}
+
+// 3. Auto-calibrated anchors
+const LAST_SUNRISE = anchor(SUNRISE_OBS);
+const REBEKAH_LAST_RISE = anchor(REBEKAH_RISE_OBS);
+const GALACTIC_BAND_PEAK = anchor(GALACTIC_PEAK_OBS);
+
+// 4. Auto-calibrated solar day length
+// Uses averaged period if available, otherwise falls back to original 1.1 days
+const solarDayMs = averagePeriod(SUNRISE_OBS) || (1.1 * 86400 * 1000);
+const SOLAR_DAY_LENGTH_SECONDS = solarDayMs / 1000;
+
+// === END MULTI-OBSERVATION SUPPORT =============================
+
+
 
         // --- All your helper functions, ported to JavaScript ---
         
@@ -807,7 +845,9 @@ Every NCT 'second' lasts roughly 1.1 Earth seconds. Here we live by GMT. </p>
             const half_solar_day_seconds = SOLAR_DAY_LENGTH_SECONDS / 2;
             const moon_time_progress = current_cycle_seconds / SOLAR_DAY_LENGTH_SECONDS;
             
-            const hours_into_moon_day = moon_time_progress * SOLAR_DAY_LENGTH_EARTH_DAYS * 24;
+            const hours_into_moon_day =
+                    moon_time_progress * (SOLAR_DAY_LENGTH_SECONDS / 3600);
+
 
             let data = {};
 
