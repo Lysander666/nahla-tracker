@@ -731,13 +731,68 @@ Every NCT 'second' lasts roughly 1.1 Earth seconds. Here we live by GMT. </p>
 
 
     </div> <script>
+
+            <script>
+
+// === MULTI-OBSERVATION SUPPORT =================================
+
+// 1. Add your observation arrays here.
+//    These will grow over time as you log more in-game events.
+
+const SUNRISE_OBS = [
+    "2025-11-09T20:00:00"
+    // Add more: "2025-11-10T21:26:30"
+];
+
+const REBEKAH_RISE_OBS = [
+    "2025-11-09T21:30:00"
+    // Add more
+];
+
+const GALACTIC_PEAK_OBS = [
+    "2025-11-09T21:30:00"
+    // Add more
+];
+
+
+// 2. Helper: convert strings to Date objects
+function toDates(list) {
+    return list.map(x => new Date(x));
+}
+
+// 3. Helper: compute average period between all observations
+function averagePeriod(list) {
+    if (list.length < 2) return null;
+    const dates = toDates(list).sort((a, b) => a - b);
+
+    const diffs = [];
+    for (let i = 1; i < dates.length; i++) {
+        diffs.push(dates[i] - dates[i - 1]); // difference in ms
+    }
+
+    return diffs.reduce((a, b) => a + b, 0) / diffs.length; // mean diff in ms
+}
+
+// 4. Helper: choose anchor = earliest observation
+function anchor(list) {
+    return new Date(Math.min(...toDates(list)));
+}
+
+// 5. Replace the old three constants with these auto-calibrated ones
+const LAST_SUNRISE = anchor(SUNRISE_OBS);
+const REBEKAH_LAST_RISE = anchor(REBEKAH_RISE_OBS);
+const GALACTIC_BAND_PEAK = anchor(GALACTIC_PEAK_OBS);
+
+// 6. Dynamically compute solar day length from your observations.
+//    If only 1 observation exists, fall back to the original 1.1 days.
+const solarDayMs = averagePeriod(SUNRISE_OBS) || (1.1 * 86400 * 1000);
+const SOLAR_DAY_LENGTH_SECONDS = solarDayMs / 1000;
+
+// === END MULTI-OBSERVATION BLOCK ================================
+
+            
         // --- All your constants, ported to JavaScript ---
         const MOON_NAME = "Nahla";
-        const SOLAR_DAY_LENGTH_EARTH_DAYS = 1.1;
-        // NOTE: JavaScript needs 'T' for ISO date format
-        const REBEKAH_LAST_RISE = new Date("2025-11-09T21:30:00"); 
-        const GALACTIC_BAND_PEAK = new Date("2025-11-09T23:00:00");
-        const LAST_SUNRISE = new Date("2025-11-09T20:00:00");
         
         const SECONDS_IN_EARTH_DAY = 24 * 60 * 60;
         const SOLAR_DAY_LENGTH_SECONDS = SOLAR_DAY_LENGTH_EARTH_DAYS * SECONDS_IN_EARTH_DAY;
