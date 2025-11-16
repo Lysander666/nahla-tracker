@@ -436,9 +436,10 @@
 
         .orbital-debug {
             font-size: 0.85rem;
-            color: #888;
+            color: #61dafb;
             margin-top: 10px;
             font-family: "Courier New", monospace;
+            text-shadow: 0 0 4px rgba(97, 218, 251, 0.3);
         }
     </style>
 </head>
@@ -707,8 +708,8 @@ Every NCT 'second' lasts roughly 1.1 Earth seconds. Here we live by GMT. </p>
 
         const REBEKAH_RISE_OBS = [
             { time: "2025-11-09T21:30:00", confidence: "high" }, // <- comma here!
-            // Add more Rebekah rise observations here
             { time: "2025-11-16T10:30:00", confidence: "medium" }
+            // Add more Rebekah rise observations here
         ];
 
         const REBEKAH_SET_OBS = [
@@ -942,7 +943,7 @@ Every NCT 'second' lasts roughly 1.1 Earth seconds. Here we live by GMT. </p>
             const degrees_per_second = 360 / HOPE_SOLAR_DAY_SECONDS;
             const current_angle = (90 + (current_cycle_seconds * degrees_per_second)) % 360;
             
-            return `<strong>Galactic Band:</strong> 🌌 at ${current_angle.toFixed(1)}° (from 90° vertical reference)`;
+            return `<strong>Galactic Band:</strong> 🌌 at <span class="time-highlight">${current_angle.toFixed(1)}°</span> (from 90° vertical reference)`;
         }
 
         function get_moon_clock() {
@@ -992,13 +993,13 @@ Every NCT 'second' lasts roughly 1.1 Earth seconds. Here we live by GMT. </p>
             const nahlaPos = getOrbitalPosition(ORBITAL_DATA.nahla, HOPE_LAST_SUNRISE, now);
             const rebekahPos = getOrbitalPosition(ORBITAL_DATA.rebekah, HOPE_LAST_SUNRISE, now);
             
-            const obsCount = HOPE_SUNRISE_OBS.length + HOPE_SUNSET_OBS.length + 
-                           REBEKAH_RISE_OBS.length + REBEKAH_SET_OBS.length;
+            // const obsCount = HOPE_SUNRISE_OBS.length + HOPE_SUNSET_OBS.length + 
+            //                REBEKAH_RISE_OBS.length + REBEKAH_SET_OBS.length;
             
             return `Orbital: Nahla ν=${(nahlaPos.trueAnomaly * 180 / Math.PI).toFixed(1)}° | ` +
                    `Rebekah ν=${(rebekahPos.trueAnomaly * 180 / Math.PI).toFixed(1)}° | ` +
-                   `Rebekah phase: ${((rebekahPos.meanAnomaly / (2 * Math.PI)) * 100).toFixed(2)}% | ` +
-                   `${obsCount} observations logged`;
+                   `Rebekah phase: ${((rebekahPos.meanAnomaly / (2 * Math.PI)) * 100).toFixed(2)}%`;
+                   // + ` | ${obsCount} observations logged`;
         }
 
         // ===== MAIN UPDATE LOOP =====
