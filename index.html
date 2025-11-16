@@ -918,22 +918,45 @@ Every NCT 'second' lasts roughly 1.1 Earth seconds. Here we live by GMT. </p>
             }
         }
 
-        function get_rebekah_status(current_time) {
+    function get_rebekah_status(current_time) {
+            // Check if anchors exist (using the globally defined constants)
             if (!REBEKAH_LAST_RISE) {
                 return `<strong>Rebekah:</strong> Awaiting rise observation`;
             }
-            
-            const time_since_rise = (current_time - REBEKAH_LAST_RISE) / 1000;
-            const current_cycle_seconds = ((time_since_rise % REBEKAH_PERIOD_SECONDS) + REBEKAH_PERIOD_SECONDS) % REBEKAH_PERIOD_SECONDS;
-            const half_period = REBEKAH_PERIOD_SECONDS / 2;
 
-            if (current_cycle_seconds < half_period) {
-                const time_until_set = half_period - current_cycle_seconds;
+            // Determine current state.
+            let is_visible = true; // Default to true if we only have rise data
+            if (REBEKAH_LAST_SET) { // This is the new, smart check
+                // If the last rise is more recent than the last set, it's visible.
+                is_visible = REBEKAH_LAST_RISE > REBEKAH_LAST_SET;
+            }
+
+            // Now, display the correct status and "time until"
+            if (is_visible) {
+                // State is VISIBLE. Next event is SET.
+                // We project this from the LAST_RISE.
+                const time_since_rise = (current_time - REBEKAH_LAST_RISE) / 1000;
+                const half_period = REBEKAH_PERIOD_SECONDS / 2;
+                // Use modulo to find progress in *this* half-cycle
+                const time_into_cycle = time_since_rise % half_period;
+                const time_until_set = half_period - time_into_cycle;
+                
                 return `<strong>Rebekah:</strong> 🪐 VISIBLE | Est. set in: <span class="time-highlight">${format_timedelta(time_until_set)}</span>`;
+            
             } else {
-                const time_until_rise = REBEKAH_PERIOD_SECONDS - current_cycle_seconds;
+                // State is NOT VISIBLE. Next event is RISE.
+                // We project this from the LAST_SET.
+                const time_since_set = (current_time - REBEKAH_LAST_SET) / 1000;
+                const half_period = REBEKAH_PERIOD_SECONDS / 2;
+                // Use modulo to find progress in *this* half-cycle
+                const time_into_cycle = time_since_set % half_period;
+                const time_until_rise = half_period - time_into_cycle;
+
                 return `<strong>Rebekah:</strong> ─ below horizon | Est. rise in: <span class="time-highlight">${format_timedelta(time_until_rise)}</span>`;
             }
+        
+        
+        
         }
 
         function get_galactic_band_indicator(current_time) {
