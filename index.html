@@ -861,8 +861,7 @@ Every NCT 'second' lasts roughly 1.1 Earth seconds. Here we live by GMT. </p>
             REBEKAH_PERIOD_SECONDS = HOPE_SOLAR_DAY_SECONDS;
         }
 
-        const SIDEREAL_DAY_SECONDS = averagePeriod(GALACTIC_VERTICAL_OBS) || 90000;
-        
+        const SIDEREAL_DAY_SECONDS = (averagePeriod(GALACTIC_VERTICAL_OBS) / 1000) || 90000;        
         const REBEKAH_LAST_RISE = mostRecent(REBEKAH_RISE_OBS) || anchor(REBEKAH_RISE_OBS);
         const REBEKAH_LAST_SET = mostRecent(REBEKAH_SET_OBS) || anchor(REBEKAH_SET_OBS);
         const GALACTIC_BAND_VERTICAL = mostRecent(GALACTIC_VERTICAL_OBS);
