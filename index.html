@@ -444,7 +444,7 @@
 </head>
 <body>
     <div class="container">
-        <h2>Nahla Day/Night Cycle Tracker - LIVE - v0.4 (Orbital Mechanics)</h2>
+        <h2>Nahla Day/Night Cycle Tracker - LIVE - v0.4 (Multi-Anchor)</h2>
         <div id="tracker">
             <div id="status">Loading...</div>
             <div id="hope">...</div>
@@ -654,7 +654,8 @@
         <div id="notes-box">
             <h2>Notes</h2>
             <div id="notes">
-                <p><strong>v0.4 Update:</strong> Now using proper orbital mechanics with EDSM data! The tracker accounts for Rebekah's motion around Hope and uses Keplerian orbital calculations for more accurate predictions.</p>
+                <p><strong>v0.4 Update:</strong> Now using proper orbital mechanics with EDSM data. The tracker accounts for Rebekah's motion around Hope and uses Keplerian orbital calculations for more accurate predictions.
+                <p>Multi-anchor observation system included. Now tracking Hope sunrise/sunset and Rebekah rise/set separately for improved accuracy. Adding more observations to reduce drift over time.</p>
                 <p><em>Clarification:</em> Nahla Coordinated time [NCT] isn't truly 24 Earth hours. It's a compressed version of Nahla's 26h 24m solar day, scaled for reference and context. 
 Every NCT 'second' lasts roughly 1.1 Earth seconds. Here we live by GMT. </p>
                 <br>
@@ -686,16 +687,31 @@ Every NCT 'second' lasts roughly 1.1 Earth seconds. Here we live by GMT. </p>
         };
 
         // ===== OBSERVATION ANCHORS =====
-        const SUNRISE_OBS = [
+        // Add timestamps as you observe them! Format: "YYYY-MM-DDTHH:MM:SS"
+        
+        const HOPE_SUNRISE_OBS = [
             "2025-11-09T20:00:00"
+            // Add more Hope sunrise observations here
+        ];
+
+        const HOPE_SUNSET_OBS = [
+            // Add Hope sunset observations here
+            // Example: "2025-11-10T09:12:00"
         ];
 
         const REBEKAH_RISE_OBS = [
             "2025-11-09T21:30:00"
+            // Add more Rebekah rise observations here
+        ];
+
+        const REBEKAH_SET_OBS = [
+            // Add Rebekah set observations here
+            // Example: "2025-11-10T08:42:00"
         ];
 
         const GALACTIC_VERTICAL_OBS = [
             "2025-11-15T15:00:00"
+            // Add more galactic band reference observations if needed
         ];
 
         // ===== HELPER FUNCTIONS =====
@@ -714,7 +730,13 @@ Every NCT 'second' lasts roughly 1.1 Earth seconds. Here we live by GMT. </p>
         }
 
         function anchor(list) {
+            if (list.length === 0) return null;
             return new Date(Math.min(...toDates(list)));
+        }
+
+        function mostRecent(list) {
+            if (list.length === 0) return null;
+            return new Date(Math.max(...toDates(list)));
         }
 
         // ===== ORBITAL MECHANICS FUNCTIONS =====
@@ -726,7 +748,7 @@ Every NCT 'second' lasts roughly 1.1 Earth seconds. Here we live by GMT. </p>
 
         // Solve Kepler's equation for eccentric anomaly (iterative)
         function solveKepler(meanAnomaly, eccentricity, tolerance = 1e-6) {
-            let E = meanAnomaly; // Initial guess
+            let E = meanAnomaly;
             let delta = 1;
             let iterations = 0;
             const maxIterations = 100;
@@ -750,23 +772,14 @@ Every NCT 'second' lasts roughly 1.1 Earth seconds. Here we live by GMT. </p>
 
         // Get orbital position at given time
         function getOrbitalPosition(body, epochTime, currentTime) {
-            const periodMs = body.period * 86400 * 1000; // Convert days to ms
-            const timeSinceEpoch = (currentTime - epochTime) / 1000; // seconds
-            const meanMotion = (2 * Math.PI) / (body.period * 86400); // radians per second
+            const periodMs = body.period * 86400 * 1000;
+            const timeSinceEpoch = (currentTime - epochTime) / 1000;
+            const meanMotion = (2 * Math.PI) / (body.period * 86400);
             
-            // Mean anomaly
             const M = (meanMotion * timeSinceEpoch) % (2 * Math.PI);
-            
-            // Eccentric anomaly
             const E = solveKepler(M, body.eccentricity);
-            
-            // True anomaly
             const nu = trueAnomalyFromEccentric(E, body.eccentricity);
-            
-            // Distance from focus
             const r = body.semiMajorAxis * (1 - body.eccentricity * Math.cos(E));
-            
-            // Argument of latitude (true anomaly + argument of periapsis)
             const u = nu + degToRad(body.argOfPeriapsis);
             
             return {
@@ -778,24 +791,25 @@ Every NCT 'second' lasts roughly 1.1 Earth seconds. Here we live by GMT. </p>
             };
         }
 
-        // Calculate Rebekah's angular position as seen from Nahla
-        function getRebekahAngle(currentTime) {
-            // Since Nahla is tidally locked and orbits Rebekah, Rebekah's position
-            // in Nahla's sky is determined by where Nahla is in its orbit
-            const nahlaPos = getOrbitalPosition(ORBITAL_DATA.nahla, LAST_SUNRISE, currentTime);
-            
-            // Rebekah rises when Nahla has rotated to face it
-            // Since tidally locked, this is simply Nahla's orbital position
-            return nahlaPos.argumentOfLatitude;
+        // ===== CALIBRATED PERIODS AND ANCHORS =====
+        
+        // Calculate Hope's day/night period from sunrise observations
+        const hopeSolarDayMs = averagePeriod(HOPE_SUNRISE_OBS) || (1.1 * 86400 * 1000);
+        const HOPE_SOLAR_DAY_SECONDS = hopeSolarDayMs / 1000;
+        
+        // Use most recent Hope sunrise as primary anchor
+        const HOPE_LAST_SUNRISE = mostRecent(HOPE_SUNRISE_OBS) || anchor(HOPE_SUNRISE_OBS);
+        
+        // Calculate Rebekah's visibility period if we have both rise and set observations
+        let REBEKAH_PERIOD_SECONDS = HOPE_SOLAR_DAY_SECONDS; // Default to same as Hope
+        if (REBEKAH_RISE_OBS.length > 0 && REBEKAH_SET_OBS.length > 0) {
+            // We can refine this if needed
+            REBEKAH_PERIOD_SECONDS = HOPE_SOLAR_DAY_SECONDS;
         }
-
-        // ===== CALIBRATED ANCHORS =====
-        const LAST_SUNRISE = anchor(SUNRISE_OBS);
-        const REBEKAH_LAST_RISE = anchor(REBEKAH_RISE_OBS);
+        
+        const REBEKAH_LAST_RISE = mostRecent(REBEKAH_RISE_OBS) || anchor(REBEKAH_RISE_OBS);
+        const REBEKAH_LAST_SET = mostRecent(REBEKAH_SET_OBS) || anchor(REBEKAH_SET_OBS);
         const GALACTIC_BAND_VERTICAL = anchor(GALACTIC_VERTICAL_OBS);
-
-        const solarDayMs = averagePeriod(SUNRISE_OBS) || (1.1 * 86400 * 1000);
-        const SOLAR_DAY_LENGTH_SECONDS = solarDayMs / 1000;
 
         // ===== CONSTANTS =====
         const MOON_NAME = "Nahla";
@@ -810,46 +824,82 @@ Every NCT 'second' lasts roughly 1.1 Earth seconds. Here we live by GMT. </p>
             return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
         }
 
-        function get_rebekah_status(current_time) {
-            const time_since_rise = (current_time - REBEKAH_LAST_RISE) / 1000;
-            const current_cycle_seconds = ((time_since_rise % SOLAR_DAY_LENGTH_SECONDS) + SOLAR_DAY_LENGTH_SECONDS) % SOLAR_DAY_LENGTH_SECONDS;
-            const half_rotation = SOLAR_DAY_LENGTH_SECONDS / 2;
-
-            if (current_cycle_seconds < half_rotation) {
-                const time_until_set = half_rotation - current_cycle_seconds;
-                return `<strong>Rebekah:</strong> 🪐 VISIBLE | Est. set in: <span class="time-highlight">${format_timedelta(time_until_set)}</span>`;
-            } else {
-                const time_until_rise = SOLAR_DAY_LENGTH_SECONDS - current_cycle_seconds;
-                return `<strong>Rebekah:</strong> ─ below horizon | Est. rise in: <span class="time-highlight">${format_timedelta(time_until_rise)}</span>`;
+        function get_hope_status(current_time) {
+            if (!HOPE_LAST_SUNRISE) {
+                return "<strong>Hope:</strong> Awaiting sunrise observation";
             }
-        }
-
-        function get_sky_arc_indicator(progress, is_daytime) {
+            
+            const time_since_sunrise = (current_time - HOPE_LAST_SUNRISE) / 1000;
+            const current_cycle_seconds = ((time_since_sunrise % HOPE_SOLAR_DAY_SECONDS) + HOPE_SOLAR_DAY_SECONDS) % HOPE_SOLAR_DAY_SECONDS;
+            const half_day = HOPE_SOLAR_DAY_SECONDS / 2;
+            
+            const is_daytime = current_cycle_seconds < half_day;
+            const progress = is_daytime ? 
+                (current_cycle_seconds / half_day) : 
+                ((current_cycle_seconds - half_day) / half_day);
+            
             if (is_daytime) {
+                const time_until_sunset = half_day - current_cycle_seconds;
                 const positions = ["🌅", "☀️", "☀️", "☀️", "☀️", "🌇"];
                 const index = Math.floor(progress * (positions.length - 1));
                 let arc = ["─", "─", "─", "─", "─", "─"];
                 arc[index] = positions[index];
-                return `<strong>Hope:</strong> [${arc.join("")}]`;
+                
+                return {
+                    status: `☀️  DAY on ${MOON_NAME} | Sunset in: <span class="time-highlight">${format_timedelta(time_until_sunset)}</span>`,
+                    arc: `<strong>Hope:</strong> [${arc.join("")}]`,
+                    isDaytime: true,
+                    progress: current_cycle_seconds / HOPE_SOLAR_DAY_SECONDS
+                };
             } else {
-                return "<strong>Hope:</strong> [────────] (below horizon)";
+                const time_until_sunrise = HOPE_SOLAR_DAY_SECONDS - current_cycle_seconds;
+                return {
+                    status: `🌙 NIGHT on ${MOON_NAME} | Sunrise in: <span class="time-highlight">${format_timedelta(time_until_sunrise)}</span>`,
+                    arc: `<strong>Hope:</strong> [────────] (below horizon)`,
+                    isDaytime: false,
+                    progress: current_cycle_seconds / HOPE_SOLAR_DAY_SECONDS
+                };
             }
         }
 
-        function get_galactic_band_indicator(current_time, is_daytime) {
-            const time_since_vertical = (current_time - GALACTIC_BAND_VERTICAL) / 1000;
-            const current_cycle_seconds = ((time_since_vertical % SOLAR_DAY_LENGTH_SECONDS) + SOLAR_DAY_LENGTH_SECONDS) % SOLAR_DAY_LENGTH_SECONDS;
+        function get_rebekah_status(current_time) {
+            if (!REBEKAH_LAST_RISE) {
+                return `<strong>Rebekah:</strong> Awaiting rise observation`;
+            }
             
-            const degrees_per_second = 360 / SOLAR_DAY_LENGTH_SECONDS;
+            const time_since_rise = (current_time - REBEKAH_LAST_RISE) / 1000;
+            const current_cycle_seconds = ((time_since_rise % REBEKAH_PERIOD_SECONDS) + REBEKAH_PERIOD_SECONDS) % REBEKAH_PERIOD_SECONDS;
+            const half_period = REBEKAH_PERIOD_SECONDS / 2;
+
+            if (current_cycle_seconds < half_period) {
+                const time_until_set = half_period - current_cycle_seconds;
+                return `<strong>Rebekah:</strong> 🪐 VISIBLE | Est. set in: <span class="time-highlight">${format_timedelta(time_until_set)}</span>`;
+            } else {
+                const time_until_rise = REBEKAH_PERIOD_SECONDS - current_cycle_seconds;
+                return `<strong>Rebekah:</strong> ─ below horizon | Est. rise in: <span class="time-highlight">${format_timedelta(time_until_rise)}</span>`;
+            }
+        }
+
+        function get_galactic_band_indicator(current_time) {
+            if (!GALACTIC_BAND_VERTICAL) {
+                return `<strong>Galactic Band:</strong> 🌌 Awaiting reference observation`;
+            }
+            
+            const time_since_vertical = (current_time - GALACTIC_BAND_VERTICAL) / 1000;
+            const current_cycle_seconds = ((time_since_vertical % HOPE_SOLAR_DAY_SECONDS) + HOPE_SOLAR_DAY_SECONDS) % HOPE_SOLAR_DAY_SECONDS;
+            
+            const degrees_per_second = 360 / HOPE_SOLAR_DAY_SECONDS;
             const current_angle = (90 + (current_cycle_seconds * degrees_per_second)) % 360;
             
             return `<strong>Galactic Band:</strong> 🌌 at ${current_angle.toFixed(1)}° (from 90° vertical reference)`;
         }
 
         function get_moon_clock() {
+            if (!HOPE_LAST_SUNRISE) return "Nahla Local Time: Awaiting sunrise observation";
+            
             const now_ms = Date.now();
-            const time_since_sunrise = (now_ms - LAST_SUNRISE) / 1000; 
-            const current_cycle_seconds = time_since_sunrise % SOLAR_DAY_LENGTH_SECONDS;
+            const time_since_sunrise = (now_ms - HOPE_LAST_SUNRISE) / 1000; 
+            const current_cycle_seconds = time_since_sunrise % HOPE_SOLAR_DAY_SECONDS;
 
             const hours = Math.floor(current_cycle_seconds / 3600);
             const minutes = Math.floor((current_cycle_seconds % 3600) / 60);
@@ -863,9 +913,11 @@ Every NCT 'second' lasts roughly 1.1 Earth seconds. Here we live by GMT. </p>
         }
 
         function get_nahla_coordinated_time() {
+            if (!HOPE_LAST_SUNRISE) return "Nahla Coordinated Time: Awaiting sunrise observation";
+            
             const now_ms = Date.now();
-            const time_since_sunrise = (now_ms - LAST_SUNRISE) / 1000;
-            const current_cycle_seconds = time_since_sunrise % SOLAR_DAY_LENGTH_SECONDS;
+            const time_since_sunrise = (now_ms - HOPE_LAST_SUNRISE) / 1000;
+            const current_cycle_seconds = time_since_sunrise % HOPE_SOLAR_DAY_SECONDS;
 
             const SCALE = 24 / 26.4;
             const scaled_seconds = current_cycle_seconds * SCALE;
@@ -883,47 +935,38 @@ Every NCT 'second' lasts roughly 1.1 Earth seconds. Here we live by GMT. </p>
         }
 
         function getOrbitalDebugInfo() {
+            if (!HOPE_LAST_SUNRISE) return "Orbital: Awaiting observations";
+            
             const now = new Date();
-            const nahlaPos = getOrbitalPosition(ORBITAL_DATA.nahla, LAST_SUNRISE, now);
-            const rebekahPos = getOrbitalPosition(ORBITAL_DATA.rebekah, LAST_SUNRISE, now);
+            const nahlaPos = getOrbitalPosition(ORBITAL_DATA.nahla, HOPE_LAST_SUNRISE, now);
+            const rebekahPos = getOrbitalPosition(ORBITAL_DATA.rebekah, HOPE_LAST_SUNRISE, now);
+            
+            const obsCount = HOPE_SUNRISE_OBS.length + HOPE_SUNSET_OBS.length + 
+                           REBEKAH_RISE_OBS.length + REBEKAH_SET_OBS.length;
             
             return `Orbital: Nahla ν=${(nahlaPos.trueAnomaly * 180 / Math.PI).toFixed(1)}° | ` +
                    `Rebekah ν=${(rebekahPos.trueAnomaly * 180 / Math.PI).toFixed(1)}° | ` +
-                   `Rebekah phase: ${((rebekahPos.meanAnomaly / (2 * Math.PI)) * 100).toFixed(2)}% of ${ORBITAL_DATA.rebekah.period}d orbit`;
+                   `Rebekah phase: ${((rebekahPos.meanAnomaly / (2 * Math.PI)) * 100).toFixed(2)}% | ` +
+                   `${obsCount} observations logged`;
         }
 
         // ===== MAIN UPDATE LOOP =====
         function updateDisplay() {
             const current_time = new Date();
-            const time_since_sunrise = (current_time - LAST_SUNRISE) / 1000;
-            const current_cycle_seconds = time_since_sunrise % SOLAR_DAY_LENGTH_SECONDS;
-            const half_solar_day_seconds = SOLAR_DAY_LENGTH_SECONDS / 2;
-            const moon_time_progress = current_cycle_seconds / SOLAR_DAY_LENGTH_SECONDS;
+            const hopeStatus = get_hope_status(current_time);
             
-            const hours_into_moon_day = moon_time_progress * (SOLAR_DAY_LENGTH_SECONDS / 3600);
-
-            let data = {};
-
-            if (current_cycle_seconds < half_solar_day_seconds) {
-                const day_progress = current_cycle_seconds / half_solar_day_seconds;
-                const time_until_sunset = half_solar_day_seconds - current_cycle_seconds;
-                data.status = `☀️  DAY on ${MOON_NAME} | Sunset in: <span class="time-highlight">${format_timedelta(time_until_sunset)}</span> | <span class="time-highlight">${hours_into_moon_day.toFixed(2)}h</span> into solar day`;
-                data.hope = get_sky_arc_indicator(day_progress, true);
-                data.band = get_galactic_band_indicator(current_time, true);
+            if (hopeStatus.status) {
+                const hours_into_day = hopeStatus.progress * (HOPE_SOLAR_DAY_SECONDS / 3600);
+                document.getElementById("status").innerHTML = 
+                    hopeStatus.status + ` | <span class="time-highlight">${hours_into_day.toFixed(2)}h</span> into solar day`;
+                document.getElementById("hope").innerHTML = hopeStatus.arc;
             } else {
-                const night_progress = (current_cycle_seconds - half_solar_day_seconds) / half_solar_day_seconds;
-                const time_until_sunrise = SOLAR_DAY_LENGTH_SECONDS - current_cycle_seconds;
-                data.status = `🌙 NIGHT on ${MOON_NAME} | Sunrise in: <span class="time-highlight">${format_timedelta(time_until_sunrise)}</span> | <span class="time-highlight">${hours_into_moon_day.toFixed(2)}h</span> into solar day`;
-                data.hope = get_sky_arc_indicator(night_progress, false);
-                data.band = get_galactic_band_indicator(current_time, false);
+                document.getElementById("status").innerHTML = hopeStatus;
+                document.getElementById("hope").innerHTML = "";
             }
-
-            data.rebekah = get_rebekah_status(current_time);
-
-            document.getElementById("status").innerHTML = data.status;
-            document.getElementById("hope").innerHTML = data.hope;
-            document.getElementById("band").innerHTML = data.band;
-            document.getElementById("rebekah").innerHTML = data.rebekah;
+            
+            document.getElementById("band").innerHTML = get_galactic_band_indicator(current_time);
+            document.getElementById("rebekah").innerHTML = get_rebekah_status(current_time);
             document.getElementById("orbital-debug").innerHTML = getOrbitalDebugInfo();
         }
 
