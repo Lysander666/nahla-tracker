@@ -855,6 +855,7 @@ Every NCT 'second' lasts roughly 1.1 Earth seconds. Here we live by GMT. </p>
         
         // Use most recent Hope sunrise as primary anchor
         const HOPE_LAST_SUNRISE = mostRecent(HOPE_SUNRISE_OBS) || anchor(HOPE_SUNRISE_OBS);
+        const HOPE_LAST_SUNSET = mostRecent(HOPE_SUNSET_OBS);
         
         // Calculate Rebekah's visibility period if we have both rise and set observations
         let REBEKAH_PERIOD_SECONDS = HOPE_SOLAR_DAY_SECONDS; // Default to same as Hope
@@ -881,22 +882,31 @@ Every NCT 'second' lasts roughly 1.1 Earth seconds. Here we live by GMT. </p>
             return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
         }
 
-        function get_hope_status(current_time) {
+ function get_hope_status(current_time) {
             if (!HOPE_LAST_SUNRISE) {
-                return "<strong>Hope:</strong> Awaiting sunrise observation";
+                return { status: "<strong>Hope:</strong> Awaiting sunrise observation", arc: "", isDaytime: false, progress: 0 };
             }
-            
-            const time_since_sunrise = (current_time - HOPE_LAST_SUNRISE) / 1000;
-            const current_cycle_seconds = ((time_since_sunrise % HOPE_SOLAR_DAY_SECONDS) + HOPE_SOLAR_DAY_SECONDS) % HOPE_SOLAR_DAY_SECONDS;
+
+            // Determine current state.
+            let is_daytime = true; // Default to true if we only have rise data
+            if (HOPE_LAST_SUNSET) { // This is the new, smart check
+                // If the last rise is more recent than the last set, it's daytime.
+                is_daytime = HOPE_LAST_SUNRISE > HOPE_LAST_SUNSET;
+            }
+
+            // We are still *estimating* a 50/50 split for the countdown,
+            // but the *state* (day/night) will now be 100% correct.
             const half_day = HOPE_SOLAR_DAY_SECONDS / 2;
             
-            const is_daytime = current_cycle_seconds < half_day;
-            const progress = is_daytime ? 
-                (current_cycle_seconds / half_day) : 
-                ((current_cycle_seconds - half_day) / half_day);
-            
             if (is_daytime) {
+                // State is DAY. Next event is SET.
+                const time_since_rise = (current_time - HOPE_LAST_SUNRISE) / 1000;
+                // Calculate progress based on the *full* cycle
+                const current_cycle_seconds = ((time_since_rise % HOPE_SOLAR_DAY_SECONDS) + HOPE_SOLAR_DAY_SECONDS) % HOPE_SOLAR_DAY_SECONDS;
                 const time_until_sunset = half_day - current_cycle_seconds;
+
+                // --- Build the arc ---
+                const progress = current_cycle_seconds / half_day;
                 const positions = ["🌅", "☀️", "☀️", "☀️", "☀️", "🌇"];
                 const index = Math.floor(progress * (positions.length - 1));
                 let arc = ["─", "─", "─", "─", "─", "─"];
@@ -908,13 +918,19 @@ Every NCT 'second' lasts roughly 1.1 Earth seconds. Here we live by GMT. </p>
                     isDaytime: true,
                     progress: current_cycle_seconds / HOPE_SOLAR_DAY_SECONDS
                 };
+
             } else {
-                const time_until_sunrise = HOPE_SOLAR_DAY_SECONDS - current_cycle_seconds;
+                // State is NIGHT. Next event is RISE.
+                const time_since_set = (current_time - HOPE_LAST_SUNSET) / 1000;
+                // Calculate progress based on the *full* cycle
+                const current_cycle_seconds = ((time_since_set % HOPE_SOLAR_DAY_SECONDS) + HOPE_SOLAR_DAY_SECONDS) % HOPE_SOLAR_DAY_SECONDS;
+                const time_until_sunrise = half_day - current_cycle_seconds;
+
                 return {
                     status: `🌙 NIGHT on ${MOON_NAME} | Sunrise in: <span class="time-highlight">${format_timedelta(time_until_sunrise)}</span>`,
                     arc: `<strong>Hope:</strong> [────────] (below horizon)`,
                     isDaytime: false,
-                    progress: current_cycle_seconds / HOPE_SOLAR_DAY_SECONDS
+                    progress: (half_day + current_cycle_seconds) / HOPE_SOLAR_DAY_SECONDS // Night progress
                 };
             }
         }
