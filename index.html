@@ -687,56 +687,107 @@ Every NCT 'second' lasts roughly 1.1 Earth seconds. Here we live by GMT. </p>
         };
 
         // ===== OBSERVATION ANCHORS =====
-        // Add timestamps as you observe them! Format: "YYYY-MM-DDTHH:MM:SS"
+        // Add timestamps as you observe them!
+        // Format options:
+        //   Simple: "YYYY-MM-DDTHH:MM:SS"
+        //   With confidence: { time: "YYYY-MM-DDTHH:MM:SS", confidence: "high" }
+        //   Confidence levels: "high" (default), "medium", "low", "estimate"
         
         const HOPE_SUNRISE_OBS = [
-            "2025-11-09T20:00:00"
+            { time: "2025-11-09T20:00:00", confidence: "medium" }
             // Add more Hope sunrise observations here
+            // Examples:
+            // "2025-11-10T20:05:00",  // Simple format (assumed high confidence)
+            // { time: "2025-11-11T20:03:00", confidence: "medium" }
         ];
 
         const HOPE_SUNSET_OBS = [
             // Add Hope sunset observations here
-            // Example: "2025-11-10T09:12:00"
         ];
 
         const REBEKAH_RISE_OBS = [
-            "2025-11-09T21:30:00"
+            { time: "2025-11-09T21:30:00", confidence: "high" }
+            { time: "2025-16-09T10:30:00", confidence: "medium" }
             // Add more Rebekah rise observations here
         ];
 
         const REBEKAH_SET_OBS = [
             // Add Rebekah set observations here
-            // Example: "2025-11-10T08:42:00"
         ];
 
         const GALACTIC_VERTICAL_OBS = [
-            "2025-11-15T15:00:00"
+            { time: "2025-11-15T15:00:00", confidence: "high" }
             // Add more galactic band reference observations if needed
         ];
 
         // ===== HELPER FUNCTIONS =====
+        
+        // Normalize observation to object format
+        function normalizeObs(obs) {
+            if (typeof obs === 'string') {
+                return { time: obs, confidence: 'high' };
+            }
+            return { time: obs.time, confidence: obs.confidence || 'high' };
+        }
+        
+        // Get confidence weight (higher = more reliable)
+        function getConfidenceWeight(confidence) {
+            const weights = {
+                'high': 1.0,
+                'medium': 0.7,
+                'low': 0.4,
+                'estimate': 0.2
+            };
+            return weights[confidence] || 1.0;
+        }
+        
         function toDates(list) {
-            return list.map(x => new Date(x));
+            return list.map(obs => {
+                const normalized = normalizeObs(obs);
+                return { date: new Date(normalized.time), confidence: normalized.confidence };
+            });
         }
 
         function averagePeriod(list) {
             if (list.length < 2) return null;
-            const dates = toDates(list).sort((a, b) => a - b);
-            const diffs = [];
-            for (let i = 1; i < dates.length; i++) {
-                diffs.push(dates[i] - dates[i - 1]);
+            const observations = toDates(list).sort((a, b) => a.date - b.date);
+            
+            let totalWeightedDiff = 0;
+            let totalWeight = 0;
+            
+            for (let i = 1; i < observations.length; i++) {
+                const diff = observations[i].date - observations[i - 1].date;
+                const weight = Math.min(
+                    getConfidenceWeight(observations[i].confidence),
+                    getConfidenceWeight(observations[i - 1].confidence)
+                );
+                totalWeightedDiff += diff * weight;
+                totalWeight += weight;
             }
-            return diffs.reduce((a, b) => a + b, 0) / diffs.length;
+            
+            return totalWeight > 0 ? totalWeightedDiff / totalWeight : null;
         }
 
         function anchor(list) {
             if (list.length === 0) return null;
-            return new Date(Math.min(...toDates(list)));
+            const observations = toDates(list);
+            return observations.reduce((earliest, obs) => 
+                obs.date < earliest.date ? obs : earliest
+            ).date;
         }
 
         function mostRecent(list) {
             if (list.length === 0) return null;
-            return new Date(Math.max(...toDates(list)));
+            const observations = toDates(list);
+            // Prefer high confidence recent observations
+            const sorted = observations.sort((a, b) => {
+                const timeDiff = b.date - a.date;
+                if (Math.abs(timeDiff) < 3600000) { // Within 1 hour
+                    return getConfidenceWeight(b.confidence) - getConfidenceWeight(a.confidence);
+                }
+                return timeDiff;
+            });
+            return sorted[0].date;
         }
 
         // ===== ORBITAL MECHANICS FUNCTIONS =====
