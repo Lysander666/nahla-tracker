@@ -717,7 +717,9 @@ Every NCT 'second' lasts roughly 1.1 Earth seconds. Here we live by GMT. </p>
         ];
 
         const GALACTIC_VERTICAL_OBS = [
-            { time: "2025-11-15T15:00:00", confidence: "medium" }
+            { time: "2025-11-15T15:00:00", confidence: "high" },
+            { time: "2025-11-16T16:00:00", confidence: "high" }
+
             // Add more galactic band reference observations if needed
         ];
 
@@ -858,10 +860,12 @@ Every NCT 'second' lasts roughly 1.1 Earth seconds. Here we live by GMT. </p>
             // We can refine this if needed
             REBEKAH_PERIOD_SECONDS = HOPE_SOLAR_DAY_SECONDS;
         }
+
+        const SIDEREAL_DAY_SECONDS = averagePeriod(GALACTIC_VERTICAL_OBS) || 90000;
         
         const REBEKAH_LAST_RISE = mostRecent(REBEKAH_RISE_OBS) || anchor(REBEKAH_RISE_OBS);
         const REBEKAH_LAST_SET = mostRecent(REBEKAH_SET_OBS) || anchor(REBEKAH_SET_OBS);
-        const GALACTIC_BAND_VERTICAL = anchor(GALACTIC_VERTICAL_OBS);
+        const GALACTIC_BAND_VERTICAL = mostRecent(GALACTIC_VERTICAL_OBS);
 
         // ===== CONSTANTS =====
         const MOON_NAME = "Nahla";
@@ -934,17 +938,19 @@ Every NCT 'second' lasts roughly 1.1 Earth seconds. Here we live by GMT. </p>
 
         function get_galactic_band_indicator(current_time) {
             if (!GALACTIC_BAND_VERTICAL) {
-                return `<strong>Galactic Band:</strong> 🌌 Awaiting reference observation`;
-            }
-            
-            const time_since_vertical = (current_time - GALACTIC_BAND_VERTICAL) / 1000;
-            const current_cycle_seconds = ((time_since_vertical % HOPE_SOLAR_DAY_SECONDS) + HOPE_SOLAR_DAY_SECONDS) % HOPE_SOLAR_DAY_SECONDS;
-            
-            const degrees_per_second = 360 / HOPE_SOLAR_DAY_SECONDS;
-            const current_angle = (90 + (current_cycle_seconds * degrees_per_second)) % 360;
-            
-            return `<strong>Galactic Band:</strong> 🌌 at <span class="time-highlight">${current_angle.toFixed(1)}°</span> (from 90° vertical reference)`;
-        }
+        return `<strong>Galactic Band:</strong> 🌌 Awaiting reference observation`;
+    }
+    
+    const time_since_vertical = (current_time - GALACTIC_BAND_VERTICAL) / 1000;
+    // THE FIX: Use the new constant
+    const current_cycle_seconds = ((time_since_vertical % SIDEREAL_DAY_SECONDS) + SIDEREAL_DAY_SECONDS) % SIDEREAL_DAY_SECONDS;
+    
+    // THE FIX: Use the new constant
+    const degrees_per_second = 360 / SIDEREAL_DAY_SECONDS;
+    const current_angle = (90 + (current_cycle_seconds * degrees_per_second)) % 360;
+    
+    return `<strong>Galactic Band:</strong> 🌌 at <span class="time-highlight">${current_angle.toFixed(1)}°</span> (from 90° vertical reference)`;
+}
 
         function get_moon_clock() {
             if (!HOPE_LAST_SUNRISE) return "Nahla Local Time: Awaiting sunrise observation";
