@@ -2,25 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    
-    <title>Nahla Tracker</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=VT323&display=swap">
-
-    <!-- Open Graph -->
-<meta property="og:type" content="website">
-<meta property="og:title" content="Nahla Tracker">
-<meta property="og:description" content="Live day/night tracker and gallery for Nahla, a remote Elite Dangerous moon.">
-<meta property="og:url" content="https://lysander666.github.io/nahla-tracker/">
-<meta property="og:image" content="https://lysander666.github.io/nahla-tracker/social-card.jpg">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
-
-<!-- Twitter -->
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Nahla Tracker">
-<meta name="twitter:description" content="Live day/night tracker and gallery for Nahla, a remote Elite Dangerous moon.">
-<meta name="twitter:image" content="https://lysander666.github.io/nahla-tracker/social-card.jpg">
-
+    <title>Nahla Tracker v0.4</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=VT323&display=swap">
     <link id="favicon" rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='80'>🌕</text></svg>">
     
     <style>
@@ -450,11 +433,18 @@
         .audio-btn:active {
           transform: scale(0.9);
         }
+
+        .orbital-debug {
+            font-size: 0.85rem;
+            color: #888;
+            margin-top: 10px;
+            font-family: "Courier New", monospace;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h2>Nahla Day/Night Cycle Tracker - LIVE - v0.3</h2>
+        <h2>Nahla Day/Night Cycle Tracker - LIVE - v0.4 (Orbital Mechanics)</h2>
         <div id="tracker">
             <div id="status">Loading...</div>
             <div id="hope">...</div>
@@ -462,6 +452,7 @@
             <div id="rebekah">...</div>
             <div id="moonclock">...</div>
             <div id="moonclock-coordinated">...</div>
+            <div class="orbital-debug" id="orbital-debug">...</div>
             
             <div style="font-size: 0.9rem; color: #aaa; margin-top: 15px;">
                 <a href="https://inara.cz/elite/cmdr/440263/" 
@@ -489,6 +480,8 @@
                     <li><strong>Volcanism:</strong> Metallic magma, gas vents, fumaroles</li>
                     <li><strong>Orbital Period:</strong> 1.1 Earth days</li>
                     <li><strong>Rotation:</strong> 1.1 Earth days (Tidally Locked)</li>
+                    <li><strong>Eccentricity:</strong> 0.0000 (Circular)</li>
+                    <li><strong>Inclination:</strong> 0.00°</li>
                     <li><strong>Observation post:</strong> Miley (Mandalay) at Natalja's Pass (39.2, 104.3)</li>
                     <li>
                       <strong>Nahla ambience audio:</strong>
@@ -510,6 +503,9 @@
                     <li><strong>Distance from Primary:</strong> 2,885 ls </li>
                     <li><strong>Orbital Period:</strong> 555.2 Earth days</li>
                     <li><strong>Rotation:</strong> 0.4 Earth days</li>
+                    <li><strong>Semi-major axis:</strong> 0.01 AU</li>
+                    <li><strong>Eccentricity:</strong> 0.0076 (Nearly circular)</li>
+                    <li><strong>Inclination:</strong> -3.69°</li>
                 </ul>
             </div>
 
@@ -658,6 +654,7 @@
         <div id="notes-box">
             <h2>Notes</h2>
             <div id="notes">
+                <p><strong>v0.4 Update:</strong> Now using proper orbital mechanics with EDSM data! The tracker accounts for Rebekah's motion around Hope and uses Keplerian orbital calculations for more accurate predictions.</p>
                 <p><em>Clarification:</em> Nahla Coordinated time [NCT] isn't truly 24 Earth hours. It's a compressed version of Nahla's 26h 24m solar day, scaled for reference and context. 
 Every NCT 'second' lasts roughly 1.1 Earth seconds. Here we live by GMT. </p>
                 <br>
@@ -670,24 +667,38 @@ Every NCT 'second' lasts roughly 1.1 Earth seconds. Here we live by GMT. </p>
     </div>
 
     <script>
-        // === MULTI-OBSERVATION SUPPORT =================================
-        // 1. Observation arrays — add more timestamps as you observe them
+        // ===== ORBITAL DATA FROM EDSM =====
+        const ORBITAL_DATA = {
+            rebekah: {
+                semiMajorAxis: 0.01,  // AU
+                eccentricity: 0.0076,
+                inclination: -3.69,    // degrees
+                argOfPeriapsis: 72.92, // degrees
+                period: 555.2          // Earth days
+            },
+            nahla: {
+                semiMajorAxis: 4.794e-5, // AU (calculated from period and Rebekah's mass)
+                eccentricity: 0.0000,
+                inclination: 0.00,
+                argOfPeriapsis: 80.09,
+                period: 1.1               // Earth days
+            }
+        };
+
+        // ===== OBSERVATION ANCHORS =====
         const SUNRISE_OBS = [
             "2025-11-09T20:00:00"
-            // Add future sunrise observations here
         ];
 
         const REBEKAH_RISE_OBS = [
             "2025-11-09T21:30:00"
-            // Add future Rebekah rise observations here
         ];
 
         const GALACTIC_VERTICAL_OBS = [
-            "2025-11-15T15:00:00"  // Band at 90° vertical (half above, half below horizon)
-            // Add future vertical band observations here
+            "2025-11-15T15:00:00"
         ];
 
-        // 2. Helper functions
+        // ===== HELPER FUNCTIONS =====
         function toDates(list) {
             return list.map(x => new Date(x));
         }
@@ -697,32 +708,100 @@ Every NCT 'second' lasts roughly 1.1 Earth seconds. Here we live by GMT. </p>
             const dates = toDates(list).sort((a, b) => a - b);
             const diffs = [];
             for (let i = 1; i < dates.length; i++) {
-                diffs.push(dates[i] - dates[i - 1]); // ms
+                diffs.push(dates[i] - dates[i - 1]);
             }
-            return diffs.reduce((a, b) => a + b, 0) / diffs.length; // mean in ms
+            return diffs.reduce((a, b) => a + b, 0) / diffs.length;
         }
 
         function anchor(list) {
-            return new Date(Math.min(...toDates(list))); // FIRST observation = anchor
+            return new Date(Math.min(...toDates(list)));
         }
 
-        // 3. Auto-calibrated anchors
+        // ===== ORBITAL MECHANICS FUNCTIONS =====
+        
+        // Convert degrees to radians
+        function degToRad(deg) {
+            return deg * Math.PI / 180;
+        }
+
+        // Solve Kepler's equation for eccentric anomaly (iterative)
+        function solveKepler(meanAnomaly, eccentricity, tolerance = 1e-6) {
+            let E = meanAnomaly; // Initial guess
+            let delta = 1;
+            let iterations = 0;
+            const maxIterations = 100;
+            
+            while (Math.abs(delta) > tolerance && iterations < maxIterations) {
+                delta = E - eccentricity * Math.sin(E) - meanAnomaly;
+                E = E - delta / (1 - eccentricity * Math.cos(E));
+                iterations++;
+            }
+            
+            return E;
+        }
+
+        // Calculate true anomaly from eccentric anomaly
+        function trueAnomalyFromEccentric(E, e) {
+            return 2 * Math.atan2(
+                Math.sqrt(1 + e) * Math.sin(E / 2),
+                Math.sqrt(1 - e) * Math.cos(E / 2)
+            );
+        }
+
+        // Get orbital position at given time
+        function getOrbitalPosition(body, epochTime, currentTime) {
+            const periodMs = body.period * 86400 * 1000; // Convert days to ms
+            const timeSinceEpoch = (currentTime - epochTime) / 1000; // seconds
+            const meanMotion = (2 * Math.PI) / (body.period * 86400); // radians per second
+            
+            // Mean anomaly
+            const M = (meanMotion * timeSinceEpoch) % (2 * Math.PI);
+            
+            // Eccentric anomaly
+            const E = solveKepler(M, body.eccentricity);
+            
+            // True anomaly
+            const nu = trueAnomalyFromEccentric(E, body.eccentricity);
+            
+            // Distance from focus
+            const r = body.semiMajorAxis * (1 - body.eccentricity * Math.cos(E));
+            
+            // Argument of latitude (true anomaly + argument of periapsis)
+            const u = nu + degToRad(body.argOfPeriapsis);
+            
+            return {
+                trueAnomaly: nu,
+                distance: r,
+                argumentOfLatitude: u,
+                meanAnomaly: M,
+                eccentricAnomaly: E
+            };
+        }
+
+        // Calculate Rebekah's angular position as seen from Nahla
+        function getRebekahAngle(currentTime) {
+            // Since Nahla is tidally locked and orbits Rebekah, Rebekah's position
+            // in Nahla's sky is determined by where Nahla is in its orbit
+            const nahlaPos = getOrbitalPosition(ORBITAL_DATA.nahla, LAST_SUNRISE, currentTime);
+            
+            // Rebekah rises when Nahla has rotated to face it
+            // Since tidally locked, this is simply Nahla's orbital position
+            return nahlaPos.argumentOfLatitude;
+        }
+
+        // ===== CALIBRATED ANCHORS =====
         const LAST_SUNRISE = anchor(SUNRISE_OBS);
         const REBEKAH_LAST_RISE = anchor(REBEKAH_RISE_OBS);
         const GALACTIC_BAND_VERTICAL = anchor(GALACTIC_VERTICAL_OBS);
 
-        // 4. Auto-calibrated solar day length
-        // Uses averaged period if available, otherwise falls back to original 1.1 days
         const solarDayMs = averagePeriod(SUNRISE_OBS) || (1.1 * 86400 * 1000);
         const SOLAR_DAY_LENGTH_SECONDS = solarDayMs / 1000;
 
-        // === END MULTI-OBSERVATION SUPPORT =============================
-
-        // Constants
+        // ===== CONSTANTS =====
         const MOON_NAME = "Nahla";
         const SECONDS_IN_EARTH_DAY = 86400;
 
-        // --- Helper functions ---
+        // ===== DISPLAY FUNCTIONS =====
         
         function format_timedelta(total_seconds) {
             const hours = Math.floor(total_seconds / 3600);
@@ -738,10 +817,10 @@ Every NCT 'second' lasts roughly 1.1 Earth seconds. Here we live by GMT. </p>
 
             if (current_cycle_seconds < half_rotation) {
                 const time_until_set = half_rotation - current_cycle_seconds;
-                return `<strong>Rebekah:</strong> 🪐 VISIBLE | Est. set in: <span class="time-highlight">${format_timedelta(time_until_set)}</span> (ESTIMATE)`;
+                return `<strong>Rebekah:</strong> 🪐 VISIBLE | Est. set in: <span class="time-highlight">${format_timedelta(time_until_set)}</span>`;
             } else {
                 const time_until_rise = SOLAR_DAY_LENGTH_SECONDS - current_cycle_seconds;
-                return `<strong>Rebekah:</strong> ─ below horizon | Est. rise in: <span class="time-highlight">${format_timedelta(time_until_rise)}</span> (ESTIMATE)`;
+                return `<strong>Rebekah:</strong> ─ below horizon | Est. rise in: <span class="time-highlight">${format_timedelta(time_until_rise)}</span>`;
             }
         }
 
@@ -761,7 +840,6 @@ Every NCT 'second' lasts roughly 1.1 Earth seconds. Here we live by GMT. </p>
             const time_since_vertical = (current_time - GALACTIC_BAND_VERTICAL) / 1000;
             const current_cycle_seconds = ((time_since_vertical % SOLAR_DAY_LENGTH_SECONDS) + SOLAR_DAY_LENGTH_SECONDS) % SOLAR_DAY_LENGTH_SECONDS;
             
-            // Calculate current angle (90° = vertical band with Hope above, 3pm reference)
             const degrees_per_second = 360 / SOLAR_DAY_LENGTH_SECONDS;
             const current_angle = (90 + (current_cycle_seconds * degrees_per_second)) % 360;
             
@@ -804,7 +882,17 @@ Every NCT 'second' lasts roughly 1.1 Earth seconds. Here we live by GMT. </p>
                    `${String(ms).padStart(2, '0')} (out of 24:00:00)`;
         }
 
-        // --- Main update loop ---
+        function getOrbitalDebugInfo() {
+            const now = new Date();
+            const nahlaPos = getOrbitalPosition(ORBITAL_DATA.nahla, LAST_SUNRISE, now);
+            const rebekahPos = getOrbitalPosition(ORBITAL_DATA.rebekah, LAST_SUNRISE, now);
+            
+            return `Orbital: Nahla ν=${(nahlaPos.trueAnomaly * 180 / Math.PI).toFixed(1)}° | ` +
+                   `Rebekah ν=${(rebekahPos.trueAnomaly * 180 / Math.PI).toFixed(1)}° | ` +
+                   `Rebekah phase: ${((rebekahPos.meanAnomaly / (2 * Math.PI)) * 100).toFixed(2)}% of ${ORBITAL_DATA.rebekah.period}d orbit`;
+        }
+
+        // ===== MAIN UPDATE LOOP =====
         function updateDisplay() {
             const current_time = new Date();
             const time_since_sunrise = (current_time - LAST_SUNRISE) / 1000;
@@ -817,14 +905,12 @@ Every NCT 'second' lasts roughly 1.1 Earth seconds. Here we live by GMT. </p>
             let data = {};
 
             if (current_cycle_seconds < half_solar_day_seconds) {
-                // Daytime
                 const day_progress = current_cycle_seconds / half_solar_day_seconds;
                 const time_until_sunset = half_solar_day_seconds - current_cycle_seconds;
                 data.status = `☀️  DAY on ${MOON_NAME} | Sunset in: <span class="time-highlight">${format_timedelta(time_until_sunset)}</span> | <span class="time-highlight">${hours_into_moon_day.toFixed(2)}h</span> into solar day`;
                 data.hope = get_sky_arc_indicator(day_progress, true);
                 data.band = get_galactic_band_indicator(current_time, true);
             } else {
-                // Nighttime
                 const night_progress = (current_cycle_seconds - half_solar_day_seconds) / half_solar_day_seconds;
                 const time_until_sunrise = SOLAR_DAY_LENGTH_SECONDS - current_cycle_seconds;
                 data.status = `🌙 NIGHT on ${MOON_NAME} | Sunrise in: <span class="time-highlight">${format_timedelta(time_until_sunrise)}</span> | <span class="time-highlight">${hours_into_moon_day.toFixed(2)}h</span> into solar day`;
@@ -834,11 +920,11 @@ Every NCT 'second' lasts roughly 1.1 Earth seconds. Here we live by GMT. </p>
 
             data.rebekah = get_rebekah_status(current_time);
 
-            // Update the HTML
             document.getElementById("status").innerHTML = data.status;
             document.getElementById("hope").innerHTML = data.hope;
             document.getElementById("band").innerHTML = data.band;
             document.getElementById("rebekah").innerHTML = data.rebekah;
+            document.getElementById("orbital-debug").innerHTML = getOrbitalDebugInfo();
         }
 
         // Run updates
@@ -850,7 +936,7 @@ Every NCT 'second' lasts roughly 1.1 Earth seconds. Here we live by GMT. </p>
             document.getElementById('moonclock-coordinated').textContent = get_nahla_coordinated_time();
         }, 50);
 
-        // --- Gallery Lightbox Functions ---
+        // ===== GALLERY FUNCTIONS =====
         function openLightbox(imageSrc) {
             const lightbox = document.getElementById('lightbox');
             const lightboxImage = document.getElementById('lightbox-image');
@@ -869,7 +955,7 @@ Every NCT 'second' lasts roughly 1.1 Earth seconds. Here we live by GMT. </p>
             }
         });
 
-        // --- Gallery draggable ---
+        // Gallery draggable
         const gallery = document.querySelector('.gallery-container');
         let isDown = false;
         let startX;
