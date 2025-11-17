@@ -482,7 +482,7 @@
 </head>
 <body>
     <div class="container">
-        <h2>Nahla Day/Night Cycle Tracker - LIVE - v0.51 ('Sumerian')</h2>
+        <h2>Nahla Day/Night Cycle Tracker - LIVE - v0.52 (Galactic Phases Fix)</h2>
         <div id="tracker">
             <div id="status">Loading...</div>
             <div id="hope">...</div>
@@ -724,6 +724,7 @@ Every NCT 'second' lasts roughly 1.1 Earth seconds. Here we live by GMT. </p>
             <p>Day–night cycles beyond Earth vary according to the orbital and rotational dynamics of their respective worlds, rather than adhering to Earth’s 24-hour rhythm.</p>
         <br>
         <small>Nahla Tracker is a personal project of Lysander666.</small>
+
 
     </div>
 </div>
@@ -995,9 +996,21 @@ Every NCT 'second' lasts roughly 1.1 Earth seconds. Here we live by GMT. </p>
             // (progress * 360) is how many degrees it has rotated *since* the 270 mark.
             const degrees = (270 + (progress * 360)) % 360;
             
+            let phase;
+            // User's anchor is 270, which starts the 'Setting' phase
+            if (degrees >= 270 && degrees < 360) {
+                phase = "Phase 1: Setting";
+            } else if (degrees >= 0 && degrees < 90) {
+                phase = "Phase 2: Nadir/Returning";
+            } else if (degrees >= 90 && degrees < 180) {
+                phase = "Phase 3: Rising";
+            } else { // degrees >= 180 && degrees < 270
+                phase = "Phase 4: Zenith/Peak";
+            }
+
             const visibility = is_daytime ? "(daylight)" : "(visible)";
 
-            return `<strong>Galactic Band:</strong> 🌌 ${degrees.toFixed(1)}° ${visibility}`;
+            return `<strong>Galactic Band:</strong> 🌌 ${phase} (${degrees.toFixed(1)}°) ${visibility}`;
             // --- END NEW LOGIC ---
         }
 
