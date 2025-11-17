@@ -1,4 +1,4 @@
-        <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -482,7 +482,7 @@
 </head>
 <body>
     <div class="container">
-        <h2>Nahla Day/Night Cycle Tracker - LIVE - v0.42</h2>
+        <h2>Nahla Day/Night Cycle Tracker - LIVE - v0.51 (Babylonion method)</h2>
         <div id="tracker">
             <div id="status">Loading...</div>
             <div id="hope">...</div>
@@ -577,7 +577,7 @@
 
                     <li><strong>A Belt</strong> Rocky Belt (Bellatrix)</li>
 
-                    <li><strong>1</strong> Metal-rich body (Simone) (3,835 K)</span>
+                    <li><strong>1</strong> Metal-rich body (Simone) (3,85 K)</span>
                     </li>
 
                     <li><strong>2</strong>Class III gas giant (Marika)
@@ -731,20 +731,200 @@ Every NCT 'second' lasts roughly 1.1 Earth seconds. Here we live by GMT. </p>
 
 
     </div> <script>
-        // --- All your constants, ported to JavaScript ---
+        // --- Observational Anchor Model ---
         const MOON_NAME = "Nahla";
-        const SOLAR_DAY_LENGTH_EARTH_DAYS = 1.1;
-        // NOTE: JavaScript needs 'T' for ISO date format
-        const REBEKAH_LAST_RISE = new Date("2025-11-09T21:30:00"); 
-        const GALACTIC_BAND_PEAK = new Date("2025-11-09T23:00:00");
-        const LAST_SUNRISE = new Date("2025-11-09T20:00:00");
-        
         const SECONDS_IN_EARTH_DAY = 24 * 60 * 60;
-        const SOLAR_DAY_LENGTH_SECONDS = SOLAR_DAY_LENGTH_EARTH_DAYS * SECONDS_IN_EARTH_DAY;
+        
+        // --- 1. OBSERVATION DATABASE ---
+        // This is your new "database" of observations.
+        // As you make new observations, add them here.
+        // Use full ISO 8601 timestamps (with 'Z' for UTC/GMT).
+        const observations = [
+            // --- Sun (Hope) Events ---
+            { timestamp: "2025-11-09T20:00:00Z", event: "sunrise" },
+            { timestamp: "2025-11-16T23:25:00Z", event: "sunset" },
+
+            // --- Rebekah Events ---
+            { timestamp: "2025-11-09T21:30:00Z", event: "rebekah_rise" },
+            { timestamp: "2025-11-16T10:30:00Z", event: "rebekah_rise" },
+            { timestamp: "2025-11-16T21:00:00Z", event: "rebekah_set" },
+            
+            // --- Galactic Band Events ---
+            // User's "GALACTIC_VERTICAL_OBS" are mapped to "galactic_270"
+            { timestamp: "2025-11-15T15:00:00Z", event: "galactic_270" },
+            { timestamp: "2025-11-16T16:00:00Z", event: "galactic_270" }
+        ];
+
+        // --- 2. FALLBACK CYCLE ESTIMATES (in Earth Days) ---
+        // The script uses these as a *guess* to auto-calculate cycles
+        // when you have more than one observation.
+        const FALLBACK_SOLAR_CYCLE_DAYS = 1.1;
+        const FALLBACK_REBEKAH_CYCLE_DAYS = 1.1; // Guess: Same as sun? Update if you know.
+        const FALLBACK_GALACTIC_CYCLE_DAYS = 1.1; // Guess: Same as sun? Update if you know.
+
+        // --- 3. MANUAL DURATION CONSTANTS (FALLBACKS) ---
+        // These are used *only if* the script can't find paired observations.
+        
+        // --- REBEKAH (asynchronous) ---
+        // (13 hours, 12 minutes = 47520 seconds) - EXAMPLE, PLEASE UPDATE
+        const MANUAL_REBEKAH_VISIBLE_DURATION_SECONDS = 1.1 * SECONDS_IN_EARTH_DAY / 2; // 47520; 
+        // (13 hours, 12 minutes = 47520 seconds) - EXAMPLE, PLEASE UPDATE
+        const MANUAL_REBEKAH_HORIZON_DURATION_SECONDS = 1.1 * SECONDS_IN_EARTH_DAY / 2; // 47520; 
+
+        
+        // --- 4. DYNAMIC CONSTANT CALCULATION ---
+        
+        // Helper to get the most recent observation of a specific type
+        function getMostRecentObservation(eventType) {
+            const events = observations
+                .filter(obs => obs.event === eventType)
+                .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)); // Sort descending
+            
+            if (events.length > 0) {
+                return new Date(events[0].timestamp);
+            }
+            return null; // Or a default fallback
+        }
+        
+        // Helper function to calculate a cycle length for any event type
+        function calculateCycleLength(eventType, fallbackCycleDays) {
+            const events = observations
+                .filter(obs => obs.event === eventType)
+                .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp)); // Sort ascending
+
+            let cycleLengthSeconds;
+            let lastAnchor;
+            const fallbackCycleMs = fallbackCycleDays * SECONDS_IN_EARTH_DAY * 1000;
+
+            if (events.length === 0) {
+                console.warn(`No '${eventType}' observations found! Using fallback.`);
+                cycleLengthSeconds = fallbackCycleMs / 1000;
+                lastAnchor = new Date(); // Fallback to now (less ideal)
+            } else if (events.length === 1) {
+                console.warn(`Only one '${eventType}' observation. Using fallback day length.`);
+                cycleLengthSeconds = fallbackCycleMs / 1000;
+                lastAnchor = new Date(events[events.length - 1].timestamp); // Use most recent
+            } else {
+                // Multi-anchor calculation!
+                const genesisEvent = new Date(events[0].timestamp);
+                const latestEvent = new Date(events[events.length - 1].timestamp);
+                
+                const totalTimeMs = latestEvent.getTime() - genesisEvent.getTime();
+                
+                // Auto-estimate cycles by rounding
+                const estimatedCycles = Math.round(totalTimeMs / fallbackCycleMs);
+
+                if (estimatedCycles === 0) {
+                    // Observations are too close together, treat as one
+                    console.warn(`Observations for '${eventType}' are too close. Using fallback day length.`);
+                    cycleLengthSeconds = fallbackCycleMs / 1000;
+                    lastAnchor = latestEvent;
+                } else {
+                    // We have enough data to calculate a new average
+                    const avgCycleDurationMs = totalTimeMs / estimatedCycles;
+                    cycleLengthSeconds = avgCycleDurationMs / 1000;
+                    lastAnchor = latestEvent; // Anchor clock to the most recent observation
+                    
+                    console.log(`Multi-anchor for ${eventType}: ${estimatedCycles} cycles detected. New avg: ${cycleLengthSeconds}s`);
+                }
+            }
+            
+            return { cycleLength: cycleLengthSeconds, anchor: lastAnchor };
+        }
+
+        // --- NEW: Helper to auto-calculate durations from paired events ---
+        function calculateRebekahDurations() {
+            let visibleDuration = MANUAL_REBEKAH_VISIBLE_DURATION_SECONDS;
+            let horizonDuration = MANUAL_REBEKAH_HORIZON_DURATION_SECONDS;
+
+            const riseEvents = observations
+                .filter(obs => obs.event === 'rebekah_rise')
+                .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)); // Descending
+
+            const setEvents = observations
+                .filter(obs => obs.event === 'rebekah_set')
+                .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)); // Descending
+
+            // 1. Try to find visible duration (most recent rise followed by a set)
+            if (riseEvents.length > 0 && setEvents.length > 0) {
+                const lastRise = new Date(riseEvents[0].timestamp);
+                // Find the first set *after* the last rise
+                const matchingSet = setEvents.map(e => new Date(e.timestamp)).find(s => s.getTime() > lastRise.getTime());
+
+                if (matchingSet) {
+                    visibleDuration = (matchingSet.getTime() - lastRise.getTime()) / 1000;
+                    console.log(`Auto-calculated Rebekah VISIBLE duration: ${visibleDuration}s`);
+                } else {
+                    // We don't have a set *after* the last rise, try finding a set *before* the last rise
+                    // This means we are in the VISIBLE phase, and can use the *previous* pair
+                    const lastSet = new Date(setEvents[0].timestamp);
+                    if (lastSet.getTime() < lastRise.getTime()) {
+                         // Find the rise *before* the last set
+                        const matchingRise = riseEvents.map(e => new Date(e.timestamp)).find(r => r.getTime() < lastSet.getTime());
+                        if (matchingRise) {
+                             visibleDuration = (lastSet.getTime() - matchingRise.getTime()) / 1000;
+                             console.log(`Auto-calculated Rebekah VISIBLE duration (from previous pair): ${visibleDuration}s`);
+                        }
+                    }
+                }
+            }
+
+            // 2. Try to find horizon duration (most recent set followed by a rise)
+            if (riseEvents.length > 0 && setEvents.length > 0) {
+                const lastSet = new Date(setEvents[0].timestamp);
+                // Find the first rise *after* the last set
+                const matchingRise = riseEvents.map(e => new Date(e.timestamp)).find(r => r.getTime() > lastSet.getTime());
+                
+                if (matchingRise) {
+                    horizonDuration = (matchingRise.getTime() - lastSet.getTime()) / 1000;
+                    console.log(`Auto-calculated Rebekah HORIZON duration: ${horizonDuration}s`);
+                } else {
+                    // We are in the HORIZON phase, use the previous pair
+                     const lastRise = new Date(riseEvents[0].timestamp);
+                     if(lastRise.getTime() < lastSet.getTime()){
+                         // Find the set *before* the last rise
+                        const matchingSet = setEvents.map(e => new Date(e.timestamp)).find(s => s.getTime() < lastRise.getTime());
+                        if(matchingSet){
+                            horizonDuration = (lastRise.getTime() - matchingSet.getTime()) / 1000;
+                            console.log(`Auto-calculated Rebekah HORIZON duration (from previous pair): ${horizonDuration}s`);
+                        }
+                     }
+                }
+            }
+
+            return { visibleDuration, horizonDuration };
+        }
+
+
+        // --- Calculate all 3 independent clocks ---
+        
+        // CLOCK 1: Sun (Hope)
+        const { cycleLength: SOLAR_DAY_LENGTH_SECONDS, anchor: LAST_SUNRISE_ANCHOR } = 
+            calculateCycleLength("sunrise", FALLBACK_SOLAR_CYCLE_DAYS);
+        const HALF_SOLAR_DAY_SECONDS = SOLAR_DAY_LENGTH_SECONDS / 2;
+        
+        // CLOCK 2: Rebekah
+        // Note: We only use the 'rise' for the *total* cycle, not the durations
+        const { cycleLength: REBEKAH_TOTAL_CYCLE_SECONDS, anchor: REBEKAH_LAST_RISE_ANCHOR } = 
+            calculateCycleLength("rebekah_rise", FALLBACK_REBEKAH_CYCLE_DAYS); 
+        // NEW: Get auto-calculated durations
+        const { visibleDuration: REBEKAH_VISIBLE_DURATION, horizonDuration: REBEKAH_HORIZON_DURATION } =
+            calculateRebekahDurations();
+
+
+        // CLOCK 3: Galactic Band
+        const { cycleLength: GALACTIC_TOTAL_CYCLE_SECONDS, anchor: GALACTIC_270_ANCHOR } =
+            calculateCycleLength("galactic_270", FALLBACK_GALACTIC_CYCLE_DAYS);
+            
+        // --- Get most recent state anchors ---
+        const REBEKAH_LAST_RISE = getMostRecentObservation("rebekah_rise");
+        const REBEKAH_LAST_SET = getMostRecentObservation("rebekah_set");
 
         // --- All your helper functions, ported to JavaScript ---
         
         function format_timedelta(total_seconds) {
+            // Ensure seconds are positive
+            total_seconds = Math.max(0, total_seconds);
             const hours = Math.floor(total_seconds / 3600);
             const minutes = Math.floor((total_seconds % 3600) / 60);
             const seconds = Math.floor(total_seconds % 60);
@@ -753,19 +933,37 @@ Every NCT 'second' lasts roughly 1.1 Earth seconds. Here we live by GMT. </p>
         }
 
         function get_rebekah_status(current_time) {
-          const time_since_rise = (current_time - REBEKAH_LAST_RISE) / 1000;
-          const current_cycle_seconds = ((time_since_rise % SOLAR_DAY_LENGTH_SECONDS) + SOLAR_DAY_LENGTH_SECONDS) % SOLAR_DAY_LENGTH_SECONDS;
-          const half_rotation = SOLAR_DAY_LENGTH_SECONDS / 2;
+          
+            let last_known_event_time = null;
+            let last_known_event_was_rise = null;
 
-          if (current_cycle_seconds < half_rotation) {
-            const time_until_set = half_rotation - current_cycle_seconds;
-            return `<strong>Rebekah:</strong> 🪐 VISIBLE | Est. set in: <span class="time-highlight">${format_timedelta(time_until_set)}</span> (ESTIMATE)`;
-          } else {
-            const time_until_rise = SOLAR_DAY_LENGTH_SECONDS - current_cycle_seconds;
-            return `<strong>Rebekah:</strong> ─ below horizon | Est. rise in: <span class="time-highlight">${format_timedelta(time_until_rise)}</span> (ESTIMATE)`;
-  
-        }
+            // Determine state based on most recent *observed* event
+            if (REBEKAH_LAST_RISE && (!REBEKAH_LAST_SET || REBEKAH_LAST_RISE.getTime() > REBEKAH_LAST_SET.getTime())) {
+                last_known_event_was_rise = true;
+                last_known_event_time = REBEKAH_LAST_RISE;
+            } else if (REBEKAH_LAST_SET && (!REBEKAH_LAST_RISE || REBEKAH_LAST_SET.getTime() > REBEKAH_LAST_RISE.getTime())) {
+                last_known_event_was_rise = false;
+                last_known_event_time = REBEKAH_LAST_SET;
+            } else {
+                 return `<strong>Rebekah:</strong> ─ STATUS UNKNOWN (No observation data)`;
+            }
 
+            // This is the time since the last *observed* event
+            const time_since_last_event = (current_time.getTime() - last_known_event_time.getTime()) / 1000;
+
+            if (last_known_event_was_rise) {
+                // Last event was a RISE, so we are in the VISIBLE phase
+                // Use the auto-calculated (or fallback) duration
+                const time_into_current_phase = (time_since_last_event % REBEKAH_VISIBLE_DURATION + REBEKAH_VISIBLE_DURATION) % REBEKAH_VISIBLE_DURATION;
+                const time_until_set = REBEKAH_VISIBLE_DURATION - time_into_current_phase;
+                return `<strong>Rebekah:</strong> 🪐 VISIBLE | Est. set in: <span class="time-highlight">${format_timedelta(time_until_set)}</span> (Auto-Calc)`;
+            } else {
+                // Last event was a SET, so we are in the HORIZON phase
+                // Use the auto-calculated (or fallback) duration
+                const time_into_current_phase = (time_since_last_event % REBEKAH_HORIZON_DURATION + REBEKAH_HORIZON_DURATION) % REBEKAH_HORIZON_DURATION;
+                const time_until_rise = REBEKAH_HORIZON_DURATION - time_into_current_phase;
+                return `<strong>Rebekah:</strong> ─ below horizon | Est. rise in: <span class="time-highlight">${format_timedelta(time_until_rise)}</span> (Auto-Calc)`;
+            }
         }
 
         function get_sky_arc_indicator(progress, is_daytime) {
@@ -781,64 +979,63 @@ Every NCT 'second' lasts roughly 1.1 Earth seconds. Here we live by GMT. </p>
         }
 
         function get_galactic_band_indicator(current_time, is_daytime) {
-            const time_since_peak = (current_time - GALACTIC_BAND_PEAK) / 1000; // in seconds
-            const current_cycle_seconds = time_since_peak % SOLAR_DAY_LENGTH_SECONDS;
-            const hours_since_peak = current_cycle_seconds / 3600;
+            if (!GALACTIC_270_ANCHOR) {
+                return `<strong>Galactic Band:</strong> ─ STATUS UNKNOWN (No 'galactic_270' observation data)`;
+            }
 
-            if (is_daytime) {
-                return "<strong>Galactic Band</strong>: 🌌 present (lower angle)";
-            }
-            if (hours_since_peak < 1.5 || hours_since_peak > 24.9) {
-                return "<strong>Galactic Band:</strong> 🌌✨ PEAK BRIGHTNESS (~70° angle, highest elevation)";
-            } else if (hours_since_peak < 4.0 || hours_since_peak > 22.4) {
-                return "<strong>Galactic Band:</strong> 🌌 BRIGHT (prominent, high angle)";
-            } else if (10.0 < hours_since_peak && hours_since_peak < 16.4) {
-                return "<strong>Galactic Band:</strong> 🌌 visible (moderate, lower angle/near horizon)";
-            } else {
-                return "<strong>Galactic Band:</strong> 🌌 visible (rising/setting through rotation)";
-            }
+            // Use the Galactic Band's *own* cycle and anchor
+            const time_since_270 = (current_time - GALACTIC_270_ANCHOR) / 1000; // in seconds
+            const current_cycle_seconds = (time_since_270 % GALACTIC_TOTAL_CYCLE_SECONDS + GALACTIC_TOTAL_CYCLE_SECONDS) % GALACTIC_TOTAL_CYCLE_SECONDS;
+            
+            // --- NEW LOGIC ---
+            // Calculate progress through the cycle (0.0 to 1.0)
+            const progress = current_cycle_seconds / GALACTIC_TOTAL_CYCLE_SECONDS;
+            
+            // Calculate degrees, starting from the 270 anchor
+            // (progress * 360) is how many degrees it has rotated *since* the 270 mark.
+            const degrees = (270 + (progress * 360)) % 360;
+            
+            const visibility = is_daytime ? "(daylight)" : "(visible)";
+
+            return `<strong>Galactic Band:</strong> 🌌 ${degrees.toFixed(1)}° ${visibility}`;
+            // --- END NEW LOGIC ---
         }
 
         // --- The main update loop ---
         function updateDisplay() {
             const current_time = new Date();
-            const time_since_sunrise = (current_time - LAST_SUNRISE) / 1000; // in seconds
-            const current_cycle_seconds = time_since_sunrise % SOLAR_DAY_LENGTH_SECONDS;
-            const half_solar_day_seconds = SOLAR_DAY_LENGTH_SECONDS / 2;
-            const moon_time_progress = current_cycle_seconds / SOLAR_DAY_LENGTH_SECONDS;
             
-            const hours_into_moon_day = moon_time_progress * SOLAR_DAY_LENGTH_EARTH_DAYS * 24;
+            // --- Clock-related calculations (Hope/Sun) ---
+            if (!LAST_SUNRISE_ANCHOR) {
+                document.getElementById("status").innerHTML = "ERROR: No Sunrise Anchor Data";
+                return;
+            }
+            const time_since_clock_anchor = (current_time - LAST_SUNRISE_ANCHOR) / 1000; // in seconds
+            const current_cycle_seconds = (time_since_clock_anchor % SOLAR_DAY_LENGTH_SECONDS + SOLAR_DAY_LENGTH_SECONDS) % SOLAR_DAY_LENGTH_SECONDS;
+            const moon_time_progress = current_cycle_seconds / SOLAR_DAY_LENGTH_SECONDS;
+            const hours_into_moon_day = moon_time_progress * (SOLAR_DAY_LENGTH_SECONDS / 3600);
+
 
             let data = {};
-
-            if (current_cycle_seconds < half_solar_day_seconds) {
+            
+            // --- Day/Night calculation based on clock cycle (This IS 50/50) ---
+            if (current_cycle_seconds < HALF_SOLAR_DAY_SECONDS) {
                 // Daytime
-                const day_progress = current_cycle_seconds / half_solar_day_seconds;
-                const time_until_sunset = half_solar_day_seconds - current_cycle_seconds;
+                const day_progress = current_cycle_seconds / HALF_SOLAR_DAY_SECONDS;
+                const time_until_sunset = HALF_SOLAR_DAY_SECONDS - current_cycle_seconds;
                 data.status = `☀️  DAY on ${MOON_NAME} | Sunset in: <span class="time-highlight">${format_timedelta(time_until_sunset)}</span> | <span class="time-highlight">${hours_into_moon_day.toFixed(2)}h</span> into solar day`;
                 data.hope = get_sky_arc_indicator(day_progress, true);
                 data.band = get_galactic_band_indicator(current_time, true);
             } else {
                 // Nighttime
-                const night_progress = (current_cycle_seconds - half_solar_day_seconds) / half_solar_day_seconds;
+                const night_progress = (current_cycle_seconds - HALF_SOLAR_DAY_SECONDS) / HALF_SOLAR_DAY_SECONDS;
                 const time_until_sunrise = SOLAR_DAY_LENGTH_SECONDS - current_cycle_seconds;
                 data.status = `🌙 NIGHT on ${MOON_NAME} | Sunrise in: <span class="time-highlight">${format_timedelta(time_until_sunrise)}</span> | <span class="time-highlight">${hours_into_moon_day.toFixed(2)}h</span> into solar day`;
                 data.hope = get_sky_arc_indicator(night_progress, false);
                 data.band = get_galactic_band_indicator(current_time, false);
             }
-setInterval(() => {
-    document.getElementById('moonclock').textContent = get_moon_clock();
-    document.getElementById('moonclock-coordinated').textContent = get_nahla_coordinated_time();
-}, 50); // update both clocks ~20 times/sec
 
-
-       
-        data.moonclock = get_moon_clock(current_time);
-         document.getElementById("moonclock").innerText = data.moonclock;
-         document.getElementById("moonclock-coordinated").innerText = get_nahla_coordinated_time(current_time);
-
-
-
+            // --- Rebekah (Asynchronous) ---
             data.rebekah = get_rebekah_status(current_time);
 
             // Update the HTML
@@ -848,43 +1045,59 @@ setInterval(() => {
             document.getElementById("rebekah").innerHTML = data.rebekah;
         }
 
+// --- CLOCK UPDATE LOGIC (MOVED OUT of updateDisplay) ---
+// This runs on a faster interval for smooth milliseconds
+function updateClocks() {
+    // Check if LAST_SUNRISE_ANCHOR (for the clock) is valid
+    if (!LAST_SUNRISE_ANCHOR) {
+        document.getElementById('moonclock').textContent = "Nahla Local Time: ERROR";
+        document.getElementById('moonclock-coordinated').textContent = "Nahla Coordinated Time: ERROR";
+        return;
+    }
+    
+    document.getElementById('moonclock').textContent = get_moon_clock();
+    document.getElementById('moonclock-coordinated').textContent = get_nahla_coordinated_time();
+}
+
 
 function get_moon_clock() {
     const now_ms = Date.now(); // absolute timestamp (ms since epoch)
-    const time_since_sunrise = (now_ms - LAST_SUNRISE) / 1000; 
-    const current_cycle_seconds = time_since_sunrise % SOLAR_DAY_LENGTH_SECONDS;
+    // We use LAST_SUNRISE_ANCHOR.getTime() to get the anchor in milliseconds
+    const time_since_sunrise_ms = (now_ms - LAST_SUNRISE_ANCHOR.getTime()); 
+    const current_cycle_ms = (time_since_sunrise_ms % (SOLAR_DAY_LENGTH_SECONDS * 1000) + (SOLAR_DAY_LENGTH_SECONDS * 1000)) % (SOLAR_DAY_LENGTH_SECONDS * 1000);
+    
+    const total_seconds = current_cycle_ms / 1000;
 
-    const hours = Math.floor(current_cycle_seconds / 3600);
-    const minutes = Math.floor((current_cycle_seconds % 3600) / 60);
-    const seconds = Math.floor(current_cycle_seconds % 60);
+    const hours = Math.floor(total_seconds / 3600);
+    const minutes = Math.floor((total_seconds % 3600) / 60);
+    const seconds = Math.floor(total_seconds % 60);
+    const ms = Math.floor((total_seconds % 1) * 100); // Get two digits for centiseconds
 
-    // High-resolution milliseconds based on performance.now()
-        const ms = Math.floor((Date.now() % 1000) / 10);
+    // Calculate total hours for the "out of" display
+    const total_hours_in_cycle = SOLAR_DAY_LENGTH_SECONDS / 3600;
 
-        return `Nahla Local Time: ${String(hours).padStart(2, '0')}:` +
+    return `Nahla Local Time: ${String(hours).padStart(2, '0')}:` +
        `${String(minutes).padStart(2, '0')}:` +
        `${String(seconds).padStart(2, '0')}.` +
-       `${String(ms).padStart(2, '0')} (out of 26:24:00)`;
-
-
+       `${String(ms).padStart(2, '0')} (out of ${total_hours_in_cycle.toFixed(2)}h)`;
 }
 
 
 function get_nahla_coordinated_time() {
     const now_ms = Date.now();
-    const time_since_sunrise = (now_ms - LAST_SUNRISE) / 1000;
-    const current_cycle_seconds = time_since_sunrise % SOLAR_DAY_LENGTH_SECONDS;
+    const time_since_sunrise_ms = (now_ms - LAST_SUNRISE_ANCHOR.getTime());
+    const current_cycle_ms = (time_since_sunrise_ms % (SOLAR_DAY_LENGTH_SECONDS * 1000) + (SOLAR_DAY_LENGTH_SECONDS * 1000)) % (SOLAR_DAY_LENGTH_SECONDS * 1000);
 
-        const SCALE = 24 / 26.4;                  // exact scaling
-        const scaled_seconds = current_cycle_seconds * SCALE;
+    const total_seconds = current_cycle_ms / 1000;
+
+    // Scale the *current* number of seconds into a 24-hour day
+    const SCALE = (24 * 3600) / SOLAR_DAY_LENGTH_SECONDS;
+    const scaled_seconds = total_seconds * SCALE;
 
     const hours   = Math.floor(scaled_seconds / 3600);
     const minutes = Math.floor((scaled_seconds % 3600) / 60);
     const seconds = Math.floor(scaled_seconds % 60);
-
-    // fractional part for smooth ms
-    const fractional = scaled_seconds % 1;
-    const ms = Math.floor(fractional * 100); // 2 decimal digits
+    const ms = Math.floor((scaled_seconds % 1) * 100); // 2 decimal digits
 
     return `Nahla Coordinated Time: ${String(hours).padStart(2, '0')}:` +
            `${String(minutes).padStart(2, '0')}:` +
@@ -893,12 +1106,15 @@ function get_nahla_coordinated_time() {
 }
 
 
-
-
-
-        // Run the update function once immediately, then every second
+        // --- Main Execution ---
+        
+        // Run the main display update once immediately, then every second
         updateDisplay();
         setInterval(updateDisplay, 1000);
+
+        // Run the clock update once immediately, then very frequently for smooth ms
+        updateClocks();
+        setInterval(updateClocks, 50); // ~20 times per second
 
         // --- Gallery Lightbox Functions ---
         function openLightbox(imageSrc) {
