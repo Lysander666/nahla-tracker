@@ -866,7 +866,7 @@ Every NCT 'second' lasts roughly 1.1 Earth seconds. Here we live by GMT. </p>
         let DURATION_HOPE_DAY_SECONDS = HOPE_SOLAR_DAY_SECONDS / 2; // Default to 50/50
         let DURATION_HOPE_NIGHT_SECONDS = HOPE_SOLAR_DAY_SECONDS / 2; // Default to 50/50
 
-        if (HOPE_LAST_SUNRISE && HOPE_LAST_SET) {
+        if (HOPE_LAST_SUNRISE && HOPE_LAST_SUNSET) {
             // Calculate time between the most recent rise and set
             let day_duration = (HOPE_LAST_SUNSET - HOPE_LAST_SUNRISE) / 1000;
             
