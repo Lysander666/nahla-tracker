@@ -946,8 +946,7 @@ function get_hope_status(current_time) {
                 // State is DAY. Next event is SET.
                 // Find our position in the *day* part of the cycle
                 const time_since_rise = (current_time - HOPE_LAST_SUNRISE) / 1000;
-                const current_day_seconds = ((time_since_rise % HOPE_SOLAR_DAY_SECONDS) + HOPE_SOLAR_DAY_SECONDS) % HOPE_SOLAR_DAY_SECONDS;
-                
+                const current_day_seconds = time_since_rise;                
                 // Use the new duration for the countdown
                 const time_until_sunset = DURATION_HOPE_DAY_SECONDS - current_day_seconds;
 
@@ -971,8 +970,7 @@ function get_hope_status(current_time) {
                 // State is NIGHT. Next event is RISE.
                 // Find our position in the *night* part of the cycle
                 const time_since_set = (current_time - HOPE_LAST_SUNSET) / 1000;
-                const current_night_seconds = ((time_since_set % HOPE_SOLAR_DAY_SECONDS) + HOPE_SOLAR_DAY_SECONDS) % HOPE_SOLAR_DAY_SECONDS;
-                
+                const current_night_seconds = time_since_set;                
                 // Use the new duration for the countdown
                 const time_until_sunrise = DURATION_HOPE_NIGHT_SECONDS - current_night_seconds;
 
