@@ -862,6 +862,26 @@ Every NCT 'second' lasts roughly 1.1 Earth seconds. Here we live by GMT. </p>
         // Use most recent Hope sunrise as primary anchor
         const HOPE_LAST_SUNRISE = mostRecent(HOPE_SUNRISE_OBS) || anchor(HOPE_SUNRISE_OBS);
         const HOPE_LAST_SUNSET = mostRecent(HOPE_SUNSET_OBS);
+// ===== Calculate Asymmetric Hope Day/Night Cycle =====
+        let DURATION_HOPE_DAY_SECONDS = HOPE_SOLAR_DAY_SECONDS / 2; // Default to 50/50
+        let DURATION_HOPE_NIGHT_SECONDS = HOPE_SOLAR_DAY_SECONDS / 2; // Default to 50/50
+
+        if (HOPE_LAST_SUNRISE && HOPE_LAST_SET) {
+            // Calculate time between the most recent rise and set
+            let day_duration = (HOPE_LAST_SUNSET - HOPE_LAST_SUNRISE) / 1000;
+            
+            // Ensure it's positive (e.g., if set is from *previous* day)
+            if (day_duration < 0) {
+                 day_duration += HOPE_SOLAR_DAY_SECONDS;
+            }
+
+            // Check if the duration is realistic (not > full period)
+            if (day_duration < HOPE_SOLAR_DAY_SECONDS) {
+                DURATION_HOPE_DAY_SECONDS = day_duration;
+                DURATION_HOPE_NIGHT_SECONDS = HOPE_SOLAR_DAY_SECONDS - DURATION_HOPE_DAY_SECONDS;
+            }
+        }
+        
         
         // ===== Calculate Rebekah's True Libration Period =====
         // We know there are 6 libration cycles between our first two 'rise' observations.
@@ -909,55 +929,59 @@ Every NCT 'second' lasts roughly 1.1 Earth seconds. Here we live by GMT. </p>
             return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
         }
 
- function get_hope_status(current_time) {
+function get_hope_status(current_time) {
             if (!HOPE_LAST_SUNRISE) {
                 return { status: "<strong>Hope:</strong> Awaiting sunrise observation", arc: "", isDaytime: false, progress: 0 };
             }
 
             // Determine current state.
             let is_daytime = true; // Default to true if we only have rise data
-            if (HOPE_LAST_SUNSET) { // This is the new, smart check
+            if (HOPE_LAST_SUNSET) { 
                 // If the last rise is more recent than the last set, it's daytime.
                 is_daytime = HOPE_LAST_SUNRISE > HOPE_LAST_SUNSET;
             }
-
-            // We are still *estimating* a 50/50 split for the countdown,
-            // but the *state* (day/night) will now be 100% correct.
-            const half_day = HOPE_SOLAR_DAY_SECONDS / 2;
             
+            // --- NEW ASYMMETRIC LOGIC ---
             if (is_daytime) {
                 // State is DAY. Next event is SET.
+                // Find our position in the *day* part of the cycle
                 const time_since_rise = (current_time - HOPE_LAST_SUNRISE) / 1000;
-                // Calculate progress based on the *full* cycle
-                const current_cycle_seconds = ((time_since_rise % HOPE_SOLAR_DAY_SECONDS) + HOPE_SOLAR_DAY_SECONDS) % HOPE_SOLAR_DAY_SECONDS;
-                const time_until_sunset = half_day - current_cycle_seconds;
+                const current_day_seconds = ((time_since_rise % HOPE_SOLAR_DAY_SECONDS) + HOPE_SOLAR_DAY_SECONDS) % HOPE_SOLAR_DAY_SECONDS;
+                
+                // Use the new duration for the countdown
+                const time_until_sunset = DURATION_HOPE_DAY_SECONDS - current_day_seconds;
 
                 // --- Build the arc ---
-                const progress = current_cycle_seconds / half_day;
+                const progress = current_day_seconds / DURATION_HOPE_DAY_SECONDS; // Progress through *day*
                 const positions = ["🌅", "☀️", "☀️", "☀️", "☀️", "🌇"];
                 const index = Math.floor(progress * (positions.length - 1));
                 let arc = ["─", "─", "─", "─", "─", "─"];
-                arc[index] = positions[index];
+                if (index >= 0 && index < arc.length) { // Safety check
+                    arc[index] = positions[index];
+                }
                 
                 return {
                     status: `☀️  DAY on ${MOON_NAME} | Sunset in: <span class="time-highlight">${format_timedelta(time_until_sunset)}</span>`,
                     arc: `<strong>Hope:</strong> [${arc.join("")}]`,
                     isDaytime: true,
-                    progress: current_cycle_seconds / HOPE_SOLAR_DAY_SECONDS
+                    progress: current_day_seconds / HOPE_SOLAR_DAY_SECONDS
                 };
 
             } else {
                 // State is NIGHT. Next event is RISE.
+                // Find our position in the *night* part of the cycle
                 const time_since_set = (current_time - HOPE_LAST_SUNSET) / 1000;
-                // Calculate progress based on the *full* cycle
-                const current_cycle_seconds = ((time_since_set % HOPE_SOLAR_DAY_SECONDS) + HOPE_SOLAR_DAY_SECONDS) % HOPE_SOLAR_DAY_SECONDS;
-                const time_until_sunrise = half_day - current_cycle_seconds;
+                const current_night_seconds = ((time_since_set % HOPE_SOLAR_DAY_SECONDS) + HOPE_SOLAR_DAY_SECONDS) % HOPE_SOLAR_DAY_SECONDS;
+                
+                // Use the new duration for the countdown
+                const time_until_sunrise = DURATION_HOPE_NIGHT_SECONDS - current_night_seconds;
 
                 return {
                     status: `🌙 NIGHT on ${MOON_NAME} | Sunrise in: <span class="time-highlight">${format_timedelta(time_until_sunrise)}</span>`,
                     arc: `<strong>Hope:</strong> [────────] (below horizon)`,
                     isDaytime: false,
-                    progress: (half_day + current_cycle_seconds) / HOPE_SOLAR_DAY_SECONDS // Night progress
+                    // Calculate overall progress
+                    progress: (DURATION_HOPE_DAY_SECONDS + current_night_seconds) / HOPE_SOLAR_DAY_SECONDS
                 };
             }
         }
