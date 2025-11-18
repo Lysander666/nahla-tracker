@@ -482,7 +482,7 @@
 </head>
 <body>
     <div class="container">
-        <h2>Nahla Day/Night Cycle Tracker - LIVE - v0.61 (Corrected Phases)</h2>
+        <h2>Nahla Day/Night Cycle Tracker - LIVE - v0.64 (Master Rotation Logic)</h2>
         <div id="tracker">
             <div id="status">Loading...</div>
             <div id="hope">...</div>
@@ -712,7 +712,7 @@
         <!-- Lightbox Modal -->
         <div class="lightbox" id="lightbox" onclick="closeLightbox()">
             <span class="lightbox-close">&times;</span>
-            <img id="lightbox-image" src="" alt="Enlarged ">
+            <img id="lightbox-image" src="" alt="Enlarged view">
         </div>
 
         <div id="notes-box">
@@ -726,7 +726,7 @@ Every NCT 'second' lasts roughly 1.1 Earth seconds. Here we live by GMT. </p>
         <small>Nahla Tracker is a personal project of Lysander666.</small>
         
         <p style="margin-top: 10px;">
-            <a href="skymechanics.html" target="_blank" style="color: #61dafb; text-decoration: none;">[View Sky Rotation Simulator]</a>
+            <a href="sky.html" target="_blank" style="color: #61dafb; text-decoration: none;">[View Sky Rotation Simulator]</a>
         </p>
 
     </div>
@@ -770,9 +770,9 @@ Every NCT 'second' lasts roughly 1.1 Earth seconds. Here we live by GMT. </p>
 
             // --- Galactic Band Events ---
             { timestamp: "2025-11-15T15:00:00Z", event: "galactic_270", weight: "precise" },
-            { timestamp: "2025-11-16T16:00:00Z", event: "galactic_270", weight: "precise" }
-            // !!! UNCOMMENT AND EDIT THIS TO FIX GALACTIC BAND:
-            // { timestamp: "2025-11-17T11:05:00Z", event: "galactic_angle", degrees: 45, weight: "estimate" } 
+            { timestamp: "2025-11-16T16:00:00Z", event: "galactic_270", weight: "precise" },
+            // MASTER LINK TEST:
+            // { timestamp: "2025-11-17T11:05:00Z", event: "galactic_angle", degrees: 239, weight: "estimate" } 
         ];
 
         // --- 2. FALLBACK CYCLE ESTIMATES (in Earth Days) ---
@@ -936,18 +936,21 @@ Every NCT 'second' lasts roughly 1.1 Earth seconds. Here we live by GMT. </p>
             return relevant.length > 0 ? relevant[0] : null;
         }
 
-        // --- NEW CENTRALIZED TIME CALCULATOR ---
+        // --- NEW CENTRALIZED TIME CALCULATOR (UPDATED FOR MASTER LINK) ---
         function getSolarCycleStatus(current_time) {
-            // Determine the best anchor to use for the CURRENT TIME position
             // Priorities: Latest timestamp wins, regardless of type
             const latestArcObs = getLatestObservationFromList(['hope_arc_progress']);
             const latestSunrise = getMostRecentObservation('sunrise');
             const latestSunset = getMostRecentObservation('sunset');
+            // NEW: Galactic Angle can also anchor solar time!
+            const latestGalacticObs = getLatestObservationFromList(['galactic_angle', 'galactic_270']);
 
             const obsCandidates = [];
             if (latestArcObs) obsCandidates.push({ t: new Date(latestArcObs.timestamp).getTime(), type: 'arc', obj: latestArcObs });
             if (latestSunrise) obsCandidates.push({ t: new Date(latestSunrise.timestamp).getTime(), type: 'sunrise', obj: latestSunrise });
             if (latestSunset) obsCandidates.push({ t: new Date(latestSunset.timestamp).getTime(), type: 'sunset', obj: latestSunset });
+            // Add Galactic Obs as candidate for Solar Time
+            if (latestGalacticObs) obsCandidates.push({ t: new Date(latestGalacticObs.timestamp).getTime(), type: 'galactic', obj: latestGalacticObs });
             
             obsCandidates.sort((a, b) => b.t - a.t); // Sort descending (newest first)
 
@@ -967,24 +970,39 @@ Every NCT 'second' lasts roughly 1.1 Earth seconds. Here we live by GMT. </p>
             let currentCycleSeconds = 0;
             let source = "";
 
-            if (latest.type === 'arc') {
-                // Manual correction (Percent of DAYLIGHT phase)
+            if (latest.type === 'galactic') {
+                // --- MASTER LINK LOGIC ---
+                // Convert Galactic Angle to Solar Time
+                // 0 deg = Sunrise (0% day)
+                // 180 deg = Noon (50% day)
+                // 360 deg = Next Sunrise
+                
+                let degrees = 270; // default if event is 'galactic_270'
+                if (latest.obj.event === 'galactic_angle') degrees = latest.obj.degrees;
+                
+                // Map 0-360 degrees to 0-SOLAR_DAY_LENGTH_SECONDS
+                
+                // So Cycle Seconds = (Degrees / 360) * SOLAR_DAY_LENGTH_SECONDS
+                const cycleSecondsFromAngle = (degrees / 360) * SOLAR_DAY_LENGTH_SECONDS;
+                
+                // Add time passed since observation
+                const totalSeconds = cycleSecondsFromAngle + timeSince;
+                currentCycleSeconds = (totalSeconds % SOLAR_DAY_LENGTH_SECONDS + SOLAR_DAY_LENGTH_SECONDS) % SOLAR_DAY_LENGTH_SECONDS;
+                
+                source = `Linked to Band ${degrees}°`;
+
+            } else if (latest.type === 'arc') {
                 const percentDone = latest.obj.percent; 
                 const dayDuration = HALF_SOLAR_DAY_SECONDS; 
                 const secondsDone = percentDone * dayDuration;
-                
-                // Current time is: (Time spent in previous phases if any) + (Seconds done at mark) + (Time since mark)
-                // Arc progress is relative to Sunrise (0.0). So previous phases = 0.
                 const totalSecondsSinceSunrise = secondsDone + timeSince;
                 currentCycleSeconds = (totalSecondsSinceSunrise % SOLAR_DAY_LENGTH_SECONDS + SOLAR_DAY_LENGTH_SECONDS) % SOLAR_DAY_LENGTH_SECONDS;
                 source = "Manual Arc";
 
             } else if (latest.type === 'sunrise') {
-                // Standard Sunrise
                 currentCycleSeconds = (timeSince % SOLAR_DAY_LENGTH_SECONDS + SOLAR_DAY_LENGTH_SECONDS) % SOLAR_DAY_LENGTH_SECONDS;
                 source = "Sunrise Obs";
             } else { // sunset
-                 // Standard Sunset (Starts at HALF_SOLAR_DAY_SECONDS)
                  const secondsSinceSunset = timeSince;
                  const totalSecondsSinceSunrise = HALF_SOLAR_DAY_SECONDS + secondsSinceSunset;
                  currentCycleSeconds = (totalSecondsSinceSunrise % SOLAR_DAY_LENGTH_SECONDS + SOLAR_DAY_LENGTH_SECONDS) % SOLAR_DAY_LENGTH_SECONDS;
@@ -1194,8 +1212,17 @@ Every NCT 'second' lasts roughly 1.1 Earth seconds. Here we live by GMT. </p>
             // We now accept current_cycle_seconds directly from the central calculator
             // If undefined (e.g. initial load error), default 0
             if (current_cycle_seconds === undefined) current_cycle_seconds = 0;
+            
+            // --- CIVIL TIME OFFSET ---
+            // Problem: The raw cycle starts at Sunrise (00:00).
+            // Goal: Make Sunrise appear as ~06:00 "Civil Time".
+            // Method: Add 25% of the day length to the current cycle seconds.
+            
+            const offset_seconds = SOLAR_DAY_LENGTH_SECONDS * 0.25; 
+            
+            // Add offset and wrap around day length
+            const total_seconds = (current_cycle_seconds + offset_seconds) % SOLAR_DAY_LENGTH_SECONDS;
 
-            const total_seconds = current_cycle_seconds;
             const hours = Math.floor(total_seconds / 3600);
             const minutes = Math.floor((total_seconds % 3600) / 60);
             const seconds = Math.floor(total_seconds % 60);
@@ -1214,16 +1241,22 @@ Every NCT 'second' lasts roughly 1.1 Earth seconds. Here we live by GMT. </p>
         function get_nahla_coordinated_time(current_cycle_seconds) {
             if (current_cycle_seconds === undefined) current_cycle_seconds = 0;
             
-            const total_seconds = current_cycle_seconds;
-
-            // Scale the *current* number of seconds into a 24-hour day
+            // --- CIVIL TIME OFFSET ---
+            // Same logic for Coordinated Time (24h scale)
+            // Add 6 hours (25% of 24h) to make Sunrise ~06:00
+            
             const SCALE = (24 * 3600) / SOLAR_DAY_LENGTH_SECONDS;
-            const scaled_seconds = total_seconds * SCALE;
+            const scaled_cycle_seconds = current_cycle_seconds * SCALE;
+            
+            // Add 6 hours in seconds (6 * 3600 = 21600)
+            const scaled_offset = 21600; 
+            
+            const total_seconds = (scaled_cycle_seconds + scaled_offset) % (24 * 3600);
 
-            const hours   = Math.floor(scaled_seconds / 3600);
-            const minutes = Math.floor((scaled_seconds % 3600) / 60);
-            const seconds = Math.floor(scaled_seconds % 60);
-            const ms = Math.floor((scaled_seconds % 1) * 100); 
+            const hours   = Math.floor(total_seconds / 3600);
+            const minutes = Math.floor((total_seconds % 3600) / 60);
+            const seconds = Math.floor(total_seconds % 60);
+            const ms = Math.floor((Date.now() % 1000) / 10); 
 
             return `Nahla Coordinated Time: ${String(hours).padStart(2, '0')}:` +
                    `${String(minutes).padStart(2, '0')}:` +
