@@ -2,12 +2,10 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    
     <title>Nahla Tracker</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=VT323&display=swap">
 
-
-        <!-- Open Graph -->
+<!-- Open Graph & Twitter Meta -->
 <meta property="og:type" content="website">
 <meta property="og:title" content="Nahla Tracker">
 <meta property="og:description" content="Live day/night tracker and gallery for Nahla, a remote Elite Dangerous moon.">
@@ -15,13 +13,10 @@
 <meta property="og:image" content="https://lysander666.github.io/nahla-tracker/social-card.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-
-<!-- Twitter -->
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Nahla Tracker">
 <meta name="twitter:description" content="Live day/night tracker and gallery for Nahla, a remote Elite Dangerous moon.">
 <meta name="twitter:image" content="https://lysander666.github.io/nahla-tracker/social-card.jpg">
-
 
     <link id="favicon" rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='80'>🌕</text></svg>">
     
@@ -70,7 +65,7 @@
             text-align: center;
             margin-top: 4px;
             letter-spacing: 2px;
-}
+        }
 
 
         .time-highlight {
@@ -103,9 +98,6 @@
     line-height: 1.45;
   }
 }
-
-
-
 
 #notes {
     background-color: #121212;
@@ -142,14 +134,8 @@
     margin: 0;
     text-align: center;
     position: relative;
-    top: 8px;  /* <-- Use this instead of margin-top */
+    top: 8px; 
 }
-
-
-
-
-
-
 
 .gallery-btn {
     background: none;
@@ -166,10 +152,10 @@
     justify-content: center;
     font-family: monospace;
     flex-shrink: 0;
-    padding: 0;           /* <-- ADD THIS */
-    outline: none;        /* <-- ADD THIS */
-    -webkit-appearance: none;  /* <-- ADD THIS */
-    appearance: none;     /* <-- ADD THIS */
+    padding: 0;           
+    outline: none;        
+    -webkit-appearance: none;  
+    appearance: none;    
 }
 
 .gallery-btn:hover {
@@ -195,8 +181,8 @@
             border-radius: 8px;
             padding: 0 20px 20px 20px;
             background-color: #222;
-            height: 580px; /* Fixed height to match map panel THIS IS THE REFERENCE BOX SIZE FOR ALL BOXES*/
-            overflow-y: auto; /* Enable scrolling for all boxes */
+            height: 580px; 
+            overflow-y: auto; 
         }
         
         .celestial-body h3, #map-panel h3, #manifest-panel h3 {
@@ -475,14 +461,22 @@
   transform: scale(0.9);
 }
 
-
+.error-msg {
+    color: #ff6b6b;
+    border: 1px solid #ff6b6b;
+    background: rgba(255, 107, 107, 0.1);
+    padding: 10px;
+    margin: 10px 0;
+    font-family: monospace;
+    font-size: 0.9rem;
+}
 
 
     </style>
 </head>
 <body>
     <div class="container">
-        <h2>Nahla Day/Night Cycle Tracker - LIVE - v0.64 (Master Rotation Logic)</h2>
+        <h2>Nahla Day/Night Cycle Tracker - LIVE - v0.83 (Final NLT Sync)</h2>
         <div id="tracker">
             <div id="status">Loading...</div>
             <div id="hope">...</div>
@@ -723,10 +717,10 @@ Every NCT 'second' lasts roughly 1.1 Earth seconds. Here we live by GMT. </p>
             <br>
             Day–night cycles beyond Earth vary according to the orbital and rotational dynamics of their respective worlds, rather than adhering to Earth’s 24-hour rhythm.
             <p></p>
-        <small>Nahla Tracker is a personal project of Lysander666.</small>
+        <small>Nahla Tracker is a personal project of CMDR Lysander666.</small>
         
         <p style="margin-top: 10px;">
-            <a href="skymechanics.html" target="_blank" style="color: #61dafb; text-decoration: none;">[View Sky Rotation Simulator]</a>
+            <a href="sky.html" target="_blank" style="color: #61dafb; text-decoration: none;">[View Sky Rotation Simulator]</a>
         </p>
 
     </div>
@@ -740,19 +734,6 @@ Every NCT 'second' lasts roughly 1.1 Earth seconds. Here we live by GMT. </p>
         const SECONDS_IN_EARTH_DAY = 24 * 60 * 60;
         
         // --- 1. OBSERVATION DATABASE ---
-        // This is your new "database" of observations.
-        // As you make new observations, add them here.
-        // Use full ISO 8601 timestamps (with 'Z' for UTC/GMT).
-        //
-        // NEW EVENT TYPES:
-        //  - "galactic_angle": { ..., degrees: 135 } (Corrects rotation to specific angle)
-        //  - "hope_arc_progress": { ..., percent: 0.5 } (0.0 = Rise, 0.5 = Noon, 1.0 = Set)
-        //  - "rebekah_arc_progress": { ..., percent: 0.1 } (0.0 = Rise, 1.0 = Set)
-        //
-        // WEIGHTING:
-        //  - "weight": "precise" (Default) - Uses this observation for cycle calc AND current status
-        //  - "weight": "estimate" - Uses this observation ONLY for current status (anchor), ignores for cycle calc
-        
         const observations = [
             // --- Sun (Hope) Events ---
             { timestamp: "2025-11-09T20:00:00Z", event: "sunrise", weight: "precise" },
@@ -765,16 +746,13 @@ Every NCT 'second' lasts roughly 1.1 Earth seconds. Here we live by GMT. </p>
             { timestamp: "2025-11-16T10:30:00Z", event: "rebekah_rise", weight: "precise" },
             { timestamp: "2025-11-16T21:00:00Z", event: "rebekah_set", weight: "precise" },
             { timestamp: "2025-11-18T07:00:00Z", event: "rebekah_rise", weight: "estimate" },
-            // !!! UNCOMMENT AND EDIT THIS TO FIX REBEKAH:
-            // { timestamp: "2025-11-17T11:05:00Z", event: "rebekah_arc_progress", percent: 0.1, weight: "estimate" },
-            // (percent 0.0 = just rising, 0.5 = peak, 1.0 = just setting)
+
 
             // --- Galactic Band Events ---
             { timestamp: "2025-11-15T15:00:00Z", event: "galactic_270", weight: "precise" },
             { timestamp: "2025-11-16T16:00:00Z", event: "galactic_270", weight: "precise" },
-            { timestamp: "2025-11-18T11:05:00Z", event: "galactic_angle", degrees: 90, weight: "estimate" }, 
-            // MASTER LINK TEST:
-            // { timestamp: "2025-11-17T11:05:00Z", event: "galactic_angle", degrees: 239, weight: "estimate" } 
+            // MASTER LINK CORRECTION:
+            { timestamp: "2025-11-18T16:00:00Z", event: "galactic_angle", degrees: 250, weight: "estimate" } 
         ];
 
         // --- 2. FALLBACK CYCLE ESTIMATES (in Earth Days) ---
@@ -789,30 +767,19 @@ Every NCT 'second' lasts roughly 1.1 Earth seconds. Here we live by GMT. </p>
         
         // --- 4. DYNAMIC CONSTANT CALCULATION ---
         
-        // Helper to get the most recent observation of a specific type
         function getMostRecentObservation(eventType) {
             const events = observations
                 .filter(obs => obs.event === eventType)
                 .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)); 
             
             if (events.length > 0) {
-                return events[0]; // Return the whole object, not just timestamp
+                return events[0]; 
             }
             return null; 
         }
         
-        // Helper to calculate cycle length (rate of change)
-        // This still prioritizes "hard" events like sunrise/sunset/270 for accuracy
-        // NEW: Ignores 'estimate' weights for calculation, effectively protecting the "clock speed"
         function calculateCycleLength(eventType, fallbackCycleDays) {
-            // Mapping for cycle calc:
             let targetEvent = eventType;
-            if (eventType === 'galactic_270') {
-                 // Include both 'galactic_270' AND 'galactic_angle' if degrees==270
-                 // But for now, let's stick to the explicitly named events for cycle stability
-            }
-
-            // FILTER: Only use PRECISE observations for cycle calculation
             const events = observations
                 .filter(obs => obs.event === targetEvent && obs.weight !== 'estimate')
                 .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp)); 
@@ -824,7 +791,6 @@ Every NCT 'second' lasts roughly 1.1 Earth seconds. Here we live by GMT. </p>
             if (events.length === 0) {
                 console.warn(`No precise '${eventType}' observations found! Using fallback.`);
                 cycleLengthSeconds = fallbackCycleMs / 1000;
-                // Fallback anchor: try finding ANY observation (even estimate) just to have something
                 const anyEvent = observations
                     .filter(obs => obs.event === targetEvent)
                     .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
@@ -850,14 +816,9 @@ Every NCT 'second' lasts roughly 1.1 Earth seconds. Here we live by GMT. </p>
                     console.log(`Multi-anchor for ${eventType}: ${estimatedCycles} cycles detected. New avg: ${cycleLengthSeconds}s`);
                 }
             }
-            
             return { cycleLength: cycleLengthSeconds, anchor: lastAnchor };
         }
 
-        // Helper to auto-calculate durations from paired events
-        // NOTE: This logic assumes paired events are PRECISE enough to determine duration.
-        // We filter out estimates here too? Or maybe we trust user paired estimates?
-        // Let's filter out estimates for duration calculation to be safe.
         function calculateRebekahDurations() {
             let visibleDuration = MANUAL_REBEKAH_VISIBLE_DURATION_SECONDS;
             let horizonDuration = MANUAL_REBEKAH_HORIZON_DURATION_SECONDS;
@@ -873,7 +834,6 @@ Every NCT 'second' lasts roughly 1.1 Earth seconds. Here we live by GMT. </p>
                     visibleDuration = (matchingSet.getTime() - lastRise.getTime()) / 1000;
                     console.log(`Auto-calculated Rebekah VISIBLE duration: ${visibleDuration}s`);
                 } else {
-                     // Check previous pair
                     const lastSet = new Date(setEvents[0].timestamp);
                     if (lastSet.getTime() < lastRise.getTime()) {
                         const matchingRise = riseEvents.map(e => new Date(e.timestamp)).find(r => r.getTime() < lastSet.getTime());
@@ -905,14 +865,11 @@ Every NCT 'second' lasts roughly 1.1 Earth seconds. Here we live by GMT. </p>
 
 
         // --- INIT CLOCKS ---
-        
-        // CLOCK 1: Sun (Hope)
         const solarData = calculateCycleLength("sunrise", FALLBACK_SOLAR_CYCLE_DAYS);
         const SOLAR_DAY_LENGTH_SECONDS = solarData.cycleLength;
         const LAST_SUNRISE_ANCHOR = solarData.anchor;
         const HALF_SOLAR_DAY_SECONDS = SOLAR_DAY_LENGTH_SECONDS / 2;
         
-        // CLOCK 2: Rebekah
         const rebekahData = calculateCycleLength("rebekah_rise", FALLBACK_REBEKAH_CYCLE_DAYS);
         const REBEKAH_TOTAL_CYCLE_SECONDS = rebekahData.cycleLength;
         const REBEKAH_LAST_RISE_ANCHOR = rebekahData.anchor;
@@ -921,16 +878,12 @@ Every NCT 'second' lasts roughly 1.1 Earth seconds. Here we live by GMT. </p>
         const REBEKAH_VISIBLE_DURATION = rebekahDurations.visibleDuration;
         const REBEKAH_HORIZON_DURATION = rebekahDurations.horizonDuration;
 
-        // CLOCK 3: Galactic Band
         const galacticData = calculateCycleLength("galactic_270", FALLBACK_GALACTIC_CYCLE_DAYS);
         const GALACTIC_TOTAL_CYCLE_SECONDS = galacticData.cycleLength;
         const GALACTIC_270_ANCHOR = galacticData.anchor;
             
 
         // --- GET ANCHORS FOR DISPLAY ---
-        
-        // Helper function to find the most recent observation of ANY type in a list
-        // This INCLUDES estimates, because we want the latest status update regardless of quality
         function getLatestObservationFromList(eventTypes) {
              const relevant = observations
                 .filter(obs => eventTypes.includes(obs.event))
@@ -938,28 +891,22 @@ Every NCT 'second' lasts roughly 1.1 Earth seconds. Here we live by GMT. </p>
             return relevant.length > 0 ? relevant[0] : null;
         }
 
-        // --- NEW CENTRALIZED TIME CALCULATOR (UPDATED FOR MASTER LINK) ---
         function getSolarCycleStatus(current_time) {
-            // Priorities: Latest timestamp wins, regardless of type
             const latestArcObs = getLatestObservationFromList(['hope_arc_progress']);
             const latestSunrise = getMostRecentObservation('sunrise');
             const latestSunset = getMostRecentObservation('sunset');
-            // NEW: Galactic Angle can also anchor solar time!
             const latestGalacticObs = getLatestObservationFromList(['galactic_angle', 'galactic_270']);
 
             const obsCandidates = [];
             if (latestArcObs) obsCandidates.push({ t: new Date(latestArcObs.timestamp).getTime(), type: 'arc', obj: latestArcObs });
             if (latestSunrise) obsCandidates.push({ t: new Date(latestSunrise.timestamp).getTime(), type: 'sunrise', obj: latestSunrise });
             if (latestSunset) obsCandidates.push({ t: new Date(latestSunset.timestamp).getTime(), type: 'sunset', obj: latestSunset });
-            // Add Galactic Obs as candidate for Solar Time
             if (latestGalacticObs) obsCandidates.push({ t: new Date(latestGalacticObs.timestamp).getTime(), type: 'galactic', obj: latestGalacticObs });
             
-            obsCandidates.sort((a, b) => b.t - a.t); // Sort descending (newest first)
+            obsCandidates.sort((a, b) => b.t - a.t); 
 
-            // Default fallback if no data
             if (obsCandidates.length === 0) {
                 if (!LAST_SUNRISE_ANCHOR) return { cycleSeconds: 0, source: "None" };
-                // Fallback to the "Cycle Calc" anchor
                 const timeSince = (current_time.getTime() - LAST_SUNRISE_ANCHOR.getTime()) / 1000;
                 return { 
                     cycleSeconds: (timeSince % SOLAR_DAY_LENGTH_SECONDS + SOLAR_DAY_LENGTH_SECONDS) % SOLAR_DAY_LENGTH_SECONDS,
@@ -973,25 +920,28 @@ Every NCT 'second' lasts roughly 1.1 Earth seconds. Here we live by GMT. </p>
             let source = "";
 
             if (latest.type === 'galactic') {
-                // --- MASTER LINK LOGIC ---
-                // Convert Galactic Angle to Solar Time
-                // 0 deg = Sunrise (0% day)
-                // 180 deg = Noon (50% day)
-                // 360 deg = Next Sunrise
+                let observedDegrees = 270; 
+                if (latest.obj.event === 'galactic_angle') observedDegrees = latest.obj.degrees;
                 
-                let degrees = 270; // default if event is 'galactic_270'
-                if (latest.obj.event === 'galactic_angle') degrees = latest.obj.degrees;
+                // --- NEW LOGIC: VISUAL SCALE CORRECTION (v0.83) ---
+                // MAX_VISUAL_DEGREES (Image 9) is the estimated angle corresponding to SUNSET.
+                // We use 330 deg as the full scale for daylight rotation.
+                const MAX_VISUAL_DEGREES = 330; 
                 
-                // Map 0-360 degrees to 0-SOLAR_DAY_LENGTH_SECONDS
+                // 1. Calculate percentage through the DAYLIGHT period based on degrees.
+                const percentComplete = Math.min(1.0, (observedDegrees % 360) / MAX_VISUAL_DEGREES);
+
+                // 2. Convert to seconds into the DAYLIGHT (half solar day)
+                const secondsIntoDaylight = percentComplete * HALF_SOLAR_DAY_SECONDS;
+
+                // 3. Add time elapsed since observation
+                const totalSeconds = secondsIntoDaylight + timeSince;
                 
-                // So Cycle Seconds = (Degrees / 360) * SOLAR_DAY_LENGTH_SECONDS
-                const cycleSecondsFromAngle = (degrees / 360) * SOLAR_DAY_LENGTH_SECONDS;
-                
-                // Add time passed since observation
-                const totalSeconds = cycleSecondsFromAngle + timeSince;
+                // 4. Wrap around cycle (full day/night)
                 currentCycleSeconds = (totalSeconds % SOLAR_DAY_LENGTH_SECONDS + SOLAR_DAY_LENGTH_SECONDS) % SOLAR_DAY_LENGTH_SECONDS;
                 
-                source = `Linked to Band ${degrees}°`;
+                const percentLeft = (1 - percentComplete) * 100;
+                source = `Band: ${observedDegrees}° (Calib to ${MAX_VISUAL_DEGREES}°)`;
 
             } else if (latest.type === 'arc') {
                 const percentDone = latest.obj.percent; 
@@ -1004,7 +954,7 @@ Every NCT 'second' lasts roughly 1.1 Earth seconds. Here we live by GMT. </p>
             } else if (latest.type === 'sunrise') {
                 currentCycleSeconds = (timeSince % SOLAR_DAY_LENGTH_SECONDS + SOLAR_DAY_LENGTH_SECONDS) % SOLAR_DAY_LENGTH_SECONDS;
                 source = "Sunrise Obs";
-            } else { // sunset
+            } else { 
                  const secondsSinceSunset = timeSince;
                  const totalSecondsSinceSunrise = HALF_SOLAR_DAY_SECONDS + secondsSinceSunset;
                  currentCycleSeconds = (totalSecondsSinceSunrise % SOLAR_DAY_LENGTH_SECONDS + SOLAR_DAY_LENGTH_SECONDS) % SOLAR_DAY_LENGTH_SECONDS;
@@ -1015,8 +965,6 @@ Every NCT 'second' lasts roughly 1.1 Earth seconds. Here we live by GMT. </p>
         }
 
 
-        // --- All your helper functions, ported to JavaScript ---
-        
         function format_timedelta(total_seconds) {
             total_seconds = Math.max(0, total_seconds);
             const hours = Math.floor(total_seconds / 3600);
@@ -1026,19 +974,16 @@ Every NCT 'second' lasts roughly 1.1 Earth seconds. Here we live by GMT. </p>
         }
 
         function get_rebekah_status(current_time) {
-            // 1. Check for arbitrary arc progress correction FIRST
             const latestArcObs = getLatestObservationFromList(['rebekah_arc_progress']);
-            // 2. Check for standard Rise/Set events
             const latestRise = getMostRecentObservation('rebekah_rise');
             const latestSet = getMostRecentObservation('rebekah_set');
             
-            // Determine which observation is actually the MOST recent
             const obsCandidates = [];
             if (latestArcObs) obsCandidates.push({ t: new Date(latestArcObs.timestamp).getTime(), type: 'arc', obj: latestArcObs });
             if (latestRise) obsCandidates.push({ t: new Date(latestRise.timestamp).getTime(), type: 'rise', obj: latestRise });
             if (latestSet) obsCandidates.push({ t: new Date(latestSet.timestamp).getTime(), type: 'set', obj: latestSet });
             
-            obsCandidates.sort((a, b) => b.t - a.t); // Descending
+            obsCandidates.sort((a, b) => b.t - a.t); 
             
             if (obsCandidates.length === 0) return `<strong>Rebekah:</strong> ─ STATUS UNKNOWN`;
             
@@ -1050,7 +995,6 @@ Every NCT 'second' lasts roughly 1.1 Earth seconds. Here we live by GMT. </p>
             let statusText = "";
 
             if (latest.type === 'arc') {
-                // Arbitrary correction logic!
                 const percentDone = latest.obj.percent;
                 const secondsDone = percentDone * REBEKAH_VISIBLE_DURATION;
                 const totalSecondsDone = secondsDone + timeSince;
@@ -1061,7 +1005,6 @@ Every NCT 'second' lasts roughly 1.1 Earth seconds. Here we live by GMT. </p>
                     statusText = "(Manual Arc)";
                 } else {
                     isVisible = false;
-                    // How far into horizon?
                     const timeIntoHorizon = totalSecondsDone - REBEKAH_VISIBLE_DURATION;
                     const horizonPhase = timeIntoHorizon % REBEKAH_HORIZON_DURATION;
                     timeRemaining = REBEKAH_HORIZON_DURATION - horizonPhase;
@@ -1073,7 +1016,7 @@ Every NCT 'second' lasts roughly 1.1 Earth seconds. Here we live by GMT. </p>
                 timeRemaining = REBEKAH_VISIBLE_DURATION - timeIntoPhase;
                 isVisible = true;
                 statusText = "(Auto-Calc)";
-            } else { // set
+            } else { 
                 const timeIntoPhase = (timeSince % REBEKAH_HORIZON_DURATION + REBEKAH_HORIZON_DURATION) % REBEKAH_HORIZON_DURATION;
                 timeRemaining = REBEKAH_HORIZON_DURATION - timeIntoPhase;
                 isVisible = false;
@@ -1090,7 +1033,6 @@ Every NCT 'second' lasts roughly 1.1 Earth seconds. Here we live by GMT. </p>
         function get_sky_arc_indicator(progress, is_daytime) {
             if (is_daytime) {
                 const positions = ["🌅", "☀️", "☀️", "☀️", "☀️", "🌇"];
-                // Ensure progress is 0-1
                 let p = Math.max(0, Math.min(1, progress));
                 const index = Math.floor(p * (positions.length - 1));
                 let arc = ["─", "─", "─", "─", "─", "─"];
@@ -1102,46 +1044,39 @@ Every NCT 'second' lasts roughly 1.1 Earth seconds. Here we live by GMT. </p>
         }
 
         function get_galactic_band_indicator(current_time, is_daytime) {
-            // 1. Find latest observation: 'galactic_270' OR 'galactic_angle'
             const latestObs = getLatestObservationFromList(['galactic_270', 'galactic_angle']);
             
             if (!latestObs) return `<strong>Galactic Band:</strong> ─ STATUS UNKNOWN`;
 
-            const timeSince = (current_time.getTime() - new Date(latestObs.timestamp).getTime()) / 1000;
-            const currentCycleSeconds = (timeSince % GALACTIC_TOTAL_CYCLE_SECONDS + GALACTIC_TOTAL_CYCLE_SECONDS) % GALACTIC_TOTAL_CYCLE_SECONDS;
-            const progress = currentCycleSeconds / GALACTIC_TOTAL_CYCLE_SECONDS; // 0.0 to 1.0 relative to anchor
-
-            // Determine Anchor Degrees
-            let anchorDegrees = 270; // Default for 'galactic_270'
-            if (latestObs.event === 'galactic_angle' && latestObs.degrees !== undefined) {
-                anchorDegrees = latestObs.degrees;
-            }
-
-            // Calculate current degrees
-            const degreesMoved = progress * 360;
-            const currentDegrees = (anchorDegrees + degreesMoved) % 360;
+            // Calculate progress based on Solar Cycle length (since they are locked)
+            const solarStatus = getSolarCycleStatus(current_time);
+            const currentCycleSeconds = solarStatus.cycleSeconds;
             
-            // --- UPDATED PHASE LOGIC ---
-            // Phase 1 (0-90): Rising
-            // Phase 2 (90-180): Ascending
-            // Phase 3 (180-270): Descending
-            // Phase 4 (270-360): Setting
+            // Progress represents time into Daylight (0.0 to 1.0)
+            const progress = currentCycleSeconds / HALF_SOLAR_DAY_SECONDS; 
+
+            // Calculate the current expected visual angle based on time.
+            const MAX_VISUAL_DEGREES = 330;
+            let currentDegrees = progress * MAX_VISUAL_DEGREES;
+            if (currentDegrees > 360) currentDegrees = currentDegrees % 360; 
             
+            // Phase Descriptions based on Image 1-12 sequence
             let phase;
-            if (currentDegrees >= 0 && currentDegrees < 90) {
-                phase = "Phase 1: Rising (Tilting Up)";
-            } else if (currentDegrees >= 90 && currentDegrees < 180) {
-                phase = "Phase 2: Ascending to Zenith";
-            } else if (currentDegrees >= 180 && currentDegrees < 270) {
-                phase = "Phase 3: Descending (Flat to Vert)";
-            } else { // 270-360
-                phase = "Phase 4: Setting (Vert to Horizon)";
+            if (progress >= 0 && progress < 0.25) { // Image 1-3 (0% to 25% of day)
+                phase = "Phase 1: Sunrise/Rising (1-3)";
+            } else if (progress >= 0.25 && progress < 0.5) { // Image 3-5 (25% to 50% of day)
+                phase = "Phase 2: Ascending/Zenith (3-5)";
+            } else if (progress >= 0.5 && progress < 0.75) { // Image 5-7 (50% to 75% of day)
+                phase = "Phase 3: Descending (5-7)";
+            } else if (progress >= 0.75 && progress < 1.0) { // Image 7-9 (75% to 100% of day)
+                phase = "Phase 4: Sunset/Setting (7-9)";
+            } else if (progress >= 1.0 && progress < 1.5) { // Night Phase (10-11)
+                phase = "Phase 5: Early Night (10-11)";
+            } else { 
+                phase = "Phase 6: Late Night (11-12, returning to 1)";
             }
 
-            // Elevation Text
             let elevationText = "";
-            if (currentDegrees >= 135 && currentDegrees < 225) elevationText = "HIGH (Zenith/Peak)"; // Peak centered around 180? Or 225?
-            // User defined: 180 = Flat (Zenith). So Peak is 180.
             if (currentDegrees >= 150 && currentDegrees < 210) elevationText = "HIGH (Zenith)";
             else if (currentDegrees >= 60 && currentDegrees < 150) elevationText = "MID (Rising)";
             else if (currentDegrees >= 210 && currentDegrees < 300) elevationText = "MID (Setting)";
@@ -1149,131 +1084,114 @@ Every NCT 'second' lasts roughly 1.1 Earth seconds. Here we live by GMT. </p>
 
             const visibility = is_daytime ? "(daylight)" : "(visible)";
 
-            return `<strong>Galactic Band:</strong> 🌌 ${phase} | ${elevationText} | (${currentDegrees.toFixed(1)}°) ${visibility}`;
+            return `<strong>Galactic Band:</strong> 🌌 ${phase} | ${elevationText} | (Est. Angle: ${currentDegrees.toFixed(1)}°) ${visibility}`;
         }
 
-        // --- The main update loop ---
         function updateDisplay() {
-            const current_time = new Date();
-            
-            // Use the new centralized status calculator
-            const solarStatus = getSolarCycleStatus(current_time);
-            const current_cycle_seconds = solarStatus.cycleSeconds;
-            const hours_into_moon_day = (current_cycle_seconds / 3600);
-            const sourceText = solarStatus.source ? `(${solarStatus.source})` : "";
+            try {
+                const current_time = new Date();
+                const solarStatus = getSolarCycleStatus(current_time);
+                const current_cycle_seconds = solarStatus.cycleSeconds;
+                const hours_into_moon_day = (current_cycle_seconds / 3600);
+                const sourceText = solarStatus.source ? `(${solarStatus.source})` : "";
 
-            let isDaytime = false;
-            let dayProgress = 0;
-            let timeUntilChange = 0;
+                let isDaytime = false;
+                let dayProgress = 0;
+                let timeUntilChange = 0;
+                let nightProgress = 0; 
 
-            if (current_cycle_seconds < HALF_SOLAR_DAY_SECONDS) {
-                // Daytime
-                isDaytime = true;
-                timeUntilChange = HALF_SOLAR_DAY_SECONDS - current_cycle_seconds;
-                dayProgress = current_cycle_seconds / HALF_SOLAR_DAY_SECONDS;
-            } else {
-                // Nighttime
-                isDaytime = false;
-                timeUntilChange = SOLAR_DAY_LENGTH_SECONDS - current_cycle_seconds;
-                // Night progress logic
-                dayProgress = 1.0 - (timeUntilChange / HALF_SOLAR_DAY_SECONDS); 
+                if (current_cycle_seconds < HALF_SOLAR_DAY_SECONDS) {
+                    isDaytime = true;
+                    timeUntilChange = HALF_SOLAR_DAY_SECONDS - current_cycle_seconds;
+                    dayProgress = current_cycle_seconds / HALF_SOLAR_DAY_SECONDS;
+                } else {
+                    isDaytime = false;
+                    timeUntilChange = SOLAR_DAY_LENGTH_SECONDS - current_cycle_seconds;
+                    nightProgress = 1.0 - (timeUntilChange / HALF_SOLAR_DAY_SECONDS); 
+                }
+
+                let data = {};
+                
+                if (isDaytime) {
+                    data.status = `☀️  DAY on ${MOON_NAME} | Sunset in: <span class="time-highlight">${format_timedelta(timeUntilChange)}</span> | <span class="time-highlight">${hours_into_moon_day.toFixed(2)}h</span> into solar day ${sourceText}`;
+                    data.hope = get_sky_arc_indicator(dayProgress, true);
+                    data.band = get_galactic_band_indicator(current_time, true);
+                } else {
+                    data.status = `🌙 NIGHT on ${MOON_NAME} | Sunrise in: <span class="time-highlight">${format_timedelta(timeUntilChange)}</span> | <span class="time-highlight">${hours_into_moon_day.toFixed(2)}h</span> into solar day ${sourceText}`;
+                    data.hope = get_sky_arc_indicator(nightProgress, false);
+                    data.band = get_galactic_band_indicator(current_time, false);
+                }
+
+                data.rebekah = get_rebekah_status(current_time);
+
+                document.getElementById("status").innerHTML = data.status;
+                document.getElementById("hope").innerHTML = data.hope;
+                document.getElementById("band").innerHTML = data.band;
+                document.getElementById("rebekah").innerHTML = data.rebekah;
+            } catch (e) {
+                document.getElementById("status").innerHTML = `<div class="error-msg">ERROR: ${e.message}</div>`;
+                console.error(e);
             }
-
-            let data = {};
-            
-            if (isDaytime) {
-                data.status = `☀️  DAY on ${MOON_NAME} | Sunset in: <span class="time-highlight">${format_timedelta(timeUntilChange)}</span> | <span class="time-highlight">${hours_into_moon_day.toFixed(2)}h</span> into solar day ${sourceText}`;
-                data.hope = get_sky_arc_indicator(dayProgress, true);
-                data.band = get_galactic_band_indicator(current_time, true);
-            } else {
-                data.status = `🌙 NIGHT on ${MOON_NAME} | Sunrise in: <span class="time-highlight">${format_timedelta(timeUntilChange)}</span> | <span class="time-highlight">${hours_into_moon_day.toFixed(2)}h</span> into solar day ${sourceText}`;
-                data.hope = get_sky_arc_indicator(nightProgress, false);
-                data.band = get_galactic_band_indicator(current_time, false);
-            }
-
-            data.rebekah = get_rebekah_status(current_time);
-
-            // Update the HTML
-            document.getElementById("status").innerHTML = data.status;
-            document.getElementById("hope").innerHTML = data.hope;
-            document.getElementById("band").innerHTML = data.band;
-            document.getElementById("rebekah").innerHTML = data.rebekah;
         }
 
-        // --- CLOCK FUNCTIONS (UPDATED) ---
         function updateClocks() {
-            const now = new Date();
-            const solarStatus = getSolarCycleStatus(now);
-            
-            document.getElementById('moonclock').textContent = get_moon_clock(solarStatus.cycleSeconds);
-            document.getElementById('moonclock-coordinated').textContent = get_nahla_coordinated_time(solarStatus.cycleSeconds);
+            try {
+                const now = new Date();
+                const solarStatus = getSolarCycleStatus(now);
+                document.getElementById('moonclock').textContent = get_moon_clock(solarStatus.cycleSeconds);
+                document.getElementById('moonclock-coordinated').textContent = get_nahla_coordinated_time(solarStatus.cycleSeconds);
+            } catch (e) {
+                console.error("Clock Error:", e);
+            }
         }
-
 
         function get_moon_clock(current_cycle_seconds) {
-            // We now accept current_cycle_seconds directly from the central calculator
-            // If undefined (e.g. initial load error), default 0
             if (current_cycle_seconds === undefined) current_cycle_seconds = 0;
             
-            // --- CIVIL TIME OFFSET ---
-            // Problem: The raw cycle starts at Sunrise (00:00).
-            // Goal: Make Sunrise appear as ~06:00 "Civil Time".
-            // Method: Add 25% of the day length to the current cycle seconds.
+            // --- NLT OFFSET CORRECTION (v0.83) ---
+            // If NLT 00:00:00 = Galactic Band at 0 degrees (Image 11/12), which is deep night.
+            // Sunrise (0 seconds into cycle) is Image 1.
+            // We assume 6 hours pass between NLT 00:00:00 and NLT 06:00:00 (Sunrise).
             
-            const offset_seconds = SOLAR_DAY_LENGTH_SECONDS * 0.25; 
+            const NLT_SUNRISE_HOUR = 6;
+            const SOLAR_DAY_LENGTH_HOURS = SOLAR_DAY_LENGTH_SECONDS / 3600;
             
-            // Add offset and wrap around day length
-            const total_seconds = (current_cycle_seconds + offset_seconds) % SOLAR_DAY_LENGTH_SECONDS;
+            // Calculate what percentage of the full day the 6 hours represents.
+            const NLT_SHIFT_PERCENT = NLT_SUNRISE_HOUR / SOLAR_DAY_LENGTH_HOURS; // ~6 hours / 26.4 hours
+            
+            // Calculate the actual shift seconds required to make NLT 00:00:00 start at Image 11/12.
+            const NLT_SHIFT_SECONDS = NLT_SHIFT_PERCENT * SOLAR_DAY_LENGTH_SECONDS;
 
+            // Shift the current cycle seconds (which start at Sunrise=0) to align the NLT clock.
+            // We shift FORWARD by the full day length minus the shift needed to align the midnight point.
+            // Since Sunrise is Time=0, and Midnight should be 6 hours before, we need to set the clock back 6 hours.
+            const total_seconds = (current_cycle_seconds + (SOLAR_DAY_LENGTH_SECONDS - NLT_SHIFT_SECONDS)) % SOLAR_DAY_LENGTH_SECONDS;
+            
             const hours = Math.floor(total_seconds / 3600);
             const minutes = Math.floor((total_seconds % 3600) / 60);
             const seconds = Math.floor(total_seconds % 60);
-            
-            // Add a fake ms for visual consistency, or remove it? 
-            // The old code derived ms from system time. We can re-add that for smoothness.
             const ms = Math.floor((Date.now() % 1000) / 10); 
-
             return `Nahla Local Time: ${String(hours).padStart(2, '0')}:` +
                `${String(minutes).padStart(2, '0')}:` +
                `${String(seconds).padStart(2, '0')}.` +
                `${String(ms).padStart(2, '0')} (out of ${(SOLAR_DAY_LENGTH_SECONDS / 3600).toFixed(2)}h)`;
         }
 
-
         function get_nahla_coordinated_time(current_cycle_seconds) {
             if (current_cycle_seconds === undefined) current_cycle_seconds = 0;
-            
-            // --- CIVIL TIME OFFSET ---
-            // Same logic for Coordinated Time (24h scale)
-            // Add 6 hours (25% of 24h) to make Sunrise ~06:00
-            
             const SCALE = (24 * 3600) / SOLAR_DAY_LENGTH_SECONDS;
             const scaled_cycle_seconds = current_cycle_seconds * SCALE;
-            
-            // Add 6 hours in seconds (6 * 3600 = 21600)
             const scaled_offset = 21600; 
-            
             const total_seconds = (scaled_cycle_seconds + scaled_offset) % (24 * 3600);
-
             const hours   = Math.floor(total_seconds / 3600);
             const minutes = Math.floor((total_seconds % 3600) / 60);
             const seconds = Math.floor(total_seconds % 60);
             const ms = Math.floor((Date.now() % 1000) / 10); 
-
             return `Nahla Coordinated Time: ${String(hours).padStart(2, '0')}:` +
                    `${String(minutes).padStart(2, '0')}:` +
                    `${String(seconds).padStart(2, '0')}.` +
                    `${String(ms).padStart(2, '0')} (out of 24:00:00)`;
         }
-
-
-        // --- Main Execution ---
-        
-        updateDisplay();
-        setInterval(updateDisplay, 1000);
-
-        updateClocks();
-        setInterval(updateClocks, 50); 
 
         // --- Gallery Lightbox Functions ---
         function openLightbox(imageSrc) {
@@ -1282,40 +1200,33 @@ Every NCT 'second' lasts roughly 1.1 Earth seconds. Here we live by GMT. </p>
             lightboxImage.src = imageSrc;
             lightbox.classList.add('active');
         }
-        
         function closeLightbox() {
             const lightbox = document.getElementById('lightbox');
             lightbox.classList.remove('active');
         }
-        
         document.addEventListener('keydown', function(event) {
             if (event.key === 'Escape') {
                 closeLightbox();
             }
         });
 
-            // --- Make gallery draggable ---
+        // --- Make gallery draggable ---
         const gallery = document.querySelector('.gallery-container');
-
         let isDown = false;
         let startX;
         let scrollLeft;
-
         gallery.addEventListener('mousedown', (e) => {
           isDown = true;
           gallery.classList.add('active');
           startX = e.pageX - gallery.offsetLeft;
           scrollLeft = gallery.scrollLeft;
         });
-
         gallery.addEventListener('mouseleave', () => {
           isDown = false;
         });
-
         gallery.addEventListener('mouseup', () => {
           isDown = false;
         });
-
         gallery.addEventListener('mousemove', (e) => {
           if (!isDown) return;
           e.preventDefault();
@@ -1324,40 +1235,39 @@ Every NCT 'second' lasts roughly 1.1 Earth seconds. Here we live by GMT. </p>
           gallery.scrollLeft = scrollLeft - walk;
         });
 
-            const scrollLeftBtn = document.getElementById('scroll-left');
-const scrollRightBtn = document.getElementById('scroll-right');
+        const scrollLeftBtn = document.getElementById('scroll-left');
+        const scrollRightBtn = document.getElementById('scroll-right');
+        const scrollAmount = 630; 
+        scrollLeftBtn.addEventListener('click', () => {
+            gallery.scrollBy({
+                left: -scrollAmount,
+                behavior: 'smooth'
+            });
+        });
+        scrollRightBtn.addEventListener('click', () => {
+            gallery.scrollBy({
+                left: scrollAmount,
+                behavior: 'smooth'
+            });
+        });
 
-const scrollAmount = 630; 
+        const audio = document.getElementById("nahla-audio");
+        const btn = document.getElementById("audio-btn");
+        btn.addEventListener("click", () => {
+          if (audio.paused) {
+            audio.play();
+            btn.textContent = "⏸"; 
+          } else {
+            audio.pause();
+            btn.textContent = "▶"; 
+          }
+        });
 
-scrollLeftBtn.addEventListener('click', () => {
-    gallery.scrollBy({
-        left: -scrollAmount,
-        behavior: 'smooth'
-    });
-});
-
-scrollRightBtn.addEventListener('click', () => {
-    gallery.scrollBy({
-        left: scrollAmount,
-        behavior: 'smooth'
-    });
-});
-
-const audio = document.getElementById("nahla-audio");
-const btn = document.getElementById("audio-btn");
-
-btn.addEventListener("click", () => {
-  if (audio.paused) {
-    audio.play();
-    btn.textContent = "⏸";  // Pause icon
-  } else {
-    audio.pause();
-    btn.textContent = "▶";  // Play icon
-  }
-});
-
-            
-
+        // --- Main Execution ---
+        updateDisplay();
+        setInterval(updateDisplay, 1000);
+        updateClocks();
+        setInterval(updateClocks, 50); 
     </script>
 </body>
 </html>
