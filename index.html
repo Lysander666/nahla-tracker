@@ -730,164 +730,77 @@ Every NCT 'second' lasts roughly 1.1 Earth seconds. Here we live by GMT. </p>
 
 
 
-    </div> <script>
-        // --- All your constants, ported to JavaScript ---
-        const MOON_NAME = "Nahla";
-        const SOLAR_DAY_LENGTH_EARTH_DAYS = 1.1;
-        // NOTE: JavaScript needs 'T' for ISO date format
-// ───────────────────────────────
-// ONE ETERNAL TRUTH FOR HOPE + GALACTIC BAND
-// ───────────────────────────────
-// Change this ONE line whenever you see the galactic band perfectly flat (image 11–12)
-// That moment = Nahla midnight = 00:00:00 NLT
-const GALACTIC_MIDNIGHT_UTC = new Date("2025-11-18T03:10:00Z");   // ← update this only
+    </div><script>
+// ─────────────────────────────── ETERNAL CONSTANTS ───────────────────────────────
+// Change ONLY these lines when you go outside and see something
 
-// How far Hope is behind galactic midnight (your current best guess)
-const HOPE_OFFSET_HOURS = -1.0;  // negative = Hope rises AFTER galactic midnight
-// Examples from your past data:
-// Nov 16–18 logs → roughly -1.0 to -1.3 hours → keep -1.0 for now
-// If one day you measure exactly 1 h 12 min behind → change to -1.2
+const GALACTIC_MIDNIGHT_UTC = new Date("2025-11-18T03:10:00Z");   // ← When band was perfectly flat (11–12) → Nahla midnight
+const HOPE_OFFSET_HOURS     = -1.0;                               // Hope rises ~1 hour AFTER galactic midnight
+const SOLAR_DAY_SECONDS     = 26.4 * 3600;                        // Keep until you measure the real length
 
-const SOLAR_DAY_SECONDS = 26.4 * 3600;  // keep this until you do the all-nighter
-        // --- All your helper functions, ported to JavaScript ---
-        
-        function format_timedelta(total_seconds) {
-            const hours = Math.floor(total_seconds / 3600);
-            const minutes = Math.floor((total_seconds % 3600) / 60);
-            const seconds = Math.floor(total_seconds % 60);
-            // padStart adds leading zeros
-            return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-        }
+const LAST_REBEKAH_RISE_UTC = new Date("2025-11-16T09:30:00Z");   // ← Change when you see Rebekah rise
 
-        function get_rebekah_status(current_time) {
-          const time_since_rise = (current_time - REBEKAH_LAST_RISE) / 1000;
-          const current_cycle_seconds = ((time_since_rise % SOLAR_DAY_LENGTH_SECONDS) + SOLAR_DAY_LENGTH_SECONDS) % SOLAR_DAY_LENGTH_SECONDS;
-          const half_rotation = SOLAR_DAY_LENGTH_SECONDS / 2;
+// ─────────────────────────────── HELPERS ───────────────────────────────
+function formatHMS(s) {
+    s = Math.floor(s);
+    const h = String(Math.floor(s/3600)).padStart(2,'0');
+    const m = String(Math.floor(s%3600/60)).padStart(2,'0');
+    const sec = String(s%60).padStart(2,'0');
+    return `${h}:${m}:${sec}`;
+}
 
-          if (current_cycle_seconds < half_rotation) {
-            const time_until_set = half_rotation - current_cycle_seconds;
-            return `<strong>Rebekah:</strong> 🪐 VISIBLE | Est. set in: <span class="time-highlight">${format_timedelta(time_until_set)}</span> (ESTIMATE)`;
-          } else {
-            const time_until_rise = SOLAR_DAY_LENGTH_SECONDS - current_cycle_seconds;
-            return `<strong>Rebekah:</strong> ─ below horizon | Est. rise in: <span class="time-highlight">${format_timedelta(time_until_rise)}</span> (ESTIMATE)`;
-  
-        }
-
-        }
-
-        function get_sky_arc_indicator(progress, is_daytime) {
-            if (is_daytime) {
-                const positions = ["🌅", "☀️", "☀️", "☀️", "☀️", "🌇"];
-                const index = Math.floor(progress * (positions.length - 1));
-                let arc = ["─", "─", "─", "─", "─", "─"];
-                arc[index] = positions[index];
-                return `<strong>Hope:</strong> [${arc.join("")}]`;
-            } else {
-                return "<strong>Hope:</strong> [────────] (below horizon)";
-            }
-        }
-
-        function get_galactic_band_indicator(current_time, is_daytime) {
-            const time_since_peak = (current_time - GALACTIC_BAND_PEAK) / 1000; // in seconds
-            const current_cycle_seconds = time_since_peak % SOLAR_DAY_LENGTH_SECONDS;
-            const hours_since_peak = current_cycle_seconds / 3600;
-
-            if (is_daytime) {
-                return "<strong>Galactic Band</strong>: 🌌 present (lower angle)";
-            }
-            if (hours_since_peak < 1.5 || hours_since_peak > 24.9) {
-                return "<strong>Galactic Band:</strong> 🌌✨ PEAK BRIGHTNESS (~70° angle, highest elevation)";
-            } else if (hours_since_peak < 4.0 || hours_since_peak > 22.4) {
-                return "<strong>Galactic Band:</strong> 🌌 BRIGHT (prominent, high angle)";
-            } else if (10.0 < hours_since_peak && hours_since_peak < 16.4) {
-                return "<strong>Galactic Band:</strong> 🌌 visible (moderate, lower angle/near horizon)";
-            } else {
-                return "<strong>Galactic Band:</strong> 🌌 visible (rising/setting through rotation)";
-            }
-        }
-
-        // --- The main update loop ---
-        function updateDisplay() {
-            const current_time = new Date();
-            const time_since_sunrise = (current_time - LAST_SUNRISE) / 1000; // in seconds
-            const current_cycle_seconds = time_since_sunrise % SOLAR_DAY_LENGTH_SECONDS;
-            const half_solar_day_seconds = SOLAR_DAY_LENGTH_SECONDS / 2;
-            const moon_time_progress = current_cycle_seconds / SOLAR_DAY_LENGTH_SECONDS;
-            
-            const hours_into_moon_day = moon_time_progress * SOLAR_DAY_LENGTH_EARTH_DAYS * 24;
-
-            let data = {};
-
-            if (current_cycle_seconds < half_solar_day_seconds) {
-                // Daytime
-                const day_progress = current_cycle_seconds / half_solar_day_seconds;
-                const time_until_sunset = half_solar_day_seconds - current_cycle_seconds;
-                data.status = `☀️  DAY on ${MOON_NAME} | Sunset in: <span class="time-highlight">${format_timedelta(time_until_sunset)}</span> | <span class="time-highlight">${hours_into_moon_day.toFixed(2)}h</span> into solar day`;
-                data.hope = get_sky_arc_indicator(day_progress, true);
-                data.band = get_galactic_band_indicator(current_time, true);
-            } else {
-                // Nighttime
-                const night_progress = (current_cycle_seconds - half_solar_day_seconds) / half_solar_day_seconds;
-                const time_until_sunrise = SOLAR_DAY_LENGTH_SECONDS - current_cycle_seconds;
-                data.status = `🌙 NIGHT on ${MOON_NAME} | Sunrise in: <span class="time-highlight">${format_timedelta(time_until_sunrise)}</span> | <span class="time-highlight">${hours_into_moon_day.toFixed(2)}h</span> into solar day`;
-                data.hope = get_sky_arc_indicator(night_progress, false);
-                data.band = get_galactic_band_indicator(current_time, false);
-            }
-setInterval(() => {
-    document.getElementById('moonclock').textContent = get_moon_clock();
-    document.getElementById('moonclock-coordinated').textContent = get_nahla_coordinated_time();
-}, 50); // update both clocks ~20 times/sec
-
-
-       
-        data.moonclock = get_moon_clock(current_time);
-         document.getElementById("moonclock").innerText = data.moonclock;
-         document.getElementById("moonclock-coordinated").innerText = get_nahla_coordinated_time(current_time);
-
-
-
-            data.rebekah = get_rebekah_status(current_time);
-
-            // Update the HTML
-            document.getElementById("status").innerHTML = data.status;
-            document.getElementById("hope").innerHTML = data.hope;
-            document.getElementById("band").innerHTML = data.band;
-            document.getElementById("rebekah").innerHTML = data.rebekah;
-        }
-
-
-function updateClocks() {
+// ─────────────────────────────── MAIN UPDATE ───────────────────────────────
+function updateEverything() {
     const now = Date.now();
+
+    // 1. Galactic band clock (master clock)
     let secs = (now - GALACTIC_MIDNIGHT_UTC) / 1000;
     secs = (secs % SOLAR_DAY_SECONDS + SOLAR_DAY_SECONDS) % SOLAR_DAY_SECONDS;
 
-    // Nahla Local Time – 00:00:00 = galactic band at 0° (your PDF rule)
+    // Nahla Local Time — 00:00:00 = galactic band flat (your PDF rule)
     const h = String(Math.floor(secs / 3600)).padStart(2,'0');
     const m = String(Math.floor(secs % 3600 / 60)).padStart(2,'0');
     const s = String(Math.floor(secs % 60)).padStart(2,'0');
     const cs = String(Math.floor(Date.now() % 1000 / 10)).padStart(2,'0');
     document.getElementById("moonclock").textContent = `Nahla Local Time: ${h}:${m}:${s}.${cs}`;
 
-    // Day/Night from Hope (using the fixed 1-hour offset)
+    // Coordinated 24 h clock (keeps your old scaling/offset)
+    const scale = 86400 / SOLAR_DAY_SECONDS;
+    const coord = (secs * scale + 21600) % 86400;
+    const ch = String(Math.floor(coord/3600)).padStart(2,'0');
+    const cm = String(Math.floor(coord%3600/60)).padStart(2,'0');
+    const cs2 = String(Math.floor(coord%60)).padStart(2,'0');
+    document.getElementById("moonclock-coordinated").textContent = `Nahla Coordinated: ${ch}:${cm}:${cs2}`;
+
+    // 2. Day/Night using Hope = 1 hour behind galactic midnight
     const hopeSecs = (secs + HOPE_OFFSET_HOURS * 3600 + SOLAR_DAY_SECONDS) % SOLAR_DAY_SECONDS;
     const isDay = hopeSecs < SOLAR_DAY_SECONDS / 2;
     const until = isDay ? SOLAR_DAY_SECONDS/2 - hopeSecs : SOLAR_DAY_SECONDS - hopeSecs;
 
     document.getElementById("status").innerHTML = isDay
-        ? `☀️ DAY | Sunset in <span class="time-highlight">${formatHMS(until)}</span>`
-        : `🌙 NIGHT | Sunrise in <span class="time-highlight">${formatHMS(until)}</span>`;
+        ? `☀️ DAY on Nahla | Sunset in <span class="time-highlight">${formatHMS(until)}</span>`
+        : `🌙 NIGHT on Nahla | Sunrise in <span class="time-highlight">${formatHMS(until)}</span>`;
 
-    // Galactic phase 1–12
+    document.getElementById("hope").innerHTML = `<strong>Hope:</strong> ${isDay ? "☀️ risen" : "below horizon"}`;
+
+    // 3. Galactic band phase 1–12
     const phase = Math.floor(secs / SOLAR_DAY_SECONDS * 12) % 12 || 12;
     document.getElementById("band").innerHTML = `<strong>Galactic Band:</strong> Phase ${phase}/12 ${phase >= 10 ? "(deep night)" : ""}`;
+
+    // 4. Rebekah (independent clock)
+    const rebekahTotal = 7.5*3600 + 16*3600; // ~24 h cycle (adjust later if needed)
+    let rsecs = (now - LAST_REBEKAH_RISE_UTC) / 1000 % rebekahTotal;
+    if (rsecs < 0) rsecs += rebekahTotal;
+    const visible = rsecs < 7.5*3600;
+    const remaining = visible ? 7.5*3600 - rsecs : rebekahTotal - rsecs;
+    document.getElementById("rebekah").innerHTML = visible
+        ? `<strong>Rebekah:</strong> 🪐 VISIBLE | Set in <span class="time-highlight">${formatHMS(remaining)}</span>`
+        : `<strong>Rebekah:</strong> — below horizon | Rise in <span class="time-highlight">${formatHMS(remaining)}</span>`;
 }
 
-
-
-
-        // Run the update function once immediately, then every second
-        updateDisplay();
-        setInterval(updateDisplay, 1000);
+            // ─────────────────────────────── START ───────────────────────────────
+updateEverything();
+setInterval(updateEverything, 1000);
 
         // --- Gallery Lightbox Functions ---
         function openLightbox(imageSrc) {
