@@ -726,7 +726,7 @@ Every NCT 'second' lasts roughly 1.1 Earth seconds. Here we live by GMT. </p>
         <small>Nahla Tracker is a personal project of Lysander666.</small>
         
         <p style="margin-top: 10px;">
-            <a href="sky.html" target="_blank" style="color: #61dafb; text-decoration: none;">[View Sky Rotation Simulator]</a>
+            <a href="skymechanics.html" target="_blank" style="color: #61dafb; text-decoration: none;">[View Sky Rotation Simulator]</a>
         </p>
 
     </div>
@@ -758,12 +758,13 @@ Every NCT 'second' lasts roughly 1.1 Earth seconds. Here we live by GMT. </p>
             { timestamp: "2025-11-09T20:00:00Z", event: "sunrise", weight: "precise" },
             { timestamp: "2025-11-16T23:25:00Z", event: "sunset", weight: "precise" },
             // YOUR MANUAL CORRECTION (Hope):
-            { timestamp: "2025-11-17T11:00:00Z", event: "hope_arc_progress", percent: 0.5, weight: "estimate" },
+            { timestamp: "2025-11-18T11:00:00Z", event: "hope_arc_progress", percent: 0.5, weight: "estimate" },
 
             // --- Rebekah Events ---
             { timestamp: "2025-11-09T21:30:00Z", event: "rebekah_rise", weight: "precise" },
             { timestamp: "2025-11-16T10:30:00Z", event: "rebekah_rise", weight: "precise" },
             { timestamp: "2025-11-16T21:00:00Z", event: "rebekah_set", weight: "precise" },
+            { timestamp: "2025-11-18T07:00:00Z", event: "rebekah_rise", weight: "estimate" },
             // !!! UNCOMMENT AND EDIT THIS TO FIX REBEKAH:
             // { timestamp: "2025-11-17T11:05:00Z", event: "rebekah_arc_progress", percent: 0.1, weight: "estimate" },
             // (percent 0.0 = just rising, 0.5 = peak, 1.0 = just setting)
@@ -771,6 +772,7 @@ Every NCT 'second' lasts roughly 1.1 Earth seconds. Here we live by GMT. </p>
             // --- Galactic Band Events ---
             { timestamp: "2025-11-15T15:00:00Z", event: "galactic_270", weight: "precise" },
             { timestamp: "2025-11-16T16:00:00Z", event: "galactic_270", weight: "precise" },
+            { timestamp: "2025-11-18T11:05:00Z", event: "galactic_angle", degrees: 90, weight: "estimate" } 
             // MASTER LINK TEST:
             // { timestamp: "2025-11-17T11:05:00Z", event: "galactic_angle", degrees: 239, weight: "estimate" } 
         ];
