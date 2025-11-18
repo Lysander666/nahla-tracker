@@ -735,13 +735,20 @@ Every NCT 'second' lasts roughly 1.1 Earth seconds. Here we live by GMT. </p>
         const MOON_NAME = "Nahla";
         const SOLAR_DAY_LENGTH_EARTH_DAYS = 1.1;
         // NOTE: JavaScript needs 'T' for ISO date format
-        const REBEKAH_LAST_RISE = new Date("2025-11-18T07:00:00"); 
-        const GALACTIC_BAND_PEAK = new Date("2025-11-18T13:00:00");
-        const LAST_SUNRISE = new Date("2025-11-18T09:00:00");
-        
-        const SECONDS_IN_EARTH_DAY = 24 * 60 * 60;
-        const SOLAR_DAY_LENGTH_SECONDS = SOLAR_DAY_LENGTH_EARTH_DAYS * SECONDS_IN_EARTH_DAY;
+// ───────────────────────────────
+// ONE ETERNAL TRUTH FOR HOPE + GALACTIC BAND
+// ───────────────────────────────
+// Change this ONE line whenever you see the galactic band perfectly flat (image 11–12)
+// That moment = Nahla midnight = 00:00:00 NLT
+const GALACTIC_MIDNIGHT_UTC = new Date("2025-11-18T03:10:00Z");   // ← update this only
 
+// How far Hope is behind galactic midnight (your current best guess)
+const HOPE_OFFSET_HOURS = -1.0;  // negative = Hope rises AFTER galactic midnight
+// Examples from your past data:
+// Nov 16–18 logs → roughly -1.0 to -1.3 hours → keep -1.0 for now
+// If one day you measure exactly 1 h 12 min behind → change to -1.2
+
+const SOLAR_DAY_SECONDS = 26.4 * 3600;  // keep this until you do the all-nighter
         // --- All your helper functions, ported to JavaScript ---
         
         function format_timedelta(total_seconds) {
@@ -849,49 +856,31 @@ setInterval(() => {
         }
 
 
-function get_moon_clock() {
-    const now_ms = Date.now(); // absolute timestamp (ms since epoch)
-    const time_since_sunrise = (now_ms - LAST_SUNRISE) / 1000; 
-    const current_cycle_seconds = time_since_sunrise % SOLAR_DAY_LENGTH_SECONDS;
+function updateClocks() {
+    const now = Date.now();
+    let secs = (now - GALACTIC_MIDNIGHT_UTC) / 1000;
+    secs = (secs % SOLAR_DAY_SECONDS + SOLAR_DAY_SECONDS) % SOLAR_DAY_SECONDS;
 
-    const hours = Math.floor(current_cycle_seconds / 3600);
-    const minutes = Math.floor((current_cycle_seconds % 3600) / 60);
-    const seconds = Math.floor(current_cycle_seconds % 60);
+    // Nahla Local Time – 00:00:00 = galactic band at 0° (your PDF rule)
+    const h = String(Math.floor(secs / 3600)).padStart(2,'0');
+    const m = String(Math.floor(secs % 3600 / 60)).padStart(2,'0');
+    const s = String(Math.floor(secs % 60)).padStart(2,'0');
+    const cs = String(Math.floor(Date.now() % 1000 / 10)).padStart(2,'0');
+    document.getElementById("moonclock").textContent = `Nahla Local Time: ${h}:${m}:${s}.${cs}`;
 
-    // High-resolution milliseconds based on performance.now()
-        const ms = Math.floor((Date.now() % 1000) / 10);
+    // Day/Night from Hope (using the fixed 1-hour offset)
+    const hopeSecs = (secs + HOPE_OFFSET_HOURS * 3600 + SOLAR_DAY_SECONDS) % SOLAR_DAY_SECONDS;
+    const isDay = hopeSecs < SOLAR_DAY_SECONDS / 2;
+    const until = isDay ? SOLAR_DAY_SECONDS/2 - hopeSecs : SOLAR_DAY_SECONDS - hopeSecs;
 
-        return `Nahla Local Time: ${String(hours).padStart(2, '0')}:` +
-       `${String(minutes).padStart(2, '0')}:` +
-       `${String(seconds).padStart(2, '0')}.` +
-       `${String(ms).padStart(2, '0')} (out of 26:24:00)`;
+    document.getElementById("status").innerHTML = isDay
+        ? `☀️ DAY | Sunset in <span class="time-highlight">${formatHMS(until)}</span>`
+        : `🌙 NIGHT | Sunrise in <span class="time-highlight">${formatHMS(until)}</span>`;
 
-
+    // Galactic phase 1–12
+    const phase = Math.floor(secs / SOLAR_DAY_SECONDS * 12) % 12 || 12;
+    document.getElementById("band").innerHTML = `<strong>Galactic Band:</strong> Phase ${phase}/12 ${phase >= 10 ? "(deep night)" : ""}`;
 }
-
-
-function get_nahla_coordinated_time() {
-    const now_ms = Date.now();
-    const time_since_sunrise = (now_ms - LAST_SUNRISE) / 1000;
-    const current_cycle_seconds = time_since_sunrise % SOLAR_DAY_LENGTH_SECONDS;
-
-        const SCALE = 24 / 26.4;                  // exact scaling
-        const scaled_seconds = current_cycle_seconds * SCALE;
-
-    const hours   = Math.floor(scaled_seconds / 3600);
-    const minutes = Math.floor((scaled_seconds % 3600) / 60);
-    const seconds = Math.floor(scaled_seconds % 60);
-
-    // fractional part for smooth ms
-    const fractional = scaled_seconds % 1;
-    const ms = Math.floor(fractional * 100); // 2 decimal digits
-
-    return `Nahla Coordinated Time: ${String(hours).padStart(2, '0')}:` +
-           `${String(minutes).padStart(2, '0')}:` +
-           `${String(seconds).padStart(2, '0')}.` +
-           `${String(ms).padStart(2, '0')} (out of 24:00:00)`;
-}
-
 
 
 
