@@ -482,7 +482,7 @@
 </head>
 <body>
     <div class="container">
-        <h2>Nahla Day/Night Cycle Tracker - LIVE - v0.57 (Unified Weighting)</h2>
+        <h2>Nahla Day/Night Cycle Tracker - LIVE - v0.61 (Corrected Phases)</h2>
         <div id="tracker">
             <div id="status">Loading...</div>
             <div id="hope">...</div>
@@ -724,6 +724,10 @@ Every NCT 'second' lasts roughly 1.1 Earth seconds. Here we live by GMT. </p>
             Day–night cycles beyond Earth vary according to the orbital and rotational dynamics of their respective worlds, rather than adhering to Earth’s 24-hour rhythm.
             <p></p>
         <small>Nahla Tracker is a personal project of Lysander666.</small>
+        
+        <p style="margin-top: 10px;">
+            <a href="sky.html" target="_blank" style="color: #61dafb; text-decoration: none;">[View Sky Rotation Simulator]</a>
+        </p>
 
     </div>
 </div>
@@ -753,25 +757,22 @@ Every NCT 'second' lasts roughly 1.1 Earth seconds. Here we live by GMT. </p>
             // --- Sun (Hope) Events ---
             { timestamp: "2025-11-09T20:00:00Z", event: "sunrise", weight: "precise" },
             { timestamp: "2025-11-16T23:25:00Z", event: "sunset", weight: "precise" },
-            { timestamp: "2025-11-18T11:30:00Z", event: "hope_arc_progress", percent: 0.3, weight: "estimate" },
-            // Example of manual correction (uncomment to test):
-            // { timestamp: "2025-11-17T12:00:00Z", event: "hope_arc_progress", percent: 0.5, weight: "estimate" }, 
+            // YOUR MANUAL CORRECTION (Hope):
+            { timestamp: "2025-11-17T11:00:00Z", event: "hope_arc_progress", percent: 0.5, weight: "estimate" },
 
             // --- Rebekah Events ---
-            { timestamp: "2025-11-09T21:30:00Z", event: "rebekah_rise", weight: "estimate" },
+            { timestamp: "2025-11-09T21:30:00Z", event: "rebekah_rise", weight: "precise" },
             { timestamp: "2025-11-16T10:30:00Z", event: "rebekah_rise", weight: "precise" },
             { timestamp: "2025-11-16T21:00:00Z", event: "rebekah_set", weight: "precise" },
-            { timestamp: "2025-11-18T09:00:00Z", event: "rebekah_rise", weight: "estimate" },
-            // Example of manual correction:
-            // { timestamp: "2025-11-17T14:00:00Z", event: "rebekah_arc_progress", percent: 0.2, weight: "estimate" },
+            // !!! UNCOMMENT AND EDIT THIS TO FIX REBEKAH:
+            // { timestamp: "2025-11-17T11:05:00Z", event: "rebekah_arc_progress", percent: 0.1, weight: "estimate" },
+            // (percent 0.0 = just rising, 0.5 = peak, 1.0 = just setting)
 
             // --- Galactic Band Events ---
-            // User's "GALACTIC_VERTICAL_OBS" are mapped to "galactic_270" (or "galactic_angle" with degrees: 270)
             { timestamp: "2025-11-15T15:00:00Z", event: "galactic_270", weight: "precise" },
-            { timestamp: "2025-11-16T16:00:00Z", event: "galactic_270", weight: "precise" },
-             { timestamp: "2025-11-18T11:30:00Z", event: "galactic_angle", degrees: 90, weight: "precise" },
-            // Example of arbitrary angle correction:
-            // { timestamp: "2025-11-17T10:00:00Z", event: "galactic_angle", degrees: 45, weight: "estimate" } 
+            { timestamp: "2025-11-16T16:00:00Z", event: "galactic_270", weight: "precise" }
+            // !!! UNCOMMENT AND EDIT THIS TO FIX GALACTIC BAND:
+            // { timestamp: "2025-11-17T11:05:00Z", event: "galactic_angle", degrees: 45, weight: "estimate" } 
         ];
 
         // --- 2. FALLBACK CYCLE ESTIMATES (in Earth Days) ---
@@ -1051,12 +1052,12 @@ Every NCT 'second' lasts roughly 1.1 Earth seconds. Here we live by GMT. </p>
                 const timeIntoPhase = (timeSince % REBEKAH_VISIBLE_DURATION + REBEKAH_VISIBLE_DURATION) % REBEKAH_VISIBLE_DURATION;
                 timeRemaining = REBEKAH_VISIBLE_DURATION - timeIntoPhase;
                 isVisible = true;
-                //statusText = "(Auto-Calc)";
+                statusText = "(Auto-Calc)";
             } else { // set
                 const timeIntoPhase = (timeSince % REBEKAH_HORIZON_DURATION + REBEKAH_HORIZON_DURATION) % REBEKAH_HORIZON_DURATION;
                 timeRemaining = REBEKAH_HORIZON_DURATION - timeIntoPhase;
                 isVisible = false;
-                //statusText = "(Auto-Calc)";
+                statusText = "(Auto-Calc)";
             }
 
             if (isVisible) {
@@ -1100,20 +1101,35 @@ Every NCT 'second' lasts roughly 1.1 Earth seconds. Here we live by GMT. </p>
             const degreesMoved = progress * 360;
             const currentDegrees = (anchorDegrees + degreesMoved) % 360;
             
+            // --- UPDATED PHASE LOGIC ---
+            // Phase 1 (0-90): Rising
+            // Phase 2 (90-180): Ascending
+            // Phase 3 (180-270): Descending
+            // Phase 4 (270-360): Setting
+            
             let phase;
-            if (currentDegrees >= 270 && currentDegrees < 360) {
-                phase = "Phase 1: Setting";
-            } else if (currentDegrees >= 0 && currentDegrees < 90) {
-                phase = "Phase 2: Nadir/Returning";
+            if (currentDegrees >= 0 && currentDegrees < 90) {
+                phase = "Phase 1: Rising (Tilting Up)";
             } else if (currentDegrees >= 90 && currentDegrees < 180) {
-                phase = "Phase 3: Rising";
-            } else { // degrees >= 180 && degrees < 270
-                phase = "Phase 4: Zenith/Peak";
+                phase = "Phase 2: Ascending to Zenith";
+            } else if (currentDegrees >= 180 && currentDegrees < 270) {
+                phase = "Phase 3: Descending (Flat to Vert)";
+            } else { // 270-360
+                phase = "Phase 4: Setting (Vert to Horizon)";
             }
+
+            // Elevation Text
+            let elevationText = "";
+            if (currentDegrees >= 135 && currentDegrees < 225) elevationText = "HIGH (Zenith/Peak)"; // Peak centered around 180? Or 225?
+            // User defined: 180 = Flat (Zenith). So Peak is 180.
+            if (currentDegrees >= 150 && currentDegrees < 210) elevationText = "HIGH (Zenith)";
+            else if (currentDegrees >= 60 && currentDegrees < 150) elevationText = "MID (Rising)";
+            else if (currentDegrees >= 210 && currentDegrees < 300) elevationText = "MID (Setting)";
+            else elevationText = "LOW (Horizon)";
 
             const visibility = is_daytime ? "(daylight)" : "(visible)";
 
-            return `<strong>Galactic Band:</strong> 🌌 ${phase} (${currentDegrees.toFixed(1)}°) ${visibility}`;
+            return `<strong>Galactic Band:</strong> 🌌 ${phase} | ${elevationText} | (${currentDegrees.toFixed(1)}°) ${visibility}`;
         }
 
         // --- The main update loop ---
@@ -1140,10 +1156,6 @@ Every NCT 'second' lasts roughly 1.1 Earth seconds. Here we live by GMT. </p>
                 isDaytime = false;
                 timeUntilChange = SOLAR_DAY_LENGTH_SECONDS - current_cycle_seconds;
                 // Night progress logic
-                // 0% at sunset (half day seconds), 100% at sunrise (full day seconds)
-                // progress = (current - half) / half
-                // BUT sky_arc wants 'inverted' progress for night? (1.0 -> 0.0)?
-                // Previous logic: 1.0 - (timeUntilChange / HALF_SOLAR_DAY_SECONDS)
                 dayProgress = 1.0 - (timeUntilChange / HALF_SOLAR_DAY_SECONDS); 
             }
 
@@ -1155,7 +1167,7 @@ Every NCT 'second' lasts roughly 1.1 Earth seconds. Here we live by GMT. </p>
                 data.band = get_galactic_band_indicator(current_time, true);
             } else {
                 data.status = `🌙 NIGHT on ${MOON_NAME} | Sunrise in: <span class="time-highlight">${format_timedelta(timeUntilChange)}</span> | <span class="time-highlight">${hours_into_moon_day.toFixed(2)}h</span> into solar day ${sourceText}`;
-                data.hope = get_sky_arc_indicator(dayProgress, false);
+                data.hope = get_sky_arc_indicator(nightProgress, false);
                 data.band = get_galactic_band_indicator(current_time, false);
             }
 
@@ -1211,7 +1223,7 @@ Every NCT 'second' lasts roughly 1.1 Earth seconds. Here we live by GMT. </p>
             const hours   = Math.floor(scaled_seconds / 3600);
             const minutes = Math.floor((scaled_seconds % 3600) / 60);
             const seconds = Math.floor(scaled_seconds % 60);
-            const ms = Math.floor((Date.now() % 1000) / 10); 
+            const ms = Math.floor((scaled_seconds % 1) * 100); 
 
             return `Nahla Coordinated Time: ${String(hours).padStart(2, '0')}:` +
                    `${String(minutes).padStart(2, '0')}:` +
