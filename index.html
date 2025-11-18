@@ -482,7 +482,7 @@
 </head>
 <body>
     <div class="container">
-        <h2>Nahla Day/Night Cycle Tracker - LIVE - v0.56 (Confidence Weighting)</h2>
+        <h2>Nahla Day/Night Cycle Tracker - LIVE - v0.57 (Unified Weighting)</h2>
         <div id="tracker">
             <div id="status">Loading...</div>
             <div id="hope">...</div>
@@ -753,14 +753,12 @@ Every NCT 'second' lasts roughly 1.1 Earth seconds. Here we live by GMT. </p>
             // --- Sun (Hope) Events ---
             { timestamp: "2025-11-09T20:00:00Z", event: "sunrise", weight: "precise" },
             { timestamp: "2025-11-16T23:25:00Z", event: "sunset", weight: "precise" },
+            { timestamp: "2025-11-18T11:30:00Z", event: "hope_arc_progress", percent: 0.3, weight: "estimate" },
             // Example of manual correction (uncomment to test):
             // { timestamp: "2025-11-17T12:00:00Z", event: "hope_arc_progress", percent: 0.5, weight: "estimate" }, 
-            
-            // ** YOUR NEW OBSERVATION **
-            { timestamp: "2025-11-18T11:00:00Z", event: "hope_arc_progress", percent: 0.3, weight: "estimate" },
 
             // --- Rebekah Events ---
-            { timestamp: "2025-11-09T21:30:00Z", event: "rebekah_rise", weight: "estimate" },
+            { timestamp: "2025-11-09T21:30:00Z", event: "rebekah_rise", weight: "precise" },
             { timestamp: "2025-11-16T10:30:00Z", event: "rebekah_rise", weight: "precise" },
             { timestamp: "2025-11-16T21:00:00Z", event: "rebekah_set", weight: "precise" },
             { timestamp: "2025-11-18T09:00:00Z", event: "rebekah_rise", weight: "estimate" },
@@ -771,7 +769,7 @@ Every NCT 'second' lasts roughly 1.1 Earth seconds. Here we live by GMT. </p>
             // User's "GALACTIC_VERTICAL_OBS" are mapped to "galactic_270" (or "galactic_angle" with degrees: 270)
             { timestamp: "2025-11-15T15:00:00Z", event: "galactic_270", weight: "precise" },
             { timestamp: "2025-11-16T16:00:00Z", event: "galactic_270", weight: "precise" },
-            { timestamp: "2025-11-18T11:30:00Z", event: "galactic_angle", degrees: 90, weight: "precise" },
+             { timestamp: "2025-11-18T11:30:00Z", event: "galactic_angle", degrees: 90, weight: "precise" },
             // Example of arbitrary angle correction:
             // { timestamp: "2025-11-17T10:00:00Z", event: "galactic_angle", degrees: 45, weight: "estimate" } 
         ];
@@ -937,6 +935,65 @@ Every NCT 'second' lasts roughly 1.1 Earth seconds. Here we live by GMT. </p>
             return relevant.length > 0 ? relevant[0] : null;
         }
 
+        // --- NEW CENTRALIZED TIME CALCULATOR ---
+        function getSolarCycleStatus(current_time) {
+            // Determine the best anchor to use for the CURRENT TIME position
+            // Priorities: Latest timestamp wins, regardless of type
+            const latestArcObs = getLatestObservationFromList(['hope_arc_progress']);
+            const latestSunrise = getMostRecentObservation('sunrise');
+            const latestSunset = getMostRecentObservation('sunset');
+
+            const obsCandidates = [];
+            if (latestArcObs) obsCandidates.push({ t: new Date(latestArcObs.timestamp).getTime(), type: 'arc', obj: latestArcObs });
+            if (latestSunrise) obsCandidates.push({ t: new Date(latestSunrise.timestamp).getTime(), type: 'sunrise', obj: latestSunrise });
+            if (latestSunset) obsCandidates.push({ t: new Date(latestSunset.timestamp).getTime(), type: 'sunset', obj: latestSunset });
+            
+            obsCandidates.sort((a, b) => b.t - a.t); // Sort descending (newest first)
+
+            // Default fallback if no data
+            if (obsCandidates.length === 0) {
+                if (!LAST_SUNRISE_ANCHOR) return { cycleSeconds: 0, source: "None" };
+                // Fallback to the "Cycle Calc" anchor
+                const timeSince = (current_time.getTime() - LAST_SUNRISE_ANCHOR.getTime()) / 1000;
+                return { 
+                    cycleSeconds: (timeSince % SOLAR_DAY_LENGTH_SECONDS + SOLAR_DAY_LENGTH_SECONDS) % SOLAR_DAY_LENGTH_SECONDS,
+                    source: "Fallback"
+                };
+            }
+
+            const latest = obsCandidates[0];
+            const timeSince = (current_time.getTime() - latest.t) / 1000;
+            let currentCycleSeconds = 0;
+            let source = "";
+
+            if (latest.type === 'arc') {
+                // Manual correction (Percent of DAYLIGHT phase)
+                const percentDone = latest.obj.percent; 
+                const dayDuration = HALF_SOLAR_DAY_SECONDS; 
+                const secondsDone = percentDone * dayDuration;
+                
+                // Current time is: (Time spent in previous phases if any) + (Seconds done at mark) + (Time since mark)
+                // Arc progress is relative to Sunrise (0.0). So previous phases = 0.
+                const totalSecondsSinceSunrise = secondsDone + timeSince;
+                currentCycleSeconds = (totalSecondsSinceSunrise % SOLAR_DAY_LENGTH_SECONDS + SOLAR_DAY_LENGTH_SECONDS) % SOLAR_DAY_LENGTH_SECONDS;
+                source = "Manual Arc";
+
+            } else if (latest.type === 'sunrise') {
+                // Standard Sunrise
+                currentCycleSeconds = (timeSince % SOLAR_DAY_LENGTH_SECONDS + SOLAR_DAY_LENGTH_SECONDS) % SOLAR_DAY_LENGTH_SECONDS;
+                source = "Sunrise Obs";
+            } else { // sunset
+                 // Standard Sunset (Starts at HALF_SOLAR_DAY_SECONDS)
+                 const secondsSinceSunset = timeSince;
+                 const totalSecondsSinceSunrise = HALF_SOLAR_DAY_SECONDS + secondsSinceSunset;
+                 currentCycleSeconds = (totalSecondsSinceSunrise % SOLAR_DAY_LENGTH_SECONDS + SOLAR_DAY_LENGTH_SECONDS) % SOLAR_DAY_LENGTH_SECONDS;
+                 source = "Sunset Obs";
+            }
+
+            return { cycleSeconds: currentCycleSeconds, source: source };
+        }
+
+
         // --- All your helper functions, ported to JavaScript ---
         
         function format_timedelta(total_seconds) {
@@ -950,16 +1007,11 @@ Every NCT 'second' lasts roughly 1.1 Earth seconds. Here we live by GMT. </p>
         function get_rebekah_status(current_time) {
             // 1. Check for arbitrary arc progress correction FIRST
             const latestArcObs = getLatestObservationFromList(['rebekah_arc_progress']);
-            // 2. Check for standard Rise/Set events (PRECISE ONLY for display preference? No, take estimates too if newer)
-            // We use getLatestObservationFromList logic (all weights) here implicitly if we just query list
+            // 2. Check for standard Rise/Set events
             const latestRise = getMostRecentObservation('rebekah_rise');
             const latestSet = getMostRecentObservation('rebekah_set');
             
             // Determine which observation is actually the MOST recent
-            let anchorType = 'none';
-            let anchorTime = 0;
-            let anchorVal = 0; // could be percent, or just event type
-            
             const obsCandidates = [];
             if (latestArcObs) obsCandidates.push({ t: new Date(latestArcObs.timestamp).getTime(), type: 'arc', obj: latestArcObs });
             if (latestRise) obsCandidates.push({ t: new Date(latestRise.timestamp).getTime(), type: 'rise', obj: latestRise });
@@ -978,9 +1030,6 @@ Every NCT 'second' lasts roughly 1.1 Earth seconds. Here we live by GMT. </p>
 
             if (latest.type === 'arc') {
                 // Arbitrary correction logic!
-                // We assume the user input a percent (0.0 - 1.0) of the VISIBLE phase.
-                // If they input > 1.0 (e.g. 1.1), maybe they mean it's set? 
-                // Let's assume "arc_progress" implies visibility.
                 const percentDone = latest.obj.percent;
                 const secondsDone = percentDone * REBEKAH_VISIBLE_DURATION;
                 const totalSecondsDone = secondsDone + timeSince;
@@ -999,13 +1048,11 @@ Every NCT 'second' lasts roughly 1.1 Earth seconds. Here we live by GMT. </p>
                 }
 
             } else if (latest.type === 'rise') {
-                // Standard Rise logic
                 const timeIntoPhase = (timeSince % REBEKAH_VISIBLE_DURATION + REBEKAH_VISIBLE_DURATION) % REBEKAH_VISIBLE_DURATION;
                 timeRemaining = REBEKAH_VISIBLE_DURATION - timeIntoPhase;
                 isVisible = true;
                 //statusText = "(Auto-Calc)";
             } else { // set
-                // Standard Set logic
                 const timeIntoPhase = (timeSince % REBEKAH_HORIZON_DURATION + REBEKAH_HORIZON_DURATION) % REBEKAH_HORIZON_DURATION;
                 timeRemaining = REBEKAH_HORIZON_DURATION - timeIntoPhase;
                 isVisible = false;
@@ -1073,100 +1120,42 @@ Every NCT 'second' lasts roughly 1.1 Earth seconds. Here we live by GMT. </p>
         function updateDisplay() {
             const current_time = new Date();
             
-            // --- Clock-related calculations (Hope/Sun) ---
-            // Similar logic: check for manual arc correction vs standard sunrise/set
-            const latestArcObs = getLatestObservationFromList(['hope_arc_progress']);
-            const latestSunrise = getMostRecentObservation('sunrise');
-            const latestSunset = getMostRecentObservation('sunset');
+            // Use the new centralized status calculator
+            const solarStatus = getSolarCycleStatus(current_time);
+            const current_cycle_seconds = solarStatus.cycleSeconds;
+            const hours_into_moon_day = (current_cycle_seconds / 3600);
+            const sourceText = solarStatus.source ? `(${solarStatus.source})` : "";
 
-             // Determine best anchor for Hope
-            let anchorType = 'none';
-            const obsCandidates = [];
-            if (latestArcObs) obsCandidates.push({ t: new Date(latestArcObs.timestamp).getTime(), type: 'arc', obj: latestArcObs });
-            if (latestSunrise) obsCandidates.push({ t: new Date(latestSunrise.timestamp).getTime(), type: 'sunrise', obj: latestSunrise });
-            if (latestSunset) obsCandidates.push({ t: new Date(latestSunset.timestamp).getTime(), type: 'sunset', obj: latestSunset });
-            
-            obsCandidates.sort((a, b) => b.t - a.t);
-
-            let isDaytime = true;
-            let dayProgress = 0; // 0.0 - 1.0
+            let isDaytime = false;
+            let dayProgress = 0;
             let timeUntilChange = 0;
-            let statusText = "";
-            
-            // Clock display calculation (still needs strict anchor, falling back to sunrise)
-            if (!LAST_SUNRISE_ANCHOR) {
-                 document.getElementById("status").innerHTML = "ERROR: No Sunrise Data";
-                 return;
-            }
-            const time_since_clock_anchor = (current_time - LAST_SUNRISE_ANCHOR) / 1000; 
-            const current_cycle_seconds = (time_since_clock_anchor % SOLAR_DAY_LENGTH_SECONDS + SOLAR_DAY_LENGTH_SECONDS) % SOLAR_DAY_LENGTH_SECONDS;
-            const hours_into_moon_day = (current_cycle_seconds / SOLAR_DAY_LENGTH_SECONDS) * (SOLAR_DAY_LENGTH_SECONDS / 3600);
 
-            if (obsCandidates.length > 0) {
-                const latest = obsCandidates[0];
-                const timeSince = (current_time.getTime() - latest.t) / 1000;
-                
-                if (latest.type === 'arc') {
-                    // Manual correction
-                    const percentDone = latest.obj.percent; // 0.0 - 1.0 of DAYLIGHT
-                    // We assume manual arc correction implies DAYTIME unless user specifies otherwise? 
-                    // Actually, usually arc progress implies sun is visible.
-                    const dayDuration = HALF_SOLAR_DAY_SECONDS; 
-                    const secondsDone = percentDone * dayDuration;
-                    const totalSeconds = secondsDone + timeSince;
-                    
-                    if (totalSeconds < dayDuration) {
-                        isDaytime = true;
-                        timeUntilChange = dayDuration - totalSeconds;
-                        dayProgress = totalSeconds / dayDuration;
-                        statusText = "(Manual Arc)";
-                    } else {
-                        isDaytime = false;
-                        const nightTime = totalSeconds - dayDuration;
-                        timeUntilChange = dayDuration - (nightTime % dayDuration); // assuming night = day length
-                        dayProgress = 0; // it's night
-                        statusText = "(Manual Arc -> Night)";
-                    }
-
-                } else if (latest.type === 'sunrise') {
-                    const cyclePos = timeSince % SOLAR_DAY_LENGTH_SECONDS;
-                    if (cyclePos < HALF_SOLAR_DAY_SECONDS) {
-                        isDaytime = true;
-                        timeUntilChange = HALF_SOLAR_DAY_SECONDS - cyclePos;
-                        dayProgress = cyclePos / HALF_SOLAR_DAY_SECONDS;
-                    } else {
-                        isDaytime = false;
-                        timeUntilChange = SOLAR_DAY_LENGTH_SECONDS - cyclePos;
-                    }
-                } else { // sunset
-                     const cyclePos = timeSince % SOLAR_DAY_LENGTH_SECONDS;
-                     // Sunset starts at "Night" (0 time into night)
-                     if (cyclePos < HALF_SOLAR_DAY_SECONDS) {
-                         isDaytime = false;
-                         timeUntilChange = HALF_SOLAR_DAY_SECONDS - cyclePos;
-                     } else {
-                         // Wrapped around to day
-                         isDaytime = true;
-                         timeUntilChange = SOLAR_DAY_LENGTH_SECONDS - cyclePos;
-                         dayProgress = (cyclePos - HALF_SOLAR_DAY_SECONDS) / HALF_SOLAR_DAY_SECONDS;
-                     }
-                }
+            if (current_cycle_seconds < HALF_SOLAR_DAY_SECONDS) {
+                // Daytime
+                isDaytime = true;
+                timeUntilChange = HALF_SOLAR_DAY_SECONDS - current_cycle_seconds;
+                dayProgress = current_cycle_seconds / HALF_SOLAR_DAY_SECONDS;
+            } else {
+                // Nighttime
+                isDaytime = false;
+                timeUntilChange = SOLAR_DAY_LENGTH_SECONDS - current_cycle_seconds;
+                // Night progress logic
+                // 0% at sunset (half day seconds), 100% at sunrise (full day seconds)
+                // progress = (current - half) / half
+                // BUT sky_arc wants 'inverted' progress for night? (1.0 -> 0.0)?
+                // Previous logic: 1.0 - (timeUntilChange / HALF_SOLAR_DAY_SECONDS)
+                dayProgress = 1.0 - (timeUntilChange / HALF_SOLAR_DAY_SECONDS); 
             }
 
             let data = {};
             
             if (isDaytime) {
-                data.status = `☀️  DAY on ${MOON_NAME} | Sunset in: <span class="time-highlight">${format_timedelta(timeUntilChange)}</span> | <span class="time-highlight">${hours_into_moon_day.toFixed(2)}h</span> into solar day ${statusText}`;
+                data.status = `☀️  DAY on ${MOON_NAME} | Sunset in: <span class="time-highlight">${format_timedelta(timeUntilChange)}</span> | <span class="time-highlight">${hours_into_moon_day.toFixed(2)}h</span> into solar day ${sourceText}`;
                 data.hope = get_sky_arc_indicator(dayProgress, true);
                 data.band = get_galactic_band_indicator(current_time, true);
             } else {
-                // Calculate night progress for arc (0 to 1)
-                // If it's night, timeUntilChange is time until sunrise.
-                // Progress = 1 - (remaining / total_night)
-                const nightProgress = 1.0 - (timeUntilChange / HALF_SOLAR_DAY_SECONDS);
-                
-                data.status = `🌙 NIGHT on ${MOON_NAME} | Sunrise in: <span class="time-highlight">${format_timedelta(timeUntilChange)}</span> | <span class="time-highlight">${hours_into_moon_day.toFixed(2)}h</span> into solar day ${statusText}`;
-                data.hope = get_sky_arc_indicator(nightProgress, false);
+                data.status = `🌙 NIGHT on ${MOON_NAME} | Sunrise in: <span class="time-highlight">${format_timedelta(timeUntilChange)}</span> | <span class="time-highlight">${hours_into_moon_day.toFixed(2)}h</span> into solar day ${sourceText}`;
+                data.hope = get_sky_arc_indicator(dayProgress, false);
                 data.band = get_galactic_band_indicator(current_time, false);
             }
 
@@ -1179,28 +1168,29 @@ Every NCT 'second' lasts roughly 1.1 Earth seconds. Here we live by GMT. </p>
             document.getElementById("rebekah").innerHTML = data.rebekah;
         }
 
-        // --- CLOCK FUNCTIONS (UNCHANGED) ---
+        // --- CLOCK FUNCTIONS (UPDATED) ---
         function updateClocks() {
-            if (!LAST_SUNRISE_ANCHOR) {
-                document.getElementById('moonclock').textContent = "Nahla Local Time: ERROR";
-                document.getElementById('moonclock-coordinated').textContent = "Nahla Coordinated Time: ERROR";
-                return;
-            }
-            document.getElementById('moonclock').textContent = get_moon_clock();
-            document.getElementById('moonclock-coordinated').textContent = get_nahla_coordinated_time();
+            const now = new Date();
+            const solarStatus = getSolarCycleStatus(now);
+            
+            document.getElementById('moonclock').textContent = get_moon_clock(solarStatus.cycleSeconds);
+            document.getElementById('moonclock-coordinated').textContent = get_nahla_coordinated_time(solarStatus.cycleSeconds);
         }
 
 
-        function get_moon_clock() {
-            const now_ms = Date.now(); 
-            const time_since_sunrise_ms = (now_ms - LAST_SUNRISE_ANCHOR.getTime()); 
-            const current_cycle_ms = (time_since_sunrise_ms % (SOLAR_DAY_LENGTH_SECONDS * 1000) + (SOLAR_DAY_LENGTH_SECONDS * 1000)) % (SOLAR_DAY_LENGTH_SECONDS * 1000);
-            
-            const total_seconds = current_cycle_ms / 1000;
+        function get_moon_clock(current_cycle_seconds) {
+            // We now accept current_cycle_seconds directly from the central calculator
+            // If undefined (e.g. initial load error), default 0
+            if (current_cycle_seconds === undefined) current_cycle_seconds = 0;
+
+            const total_seconds = current_cycle_seconds;
             const hours = Math.floor(total_seconds / 3600);
             const minutes = Math.floor((total_seconds % 3600) / 60);
             const seconds = Math.floor(total_seconds % 60);
-            const ms = Math.floor((total_seconds % 1) * 100); 
+            
+            // Add a fake ms for visual consistency, or remove it? 
+            // The old code derived ms from system time. We can re-add that for smoothness.
+            const ms = Math.floor((Date.now() % 1000) / 10); 
 
             return `Nahla Local Time: ${String(hours).padStart(2, '0')}:` +
                `${String(minutes).padStart(2, '0')}:` +
@@ -1209,12 +1199,10 @@ Every NCT 'second' lasts roughly 1.1 Earth seconds. Here we live by GMT. </p>
         }
 
 
-        function get_nahla_coordinated_time() {
-            const now_ms = Date.now();
-            const time_since_sunrise_ms = (now_ms - LAST_SUNRISE_ANCHOR.getTime());
-            const current_cycle_ms = (time_since_sunrise_ms % (SOLAR_DAY_LENGTH_SECONDS * 1000) + (SOLAR_DAY_LENGTH_SECONDS * 1000)) % (SOLAR_DAY_LENGTH_SECONDS * 1000);
-
-            const total_seconds = current_cycle_ms / 1000;
+        function get_nahla_coordinated_time(current_cycle_seconds) {
+            if (current_cycle_seconds === undefined) current_cycle_seconds = 0;
+            
+            const total_seconds = current_cycle_seconds;
 
             // Scale the *current* number of seconds into a 24-hour day
             const SCALE = (24 * 3600) / SOLAR_DAY_LENGTH_SECONDS;
@@ -1223,7 +1211,7 @@ Every NCT 'second' lasts roughly 1.1 Earth seconds. Here we live by GMT. </p>
             const hours   = Math.floor(scaled_seconds / 3600);
             const minutes = Math.floor((scaled_seconds % 3600) / 60);
             const seconds = Math.floor(scaled_seconds % 60);
-            const ms = Math.floor((scaled_seconds % 1) * 100); 
+            const ms = Math.floor((Date.now() % 1000) / 10); 
 
             return `Nahla Coordinated Time: ${String(hours).padStart(2, '0')}:` +
                    `${String(minutes).padStart(2, '0')}:` +
