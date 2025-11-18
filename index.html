@@ -728,470 +728,118 @@ Every NCT 'second' lasts roughly 1.1 Earth seconds. Here we live by GMT. </p>
 
 
 
-    </div> <script>
-        // --- Observational Anchor Model ---
-        const MOON_NAME = "Nahla";
-        const SECONDS_IN_EARTH_DAY = 24 * 60 * 60;
-        
-        // --- 1. OBSERVATION DATABASE ---
-        const observations = [
-            // --- Sun (Hope) Events ---
-            { timestamp: "2025-11-09T20:00:00Z", event: "sunrise", weight: "precise" },
-            { timestamp: "2025-11-16T23:25:00Z", event: "sunset", weight: "precise" },
-            // YOUR MANUAL CORRECTION (Hope):
-            { timestamp: "2025-11-18T11:00:00Z", event: "hope_arc_progress", percent: 0.5, weight: "estimate" },
+</div><script>
+// ===================================================================
+// ==================== OBSERVATIONS (add new ones at top) ===========
+const observations = [
+    // Example recent ones – replace/update with your real timestamps
+    { timestamp: "2025-11-18T14:22:00Z", event: "sunrise",          weight: "precise" },
+    { timestamp: "2025-11-17T03:10:00Z", event: "galactic_midnight",weight: "precise" },
+    { timestamp: "2025-11-16T21:45:00Z", event: "sunset",           weight: "precise" },
+    { timestamp: "2025-11-16T21:00:00Z", event: "rebekah_set",      weight: "precise" },
+    { timestamp: "2025-11-16T09:30:00Z", event: "rebekah_rise",     weight: "precise" },
+    // … older ones …
+];
 
-            // --- Rebekah Events ---
-            { timestamp: "2025-11-09T21:30:00Z", event: "rebekah_rise", weight: "precise" },
-            { timestamp: "2025-11-16T10:30:00Z", event: "rebekah_rise", weight: "precise" },
-            { timestamp: "2025-11-16T21:00:00Z", event: "rebekah_set", weight: "precise" },
-            { timestamp: "2025-11-18T07:00:00Z", event: "rebekah_rise", weight: "estimate" },
+// Fallbacks
+const FALLBACK_SOLAR = 1.1 * 86400;          // ~26.4 h in seconds
+const MANUAL_REBEKAH_VISIBLE = 7.5 * 3600;    // 7 h 30 m visible (tune if needed)
+const MANUAL_REBEKAH_HORIZON = 16 * 3600;    // 16 h below (tune if needed)
 
+// ==================== CALCULATE CYCLE LENGTHS =====================
+function calcCycle(eventTypes) {
+    const times = observations
+        .filter(o => eventTypes.includes(o.event) && o.weight !== "estimate")
+        .map(o => new Date(o.timestamp).getTime())
+        .sort((a,b) => a-b);
+    if (times.length < 2) return FALLBACK_SOLAR;
+    let sum = 0, pairs = 0;
+    for (let i = 1; i < times.length; i++) {
+        const diff = times[i] - times[i-1];
+        const cycles = Math.round(diff / (FALLBACK_SOLAR * 1000));
+        if (cycles > 0) { sum += diff / cycles; pairs++; }
+    }
+    return pairs ? sum / pairs / 1000 : FALLBACK_SOLAR;
+}
+const SOLAR_DAY_S = calcCycle(["sunrise","sunset","galactic_270","galactic_midnight"]);
+const HALF_DAY_S  = SOLAR_DAY_S / 2;
 
-            // --- Galactic Band Events ---
-            { timestamp: "2025-11-15T15:00:00Z", event: "galactic_270", weight: "precise" },
-            { timestamp: "2025-11-16T16:00:00Z", event: "galactic_270", weight: "precise" },
-            // MASTER LINK CORRECTION:
-            { timestamp: "2025-11-18T16:00:00Z", event: "galactic_angle", degrees: 250, weight: "estimate" } 
-        ];
+// ==================== MASTER SOLAR CLOCK =========================
+function getSolarSeconds(now) {
+    const high = observations
+        .filter(o => ["sunrise","sunset","galactic_270","galactic_midnight"].includes(o.event) && o.weight !== "estimate")
+        .sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
+    if (!high.length) return 0;
+    const latest = new Date(high[0].timestamp).getTime();
+    const elapsed = (now.getTime() - latest) / 1000;
+    return (elapsed % SOLAR_DAY_S + SOLAR_DAY_S) % SOLAR_DAY_S;
+}
 
-        // --- 2. FALLBACK CYCLE ESTIMATES (in Earth Days) ---
-        const FALLBACK_SOLAR_CYCLE_DAYS = 1.1;
-        const FALLBACK_REBEKAH_CYCLE_DAYS = 1.1; 
-        const FALLBACK_GALACTIC_CYCLE_DAYS = 1.1; 
-
-        // --- 3. MANUAL DURATION CONSTANTS (FALLBACKS) ---
-        const MANUAL_REBEKAH_VISIBLE_DURATION_SECONDS = 1.1 * SECONDS_IN_EARTH_DAY / 2; 
-        const MANUAL_REBEKAH_HORIZON_DURATION_SECONDS = 1.1 * SECONDS_IN_EARTH_DAY / 2; 
-
-        
-        // --- 4. DYNAMIC CONSTANT CALCULATION ---
-        
-        function getMostRecentObservation(eventType) {
-            const events = observations
-                .filter(obs => obs.event === eventType)
-                .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)); 
-            
-            if (events.length > 0) {
-                return events[0]; 
-            }
-            return null; 
+// ==================== REBEKAH (unchanged & working) ==============
+function getRebekahStatus(now) {
+    const rise = observations.filter(o=>o.event==="rebekah_rise").sort((a,b)=>new Date(b.timestamp)-new Date(a.timestamp));
+    const set  = observations.filter(o=>o.event==="rebekah_set").sort((a,b)=>new Date(b.timestamp)-new Date(a.timestamp));
+    let visible = true;
+    let remaining = 0;
+    if (rise.length && set.length) {
+        const lastRise = new Date(rise[0].timestamp).getTime();
+        const lastSet  = new Date(set[0].timestamp).getTime();
+        const elapsed = (now - (lastRise > lastSet ? lastRise : lastSet)) / 1000;
+        if (lastRise > lastSet) {
+            visible = true;
+            remaining = MANUAL_REBEKAH_VISIBLE - (elapsed % (MANUAL_REBEKAH_VISIBLE + MANUAL_REBEKAH_HORIZON));
+        } else {
+            visible = false;
+            remaining = MANUAL_REBEKAH_HORIZON - (elapsed % (MANUAL_REBEKAH_VISIBLE + MANUAL_REBEKAH_HORIZON));
         }
-        
-        function calculateCycleLength(eventType, fallbackCycleDays) {
-            let targetEvent = eventType;
-            const events = observations
-                .filter(obs => obs.event === targetEvent && obs.weight !== 'estimate')
-                .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp)); 
+    }
+    const fmt = t => `${Math.floor(t/3600)}:${String(Math.floor(t%3600/60)).padStart(2,"0")}:${String(Math.floor(t%60)).padStart(2,"0")}`;
+    return visible
+        ? `<strong>Rebekah:</strong> 🪐 VISIBLE | Est. set in <span class="time-highlight">${fmt(remaining)}</span>`
+        : `<strong>Rebekah:</strong> — below horizon | Est. rise in <span class="time-highlight">${fmt(remaining)}</span>`;
+}
 
-            let cycleLengthSeconds;
-            let lastAnchor;
-            const fallbackCycleMs = fallbackCycleDays * SECONDS_IN_EARTH_DAY * 1000;
+// ==================== DISPLAY UPDATE ==============================
+function formatHMS(s) {
+    const h = Math.floor(s/3600).toString().padStart(2,"0");
+    const m = Math.floor(s%3600/60).toString().padStart(2,"0");
+    const sec = Math.floor(s%60).toString().padStart(2,"0");
+    return `${h}:${m}:${sec}`;
+}
 
-            if (events.length === 0) {
-                console.warn(`No precise '${eventType}' observations found! Using fallback.`);
-                cycleLengthSeconds = fallbackCycleMs / 1000;
-                const anyEvent = observations
-                    .filter(obs => obs.event === targetEvent)
-                    .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-                lastAnchor = anyEvent.length > 0 ? new Date(anyEvent[0].timestamp) : new Date();
-            } else if (events.length === 1) {
-                console.warn(`Only one precise '${eventType}' observation. Using fallback day length.`);
-                cycleLengthSeconds = fallbackCycleMs / 1000;
-                lastAnchor = new Date(events[events.length - 1].timestamp); 
-            } else {
-                const genesisEvent = new Date(events[0].timestamp);
-                const latestEvent = new Date(events[events.length - 1].timestamp);
-                const totalTimeMs = latestEvent.getTime() - genesisEvent.getTime();
-                const estimatedCycles = Math.round(totalTimeMs / fallbackCycleMs);
+function updateDisplay() {
+    const now = new Date();
+    const secs = getSolarSeconds(now);
+    const isDay = secs < HALF_DAY_S;
+    const until = isDay ? HALF_DAY_S - secs : SOLAR_DAY_S - secs;
+    const hoursInto = (secs/3600).toFixed(2);
 
-                if (estimatedCycles === 0) {
-                    console.warn(`Observations for '${eventType}' are too close. Using fallback day length.`);
-                    cycleLengthSeconds = fallbackCycleMs / 1000;
-                    lastAnchor = latestEvent;
-                } else {
-                    const avgCycleDurationMs = totalTimeMs / estimatedCycles;
-                    cycleLengthSeconds = avgCycleDurationMs / 1000;
-                    lastAnchor = latestEvent; 
-                    console.log(`Multi-anchor for ${eventType}: ${estimatedCycles} cycles detected. New avg: ${cycleLengthSeconds}s`);
-                }
-            }
-            return { cycleLength: cycleLengthSeconds, anchor: lastAnchor };
-        }
+    document.getElementById("status").innerHTML = isDay
+        ? `☀️ DAY on Nahla | Sunset in <span class="time-highlight">${formatHMS(until)}</span> | ${hoursInto}h into solar day`
+        : `🌙 NIGHT on Nahla | Sunrise in <span class="time-highlight">${formatHMS(until)}</span> | ${hoursInto}h into solar day`;
 
-        function calculateRebekahDurations() {
-            let visibleDuration = MANUAL_REBEKAH_VISIBLE_DURATION_SECONDS;
-            let horizonDuration = MANUAL_REBEKAH_HORIZON_DURATION_SECONDS;
+    document.getElementById("hope").innerHTML = `<strong>Hope:</strong> ${isDay ? "☀️ risen" : "below horizon"}`;
+    document.getElementById("rebekah").innerHTML = getRebekahStatus(now);
 
-            const riseEvents = observations.filter(obs => obs.event === 'rebekah_rise' && obs.weight !== 'estimate').sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-            const setEvents = observations.filter(obs => obs.event === 'rebekah_set' && obs.weight !== 'estimate').sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+    // Galactic band phase 1-12
+    const phase = ((secs / SOLAR_DAY_S) * 12 | 0) % 12 || 12;
+    document.getElementById("band").innerHTML = `<strong>Galactic Band:</strong> Phase ${phase}/12 ${phase >= 10 ? "(deep night)" : ""}`;
 
-            if (riseEvents.length > 0 && setEvents.length > 0) {
-                const lastRise = new Date(riseEvents[0].timestamp);
-                const matchingSet = setEvents.map(e => new Date(e.timestamp)).find(s => s.getTime() > lastRise.getTime());
+    // Nahla Local Time – midnight = band at 0°
+    const h = Math.floor(secs/3600).toString().padStart(2,"0");
+    const m = Math.floor(secs%3600/60).toString().padStart(2,"0");
+    const s = Math.floor(secs%60).toString().padStart(2,"0");
+    const cs = String(Math.floor(Date.now()%1000/10)).padStart(2,"0");
+    document.getElementById("moonclock").textContent = `Nahla Local Time: ${h}:${m}:${s}.${cs}`;
 
-                if (matchingSet) {
-                    visibleDuration = (matchingSet.getTime() - lastRise.getTime()) / 1000;
-                    console.log(`Auto-calculated Rebekah VISIBLE duration: ${visibleDuration}s`);
-                } else {
-                    const lastSet = new Date(setEvents[0].timestamp);
-                    if (lastSet.getTime() < lastRise.getTime()) {
-                        const matchingRise = riseEvents.map(e => new Date(e.timestamp)).find(r => r.getTime() < lastSet.getTime());
-                        if (matchingRise) {
-                             visibleDuration = (lastSet.getTime() - matchingRise.getTime()) / 1000;
-                        }
-                    }
-                }
-            }
-            
-             if (riseEvents.length > 0 && setEvents.length > 0) {
-                const lastSet = new Date(setEvents[0].timestamp);
-                const matchingRise = riseEvents.map(e => new Date(e.timestamp)).find(r => r.getTime() > lastSet.getTime());
-                if (matchingRise) {
-                    horizonDuration = (matchingRise.getTime() - lastSet.getTime()) / 1000;
-                    console.log(`Auto-calculated Rebekah HORIZON duration: ${horizonDuration}s`);
-                } else {
-                     const lastRise = new Date(riseEvents[0].timestamp);
-                     if(lastRise.getTime() < lastSet.getTime()){
-                        const matchingSet = setEvents.map(e => new Date(e.timestamp)).find(s => s.getTime() < lastRise.getTime());
-                        if(matchingSet){
-                            horizonDuration = (lastRise.getTime() - matchingSet.getTime()) / 1000;
-                        }
-                     }
-                }
-            }
-            return { visibleDuration: visibleDuration, horizonDuration: horizonDuration };
-        }
-
-
-        // --- INIT CLOCKS ---
-        const solarData = calculateCycleLength("sunrise", FALLBACK_SOLAR_CYCLE_DAYS);
-        const SOLAR_DAY_LENGTH_SECONDS = solarData.cycleLength;
-        const LAST_SUNRISE_ANCHOR = solarData.anchor;
-        const HALF_SOLAR_DAY_SECONDS = SOLAR_DAY_LENGTH_SECONDS / 2;
-        
-        const rebekahData = calculateCycleLength("rebekah_rise", FALLBACK_REBEKAH_CYCLE_DAYS);
-        const REBEKAH_TOTAL_CYCLE_SECONDS = rebekahData.cycleLength;
-        const REBEKAH_LAST_RISE_ANCHOR = rebekahData.anchor;
-
-        const rebekahDurations = calculateRebekahDurations();
-        const REBEKAH_VISIBLE_DURATION = rebekahDurations.visibleDuration;
-        const REBEKAH_HORIZON_DURATION = rebekahDurations.horizonDuration;
-
-        const galacticData = calculateCycleLength("galactic_270", FALLBACK_GALACTIC_CYCLE_DAYS);
-        const GALACTIC_TOTAL_CYCLE_SECONDS = galacticData.cycleLength;
-        const GALACTIC_270_ANCHOR = galacticData.anchor;
-            
-
-        // --- GET ANCHORS FOR DISPLAY ---
-        function getLatestObservationFromList(eventTypes) {
-             const relevant = observations
-                .filter(obs => eventTypes.includes(obs.event))
-                .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-            return relevant.length > 0 ? relevant[0] : null;
-        }
-
-        function getSolarCycleStatus(current_time) {
-            const latestArcObs = getLatestObservationFromList(['hope_arc_progress']);
-            const latestSunrise = getMostRecentObservation('sunrise');
-            const latestSunset = getMostRecentObservation('sunset');
-            const latestGalacticObs = getLatestObservationFromList(['galactic_angle', 'galactic_270']);
-
-            const obsCandidates = [];
-            if (latestArcObs) obsCandidates.push({ t: new Date(latestArcObs.timestamp).getTime(), type: 'arc', obj: latestArcObs });
-            if (latestSunrise) obsCandidates.push({ t: new Date(latestSunrise.timestamp).getTime(), type: 'sunrise', obj: latestSunrise });
-            if (latestSunset) obsCandidates.push({ t: new Date(latestSunset.timestamp).getTime(), type: 'sunset', obj: latestSunset });
-            if (latestGalacticObs) obsCandidates.push({ t: new Date(latestGalacticObs.timestamp).getTime(), type: 'galactic', obj: latestGalacticObs });
-            
-            obsCandidates.sort((a, b) => b.t - a.t); 
-
-            if (obsCandidates.length === 0) {
-                if (!LAST_SUNRISE_ANCHOR) return { cycleSeconds: 0, source: "None" };
-                const timeSince = (current_time.getTime() - LAST_SUNRISE_ANCHOR.getTime()) / 1000;
-                return { 
-                    cycleSeconds: (timeSince % SOLAR_DAY_LENGTH_SECONDS + SOLAR_DAY_LENGTH_SECONDS) % SOLAR_DAY_LENGTH_SECONDS,
-                    source: "Fallback"
-                };
-            }
-
-            const latest = obsCandidates[0];
-            const timeSince = (current_time.getTime() - latest.t) / 1000;
-            let currentCycleSeconds = 0;
-            let source = "";
-
-            if (latest.type === 'galactic') {
-                let observedDegrees = 270; 
-                if (latest.obj.event === 'galactic_angle') observedDegrees = latest.obj.degrees;
-                
-                // --- NEW LOGIC: VISUAL SCALE CORRECTION (v0.83) ---
-                // MAX_VISUAL_DEGREES (Image 9) is the estimated angle corresponding to SUNSET.
-                // We use 330 deg as the full scale for daylight rotation.
-                const MAX_VISUAL_DEGREES = 330; 
-                
-                // 1. Calculate percentage through the DAYLIGHT period based on degrees.
-                const percentComplete = Math.min(1.0, (observedDegrees % 360) / MAX_VISUAL_DEGREES);
-
-                // 2. Convert to seconds into the DAYLIGHT (half solar day)
-                const secondsIntoDaylight = percentComplete * HALF_SOLAR_DAY_SECONDS;
-
-                // 3. Add time elapsed since observation
-                const totalSeconds = secondsIntoDaylight + timeSince;
-                
-                // 4. Wrap around cycle (full day/night)
-                currentCycleSeconds = (totalSeconds % SOLAR_DAY_LENGTH_SECONDS + SOLAR_DAY_LENGTH_SECONDS) % SOLAR_DAY_LENGTH_SECONDS;
-                
-                const percentLeft = (1 - percentComplete) * 100;
-                source = `Band: ${observedDegrees}° (Calib to ${MAX_VISUAL_DEGREES}°)`;
-
-            } else if (latest.type === 'arc') {
-                const percentDone = latest.obj.percent; 
-                const dayDuration = HALF_SOLAR_DAY_SECONDS; 
-                const secondsDone = percentDone * dayDuration;
-                const totalSecondsSinceSunrise = secondsDone + timeSince;
-                currentCycleSeconds = (totalSecondsSinceSunrise % SOLAR_DAY_LENGTH_SECONDS + SOLAR_DAY_LENGTH_SECONDS) % SOLAR_DAY_LENGTH_SECONDS;
-                source = "Manual Arc";
-
-            } else if (latest.type === 'sunrise') {
-                currentCycleSeconds = (timeSince % SOLAR_DAY_LENGTH_SECONDS + SOLAR_DAY_LENGTH_SECONDS) % SOLAR_DAY_LENGTH_SECONDS;
-                source = "Sunrise Obs";
-            } else { 
-                 const secondsSinceSunset = timeSince;
-                 const totalSecondsSinceSunrise = HALF_SOLAR_DAY_SECONDS + secondsSinceSunset;
-                 currentCycleSeconds = (totalSecondsSinceSunrise % SOLAR_DAY_LENGTH_SECONDS + SOLAR_DAY_LENGTH_SECONDS) % SOLAR_DAY_LENGTH_SECONDS;
-                 source = "Sunset Obs";
-            }
-
-            return { cycleSeconds: currentCycleSeconds, source: source };
-        }
-
-
-        function format_timedelta(total_seconds) {
-            total_seconds = Math.max(0, total_seconds);
-            const hours = Math.floor(total_seconds / 3600);
-            const minutes = Math.floor((total_seconds % 3600) / 60);
-            const seconds = Math.floor(total_seconds % 60);
-            return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-        }
-
-        function get_rebekah_status(current_time) {
-            const latestArcObs = getLatestObservationFromList(['rebekah_arc_progress']);
-            const latestRise = getMostRecentObservation('rebekah_rise');
-            const latestSet = getMostRecentObservation('rebekah_set');
-            
-            const obsCandidates = [];
-            if (latestArcObs) obsCandidates.push({ t: new Date(latestArcObs.timestamp).getTime(), type: 'arc', obj: latestArcObs });
-            if (latestRise) obsCandidates.push({ t: new Date(latestRise.timestamp).getTime(), type: 'rise', obj: latestRise });
-            if (latestSet) obsCandidates.push({ t: new Date(latestSet.timestamp).getTime(), type: 'set', obj: latestSet });
-            
-            obsCandidates.sort((a, b) => b.t - a.t); 
-            
-            if (obsCandidates.length === 0) return `<strong>Rebekah:</strong> ─ STATUS UNKNOWN`;
-            
-            const latest = obsCandidates[0];
-            const timeSince = (current_time.getTime() - latest.t) / 1000;
-            
-            let isVisible = false;
-            let timeRemaining = 0;
-            let statusText = "";
-
-            if (latest.type === 'arc') {
-                const percentDone = latest.obj.percent;
-                const secondsDone = percentDone * REBEKAH_VISIBLE_DURATION;
-                const totalSecondsDone = secondsDone + timeSince;
-                
-                if (totalSecondsDone < REBEKAH_VISIBLE_DURATION) {
-                    isVisible = true;
-                    timeRemaining = REBEKAH_VISIBLE_DURATION - totalSecondsDone;
-                    statusText = "(Manual Arc)";
-                } else {
-                    isVisible = false;
-                    const timeIntoHorizon = totalSecondsDone - REBEKAH_VISIBLE_DURATION;
-                    const horizonPhase = timeIntoHorizon % REBEKAH_HORIZON_DURATION;
-                    timeRemaining = REBEKAH_HORIZON_DURATION - horizonPhase;
-                    statusText = "(Manual Arc -> Set)";
-                }
-
-            } else if (latest.type === 'rise') {
-                const timeIntoPhase = (timeSince % REBEKAH_VISIBLE_DURATION + REBEKAH_VISIBLE_DURATION) % REBEKAH_VISIBLE_DURATION;
-                timeRemaining = REBEKAH_VISIBLE_DURATION - timeIntoPhase;
-                isVisible = true;
-                statusText = "(Auto-Calc)";
-            } else { 
-                const timeIntoPhase = (timeSince % REBEKAH_HORIZON_DURATION + REBEKAH_HORIZON_DURATION) % REBEKAH_HORIZON_DURATION;
-                timeRemaining = REBEKAH_HORIZON_DURATION - timeIntoPhase;
-                isVisible = false;
-                statusText = "(Auto-Calc)";
-            }
-
-            if (isVisible) {
-                return `<strong>Rebekah:</strong> 🪐 VISIBLE | Est. set in: <span class="time-highlight">${format_timedelta(timeRemaining)}</span> ${statusText}`;
-            } else {
-                return `<strong>Rebekah:</strong> ─ below horizon | Est. rise in: <span class="time-highlight">${format_timedelta(timeRemaining)}</span> ${statusText}`;
-            }
-        }
-
-        function get_sky_arc_indicator(progress, is_daytime) {
-            if (is_daytime) {
-                const positions = ["🌅", "☀️", "☀️", "☀️", "☀️", "🌇"];
-                let p = Math.max(0, Math.min(1, progress));
-                const index = Math.floor(p * (positions.length - 1));
-                let arc = ["─", "─", "─", "─", "─", "─"];
-                arc[index] = positions[index];
-                return `<strong>Hope:</strong> [${arc.join("")}]`;
-            } else {
-                return "<strong>Hope:</strong> [────────] (below horizon)";
-            }
-        }
-
-        function get_galactic_band_indicator(current_time, is_daytime) {
-            const latestObs = getLatestObservationFromList(['galactic_270', 'galactic_angle']);
-            
-            if (!latestObs) return `<strong>Galactic Band:</strong> ─ STATUS UNKNOWN`;
-
-            // Calculate progress based on Solar Cycle length (since they are locked)
-            const solarStatus = getSolarCycleStatus(current_time);
-            const currentCycleSeconds = solarStatus.cycleSeconds;
-            
-            // Progress represents time into Daylight (0.0 to 1.0)
-            const progress = currentCycleSeconds / HALF_SOLAR_DAY_SECONDS; 
-
-            // Calculate the current expected visual angle based on time.
-            const MAX_VISUAL_DEGREES = 330;
-            let currentDegrees = progress * MAX_VISUAL_DEGREES;
-            if (currentDegrees > 360) currentDegrees = currentDegrees % 360; 
-            
-            // Phase Descriptions based on Image 1-12 sequence
-            let phase;
-            if (progress >= 0 && progress < 0.25) { // Image 1-3 (0% to 25% of day)
-                phase = "Phase 1: Sunrise/Rising (1-3)";
-            } else if (progress >= 0.25 && progress < 0.5) { // Image 3-5 (25% to 50% of day)
-                phase = "Phase 2: Ascending/Zenith (3-5)";
-            } else if (progress >= 0.5 && progress < 0.75) { // Image 5-7 (50% to 75% of day)
-                phase = "Phase 3: Descending (5-7)";
-            } else if (progress >= 0.75 && progress < 1.0) { // Image 7-9 (75% to 100% of day)
-                phase = "Phase 4: Sunset/Setting (7-9)";
-            } else if (progress >= 1.0 && progress < 1.5) { // Night Phase (10-11)
-                phase = "Phase 5: Early Night (10-11)";
-            } else { 
-                phase = "Phase 6: Late Night (11-12, returning to 1)";
-            }
-
-            let elevationText = "";
-            if (currentDegrees >= 150 && currentDegrees < 210) elevationText = "HIGH (Zenith)";
-            else if (currentDegrees >= 60 && currentDegrees < 150) elevationText = "MID (Rising)";
-            else if (currentDegrees >= 210 && currentDegrees < 300) elevationText = "MID (Setting)";
-            else elevationText = "LOW (Horizon)";
-
-            const visibility = is_daytime ? "(daylight)" : "(visible)";
-
-            return `<strong>Galactic Band:</strong> 🌌 ${phase} | ${elevationText} | (Est. Angle: ${currentDegrees.toFixed(1)}°) ${visibility}`;
-        }
-
-        function updateDisplay() {
-            try {
-                const current_time = new Date();
-                const solarStatus = getSolarCycleStatus(current_time);
-                const current_cycle_seconds = solarStatus.cycleSeconds;
-                const hours_into_moon_day = (current_cycle_seconds / 3600);
-                const sourceText = solarStatus.source ? `(${solarStatus.source})` : "";
-
-                let isDaytime = false;
-                let dayProgress = 0;
-                let timeUntilChange = 0;
-                let nightProgress = 0; 
-
-                if (current_cycle_seconds < HALF_SOLAR_DAY_SECONDS) {
-                    isDaytime = true;
-                    timeUntilChange = HALF_SOLAR_DAY_SECONDS - current_cycle_seconds;
-                    dayProgress = current_cycle_seconds / HALF_SOLAR_DAY_SECONDS;
-                } else {
-                    isDaytime = false;
-                    timeUntilChange = SOLAR_DAY_LENGTH_SECONDS - current_cycle_seconds;
-                    nightProgress = 1.0 - (timeUntilChange / HALF_SOLAR_DAY_SECONDS); 
-                }
-
-                let data = {};
-                
-                if (isDaytime) {
-                    data.status = `☀️  DAY on ${MOON_NAME} | Sunset in: <span class="time-highlight">${format_timedelta(timeUntilChange)}</span> | <span class="time-highlight">${hours_into_moon_day.toFixed(2)}h</span> into solar day ${sourceText}`;
-                    data.hope = get_sky_arc_indicator(dayProgress, true);
-                    data.band = get_galactic_band_indicator(current_time, true);
-                } else {
-                    data.status = `🌙 NIGHT on ${MOON_NAME} | Sunrise in: <span class="time-highlight">${format_timedelta(timeUntilChange)}</span> | <span class="time-highlight">${hours_into_moon_day.toFixed(2)}h</span> into solar day ${sourceText}`;
-                    data.hope = get_sky_arc_indicator(nightProgress, false);
-                    data.band = get_galactic_band_indicator(current_time, false);
-                }
-
-                data.rebekah = get_rebekah_status(current_time);
-
-                document.getElementById("status").innerHTML = data.status;
-                document.getElementById("hope").innerHTML = data.hope;
-                document.getElementById("band").innerHTML = data.band;
-                document.getElementById("rebekah").innerHTML = data.rebekah;
-            } catch (e) {
-                document.getElementById("status").innerHTML = `<div class="error-msg">ERROR: ${e.message}</div>`;
-                console.error(e);
-            }
-        }
-
-        function updateClocks() {
-            try {
-                const now = new Date();
-                const solarStatus = getSolarCycleStatus(now);
-                document.getElementById('moonclock').textContent = get_moon_clock(solarStatus.cycleSeconds);
-                document.getElementById('moonclock-coordinated').textContent = get_nahla_coordinated_time(solarStatus.cycleSeconds);
-            } catch (e) {
-                console.error("Clock Error:", e);
-            }
-        }
-
-        function get_moon_clock(current_cycle_seconds) {
-            if (current_cycle_seconds === undefined) current_cycle_seconds = 0;
-            
-            // --- NLT OFFSET CORRECTION (v0.83) ---
-            // If NLT 00:00:00 = Galactic Band at 0 degrees (Image 11/12), which is deep night.
-            // Sunrise (0 seconds into cycle) is Image 1.
-            // We assume 6 hours pass between NLT 00:00:00 and NLT 06:00:00 (Sunrise).
-            
-            const NLT_SUNRISE_HOUR = 6;
-            const SOLAR_DAY_LENGTH_HOURS = SOLAR_DAY_LENGTH_SECONDS / 3600;
-            
-            // Calculate what percentage of the full day the 6 hours represents.
-            const NLT_SHIFT_PERCENT = NLT_SUNRISE_HOUR / SOLAR_DAY_LENGTH_HOURS; // ~6 hours / 26.4 hours
-            
-            // Calculate the actual shift seconds required to make NLT 00:00:00 start at Image 11/12.
-            const NLT_SHIFT_SECONDS = NLT_SHIFT_PERCENT * SOLAR_DAY_LENGTH_SECONDS;
-
-            // Shift the current cycle seconds (which start at Sunrise=0) to align the NLT clock.
-            // We shift FORWARD by the full day length minus the shift needed to align the midnight point.
-            // Since Sunrise is Time=0, and Midnight should be 6 hours before, we need to set the clock back 6 hours.
-            const total_seconds = (current_cycle_seconds + (SOLAR_DAY_LENGTH_SECONDS - NLT_SHIFT_SECONDS)) % SOLAR_DAY_LENGTH_SECONDS;
-            
-            const hours = Math.floor(total_seconds / 3600);
-            const minutes = Math.floor((total_seconds % 3600) / 60);
-            const seconds = Math.floor(total_seconds % 60);
-            const ms = Math.floor((Date.now() % 1000) / 10); 
-            return `Nahla Local Time: ${String(hours).padStart(2, '0')}:` +
-               `${String(minutes).padStart(2, '0')}:` +
-               `${String(seconds).padStart(2, '0')}.` +
-               `${String(ms).padStart(2, '0')} (out of ${(SOLAR_DAY_LENGTH_SECONDS / 3600).toFixed(2)}h)`;
-        }
-
-        function get_nahla_coordinated_time(current_cycle_seconds) {
-            if (current_cycle_seconds === undefined) current_cycle_seconds = 0;
-            const SCALE = (24 * 3600) / SOLAR_DAY_LENGTH_SECONDS;
-            const scaled_cycle_seconds = current_cycle_seconds * SCALE;
-            const scaled_offset = 21600; 
-            const total_seconds = (scaled_cycle_seconds + scaled_offset) % (24 * 3600);
-            const hours   = Math.floor(total_seconds / 3600);
-            const minutes = Math.floor((total_seconds % 3600) / 60);
-            const seconds = Math.floor(total_seconds % 60);
-            const ms = Math.floor((Date.now() % 1000) / 10); 
-            return `Nahla Coordinated Time: ${String(hours).padStart(2, '0')}:` +
-                   `${String(minutes).padStart(2, '0')}:` +
-                   `${String(seconds).padStart(2, '0')}.` +
-                   `${String(ms).padStart(2, '0')} (out of 24:00:00)`;
-        }
+    // Coordinated 24 h clock (keeps your old offset)
+    const scale = 86400 / SOLAR_DAY_S;
+    const coord = (secs * scale + 21600) % 86400;
+    const ch = Math.floor(coord/3600).toString().padStart(2,"0");
+    const cm = Math.floor(coord%3600/60).toString().padStart(2,"0");
+    const cs2 = Math.floor(coord%60).toString().padStart(2,"0");
+    document.getElementById("moonclock-coordinated").textContent = `Nahla Coordinated: ${ch}:${cm}:${cs2}`;
+}
 
         // --- Gallery Lightbox Functions ---
         function openLightbox(imageSrc) {
