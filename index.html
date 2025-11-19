@@ -730,6 +730,36 @@ var CYCLE_ANCHOR   = new Date("2025-11-19T06:00:00.000Z");
 // Anchor for Rebekah's cycle (e.g. last rise or transit – your choice)
 var REBEKAH_ANCHOR = new Date("2025-11-18T07:00:00.000Z");
 
+// Load anchors from shared storage on startup
+async function loadAnchorsFromStorage() {
+    try {
+        const cycleResult = await window.storage.get('nahla-cycle-anchor', true);
+        const rebekahResult = await window.storage.get('nahla-rebekah-anchor', true);
+        
+        if (cycleResult && cycleResult.value) {
+            CYCLE_ANCHOR = new Date(cycleResult.value);
+            console.log('%c[LOADED] Cycle anchor from storage: ' + CYCLE_ANCHOR.toISOString(), 'color: lime;');
+        }
+        if (rebekahResult && rebekahResult.value) {
+            REBEKAH_ANCHOR = new Date(rebekahResult.value);
+            console.log('%c[LOADED] Rebekah anchor from storage: ' + REBEKAH_ANCHOR.toISOString(), 'color: lime;');
+        }
+    } catch (error) {
+        console.log('%c[STORAGE] Using default anchors (no saved data found)', 'color: yellow;');
+    }
+}
+
+// Save anchors to shared storage
+async function saveAnchorsToStorage() {
+    try {
+        await window.storage.set('nahla-cycle-anchor', CYCLE_ANCHOR.toISOString(), true);
+        await window.storage.set('nahla-rebekah-anchor', REBEKAH_ANCHOR.toISOString(), true);
+        console.log('%c[SAVED] Anchors saved to shared storage', 'color: lime; font-weight: bold;');
+    } catch (error) {
+        console.error('[STORAGE ERROR]', error);
+    }
+}
+
 // --- Utility helpers ---
 
 function mod(a, b) {
