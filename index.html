@@ -1,27 +1,25 @@
-        <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
     <title>Nahla Tracker</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=VT323&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=VT323&display=swap">
+    <!-- Inter font wasn't imported in original but used in CSS, adding it for completeness -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap">
 
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Nahla Tracker">
+    <meta property="og:description" content="Live day/night tracker and gallery for Nahla, a remote Elite Dangerous moon.">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
 
-        <!-- Open Graph -->
-<meta property="og:type" content="website">
-<meta property="og:title" content="Nahla Tracker">
-<meta property="og:description" content="Live day/night tracker and gallery for Nahla, a remote Elite Dangerous moon.">
-<meta property="og:url" content="https://lysander666.github.io/nahla-tracker/">
-<meta property="og:image" content="https://lysander666.github.io/nahla-tracker/social-card.jpg">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
-
-<!-- Twitter -->
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Nahla Tracker">
-<meta name="twitter:description" content="Live day/night tracker and gallery for Nahla, a remote Elite Dangerous moon.">
-<meta name="twitter:image" content="https://lysander666.github.io/nahla-tracker/social-card.jpg">
-
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Nahla Tracker">
+    <meta name="twitter:description" content="Live day/night tracker and gallery for Nahla, a remote Elite Dangerous moon.">
 
     <link id="favicon" rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='80'>🌕</text></svg>">
     
@@ -33,6 +31,7 @@
             font-size: 1.1rem; 
             line-height: 1.6; 
             padding: 20px;
+            margin: 0;
         }
         .container {
             max-width: 1800px;
@@ -70,55 +69,50 @@
             text-align: center;
             margin-top: 4px;
             letter-spacing: 2px;
-}
-
+        }
 
         .time-highlight {
           color: #61dafb;   /* cyan, same tone as your UI highlights */
           font-weight: bold;
         }
 
-#notes-box {
-    background-color: #1e1e1e;
-    border-radius: 8px;
-    padding: 15px;
-    margin-bottom: 20px;
-    box-shadow: 0 0 12px rgba(97, 218, 251, 0.1);
-}
+        #notes-box {
+            background-color: #1e1e1e;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 0 12px rgba(97, 218, 251, 0.1);
+        }
 
-#notes-box h2 {
-    color: #61dafb;
-    margin-top: 0;
-    margin-bottom: 10px;
-    font-family: "Consolas", "Courier New", monospace;
-}
+        #notes-box h2 {
+            color: #61dafb;
+            margin-top: 0;
+            margin-bottom: 10px;
+            font-family: "Consolas", "Courier New", monospace;
+        }
 
-/* Make Notes text smaller on mobile */
-@media (max-width: 600px) {
-  #notes-box, 
-  #notes-box p, 
-  #notes-box div, 
-  #notes-box span {
-    font-size: 0.85rem !important;
-    line-height: 1.45;
-  }
-}
+        /* Make Notes text smaller on mobile */
+        @media (max-width: 600px) {
+          #notes-box, 
+          #notes-box p, 
+          #notes-box div, 
+          #notes-box span {
+            font-size: 0.85rem !important;
+            line-height: 1.45;
+          }
+        }
 
-
-
-
-#notes {
-    background-color: #121212;
-    border: 1px solid #333;
-    border-radius: 6px;
-    color: #ccc;
-    font-family: "Inter", sans-serif;
-    font-size: 0.95rem;
-    padding: 8px 10px;
-    line-height: 1.5;
-    text-align: justify;
-}
-
+        #notes {
+            background-color: #121212;
+            border: 1px solid #333;
+            border-radius: 6px;
+            color: #ccc;
+            font-family: "Inter", sans-serif;
+            font-size: 0.95rem;
+            padding: 8px 10px;
+            line-height: 1.5;
+            text-align: justify;
+        }
 
         .gallery-container {
           cursor: grab;
@@ -128,69 +122,65 @@
           cursor: grabbing;
         }
 
-.gallery-header {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 20px;
-    margin-bottom: 15px;
-    height: 40px;
-}
+        .gallery-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 15px;
+            height: 40px;
+        }
 
-.gallery-header h2 {
-    color: #61dafb;
-    margin: 0;
-    text-align: center;
-    position: relative;
-    top: 8px;  /* <-- Use this instead of margin-top */
-}
+        .gallery-header h2 {
+            color: #61dafb;
+            margin: 0;
+            text-align: center;
+            position: relative;
+            top: 8px; 
+        }
 
+        .gallery-btn {
+            background: none;
+            border: 2px solid #61dafb;
+            color: #61dafb;
+            font-size: 1.5rem;
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: monospace;
+            flex-shrink: 0;
+            padding: 0;           
+            outline: none;        
+            -webkit-appearance: none; 
+            appearance: none;     
+        }
 
+        .gallery-btn:hover {
+            background-color: #61dafb;
+            color: #1a1a1a;
+            transform: scale(1.1);
+        }
 
-
-
-
-
-.gallery-btn {
-    background: none;
-    border: 2px solid #61dafb;
-    color: #61dafb;
-    font-size: 1.5rem;
-    width: 40px;
-    height: 40px;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: monospace;
-    flex-shrink: 0;
-    padding: 0;           /* <-- ADD THIS */
-    outline: none;        /* <-- ADD THIS */
-    -webkit-appearance: none;  /* <-- ADD THIS */
-    appearance: none;     /* <-- ADD THIS */
-}
-
-.gallery-btn:hover {
-    background-color: #61dafb;
-    color: #1a1a1a;
-    transform: scale(1.1);
-}
-
-.gallery-btn:active {
-    transform: scale(0.95);
-}
+        .gallery-btn:active {
+            transform: scale(0.95);
+        }
         
         /* --- Main 5-Column Layout --- */
         #system-info-container {
             display: flex;
             gap: 20px;
             align-items: flex-start;
+            flex-wrap: wrap; /* Added wrap for responsiveness */
         }
         
         .celestial-body, #map-panel, #manifest-panel {
             flex: 1;
+            min-width: 250px; /* Added min-width for wrapping */
             border: 1px solid #444;
             border-radius: 8px;
             padding: 0 20px 20px 20px;
@@ -208,6 +198,7 @@
             background-color: #222;
             margin: 0;
             padding-top: 20px;
+            z-index: 1;
         }
         
         .celestial-body ul, #map-panel ul {
@@ -353,6 +344,7 @@
             width: 100%;
             height: calc(100% - 36px); /* 100% of container minus caption height */
             object-fit: cover;         /* keeps the image nicely cropped */
+            background-color: #333; /* Placeholder bg */
         }
 
         .gallery-caption {
@@ -457,32 +449,27 @@
             scrollbar-width: none; /* Firefox */
         }
 
-.audio-btn {
-  background: none;
-  border: none;
-  color: #61dafb;
-  font-size: 18px;      /* FIXED SIZE — prevents wrapping */
-  cursor: pointer;
-  display: inline-flex; /* keeps it on the same line */
-  align-items: center;
-  vertical-align: middle;
-  padding: 0;
-  vertical-align: 0px; /* ← bump upward */
+        .audio-btn {
+            background: none;
+            border: none;
+            color: #61dafb;
+            font-size: 18px;      /* FIXED SIZE — prevents wrapping */
+            cursor: pointer;
+            display: inline-flex; /* keeps it on the same line */
+            align-items: center;
+            vertical-align: middle;
+            padding: 0;
+            vertical-align: 0px; /* ← bump upward */
+        }
 
-}
-
-.audio-btn:active {
-  transform: scale(0.9);
-}
-
-
-
-
+        .audio-btn:active {
+            transform: scale(0.9);
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h2>Nahla Day/Night Cycle Tracker - LIVE - v0.2</h2>
+        <h2>Nahla Day/Night Cycle Tracker - LIVE - v0.21 (Sumerian Rebirth version)</h2>
         <div id="tracker">
             <div id="status">Loading...</div>
             <div id="hope">...</div>
@@ -551,7 +538,7 @@
                 <ul>
                     <li><strong>Type:</strong> A5 Vb Blue-White Star</li>
                     <li><strong>Mass:</strong> 1.6758 Solar</li>
-                    <li><strong>Radius:</strong> 1.427 Solar<li>
+                    <li><strong>Radius:</strong> 1.427 Solar</li>
                     <li><strong>Temp:</strong> 8,631 K / 8,358 C</li>
                     <li><strong>Absolute magnitude:</strong> 2.3165 </li>
                     <li><strong>Age:</strong> 800 million years</li>
@@ -566,18 +553,18 @@
                     <li><strong>Dist. to Colonia:</strong> 22,698.70 ly</li>
                 </ul>
                 <h4>Galactic Position</h4>
-                <img src="galaxy_map.png" alt="Galactic Position" onclick="openLightbox('galaxy_map.png')" style="cursor: pointer;">
+                <img src="https://placehold.co/275x275?text=Galaxy+Map" alt="Galactic Position" onclick="openLightbox('https://placehold.co/800x800?text=Galaxy+Map')" style="cursor: pointer;">
             </div>
 
             <div id="manifest-panel">
                 <h3>Full System Manifest</h3>
                 <ul class="manifest-list">
-                   <li><strong>A</strong> Blue-White Star (Hope) (Scoopable)</span>
+                   <li><strong>A</strong> Blue-White Star (Hope) (Scoopable)
                     </li>
 
                     <li><strong>A Belt</strong> Rocky Belt (Bellatrix)</li>
 
-                    <li><strong>1</strong> Metal-rich body (Simone) (3,835 K)</span>
+                    <li><strong>1</strong> Metal-rich body (Simone) (3,835 K)
                     </li>
 
                     <li><strong>2</strong>Class III gas giant (Marika)
@@ -591,7 +578,7 @@
                             <li><strong>2e</strong>Rocky body (Bunika) <span class="hl-landable">(L)</span></li>
                         </ul>
                     </li>
-                    <li><strong>3</strong>High metal content (Ružena) (1,077 K)</span>
+                    <li><strong>3</strong>High metal content (Ružena) (1,077 K)
                     </li>
                     <li><strong>4</strong>Y (Brown dwarf) Star (Rayne)
                         <ul>
@@ -607,7 +594,6 @@
                         </ul>
                     </li>
                     <li><strong>7</strong><span class="hl-life">Gas giant with water-based life (Aeoga)</span>
-                    </li>
                         <ul>
                             <li><strong>7a</strong>Rocky body (Herbst9) <span class="hl-landable">(L)</span></li>
                             <li><strong>7b</strong>Rocky body (Asmorod) <span class="hl-landable">(L)</span></li>
@@ -640,73 +626,58 @@
     <button class="gallery-btn" id="scroll-right">&gt;</button>
 </div>
              <div class="gallery-container">
-<!--
-        <div class="gallery-item" onclick="openLightbox('galaxy_map.png')">
-            <div class="gallery-tooltip">Galactic Position Map</div>
-            <img src="galaxy_map.png" alt="Galactic Position">
-            <div class="gallery-caption">Galactic Position Map</div>
-        </div>
---> 
-        <div class="gallery-item" onclick="openLightbox('Nahla.jpg')">
+
+        <div class="gallery-item" onclick="openLightbox('https://placehold.co/1200x800?text=Nahla')">
             <div class="gallery-tooltip">Nahla</div>
-            <img src="Nahla.jpg" alt="Nahla">
+            <img src="https://placehold.co/300x220?text=Nahla" alt="Nahla">
             <div class="gallery-caption">Nahla</div>
         </div>             
 
-        <div class="gallery-item" onclick="openLightbox('Rebekah-from-Nahla.jpg')">
+        <div class="gallery-item" onclick="openLightbox('https://placehold.co/1200x800?text=Rebekah')">
             <div class="gallery-tooltip">Rebekah seen from Nahla</div>
-            <img src="Rebekah-from-Nahla.jpg" alt="Rebekah seen from Nahla">
+            <img src="https://placehold.co/300x220?text=Rebekah+from+Nahla" alt="Rebekah seen from Nahla">
             <div class="gallery-caption">Rebekah seen from Nahla</div>
         </div>
                      
-        <div class="gallery-item" onclick="openLightbox('Pate-Sablee-Overhead.jpg')">
+        <div class="gallery-item" onclick="openLightbox('https://placehold.co/1200x800?text=Pate+Sablee')">
             <div class="gallery-tooltip">Pâte Sablée crater</div>
-            <img src="Pate-Sablee-Overhead.jpg" alt="Pâte Sablée crater">
+            <img src="https://placehold.co/300x220?text=Pate+Sablee+Crater" alt="Pâte Sablée crater">
             <div class="gallery-caption">Pâte Sablée crater</div>
         </div>     
 
-        <div class="gallery-item" onclick="openLightbox('galactic-band.jpg')">
+        <div class="gallery-item" onclick="openLightbox('https://placehold.co/1200x800?text=Galactic+Band')">
             <div class="gallery-tooltip">Galactic band</div>
-            <img src="galactic-band.jpg" alt="Galactic band">
+            <img src="https://placehold.co/300x220?text=Galactic+Band" alt="Galactic band">
             <div class="gallery-caption">Galactic band</div>
         </div>
                 
-        <div class="gallery-item" onclick="openLightbox('Natalja.jpg')">
+        <div class="gallery-item" onclick="openLightbox('https://placehold.co/1200x800?text=Nataljas+Pass')">
             <div class="gallery-tooltip">Natalja's Pass</div>
-            <img src="Natalja.jpg" alt="Natalja's Pass">
+            <img src="https://placehold.co/300x220?text=Nataljas+Pass" alt="Natalja's Pass">
             <div class="gallery-caption">Natalja's Pass</div>
         </div>
 
-        <div class="gallery-item" onclick="openLightbox('night.jpg')">
+        <div class="gallery-item" onclick="openLightbox('https://placehold.co/1200x800?text=True+Night')">
             <div class="gallery-tooltip">True Night</div>
-            <img src="night.jpg" alt="Night">
+            <img src="https://placehold.co/300x220?text=True+Night" alt="Night">
             <div class="gallery-caption">True Night</div>
         </div>
 
-         <div class="gallery-item" onclick="openLightbox('galacticnight.jpg')">
+         <div class="gallery-item" onclick="openLightbox('https://placehold.co/1200x800?text=Galactic+Night')">
             <div class="gallery-tooltip">Galactic Night</div>
-            <img src="galacticnight.jpg" alt="Galactic Night">
+            <img src="https://placehold.co/300x220?text=Galactic+Night" alt="Galactic Night">
         <div class="gallery-caption">Galactic Night</div>
          </div>         
                 
-        <div class="gallery-item" onclick="openLightbox('hope.jpg')">
+        <div class="gallery-item" onclick="openLightbox('https://placehold.co/1200x800?text=Hope')">
             <div class="gallery-tooltip">Hope</div>
-            <img src="hope.jpg" alt="Hope">
+            <img src="https://placehold.co/300x220?text=Hope" alt="Hope">
             <div class="gallery-caption">Hope</div>
         </div>          
-
                           
     </div>
 </div>
 
-                <!-- Add more gallery items here with your screenshots -->
-                <!-- Example template:
-                <div class="gallery-item" onclick="openLightbox('your-image.jpg')">
-                    <img src="your-image.jpg" alt="Description">
-                    <div class="gallery-caption">Your Caption Here</div>
-                </div>
-                -->
-            </div>
         </div>
 
         <!-- Lightbox Modal -->
@@ -728,177 +699,373 @@ Every NCT 'second' lasts roughly 1.1 Earth seconds. Here we live by GMT. </p>
     </div>
 </div>
 
+    </div> 
+    
+<script>
+// =======================
+//  NAHLA 12-PHASE TRACKER
+// =======================
+
+// --- Core constants ---
+
+const MOON_NAME = "Nahla";
+
+// Length of one full rotation (solar day) on Nahla
+const DAY_LENGTH_HOURS   = 26.4;
+const DAY_LENGTH_SECONDS = DAY_LENGTH_HOURS * 3600;  // 95,040
+
+// We divide the sky into 12 equal galactic-band phases
+const PHASE_COUNT           = 12;
+const PHASE_LENGTH_SECONDS  = DAY_LENGTH_SECONDS / PHASE_COUNT; // 7,920 s
+
+// Anchor: moment when Phase 1 starts (you update this when you resync)
+const CYCLE_ANCHOR = new Date("2025-11-18T09:00:00"); // Phase 1 start
+
+// Anchor for Rebekah's cycle (e.g. last rise or transit – your choice)
+const REBEKAH_ANCHOR = new Date("2025-11-18T07:00:00");
+
+// --- Utility helpers ---
+
+function mod(a, b) {
+    return ((a % b) + b) % b;
+}
+
+function format_timedelta(total_seconds) {
+    total_seconds = Math.max(0, total_seconds); // avoid negative weirdness
+
+    const hours   = Math.floor(total_seconds / 3600);
+    const minutes = Math.floor((total_seconds % 3600) / 60);
+    const seconds = Math.floor(total_seconds % 60);
+
+    return (
+        String(hours).padStart(2, "0")   + ":" +
+        String(minutes).padStart(2, "0") + ":" +
+        String(seconds).padStart(2, "0")
+    );
+}
+
+// ===============================================
+//        SYNC HELPERS FOR NAHLA SKY TRACKER
+// ===============================================
+//
+//  These helpers let you *instantly* resynchronise
+//  your 12-phase Galactic Band cycle and Rebekah’s
+//  rise/set cycle with a single observation.
+//
+//  No math. No offsets. Just:
+//
+//      setPhaseAnchor("2025-11-20T22:15:00", 7);
+//      setRebekahAnchor("2025-11-20T05:42:00");
+//
+// ===============================================
 
 
-    </div> <script>
-        // --- All your constants, ported to JavaScript ---
-        const MOON_NAME = "Nahla";
-        const SOLAR_DAY_LENGTH_EARTH_DAYS = 1.1;
-        // NOTE: JavaScript needs 'T' for ISO date format
-        const REBEKAH_LAST_RISE = new Date("2025-11-18T07:00:00"); 
-        const GALACTIC_BAND_PEAK = new Date("2025-11-18T13:00:00");
-        const LAST_SUNRISE = new Date("2025-11-18T09:00:00");
-        
-        const SECONDS_IN_EARTH_DAY = 24 * 60 * 60;
-        const SOLAR_DAY_LENGTH_SECONDS = SOLAR_DAY_LENGTH_EARTH_DAYS * SECONDS_IN_EARTH_DAY;
+// -----------------------------------------------
+//   A) Galactic Band Phase Anchor
+// -----------------------------------------------
+//
+//  When you observe the sky and determine the current
+//  phase number *N* (1–12), call:
+//
+//     setPhaseAnchor("timestamp", N)
+//     example - setPhaseAnchor("2025-11-21T23:14:55", 10); <<<<<<<<<
+//
+//  It will compute the correct CYCLE_ANCHOR such that
+//  Phase 1 aligns properly with the 26.4h cycle.
+//
 
-        // --- All your helper functions, ported to JavaScript ---
-        
-        function format_timedelta(total_seconds) {
-            const hours = Math.floor(total_seconds / 3600);
-            const minutes = Math.floor((total_seconds % 3600) / 60);
-            const seconds = Math.floor(total_seconds % 60);
-            // padStart adds leading zeros
-            return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-        }
+function setPhaseAnchor(observedTimestampString, observedPhaseNumber) {
 
-        function get_rebekah_status(current_time) {
-          const time_since_rise = (current_time - REBEKAH_LAST_RISE) / 1000;
-          const current_cycle_seconds = ((time_since_rise % SOLAR_DAY_LENGTH_SECONDS) + SOLAR_DAY_LENGTH_SECONDS) % SOLAR_DAY_LENGTH_SECONDS;
-          const half_rotation = SOLAR_DAY_LENGTH_SECONDS / 2;
+    // Convert input string → JS Date
+    const observedTime = new Date(observedTimestampString);
 
-          if (current_cycle_seconds < half_rotation) {
-            const time_until_set = half_rotation - current_cycle_seconds;
-            return `<strong>Rebekah:</strong> 🪐 VISIBLE | Est. set in: <span class="time-highlight">${format_timedelta(time_until_set)}</span> (ESTIMATE)`;
-          } else {
-            const time_until_rise = SOLAR_DAY_LENGTH_SECONDS - current_cycle_seconds;
-            return `<strong>Rebekah:</strong> ─ below horizon | Est. rise in: <span class="time-highlight">${format_timedelta(time_until_rise)}</span> (ESTIMATE)`;
-  
-        }
+    if (isNaN(observedTime.getTime())) {
+        console.error("Invalid timestamp passed to setPhaseAnchor()");
+        return;
+    }
 
-        }
+    if (observedPhaseNumber < 1 || observedPhaseNumber > 12) {
+        console.error("Phase number must be between 1 and 12");
+        return;
+    }
 
-        function get_sky_arc_indicator(progress, is_daytime) {
-            if (is_daytime) {
-                const positions = ["🌅", "☀️", "☀️", "☀️", "☀️", "🌇"];
-                const index = Math.floor(progress * (positions.length - 1));
-                let arc = ["─", "─", "─", "─", "─", "─"];
-                arc[index] = positions[index];
-                return `<strong>Hope:</strong> [${arc.join("")}]`;
-            } else {
-                return "<strong>Hope:</strong> [────────] (below horizon)";
-            }
-        }
+    // Phase N = Phase 1 + (N-1)*phaseLength
+    const offsetSeconds = (observedPhaseNumber - 1) * PHASE_LENGTH_SECONDS;
 
-        function get_galactic_band_indicator(current_time, is_daytime) {
-            const time_since_peak = (current_time - GALACTIC_BAND_PEAK) / 1000; // in seconds
-            const current_cycle_seconds = time_since_peak % SOLAR_DAY_LENGTH_SECONDS;
-            const hours_since_peak = current_cycle_seconds / 3600;
+    // New anchor = observed time – offset
+    const correctedAnchorMs = observedTime.getTime() - offsetSeconds * 1000;
 
-            if (is_daytime) {
-                return "<strong>Galactic Band</strong>: 🌌 present (lower angle)";
-            }
-            if (hours_since_peak < 1.5 || hours_since_peak > 24.9) {
-                return "<strong>Galactic Band:</strong> 🌌✨ PEAK BRIGHTNESS (~70° angle, highest elevation)";
-            } else if (hours_since_peak < 4.0 || hours_since_peak > 22.4) {
-                return "<strong>Galactic Band:</strong> 🌌 BRIGHT (prominent, high angle)";
-            } else if (10.0 < hours_since_peak && hours_since_peak < 16.4) {
-                return "<strong>Galactic Band:</strong> 🌌 visible (moderate, lower angle/near horizon)";
-            } else {
-                return "<strong>Galactic Band:</strong> 🌌 visible (rising/setting through rotation)";
-            }
-        }
+    // Assign globally so the rest of the tracker uses it
+    window.CYCLE_ANCHOR = new Date(correctedAnchorMs);
 
-        // --- The main update loop ---
-        function updateDisplay() {
-            const current_time = new Date();
-            const time_since_sunrise = (current_time - LAST_SUNRISE) / 1000; // in seconds
-            const current_cycle_seconds = time_since_sunrise % SOLAR_DAY_LENGTH_SECONDS;
-            const half_solar_day_seconds = SOLAR_DAY_LENGTH_SECONDS / 2;
-            const moon_time_progress = current_cycle_seconds / SOLAR_DAY_LENGTH_SECONDS;
-            
-            const hours_into_moon_day = moon_time_progress * SOLAR_DAY_LENGTH_EARTH_DAYS * 24;
-
-            let data = {};
-
-            if (current_cycle_seconds < half_solar_day_seconds) {
-                // Daytime
-                const day_progress = current_cycle_seconds / half_solar_day_seconds;
-                const time_until_sunset = half_solar_day_seconds - current_cycle_seconds;
-                data.status = `☀️  DAY on ${MOON_NAME} | Sunset in: <span class="time-highlight">${format_timedelta(time_until_sunset)}</span> | <span class="time-highlight">${hours_into_moon_day.toFixed(2)}h</span> into solar day`;
-                data.hope = get_sky_arc_indicator(day_progress, true);
-                data.band = get_galactic_band_indicator(current_time, true);
-            } else {
-                // Nighttime
-                const night_progress = (current_cycle_seconds - half_solar_day_seconds) / half_solar_day_seconds;
-                const time_until_sunrise = SOLAR_DAY_LENGTH_SECONDS - current_cycle_seconds;
-                data.status = `🌙 NIGHT on ${MOON_NAME} | Sunrise in: <span class="time-highlight">${format_timedelta(time_until_sunrise)}</span> | <span class="time-highlight">${hours_into_moon_day.toFixed(2)}h</span> into solar day`;
-                data.hope = get_sky_arc_indicator(night_progress, false);
-                data.band = get_galactic_band_indicator(current_time, false);
-            }
-setInterval(() => {
-    document.getElementById('moonclock').textContent = get_moon_clock();
-    document.getElementById('moonclock-coordinated').textContent = get_nahla_coordinated_time();
-}, 50); // update both clocks ~20 times/sec
-
-
-       
-        data.moonclock = get_moon_clock(current_time);
-         document.getElementById("moonclock").innerText = data.moonclock;
-         document.getElementById("moonclock-coordinated").innerText = get_nahla_coordinated_time(current_time);
-
-
-
-            data.rebekah = get_rebekah_status(current_time);
-
-            // Update the HTML
-            document.getElementById("status").innerHTML = data.status;
-            document.getElementById("hope").innerHTML = data.hope;
-            document.getElementById("band").innerHTML = data.band;
-            document.getElementById("rebekah").innerHTML = data.rebekah;
-        }
-
-
-function get_moon_clock() {
-    const now_ms = Date.now(); // absolute timestamp (ms since epoch)
-    const time_since_sunrise = (now_ms - LAST_SUNRISE) / 1000; 
-    const current_cycle_seconds = time_since_sunrise % SOLAR_DAY_LENGTH_SECONDS;
-
-    const hours = Math.floor(current_cycle_seconds / 3600);
-    const minutes = Math.floor((current_cycle_seconds % 3600) / 60);
-    const seconds = Math.floor(current_cycle_seconds % 60);
-
-    // High-resolution milliseconds based on performance.now()
-        const ms = Math.floor((Date.now() % 1000) / 10);
-
-        return `Nahla Local Time: ${String(hours).padStart(2, '0')}:` +
-       `${String(minutes).padStart(2, '0')}:` +
-       `${String(seconds).padStart(2, '0')}.` +
-       `${String(ms).padStart(2, '0')} (out of 26:24:00)`;
-
-
+    console.log(
+        `%c[SYNC] Galactic Band Anchor Updated\n` +
+        `Observed Phase: ${observedPhaseNumber}\n` +
+        `Observed Time: ${observedTime.toISOString()}\n` +
+        `New CYCLE_ANCHOR: ${window.CYCLE_ANCHOR.toISOString()}`,
+        "color: cyan; font-weight: bold;"
+    );
 }
 
 
-function get_nahla_coordinated_time() {
-    const now_ms = Date.now();
-    const time_since_sunrise = (now_ms - LAST_SUNRISE) / 1000;
-    const current_cycle_seconds = time_since_sunrise % SOLAR_DAY_LENGTH_SECONDS;
 
-        const SCALE = 24 / 26.4;                  // exact scaling
-        const scaled_seconds = current_cycle_seconds * SCALE;
+// -----------------------------------------------
+//   B) Rebekah Cycle Anchor
+// -----------------------------------------------
+//
+//  When you observe Rebekah rising or transiting,
+//  call:
+//
+//      setRebekahAnchor("timestamp");
+//
+//  This lets her half-cycle (13.2h visible,
+//  13.2h below horizon) stay aligned with your
+//  observations.
+//
+// -----------------------------------------------
+
+function setRebekahAnchor(observedTimestampString) {
+
+    const observedTime = new Date(observedTimestampString);
+
+    if (isNaN(observedTime.getTime())) {
+        console.error("Invalid timestamp passed to setRebekahAnchor()");
+        return;
+    }
+
+    // Assign globally
+    window.REBEKAH_ANCHOR = observedTime;
+
+    console.log(
+        `%c[SYNC] Rebekah Anchor Updated\n` +
+        `Observed Rise/Transit: ${observedTime.toISOString()}\n` +
+        `New REBEKAH_ANCHOR set.`,
+        "color: violet; font-weight: bold;"
+    );
+}
+
+
+
+// -----------------------------------------------
+//  OPTIONAL: Convenience function for debugging
+// -----------------------------------------------
+//
+//  Prints current anchors + phase diagnostics
+//
+
+function printAnchors() {
+    console.log(
+        `%cCurrent Anchors:\n` +
+        `CYCLE_ANCHOR:   ${window.CYCLE_ANCHOR.toISOString()}\n` +
+        `REBEKAH_ANCHOR: ${window.REBEKAH_ANCHOR.toISOString()}`,
+        "color: orange; font-weight: bold;"
+    );
+}
+
+
+
+
+
+// --- Galactic band + phase logic ---
+
+// Descriptions for each of the 12 galactic-band orientations
+const BAND_PHASE_DESCRIPTIONS = {
+    1: "low, rising (left)",
+    2: "low, steep rising",
+    3: "mid-height vertical",
+    4: "high, slanting across",
+    5: "overhead horizontal (maximum elevation)",
+    6: "high, descending",
+    7: "mid-height vertical (reversed)",
+    8: "steeply descending (right)",
+    9: "low, angled (right)",
+    10:"low, flat (reversed)",
+    11:"very low, dim rise",
+    12:"lowest, horizon-level (deep night)"
+};
+
+// Compute where we are in the 26.4 h cycle and which phase this corresponds to
+function get_cycle_state(now) {
+    const elapsed_seconds = (now - CYCLE_ANCHOR) / 1000; // float
+    const wrapped         = mod(elapsed_seconds, DAY_LENGTH_SECONDS);
+
+    const phaseIndex0     = Math.floor(wrapped / PHASE_LENGTH_SECONDS); // 0–11
+    const phaseNumber     = phaseIndex0 + 1;                            // 1–12
+    const secondsIntoPhase = wrapped - phaseIndex0 * PHASE_LENGTH_SECONDS;
+    const hoursIntoDay     = wrapped / 3600;
+
+    return {
+        wrappedSeconds: wrapped,
+        phaseIndex0,
+        phaseNumber,
+        secondsIntoPhase,
+        hoursIntoDay
+    };
+}
+
+// --- Hope (primary star) / sun-state logic ---
+
+// We group phases into 6 sun states, each covering 2 phases:
+//  Phases 1–2: dawn         (state 0)
+//  Phases 3–4: morning      (state 1)
+//  Phases 5–6: high sun     (state 2)
+//  Phases 7–8: sunset       (state 3)
+//  Phases 9–10: night       (state 4)
+//  Phases 11–12: deep night (state 5)
+
+function get_sun_state_index(phaseIndex0) {
+    // 0..11  =>  0..5
+    return Math.floor(phaseIndex0 / 2);
+}
+
+function get_hope_indicator(phaseIndex0) {
+    const sunState = get_sun_state_index(phaseIndex0);
+
+    // Daytime states (0–3) show the arc with an emoji
+    if (sunState <= 3) {
+        const symbols = ["🌅","☀️","🔆","🌇"]; // Dawn, morning, high, sunset
+        const arc = ["─","─","─","─","─","─"];
+        arc[sunState] = symbols[sunState];
+        return `<strong>Hope:</strong> [${arc.join("")}]`;
+    }
+
+    // Night & deep night: below horizon
+    return "<strong>Hope:</strong> [────────] (below horizon)";
+}
+
+// --- Galactic band indicator text ---
+
+function get_galactic_band_indicator(phaseNumber) {
+    // You can stylise this however you like; here we keep some “peak” flavour
+    if (phaseNumber === 5) {
+        return `<strong>Galactic Band:</strong> 🌌✨ PEAK BRIGHTNESS (${BAND_PHASE_DESCRIPTIONS[phaseNumber]})`;
+    } else if (phaseNumber === 4 || phaseNumber === 6) {
+        return `<strong>Galactic Band:</strong> 🌌 BRIGHT (${BAND_PHASE_DESCRIPTIONS[phaseNumber]})`;
+    } else if (phaseNumber === 3 || phaseNumber === 7 || phaseNumber === 8 || phaseNumber === 9) {
+        return `<strong>Galactic Band:</strong> 🌌 visible (${BAND_PHASE_DESCRIPTIONS[phaseNumber]})`;
+    } else {
+        return `<strong>Galactic Band:</strong> 🌌 visible (low angle – ${BAND_PHASE_DESCRIPTIONS[phaseNumber]})`;
+    }
+}
+
+// --- Rebekah status ---
+
+function get_rebekah_status(now) {
+    const elapsed = (now - REBEKAH_ANCHOR) / 1000;
+    const wrapped = mod(elapsed, DAY_LENGTH_SECONDS);
+    const half    = DAY_LENGTH_SECONDS / 2;
+
+    if (wrapped < half) {
+        // Above horizon – time until set
+        const time_until_set = half - wrapped;
+        return `<strong>Rebekah:</strong> 🪐 VISIBLE | Est. set in: <span class="time-highlight">${format_timedelta(time_until_set)}</span> (ESTIMATE)`;
+    } else {
+        // Below horizon – time until next rise
+        const time_until_rise = DAY_LENGTH_SECONDS - wrapped;
+        return `<strong>Rebekah:</strong> ─ below horizon | Est. rise in: <span class="time-highlight">${format_timedelta(time_until_rise)}</span> (ESTIMATE)`;
+    }
+}
+
+// --- 26.4h Nahla Local Time + 24h Coordinated Time ---
+
+function get_nahla_local_time_string(wrappedSeconds) {
+    const hours   = Math.floor(wrappedSeconds / 3600);
+    const minutes = Math.floor((wrappedSeconds % 3600) / 60);
+    const seconds = Math.floor(wrappedSeconds % 60);
+
+    const fractional = wrappedSeconds - Math.floor(wrappedSeconds);
+    const ms2        = Math.floor(fractional * 100); // two decimal digits
+
+    return (
+        "Nahla Local Time: " +
+        String(hours).padStart(2,"0")   + ":" +
+        String(minutes).padStart(2,"0") + ":" +
+        String(seconds).padStart(2,"0") + "." +
+        String(ms2).padStart(2,"0") +
+        " (out of 26:24:00)"
+    );
+}
+
+function get_nahla_coordinated_time_string(wrappedSeconds) {
+    const SCALE          = 24 / 26.4; // compress to 24h
+    const scaled_seconds = wrappedSeconds * SCALE;
 
     const hours   = Math.floor(scaled_seconds / 3600);
     const minutes = Math.floor((scaled_seconds % 3600) / 60);
     const seconds = Math.floor(scaled_seconds % 60);
 
-    // fractional part for smooth ms
-    const fractional = scaled_seconds % 1;
-    const ms = Math.floor(fractional * 100); // 2 decimal digits
+    const fractional = scaled_seconds - Math.floor(scaled_seconds);
+    const ms2        = Math.floor(fractional * 100);
 
-    return `Nahla Coordinated Time: ${String(hours).padStart(2, '0')}:` +
-           `${String(minutes).padStart(2, '0')}:` +
-           `${String(seconds).padStart(2, '0')}.` +
-           `${String(ms).padStart(2, '0')} (out of 24:00:00)`;
+    return (
+        "Nahla Coordinated Time: " +
+        String(hours).padStart(2,"0")   + ":" +
+        String(minutes).padStart(2,"0") + ":" +
+        String(seconds).padStart(2,"0") + "." +
+        String(ms2).padStart(2,"0") +
+        " (out of 24:00:00)"
+    );
 }
 
+// --- Main display update ---
+
+function updateDisplay() {
+    const now = new Date();
+    const cycle = get_cycle_state(now);
+
+    const phaseIndex0   = cycle.phaseIndex0;
+    const phaseNumber   = cycle.phaseNumber;
+    const wrapped       = cycle.wrappedSeconds;
+    const hoursIntoDay  = cycle.hoursIntoDay;
+
+    // Day vs night from phases:
+    // Phases 1–6 (indices 0–5) = DAY
+    // Phases 7–12 (indices 6–11) = NIGHT
+    const isDay = phaseIndex0 < 6;
+
+    let statusText;
+    let timeToEvent;
+
+    if (isDay) {
+        // Sunset at start of Phase 7 (index 6)
+        const sunset_at = 6 * PHASE_LENGTH_SECONDS; // seconds into cycle
+        timeToEvent     = sunset_at - wrapped;
+        statusText = `☀️  DAY on ${MOON_NAME} | Sunset in: <span class="time-highlight">${format_timedelta(timeToEvent)}</span> | <span class="time-highlight">${hoursIntoDay.toFixed(2)}h</span> into solar day`;
+    } else {
+        // Sunrise at start of Phase 1 (index 0) i.e. wrapped = 0 next cycle
+        timeToEvent = DAY_LENGTH_SECONDS - wrapped;
+        statusText = `🌙 NIGHT on ${MOON_NAME} | Sunrise in: <span class="time-highlight">${format_timedelta(timeToEvent)}</span> | <span class="time-highlight">${hoursIntoDay.toFixed(2)}h</span> into solar day`;
+    }
+
+    const hopeHtml   = get_hope_indicator(phaseIndex0);
+    const bandHtml   = get_galactic_band_indicator(phaseNumber);
+    const rebekahHtml = get_rebekah_status(now);
+
+    const moonclockString  = get_nahla_local_time_string(wrapped);
+    const nctString        = get_nahla_coordinated_time_string(wrapped);
+
+    // Push to DOM
+    const statusEl  = document.getElementById("status");
+    const hopeEl    = document.getElementById("hope");
+    const bandEl    = document.getElementById("band");
+    const rebekahEl = document.getElementById("rebekah");
+    const moonEl    = document.getElementById("moonclock");
+    const nctEl     = document.getElementById("moonclock-coordinated");
+
+    if (statusEl)  statusEl.innerHTML  = statusText;
+    if (hopeEl)    hopeEl.innerHTML    = hopeHtml;
+    if (bandEl)    bandEl.innerHTML    = bandHtml;
+    if (rebekahEl) rebekahEl.innerHTML = rebekahHtml;
+    if (moonEl)    moonEl.textContent  = moonclockString;
+    if (nctEl)     nctEl.textContent   = nctString;
+}
+
+// Run immediately, then keep updating
+updateDisplay();
+setInterval(updateDisplay, 50);   // ~20 FPS for smooth ms on the clocks
 
 
 
-
-        // Run the update function once immediately, then every second
-        updateDisplay();
-        setInterval(updateDisplay, 1000);
 
         // --- Gallery Lightbox Functions ---
         function openLightbox(imageSrc) {
@@ -920,7 +1087,7 @@ function get_nahla_coordinated_time() {
             }
         });
 
-            // --- Make gallery draggable ---
+        // --- Make gallery draggable ---
         const gallery = document.querySelector('.gallery-container');
 
         let isDown = false;
@@ -950,40 +1117,39 @@ function get_nahla_coordinated_time() {
           gallery.scrollLeft = scrollLeft - walk;
         });
 
-            const scrollLeftBtn = document.getElementById('scroll-left');
-const scrollRightBtn = document.getElementById('scroll-right');
+        const scrollLeftBtn = document.getElementById('scroll-left');
+        const scrollRightBtn = document.getElementById('scroll-right');
 
-const scrollAmount = 630; // 300px image + 15px gap
+        const scrollAmount = 630; // 300px image + 15px gap
 
-scrollLeftBtn.addEventListener('click', () => {
-    gallery.scrollBy({
-        left: -scrollAmount,
-        behavior: 'smooth'
-    });
-});
+        scrollLeftBtn.addEventListener('click', () => {
+            gallery.scrollBy({
+                left: -scrollAmount,
+                behavior: 'smooth'
+            });
+        });
 
-scrollRightBtn.addEventListener('click', () => {
-    gallery.scrollBy({
-        left: scrollAmount,
-        behavior: 'smooth'
-    });
-});
+        scrollRightBtn.addEventListener('click', () => {
+            gallery.scrollBy({
+                left: scrollAmount,
+                behavior: 'smooth'
+            });
+        });
 
-const audio = document.getElementById("nahla-audio");
-const btn = document.getElementById("audio-btn");
+        const audio = document.getElementById("nahla-audio");
+        const btn = document.getElementById("audio-btn");
 
-btn.addEventListener("click", () => {
-  if (audio.paused) {
-    audio.play();
-    btn.textContent = "⏸";  // Pause icon
-  } else {
-    audio.pause();
-    btn.textContent = "▶";  // Play icon
-  }
-});
-
-            
-
+        btn.addEventListener("click", () => {
+          // Audio context handling for autoplay policies usually requires a user gesture first
+          // which this click provides.
+          if (audio.paused) {
+            audio.play().catch(e => console.log("Audio play failed (likely missing file):", e));
+            btn.textContent = "⏸";  // Pause icon
+          } else {
+            audio.pause();
+            btn.textContent = "▶";  // Play icon
+          }
+        });
     </script>
 </body>
 </html>
