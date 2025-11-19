@@ -890,6 +890,11 @@ const BAND_PHASE_DESCRIPTIONS = {
     12:"lowest, horizon-level (deep night)"
 };
 
+    function get_phase_label(phaseNumber) {
+    return `Phase ${phaseNumber}: ${BAND_PHASE_DESCRIPTIONS[phaseNumber]}`;
+}
+
+
 // Compute where we are in the 26.4 h cycle and which phase this corresponds to
 function get_cycle_state(now) {
     const elapsed_seconds = (now - CYCLE_ANCHOR) / 1000; // float
@@ -1044,7 +1049,7 @@ function updateDisplay() {
     }
 
     const hopeHtml   = get_hope_indicator(phaseIndex0);
-    const bandHtml   = get_galactic_band_indicator(phaseNumber);
+    const bandHtml = `<strong>Galactic Band:</strong> 🌌 ${get_phase_label(phaseNumber)}`;
     const rebekahHtml = get_rebekah_status(now);
 
     const moonclockString  = get_nahla_local_time_string(wrapped);
