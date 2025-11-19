@@ -733,7 +733,7 @@ const PHASE_LENGTH_SECONDS  = DAY_LENGTH_SECONDS / PHASE_COUNT; // 7,920 s
 var CYCLE_ANCHOR   = new Date("2025-11-19T06:38:55.000Z");
 
 // Anchor for Rebekah's cycle (e.g. last rise or transit – your choice)
-var REBEKAH_ANCHOR = new Date("2025-11-19T05:42:00.000Z");
+var REBEKAH_ANCHOR = new Date("2025-11-19T15:00:00.000Z");
 
 // Load anchors from shared storage on startup
 async function loadAnchorsFromStorage() {
@@ -756,7 +756,7 @@ async function loadAnchorsFromStorage() {
 
 // Save anchors to shared storage
 async function saveAnchorsToStorage() {
-    try {
+    try {var REBEKAH_ANCHOR = new Date("${rebeka
         await window.storage.set('nahla-cycle-anchor', CYCLE_ANCHOR.toISOString(), true);
         await window.storage.set('nahla-rebekah-anchor', REBEKAH_ANCHOR.toISOString(), true);
         console.log('%c[SAVED] Anchors saved to shared storage', 'color: lime; font-weight: bold;');
