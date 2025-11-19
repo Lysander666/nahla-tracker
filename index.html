@@ -716,6 +716,11 @@ Every NCT 'second' lasts roughly 1.1 Earth seconds. Here we live by GMT. </p>
 
 const MOON_NAME = "Nahla";
 
+const SUNRISE_PHASE_INDEX0 = 0;   // phase 1
+const SUNSET_PHASE_INDEX0  = 8;   // phase 9
+const NIGHT_START_INDEX0   = 9;   // phase 10
+
+
 // Length of one full rotation (solar day) on Nahla
 const DAY_LENGTH_HOURS   = 26.4;
 const DAY_LENGTH_SECONDS = DAY_LENGTH_HOURS * 3600;  // 95,040
@@ -1084,21 +1089,28 @@ function updateDisplay() {
     // Day vs night from phases:
     // Phases 1–6 (indices 0–5) = DAY
     // Phases 7–12 (indices 6–11) = NIGHT
-    const isDay = phaseIndex0 < 6;
+    const isDay = phaseIndex0 >= SUNRISE_PHASE_INDEX0 && phaseIndex0 < SUNSET_PHASE_INDEX0;
 
     let statusText;
     let timeToEvent;
 
     if (isDay) {
         // Sunset at start of Phase 7 (index 6)
-        const sunset_at = 6 * PHASE_LENGTH_SECONDS; // seconds into cycle
+       const sunset_at = SUNSET_PHASE_INDEX0 * PHASE_LENGTH_SECONDS;
         timeToEvent     = sunset_at - wrapped;
         statusText = `☀️  DAY on ${MOON_NAME} | Sunset in: <span class="time-highlight">${format_timedelta(timeToEvent)}</span> | <span class="time-highlight">${hoursIntoDay.toFixed(2)}h</span> into solar day`;
-    } else {
-        // Sunrise at start of Phase 1 (index 0) i.e. wrapped = 0 next cycle
-        timeToEvent = DAY_LENGTH_SECONDS - wrapped;
-        statusText = `🌙 NIGHT on ${MOON_NAME} | Sunrise in: <span class="time-highlight">${format_timedelta(timeToEvent)}</span> | <span class="time-highlight">${hoursIntoDay.toFixed(2)}h</span> into solar day`;
-    }
+  } else {
+    // === NIGHTTIME ===
+
+    // Sunrise occurs when we cycle from phase 12 → phase 1.
+    // That is: wrapped = full 12 phases = 12 × phase_length.
+    const sunrise_at = 12 * PHASE_LENGTH_SECONDS;
+
+    // Time until sunrise = difference between full cycle and current progress.
+    const timeToEvent = sunrise_at - wrapped;
+
+    statusText = `🌙 NIGHT on ${MOON_NAME} | Sunrise in: <span class="time-highlight">${format_timedelta(timeToEvent)}</span> | <span class="time-highlight">${hoursIntoDay.toFixed(2)}h</span> into solar day`;
+}
 
     const hopeHtml   = get_hope_indicator(phaseIndex0);
     const bandHtml = get_galactic_band_indicator(phaseNumber)
