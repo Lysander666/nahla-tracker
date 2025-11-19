@@ -782,7 +782,6 @@ function format_timedelta(total_seconds) {
 
 function setPhaseAnchor(observedTimestampString, observedPhaseNumber) {
 
-    // Convert input string → JS Date
     const observedTime = new Date(observedTimestampString);
 
     if (isNaN(observedTime.getTime())) {
@@ -793,18 +792,12 @@ function setPhaseAnchor(observedTimestampString, observedPhaseNumber) {
     if (observedPhaseNumber < 1 || observedPhaseNumber > 12) {
         console.error("Phase number must be between 1 and 12");
         return;
-
-        printCodeForGitHub();
-
     }
 
-    // Phase N = Phase 1 + (N-1)*phaseLength
     const offsetSeconds = (observedPhaseNumber - 1) * PHASE_LENGTH_SECONDS;
 
-    // New anchor = observed time – offset
     const correctedAnchorMs = observedTime.getTime() - offsetSeconds * 1000;
 
-    // Assign globally so the rest of the tracker uses it
     window.CYCLE_ANCHOR = new Date(correctedAnchorMs);
 
     console.log(
@@ -814,7 +807,11 @@ function setPhaseAnchor(observedTimestampString, observedPhaseNumber) {
         `New CYCLE_ANCHOR: ${window.CYCLE_ANCHOR.toISOString()}`,
         "color: cyan; font-weight: bold;"
     );
+
+    // ✅ Now persistence works
+    printCodeForGitHub();
 }
+
 
 
 
@@ -840,12 +837,8 @@ function setRebekahAnchor(observedTimestampString) {
     if (isNaN(observedTime.getTime())) {
         console.error("Invalid timestamp passed to setRebekahAnchor()");
         return;
-
-        printCodeForGitHub();
-
     }
 
-    // Assign globally
     window.REBEKAH_ANCHOR = observedTime;
 
     console.log(
@@ -854,7 +847,11 @@ function setRebekahAnchor(observedTimestampString) {
         `New REBEKAH_ANCHOR set.`,
         "color: violet; font-weight: bold;"
     );
+
+    // ✅ Now persistence works
+    printCodeForGitHub();
 }
+
 
 
 
