@@ -725,10 +725,10 @@ const PHASE_COUNT           = 12;
 const PHASE_LENGTH_SECONDS  = DAY_LENGTH_SECONDS / PHASE_COUNT; // 7,920 s
 
 // Anchor: moment when Phase 1 starts (you update this when you resync)
-var CYCLE_ANCHOR = new Date("2025-11-18T09:00:00"); // Phase 1 start
+var CYCLE_ANCHOR   = new Date("2025-11-19T06:00:00.000Z");   // Phase cycle anchor
 
 // Anchor for Rebekah's cycle (e.g. last rise or transit – your choice)
-var REBEKAH_ANCHOR = new Date("2025-11-18T07:00:00");
+var REBEKAH_ANCHOR = new Date("2025-11-18T07:00:00.000Z");   // Rebekah anchor
 
 // --- Utility helpers ---
 
@@ -793,6 +793,9 @@ function setPhaseAnchor(observedTimestampString, observedPhaseNumber) {
     if (observedPhaseNumber < 1 || observedPhaseNumber > 12) {
         console.error("Phase number must be between 1 and 12");
         return;
+
+        printCodeForGitHub();
+
     }
 
     // Phase N = Phase 1 + (N-1)*phaseLength
@@ -837,6 +840,9 @@ function setRebekahAnchor(observedTimestampString) {
     if (isNaN(observedTime.getTime())) {
         console.error("Invalid timestamp passed to setRebekahAnchor()");
         return;
+
+        printCodeForGitHub();
+
     }
 
     // Assign globally
@@ -1019,6 +1025,25 @@ function get_nahla_coordinated_time_string(wrappedSeconds) {
 }
 
 // --- Main display update ---
+
+    function printCodeForGitHub() {
+    const cycle = window.CYCLE_ANCHOR.toISOString();
+    const rebekah = window.REBEKAH_ANCHOR.toISOString();
+
+    console.log(`
+////////////////////////////////////////////////////
+//  COPY THIS BLOCK INTO YOUR GITHUB CODE
+////////////////////////////////////////////////////
+
+var CYCLE_ANCHOR   = new Date("${cycle}");
+var REBEKAH_ANCHOR = new Date("${rebekah}");
+
+////////////////////////////////////////////////////
+//  END OF ANCHOR BLOCK
+////////////////////////////////////////////////////
+`);
+}
+
 
 function updateDisplay() {
     const now = new Date();
