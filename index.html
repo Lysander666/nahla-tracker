@@ -721,7 +721,7 @@
     <h2>🌕 Nahla News Network 🌌</h2>
     <div id="notes">
         <p><strong>21/11/3311: New calibrations and visitations!:</strong> Thanks to <a class="cyan-link" href="https://bsky.app/profile/fool.canonn.tech" target="_blank">LCU</a> we have the exact length of Nahla's 
-            rotation, which is 25 hours, 26 mins [and six seconds!]. And yesterday Hope system received a rare visit from a Sidewinder. Welcome!</p>
+            rotation, which is 25 hours, 26 mins [and ten seconds!]. And yesterday Hope system received a rare visit from a Sidewinder. Welcome!</p>
         <p><strong>20/11/3311: Four months today!:</strong> Today marks four months here for <strong>Zell Ak'inyi</strong>. That's a good amount of study, research, solace and relaxation for the Rawrunning pioneer. 
             Keep up with her through <a class="cyan-link" href="https://distantworlds3.space/projects/rawrunner/" target="_blank">Distant Worlds 3</a></strong> 🚀 </p>
         <p><strong>19/11/3311: Nahla Tracker is in alpha, v0.21:</strong> With this new version, NT is in alpha! We have ripped out all the old 'Keplerian' tracker script
@@ -754,7 +754,7 @@ const NIGHT_START_INDEX0   = 9;   // phase 10
 
 
 // Length of one full rotation (solar day) on Nahla
-const DAY_LENGTH_HOURS   = 26.4;
+const DAY_LENGTH_HOURS   = 25.435;
 const DAY_LENGTH_SECONDS = 91569.990873;
 
 // We divide the sky into 12 equal galactic-band phases
@@ -1074,7 +1074,7 @@ function get_nahla_local_time_string(wrappedSeconds) {
         String(minutes).padStart(2,"0") + ":" +
         String(seconds).padStart(2,"0") + "." +
         String(ms2).padStart(2,"0") +
-        " (out of 26:24:00)"
+        " (out of 25:26:10)"
     );
 }
 
