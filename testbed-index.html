@@ -1306,7 +1306,8 @@ function updateDisplay() {
     const hopeHtml   = get_hope_indicator(phaseIndex0);
     const bandHtml = get_galactic_band_indicator(phaseNumber)
     .replace("<strong>Galactic Band:</strong>", 
-             `<strong>Galactic Band:</strong> 🌌 ${greekPhase(phaseNumber)} —`);
+         `<strong>Galactic Band:</strong> 🌌 Phase ${phaseNumber} —`);
+
 
     const rebekahHtml = get_rebekah_status(now);
 
