@@ -489,6 +489,19 @@
         color: #66e2ff; /* or whatever colour you're using */
         }
 
+        #hope-graph {
+      width: 100%;
+      height: auto;
+      aspect-ratio: 1 / 1;       /* always square */
+      margin-top: 15px;
+      border-radius: 8px;
+      background: #050608;
+      box-shadow:
+        0 0 12px rgba(0,0,0,0.8),
+        0 0 16px rgba(97,218,251,0.25);
+    }
+
+
 
     </style>
 </head>
@@ -568,6 +581,7 @@
                     <li><strong>Absolute magnitude:</strong> 2.3165 </li>
                     <li><strong>Age:</strong> 800 million years</li>
                     <li><strong>Rotation:</strong> 1.0 Earth days</li>
+                    <canvas id="hope-graph"></canvas>
                     <li><strong>&nbsp;</strong></li> <li><strong>&nbsp;</strong></li> </ul>
             </div>
 
@@ -1271,6 +1285,290 @@ setInterval(updateDisplay, 50);   // ~20 FPS for smooth ms on the clocks
             btn.textContent = "▶";  // Play icon
           }
         });
+// ======================================================
+// HOPE LIVE GRAPH – Production Version
+// Dual Axis: Elevation (°) + Temperature (K)
+// X-axis: last 10 minutes (600 seconds)
+// Only corner labels, fixed grid, responsive square canvas
+// Uses: CYCLE_ANCHOR, DAY_LENGTH_SECONDS, mod()
+// ======================================================
+
+(function initHopeGraph() {
+  const canvas = document.getElementById("hope-graph");
+  if (!canvas) return;
+
+  const ctx = canvas.getContext("2d");
+
+  const WINDOW_SECONDS = 600; // 10 minutes
+  const MIN_ELEV_DEG = -90;
+  const MAX_ELEV_DEG = 90;
+  const MIN_TEMP = 143;
+  const MAX_TEMP = 275;
+
+  let width = 0;
+  let height = 0;
+  let samples = [];  // { elevDeg, tempK, tSec }
+  let secondsPerSample = 1;
+  let lastTemp = (MIN_TEMP + MAX_TEMP) / 2;
+  let lastSampleTimeSec = null;
+
+  // -----------------------
+  //  Resize handling
+  // -----------------------
+  function resizeCanvas() {
+    const displayWidth = canvas.clientWidth 
+                      || canvas.parentElement.clientWidth 
+                      || 300;
+
+    canvas.width = displayWidth;
+    canvas.height = displayWidth; // square
+    width = canvas.width;
+    height = canvas.height;
+
+    secondsPerSample = WINDOW_SECONDS / Math.max(1, width);
+
+    samples = [];
+    const nowSec = Date.now() / 1000;
+    lastSampleTimeSec = nowSec - WINDOW_SECONDS;
+
+    for (let i = 0; i < width; i++) {
+      const t = lastSampleTimeSec + i * secondsPerSample;
+      const d = new Date(t * 1000);
+      const eNorm = getElevationNormReal(d);
+      const elevDeg = eNorm * 90;
+      const tempK = computeTempK(eNorm);
+
+      samples.push({ elevDeg, tempK, tSec: t });
+    }
+  }
+
+  window.addEventListener("resize", resizeCanvas);
+  resizeCanvas();
+
+  // -----------------------
+  //  Elevation + Temperature
+  // -----------------------
+  function getElevationNormReal(now) {
+    const anchor = (window.CYCLE_ANCHOR instanceof Date)
+      ? window.CYCLE_ANCHOR
+      : new Date(0);
+
+    const elapsed = (now - anchor) / 1000;
+    const wrapped = mod(elapsed, DAY_LENGTH_SECONDS);
+    const frac = wrapped / DAY_LENGTH_SECONDS;
+
+    return Math.sin(frac * 2 * Math.PI - Math.PI / 2);
+  }
+
+  function computeTempK(eNorm) {
+    const base = MIN_TEMP + ((eNorm + 1) / 2) * (MAX_TEMP - MIN_TEMP);
+    const noise = (Math.random() - 0.5) * 2;
+    const target = base + noise;
+
+    const out = lastTemp * 0.95 + target * 0.05;
+    lastTemp = Math.max(MIN_TEMP, Math.min(MAX_TEMP, out));
+    return lastTemp;
+  }
+
+  // -----------------------
+  //  Sampling (time window)
+  // -----------------------
+  function addSamplesUpTo(nowSec) {
+    if (lastSampleTimeSec === null) {
+      lastSampleTimeSec = nowSec - secondsPerSample;
+    }
+
+    let t = lastSampleTimeSec;
+
+    while (t + secondsPerSample <= nowSec) {
+      t += secondsPerSample;
+
+      const d = new Date(t * 1000);
+      const eNorm = getElevationNormReal(d);
+      const elevDeg = eNorm * 90;
+      const tempK = computeTempK(eNorm);
+
+      samples.push({ elevDeg, tempK, tSec: t });
+      if (samples.length > width) samples.shift();
+    }
+
+    lastSampleTimeSec = t;
+  }
+
+  // -----------------------
+  //  Coordinate transforms
+  // -----------------------
+  function getPlotBounds() {
+    return {
+      left: 50,             // space for elevation labels
+      right: width - 50,    // space for temperature labels
+      top: 20,
+      bottom: height - 35   // space for time labels
+    };
+  }
+
+  function xForTimeOffset(sec, plot) {
+    const frac = sec / WINDOW_SECONDS;
+    return plot.left + frac * (plot.right - plot.left);
+  }
+
+  function yForElevDeg(deg, plot) {
+    const frac = (deg - MIN_ELEV_DEG) / (MAX_ELEV_DEG - MIN_ELEV_DEG);
+    return plot.bottom - frac * (plot.bottom - plot.top);
+  }
+
+  function yForTempK(T, plot) {
+    const frac = (T - MIN_TEMP) / (MAX_TEMP - MIN_TEMP);
+    return plot.bottom - frac * (plot.bottom - plot.top);
+  }
+
+  // -----------------------
+  //  Draw grid + axes
+  // -----------------------
+  function drawAxesAndGrid() {
+    const plot = getPlotBounds();
+
+    ctx.fillStyle = "#050608";
+    ctx.fillRect(0, 0, width, height);
+
+    ctx.save();
+    ctx.strokeStyle = "#14171c";
+    ctx.lineWidth = 1;
+
+    // Vertical grid lines for time ticks
+    const timeTicks = [0, 120, 240, 360, 480, 600];
+    timeTicks.forEach(t => {
+      const x = xForTimeOffset(t, plot) + 0.5;
+      ctx.beginPath();
+      ctx.moveTo(x, plot.top);
+      ctx.lineTo(x, plot.bottom);
+      ctx.stroke();
+    });
+
+    // Horizontal grid lines (for elevation)
+    const elevTicks = [-90, -45, 0, 45, 90];
+    elevTicks.forEach(deg => {
+      const y = yForElevDeg(deg, plot) + 0.5;
+      ctx.beginPath();
+      ctx.moveTo(plot.left, y);
+      ctx.lineTo(plot.right, y);
+      ctx.stroke();
+    });
+
+    ctx.restore();
+
+    // Border box
+    ctx.save();
+    ctx.strokeStyle = "#2b3a45";
+    ctx.lineWidth = 1.2;
+    ctx.strokeRect(plot.left, plot.top, plot.right - plot.left, plot.bottom - plot.top);
+    ctx.restore();
+
+    // Labels (corners only)
+    ctx.save();
+    ctx.fillStyle = "#9bd1e1";
+    ctx.font = "11px Consolas, monospace";
+    ctx.textBaseline = "middle";
+
+    // Elevation min/max
+    ctx.textAlign = "right";
+    ctx.fillText("-90°", plot.left - 6, yForElevDeg(-90, plot));
+    ctx.fillText("90°",  plot.left - 6, yForElevDeg(90, plot));
+
+    // Temperature min/max
+    ctx.textAlign = "left";
+    ctx.fillText("143K", plot.right + 6, yForTempK(143, plot));
+    ctx.fillText("275K", plot.right + 6, yForTempK(275, plot));
+
+    // Time: only start and end
+    ctx.textAlign = "center";
+    ctx.textBaseline = "top";
+    ctx.fillText("-10m", plot.left, plot.bottom + 4);
+    ctx.fillText("now", plot.right, plot.bottom + 4);
+
+    ctx.restore();
+  }
+
+  // -----------------------
+  //  Draw lines
+  // -----------------------
+  function drawWaveforms() {
+    const plot = getPlotBounds();
+    if (samples.length < 2) return;
+
+    const oldestTime = samples[0].tSec;
+
+    // Elevation (cyan)
+    ctx.save();
+    ctx.beginPath();
+    samples.forEach((s, i) => {
+      const x = xForTimeOffset(s.tSec - oldestTime, plot);
+      const y = yForElevDeg(s.elevDeg, plot);
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    });
+    ctx.strokeStyle = "#5fe4ff";
+    ctx.lineWidth = 2;
+    ctx.shadowColor = "rgba(95,228,255,0.7)";
+    ctx.shadowBlur = 6;
+    ctx.stroke();
+    ctx.restore();
+
+    // Temperature (orange)
+    ctx.save();
+    ctx.beginPath();
+    samples.forEach((s, i) => {
+      const x = xForTimeOffset(s.tSec - oldestTime, plot);
+      const y = yForTempK(s.tempK, plot);
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    });
+    ctx.strokeStyle = "#ffb15c";
+    ctx.lineWidth = 1.6;
+    ctx.shadowColor = "rgba(255,177,92,0.8)";
+    ctx.shadowBlur = 5;
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  // -----------------------
+  //  Animation loop
+  // -----------------------
+  function step() {
+    const nowSec = Date.now() / 1000;
+
+    if (width === 0 || height === 0) resizeCanvas();
+
+    addSamplesUpTo(nowSec);
+
+    // Pad if needed
+    while (samples.length < width) {
+      const t = (samples.length === 0)
+        ? nowSec - WINDOW_SECONDS
+        : samples[samples.length - 1].tSec + secondsPerSample;
+
+      const d = new Date(t * 1000);
+      const eNorm = getElevationNormReal(d);
+
+      samples.push({
+        elevDeg: eNorm * 90,
+        tempK: computeTempK(eNorm),
+        tSec: t
+      });
+    }
+
+    if (samples.length > width) samples = samples.slice(samples.length - width);
+
+    drawAxesAndGrid();
+    drawWaveforms();
+
+    requestAnimationFrame(step);
+  }
+
+  requestAnimationFrame(step);
+})();
+
+    
     </script>
 </body>
 </html>
