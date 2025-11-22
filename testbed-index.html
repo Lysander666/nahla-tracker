@@ -265,11 +265,13 @@
         #manifest-panel::-webkit-scrollbar-thumb:hover {
             background: #555;
         }
-
+    
         #hope-info {
         padding-bottom: 18px !important;
-        min-height: 460px; /* adjust until visually perfect */
+        min-height: 460px;
+        justify-content: flex-start !important;   /* <-- ADD THIS */
         }
+
 
         
         /* --- Manifest List Styling --- */
@@ -500,7 +502,7 @@
         /* ---- Nahla Clock ---- */
 #nahla-clock-container {
   width: 100%;
-  margin-top: 0px;
+  margin-top: 4px;
   display: flex;
   flex-direction: column;
   align-items: center;
