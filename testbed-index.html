@@ -581,8 +581,297 @@
                     <li><strong>Absolute magnitude:</strong> 2.3165 </li>
                     <li><strong>Age:</strong> 800 million years</li>
                     <li><strong>Rotation:</strong> 1.0 Earth days</li>
-                    <canvas id="hope-graph"></canvas>
                     <li><strong>&nbsp;</strong></li> <li><strong>&nbsp;</strong></li> </ul>
+                <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nahla 25h Clock – Galactic Compass</title>
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #101010;
+      color: #e0e0e0;
+      font-family: "Consolas", "Courier New", monospace;
+    }
+
+    #nahla-clock-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+    }
+
+    #nahla-clock {
+      width: 260px;
+      height: 260px;
+      filter: drop-shadow(0 0 15px rgba(97, 218, 251, 0.4));
+    }
+
+    .clock-face {
+      fill: #1a1a1a;
+      stroke: #333;
+      stroke-width: 2;
+    }
+
+    .clock-ring {
+      fill: none;
+      stroke: #61dafb;
+      stroke-width: 3;
+      opacity: 0.9;
+    }
+
+    /* 12 galactic-phase sectors */
+    .sector {
+      fill: rgba(97, 218, 251, 0.06);
+      stroke: rgba(97, 218, 251, 0.10);
+      stroke-width: 1;
+    }
+
+    .sector:nth-child(odd) {
+      fill: rgba(97, 218, 251, 0.04);
+    }
+
+    .tick {
+      stroke: #3c9fb9;
+      stroke-width: 1.6;
+      stroke-linecap: round;
+    }
+
+    .tick.major {
+      stroke-width: 2.4;
+      stroke: #61dafb;
+    }
+
+    .clock-number {
+      fill: #61dafb;
+      font-size: 10px;
+      font-weight: bold;
+      text-anchor: middle;
+      dominant-baseline: central;
+      opacity: 0.9;
+    }
+
+    .center-dot {
+      fill: #61dafb;
+    }
+
+    .hand-hour {
+      stroke: #61dafb;
+      stroke-width: 3;
+      stroke-linecap: round;
+      transform-origin: center;
+    }
+
+    .hand-glow {
+      stroke: rgba(97, 218, 251, 0.4);
+      stroke-width: 6;
+      stroke-linecap: round;
+      filter: blur(1px);
+      transform-origin: center;
+    }
+
+    .clock-label {
+      font-size: 0.9rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #9ee7ff;
+      margin-top: 10px;
+    }
+
+    .clock-digital {
+      font-size: 1.1rem;
+      letter-spacing: 0.12em;
+      color: #c0f5ff;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div id="nahla-clock-container">
+    <svg id="nahla-clock" viewBox="0 0 200 200">
+      <!-- Face -->
+      <circle cx="100" cy="100" r="90" class="clock-face" />
+      <circle cx="100" cy="100" r="88" class="clock-ring" />
+
+      <!-- 12-phase galactic band sectors (Greek) -->
+      <g id="sectors"></g>
+
+      <!-- 25 hour ticks -->
+      <g id="ticks"></g>
+
+      <!-- 25 hour numbers -->
+      <g id="numbers"></g>
+
+      <!-- Hour hand glow -->
+      <line id="hand-glow" class="hand-glow"
+            x1="100" y1="100" x2="100" y2="38" />
+
+      <!-- Hour hand -->
+      <line id="hand-hour" class="hand-hour"
+            x1="100" y1="100" x2="100" y2="40" />
+
+      <!-- Center dot -->
+      <circle cx="100" cy="100" r="3" class="center-dot" />
+    </svg>
+
+    <div class="clock-label">Nahla Local Time • 25h Day</div>
+    <div id="nahla-digital" class="clock-digital">00:00:00</div>
+  </div>
+
+  <script>
+    // These are from your main tracker:
+    // (When you paste this into your main file, they already exist.)
+    // DAY_LENGTH_SECONDS = 91569.990873;
+    // CYCLE_ANCHOR = Date object updated by your anchor updates.
+    // mod() = your modular arithmetic helper.
+
+    const tickGroup = document.getElementById('ticks');
+    const numGroup = document.getElementById('numbers');
+    const handHour = document.getElementById('hand-hour');
+    const handGlow = document.getElementById('hand-glow');
+    const digitalDisplay = document.getElementById('nahla-digital');
+
+    const HOURS_ON_FACE = 25;
+    const RADIUS = 88;
+    const NUMBER_RADIUS = 72;
+    const TICK_LENGTH_MAJOR = 10;
+    const TICK_LENGTH_MINOR = 6;
+
+    // Greek letters for phases
+    const phaseLabels = ['α','β','γ','δ','ε','ζ','η','θ','ι','κ','λ','μ'];
+
+    // -------------------------
+    // Build Sectors (Greek)
+    // -------------------------
+    function buildSectors() {
+      const group = document.getElementById("sectors");
+      const cx = 100, cy = 100;
+      const r = 88;
+      const labelR = 55;
+      const sectors = 12;
+
+      for (let i = 0; i < sectors; i++) {
+        const start = (i / sectors) * 2 * Math.PI - Math.PI / 2;
+        const end   = ((i + 1) / sectors) * 2 * Math.PI - Math.PI / 2;
+        const mid   = (start + end) / 2;
+
+        const x1 = cx + r * Math.cos(start);
+        const y1 = cy + r * Math.sin(start);
+        const x2 = cx + r * Math.cos(end);
+        const y2 = cy + r * Math.sin(end);
+
+        const path = document.createElementNS("http://www.w3.org/2000/svg","path");
+        path.setAttribute("d", `M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 0 1 ${x2} ${y2} Z`);
+        path.setAttribute("class","sector");
+        group.appendChild(path);
+
+        // Greek label
+        const lx = cx + labelR * Math.cos(mid);
+        const ly = cy + labelR * Math.sin(mid);
+
+        const text = document.createElementNS("http://www.w3.org/2000/svg","text");
+        text.textContent = phaseLabels[i];
+        text.setAttribute("x", lx);
+        text.setAttribute("y", ly);
+        text.setAttribute("fill", "#8eeaff");
+        text.setAttribute("font-size", "14");
+        text.setAttribute("font-family", "Consolas, monospace");
+        text.setAttribute("text-anchor", "middle");
+        text.setAttribute("dominant-baseline", "middle");
+        text.setAttribute("opacity", "0.5");
+
+        group.appendChild(text);
+      }
+    }
+
+    // -------------------------
+    // Build ticks + 0–24 numbers
+    // -------------------------
+    function createFaceElements() {
+      for (let i = 0; i < HOURS_ON_FACE; i++) {
+        const angleDeg = (i * 360) / HOURS_ON_FACE;
+        const isMajor = (i % 5 === 0);
+        const length = isMajor ? TICK_LENGTH_MAJOR : TICK_LENGTH_MINOR;
+
+        // Tick line
+        const tick = document.createElementNS("http://www.w3.org/2000/svg","line");
+        tick.setAttribute("x1", 100);
+        tick.setAttribute("y1", 100 - RADIUS);
+        tick.setAttribute("x2", 100);
+        tick.setAttribute("y2", 100 - RADIUS + length);
+        tick.setAttribute("class", `tick ${isMajor ? "major" : ""}`);
+        tick.setAttribute("transform", `rotate(${angleDeg}, 100, 100)`);
+        tickGroup.appendChild(tick);
+
+        // Number 0–24
+        const angleRad = (angleDeg - 90) * (Math.PI / 180);
+        const tx = 100 + NUMBER_RADIUS * Math.cos(angleRad);
+        const ty = 100 + NUMBER_RADIUS * Math.sin(angleRad);
+
+        const text = document.createElementNS("http://www.w3.org/2000/svg","text");
+        text.setAttribute("x", tx);
+        text.setAttribute("y", ty);
+        text.setAttribute("class","clock-number");
+        text.textContent = i;
+        numGroup.appendChild(text);
+      }
+    }
+
+    // -------------------------
+    // Sync with your tracker:
+    // Uses: CYCLE_ANCHOR + mod() + DAY_LENGTH_SECONDS
+    // -------------------------
+    function getWrappedNahlaSeconds() {
+      const now = new Date();
+      const anchor = (window.CYCLE_ANCHOR instanceof Date)
+        ? window.CYCLE_ANCHOR
+        : new Date(0);
+
+      const elapsed = (now - anchor) / 1000;
+      return mod(elapsed, DAY_LENGTH_SECONDS);
+    }
+
+    // Format as HH:MM:SS
+    function fmt(sec) {
+      sec = Math.floor(sec);
+      const h = Math.floor(sec / 3600);
+      const m = Math.floor((sec % 3600) / 60);
+      const s = sec % 60;
+      return `${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
+    }
+
+    // -------------------------
+    // Animation
+    // -------------------------
+    function updateClock() {
+      const wrapped = getWrappedNahlaSeconds();
+      const fraction = wrapped / DAY_LENGTH_SECONDS;
+      const rotation = fraction * 360;
+
+      handHour.style.transform = `rotate(${rotation}deg)`;
+      handGlow.style.transform = `rotate(${rotation}deg)`;
+
+      digitalDisplay.textContent = fmt(wrapped);
+
+      requestAnimationFrame(updateClock);
+    }
+
+    // -------------------------
+    // Init
+    // -------------------------
+    buildSectors();
+    createFaceElements();
+    updateClock();
+  </script>
+</body>
+</html>
+
             </div>
 
             <div id="map-panel">
@@ -1285,288 +1574,6 @@ setInterval(updateDisplay, 50);   // ~20 FPS for smooth ms on the clocks
             btn.textContent = "▶";  // Play icon
           }
         });
-// ======================================================
-// HOPE LIVE GRAPH – Production Version
-// Dual Axis: Elevation (°) + Temperature (K)
-// X-axis: last 10 minutes (600 seconds)
-// Only corner labels, fixed grid, responsive square canvas
-// Uses: CYCLE_ANCHOR, DAY_LENGTH_SECONDS, mod()
-// ======================================================
-
-(function initHopeGraph() {
-  const canvas = document.getElementById("hope-graph");
-  if (!canvas) return;
-
-  const ctx = canvas.getContext("2d");
-
-  const WINDOW_SECONDS = 600; // 10 minutes
-  const MIN_ELEV_DEG = -90;
-  const MAX_ELEV_DEG = 90;
-  const MIN_TEMP = 143;
-  const MAX_TEMP = 275;
-
-  let width = 0;
-  let height = 0;
-  let samples = [];  // { elevDeg, tempK, tSec }
-  let secondsPerSample = 1;
-  let lastTemp = (MIN_TEMP + MAX_TEMP) / 2;
-  let lastSampleTimeSec = null;
-
-  // -----------------------
-  //  Resize handling
-  // -----------------------
-  function resizeCanvas() {
-    const displayWidth = canvas.clientWidth 
-                      || canvas.parentElement.clientWidth 
-                      || 300;
-
-    canvas.width = displayWidth;
-    canvas.height = displayWidth; // square
-    width = canvas.width;
-    height = canvas.height;
-
-    secondsPerSample = WINDOW_SECONDS / Math.max(1, width);
-
-    samples = [];
-    const nowSec = Date.now() / 1000;
-    lastSampleTimeSec = nowSec - WINDOW_SECONDS;
-
-    for (let i = 0; i < width; i++) {
-      const t = lastSampleTimeSec + i * secondsPerSample;
-      const d = new Date(t * 1000);
-      const eNorm = getElevationNormReal(d);
-      const elevDeg = eNorm * 90;
-      const tempK = computeTempK(eNorm);
-
-      samples.push({ elevDeg, tempK, tSec: t });
-    }
-  }
-
-  window.addEventListener("resize", resizeCanvas);
-  resizeCanvas();
-
-  // -----------------------
-  //  Elevation + Temperature
-  // -----------------------
-  function getElevationNormReal(now) {
-    const anchor = (window.CYCLE_ANCHOR instanceof Date)
-      ? window.CYCLE_ANCHOR
-      : new Date(0);
-
-    const elapsed = (now - anchor) / 1000;
-    const wrapped = mod(elapsed, DAY_LENGTH_SECONDS);
-    const frac = wrapped / DAY_LENGTH_SECONDS;
-
-    return Math.sin(frac * 2 * Math.PI - Math.PI / 2);
-  }
-
-  function computeTempK(eNorm) {
-    const base = MIN_TEMP + ((eNorm + 1) / 2) * (MAX_TEMP - MIN_TEMP);
-    const noise = (Math.random() - 0.5) * 2;
-    const target = base + noise;
-
-    const out = lastTemp * 0.95 + target * 0.05;
-    lastTemp = Math.max(MIN_TEMP, Math.min(MAX_TEMP, out));
-    return lastTemp;
-  }
-
-  // -----------------------
-  //  Sampling (time window)
-  // -----------------------
-  function addSamplesUpTo(nowSec) {
-    if (lastSampleTimeSec === null) {
-      lastSampleTimeSec = nowSec - secondsPerSample;
-    }
-
-    let t = lastSampleTimeSec;
-
-    while (t + secondsPerSample <= nowSec) {
-      t += secondsPerSample;
-
-      const d = new Date(t * 1000);
-      const eNorm = getElevationNormReal(d);
-      const elevDeg = eNorm * 90;
-      const tempK = computeTempK(eNorm);
-
-      samples.push({ elevDeg, tempK, tSec: t });
-      if (samples.length > width) samples.shift();
-    }
-
-    lastSampleTimeSec = t;
-  }
-
-  // -----------------------
-  //  Coordinate transforms
-  // -----------------------
-  function getPlotBounds() {
-    return {
-      left: 50,             // space for elevation labels
-      right: width - 50,    // space for temperature labels
-      top: 20,
-      bottom: height - 35   // space for time labels
-    };
-  }
-
-  function xForTimeOffset(sec, plot) {
-    const frac = sec / WINDOW_SECONDS;
-    return plot.left + frac * (plot.right - plot.left);
-  }
-
-  function yForElevDeg(deg, plot) {
-    const frac = (deg - MIN_ELEV_DEG) / (MAX_ELEV_DEG - MIN_ELEV_DEG);
-    return plot.bottom - frac * (plot.bottom - plot.top);
-  }
-
-  function yForTempK(T, plot) {
-    const frac = (T - MIN_TEMP) / (MAX_TEMP - MIN_TEMP);
-    return plot.bottom - frac * (plot.bottom - plot.top);
-  }
-
-  // -----------------------
-  //  Draw grid + axes
-  // -----------------------
-  function drawAxesAndGrid() {
-    const plot = getPlotBounds();
-
-    ctx.fillStyle = "#050608";
-    ctx.fillRect(0, 0, width, height);
-
-    ctx.save();
-    ctx.strokeStyle = "#14171c";
-    ctx.lineWidth = 1;
-
-    // Vertical grid lines for time ticks
-    const timeTicks = [0, 120, 240, 360, 480, 600];
-    timeTicks.forEach(t => {
-      const x = xForTimeOffset(t, plot) + 0.5;
-      ctx.beginPath();
-      ctx.moveTo(x, plot.top);
-      ctx.lineTo(x, plot.bottom);
-      ctx.stroke();
-    });
-
-    // Horizontal grid lines (for elevation)
-    const elevTicks = [-90, -45, 0, 45, 90];
-    elevTicks.forEach(deg => {
-      const y = yForElevDeg(deg, plot) + 0.5;
-      ctx.beginPath();
-      ctx.moveTo(plot.left, y);
-      ctx.lineTo(plot.right, y);
-      ctx.stroke();
-    });
-
-    ctx.restore();
-
-    // Border box
-    ctx.save();
-    ctx.strokeStyle = "#2b3a45";
-    ctx.lineWidth = 1.2;
-    ctx.strokeRect(plot.left, plot.top, plot.right - plot.left, plot.bottom - plot.top);
-    ctx.restore();
-
-    // Labels (corners only)
-    ctx.save();
-    ctx.fillStyle = "#9bd1e1";
-    ctx.font = "11px Consolas, monospace";
-    ctx.textBaseline = "middle";
-
-    // Elevation min/max
-    ctx.textAlign = "right";
-    ctx.fillText("-90°", plot.left - 6, yForElevDeg(-90, plot));
-    ctx.fillText("90°",  plot.left - 6, yForElevDeg(90, plot));
-
-    // Temperature min/max
-    ctx.textAlign = "left";
-    ctx.fillText("143K", plot.right + 6, yForTempK(143, plot));
-    ctx.fillText("275K", plot.right + 6, yForTempK(275, plot));
-
-    // Time: only start and end
-    ctx.textAlign = "center";
-    ctx.textBaseline = "top";
-    ctx.fillText("-10m", plot.left, plot.bottom + 4);
-    ctx.fillText("now", plot.right, plot.bottom + 4);
-
-    ctx.restore();
-  }
-
-  // -----------------------
-  //  Draw lines
-  // -----------------------
-  function drawWaveforms() {
-    const plot = getPlotBounds();
-    if (samples.length < 2) return;
-
-    const oldestTime = samples[0].tSec;
-
-    // Elevation (cyan)
-    ctx.save();
-    ctx.beginPath();
-    samples.forEach((s, i) => {
-      const x = xForTimeOffset(s.tSec - oldestTime, plot);
-      const y = yForElevDeg(s.elevDeg, plot);
-      if (i === 0) ctx.moveTo(x, y);
-      else ctx.lineTo(x, y);
-    });
-    ctx.strokeStyle = "#5fe4ff";
-    ctx.lineWidth = 2;
-    ctx.shadowColor = "rgba(95,228,255,0.7)";
-    ctx.shadowBlur = 6;
-    ctx.stroke();
-    ctx.restore();
-
-    // Temperature (orange)
-    ctx.save();
-    ctx.beginPath();
-    samples.forEach((s, i) => {
-      const x = xForTimeOffset(s.tSec - oldestTime, plot);
-      const y = yForTempK(s.tempK, plot);
-      if (i === 0) ctx.moveTo(x, y);
-      else ctx.lineTo(x, y);
-    });
-    ctx.strokeStyle = "#ffb15c";
-    ctx.lineWidth = 1.6;
-    ctx.shadowColor = "rgba(255,177,92,0.8)";
-    ctx.shadowBlur = 5;
-    ctx.stroke();
-    ctx.restore();
-  }
-
-  // -----------------------
-  //  Animation loop
-  // -----------------------
-  function step() {
-    const nowSec = Date.now() / 1000;
-
-    if (width === 0 || height === 0) resizeCanvas();
-
-    addSamplesUpTo(nowSec);
-
-    // Pad if needed
-    while (samples.length < width) {
-      const t = (samples.length === 0)
-        ? nowSec - WINDOW_SECONDS
-        : samples[samples.length - 1].tSec + secondsPerSample;
-
-      const d = new Date(t * 1000);
-      const eNorm = getElevationNormReal(d);
-
-      samples.push({
-        elevDeg: eNorm * 90,
-        tempK: computeTempK(eNorm),
-        tSec: t
-      });
-    }
-
-    if (samples.length > width) samples = samples.slice(samples.length - width);
-
-    drawAxesAndGrid();
-    drawWaveforms();
-
-    requestAnimationFrame(step);
-  }
-
-  requestAnimationFrame(step);
-})();
 
     
     </script>
