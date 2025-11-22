@@ -489,6 +489,113 @@
         color: #66e2ff; /* or whatever colour you're using */
         }
 
+        /* ---- Nahla Clock ---- */
+#nahla-clock-container {
+  width: 100%;
+  padding-top: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#nahla-clock {
+  width: 100%;
+  height: auto;
+  max-width: 260px;
+  filter: drop-shadow(0 0 15px rgba(97, 218, 251, 0.4));
+}
+
+.clock-face {
+  fill: #1a1a1a;
+  stroke: #333;
+  stroke-width: 2;
+}
+
+.clock-ring {
+  fill: none;
+  stroke: #61dafb;
+  stroke-width: 3;
+  opacity: 0.9;
+}
+
+.sector {
+  fill: rgba(97, 218, 251, 0.06);
+  stroke: rgba(97, 218, 251, 0.10);
+  stroke-width: 1;
+}
+
+.sector:nth-child(odd) {
+  fill: rgba(97, 218, 251, 0.04);
+}
+
+.tick {
+  stroke: #3c9fb9;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+}
+
+.tick.major {
+  stroke: #61dafb;
+  stroke-width: 2.4;
+}
+
+.clock-number {
+  fill: #61dafb;
+  font-size: 10px;
+  font-weight: bold;
+  text-anchor: middle;
+  dominant-baseline: central;
+  opacity: 0.9;
+}
+
+.center-dot {
+  fill: #61dafb;
+}
+
+.hand-hour {
+  stroke: #61dafb;
+  stroke-width: 3;
+  stroke-linecap: round;
+  transform-origin: center;
+}
+
+.hand-glow {
+  stroke: rgba(97, 218, 251, 0.4);
+  stroke-width: 6;
+  stroke-linecap: round;
+  filter: blur(1px);
+  transform-origin: center;
+}
+
+.clock-label {
+  margin-top: 6px;
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #9ee7ff;
+}
+
+.clock-digital {
+  font-size: 0.9rem;
+  letter-spacing: 0.12em;
+  color: #c0f5ff;
+  font-weight: bold;
+  margin-top: 2px;
+}
+
+/* PULSE EFFECT FOR ACTIVE PHASE */
+.active-phase {
+  stroke: #9ee7ff !important;
+  stroke-width: 2 !important;
+  animation: phasePulse 3s ease-in-out infinite;
+}
+
+@keyframes phasePulse {
+  0%   { fill-opacity: 0.06; stroke-opacity: 0.5; }
+  50%  { fill-opacity: 0.12; stroke-opacity: 0.9; }
+  100% { fill-opacity: 0.06; stroke-opacity: 0.5; }
+}
+
 
     </style>
 </head>
@@ -569,295 +676,28 @@
                     <li><strong>Age:</strong> 800 million years</li>
                     <li><strong>Rotation:</strong> 1.0 Earth days</li>
                     <li><strong>&nbsp;</strong></li> <li><strong>&nbsp;</strong></li> </ul>
-                <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Nahla 25h Clock – Galactic Compass</title>
-  <style>
-    body {
-      margin: 0;
-      height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: #101010;
-      color: #e0e0e0;
-      font-family: "Consolas", "Courier New", monospace;
-    }
-
-    #nahla-clock-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 16px;
-    }
-
-    #nahla-clock {
-      width: 260px;
-      height: 260px;
-      filter: drop-shadow(0 0 15px rgba(97, 218, 251, 0.4));
-    }
-
-    .clock-face {
-      fill: #1a1a1a;
-      stroke: #333;
-      stroke-width: 2;
-    }
-
-    .clock-ring {
-      fill: none;
-      stroke: #61dafb;
-      stroke-width: 3;
-      opacity: 0.9;
-    }
-
-    /* 12 galactic-phase sectors */
-    .sector {
-      fill: rgba(97, 218, 251, 0.06);
-      stroke: rgba(97, 218, 251, 0.10);
-      stroke-width: 1;
-    }
-
-    .sector:nth-child(odd) {
-      fill: rgba(97, 218, 251, 0.04);
-    }
-
-    .tick {
-      stroke: #3c9fb9;
-      stroke-width: 1.6;
-      stroke-linecap: round;
-    }
-
-    .tick.major {
-      stroke-width: 2.4;
-      stroke: #61dafb;
-    }
-
-    .clock-number {
-      fill: #61dafb;
-      font-size: 10px;
-      font-weight: bold;
-      text-anchor: middle;
-      dominant-baseline: central;
-      opacity: 0.9;
-    }
-
-    .center-dot {
-      fill: #61dafb;
-    }
-
-    .hand-hour {
-      stroke: #61dafb;
-      stroke-width: 3;
-      stroke-linecap: round;
-      transform-origin: center;
-    }
-
-    .hand-glow {
-      stroke: rgba(97, 218, 251, 0.4);
-      stroke-width: 6;
-      stroke-linecap: round;
-      filter: blur(1px);
-      transform-origin: center;
-    }
-
-    .clock-label {
-      font-size: 0.9rem;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: #9ee7ff;
-      margin-top: 10px;
-    }
-
-    .clock-digital {
-      font-size: 1.1rem;
-      letter-spacing: 0.12em;
-      color: #c0f5ff;
-      font-weight: bold;
-    }
-  </style>
-</head>
-<body>
-  <div id="nahla-clock-container">
+<!-- Nahla Local Time Clock -->
+<div id="nahla-clock-container">
     <svg id="nahla-clock" viewBox="0 0 200 200">
-      <!-- Face -->
-      <circle cx="100" cy="100" r="90" class="clock-face" />
-      <circle cx="100" cy="100" r="88" class="clock-ring" />
+        <circle cx="100" cy="100" r="90" class="clock-face" />
+        <circle cx="100" cy="100" r="88" class="clock-ring" />
 
-      <!-- 12-phase galactic band sectors (Greek) -->
-      <g id="sectors"></g>
+        <g id="nahla-sectors"></g>
+        <g id="nahla-ticks"></g>
+        <g id="nahla-numbers"></g>
 
-      <!-- 25 hour ticks -->
-      <g id="ticks"></g>
+        <line id="nahla-hand-glow" class="hand-glow"
+              x1="100" y1="100" x2="100" y2="38" />
 
-      <!-- 25 hour numbers -->
-      <g id="numbers"></g>
+        <line id="nahla-hand-hour" class="hand-hour"
+              x1="100" y1="100" x2="100" y2="40" />
 
-      <!-- Hour hand glow -->
-      <line id="hand-glow" class="hand-glow"
-            x1="100" y1="100" x2="100" y2="38" />
-
-      <!-- Hour hand -->
-      <line id="hand-hour" class="hand-hour"
-            x1="100" y1="100" x2="100" y2="40" />
-
-      <!-- Center dot -->
-      <circle cx="100" cy="100" r="3" class="center-dot" />
+        <circle cx="100" cy="100" r="3" class="center-dot" />
     </svg>
 
     <div class="clock-label">Nahla Local Time • 25h Day</div>
     <div id="nahla-digital" class="clock-digital">00:00:00</div>
-  </div>
-
-  <script>
-    // These are from your main tracker:
-    // (When you paste this into your main file, they already exist.)
-    // DAY_LENGTH_SECONDS = 91569.990873;
-    // CYCLE_ANCHOR = Date object updated by your anchor updates.
-    // mod() = your modular arithmetic helper.
-
-    const tickGroup = document.getElementById('ticks');
-    const numGroup = document.getElementById('numbers');
-    const handHour = document.getElementById('hand-hour');
-    const handGlow = document.getElementById('hand-glow');
-    const digitalDisplay = document.getElementById('nahla-digital');
-
-    const HOURS_ON_FACE = 25;
-    const RADIUS = 88;
-    const NUMBER_RADIUS = 72;
-    const TICK_LENGTH_MAJOR = 10;
-    const TICK_LENGTH_MINOR = 6;
-
-    // Greek letters for phases
-    const phaseLabels = ['α','β','γ','δ','ε','ζ','η','θ','ι','κ','λ','μ'];
-
-    // -------------------------
-    // Build Sectors (Greek)
-    // -------------------------
-    function buildSectors() {
-      const group = document.getElementById("sectors");
-      const cx = 100, cy = 100;
-      const r = 88;
-      const labelR = 55;
-      const sectors = 12;
-
-      for (let i = 0; i < sectors; i++) {
-        const start = (i / sectors) * 2 * Math.PI - Math.PI / 2;
-        const end   = ((i + 1) / sectors) * 2 * Math.PI - Math.PI / 2;
-        const mid   = (start + end) / 2;
-
-        const x1 = cx + r * Math.cos(start);
-        const y1 = cy + r * Math.sin(start);
-        const x2 = cx + r * Math.cos(end);
-        const y2 = cy + r * Math.sin(end);
-
-        const path = document.createElementNS("http://www.w3.org/2000/svg","path");
-        path.setAttribute("d", `M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 0 1 ${x2} ${y2} Z`);
-        path.setAttribute("class","sector");
-        group.appendChild(path);
-
-        // Greek label
-        const lx = cx + labelR * Math.cos(mid);
-        const ly = cy + labelR * Math.sin(mid);
-
-        const text = document.createElementNS("http://www.w3.org/2000/svg","text");
-        text.textContent = phaseLabels[i];
-        text.setAttribute("x", lx);
-        text.setAttribute("y", ly);
-        text.setAttribute("fill", "#8eeaff");
-        text.setAttribute("font-size", "14");
-        text.setAttribute("font-family", "Consolas, monospace");
-        text.setAttribute("text-anchor", "middle");
-        text.setAttribute("dominant-baseline", "middle");
-        text.setAttribute("opacity", "0.5");
-
-        group.appendChild(text);
-      }
-    }
-
-    // -------------------------
-    // Build ticks + 0–24 numbers
-    // -------------------------
-    function createFaceElements() {
-      for (let i = 0; i < HOURS_ON_FACE; i++) {
-        const angleDeg = (i * 360) / HOURS_ON_FACE;
-        const isMajor = (i % 5 === 0);
-        const length = isMajor ? TICK_LENGTH_MAJOR : TICK_LENGTH_MINOR;
-
-        // Tick line
-        const tick = document.createElementNS("http://www.w3.org/2000/svg","line");
-        tick.setAttribute("x1", 100);
-        tick.setAttribute("y1", 100 - RADIUS);
-        tick.setAttribute("x2", 100);
-        tick.setAttribute("y2", 100 - RADIUS + length);
-        tick.setAttribute("class", `tick ${isMajor ? "major" : ""}`);
-        tick.setAttribute("transform", `rotate(${angleDeg}, 100, 100)`);
-        tickGroup.appendChild(tick);
-
-        // Number 0–24
-        const angleRad = (angleDeg - 90) * (Math.PI / 180);
-        const tx = 100 + NUMBER_RADIUS * Math.cos(angleRad);
-        const ty = 100 + NUMBER_RADIUS * Math.sin(angleRad);
-
-        const text = document.createElementNS("http://www.w3.org/2000/svg","text");
-        text.setAttribute("x", tx);
-        text.setAttribute("y", ty);
-        text.setAttribute("class","clock-number");
-        text.textContent = i;
-        numGroup.appendChild(text);
-      }
-    }
-
-    // -------------------------
-    // Sync with your tracker:
-    // Uses: CYCLE_ANCHOR + mod() + DAY_LENGTH_SECONDS
-    // -------------------------
-    function getWrappedNahlaSeconds() {
-      const now = new Date();
-      const anchor = (window.CYCLE_ANCHOR instanceof Date)
-        ? window.CYCLE_ANCHOR
-        : new Date(0);
-
-      const elapsed = (now - anchor) / 1000;
-      return mod(elapsed, DAY_LENGTH_SECONDS);
-    }
-
-    // Format as HH:MM:SS
-    function fmt(sec) {
-      sec = Math.floor(sec);
-      const h = Math.floor(sec / 3600);
-      const m = Math.floor((sec % 3600) / 60);
-      const s = sec % 60;
-      return `${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
-    }
-
-    // -------------------------
-    // Animation
-    // -------------------------
-    function updateClock() {
-      const wrapped = getWrappedNahlaSeconds();
-      const fraction = wrapped / DAY_LENGTH_SECONDS;
-      const rotation = fraction * 360;
-
-      handHour.style.transform = `rotate(${rotation}deg)`;
-      handGlow.style.transform = `rotate(${rotation}deg)`;
-
-      digitalDisplay.textContent = fmt(wrapped);
-
-      requestAnimationFrame(updateClock);
-    }
-
-    // -------------------------
-    // Init
-    // -------------------------
-    buildSectors();
-    createFaceElements();
-    updateClock();
-  </script>
-</body>
-</html>
+</div>
 
             </div>
 
@@ -1561,6 +1401,150 @@ setInterval(updateDisplay, 50);   // ~20 FPS for smooth ms on the clocks
             btn.textContent = "▶";  // Play icon
           }
         });
+
+    /* ===================================
+      NAHLA CLOCK (SYNCED + ACTIVE)
+   =================================== */
+
+(function() {
+
+  const HOURS_ON_FACE = 25;
+  const RADIUS = 88;
+  const NUMBER_RADIUS = 72;
+  const TICK_LENGTH_MAJOR = 10;
+  const TICK_LENGTH_MINOR = 6;
+
+  const greekPhases = ['α','β','γ','δ','ε','ζ','η','θ','ι','κ','λ','μ'];
+
+  const svgSectors = document.getElementById("nahla-sectors");
+  const svgTicks   = document.getElementById("nahla-ticks");
+  const svgNums    = document.getElementById("nahla-numbers");
+  const handHour   = document.getElementById("nahla-hand-hour");
+  const handGlow   = document.getElementById("nahla-hand-glow");
+  const digital    = document.getElementById("nahla-digital");
+
+  /* ------- Build Greek Phase Sectors ------- */
+  function buildSectors() {
+    const cx = 100, cy = 100;
+    const r = 88;
+    const labelR = 55;
+
+    for (let i = 0; i < 12; i++) {
+      const start = (i / 12) * 2*Math.PI - Math.PI/2;
+      const end   = ((i+1)/12) * 2*Math.PI - Math.PI/2;
+      const mid   = (start + end) / 2;
+
+      const x1 = cx + r*Math.cos(start);
+      const y1 = cy + r*Math.sin(start);
+      const x2 = cx + r*Math.cos(end);
+      const y2 = cy + r*Math.sin(end);
+
+      const path = document.createElementNS("http://www.w3.org/2000/svg","path");
+      path.setAttribute("d", `M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 0 1 ${x2} ${y2} Z`);
+      path.setAttribute("class","sector");
+      svgSectors.appendChild(path);
+
+      const lx = cx + labelR*Math.cos(mid);
+      const ly = cy + labelR*Math.sin(mid);
+
+      const t = document.createElementNS("http://www.w3.org/2000/svg","text");
+      t.textContent = greekPhases[i];
+      t.setAttribute("x", lx);
+      t.setAttribute("y", ly);
+      t.setAttribute("fill", "#8eeaff");
+      t.setAttribute("font-size", "14");
+      t.setAttribute("font-family", "Consolas, monospace");
+      t.setAttribute("text-anchor", "middle");
+      t.setAttribute("dominant-baseline", "middle");
+      t.setAttribute("opacity", "0.5");
+      svgSectors.appendChild(t);
+    }
+  }
+
+  /* ------- Ticks + Numbers ------- */
+  function buildTicks() {
+    for (let i = 0; i < HOURS_ON_FACE; i++) {
+      const angleDeg = (i * 360) / HOURS_ON_FACE;
+      const isMajor = i % 5 === 0;
+      const length  = isMajor ? TICK_LENGTH_MAJOR : TICK_LENGTH_MINOR;
+
+      const tick = document.createElementNS("http://www.w3.org/2000/svg","line");
+      tick.setAttribute("x1",100);
+      tick.setAttribute("y1",100 - RADIUS);
+      tick.setAttribute("x2",100);
+      tick.setAttribute("y2",100 - RADIUS + length);
+      tick.setAttribute("class", `tick ${isMajor ? 'major':''}`);
+      tick.setAttribute("transform",`rotate(${angleDeg},100,100)`);
+      svgTicks.appendChild(tick);
+
+      const angleRad = (angleDeg - 90)*(Math.PI/180);
+      const tx = 100 + NUMBER_RADIUS*Math.cos(angleRad);
+      const ty = 100 + NUMBER_RADIUS*Math.sin(angleRad);
+
+      const num = document.createElementNS("http://www.w3.org/2000/svg","text");
+      num.setAttribute("x", tx);
+      num.setAttribute("y", ty);
+      num.setAttribute("class","clock-number");
+      num.textContent = i;
+      svgNums.appendChild(num);
+    }
+  }
+
+  /* ------- NLT True Seconds (Synced) ------- */
+  function getWrappedNahlaSeconds() {
+    const now = new Date();
+    const anchor = (window.CYCLE_ANCHOR instanceof Date) ? window.CYCLE_ANCHOR : new Date(0);
+    const elapsed = (now - anchor) / 1000;
+    return mod(elapsed, DAY_LENGTH_SECONDS);
+  }
+
+  function fmt(sec) {
+    sec = Math.floor(sec);
+    const h = Math.floor(sec / 3600);
+    const m = Math.floor((sec % 3600) / 60);
+    const s = sec % 60;
+    return `${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
+  }
+
+  /* ------- Active Phase Pulse ------- */
+  function getCurrentPhase(wrappedSec) {
+    return Math.floor((wrappedSec / DAY_LENGTH_SECONDS) * 12) % 12;
+  }
+
+  let lastActive = null;
+
+  function updateActiveSector(wrappedSec) {
+    const phase = getCurrentPhase(wrappedSec);
+    if (phase === lastActive) return;
+    lastActive = phase;
+
+    const paths = svgSectors.querySelectorAll("path");
+    paths.forEach(p => p.classList.remove("active-phase"));
+    if (paths[phase]) paths[phase].classList.add("active-phase");
+  }
+
+  /* ------- Animation Loop ------- */
+  function updateClock() {
+    const wrapped = getWrappedNahlaSeconds();
+    const fraction = wrapped / DAY_LENGTH_SECONDS;
+    const rotation = fraction * 360;
+
+    handHour.style.transform = `rotate(${rotation}deg)`;
+    handGlow.style.transform = `rotate(${rotation}deg)`;
+
+    digital.textContent = fmt(wrapped);
+    updateActiveSector(wrapped);
+
+    requestAnimationFrame(updateClock);
+  }
+
+  buildSectors();
+  buildTicks();
+  updateClock();
+
+})();
+
+    
     </script>
 </body>
 </html>
