@@ -526,13 +526,11 @@
             fill: #61dafb;
         }
 
-        .hand-hour {
-            stroke: #61dafb;
-            stroke-width: 3;
-            stroke-linecap: round;
-            transform-origin: center;
-            opacity: 0.75;
-        }
+.hand-hour {
+    fill: #61dafb;   /* the colour of the hand */
+    stroke: none;    /* no outline */
+}
+
 
         .hand-glow {
             stroke: rgba(97, 218, 251, 0.4);
@@ -648,9 +646,8 @@
                 <line id="hand-glow" class="hand-glow"
                   x1="100" y1="100" x2="100" y2="58" />
 
-                <!-- Hour hand tapered -->
-                <polygon id="hand-hour" class="hand-hour"
-                 points="100,100 103,42 97,42" />
+<polygon id="hand-hour" class="hand-hour"
+    points="100,100 101.5,42 98.5,42" />
 
                             <circle cx="100" cy="100" r="3" class="center-dot" />
                         </svg>
