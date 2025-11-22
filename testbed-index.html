@@ -1,4 +1,4 @@
-    <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -526,11 +526,13 @@
             fill: #61dafb;
         }
 
-.hand-hour {
-    fill: #61dafb;   /* the colour of the hand */
-    stroke: none;    /* no outline */
-}
-
+        .hand-hour {
+            stroke: #61dafb;
+            stroke-width: 3;
+            stroke-linecap: round;
+            transform-origin: center;
+            opacity: 0.75;
+        }
 
         .hand-glow {
             stroke: rgba(97, 218, 251, 0.4);
@@ -642,19 +644,17 @@
                             <g id="nahla-ticks"></g>
                             <g id="nahla-numbers"></g>
 
-                <!-- Hour hand glow (kept as line, fine as-is) -->
-                <line id="hand-glow" class="hand-glow"
-                  x1="100" y1="100" x2="100" y2="58" />
+                            <line id="nahla-hand-glow" class="hand-glow"
+                                  x1="100" y1="100" x2="100" y2="56" />
 
-<polygon id="hand-hour" class="hand-hour"
-    points="100,100 101.5,42 98.5,42" />
+                            <line id="nahla-hand-hour" class="hand-hour"
+                                  x1="100" y1="100" x2="100" y2="56" />
 
                             <circle cx="100" cy="100" r="3" class="center-dot" />
                         </svg>
 
                         <div class="clock-label">Nahla Phase Clock • 25h Day</div>
                         <div class="clock-label">Galactic Band &#945;-&#956;</div>
-
                     </div>
                 </ul>
             </div>
