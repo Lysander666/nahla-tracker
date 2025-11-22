@@ -1306,10 +1306,13 @@ function updateDisplay() {
     statusText = `🌙 NIGHT on ${MOON_NAME} | Sunrise in: <span class="time-highlight">${format_timedelta(timeToEvent)}</span> | <span class="time-highlight">${hoursIntoDay.toFixed(2)}h</span> into solar day`;
 }
 
-const bandHtml = get_galactic_band_indicator(phaseNumber)
-    .replace("<strong>Galactic Band:</strong>",
-             `<strong>Galactic Band:</strong> 🌌 Phase ${greekPhase(phaseNumber)} —`);
-
+const bandHtml =
+    `<strong>Galactic Band:</strong> 🌌 Phase ${greekPhase(phaseNumber)} — ` +
+    get_galactic_band_indicator(phaseNumber)
+        .replace(
+            /^<strong>Galactic Band:<\/strong>\s*🌌(?:\uFE0F)?\s*/i,
+            ""
+        );
 
 
     const rebekahHtml = get_rebekah_status(now);
