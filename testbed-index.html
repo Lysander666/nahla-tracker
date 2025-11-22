@@ -606,9 +606,10 @@
 }
 
 .system-info {
-    display: grid;
+    display: grid !important;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    grid-auto-rows: 640px;   /* <-- restores uniform panel heights */
+    grid-auto-rows: 640px !important;
+    align-items: stretch !important;
 }
 
         
@@ -711,7 +712,7 @@
     </svg>
 
     <div class="clock-label">Nahla Local Time • 25h Day</div>
-    <div id="nahla-digital" class="clock-digital">00:00:00</div>
+    <!-- <div id="nahla-digital" class="clock-digital">00:00:00</div> -->
 </div>
 
             </div>
@@ -1547,7 +1548,7 @@ setInterval(updateDisplay, 50);   // ~20 FPS for smooth ms on the clocks
     handHour.style.transform = `rotate(${rotation}deg)`;
     handGlow.style.transform = `rotate(${rotation}deg)`;
 
-    digital.textContent = fmt(wrapped);
+   // digital.textContent = fmt(wrapped);
     updateActiveSector(wrapped);
 
     requestAnimationFrame(updateClock);
