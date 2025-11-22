@@ -968,6 +968,12 @@ function format_timedelta(total_seconds) {
         String(minutes).padStart(2, "0") + ":" +
         String(seconds).padStart(2, "0")
     );
+
+function greekPhase(n) {
+    return ["α","β","γ","δ","ε","ζ","η","θ","ι","κ","λ","μ"][n-1];
+}
+
+    
 }
 
 // ===============================================
@@ -1300,7 +1306,7 @@ function updateDisplay() {
     const hopeHtml   = get_hope_indicator(phaseIndex0);
     const bandHtml = get_galactic_band_indicator(phaseNumber)
     .replace("<strong>Galactic Band:</strong>", 
-             `<strong>Galactic Band:</strong> 🌌 Phase ${phaseNumber} —`);
+             `<strong>Galactic Band:</strong> 🌌 ${greekPhase(phaseNumber)} —`);
 
     const rebekahHtml = get_rebekah_status(now);
 
