@@ -601,6 +601,10 @@
             <div id="rebekah">...</div>
             <div id="moonclock">...</div>
             <div id="moonclock-coordinated">...</div>
+           <div id="next-phase-timer" style="margin-top: 6px; color:#9ee7ff; font-family: monospace; font-size:1rem;">
+             Next phase in: --
+            </div>
+
 
             <div style="font-size: 0.9rem; color: #aaa; margin-top: 15px;">
                 <a href="https://inara.cz/elite/cmdr/440263/" 
@@ -1099,6 +1103,12 @@ function get_nahla_coordinated_time_string(wrappedSeconds) {
     );
 }
 
+function get_time_to_next_phase(secondsIntoPhase) {
+    const remaining = PHASE_LENGTH_SECONDS - secondsIntoPhase;
+    return format_timedelta(remaining);
+}
+       
+
 function printCodeForGitHub() {
     const cycle = window.CYCLE_ANCHOR.toISOString();
     const rebekah = window.REBEKAH_ANCHOR.toISOString();
@@ -1151,12 +1161,18 @@ function updateDisplay() {
     const moonclockString  = get_nahla_local_time_string(wrapped);
     const nctString        = get_nahla_coordinated_time_string(wrapped);
 
+   const nextPhaseString = "Next phase in: " + 
+    get_time_to_next_phase(cycle.secondsIntoPhase);
+
+
     const statusEl  = document.getElementById("status");
     const hopeEl    = document.getElementById("hope");
     const bandEl    = document.getElementById("band");
     const rebekahEl = document.getElementById("rebekah");
     const moonEl    = document.getElementById("moonclock");
     const nctEl     = document.getElementById("moonclock-coordinated");
+    const nextPhaseEl = document.getElementById("next-phase-timer");
+
 
     if (statusEl)  statusEl.innerHTML  = statusText;
     if (hopeEl)    hopeEl.innerHTML    = hopeHtml;
@@ -1164,6 +1180,7 @@ function updateDisplay() {
     if (rebekahEl) rebekahEl.innerHTML = rebekahHtml;
     if (moonEl)    moonEl.textContent  = moonclockString;
     if (nctEl)     nctEl.textContent   = nctString;
+    if (nextPhaseEl) nextPhaseEl.textContent = nextPhaseString;
 }
 
 // Gallery Lightbox Functions
