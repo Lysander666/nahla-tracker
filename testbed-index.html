@@ -1176,17 +1176,21 @@ function get_hope_indicator(phaseIndex0) {
 // --- Galactic band indicator text ---
 
 function get_galactic_band_indicator(phaseNumber) {
-    // You can stylise this however you like; here we keep some “peak” flavour
+
     if (phaseNumber === 5) {
-        return `<strong>Galactic Band:</strong> 🌌✨ PEAK BRIGHTNESS (${BAND_PHASE_DESCRIPTIONS[phaseNumber]})`;
+        return `<strong>Galactic Band:</strong> 🌌 ${greekPhase(phaseNumber)} — ✨PEAK BRIGHTNESS (${BAND_PHASE_DESCRIPTIONS[phaseNumber]})`;
+
     } else if (phaseNumber === 4 || phaseNumber === 6) {
-        return `<strong>Galactic Band:</strong> 🌌 BRIGHT (${BAND_PHASE_DESCRIPTIONS[phaseNumber]})`;
+        return `<strong>Galactic Band:</strong> 🌌 ${greekPhase(phaseNumber)} — BRIGHT (${BAND_PHASE_DESCRIPTIONS[phaseNumber]})`;
+
     } else if (phaseNumber === 3 || phaseNumber === 7 || phaseNumber === 8 || phaseNumber === 9) {
-        return `<strong>Galactic Band:</strong> 🌌 visible (${BAND_PHASE_DESCRIPTIONS[phaseNumber]})`;
+        return `<strong>Galactic Band:</strong> 🌌 ${greekPhase(phaseNumber)} — visible (${BAND_PHASE_DESCRIPTIONS[phaseNumber]})`;
+
     } else {
-        return `<strong>Galactic Band:</strong> 🌌 visible (low angle – ${BAND_PHASE_DESCRIPTIONS[phaseNumber]})`;
+        return `<strong>Galactic Band:</strong> 🌌 ${greekPhase(phaseNumber)} — visible (low angle – ${BAND_PHASE_DESCRIPTIONS[phaseNumber]})`;
     }
 }
+
 
 // --- Rebekah status ---
 
