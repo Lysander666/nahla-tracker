@@ -41,7 +41,7 @@
     <meta name="twitter:title" content="Nahla Tracker">
     <meta name="twitter:description" content="Live day/night tracker and gallery for Nahla, a remote Elite Dangerous moon.">
 
-    <link id="favicon" rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='80'>🌕</text></svg>">
+   <link rel="icon" type="image/png" href="favicon3.png">
     
     <style>
         body { 
@@ -57,6 +57,13 @@
             max-width: 1800px;
             margin: 0 auto;
         }
+
+       .header-logo img {
+       width: 42px;
+       height: auto;
+       display: block;
+      }
+
         
         h2 {
             text-align: center;
@@ -708,6 +715,9 @@
 </head>
 <body>
     <div class="container">
+        <div class="header-logo">
+        <img src="favicon3.png" alt="Nahla Tracker Logo">
+        </div>
         <h2>Nahla Day/Night Cycle Tracker - LIVE - v0.22 (alpha)</h2>
         <div id="tracker">
             <div id="status">Loading...</div>
