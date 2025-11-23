@@ -104,25 +104,33 @@
             text-align: center;
         }
         
+/* Fading edges for tracker box */
 #tracker {
-    position: relative;
-    padding: 20px;
-    border: 1px solid #444;
-    border-radius: 8px;
-    margin-bottom: 25px;
-    text-align: center;
-    overflow: hidden; /* ensures pseudo-element doesn't spill out */
+    position: relative;  /* required for overlays */
+    overflow: hidden;    /* hides the overlay elements */
 }
 
-/* gradient applied behind the box */
-#tracker::before {
+#tracker::before,
+#tracker::after {
     content: "";
     position: absolute;
-    inset: 0;
-    background: radial-gradient(circle at center, #1a1a1a 0%, #000000 80%);
-    opacity: 1; /* adjust if you want it lighter */
-    z-index: -1;
+    top: 0;
+    width: 80px;          /* width of fade */
+    height: 100%;
+    pointer-events: none; /* overlay shouldn't interfere */
+    z-index: 5;           /* sits on top */
 }
+
+#tracker::before {
+    left: 0;
+    background: linear-gradient(to right, rgba(0,0,0,0.7), rgba(0,0,0,0));
+}
+
+#tracker::after {
+    right: 0;
+    background: linear-gradient(to left, rgba(0,0,0,0.7), rgba(0,0,0,0));
+}
+
 
 
         #moonclock {
