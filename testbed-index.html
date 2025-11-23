@@ -96,6 +96,12 @@
           font-weight: bold;
         }
 
+       .phase-highlight {
+       color: #3af2ff;
+       text-shadow: 0 0 8px #3af2ff, 0 0 14px #007a85;
+      }
+
+
         #notes-box {
             background-color: #1e1e1e;
             border-radius: 8px;
@@ -601,7 +607,7 @@
             <div id="rebekah">...</div>
             <div id="moonclock">...</div>
             <div id="moonclock-coordinated">...</div>
-           <div id="next-phase-timer" style="margin-top: 6px; color:#9ee7ff; font-family: monospace; font-size:1rem;">
+           <div id="next-phase-timer" style="margin-top: 6px; color:#b0c4d4; font-family: monospace; font-size:1rem;">
              Next phase in: --
             </div>
 
@@ -1039,16 +1045,19 @@ function get_hope_indicator(phaseIndex0) {
 }
 
 function get_galactic_band_indicator(phaseNumber) {
+    const phaseLabel = `<span class="phase-highlight">Phase ${greekPhase(phaseNumber)}</span>`;
+
     if (phaseNumber === 5) {
-        return `<strong>Galactic Band:</strong> 🌌 Phase ${greekPhase(phaseNumber)} – ✨PEAK BRIGHTNESS (${BAND_PHASE_DESCRIPTIONS[phaseNumber]})`;
+        return `<strong>Galactic Band:</strong> 🌌 ${phaseLabel} – ✨PEAK BRIGHTNESS (${BAND_PHASE_DESCRIPTIONS[phaseNumber]})`;
     } else if (phaseNumber === 4 || phaseNumber === 6) {
-        return `<strong>Galactic Band:</strong> 🌌 Phase ${greekPhase(phaseNumber)} – BRIGHT (${BAND_PHASE_DESCRIPTIONS[phaseNumber]})`;
+        return `<strong>Galactic Band:</strong> 🌌 ${phaseLabel} – BRIGHT (${BAND_PHASE_DESCRIPTIONS[phaseNumber]})`;
     } else if (phaseNumber === 3 || phaseNumber === 7 || phaseNumber === 8 || phaseNumber === 9) {
-        return `<strong>Galactic Band:</strong> 🌌 Phase ${greekPhase(phaseNumber)} – visible (${BAND_PHASE_DESCRIPTIONS[phaseNumber]})`;
+        return `<strong>Galactic Band:</strong> 🌌 ${phaseLabel} – visible (${BAND_PHASE_DESCRIPTIONS[phaseNumber]})`;
     } else {
-        return `<strong>Galactic Band:</strong> 🌌 Phase ${greekPhase(phaseNumber)} – visible (low angle – ${BAND_PHASE_DESCRIPTIONS[phaseNumber]})`;
+        return `<strong>Galactic Band:</strong> 🌌 ${phaseLabel} – visible (low angle – ${BAND_PHASE_DESCRIPTIONS[phaseNumber]})`;
     }
 }
+
 
 function get_rebekah_status(now) {
     const elapsed = (now - REBEKAH_ANCHOR) / 1000;
