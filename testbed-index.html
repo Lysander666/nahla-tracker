@@ -1211,7 +1211,7 @@ function get_nahla_local_time_string(wrappedSeconds) {
 }
 
 function get_nahla_coordinated_time_string(wrappedSeconds) {
-    const SCALE          = 24 / 26.4;
+     const SCALE = 24 / DAY_LENGTH_HOURS;  // Auto-sync to actual Nahla day length
     const scaled_seconds = wrappedSeconds * SCALE;
 
     const hours   = Math.floor(scaled_seconds / 3600);
