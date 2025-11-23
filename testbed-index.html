@@ -158,20 +158,21 @@
     top: 50%;
     left: 50%;
     transform-origin: top center;
-    transform: translateX(-50%) rotate(110deg); /* adjust angle if you want */
-    opacity: 0.9;
+    transform: translateX(-50%) rotate(110deg);
 }
 
-.rebekah-dot {
+
+   .rebekah-dot {
     position: absolute;
-    width: 9px;
-    height: 9px;
+    width: 10px;
+    height: 10px;
     border-radius: 50%;
     background-color: #61dafb;
     box-shadow: 0 0 10px rgba(97,218,251,0.9);
-    top: 72%;
-    left: 25%;
-    transform: translate(-50%, -50%);
+    top: 50%;
+    left: 50%;
+    transform-origin: center -55px;
+    transform: rotate(110deg) translateY(-55px);
 }
 
 .rebekah-dot::after {
@@ -182,15 +183,15 @@
     background-color: #1a1a1a;
 }
 
-.rebekah-label {
-    position: absolute;
-    bottom: 10px;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 0.65rem;
+.rebekah-label-outside {
+    margin-top: 6px;
+    text-align: center;
+    font-size: 0.75rem;
     color: #9ee7ff;
     text-shadow: 0 0 5px rgba(97,218,251,0.7);
 }
+
+
 
 
 
@@ -753,7 +754,7 @@
                     <li><strong>Rotation:</strong> 0.4 Earth days</li>
                 </ul>
 
-               <div class="rebekah-compass">
+<div class="rebekah-compass">
     <div class="rebekah-compass-circle">
         <div class="cardinal n">N</div>
         <div class="cardinal e">E</div>
@@ -763,9 +764,11 @@
         <div class="rebekah-center"></div>
         <div class="rebekah-ray"></div>
         <div class="rebekah-dot"></div>
-        <div class="rebekah-label">Rebekah from Natalja's Pass</div>
     </div>
 </div>
+
+<div class="rebekah-label-outside">Rebekah from Natalja's Pass</div>
+
 
             </div>
 
