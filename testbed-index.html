@@ -1,4 +1,4 @@
-<!-- 
+   <!-- 
 === QUICK SYNC (MINIMAL) =========================================
 
 1) SYNC GALACTIC BAND PHASE (1–12)
@@ -58,10 +58,22 @@
             margin: 0 auto;
         }
 
-       .header-logo img {
-       width: 42px;
-       height: auto;
+      .header {
+       display: flex;
+       align-items: center;
+       gap: 12px;
+       margin-bottom: 20px;
+      }
+
+      .header-logo img {
+       width: 48px;   /* adjust size here */
+       height: 48px;
        display: block;
+      }
+
+      .header-title {
+       margin: 0;
+       padding: 0;
       }
 
         
@@ -715,10 +727,13 @@
 </head>
 <body>
     <div class="container">
-        <div class="header-logo">
+        <div class="header">
+    <div class="header-logo">
         <img src="favicon2.png" alt="Nahla Tracker Logo">
-    
-        <h2>Nahla Day/Night Cycle Tracker - LIVE - v0.22 (alpha)</h2>
+    </div>
+    <h2 class="header-title">Nahla Tracker • LIVE • v0.22 (alpha)</h2>
+</div>
+
         <div id="tracker">
             <div id="status">Loading...</div>
             <div id="hope">...</div>
