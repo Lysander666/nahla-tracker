@@ -245,6 +245,25 @@
     text-shadow: 0 0 5px rgba(97,218,251,0.7);
 }
 
+       @keyframes pulseGlow {
+    0% {
+        transform: scale(1);
+        filter: drop-shadow(0 0 4px rgba(255, 0, 80, 0.7));
+    }
+    50% {
+        transform: scale(1.12);
+        filter: drop-shadow(0 0 10px rgba(255, 0, 120, 1));
+    }
+    100% {
+        transform: scale(1);
+        filter: drop-shadow(0 0 4px rgba(255, 0, 80, 0.7));
+    }
+}
+
+       .rebekah-dot {
+    animation: pulseGlow 2.2s ease-in-out infinite;
+}
+
 
 
 
