@@ -101,6 +101,97 @@
        text-shadow: 0 0 1px #3af2ff, 0 0 2px #007a85;
       }
 
+       
+/* Rebekah static sky compass */
+
+.rebekah-compass {
+    margin-top: 16px;
+    display: flex;
+    justify-content: center;
+}
+
+.rebekah-compass-circle {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    border: 1px solid #444;
+    position: relative;
+    box-shadow: 0 0 14px rgba(97, 218, 251, 0.2);
+    background: radial-gradient(circle at 50% 60%, #222 0%, #181818 60%, #141414 100%);
+    font-size: 0.7rem;
+    color: #888;
+}
+
+/* Cardinal points */
+
+.rebekah-compass-circle .cardinal {
+    position: absolute;
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.rebekah-compass-circle .cardinal.n { top: 4px; left: 50%; transform: translateX(-50%); }
+.rebekah-compass-circle .cardinal.s { bottom: 4px; left: 50%; transform: translateX(-50%); }
+.rebekah-compass-circle .cardinal.e { right: 4px; top: 50%; transform: translateY(-50%); }
+.rebekah-compass-circle .cardinal.w { left: 4px; top: 50%; transform: translateY(-50%); }
+
+/* Rebekah marker – fixed position in southern sky */
+
+.rebekah-center {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: #61dafb;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    opacity: 0.8;
+}
+
+.rebekah-ray {
+    position: absolute;
+    width: 2px;
+    height: 42px;
+    background: linear-gradient(to bottom, rgba(97,218,251,0.0), rgba(97,218,251,0.7));
+    top: 50%;
+    left: 50%;
+    transform-origin: top center;
+    transform: translateX(-50%) rotate(110deg); /* adjust angle if you want */
+    opacity: 0.9;
+}
+
+.rebekah-dot {
+    position: absolute;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background-color: #61dafb;
+    box-shadow: 0 0 10px rgba(97,218,251,0.9);
+    top: 72%;
+    left: 25%;
+    transform: translate(-50%, -50%);
+}
+
+.rebekah-dot::after {
+    content: "";
+    position: absolute;
+    inset: 2px;
+    border-radius: 50%;
+    background-color: #1a1a1a;
+}
+
+.rebekah-label {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.65rem;
+    color: #9ee7ff;
+    text-shadow: 0 0 5px rgba(97,218,251,0.7);
+}
+
 
 
         #notes-box {
@@ -661,6 +752,21 @@
                     <li><strong>Orbital Period:</strong> 555.2 Earth days</li>
                     <li><strong>Rotation:</strong> 0.4 Earth days</li>
                 </ul>
+
+               <div class="rebekah-compass">
+    <div class="rebekah-compass-circle">
+        <div class="cardinal n">N</div>
+        <div class="cardinal e">E</div>
+        <div class="cardinal s">S</div>
+        <div class="cardinal w">W</div>
+
+        <div class="rebekah-center"></div>
+        <div class="rebekah-ray"></div>
+        <div class="rebekah-dot"></div>
+        <div class="rebekah-label">Rebekah from Natalja's Pass</div>
+    </div>
+</div>
+
             </div>
 
             <div class="celestial-body" id="hope-info">
