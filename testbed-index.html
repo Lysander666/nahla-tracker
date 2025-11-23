@@ -235,6 +235,8 @@
     border: 1px solid rgba(255, 130, 150, 0.5);
     transform: rotate(25deg); /* fake ring tilt */
     opacity: 0.4;
+animation: pulseGlow 2.2s ease-in-out infinite;
+
 }
 
 .rebekah-label-outside {
@@ -244,6 +246,15 @@
     color: #9ee7ff;
     text-shadow: 0 0 5px rgba(97,218,251,0.7);
 }
+
+       .rebekah-dot-wrapper {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translateX(-50%) rotate(262deg) translateY(42px);
+    transform-origin: top center;
+}
+
 
        @keyframes pulseGlow {
     0% {
@@ -260,9 +271,7 @@
     }
 }
 
-       .rebekah-dot {
-    animation: pulseGlow 2.2s ease-in-out infinite;
-}
+
 
 
 
@@ -852,7 +861,10 @@
 
         <div class="rebekah-center"></div>
         <div class="rebekah-ray"></div>
-        <div class="rebekah-dot"></div>
+        <div class="rebekah-dot-wrapper">
+    <div class="rebekah-dot"></div>
+</div>
+
     </div>
 </div>
 
