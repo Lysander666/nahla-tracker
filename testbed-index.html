@@ -41,7 +41,7 @@
     <meta name="twitter:title" content="Nahla Tracker">
     <meta name="twitter:description" content="Live day/night tracker and gallery for Nahla, a remote Elite Dangerous moon.">
 
-   <link rel="icon" type="image/png" href="favicon3.png">
+   <link rel="icon" type="image/png" href="favicon2.png">
     
     <style>
         body { 
@@ -58,23 +58,36 @@
             margin: 0 auto;
         }
 
-         .header {
-          display: flex;
-          justify-content: center;   /* centers horizontally */
-          align-items: center;        /* aligns logo + text vertically */
-          gap: 12px;
-          margin-bottom: 20px;
-         }
+.header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    text-align: center;
+}
 
-         .header-logo img {
-          width: 48px;
-          height: 48px;
-         }
+.header-logo img {
+    width: 48px;
+    height: 48px;
+}
 
-         .header-title h2 {
-          margin: 0;
-          padding: 0;
-         }
+.header-title {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+}
+
+.title-main {
+    font-size: 2rem;
+    font-weight: 600;
+}
+
+.title-sub {
+    font-size: 1.2rem;
+    opacity: 0.85;
+}
+
 
 
         
@@ -727,16 +740,16 @@
     </style>
 </head>
 <body>
-<div class="container">
-    <div class="header">
-        <div class="header-logo">
-            <img src="favicon2.png" alt="Nahla Tracker Logo">
-        </div>
-
-        <div class="header-title">
-            <h2>Nahla Tracker • LIVE • v0.22 (alpha)</h2>
-        </div>
+<div class="header">
+    <div class="header-logo">
+        <img src="favicon2.png" alt="Nahla Tracker Logo">
     </div>
+    <div class="header-title">
+        <div class="title-main">Nahla Tracker</div>
+        <div class="title-sub">LIVE • v0.22 (alpha)</div>
+    </div>
+</div>
+
 
         <div id="tracker">
             <div id="status">Loading...</div>
