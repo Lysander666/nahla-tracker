@@ -218,11 +218,13 @@
     width: 10px;
     height: 10px;
     border-radius: 50%;
-    background-color: #c72a4a;
+    background-color: #c72a4a; /* deep red */
     box-shadow: 0 0 12px rgba(255, 80, 120, 0.9),
                 0 0 18px rgba(255, 40, 80, 0.5);
+    
+    transform-origin: top center;
+    transform: translateX(-50%) rotate(266deg) translateY(42px);
 }
-
 
 
 .rebekah-dot::after {
@@ -233,8 +235,6 @@
     border: 1px solid rgba(255, 130, 150, 0.5);
     transform: rotate(25deg); /* fake ring tilt */
     opacity: 0.4;
-animation: pulseGlow 2.2s ease-in-out infinite;
-
 }
 
 .rebekah-label-outside {
@@ -244,32 +244,6 @@ animation: pulseGlow 2.2s ease-in-out infinite;
     color: #9ee7ff;
     text-shadow: 0 0 5px rgba(97,218,251,0.7);
 }
-
-.rebekah-dot-wrapper {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translateX(-50%) rotate(262deg) translateY(42px);
-    transform-origin: top center;
-}
-
-
-       @keyframes pulseGlow {
-    0% {
-        transform: scale(1);
-        filter: drop-shadow(0 0 4px rgba(255, 0, 80, 0.7));
-    }
-    50% {
-        transform: scale(1.12);
-        filter: drop-shadow(0 0 10px rgba(255, 0, 120, 1));
-    }
-    100% {
-        transform: scale(1);
-        filter: drop-shadow(0 0 4px rgba(255, 0, 80, 0.7));
-    }
-}
-
-
 
 
 
@@ -859,10 +833,7 @@ animation: pulseGlow 2.2s ease-in-out infinite;
 
         <div class="rebekah-center"></div>
         <div class="rebekah-ray"></div>
-        <div class="rebekah-dot-wrapper">
-    <div class="rebekah-dot"></div>
-</div>
-
+        <div class="rebekah-dot"></div>
     </div>
 </div>
 
