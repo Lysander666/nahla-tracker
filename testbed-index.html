@@ -104,14 +104,27 @@
             text-align: center;
         }
         
-        #tracker { 
-            padding: 20px; 
-            border: 1px solid #444; 
-            background-color: #2a2a2a;
-            border-radius: 8px;
-            margin-bottom: 25px;
-            text-align: center; 
-        }
+#tracker {
+    padding: 20px;
+    border: 1px solid #444;
+    background-color: #2a2a2a;
+
+    /* NEW: fade left + right edges */
+    -webkit-mask-image: linear-gradient(
+        to right,
+        transparent 0%,
+        black 15%,
+        black 85%,
+        transparent 100%
+    );
+    mask-image: linear-gradient(
+        to right,
+        transparent 0%,
+        black 15%,
+        black 85%,
+        transparent 100%
+    );
+}
 
         #moonclock {
             font-family: "Consolas", "Courier New", monospace;
