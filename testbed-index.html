@@ -154,26 +154,28 @@
     position: absolute;
     width: 2px;
     height: 42px;
-    background: linear-gradient(to bottom, rgba(97,218,251,0.0), rgba(97,218,251,0.7));
+    background: linear-gradient(to bottom, rgba(97,218,251,0.0), rgba(97,218,251,0.8));
     top: 50%;
     left: 50%;
     transform-origin: top center;
     transform: translateX(-50%) rotate(110deg);
 }
 
-
-   .rebekah-dot {
+.rebekah-dot {
     position: absolute;
+    top: 50%;
+    left: 50%;
     width: 10px;
     height: 10px;
     border-radius: 50%;
     background-color: #61dafb;
     box-shadow: 0 0 10px rgba(97,218,251,0.9);
-    top: 50%;
-    left: 50%;
-    transform-origin: center -55px;
-    transform: rotate(110deg) translateY(-55px);
+
+    /* This makes the dot sit at the end of the ray */
+    transform-origin: top center;
+    transform: translateX(-50%) rotate(110deg) translateY(42px);
 }
+
 
 .rebekah-dot::after {
     content: "";
@@ -1101,7 +1103,7 @@ function printAnchors() {
 }
 
 const BAND_PHASE_DESCRIPTIONS = {
-    1: "low, rising (left)",
+    1: "low, sun rising (left)",
     2: "low, steep rising",
     3: "mid-height vertical",
     4: "high, slanting across",
@@ -1109,10 +1111,10 @@ const BAND_PHASE_DESCRIPTIONS = {
     6: "high, descending",
     7: "mid-height vertical (reversed)",
     8: "steeply descending (right)",
-    9: "low, angled (right)",
-    10:"low, flat (reversed)",
-    11:"very low, dim rise",
-    12:"lowest, horizon-level (deep night)"
+    9: "low, angled sunset (right)",
+    10:"low, flat dusk (reversed)",
+    11:"lowest, deep night",
+    12:"galatic dawn, dim rise"
 };
 
 function get_phase_label(phaseNumber) {
