@@ -124,6 +124,32 @@
     z-index: -1;
 }
 
+       .tracker-fade {
+    position: relative;
+}
+
+.tracker-fade::before,
+.tracker-fade::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    width: 120px;
+    height: 100%;
+    pointer-events: none;
+    z-index: 5;
+}
+
+.tracker-fade::before {
+    left: 0;
+    background: linear-gradient(to right, #1a1a1a 0%, transparent 100%);
+}
+
+.tracker-fade::after {
+    right: 0;
+    background: linear-gradient(to left, #1a1a1a 0%, transparent 100%);
+}
+
+
 
 
 
@@ -773,7 +799,8 @@
     </div>
 </div>
 
-
+<div class="tracker-fade">
+    <div id="tracker">
         <div id="tracker">
             <div id="status">Loading...</div>
             <div id="hope">...</div>
@@ -784,7 +811,8 @@
          <!--  <div id="next-phase-timer" style="margin-top: 6px; color:#6eb5c0; font-family: monospace; font-size:1rem;">
              Next phase in: --      
             </div>   -->
-
+        </div>
+    </div>
 
             <div style="font-size: 0.9rem; color: #aaa; margin-top: 15px;">
                 <a href="https://inara.cz/elite/cmdr/440263/" 
