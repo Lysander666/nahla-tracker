@@ -104,54 +104,14 @@
             text-align: center;
         }
         
-#tracker {
-    position: relative;
-    padding: 20px;
-    border: 1px solid #444;
-    border-radius: 8px;
-    margin-bottom: 25px;
-    text-align: center;
-    overflow: hidden; /* ensures pseudo-element doesn't spill out */
-}
-
-/* gradient applied behind the box */
-#tracker::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(circle at center, #1a1a1a 0%, #000000 80%);
-    opacity: 1; /* adjust if you want it lighter */
-    z-index: -1;
-}
-
-       .tracker-fade {
-    position: relative;
-}
-
-.tracker-fade::before,
-.tracker-fade::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    width: 120px;
-    height: 100%;
-    pointer-events: none;
-    z-index: 5;
-}
-
-.tracker-fade::before {
-    left: 0;
-    background: linear-gradient(to right, #1a1a1a 0%, transparent 100%);
-}
-
-.tracker-fade::after {
-    right: 0;
-    background: linear-gradient(to left, #1a1a1a 0%, transparent 100%);
-}
-
-
-
-
+        #tracker { 
+            padding: 20px; 
+            border: 1px solid #444; 
+            background-color: #2a2a2a;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            text-align: center; 
+        }
 
         #moonclock {
             font-family: "Consolas", "Courier New", monospace;
@@ -799,8 +759,7 @@
     </div>
 </div>
 
-<div class="tracker-fade">
-    <div id="tracker">
+
         <div id="tracker">
             <div id="status">Loading...</div>
             <div id="hope">...</div>
@@ -822,9 +781,6 @@
                 </a>
             </div>
         </div>
-
-               </div>
-    </div>
 
         <h2>System Information</h2>
 
