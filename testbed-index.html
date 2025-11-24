@@ -461,10 +461,17 @@
             display: none;
         }
 
-        #manifest-panel {
-            scrollbar-width: none;
-            overscroll-behavior: none;
-        }
+#manifest-panel {
+    /* 1. Hide the scrollbar (Firefox) */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+
+    /* 2. Ensure scrolling is enabled */
+    overflow-y: auto; 
+
+    /* 3. Explicitly tell browser to pass scroll to parent when bottom is reached */
+    overscroll-behavior-y: auto; 
+}
 
  
         .hl-landable { color: #8f9; }
