@@ -457,21 +457,15 @@
             margin-top: 5px;
         }
 
-        #manifest-panel::-webkit-scrollbar {
-            display: none;
-        }
-
-#manifest-panel {
-    /* 1. Hide the scrollbar (Firefox) */
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-
-    /* 2. Ensure scrolling is enabled */
-    overflow-y: auto; 
-
-    /* 3. Explicitly tell browser to pass scroll to parent when bottom is reached */
-    overscroll-behavior-y: auto; 
+#manifest-panel::-webkit-scrollbar {
+    width: 4px; /* Very thin */
 }
+#manifest-panel::-webkit-scrollbar-thumb {
+    background-color: #444; /* Dark grey to blend in */
+    border-radius: 4px;
+}
+
+       
 
  
         .hl-landable { color: #8f9; }
