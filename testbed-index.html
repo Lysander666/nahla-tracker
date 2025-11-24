@@ -405,28 +405,24 @@
         }
         
         .celestial-body::-webkit-scrollbar,
-        #map-panel::-webkit-scrollbar,
-        #manifest-panel::-webkit-scrollbar {
+        #map-panel::-webkit-scrollbar
             width: 10px;
         }
         
         .celestial-body::-webkit-scrollbar-track,
-        #map-panel::-webkit-scrollbar-track,
-        #manifest-panel::-webkit-scrollbar-track {
+        #map-panel::-webkit-scrollbar-track
             background: #1a1a1a;
             border-radius: 4px;
         }
         
         .celestial-body::-webkit-scrollbar-thumb,
-        #map-panel::-webkit-scrollbar-thumb,
-        #manifest-panel::-webkit-scrollbar-thumb {
+        #map-panel::-webkit-scrollbar-thumb
             background: #444;
             border-radius: 4px;
         }
         
         .celestial-body::-webkit-scrollbar-thumb:hover,
-        #map-panel::-webkit-scrollbar-thumb:hover,
-        #manifest-panel::-webkit-scrollbar-thumb:hover {
+        #map-panel::-webkit-scrollbar-thumb:hover
             background: #555;
         }
     
@@ -457,14 +453,26 @@
             margin-top: 5px;
         }
 
-#manifest-panel::-webkit-scrollbar {
-    width: 4px; /* Very thin */
-}
-#manifest-panel::-webkit-scrollbar-thumb {
-    background-color: #444; /* Dark grey to blend in */
-    border-radius: 4px;
+/* --- MANIFEST PANEL SPECIFIC SCROLLBAR --- */
+
+#manifest-panel {
+    scrollbar-width: thin; /* Firefox */
+    scrollbar-color: #444 #222; 
 }
 
+#manifest-panel::-webkit-scrollbar {
+    width: 4px; /* Thin width for Chrome/Safari */
+    display: block; /* Force it to show */
+}
+
+#manifest-panel::-webkit-scrollbar-track {
+    background: #222;
+}
+
+#manifest-panel::-webkit-scrollbar-thumb {
+    background-color: #444; 
+    border-radius: 4px;
+}
        
 
  
@@ -619,16 +627,14 @@
             opacity: 1;
         }
 
-        .celestial-body::-webkit-scrollbar,
+.celestial-body::-webkit-scrollbar,
         #map-panel::-webkit-scrollbar,
-        #manifest-panel::-webkit-scrollbar,
         .gallery-container::-webkit-scrollbar {
             display: none;
         }
 
         .celestial-body,
         #map-panel,
-        #manifest-panel,
         .gallery-container {
             scrollbar-width: none;
         }
