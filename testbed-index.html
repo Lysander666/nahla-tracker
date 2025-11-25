@@ -360,8 +360,7 @@
             display: flex;
             gap: 20px;
             align-items: flex-start;
-            flex-wrap: nowrap;
-            overflow-x: auto;
+            flex-wrap: wrap;
         }
         
         .celestial-body, #map-panel, #manifest-panel {
@@ -1097,6 +1096,26 @@
     scrollbar-width: thin;
     scrollbar-color: #333 #181818;
 }
+/* For screens around 1366px and smaller */
+@media (max-width: 1400px) {
+    #system-info-container {
+        zoom: 0.8;
+    }
+}
+
+/* For even smaller screens if needed */
+@media (max-width: 1200px) {
+    #system-info-container {
+        zoom: 0.7;
+    }
+}
+
+@media (max-width: 1000px) {
+    #system-info-container {
+        zoom: 0.6;
+    }
+}
+       
 
     </style>
 </head>
