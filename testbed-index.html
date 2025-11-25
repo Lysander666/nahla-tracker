@@ -163,7 +163,7 @@
 /* Rebekah static sky compass */
 
 .rebekah-compass {
-    margin-top: 30px;   /* adjust this number as you like */
+    margin-top: 45px;   /* adjust this number as you like */
     margin-bottom: 4px; /* keeps spacing above the label clean */
     display: flex;
     justify-content: center;
@@ -360,7 +360,8 @@
             display: flex;
             gap: 20px;
             align-items: flex-start;
-            flex-wrap: wrap;
+            flex-wrap: nowrap;
+            overflow-x: auto;
         }
         
         .celestial-body, #map-panel, #manifest-panel {
@@ -370,7 +371,7 @@
             border-radius: 8px;
             padding: 0 20px 20px 20px;
             background-color: #222;
-            height: 630px; /* <<<<< ALL PANEL HEIGHTS ARE CONTROLLED BY THIS LINE HERE!! <<<<<< */
+            height: 635px; /* <<<<< ALL PANEL HEIGHTS ARE CONTROLLED BY THIS LINE HERE!! <<<<<< */
             overflow-y: auto;
         }
         
@@ -458,10 +459,7 @@
 #manifest-panel {
     scrollbar-width: thin; /* Firefox */
     scrollbar-color: #444 #222; 
-    flex: 1 1 0 !important;
-    min-width: 0 !important;
 }
-
 
 #manifest-panel::-webkit-scrollbar {
     width: 4px; /* Thin width for Chrome/Safari */
@@ -789,7 +787,7 @@
        font-weight: 500; /* barely stronger */
       }
 
-       /* ===========================
+        /* ===========================
    NAHLA DRIFT PANEL (END)
    =========================== */
 
@@ -1100,35 +1098,6 @@
     scrollbar-color: #333 #181818;
 }
 
-/* Force all 5 system panels to fit on a single row on 1366px screens */
-@media (max-width: 1500px) {
-
-    #system-info-container > * {
-        min-width: 200px !important;
-        flex: 1 1 200px !important;
-        height: auto !important;       /* allow them to shrink */
-    }
-
-    /* Reduce padding slightly to reclaim horizontal space */
-    #system-info-container > * {
-        padding-left: 14px !important;
-        padding-right: 14px !important;
-    }
-}
-
-/* Slightly tighter on 1366px screens */
-@media (max-width: 1366px) {
-    #system-info-container > * {
-        min-width: 180px !important;
-        flex: 1 1 180px !important;
-    }
-}
-
-
-
-
-
-
     </style>
 </head>
 <body>
@@ -1138,7 +1107,7 @@
     </div>
     <div class="header-title">
         <div class="title-main">Nahla Tracker</div>
-        <div class="title-sub">LIVE • v0.22 (alpha)</div>
+        <div class="title-sub">LIVE • v0.23 (alpha)</div>
     </div>
 </div>
 
@@ -1166,7 +1135,7 @@
         </div>
 
         <h2>System Information</h2>
-<div id="top-panel-scale">
+
         <div id="system-info-container">
             
             <div class="celestial-body" id="nahla-info">
@@ -1324,8 +1293,8 @@
                     <li><strong>12</strong>High metal content (Anneke)</li>
                 </ul>
             </div>
+            
         </div>
-      </div>
 
         <div id="gallery-section">
             <div class="gallery-header">
@@ -1397,7 +1366,10 @@
 
         <div id="notes-box">
             <h2>🌕 Nahla News Network 🌌</h2>
-            <div id="notes">
+            <div id="notes"><p><strong>25/11/3311: Live drift chart added:</strong> This shows GMT offset to NLT.
+                <p><strong>24/11/3311: Massive update to the tracker:</strong> Lots of updates over the weekend to our tracker - most notably being the Phase Clock which shows live galactic band phase times, of which there are 12. Phase numbers have been changed to
+                    Greek letters for clarity to avoid them getting confused with hours! Overall time sync also has been massively improved. For the foreseable future we will focus on our ground research
+                    here on Nahla and update the tracker/remove minor bugs sporadically ^^ </p>
                 <p><strong>21/11/3311: New calibrations and visitations!:</strong> Thanks to <a class="cyan-link" href="https://bsky.app/profile/fool.canonn.tech" target="_blank">LCU</a> we have the exact length of Nahla's 
                     rotation, which is 25 hours, 26 mins [and ten seconds!]. And yesterday Hope system received a rare visit from a Sidewinder. Welcome!</p>
                 <p><strong>20/11/3311: Four months today!:</strong> Today marks four months here for <strong>Zell Ak'inyi</strong>. That's a good amount of study, research, solace and relaxation for the Rawrunning pioneer. 
@@ -1413,8 +1385,7 @@
                 <small>Nahla Tracker is a personal project of Lysander666 - <a class="cyan-link" href="https://bsky.app/profile/lysander666.bsky.social" target="_blank">@lysander666.bsky.social</a></small>
             </div>
         </div>
-
-           <div id="drift-panel">
+ <div id="drift-panel">
             <h2>Nahla Drift Chart</h2>
 
             <div class="drift-header">
@@ -1474,7 +1445,7 @@
                 <!-- anchor info injected by JS -->
             </div>
         </div>
-
+   
     </div> 
     
     <script>
