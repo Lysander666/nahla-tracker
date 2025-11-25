@@ -1097,6 +1097,22 @@
     scrollbar-color: #333 #181818;
 }
 
+       /* Fix drift-row hover flicker */
+.drift-row,
+.drift-row-current {
+    border-left: 3px solid transparent;
+}
+
+.drift-row-current {
+    border-left-color: #61dafb;
+}
+
+.drift-row:hover {
+    background-color: #242424;
+    border-left-color: #61dafb33; /* subtle cyan tint on hover, no layout shift */
+}
+
+
 
     </style>
 </head>
