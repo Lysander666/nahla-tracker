@@ -458,7 +458,12 @@
 #manifest-panel {
     scrollbar-width: thin; /* Firefox */
     scrollbar-color: #444 #222; 
+   overflow-y: auto;
+    word-wrap: break-word;
+    overflow-wrap: anywhere;
+    hyphens: auto;
 }
+
 
 #manifest-panel::-webkit-scrollbar {
     width: 4px; /* Thin width for Chrome/Safari */
