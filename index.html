@@ -2002,33 +2002,31 @@ loadAnchorsFromStorage().then(() => {
     setInterval(updateDisplay, 50);
 });
 
- /* ===========================
-   NAHLA DRIFT PANEL LOGIC
-   =========================== */
+/* ======================================
+   NAHLA DRIFT PANEL (no blinking version)
+   Builds rows ONCE, updates values only
+   ====================================== */
 
-(function() {
+(function () {
     const DRIFT_DAY_LENGTH_SECONDS = (typeof DAY_LENGTH_SECONDS !== "undefined")
         ? DAY_LENGTH_SECONDS
-        : 91570; // fallback
+        : 91570;
 
     function getAnchorDate() {
         if (window.CYCLE_ANCHOR instanceof Date && !isNaN(window.CYCLE_ANCHOR)) {
             return window.CYCLE_ANCHOR;
         }
-        // Fallback to original anchor if for some reason it's missing
         return new Date("2025-11-22T11:46:55.000Z");
     }
 
-    function pad(n) {
-        return String(n).padStart(2, "0");
-    }
+    function pad(n) { return String(n).padStart(2, "0"); }
 
     function formatUtcTime(date) {
         return date.toLocaleTimeString("en-GB", {
             hour: "2-digit",
             minute: "2-digit",
             second: "2-digit",
-            timeZone: "UTC"
+            timeZone: "UTC",
         });
     }
 
@@ -2036,129 +2034,192 @@ loadAnchorsFromStorage().then(() => {
         return date.toLocaleDateString("en-GB", {
             day: "numeric",
             month: "short",
-            timeZone: "UTC"
+            timeZone: "UTC",
         });
     }
 
-    // Calculate Nahla local time + cycle for a given Earth moment
-    function getNahlaData(targetDate) {
+    function getNahlaData(now) {
         const anchor = getAnchorDate();
-        const elapsedSeconds = (targetDate.getTime() - anchor.getTime()) / 1000;
+        const elapsed = (now - anchor) / 1000;
 
-        const cycleIndex = Math.floor(elapsedSeconds / DRIFT_DAY_LENGTH_SECONDS);
-        let secondsIntoCycle = elapsedSeconds - cycleIndex * DRIFT_DAY_LENGTH_SECONDS;
+        const cycle = Math.floor(elapsed / DRIFT_DAY_LENGTH_SECONDS);
+        let sec = elapsed - cycle * DRIFT_DAY_LENGTH_SECONDS;
+        if (sec < 0) sec += DRIFT_DAY_LENGTH_SECONDS;
 
-        // Keep secondsIntoCycle positive
-        if (secondsIntoCycle < 0) {
-            secondsIntoCycle += DRIFT_DAY_LENGTH_SECONDS;
-        }
-
-        const h = Math.floor(secondsIntoCycle / 3600);
-        const m = Math.floor((secondsIntoCycle % 3600) / 60);
-        const s = Math.floor(secondsIntoCycle % 60);
+        const h = Math.floor(sec / 3600);
+        const m = Math.floor((sec % 3600) / 60);
+        const s = Math.floor(sec % 60);
 
         return {
-            cycle: cycleIndex,
+            cycle,
+            secondsIntoCycle: sec,
             timeString: `${pad(h)}:${pad(m)}:${pad(s)}`
         };
     }
 
-    // Build schedule of NLT 00:00 times in GMT over several cycles
-    function generateDriftSchedule(now, forecastDays) {
-        const rows = [];
-        const anchor = getAnchorDate();
-        const current = getNahlaData(now);
-        const startCycle = current.cycle - 2; // a couple of past days for context
-
-        for (let i = 0; i < forecastDays; i++) {
-            const cycleNum = startCycle + i;
-            const startTimestamp = anchor.getTime() + cycleNum * DRIFT_DAY_LENGTH_SECONDS * 1000;
-            const startDate = new Date(startTimestamp);
-
-            const startHour = startDate.getUTCHours();
-            const startMin  = startDate.getUTCMinutes();
-            const dayProgressPercent = ((startHour * 60 + startMin) / 1440) * 100;
-
-            rows.push({
-                cycle: cycleNum,
-                gmtDate: startDate,
-                isCurrent: cycleNum === current.cycle,
-                percent: dayProgressPercent
-            });
-        }
-
-        return rows;
+    function computeCycleDate(cycle) {
+        return new Date(
+            getAnchorDate().getTime() + cycle * DRIFT_DAY_LENGTH_SECONDS * 1000
+        );
     }
 
-    function renderDriftPanel() {
-        const gmtEl        = document.getElementById("drift-gmt-clock");
-        const nltEl        = document.getElementById("drift-nlt-clock");
-        const bodyEl       = document.getElementById("drift-table-body");
-        const rowsSelectEl = document.getElementById("drift-rows-select");
+    /* -------------------------------
+       BUILD TABLE ONCE (no blinking)
+       ------------------------------- */
+
+    function buildDriftTable() {
+        const body = document.getElementById("drift-table-body");
+        const rowsSelect = document.getElementById("drift-rows-select");
         const anchorInfoEl = document.getElementById("drift-anchor-info");
 
-        // If panel isn't present, quietly bail
-        if (!gmtEl || !nltEl || !bodyEl || !rowsSelectEl || !anchorInfoEl) {
-            return;
-        }
+        if (!body || !rowsSelect) return;
+
+        body.innerHTML = ""; // clear once (not every second)
 
         const now = new Date();
-        const forecastDays = parseInt(rowsSelectEl.value, 10) || 14;
+        const N = parseInt(rowsSelect.value, 10) || 14;
+        const current = getNahlaData(now);
+        const startCycle = current.cycle - 2;
+
         const anchor = getAnchorDate();
-        const nahla = getNahlaData(now);
-
-        // Update live clocks
-        gmtEl.textContent = formatUtcTime(now);
-        nltEl.textContent = nahla.timeString;
-
-        // Anchor info footer
         anchorInfoEl.textContent =
             "Cycle Anchor: " + anchor.toISOString() +
             " • Day Length: 25h 26m 10s";
 
-        // Build schedule
-        const schedule = generateDriftSchedule(now, forecastDays);
+        for (let i = 0; i < N; i++) {
+            const cycle = startCycle + i;
+            const date = computeCycleDate(cycle);
 
-        let html = "";
-        schedule.forEach((row) => {
-            const rowClass = row.isCurrent ? "drift-row drift-row-current" : "drift-row";
+            const row = document.createElement("div");
+            row.className = "drift-row" + (cycle === current.cycle ? " drift-row-current" : "");
 
-            html += `<div class="${rowClass}">`;
-            html += `<div class="drift-cell drift-cycle">#${row.cycle}</div>`;
-            html += `<div class="drift-cell drift-date">${formatUtcDate(row.gmtDate)}</div>`;
-            html += `<div class="drift-cell drift-time">${formatUtcTime(row.gmtDate)}</div>`;
+            /* Create cells */
+            const c1 = document.createElement("div");
+            c1.className = "drift-cell drift-cycle";
+            c1.textContent = "#" + cycle;
 
-            html += `<div class="drift-cell drift-bar-cell">`;
-            html += `<div class="drift-bar-track">`;
+            const c2 = document.createElement("div");
+            c2.className = "drift-cell drift-date";
+            c2.textContent = formatUtcDate(date);
 
-            [0, 6, 12, 18].forEach((h) => {
-                const left = (h / 24) * 100;
-                html += `<div class="drift-bar-hour-marker" style="left: ${left}%;"></div>`;
+            const c3 = document.createElement("div");
+            c3.className = "drift-cell drift-time drift-time-value";
+            c3.dataset.cycle = cycle;   // link updates
+            c3.textContent = formatUtcTime(date);
+
+            const c4 = document.createElement("div");
+            c4.className = "drift-cell drift-bar-cell";
+
+            const track = document.createElement("div");
+            track.className = "drift-bar-track";
+
+            [0, 6, 12, 18].forEach(h => {
+                const div = document.createElement("div");
+                div.className = "drift-bar-hour-marker";
+                div.style.left = ((h / 24) * 100) + "%";
+                track.appendChild(div);
             });
 
-            html += `<div class="drift-bar-marker" style="left: ${row.percent}%;"></div>`;
-            html += `</div>`; // drift-bar-track
+            const marker = document.createElement("div");
+            marker.className = "drift-bar-marker drift-marker";
+            marker.dataset.cycle = cycle;
 
-            html += `<div class="drift-bar-labels"><span>00:00</span><span>12:00</span><span>23:59</span></div>`;
-            html += `</div>`; // drift-bar-cell
+            track.appendChild(marker);
 
-            html += `</div>`; // drift-row
-        });
+            const labels = document.createElement("div");
+            labels.className = "drift-bar-labels";
+            labels.innerHTML = "<span>00:00</span><span>12:00</span><span>23:59</span>";
 
-        bodyEl.innerHTML = html;
+            c4.appendChild(track);
+            c4.appendChild(labels);
+
+            row.appendChild(c1);
+            row.appendChild(c2);
+            row.appendChild(c3);
+            row.appendChild(c4);
+
+            body.appendChild(row);
+        }
     }
 
-    document.addEventListener("DOMContentLoaded", function() {
-        const rowsSelectEl = document.getElementById("drift-rows-select");
-        if (!rowsSelectEl) return;
+    /* -------------------------------
+       UPDATE ONLY VALUES (every sec)
+       ------------------------------- */
 
-        rowsSelectEl.addEventListener("change", renderDriftPanel);
+    function updateDriftTable() {
+        const now = new Date();
 
-        // Initial render + interval
-        renderDriftPanel();
-        setInterval(renderDriftPanel, 1000);
+          // Restore live clocks
+const gmtEl = document.getElementById("drift-gmt-clock");
+const nltEl = document.getElementById("drift-nlt-clock");
+
+const nahla = getNahlaData(now);
+
+if (gmtEl) gmtEl.textContent = formatUtcTime(now);
+if (nltEl) nltEl.textContent = nahla.timeString;
+
+       
+        const anchor = getAnchorDate();
+        const N = parseInt(document.getElementById("drift-rows-select").value, 10) || 14;
+
+        const current = getNahlaData(now);
+        const startCycle = current.cycle - 2;
+
+        // Update each row’s cells
+        const timeCells = document.querySelectorAll(".drift-time-value");
+        const markers = document.querySelectorAll(".drift-marker");
+
+        timeCells.forEach(cell => {
+            const cycle = parseInt(cell.dataset.cycle, 10);
+            const date = computeCycleDate(cycle);
+            cell.textContent = formatUtcTime(date);
+        });
+
+        markers.forEach(marker => {
+            const cycle = parseInt(marker.dataset.cycle, 10);
+            const date = computeCycleDate(cycle);
+
+            const h = date.getUTCHours();
+            const m = date.getUTCMinutes();
+            const percent = ((h * 60 + m) / 1440) * 100;
+
+            marker.style.left = percent + "%";
+        });
+
+    // Highlight current cycle row (no rebuild)
+const allRows = document.querySelectorAll(".drift-row");
+allRows.forEach(row => row.classList.remove("drift-row-current"));
+
+let cycleCells = document.querySelectorAll(".drift-cell.drift-cycle");
+
+cycleCells.forEach(cell => {
+    if (cell.textContent.trim() === `#${current.cycle}`) {
+        cell.parentElement.classList.add("drift-row-current");
+    }
+});
+
+    }
+
+    /* -------------------------------
+       INIT
+       ------------------------------- */
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const select = document.getElementById("drift-rows-select");
+        if (!select) return;
+
+        buildDriftTable();    // build structure ONCE
+        updateDriftTable();   // then update data
+
+        select.addEventListener("change", () => {
+            buildDriftTable();   // rebuild only when selector changes
+            updateDriftTable();
+        });
+
+        setInterval(updateDriftTable, 1000); // smooth updates, no blinking
     });
 })();
+
 
     </script>
 </body>
