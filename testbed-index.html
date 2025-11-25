@@ -1100,30 +1100,29 @@
     scrollbar-color: #333 #181818;
 }
 
-/* Scale top dashboard for mid-size screens */
+/* Force all 5 system panels to fit on a single row on 1366px screens */
 @media (max-width: 1500px) {
-    #top-panel-scale {
-        transform: scale(0.92);
-        transform-origin: top left;
+
+    #system-info-container > * {
+        min-width: 200px !important;
+        flex: 1 1 200px !important;
+        height: auto !important;       /* allow them to shrink */
+    }
+
+    /* Reduce padding slightly to reclaim horizontal space */
+    #system-info-container > * {
+        padding-left: 14px !important;
+        padding-right: 14px !important;
     }
 }
 
-/* Scale further for 1366px screens */
+/* Slightly tighter on 1366px screens */
 @media (max-width: 1366px) {
-    #top-panel-scale {
-        transform: scale(0.82);
-        transform-origin: top left;
+    #system-info-container > * {
+        min-width: 180px !important;
+        flex: 1 1 180px !important;
     }
 }
-
-/* Optional: small desktop */
-@media (max-width: 1280px) {
-    #top-panel-scale {
-        transform: scale(0.78);
-        transform-origin: top left;
-    }
-}
-
 
 
 
