@@ -1106,19 +1106,20 @@
     }
 }
 
-/* Equalise heights of all 5 system-info panels on desktop */
+/* Equalise heights of all 5 panels on desktop */
 @media (min-width: 1100px) {
 
     #system-info-container {
-        align-items: stretch !important; /* stretch all panels to tallest */
+        align-items: stretch !important;
     }
 
-    /* Remove fixed heights and allow auto-balancing */
     #system-info-container > * {
         height: auto !important;
-        min-height: 630px !important;   /* tweak this value as you like */
+        min-height: 630px !important;  /* <- your chosen height */
     }
 }
+
+
 
 
 
