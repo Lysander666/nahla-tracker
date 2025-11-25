@@ -1112,6 +1112,35 @@
     border-left-color: #61dafb33; /* subtle cyan tint on hover, no layout shift */
 }
 
+       /* Anti-flicker hover for drift rows */
+.drift-row {
+    position: relative;
+}
+
+.drift-row::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    background-color: transparent;
+    pointer-events: none;
+    transition: background-color 0.15s ease;
+    z-index: 0; /* behind the content */
+}
+
+.drift-row:hover::before {
+    background-color: #242424; /* your hover grey */
+}
+
+/* Make sure actual content sits above the pseudo-background */
+.drift-row > * {
+    position: relative;
+    z-index: 1;
+}
+
+
 
 
     </style>
