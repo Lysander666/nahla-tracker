@@ -1097,13 +1097,14 @@
     scrollbar-color: #333 #181818;
 }
 
-/* FORCE 5 PANELS TO FIT ON ONE LINE BETWEEN 1100–1500px */
 @media (min-width: 1100px) and (max-width: 1500px) {
+    /* FORCE all 5 top panels to shrink */
     #system-info-container .celestial-body,
     #system-info-container #map-panel,
     #system-info-container #manifest-panel {
-        min-width: 220px;   /* was 250px */
-        max-width: 260px;
+        min-width: 220px !important;
+        max-width: 260px !important;
+        flex: 1 1 220px !important;
     }
 }
 
