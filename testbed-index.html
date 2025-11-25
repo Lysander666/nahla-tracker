@@ -2150,6 +2150,17 @@ loadAnchorsFromStorage().then(() => {
 
     function updateDriftTable() {
         const now = new Date();
+
+          // Restore live clocks
+const gmtEl = document.getElementById("drift-gmt-clock");
+const nltEl = document.getElementById("drift-nlt-clock");
+
+const nahla = getNahlaData(now);
+
+if (gmtEl) gmtEl.textContent = formatUtcTime(now);
+if (nltEl) nltEl.textContent = nahla.timeString;
+
+       
         const anchor = getAnchorDate();
         const N = parseInt(document.getElementById("drift-rows-select").value, 10) || 14;
 
