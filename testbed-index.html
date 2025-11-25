@@ -370,7 +370,7 @@
             border-radius: 8px;
             padding: 0 20px 20px 20px;
             background-color: #222;
-            height: 700px; /* <<<<< ALL PANEL HEIGHTS ARE CONTROLLED BY THIS LINE HERE!! <<<<<< */
+            height: 630px; /* <<<<< ALL PANEL HEIGHTS ARE CONTROLLED BY THIS LINE HERE!! <<<<<< */
             overflow-y: auto;
         }
         
@@ -1106,6 +1106,19 @@
     }
 }
 
+/* Equalise heights of all 5 system-info panels on desktop */
+@media (min-width: 1100px) {
+
+    #system-info-container {
+        align-items: stretch !important; /* stretch all panels to tallest */
+    }
+
+    /* Remove fixed heights and allow auto-balancing */
+    #system-info-container > * {
+        height: auto !important;
+        min-height: 630px !important;   /* tweak this value as you like */
+    }
+}
 
 
 
