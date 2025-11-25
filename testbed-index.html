@@ -1097,12 +1097,15 @@
     scrollbar-color: #333 #181818;
 }
 
-#system-info-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-    align-items: flex-start !important;   /* <-- THE FIX */
+/* FIX: shrink all 5 panels on mid-sized screens */
+@media (min-width: 1100px) and (max-width: 1500px) {
+    #system-info-container > * {
+        min-width: 200px !important;
+        max-width: 240px !important;
+        flex: 1 1 200px !important;
+    }
 }
+
 
 
 
