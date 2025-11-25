@@ -786,6 +786,317 @@
        font-weight: 500; /* barely stronger */
       }
 
+        /* ===========================
+   NAHLA DRIFT PANEL (END)
+   =========================== */
+
+#drift-panel {
+    margin-top: 30px;
+    border: 1px solid #444;
+    border-radius: 8px;
+    padding: 20px;
+    background-color: #222;
+    box-shadow: 0 0 18px rgba(0, 0, 0, 0.5);
+    font-size: 0.95rem;
+}
+
+#drift-panel h2 {
+    color: #61dafb;
+    margin-top: 0;
+    margin-bottom: 12px;
+    font-family: "Consolas", "Courier New", monospace;
+    text-align: left;
+}
+
+.drift-header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #444;
+    margin-bottom: 14px;
+}
+
+.drift-header-title {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.drift-pill {
+    display: inline-block;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: #9ee7ff;
+    padding: 3px 7px;
+    border-radius: 999px;
+    border: 1px solid rgba(97, 218, 251, 0.4);
+    background: rgba(20, 40, 50, 0.9);
+}
+
+.drift-title-main {
+    font-size: 1.15rem;
+    font-weight: 600;
+}
+
+.drift-clock-box {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background-color: #1b1b1b;
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 1px solid #333;
+}
+
+.drift-clock {
+    text-align: center;
+    min-width: 110px;
+}
+
+.drift-clock-label {
+    font-size: 0.7rem;
+    color: #888;
+    margin-bottom: 2px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+}
+
+.drift-clock-value {
+    font-size: 1.2rem;
+    font-family: "Consolas", "Courier New", monospace;
+}
+
+.drift-clock-nlt {
+    color: #61dafb;
+    text-shadow: 0 0 5px rgba(97, 218, 251, 0.7);
+}
+
+.drift-clock-divider {
+    width: 1px;
+    height: 28px;
+    background-color: #444;
+}
+
+.drift-explainer {
+    background-color: #1c1c1c;
+    border-left: 4px solid #61dafb;
+    padding: 10px 12px;
+    margin-bottom: 14px;
+    color: #ccc;
+    line-height: 1.5;
+}
+
+.drift-explainer p {
+    margin: 0;
+}
+
+.drift-highlight {
+    color: #61dafb;
+    font-weight: 600;
+}
+
+.drift-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    font-size: 0.85rem;
+    color: #aaa;
+}
+
+.drift-controls-right {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+#drift-rows-select {
+    background-color: #222;
+    border: 1px solid #444;
+    color: #eee;
+    border-radius: 4px;
+    padding: 3px 6px;
+    font-size: 0.85rem;
+    font-family: inherit;
+}
+
+#drift-rows-select:focus {
+    outline: none;
+    border-color: #61dafb;
+}
+
+/* Table layout */
+
+.drift-table {
+    border: 1px solid #333;
+    border-radius: 6px;
+    overflow: hidden;
+    background-color: #181818;
+}
+
+.drift-table-header {
+    display: grid;
+    grid-template-columns: 0.6fr 1.4fr 1.1fr 3fr;
+    gap: 10px;
+    padding: 8px 10px;
+    background-color: #111;
+    border-bottom: 1px solid #333;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #888;
+}
+
+.drift-table-header-shift {
+    text-align: left;
+}
+
+.drift-table-body {
+    max-height: 340px;
+    overflow-y: auto;
+}
+
+.drift-row {
+    display: grid;
+    grid-template-columns: 0.6fr 1.4fr 1.1fr 3fr;
+    gap: 10px;
+    padding: 7px 10px;
+    align-items: center;
+    font-size: 0.85rem;
+    border-bottom: 1px solid #222;
+    transition: background-color 0.15s ease;
+}
+
+.drift-row:last-child {
+    border-bottom: none;
+}
+
+.drift-row:hover {
+    background-color: #242424;
+}
+
+.drift-row-current {
+    background-color: #1e2a33;
+    border-left: 3px solid #61dafb;
+}
+
+.drift-cell.drift-cycle {
+    color: #777;
+    font-weight: 600;
+}
+
+.drift-row-current .drift-cell.drift-cycle {
+    color: #fff;
+}
+
+.drift-cell.drift-date {
+    color: #ccc;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.drift-cell.drift-time {
+    font-family: "Consolas", "Courier New", monospace;
+    font-size: 0.95rem;
+}
+
+.drift-bar-cell {
+    font-size: 0.75rem;
+}
+
+/* Drift bar */
+
+.drift-bar-track {
+    position: relative;
+    width: 100%;
+    height: 6px;
+    border-radius: 999px;
+    background-color: #101010;
+    overflow: hidden;
+    margin-bottom: 3px;
+}
+
+.drift-bar-hour-marker {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background-color: #333;
+}
+
+.drift-bar-marker {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 6px;
+    border-radius: 999px;
+    background-color: #61dafb;
+    box-shadow: 0 0 8px rgba(97, 218, 251, 0.9);
+    transform: translateX(-50%);
+}
+
+.drift-bar-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.68rem;
+    color: #555;
+    font-family: "Consolas", "Courier New", monospace;
+}
+
+.drift-footer {
+    margin-top: 10px;
+    font-size: 0.7rem;
+    color: #777;
+    text-align: center;
+}
+
+/* Responsive tweak */
+
+@media (max-width: 800px) {
+    .drift-table-header,
+    .drift-row {
+        grid-template-columns: 0.7fr 1.3fr 1.2fr 2.6fr;
+    }
+
+    .drift-header {
+        align-items: flex-start;
+    }
+
+    .drift-clock-box {
+        width: 100%;
+        justify-content: space-between;
+    }
+}
+
+       /* Drift Panel Scrollbar — Nahla dark theme */
+
+#drift-table-body::-webkit-scrollbar {
+    width: 8px;
+}
+
+#drift-table-body::-webkit-scrollbar-track {
+    background: #181818; /* very dark grey, like other panels */
+}
+
+#drift-table-body::-webkit-scrollbar-thumb {
+    background: #333;    /* dark thumb */
+    border-radius: 4px;
+}
+
+#drift-table-body::-webkit-scrollbar-thumb:hover {
+    background: #444;    /* slight brighten on hover */
+}
+
+/* Firefox */
+#drift-table-body {
+    scrollbar-width: thin;
+    scrollbar-color: #333 #181818;
+}
+
     </style>
 </head>
 <body>
@@ -1073,6 +1384,67 @@
                 <small>Nahla Tracker is a personal project of Lysander666 - <a class="cyan-link" href="https://bsky.app/profile/lysander666.bsky.social" target="_blank">@lysander666.bsky.social</a></small>
             </div>
         </div>
+ <div id="drift-panel">
+            <h2>Nahla Drift Chart</h2>
+
+            <div class="drift-header">
+                <div class="drift-header-title">
+                    <div class="drift-pill">GMT vs Nahla Local Time</div>
+                    <div class="drift-title-main">Nahla Midnight Drift</div>
+                </div>
+
+                <div class="drift-clock-box">
+                    <div class="drift-clock">
+                        <div class="drift-clock-label">GMT / UTC</div>
+                        <div class="drift-clock-value" id="drift-gmt-clock">--:--:--</div>
+                    </div>
+                    <div class="drift-clock-divider"></div>
+                    <div class="drift-clock">
+                        <div class="drift-clock-label">Nahla Local Time (NLT)</div>
+                        <div class="drift-clock-value drift-clock-nlt" id="drift-nlt-clock">--:--:--</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="drift-explainer">
+                <p>
+                    <strong>The Drift:</strong> A solar day on Nahla lasts <span class="drift-highlight">25h 26m 10s</span>, 
+                    which is <span class="drift-highlight">1h 26m 10s longer</span> than an Earth day.
+                    This means <strong>NLT midnight (00:00)</strong> slides later in GMT each cycle.
+                    The chart below shows when NLT 00:00 happens in GMT over upcoming Nahla days.
+                </p>
+            </div>
+
+            <div class="drift-controls">
+                <div class="drift-controls-label">Upcoming Nahla cycles</div>
+                <div class="drift-controls-right">
+                    <span>Show rows:</span>
+                    <select id="drift-rows-select">
+                        <option value="7">7</option>
+                        <option value="14" selected>14</option>
+                        <option value="30">30</option>
+                        <option value="60">60</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="drift-table">
+                <div class="drift-table-header">
+                    <div>Cycle</div>
+                    <div>GMT Date</div>
+                    <div>NLT 00:00 @</div>
+                    <div class="drift-table-header-shift">Daily Shift</div>
+                </div>
+                <div id="drift-table-body" class="drift-table-body">
+                    <!-- rows injected by JS -->
+                </div>
+            </div>
+
+            <div class="drift-footer" id="drift-anchor-info">
+                <!-- anchor info injected by JS -->
+            </div>
+        </div>
+   
     </div> 
     
     <script>
@@ -1629,6 +2001,164 @@ loadAnchorsFromStorage().then(() => {
     updateDisplay();
     setInterval(updateDisplay, 50);
 });
+
+ /* ===========================
+   NAHLA DRIFT PANEL LOGIC
+   =========================== */
+
+(function() {
+    const DRIFT_DAY_LENGTH_SECONDS = (typeof DAY_LENGTH_SECONDS !== "undefined")
+        ? DAY_LENGTH_SECONDS
+        : 91570; // fallback
+
+    function getAnchorDate() {
+        if (window.CYCLE_ANCHOR instanceof Date && !isNaN(window.CYCLE_ANCHOR)) {
+            return window.CYCLE_ANCHOR;
+        }
+        // Fallback to original anchor if for some reason it's missing
+        return new Date("2025-11-22T11:46:55.000Z");
+    }
+
+    function pad(n) {
+        return String(n).padStart(2, "0");
+    }
+
+    function formatUtcTime(date) {
+        return date.toLocaleTimeString("en-GB", {
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+            timeZone: "UTC"
+        });
+    }
+
+    function formatUtcDate(date) {
+        return date.toLocaleDateString("en-GB", {
+            day: "numeric",
+            month: "short",
+            timeZone: "UTC"
+        });
+    }
+
+    // Calculate Nahla local time + cycle for a given Earth moment
+    function getNahlaData(targetDate) {
+        const anchor = getAnchorDate();
+        const elapsedSeconds = (targetDate.getTime() - anchor.getTime()) / 1000;
+
+        const cycleIndex = Math.floor(elapsedSeconds / DRIFT_DAY_LENGTH_SECONDS);
+        let secondsIntoCycle = elapsedSeconds - cycleIndex * DRIFT_DAY_LENGTH_SECONDS;
+
+        // Keep secondsIntoCycle positive
+        if (secondsIntoCycle < 0) {
+            secondsIntoCycle += DRIFT_DAY_LENGTH_SECONDS;
+        }
+
+        const h = Math.floor(secondsIntoCycle / 3600);
+        const m = Math.floor((secondsIntoCycle % 3600) / 60);
+        const s = Math.floor(secondsIntoCycle % 60);
+
+        return {
+            cycle: cycleIndex,
+            timeString: `${pad(h)}:${pad(m)}:${pad(s)}`
+        };
+    }
+
+    // Build schedule of NLT 00:00 times in GMT over several cycles
+    function generateDriftSchedule(now, forecastDays) {
+        const rows = [];
+        const anchor = getAnchorDate();
+        const current = getNahlaData(now);
+        const startCycle = current.cycle - 2; // a couple of past days for context
+
+        for (let i = 0; i < forecastDays; i++) {
+            const cycleNum = startCycle + i;
+            const startTimestamp = anchor.getTime() + cycleNum * DRIFT_DAY_LENGTH_SECONDS * 1000;
+            const startDate = new Date(startTimestamp);
+
+            const startHour = startDate.getUTCHours();
+            const startMin  = startDate.getUTCMinutes();
+            const dayProgressPercent = ((startHour * 60 + startMin) / 1440) * 100;
+
+            rows.push({
+                cycle: cycleNum,
+                gmtDate: startDate,
+                isCurrent: cycleNum === current.cycle,
+                percent: dayProgressPercent
+            });
+        }
+
+        return rows;
+    }
+
+    function renderDriftPanel() {
+        const gmtEl        = document.getElementById("drift-gmt-clock");
+        const nltEl        = document.getElementById("drift-nlt-clock");
+        const bodyEl       = document.getElementById("drift-table-body");
+        const rowsSelectEl = document.getElementById("drift-rows-select");
+        const anchorInfoEl = document.getElementById("drift-anchor-info");
+
+        // If panel isn't present, quietly bail
+        if (!gmtEl || !nltEl || !bodyEl || !rowsSelectEl || !anchorInfoEl) {
+            return;
+        }
+
+        const now = new Date();
+        const forecastDays = parseInt(rowsSelectEl.value, 10) || 14;
+        const anchor = getAnchorDate();
+        const nahla = getNahlaData(now);
+
+        // Update live clocks
+        gmtEl.textContent = formatUtcTime(now);
+        nltEl.textContent = nahla.timeString;
+
+        // Anchor info footer
+        anchorInfoEl.textContent =
+            "Cycle Anchor: " + anchor.toISOString() +
+            " • Day Length: 25h 26m 10s";
+
+        // Build schedule
+        const schedule = generateDriftSchedule(now, forecastDays);
+
+        let html = "";
+        schedule.forEach((row) => {
+            const rowClass = row.isCurrent ? "drift-row drift-row-current" : "drift-row";
+
+            html += `<div class="${rowClass}">`;
+            html += `<div class="drift-cell drift-cycle">#${row.cycle}</div>`;
+            html += `<div class="drift-cell drift-date">${formatUtcDate(row.gmtDate)}</div>`;
+            html += `<div class="drift-cell drift-time">${formatUtcTime(row.gmtDate)}</div>`;
+
+            html += `<div class="drift-cell drift-bar-cell">`;
+            html += `<div class="drift-bar-track">`;
+
+            [0, 6, 12, 18].forEach((h) => {
+                const left = (h / 24) * 100;
+                html += `<div class="drift-bar-hour-marker" style="left: ${left}%;"></div>`;
+            });
+
+            html += `<div class="drift-bar-marker" style="left: ${row.percent}%;"></div>`;
+            html += `</div>`; // drift-bar-track
+
+            html += `<div class="drift-bar-labels"><span>00:00</span><span>12:00</span><span>23:59</span></div>`;
+            html += `</div>`; // drift-bar-cell
+
+            html += `</div>`; // drift-row
+        });
+
+        bodyEl.innerHTML = html;
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        const rowsSelectEl = document.getElementById("drift-rows-select");
+        if (!rowsSelectEl) return;
+
+        rowsSelectEl.addEventListener("change", renderDriftPanel);
+
+        // Initial render + interval
+        renderDriftPanel();
+        setInterval(renderDriftPanel, 1000);
+    });
+})();
 
     </script>
 </body>
