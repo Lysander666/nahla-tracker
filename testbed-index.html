@@ -2177,11 +2177,18 @@ loadAnchorsFromStorage().then(() => {
             marker.style.left = percent + "%";
         });
 
-        // Highlight current cycle row
-        document.querySelectorAll(".drift-row").forEach(row => {
-            row.classList.remove("drift-row-current");
-        });
-        const currentRow = document.querySelector(`.drift-cycle:contains("#${current.cycle}")`);
+    // Highlight current cycle row (no rebuild)
+const allRows = document.querySelectorAll(".drift-row");
+allRows.forEach(row => row.classList.remove("drift-row-current"));
+
+let cycleCells = document.querySelectorAll(".drift-cell.drift-cycle");
+
+cycleCells.forEach(cell => {
+    if (cell.textContent.trim() === `#${current.cycle}`) {
+        cell.parentElement.classList.add("drift-row-current");
+    }
+});
+
     }
 
     /* -------------------------------
