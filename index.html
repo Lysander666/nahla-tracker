@@ -1097,6 +1097,15 @@
     scrollbar-color: #333 #181818;
 }
 
+
+/* Only for screens around your laptop size */
+@media (min-width: 1200px) and (max-width: 1400px) {
+    #system-info-container {
+        zoom: 0.8;
+    }
+}
+       
+
     </style>
 </head>
 <body>
@@ -1167,8 +1176,8 @@
                     <li><strong>Gravity:</strong> 29.19 G</li>
                     <li><strong>Temp:</strong> 908 K / 635C</li>
                     <li><strong>Atmosphere:</strong> H<sub>2</sub> (72.89%), He (27.11%)</li>
-                    <li><strong>Distance from Primary:</strong> 2,885 ls </li>
-                    <li><strong>Orbital Period:</strong> 555.2 Earth days</li>
+                    <li><strong>Distance from Primary:</strong> 3k ls</li>
+                    <li><strong>Orbital Period:</strong> 555.2 d</li>
                     <li><strong>Rotation:</strong> 0.4 Earth days</li>
                 </ul>
 
@@ -1420,8 +1429,8 @@
                 <div class="drift-controls-right">
                     <span>Show rows:</span>
                     <select id="drift-rows-select">
-                        <option value="7">7</option>
-                        <option value="14" selected>14</option>
+                        <option value="7" selected>7</option>
+                        <option value="14">14</option>
                         <option value="30">30</option>
                         <option value="60">60</option>
                     </select>
@@ -2219,6 +2228,7 @@ cycleCells.forEach(cell => {
         setInterval(updateDriftTable, 1000); // smooth updates, no blinking
     });
 })();
+
 
 
     </script>
