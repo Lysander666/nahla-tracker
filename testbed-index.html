@@ -2012,10 +2012,11 @@ loadAnchorsFromStorage().then(() => {
 });
 
 
-  /* ======================================================
-   NAHLA DRIFT TABLE (ALWAYS SHOW TODAY — FIXED POSITION)
+/* ======================================================
+   NAHLA DRIFT TABLE (GMT-ROLLOVER, STABLE, NO FLICKER)
    ====================================================== */
 
+// Format GMT date (e.g. "26 Nov")
 function formatUtcDateShort(d) {
     return d.toLocaleDateString("en-GB", {
         day: "2-digit",
@@ -2024,20 +2025,13 @@ function formatUtcDateShort(d) {
     }).replace(",", "");
 }
 
-// Compute NLT midnight (00:00) for a given GMT date
+// Compute real NLT midnight for a given GMT date
 function computeNltMidnightForDate(dateObj) {
-    // DateObj = GMT midnight of that calendar day
-    const diffSeconds =
-        (dateObj - CYCLE_ANCHOR) / 1000;
-
+    const diffSeconds = (dateObj - CYCLE_ANCHOR) / 1000;
     const wrapped = mod(diffSeconds, DAY_LENGTH_SECONDS);
 
-    // To get the NEXT NLT midnight after this GMT date:
-    const secondsUntilMidnight =
-        DAY_LENGTH_SECONDS - wrapped;
-
-    const nltMidnight = new Date(dateObj.getTime() + secondsUntilMidnight * 1000);
-    return nltMidnight;
+    const secondsUntilMidnight = DAY_LENGTH_SECONDS - wrapped;
+    return new Date(dateObj.getTime() + secondsUntilMidnight * 1000);
 }
 
 // Compute cycle number for that NLT midnight
@@ -2047,25 +2041,31 @@ function computeCycleNumber(dateObj) {
     return Math.floor(diff / DAY_LENGTH_SECONDS) + 1;
 }
 
-function buildDriftTable() {
-    const body = document.getElementById("drift-table-body");
-    body.innerHTML = "";
+// CACHE last-built GMT day so we rebuild only once per day
+let lastBuiltDay = null;
 
-    const rowsToShow = parseInt(document.getElementById("drift-rows-select").value, 10);
-
+function buildDriftTable(force = false) {
     const now = new Date();
-
-    // TODAY (UTC)
     const today = new Date(Date.UTC(
         now.getUTCFullYear(),
         now.getUTCMonth(),
         now.getUTCDate()
     ));
 
-    // We want:
-    // Row 1: yesterday
-    // Row 2: today (highlighted)
-    // Rows 3–N: future dates
+    // Avoid flicker: only rebuild if:
+    //  - forced
+    //  - or the GMT date has changed since last build
+    if (!force && lastBuiltDay === today.getTime()) {
+        return;
+    }
+    lastBuiltDay = today.getTime();
+
+    const body = document.getElementById("drift-table-body");
+    body.innerHTML = "";
+
+    const rowsToShow = parseInt(document.getElementById("drift-rows-select").value, 10);
+
+    // Row 1 = Yesterday
     const firstDate = new Date(today);
     firstDate.setUTCDate(today.getUTCDate() - 1);
 
@@ -2080,40 +2080,40 @@ function buildDriftTable() {
         const row = document.createElement("div");
         row.className = "drift-row";
 
-        // Cycle column
+        // ===== Cycle cell =====
         const cycleCell = document.createElement("div");
         cycleCell.className = "drift-cell drift-cycle";
         cycleCell.textContent = `#${cycle}`;
-        row.(cycleCell);
+        row.appendChild(cycleCell);
 
-        // GMT date
+        // ===== GMT Date cell =====
         const dateCell = document.createElement("div");
         dateCell.className = "drift-cell drift-date";
         dateCell.textContent = formatUtcDateShort(d);
-        row.(dateCell);
+        row.appendChild(dateCell);
 
-        // NLT midnight time
+        // ===== Time cell =====
         const timeCell = document.createElement("div");
         timeCell.className = "drift-cell drift-time";
         timeCell.textContent = nltMidnight.toISOString().split("T")[1].split(".")[0];
-        row.(timeCell);
+        row.appendChild(timeCell);
 
-        // Daily shift column
+        // ===== Bar cell =====
         const barCell = document.createElement("div");
         barCell.className = "drift-bar-cell";
 
         const barTrack = document.createElement("div");
         barTrack.className = "drift-bar-track";
 
-        // Add markers
+        // Hour markers
         for (let h = 0; h < 24; h++) {
             const mk = document.createElement("div");
             mk.className = "drift-bar-hour-marker";
             mk.style.left = `${(h / 24) * 100}%`;
-            barTrack.(mk);
+            barTrack.appendChild(mk);
         }
 
-        // Marker for NLT midnight position
+        // Midnight marker position
         const seconds = nltMidnight.getUTCHours() * 3600 +
                         nltMidnight.getUTCMinutes() * 60 +
                         nltMidnight.getUTCSeconds();
@@ -2123,35 +2123,30 @@ function buildDriftTable() {
         const marker = document.createElement("div");
         marker.className = "drift-bar-marker";
         marker.style.left = `${pos}%`;
-        barTrack.(marker);
+        barTrack.appendChild(marker);
 
-        // Append the bar itself
-barCell.appendChild(barTrack);
+        barCell.appendChild(barTrack);
 
-// ==== Add hour labels back ====
-const labels = document.createElement("div");
-labels.className = "drift-bar-labels";
+        // ===== Add labels back ("00:00", "12:00", "23:59") =====
+        const labels = document.createElement("div");
+        labels.className = "drift-bar-labels";
 
-const labelStart = document.createElement("span");
-labelStart.textContent = "00:00";
+        const l1 = document.createElement("span");
+        l1.textContent = "00:00";
+        labels.appendChild(l1);
 
-const labelMid = document.createElement("span");
-labelMid.textContent = "12:00";
+        const l2 = document.createElement("span");
+        l2.textContent = "12:00";
+        labels.appendChild(l2);
 
-const labelEnd = document.createElement("span");
-labelEnd.textContent = "23:59";
+        const l3 = document.createElement("span");
+        l3.textContent = "23:59";
+        labels.appendChild(l3);
 
-labels.appendChild(labelStart);
-labels.appendChild(labelMid);
-labels.appendChild(labelEnd);
+        barCell.appendChild(labels);
+        row.appendChild(barCell);
 
-barCell.appendChild(labels);
-// =================================
-
-row.appendChild(barCell);
-
-
-        // Highlight today's row (#2 always)
+        // ===== Highlight today's row =====
         if (d.getTime() === today.getTime()) {
             row.classList.add("drift-row-current");
         }
@@ -2162,10 +2157,12 @@ row.appendChild(barCell);
 
 function updateDriftPanelClocks() {
     const now = new Date();
+
+    // GMT Clock
     document.getElementById("drift-gmt-clock").textContent =
         now.toISOString().split("T")[1].split(".")[0];
 
-    // Compute NLT time
+    // NLT Clock
     const cycle = get_cycle_state(now);
     const wrapped = cycle.wrappedSeconds;
 
@@ -2177,16 +2174,16 @@ function updateDriftPanelClocks() {
         `${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
 }
 
-// Every second: update clocks, rebuild rows if needed
+// Clock updates every second (no table rebuild)
 setInterval(() => {
     updateDriftPanelClocks();
-    buildDriftTable(); // DAILY-LOCKED design → safe to rebuild every second
+    buildDriftTable();   // Will NOT rebuild unless date changed → no flicker
 }, 1000);
 
-// Initial build
-buildDriftTable();
+// Initial full build
+buildDriftTable(true);
 updateDriftPanelClocks();
-     
+
 
 
     </script>
