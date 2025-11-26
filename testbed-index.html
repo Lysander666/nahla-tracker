@@ -2011,227 +2011,170 @@ loadAnchorsFromStorage().then(() => {
     setInterval(updateDisplay, 50);
 });
 
-/* ======================================
-   NAHLA DRIFT PANEL (GMT-day based)
-   ====================================== */
+/* ======================================================
+   NAHLA DRIFT TABLE v2 — GMT rollover, no flicker,
+   restored hour labels, stable highlight.
+   ====================================================== */
 
-(function () {
-    const DRIFT_DAY_LENGTH_SECONDS = (typeof DAY_LENGTH_SECONDS !== "undefined")
-        ? DAY_LENGTH_SECONDS
-        : 91570;
+// Format GMT date (e.g. "26 Nov")
+function formatUtcDateShort(d) {
+    return d.toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "short",
+        timeZone: "UTC"
+    }).replace(",", "");
+}
 
-    function getAnchorDate() {
-        if (window.CYCLE_ANCHOR instanceof Date && !isNaN(window.CYCLE_ANCHOR)) {
-            return window.CYCLE_ANCHOR;
+// Compute real NLT midnight for a given GMT date
+function computeNltMidnightForDate(dateObj) {
+    const diffSeconds = (dateObj - CYCLE_ANCHOR) / 1000;
+    const wrapped = mod(diffSeconds, DAY_LENGTH_SECONDS);
+    const secondsUntilMidnight = DAY_LENGTH_SECONDS - wrapped;
+    return new Date(dateObj.getTime() + secondsUntilMidnight * 1000);
+}
+
+// Compute cycle number
+function computeCycleNumber(dateObj) {
+    const nlt0 = computeNltMidnightForDate(dateObj);
+    const diff = (nlt0 - CYCLE_ANCHOR) / 1000;
+    return Math.floor(diff / DAY_LENGTH_SECONDS) + 1;
+}
+
+// Cache last GMT day to prevent flicker
+let lastBuiltDay = null;
+
+function buildDriftTable(force = false) {
+    const now = new Date();
+
+    // Today's GMT date at 00:00:00
+    const today = new Date(Date.UTC(
+        now.getUTCFullYear(),
+        now.getUTCMonth(),
+        now.getUTCDate()
+    ));
+
+    // Only rebuild ONCE per GMT day
+    if (!force && lastBuiltDay === today.getTime()) return;
+    lastBuiltDay = today.getTime();
+
+    const body = document.getElementById("drift-table-body");
+    body.innerHTML = "";
+
+    const rowsToShow = parseInt(document.getElementById("drift-rows-select").value, 10);
+
+    // First row = yesterday
+    const firstDate = new Date(today);
+    firstDate.setUTCDate(today.getUTCDate() - 1);
+
+    for (let i = 0; i < rowsToShow; i++) {
+        const d = new Date(firstDate);
+        d.setUTCDate(firstDate.getUTCDate() + i);
+
+        const nltMidnight = computeNltMidnightForDate(d);
+        const cycle = computeCycleNumber(d);
+
+        const row = document.createElement("div");
+        row.className = "drift-row";
+
+        // Cycle #
+        const cycleCell = document.createElement("div");
+        cycleCell.className = "drift-cell drift-cycle";
+        cycleCell.textContent = `#${cycle}`;
+        row.appendChild(cycleCell);
+
+        // GMT Date
+        const dateCell = document.createElement("div");
+        dateCell.className = "drift-cell drift-date";
+        dateCell.textContent = formatUtcDateShort(d);
+        row.appendChild(dateCell);
+
+        // NLT 00:00 time (HH:MM:SS)
+        const timeCell = document.createElement("div");
+        timeCell.className = "drift-cell drift-time";
+        timeCell.textContent = nltMidnight.toISOString().split("T")[1].split(".")[0];
+        row.appendChild(timeCell);
+
+        // Bar cell
+        const barCell = document.createElement("div");
+        barCell.className = "drift-bar-cell";
+
+        const barTrack = document.createElement("div");
+        barTrack.className = "drift-bar-track";
+
+        // Hour markers
+        for (let h = 0; h < 24; h++) {
+            const mk = document.createElement("div");
+            mk.className = "drift-bar-hour-marker";
+            mk.style.left = `${(h / 24) * 100}%`;
+            barTrack.appendChild(mk);
         }
-        return new Date("2025-11-22T11:46:55.000Z");
-    }
 
-    function pad(n) { return String(n).padStart(2, "0"); }
+        // Midnight marker
+        const seconds =
+            nltMidnight.getUTCHours() * 3600 +
+            nltMidnight.getUTCMinutes() * 60 +
+            nltMidnight.getUTCSeconds();
 
-    function formatUtcTime(date) {
-        return date.toLocaleTimeString("en-GB", {
-            hour: "2-digit",
-            minute: "2-digit",
-            second: "2-digit",
-            timeZone: "UTC",
+        const pos = (seconds / 86400) * 100;
+
+        const marker = document.createElement("div");
+        marker.className = "drift-bar-marker";
+        marker.style.left = `${pos}%`;
+        barTrack.appendChild(marker);
+
+        barCell.appendChild(barTrack);
+
+        // Hour labels restored
+        const labels = document.createElement("div");
+        labels.className = "drift-bar-labels";
+
+        ["00:00", "12:00", "23:59"].forEach(t => {
+            const span = document.createElement("span");
+            span.textContent = t;
+            labels.appendChild(span);
         });
-    }
 
-    function formatUtcDate(date) {
-        return date.toLocaleDateString("en-GB", {
-            day: "numeric",
-            month: "short",
-            timeZone: "UTC",
-        });
-    }
+        barCell.appendChild(labels);
+        row.appendChild(barCell);
 
-    function getNahlaData(now) {
-        const anchor = getAnchorDate();
-        const elapsed = (now - anchor) / 1000;
-
-        const cycle = Math.floor(elapsed / DRIFT_DAY_LENGTH_SECONDS);
-        let sec = elapsed - cycle * DRIFT_DAY_LENGTH_SECONDS;
-        if (sec < 0) sec += DRIFT_DAY_LENGTH_SECONDS;
-
-        const h = Math.floor(sec / 3600);
-        const m = Math.floor((sec % 3600) / 60);
-        const s = Math.floor(sec % 60);
-
-        return {
-            cycle,
-            secondsIntoCycle: sec,
-            timeString: `${pad(h)}:${pad(m)}:${pad(s)}`
-        };
-    }
-
-    function getGmtDayStart(date) {
-        const d = new Date(date);
-        d.setUTCHours(0, 0, 0, 0);
-        return d;
-    }
-
-    function computeNahlaMidnightForGmtDay(gmtDayStart) {
-        const anchor = getAnchorDate();
-        const elapsed = (gmtDayStart - anchor) / 1000;
-        const cycle = Math.floor(elapsed / DRIFT_DAY_LENGTH_SECONDS);
-        const cycleStart = new Date(anchor.getTime() + cycle * DRIFT_DAY_LENGTH_SECONDS * 1000);
-        return cycleStart;
-    }
-
-    /* -------------------------------
-       BUILD TABLE ONCE
-       ------------------------------- */
-
-    function buildDriftTable() {
-        const body = document.getElementById("drift-table-body");
-        const rowsSelect = document.getElementById("drift-rows-select");
-        const anchorInfoEl = document.getElementById("drift-anchor-info");
-
-        if (!body || !rowsSelect) return;
-
-        body.innerHTML = "";
-
-        const now = new Date();
-        const N = parseInt(rowsSelect.value, 10) || 14;
-        
-        const todayGmt = getGmtDayStart(now);
-
-        const anchor = getAnchorDate();
-        anchorInfoEl.textContent =
-            "Cycle Anchor: " + anchor.toISOString() +
-            " • Day Length: 25h 26m 10s";
-
-        for (let i = 0; i < N; i++) {
-            const offset = i - 2; // Start 2 days before today
-            const gmtDay = new Date(todayGmt.getTime() + offset * 24 * 60 * 60 * 1000);
-            const nahlaMidnight = computeNahlaMidnightForGmtDay(gmtDay);
-
-            const isToday = offset === 0;
-
-            const row = document.createElement("div");
-            row.className = "drift-row" + (isToday ? " drift-row-current" : "");
-
-            /* Cycle number */
-            const elapsed = (nahlaMidnight - anchor) / 1000;
-            const cycle = Math.floor(elapsed / DRIFT_DAY_LENGTH_SECONDS);
-
-            const c1 = document.createElement("div");
-            c1.className = "drift-cell drift-cycle";
-            c1.textContent = "#" + cycle;
-
-            const c2 = document.createElement("div");
-            c2.className = "drift-cell drift-date";
-            c2.textContent = formatUtcDate(gmtDay);
-
-            const c3 = document.createElement("div");
-            c3.className = "drift-cell drift-time drift-time-value";
-            c3.dataset.offset = offset;
-            c3.textContent = formatUtcTime(nahlaMidnight);
-
-            const c4 = document.createElement("div");
-            c4.className = "drift-cell drift-bar-cell";
-
-            const track = document.createElement("div");
-            track.className = "drift-bar-track";
-
-            [0, 6, 12, 18].forEach(h => {
-                const div = document.createElement("div");
-                div.className = "drift-bar-hour-marker";
-                div.style.left = ((h / 24) * 100) + "%";
-                track.appendChild(div);
-            });
-
-            const marker = document.createElement("div");
-            marker.className = "drift-bar-marker drift-marker";
-            marker.dataset.offset = offset;
-
-            track.appendChild(marker);
-
-            const labels = document.createElement("div");
-            labels.className = "drift-bar-labels";
-            labels.innerHTML = "<span>00:00</span><span>12:00</span><span>23:59</span>";
-
-            c4.appendChild(track);
-            c4.appendChild(labels);
-
-            row.appendChild(c1);
-            row.appendChild(c2);
-            row.appendChild(c3);
-            row.appendChild(c4);
-
-            body.appendChild(row);
+        // Highlight today's row
+        if (d.getTime() === today.getTime()) {
+            row.classList.add("drift-row-current");
         }
+
+        body.appendChild(row);
     }
+}
 
-    /* -------------------------------
-       UPDATE ONLY VALUES (every sec)
-       ------------------------------- */
+// Update only clocks every second (no table rebuild)
+function updateDriftPanelClocks() {
+    const now = new Date();
 
-    function updateDriftTable() {
-        const now = new Date();
+    // GMT Clock
+    document.getElementById("drift-gmt-clock").textContent =
+        now.toISOString().split("T")[1].split(".")[0];
 
-        const gmtEl = document.getElementById("drift-gmt-clock");
-        const nltEl = document.getElementById("drift-nlt-clock");
+    const cycle = get_cycle_state(now);
+    const wrapped = cycle.wrappedSeconds;
 
-        const nahla = getNahlaData(now);
+    const h = Math.floor(wrapped / 3600);
+    const m = Math.floor((wrapped % 3600) / 60);
+    const s = Math.floor(wrapped % 60);
 
-        if (gmtEl) gmtEl.textContent = formatUtcTime(now);
-        if (nltEl) nltEl.textContent = nahla.timeString;
+    document.getElementById("drift-nlt-clock").textContent =
+        `${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
+}
 
-        const todayGmt = getGmtDayStart(now);
+// Timer — stable, no-flicker
+setInterval(() => {
+    updateDriftPanelClocks();
+    buildDriftTable(); // no rebuild unless GMT day changed
+}, 1000);
 
-        const timeCells = document.querySelectorAll(".drift-time-value");
-        const markers = document.querySelectorAll(".drift-marker");
+// First build
+buildDriftTable(true);
+updateDriftPanelClocks();
 
-        timeCells.forEach(cell => {
-            const offset = parseInt(cell.dataset.offset, 10);
-            const gmtDay = new Date(todayGmt.getTime() + offset * 24 * 60 * 60 * 1000);
-            const nahlaMidnight = computeNahlaMidnightForGmtDay(gmtDay);
-            cell.textContent = formatUtcTime(nahlaMidnight);
-        });
-
-        markers.forEach(marker => {
-            const offset = parseInt(marker.dataset.offset, 10);
-            const gmtDay = new Date(todayGmt.getTime() + offset * 24 * 60 * 60 * 1000);
-            const nahlaMidnight = computeNahlaMidnightForGmtDay(gmtDay);
-
-            const h = nahlaMidnight.getUTCHours();
-            const m = nahlaMidnight.getUTCMinutes();
-            const percent = ((h * 60 + m) / 1440) * 100;
-
-            marker.style.left = percent + "%";
-        });
-
-        // Highlight is always on row with offset=0 (today)
-        const allRows = document.querySelectorAll(".drift-row");
-        allRows.forEach(row => row.classList.remove("drift-row-current"));
-        
-        // Row 3 (index 2) is always today
-        if (allRows[2]) {
-            allRows[2].classList.add("drift-row-current");
-        }
-    }
-
-    /* -------------------------------
-       INIT
-       ------------------------------- */
-
-    document.addEventListener("DOMContentLoaded", function () {
-        const select = document.getElementById("drift-rows-select");
-        if (!select) return;
-
-        buildDriftTable();
-        updateDriftTable();
-
-        select.addEventListener("change", () => {
-            buildDriftTable();
-            updateDriftTable();
-        });
-
-        setInterval(updateDriftTable, 1000);
-    });
-})();
 
 
     </script>
