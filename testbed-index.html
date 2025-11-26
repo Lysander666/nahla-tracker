@@ -1912,7 +1912,7 @@ btn.addEventListener("click", () => {
             const path = document.createElementNS("http://www.w3.org/2000/svg","path");
             path.setAttribute("d", `M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 0 1 ${x2} ${y2} Z`);
             path.setAttribute("class","sector");
-            svgSectors.appendChild(path);
+            svgSectors.(path);
 
             const lx = cx + labelR*Math.cos(mid);
             const ly = cy + labelR*Math.sin(mid);
@@ -1927,7 +1927,7 @@ btn.addEventListener("click", () => {
             t.setAttribute("text-anchor", "middle");
             t.setAttribute("dominant-baseline", "middle");
             t.setAttribute("opacity", "0.5");
-            svgSectors.appendChild(t);
+            svgSectors.(t);
         }
     }
 
@@ -1944,7 +1944,7 @@ btn.addEventListener("click", () => {
             tick.setAttribute("y2",100 - RADIUS + length);
             tick.setAttribute("class", `tick ${isMajor ? 'major':''}`);
             tick.setAttribute("transform",`rotate(${angleDeg},100,100)`);
-            svgTicks.appendChild(tick);
+            svgTicks.(tick);
 
             const angleRad = (angleDeg - 90)*(Math.PI/180);
             const tx = 100 + NUMBER_RADIUS*Math.cos(angleRad);
@@ -1955,7 +1955,7 @@ btn.addEventListener("click", () => {
             num.setAttribute("y", ty);
             num.setAttribute("class","clock-number");
             num.textContent = i;
-            svgNums.appendChild(num);
+            svgNums.(num);
         }
     }
 
@@ -2084,19 +2084,19 @@ function buildDriftTable() {
         const cycleCell = document.createElement("div");
         cycleCell.className = "drift-cell drift-cycle";
         cycleCell.textContent = `#${cycle}`;
-        row.appendChild(cycleCell);
+        row.(cycleCell);
 
         // GMT date
         const dateCell = document.createElement("div");
         dateCell.className = "drift-cell drift-date";
         dateCell.textContent = formatUtcDateShort(d);
-        row.appendChild(dateCell);
+        row.(dateCell);
 
         // NLT midnight time
         const timeCell = document.createElement("div");
         timeCell.className = "drift-cell drift-time";
         timeCell.textContent = nltMidnight.toISOString().split("T")[1].split(".")[0];
-        row.appendChild(timeCell);
+        row.(timeCell);
 
         // Daily shift column
         const barCell = document.createElement("div");
@@ -2110,7 +2110,7 @@ function buildDriftTable() {
             const mk = document.createElement("div");
             mk.className = "drift-bar-hour-marker";
             mk.style.left = `${(h / 24) * 100}%`;
-            barTrack.appendChild(mk);
+            barTrack.(mk);
         }
 
         // Marker for NLT midnight position
@@ -2123,10 +2123,33 @@ function buildDriftTable() {
         const marker = document.createElement("div");
         marker.className = "drift-bar-marker";
         marker.style.left = `${pos}%`;
-        barTrack.appendChild(marker);
+        barTrack.(marker);
 
-        barCell.appendChild(barTrack);
-        row.appendChild(barCell);
+        // Append the bar itself
+barCell.appendChild(barTrack);
+
+// ==== Add hour labels back ====
+const labels = document.createElement("div");
+labels.className = "drift-bar-labels";
+
+const labelStart = document.createElement("span");
+labelStart.textContent = "00:00";
+
+const labelMid = document.createElement("span");
+labelMid.textContent = "12:00";
+
+const labelEnd = document.createElement("span");
+labelEnd.textContent = "23:59";
+
+labels.appendChild(labelStart);
+labels.appendChild(labelMid);
+labels.appendChild(labelEnd);
+
+barCell.appendChild(labels);
+// =================================
+
+row.appendChild(barCell);
+
 
         // Highlight today's row (#2 always)
         if (d.getTime() === today.getTime()) {
