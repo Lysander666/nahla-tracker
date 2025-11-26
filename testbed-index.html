@@ -1096,23 +1096,12 @@
     scrollbar-width: thin;
     scrollbar-color: #333 #181818;
 }
-/* For screens around 1366px and smaller */
-@media (max-width: 1400px) {
-    #system-info-container {
-        zoom: 0.85;
-    }
-}
 
-/* For even smaller screens if needed */
-@media (max-width: 1200px) {
-    #system-info-container {
-        zoom: 0.7;
-    }
-}
 
-@media (max-width: 1000px) {
+/* Only for screens around your laptop size */
+@media (min-width: 1200px) and (max-width: 1400px) {
     #system-info-container {
-        zoom: 0.6;
+        zoom: 0.8;
     }
 }
        
