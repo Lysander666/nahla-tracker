@@ -2165,6 +2165,14 @@ function updateDriftPanelClocks() {
         `${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
 }
 
+       function updateDriftAnchorInfo() {
+    const footer = document.getElementById("drift-anchor-info");
+    if (!footer) return;
+
+    footer.textContent = `Cycle Anchor: ${CYCLE_ANCHOR.toISOString()} • Day Length: 25h 26m 10s`;
+}
+
+
 // Timer — stable, no-flicker
 setInterval(() => {
     updateDriftPanelClocks();
@@ -2174,6 +2182,7 @@ setInterval(() => {
 // First build
 buildDriftTable(true);
 updateDriftPanelClocks();
+updateDriftAnchorInfo();
 
 
     </script>
