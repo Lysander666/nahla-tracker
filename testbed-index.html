@@ -1912,7 +1912,7 @@ btn.addEventListener("click", () => {
             const path = document.createElementNS("http://www.w3.org/2000/svg","path");
             path.setAttribute("d", `M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 0 1 ${x2} ${y2} Z`);
             path.setAttribute("class","sector");
-            svgSectors.(path);
+            svgSectors.appendChild(path);
 
             const lx = cx + labelR*Math.cos(mid);
             const ly = cy + labelR*Math.sin(mid);
@@ -1927,7 +1927,7 @@ btn.addEventListener("click", () => {
             t.setAttribute("text-anchor", "middle");
             t.setAttribute("dominant-baseline", "middle");
             t.setAttribute("opacity", "0.5");
-            svgSectors.(t);
+            svgSectors.appendChild(t);
         }
     }
 
@@ -1944,7 +1944,7 @@ btn.addEventListener("click", () => {
             tick.setAttribute("y2",100 - RADIUS + length);
             tick.setAttribute("class", `tick ${isMajor ? 'major':''}`);
             tick.setAttribute("transform",`rotate(${angleDeg},100,100)`);
-            svgTicks.(tick);
+            svgTicks.appendChild(tick);
 
             const angleRad = (angleDeg - 90)*(Math.PI/180);
             const tx = 100 + NUMBER_RADIUS*Math.cos(angleRad);
@@ -1955,7 +1955,7 @@ btn.addEventListener("click", () => {
             num.setAttribute("y", ty);
             num.setAttribute("class","clock-number");
             num.textContent = i;
-            svgNums.(num);
+            svgNums.appendChild(num);
         }
     }
 
@@ -2174,7 +2174,6 @@ setInterval(() => {
 // First build
 buildDriftTable(true);
 updateDriftPanelClocks();
-
 
 
     </script>
