@@ -1880,9 +1880,9 @@ function updateTempDot(wrappedSeconds) {
     const dot = document.getElementById("temp-wave-dot");
     const svg = document.getElementById("temp-wave");
     if (!dot || !svg) return;
-
-    const waveWidth = svg.viewBox.baseVal.width;
-    const waveHeight = svg.viewBox.baseVal.height;
+   
+const waveWidth  = svg.clientWidth  || svg.viewBox.baseVal.width;
+const waveHeight = svg.clientHeight || svg.viewBox.baseVal.height;
 
     const t = wrappedSeconds / DAY_LENGTH_SECONDS;
     const angle = t * 2 * Math.PI;
