@@ -795,37 +795,21 @@
     background: #111;
     border: 1px solid #222;
     border-radius: 10px;
+
     display: flex;
+    flex-direction: column;
     justify-content: center;
-    flex-direction: column;
     align-items: center;
 }
 
-.weather-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+.weather-wave {
+    margin-bottom: 12px;
 }
 
-.weather-label {
-    font-size: 0.75rem;
-    color: #888;
-    margin-bottom: 4px;
-    letter-spacing: 1px;
+.weather-temp-readout {
+    text-align: center;
 }
 
-.weather-value {
-    font-size: 1rem;
-    color: #ddd;
-}
-
-#temp-wave-line {
-    opacity: 0.9;
-}
-
-#temp-wave- {
-    filter: drop-shadow(0 0 4px #3af2ff);
-}
 
 
 
@@ -1350,30 +1334,17 @@
    <!-- ====================== -->
 <!--   NAHLA WEATHER PANEL  -->
 <!-- ====================== -->
-<div id="weather-panel" class="weather-panel">
+<div class="weather-panel">
+    <div class="weather-wave">
+        <svg id="temp-wave" width="260" height="60">
+            <polyline id="temp-wave-line" points="" stroke="#3af2ff" fill="none" stroke-width="2"></polyline>
+            <circle id="temp-wave-dot" r="4" fill="#3af2ff"></circle>
+        </svg>
+    </div>
 
-    <!-- Temperature Wave Graph -->
-    <svg id="temp-wave" width="260" height="60" viewBox="0 0 260 60" style="margin-bottom: 6px;">
-        <!-- The static sine wave -->
-        <polyline id="temp-wave-line"
-                  fill="none"
-                  stroke="#3af2ff"
-                  stroke-width="2"
-                  points="" />
-        
-        <!-- Live moving  -->
-        <circle id="temp-wave-"
-                cx="0"
-                cy="0"
-                r="4"
-                fill="#3af2ff"
-                stroke="#fff"
-                stroke-width="1" />
-    </svg>
-
-    <div class="weather-item">
-        <div class="weather-label">Temperature</div>
-        <div class="weather-value" id="weather-temp">--</div>
+    <div class="weather-temp-readout">
+        <span class="weather-label">Temperature</span>
+        <span id="weather-temp" class="weather-value">--</span>
     </div>
 </div>
 
