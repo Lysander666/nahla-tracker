@@ -1171,7 +1171,7 @@
 #temp-wave {
     width: 100%;
     height: auto;
-    max-width: 500px;
+    max-width: 800px;
 }       
        
 
@@ -1377,7 +1377,7 @@
 <!--   NAHLA WEATHER PANEL  -->
 <!-- ====================== -->
 <div class="weather-wave">
-    <svg id="temp-wave" width="500" height="60" viewBox="0 0 500 60">
+    <svg id="temp-wave" width="800" height="80" viewBox="0 0 800 80">
         <defs>
             <linearGradient id="wave-gradient" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stop-color="rgba(58, 242, 255, 0.25)" />
@@ -1933,8 +1933,8 @@ function updateTempDot(wrappedSeconds) {
     if (!dot || !svg) return;
 
     // FIX: Use the internal SVG dimensions (500x60), NOT the screen size
-    const waveWidth = 500; 
-    const waveHeight = 60; 
+    const waveWidth = 800; 
+    const waveHeight = 80; 
 
     // The rest of the math remains exactly the same...
     const t = wrappedSeconds / DAY_LENGTH_SECONDS;
@@ -2204,8 +2204,8 @@ function getSunElevationDegFromPhase(phaseIndex0) {
        
 
 function buildTemperatureWave() {
-    const width = 500;
-    const height = 60;
+    const width = 800;
+    const height = 80;
     const minK = 143;
     const maxK = 275;
 
