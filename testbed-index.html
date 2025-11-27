@@ -786,6 +786,50 @@
        font-weight: 500; /* barely stronger */
       }
 
+       /* ===========================
+   WEATHER PANEL
+=========================== */
+.weather-panel {
+    margin: 22px 0 12px 0;
+    padding: 10px 14px;
+    background: #111;
+    border: 1px solid #222;
+    border-radius: 10px;
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    color: #ddd;
+    font-size: 0.9rem;
+    gap: 14px;
+}
+
+.weather-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 90px;
+}
+
+.weather-label {
+    font-size: 0.75rem;
+    color: #888;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.weather-value {
+    font-size: 0.95rem;
+    color: #ddd;
+}
+
+.weather-sep {
+    width: 1px;
+    height: 24px;
+    background: #222;
+}
+
+
         /* ===========================
    NAHLA DRIFT PANEL (END)
    =========================== */
@@ -1304,6 +1348,35 @@
             
         </div>
 
+   <!-- ====================== -->
+<!--   NAHLA WEATHER PANEL  -->
+<!-- ====================== -->
+<div id="weather-panel" class="weather-panel">
+    <div class="weather-item">
+        <div class="weather-label">Light</div>
+        <div class="weather-value" id="weather-light">--</div>
+    </div>
+    <div class="weather-sep"></div>
+
+    <div class="weather-item">
+        <div class="weather-label">Shadow</div>
+        <div class="weather-value" id="weather-shadow">--</div>
+    </div>
+    <div class="weather-sep"></div>
+
+    <div class="weather-item">
+        <div class="weather-label">Temperature</div>
+        <div class="weather-value" id="weather-temp">--</div>
+    </div>
+    <div class="weather-sep"></div>
+
+    <div class="weather-item">
+        <div class="weather-label">Darkness</div>
+        <div class="weather-value" id="weather-darkness">--</div>
+    </div>
+</div>
+
+
         <div id="gallery-section">
             <div class="gallery-header">
                 <button class="gallery-btn" id="scroll-left">&lt;</button>
@@ -1627,6 +1700,24 @@ function get_cycle_state(now) {
         hoursIntoDay
     };
 }
+
+       // ===============================
+//  SUN & HOPE ELEVATION HELPERS
+// ===============================
+
+// Sun elevation (deg) from wrapped seconds in a 25h26m10s solar day.
+function getSunElevationDeg(wrappedSeconds) {
+    const angle = (wrappedSeconds / DAY_LENGTH_SECONDS) * 2 * Math.PI;
+    return Math.sin(angle) * 90; // -90° (nadir) → +90° (zenith)
+}
+
+// Hope elevation based on phaseIndex0 (12-phase cycle)
+function getHopeElevationDeg(phaseIndex0) {
+    // Divide 12 phases into a sinusoid from -90° to +90°.
+    const angle = (phaseIndex0 / 12) * 2 * Math.PI;
+    return Math.sin(angle) * 90;
+}
+
 
 function get_sun_state_index(phaseIndex0) {
     return Math.floor(phaseIndex0 / 2);
@@ -2011,6 +2102,55 @@ loadAnchorsFromStorage().then(() => {
     setInterval(updateDisplay, 50);
 });
 
+   function toRad(deg) { return deg * Math.PI / 180; }
+
+function getNahlaWeatherState(sunElevDeg, hopeAboveHorizon) {
+    /* ----- LIGHT ----- */
+    let light;
+    if (sunElevDeg > 20)      light = "Strong sunlight";
+    else if (sunElevDeg > 5)  light = "Low-angle light";
+    else if (sunElevDeg >= 0) light = "Sunrise/Sunset";
+    else                      light = "No sunlight";
+
+    /* ----- SHADOW ----- */
+    let shadow;
+    if (sunElevDeg > 45)      shadow = "Minimal";
+    else if (sunElevDeg > 20) shadow = "Short";
+    else if (sunElevDeg > 5)  shadow = "Long";
+    else if (sunElevDeg >= 0) shadow = "Very long";
+    else                      shadow = "Dark side";
+
+    /* ----- TEMPERATURE (approx arc) ----- */
+    const Tmin = 143;  // K
+    const Tmax = 250;  // K
+    const lightFactor = Math.max(0, Math.sin(toRad(sunElevDeg)));
+
+    const tempK = Tmin + lightFactor * (Tmax - Tmin);
+    const tempC = tempK - 273.15;
+
+    /* convert to label */
+    let tLabel;
+    if (tempK < (Tmin + (Tmax - Tmin) * 0.25)) tLabel = "Freezing";
+    else if (tempK < (Tmin + (Tmax - Tmin) * 0.55)) tLabel = "Cold";
+    else if (tempK < (Tmin + (Tmax - Tmin) * 0.8))  tLabel = "Cool";
+    else                                             tLabel = "Mild";
+
+    /* ----- DARKNESS ----- */
+    let darkness;
+    if (sunElevDeg >= 10) darkness = "None";
+    else if (sunElevDeg >= 0) darkness = "Low";
+    else if (hopeAboveHorizon) darkness = "Moderate";
+    else darkness = "Deep";
+
+    return {
+        light,
+        shadow,
+        temperature: `${tLabel} (${tempC.toFixed(1)}°C)`,
+        darkness
+    };
+}
+    
+
 /* ======================================================
    NAHLA DRIFT TABLE v2 — GMT rollover, no flicker,
    restored hour labels, stable highlight.
@@ -2171,6 +2311,25 @@ function updateDriftPanelClocks() {
 
     footer.textContent = `Cycle Anchor: ${CYCLE_ANCHOR.toISOString()} • Day Length: 25h 26m 10s`;
 }
+
+       function updateWeatherPanel() {
+    const now = new Date();
+    const cycle = get_cycle_state(now);
+
+    const sunElevDeg  = getSunElevationDeg(cycle.wrappedSeconds);
+    const hopeElevDeg = getHopeElevationDeg(cycle.phaseIndex0);
+
+    const w = getNahlaWeatherState(
+        sunElevDeg,
+        hopeElevDeg > 0 // boolean
+    );
+
+    document.getElementById("weather-light").textContent    = w.light;
+    document.getElementById("weather-shadow").textContent   = w.shadow;
+    document.getElementById("weather-temp").textContent     = w.temperature;
+    document.getElementById("weather-darkness").textContent = w.darkness;
+}
+
 
 
 // Timer — stable, no-flicker
