@@ -1727,7 +1727,7 @@ function get_hope_indicator(phaseIndex0) {
     const sunState = get_sun_state_index(phaseIndex0);
 
     if (sunState <= 3) {
-        const symbols = ["🌅","☀️","🔆","🌇"];
+        const symbols = ["🌅","☀️","🔆","🌄"];
         const arc = ["─","─","─","─","─","─"];
         arc[sunState] = symbols[sunState];
         return `<strong>Hope:</strong> [${arc.join("")}]`;
