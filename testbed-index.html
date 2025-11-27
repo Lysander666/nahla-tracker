@@ -2339,17 +2339,17 @@ function updateDriftPanelClocks() {
     footer.textContent = `Cycle Anchor: ${CYCLE_ANCHOR.toISOString()} • Day Length: 25h 26m 10s`;
 }
 
-       function updateWeatherPanel() {
+function updateWeatherPanel() {
     const now = new Date();
     const cycle = get_cycle_state(now);
 
-const sunElevDeg = getSunElevationDegFromPhase(cycle.phaseIndex0);
-    const hopeElevDeg = getHopeElevationDeg(cycle.phaseIndex0);
+    // 1. Update the Text
+    document.getElementById("weather-temp").textContent =
+        getNahlaTempKelvin(cycle.wrappedSeconds);
 
-    const w = getNahlaWeatherState(
-        sunElevDeg,
-        hopeElevDeg > 0 // boolean
-    );
+    // 2. Update the Dot Position
+    updateTempDot(cycle.wrappedSeconds);
+}
 
 document.getElementById("weather-temp").textContent =
     getNahlaTempKelvin(cycle.wrappedSeconds);
