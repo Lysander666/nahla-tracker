@@ -791,44 +791,42 @@
 =========================== */
 .weather-panel {
     margin: 22px 0 12px 0;
-    padding: 14px 24px;
-    background: linear-gradient(180deg, #131313, #0f0f0f);
-    border: 1px solid #2a2a2a;
-    border-radius: 12px;
+    padding: 10px 14px;
+    background: #111;
+    border: 1px solid #222;
+    border-radius: 10px;
     display: flex;
-    justify-content: space-around;
+    justify-content: space-evenly;
     align-items: center;
     color: #ddd;
-    font-size: 1rem;
-    gap: 24px;
-    box-shadow: 0 0 15px rgba(0,0,0,0.35);
+    font-size: 0.9rem;
+    gap: 14px;
 }
 
 .weather-item {
     display: flex;
     flex-direction: column;
     align-items: center;
-    min-width: 120px;
+    min-width: 90px;
 }
 
 .weather-label {
     font-size: 0.75rem;
-    color: #82a3b1; /* subtle bluish tint */
-    margin-bottom: 6px;
+    color: #888;
+    margin-bottom: 4px;
     text-transform: uppercase;
-    letter-spacing: 1.3px;
+    letter-spacing: 1px;
 }
 
 .weather-value {
-    font-size: 1.05rem;
-    color: #e8f9ff;
+    font-size: 0.95rem;
+    color: #ddd;
 }
 
 .weather-sep {
     width: 1px;
-    height: 36px;
-    background: linear-gradient(180deg, #444, #222);
-    box-shadow: 0 0 4px rgba(97,218,251,0.15);
+    height: 24px;
+    background: #222;
 }
 
 
@@ -2139,21 +2137,13 @@ function getSunElevationDegFromPhase(phaseIndex0) {
 
        
 
-function getNahlaWeatherState(sunElevDeg, hopeAboveHorizon, phaseIndex0) {
- // Phase-aware light model
-const p = phaseIndex0 + 1;
-
-if (p === 5)                 light = "High sun";
-else if (p === 4 || p === 6) light = "Strong sunlight";
-else if (p === 3)            light = "Daylight";
-else if (p === 7)            light = "Evening light";
-else if (p === 2)            light = "Morning light";
-else if (p === 1)            light = "Sunrise";
-else if (p === 9)            light = "Sunset";
-else if (p === 8)            light = "Dusk light";
-else if (p === 12)           light = "Dawn glow";
-else                         light = "No sunlight";
-
+function getNahlaWeatherState(sunElevDeg, hopeAboveHorizon) {
+    /* ----- LIGHT ----- */
+    let light;
+    if (sunElevDeg > 20)      light = "Strong sunlight";
+    else if (sunElevDeg > 5)  light = "Low-angle light";
+    else if (sunElevDeg >= 0) light = "Sunrise/Sunset";
+    else                      light = "No sunlight";
 
     /* ----- SHADOW ----- */
     let shadow;
@@ -2188,7 +2178,7 @@ else                         light = "No sunlight";
     return {
         light,
         shadow,
-        temperature: `${tLabel} (${tempK.toFixed(1)} K) / ${tempC.toFixed(1)}°C`
+        temperature: `${tLabel} (${tempC.toFixed(1)}°C)`,
         darkness
     };
 }
