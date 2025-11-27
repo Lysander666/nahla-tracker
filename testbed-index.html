@@ -818,6 +818,14 @@
     color: #ddd;
 }
 
+#temp-wave-line {
+    opacity: 0.9;
+}
+
+#temp-wave-dot {
+    filter: drop-shadow(0 0 4px #3af2ff);
+}
+
 
 
         /* ===========================
@@ -1342,6 +1350,26 @@
 <!--   NAHLA WEATHER PANEL  -->
 <!-- ====================== -->
 <div id="weather-panel" class="weather-panel">
+
+    <!-- Temperature Wave Graph -->
+    <svg id="temp-wave" width="260" height="60" viewBox="0 0 260 60" style="margin-bottom: 6px;">
+        <!-- The static sine wave -->
+        <polyline id="temp-wave-line"
+                  fill="none"
+                  stroke="#3af2ff"
+                  stroke-width="2"
+                  points="" />
+        
+        <!-- Live moving dot -->
+        <circle id="temp-wave-dot"
+                cx="0"
+                cy="0"
+                r="4"
+                fill="#3af2ff"
+                stroke="#fff"
+                stroke-width="1" />
+    </svg>
+
     <div class="weather-item">
         <div class="weather-label">Temperature</div>
         <div class="weather-value" id="weather-temp">--</div>
@@ -1872,6 +1900,24 @@ function updateDisplay() {
     if (nextPhaseEl) nextPhaseEl.textContent = nextPhaseString;
 }
 
+// Move temperature dot along the wave
+const dot = document.getElementById("temp-wave-dot");
+const waveWidth = 260;
+const waveHeight = 60;
+
+const t = wrapped / DAY_LENGTH_SECONDS;  // 0 → 1 over NLT
+
+const dotX = t * waveWidth;
+
+// Match the same sine curve for Y
+const angle = t * 2 * Math.PI;
+const norm = (Math.sin(angle - Math.PI / 2) + 1) / 2;
+const dotY = waveHeight - (norm * (waveHeight - 10)) - 5;
+
+dot.setAttribute("cx", dotX);
+dot.setAttribute("cy", dotY);
+
+       
 // Gallery Lightbox Functions
 function openLightbox(imageSrc) {
     const lightbox = document.getElementById('lightbox');
@@ -2125,51 +2171,28 @@ function getSunElevationDegFromPhase(phaseIndex0) {
 
        
 
-function getNahlaWeatherState(sunElevDeg, hopeAboveHorizon) {
-    /* ----- LIGHT ----- */
-    let light;
-    if (sunElevDeg > 20)      light = "Strong sunlight";
-    else if (sunElevDeg > 5)  light = "Low-angle light";
-    else if (sunElevDeg >= 0) light = "Sunrise/Sunset";
-    else                      light = "No sunlight";
+function buildTemperatureWave() {
+    const width = 260;
+    const height = 60;
+    const minK = 143;
+    const maxK = 275;
 
-    /* ----- SHADOW ----- */
-    let shadow;
-    if (sunElevDeg > 45)      shadow = "Minimal";
-    else if (sunElevDeg > 20) shadow = "Short";
-    else if (sunElevDeg > 5)  shadow = "Long";
-    else if (sunElevDeg >= 0) shadow = "Very long";
-    else                      shadow = "Dark side";
+    const points = [];
+    for (let x = 0; x <= width; x++) {
+        const t = x / width; // 0 → 1 across NLT cycle
+        const angle = t * 2 * Math.PI;
 
-    /* ----- TEMPERATURE (approx arc) ----- */
-    const Tmin = 143;  // K
-    const Tmax = 250;  // K
-    const lightFactor = Math.max(0, Math.sin(toRad(sunElevDeg)));
+        // Normalised sine wave
+        const norm = (Math.sin(angle - Math.PI / 2) + 1) / 2;
+        const temp = minK + (maxK - minK) * norm;
 
-    const tempK = Tmin + lightFactor * (Tmax - Tmin);
-    const tempC = tempK - 273.15;
+        const y = height - (norm * (height - 10)) - 5;
+        points.push(`${x},${y}`);
+    }
 
-    /* convert to label */
-    let tLabel;
-    if (tempK < (Tmin + (Tmax - Tmin) * 0.25)) tLabel = "Freezing";
-    else if (tempK < (Tmin + (Tmax - Tmin) * 0.55)) tLabel = "Cold";
-    else if (tempK < (Tmin + (Tmax - Tmin) * 0.8))  tLabel = "Cool";
-    else                                             tLabel = "Mild";
-
-    /* ----- DARKNESS ----- */
-    let darkness;
-    if (sunElevDeg >= 10) darkness = "None";
-    else if (sunElevDeg >= 0) darkness = "Low";
-    else if (hopeAboveHorizon) darkness = "Moderate";
-    else darkness = "Deep";
-
-    return {
-        light,
-        shadow,
-        temperature: `${tLabel} (${tempC.toFixed(1)}°C)`,
-        darkness
-    };
+    document.getElementById("temp-wave-line").setAttribute("points", points.join(" "));
 }
+
     
 
 /* ======================================================
@@ -2362,6 +2385,8 @@ setInterval(() => {
 buildDriftTable(true);
 updateDriftPanelClocks();
 updateDriftAnchorInfo();
+buildTemperatureWave();
+       
 
 
     </script>
