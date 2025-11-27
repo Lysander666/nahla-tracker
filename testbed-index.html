@@ -2123,6 +2123,19 @@ function getHopeElevationDeg(phaseIndex0) {
 }
 
        
+function getSunElevationDegFromPhase(phaseIndex0) {
+    const p = phaseIndex0 + 1; // convert 0–11 → 1–12
+
+    if (p === 5) return 60;                   // ε — overhead
+    if (p === 4 || p === 6) return 40;        // δ, ζ — high slanted
+    if (p === 3 || p === 7) return 20;        // γ, η — mid-height
+    if (p === 2 || p === 8) return 5;         // β, θ — steep rising/descending (sunlight!)
+    if (p === 1 || p === 9) return 1;         // α, ι — sunrise/sunset
+    if (p === 10 || p === 12) return -10;     // κ dusk / μ dawn
+    return -30;                               // λ deep night
+}
+
+       
 
 function getNahlaWeatherState(sunElevDeg, hopeAboveHorizon) {
     /* ----- LIGHT ----- */
@@ -2336,7 +2349,7 @@ function updateDriftPanelClocks() {
     const now = new Date();
     const cycle = get_cycle_state(now);
 
-    const sunElevDeg  = getSunElevationDeg(cycle.wrappedSeconds);
+const sunElevDeg = getSunElevationDegFromPhase(cycle.phaseIndex0);
     const hopeElevDeg = getHopeElevationDeg(cycle.phaseIndex0);
 
     const w = getNahlaWeatherState(
