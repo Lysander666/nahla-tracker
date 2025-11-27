@@ -2340,22 +2340,29 @@ function updateDriftPanelClocks() {
 }
 
 function updateWeatherPanel() {
-    const now = new Date();
-    const cycle = get_cycle_state(now);
+    try {
+        const now = new Date();
+        // Check if cycle calculator exists before running
+        if (typeof get_cycle_state !== "function") return;
+        
+        const cycle = get_cycle_state(now);
 
-    // 1. Update the Text
-    document.getElementById("weather-temp").textContent =
-        getNahlaTempKelvin(cycle.wrappedSeconds);
+        // 1. Update the Text (Safely)
+        const tempElement = document.getElementById("weather-temp");
+        if (tempElement && typeof getNahlaTempKelvin === "function") {
+            tempElement.textContent = getNahlaTempKelvin(cycle.wrappedSeconds);
+        }
 
-    // 2. Update the Dot Position
-    updateTempDot(cycle.wrappedSeconds);
-}
+        // 2. Update the Dot Position (Safely)
+        // We double check if updateTempDot exists to prevent crashes
+        if (typeof updateTempDot === "function") {
+            updateTempDot(cycle.wrappedSeconds);
+        }
 
-document.getElementById("weather-temp").textContent =
-    getNahlaTempKelvin(cycle.wrappedSeconds);
-   updateTempDot(cycle.wrappedSeconds);
-updateTempDot(cycle.wrappedSeconds);
-
+    } catch (err) {
+        // If weather fails, log it but DO NOT crash the other trackers
+        console.error("Weather Panel Error:", err);
+    }
 }
 
 
