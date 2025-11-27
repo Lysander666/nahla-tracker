@@ -1203,7 +1203,7 @@
     </div>
 </div>
 
-<div class="header-tagline" id="tagline"></div>
+<div class="header-tagline"><i></i>A random moon in a galaxy of trillions.</i></div>   
 
         <div id="tracker">
             <div id="status">Loading...</div>
@@ -2458,31 +2458,7 @@ buildDriftTable(true);
 updateDriftPanelClocks();
 updateDriftAnchorInfo();
 buildTemperatureWave();
-
-(function() {
-    const TAGLINES = [
-        "A hand-picked moon in a galaxy of trillions.",
-        "One quiet moon chosen from countless worlds.",
-        "A single speck in a trillion-world sky.",
-        "A lonely moon pulled from the noise of the galaxy.",
-        "A moon at random. A study with intention.",
-        "A random moon. A deliberate obsession.",
-        "A chosen sanctuary in the chaos of stars.",
-        "Where randomness meets ritual.",
-        "A moon like any other. A moon like no other.",
-        "Selected at random. Studied with devotion.",
-        "One moon. Endless study.",
-        "A random world. A real home.",
-        "In the vastness, one moon matters."
-        "Randomising meaning."
-    ];
-
-    const taglineEl = document.getElementById("tagline");
-    if (taglineEl) {
-        taglineEl.textContent = TAGLINES[Math.floor(Math.random() * TAGLINES.length)];
-    }
-})();
-
+       
 
 
     </script>
