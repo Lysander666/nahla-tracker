@@ -1147,7 +1147,7 @@
     transform-origin: center;
     transform-box: fill-box; /* Ensures it scales from its own center */
     animation: tempDotPulse 2s infinite ease-in-out;
-}
+}      
 
 @keyframes tempDotPulse {
     0% {
@@ -1166,6 +1166,13 @@
         filter: drop-shadow(0 0 2px rgba(58, 242, 255, 0.5));
     }
 }
+
+/* This ensures the SVG shrinks to fit the phone screen without breaking coordinates */
+#temp-wave {
+    width: 100%;
+    height: auto;
+    max-width: 500px;
+}       
        
 
     </style>
@@ -1915,23 +1922,22 @@ function updateTempDot(wrappedSeconds) {
     const dot = document.getElementById("temp-wave-dot");
     const svg = document.getElementById("temp-wave");
     if (!dot || !svg) return;
-   
-const waveWidth  = svg.clientWidth  || svg.viewBox.baseVal.width;
-const waveHeight = svg.clientHeight || svg.viewBox.baseVal.height;
 
+    // FIX: Use the internal SVG dimensions (500x60), NOT the screen size
+    const waveWidth = 500; 
+    const waveHeight = 60; 
+
+    // The rest of the math remains exactly the same...
     const t = wrappedSeconds / DAY_LENGTH_SECONDS;
     const angle = t * 2 * Math.PI;
     const norm = (Math.sin(angle - Math.PI / 2) + 1) / 2;
 
     const dotX = t * waveWidth;
-
-    // Corrected Y position based on actual SVG height
     const dotY = waveHeight - (norm * (waveHeight - 10)) - 5;
 
     dot.setAttribute("cx", dotX);
     dot.setAttribute("cy", dotY);
 }
-
 
 
        
