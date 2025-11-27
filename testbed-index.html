@@ -2107,6 +2107,22 @@ loadAnchorsFromStorage().then(() => {
 });
 
    function toRad(deg) { return deg * Math.PI / 180; }
+function getSunElevationDeg(wrappedSeconds) {
+    // Simple solar elevation model:
+    //  -90° = midnight
+    //    0° = sunrise/sunset
+    //   90° = high noon
+    const fraction = wrappedSeconds / DAY_LENGTH_SECONDS;
+    return Math.sin(fraction * 2 * Math.PI) * 90;
+}
+
+function getHopeElevationDeg(phaseIndex0) {
+    // Placeholder model for Hope's elevation
+    // Maps 0–11 phase index to -90° to +90°
+    return (phaseIndex0 / 12) * 180 - 90;
+}
+
+       
 
 function getNahlaWeatherState(sunElevDeg, hopeAboveHorizon) {
     /* ----- LIGHT ----- */
