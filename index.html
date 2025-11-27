@@ -98,6 +98,18 @@
     line-height: 1.2;
 }
 
+.header-tagline {
+    text-align: center;
+    font-size: 1.1rem;
+    margin-top: -30px;
+    margin-bottom: 22px;
+    color: #61dafb;
+    font-family: Consolas, "Courier New", monospace;
+    text-shadow: 0 0 8px rgba(97,218,251,0.4);
+}
+
+
+
 .title-main {
     font-size: 2rem;
     font-weight: 600;
@@ -224,7 +236,7 @@
     transform: translateX(-50%) rotate(266deg);
 }
 
-.rebekah-dot {
+.rebekah- {
     position: absolute;
     top: 50%;
     left: 50%;
@@ -241,7 +253,7 @@
 }
 
 
-.rebekah-dot::after {
+.rebekah-::after {
     content: "";
     position: absolute;
     inset: -4px;
@@ -726,7 +738,7 @@
             opacity: 0.9;
         }
 
-        .center-dot {
+        .center- {
             fill: #61dafb;
         }
 
@@ -785,6 +797,46 @@
        text-shadow: 0 0 4px rgba(90, 240, 255, 0.8);
        font-weight: 500; /* barely stronger */
       }
+
+       /* ===========================
+   WEATHER PANEL
+=========================== */
+.weather-panel {
+    margin: 22px 0 12px 0;
+    
+    /* CHANGE THIS LINE: 
+       Old: padding: 12px 16px;
+       New: Adds 35px to the top, 20px to the bottom for balance 
+    */
+    padding: 35px 16px 20px 16px;
+
+    background: #111;
+    border: 1px solid #222;
+    border-radius: 10px;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.weather-wave {
+    width: 100%;             /* Allow it to fill the panel width */
+    display: flex;           /* Turn on Flexbox */
+    justify-content: center; /* Force the SVG to the center */
+    margin-bottom: 12px;
+    margin-top: 30px;
+}
+
+.weather-temp-readout {
+    text-align: center;
+    font-size: 1rem; /* Reduced from 1.1rem (default) */
+    color: #bbb;       /* Optional: slightly dimmer color looks nice */
+    margin-top: 5px;   /* Optional: adds a tiny bit of space from the wave */
+}
+
+
+
 
         /* ===========================
    NAHLA DRIFT PANEL (END)
@@ -1104,6 +1156,38 @@
         zoom: 0.8;
     }
 }
+
+       /* Pulse animation for the weather dot */
+#temp-wave-dot {
+    transform-origin: center;
+    transform-box: fill-box; /* Ensures it scales from its own center */
+    animation: tempDotPulse 2s infinite ease-in-out;
+}      
+
+@keyframes tempDotPulse {
+    0% {
+        transform: scale(1);
+        fill-opacity: 1;
+        filter: drop-shadow(0 0 2px rgba(58, 242, 255, 0.5));
+    }
+    50% {
+        transform: scale(1.5); /* Grows 50% larger */
+        fill-opacity: 0.8;
+        filter: drop-shadow(0 0 8px rgba(58, 242, 255, 1)); /* Bright glow */
+    }
+    100% {
+        transform: scale(1);
+        fill-opacity: 1;
+        filter: drop-shadow(0 0 2px rgba(58, 242, 255, 0.5));
+    }
+}
+
+/* This ensures the SVG shrinks to fit the phone screen without breaking coordinates */
+#temp-wave {
+    width: 100%;
+    height: auto;
+    max-width: 800px;
+}       
        
 
     </style>
@@ -1115,10 +1199,11 @@
     </div>
     <div class="header-title">
         <div class="title-main">Nahla Tracker</div>
-        <div class="title-sub">LIVE • v0.23 (alpha)</div>
+        <div class="title-sub">LIVE • v0.9 (beta)</div>
     </div>
 </div>
 
+<div class="header-tagline"><i></i>A random moon; a long-term study.</i></div>   
 
         <div id="tracker">
             <div id="status">Loading...</div>
@@ -1190,7 +1275,7 @@
 
         <div class="rebekah-center"></div>
         <div class="rebekah-ray"></div>
-        <div class="rebekah-dot"></div>
+        <div class="rebekah-"></div>
     </div>
 </div>
 
@@ -1229,7 +1314,7 @@
                             <line id="nahla-hand-hour" class="hand-hour"
                                   x1="100" y1="100" x2="100" y2="56" />
 
-                            <circle cx="100" cy="100" r="3" class="center-dot" />
+                            <circle cx="100" cy="100" r="3" class="center-" />
                         </svg>
 
                         <div class="clock-label">Nahla Phase Clock • 25h Day</div>
@@ -1304,6 +1389,36 @@
             
         </div>
 
+   <!-- ====================== -->
+<!--   NAHLA WEATHER PANEL  -->
+<!-- ====================== -->
+<div class="weather-wave">
+    <svg id="temp-wave" width="800" height="80" viewBox="0 0 800 80">
+        <defs>
+            <linearGradient id="wave-gradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="rgba(58, 242, 255, 0.25)" />
+                <stop offset="100%" stop-color="rgba(58, 242, 255, 0)" />
+            </linearGradient>
+        </defs>
+
+        <polygon id="temp-wave-fill" points="" fill="url(#wave-gradient)"></polygon>
+
+        <polyline id="temp-wave-line" points="" 
+                  stroke="#3af2ff" fill="none" stroke-width="2"
+                  style="filter: drop-shadow(0 0 6px rgba(58, 242, 255, 0.6));">
+        </polyline>
+
+        <circle id="temp-wave-dot" r="4" fill="#3af2ff"></circle>
+    </svg>
+</div>
+
+    <div class="weather-temp-readout">
+        <span class="weather-label">Current temperature at Natalja's Pass:</span>
+        <span id="weather-temp" class="weather-value">--</span>
+    </div>
+</div>
+   
+
         <div id="gallery-section">
             <div class="gallery-header">
                 <button class="gallery-btn" id="scroll-left">&lt;</button>
@@ -1374,7 +1489,10 @@
 
         <div id="notes-box">
             <h2>🌕 Nahla News Network 🌌</h2>
-            <div id="notes"><p><strong>25/11/3311: Live drift chart added:</strong> This shows GMT offset to NLT.
+            <div id="notes"><p><strong>27/11/3311: Nahla Tracker is in beta!:</strong> Now is a good time to consider NT <strong>feature complete</strong> - the phase clock governs everything such as galactic band cycle, NLT, NCT, drift time
+               and temperature, and it's time to stop things from getting overcomplicated while they're still stable! From now on we will focus on minor design improvements, bug fixes, stability and reliability. If you really like NT, please consider heading to <a class="cyan link" href="https://ko-fi.com/lysander" target="blank">Ko-fi</a> 
+               to buy us a macchiato! ☕ 🌕
+               <p><strong>25/11/3311: Live drift chart added:</strong> This shows GMT offset to NLT.
                 <p><strong>24/11/3311: Massive update to the tracker:</strong> Lots of updates over the weekend to our tracker - most notably being the Phase Clock which shows live galactic band phase times, of which there are 12. Phase numbers have been changed to
                     Greek letters for clarity to avoid them getting confused with hours! Overall time sync also has been massively improved. For the foreseable future we will focus on our ground research
                     here on Nahla and update the tracker/remove minor bugs sporadically ^^ </p>
@@ -1628,6 +1746,24 @@ function get_cycle_state(now) {
     };
 }
 
+       // ===============================
+//  SUN & HOPE ELEVATION HELPERS
+// ===============================
+
+// Sun elevation (deg) from wrapped seconds in a 25h26m10s solar day.
+function getSunElevationDeg(wrappedSeconds) {
+    const angle = (wrappedSeconds / DAY_LENGTH_SECONDS) * 2 * Math.PI;
+    return Math.sin(angle) * 90; // -90° (nadir) → +90° (zenith)
+}
+
+// Hope elevation based on phaseIndex0 (12-phase cycle)
+function getHopeElevationDeg(phaseIndex0) {
+    // Divide 12 phases into a sinusoid from -90° to +90°.
+    const angle = (phaseIndex0 / 12) * 2 * Math.PI;
+    return Math.sin(angle) * 90;
+}
+
+
 function get_sun_state_index(phaseIndex0) {
     return Math.floor(phaseIndex0 / 2);
 }
@@ -1636,7 +1772,7 @@ function get_hope_indicator(phaseIndex0) {
     const sunState = get_sun_state_index(phaseIndex0);
 
     if (sunState <= 3) {
-        const symbols = ["🌅","☀️","🔆","🌇"];
+        const symbols = ["🌅","☀️","🔆","🌄"];
         const arc = ["─","─","─","─","─","─"];
         arc[sunState] = symbols[sunState];
         return `<strong>Hope:</strong> [${arc.join("")}]`;
@@ -1717,6 +1853,21 @@ function get_time_to_next_phase(secondsIntoPhase) {
     const remaining = PHASE_LENGTH_SECONDS - secondsIntoPhase;
     return format_timedelta(remaining);
 }
+
+function getNahlaTempKelvin(wrappedSeconds) {
+    const minK = 143;
+    const maxK = 275;
+
+    // Normalised 0 → 1 day model using sin curve
+    const angle = (wrappedSeconds / DAY_LENGTH_SECONDS) * 2 * Math.PI;
+    const norm = (Math.sin(angle - Math.PI / 2) + 1) / 2; 
+    // Shifted so minimum is at “night”, maximum at “day”
+
+    const K = minK + (maxK - minK) * norm;
+
+    return `${K.toFixed(0)} K (${(K - 273.15).toFixed(1)} °C)`;
+}
+       
        
 
 function printCodeForGitHub() {
@@ -1793,6 +1944,31 @@ function updateDisplay() {
     if (nextPhaseEl) nextPhaseEl.textContent = nextPhaseString;
 }
 
+
+
+function updateTempDot(wrappedSeconds) {
+    const dot = document.getElementById("temp-wave-dot");
+    const svg = document.getElementById("temp-wave");
+    if (!dot || !svg) return;
+
+    // FIX: Use the internal SVG dimensions (500x60), NOT the screen size
+    const waveWidth = 800; 
+    const waveHeight = 80; 
+
+    // The rest of the math remains exactly the same...
+    const t = wrappedSeconds / DAY_LENGTH_SECONDS;
+    const angle = t * 2 * Math.PI;
+    const norm = (Math.sin(angle - Math.PI / 2) + 1) / 2;
+
+    const dotX = t * waveWidth;
+    const dotY = waveHeight - (norm * (waveHeight - 10)) - 5;
+
+    dot.setAttribute("cx", dotX);
+    dot.setAttribute("cy", dotY);
+}
+
+
+       
 // Gallery Lightbox Functions
 function openLightbox(imageSrc) {
     const lightbox = document.getElementById('lightbox');
@@ -2004,231 +2180,285 @@ btn.addEventListener("click", () => {
 // Initialize: Load anchors first, then start tracker
 loadAnchorsFromStorage().then(() => {
     updateDisplay();
+    updateWeatherPanel(); // Initialize weather panel
     setInterval(updateDisplay, 50);
+    setInterval(updateWeatherPanel, 1000); // Update weather every second
 }).catch(err => {
     console.error("Storage load failed, using defaults:", err);
     updateDisplay();
+    updateWeatherPanel(); // Initialize weather panel
     setInterval(updateDisplay, 50);
+    setInterval(updateWeatherPanel, 1000); // Update weather every second
 });
 
-/* ======================================
-   NAHLA DRIFT PANEL (no blinking version)
-   Builds rows ONCE, updates values only
-   ====================================== */
+   function toRad(deg) { return deg * Math.PI / 180; }
+function getSunElevationDeg(wrappedSeconds) {
+    // Simple solar elevation model:
+    //  -90° = midnight
+    //    0° = sunrise/sunset
+    //   90° = high noon
+    const fraction = wrappedSeconds / DAY_LENGTH_SECONDS;
+    return Math.sin(fraction * 2 * Math.PI) * 90;
+}
 
-(function () {
-    const DRIFT_DAY_LENGTH_SECONDS = (typeof DAY_LENGTH_SECONDS !== "undefined")
-        ? DAY_LENGTH_SECONDS
-        : 91570;
-
-    function getAnchorDate() {
-        if (window.CYCLE_ANCHOR instanceof Date && !isNaN(window.CYCLE_ANCHOR)) {
-            return window.CYCLE_ANCHOR;
-        }
-        return new Date("2025-11-22T11:46:55.000Z");
-    }
-
-    function pad(n) { return String(n).padStart(2, "0"); }
-
-    function formatUtcTime(date) {
-        return date.toLocaleTimeString("en-GB", {
-            hour: "2-digit",
-            minute: "2-digit",
-            second: "2-digit",
-            timeZone: "UTC",
-        });
-    }
-
-    function formatUtcDate(date) {
-        return date.toLocaleDateString("en-GB", {
-            day: "numeric",
-            month: "short",
-            timeZone: "UTC",
-        });
-    }
-
-    function getNahlaData(now) {
-        const anchor = getAnchorDate();
-        const elapsed = (now - anchor) / 1000;
-
-        const cycle = Math.floor(elapsed / DRIFT_DAY_LENGTH_SECONDS);
-        let sec = elapsed - cycle * DRIFT_DAY_LENGTH_SECONDS;
-        if (sec < 0) sec += DRIFT_DAY_LENGTH_SECONDS;
-
-        const h = Math.floor(sec / 3600);
-        const m = Math.floor((sec % 3600) / 60);
-        const s = Math.floor(sec % 60);
-
-        return {
-            cycle,
-            secondsIntoCycle: sec,
-            timeString: `${pad(h)}:${pad(m)}:${pad(s)}`
-        };
-    }
-
-    function computeCycleDate(cycle) {
-        return new Date(
-            getAnchorDate().getTime() + cycle * DRIFT_DAY_LENGTH_SECONDS * 1000
-        );
-    }
-
-    /* -------------------------------
-       BUILD TABLE ONCE (no blinking)
-       ------------------------------- */
-
-    function buildDriftTable() {
-        const body = document.getElementById("drift-table-body");
-        const rowsSelect = document.getElementById("drift-rows-select");
-        const anchorInfoEl = document.getElementById("drift-anchor-info");
-
-        if (!body || !rowsSelect) return;
-
-        body.innerHTML = ""; // clear once (not every second)
-
-        const now = new Date();
-        const N = parseInt(rowsSelect.value, 10) || 14;
-        const current = getNahlaData(now);
-        const startCycle = current.cycle - 2;
-
-        const anchor = getAnchorDate();
-        anchorInfoEl.textContent =
-            "Cycle Anchor: " + anchor.toISOString() +
-            " • Day Length: 25h 26m 10s";
-
-        for (let i = 0; i < N; i++) {
-            const cycle = startCycle + i;
-            const date = computeCycleDate(cycle);
-
-            const row = document.createElement("div");
-            row.className = "drift-row" + (cycle === current.cycle ? " drift-row-current" : "");
-
-            /* Create cells */
-            const c1 = document.createElement("div");
-            c1.className = "drift-cell drift-cycle";
-            c1.textContent = "#" + cycle;
-
-            const c2 = document.createElement("div");
-            c2.className = "drift-cell drift-date";
-            c2.textContent = formatUtcDate(date);
-
-            const c3 = document.createElement("div");
-            c3.className = "drift-cell drift-time drift-time-value";
-            c3.dataset.cycle = cycle;   // link updates
-            c3.textContent = formatUtcTime(date);
-
-            const c4 = document.createElement("div");
-            c4.className = "drift-cell drift-bar-cell";
-
-            const track = document.createElement("div");
-            track.className = "drift-bar-track";
-
-            [0, 6, 12, 18].forEach(h => {
-                const div = document.createElement("div");
-                div.className = "drift-bar-hour-marker";
-                div.style.left = ((h / 24) * 100) + "%";
-                track.appendChild(div);
-            });
-
-            const marker = document.createElement("div");
-            marker.className = "drift-bar-marker drift-marker";
-            marker.dataset.cycle = cycle;
-
-            track.appendChild(marker);
-
-            const labels = document.createElement("div");
-            labels.className = "drift-bar-labels";
-            labels.innerHTML = "<span>00:00</span><span>12:00</span><span>23:59</span>";
-
-            c4.appendChild(track);
-            c4.appendChild(labels);
-
-            row.appendChild(c1);
-            row.appendChild(c2);
-            row.appendChild(c3);
-            row.appendChild(c4);
-
-            body.appendChild(row);
-        }
-    }
-
-    /* -------------------------------
-       UPDATE ONLY VALUES (every sec)
-       ------------------------------- */
-
-    function updateDriftTable() {
-        const now = new Date();
-
-          // Restore live clocks
-const gmtEl = document.getElementById("drift-gmt-clock");
-const nltEl = document.getElementById("drift-nlt-clock");
-
-const nahla = getNahlaData(now);
-
-if (gmtEl) gmtEl.textContent = formatUtcTime(now);
-if (nltEl) nltEl.textContent = nahla.timeString;
+function getHopeElevationDeg(phaseIndex0) {
+    // Placeholder model for Hope's elevation
+    // Maps 0–11 phase index to -90° to +90°
+    return (phaseIndex0 / 12) * 180 - 90;
+}
 
        
-        const anchor = getAnchorDate();
-        const N = parseInt(document.getElementById("drift-rows-select").value, 10) || 14;
+function getSunElevationDegFromPhase(phaseIndex0) {
+    const p = phaseIndex0 + 1; // convert 0–11 → 1–12
 
-        const current = getNahlaData(now);
-        const startCycle = current.cycle - 2;
+    if (p === 5) return 60;                   // ε — overhead
+    if (p === 4 || p === 6) return 40;        // δ, ζ — high slanted
+    if (p === 3 || p === 7) return 20;        // γ, η — mid-height
+    if (p === 2 || p === 8) return 5;         // β, θ — steep rising/descending (sunlight!)
+    if (p === 1 || p === 9) return 1;         // α, ι — sunrise/sunset
+    if (p === 10 || p === 12) return -10;     // κ dusk / μ dawn
+    return -30;                               // λ deep night
+}
 
-        // Update each row’s cells
-        const timeCells = document.querySelectorAll(".drift-time-value");
-        const markers = document.querySelectorAll(".drift-marker");
+       
 
-        timeCells.forEach(cell => {
-            const cycle = parseInt(cell.dataset.cycle, 10);
-            const date = computeCycleDate(cycle);
-            cell.textContent = formatUtcTime(date);
-        });
+function buildTemperatureWave() {
+    const width = 800;
+    const height = 80;
+    const minK = 143;
+    const maxK = 275;
 
-        markers.forEach(marker => {
-            const cycle = parseInt(marker.dataset.cycle, 10);
-            const date = computeCycleDate(cycle);
+    const points = [];
+    for (let x = 0; x <= width; x++) {
+        const t = x / width; 
+        const angle = t * 2 * Math.PI;
 
-            const h = date.getUTCHours();
-            const m = date.getUTCMinutes();
-            const percent = ((h * 60 + m) / 1440) * 100;
-
-            marker.style.left = percent + "%";
-        });
-
-    // Highlight current cycle row (no rebuild)
-const allRows = document.querySelectorAll(".drift-row");
-allRows.forEach(row => row.classList.remove("drift-row-current"));
-
-let cycleCells = document.querySelectorAll(".drift-cell.drift-cycle");
-
-cycleCells.forEach(cell => {
-    if (cell.textContent.trim() === `#${current.cycle}`) {
-        cell.parentElement.classList.add("drift-row-current");
-    }
-});
-
+        // Normalised sine wave
+        const norm = (Math.sin(angle - Math.PI / 2) + 1) / 2;
+        
+        const y = height - (norm * (height - 10)) - 5;
+        points.push(`${x},${y}`);
     }
 
-    /* -------------------------------
-       INIT
-       ------------------------------- */
+    const linePointsString = points.join(" ");
 
-    document.addEventListener("DOMContentLoaded", function () {
-        const select = document.getElementById("drift-rows-select");
-        if (!select) return;
+    // 1. Draw the main line
+    document.getElementById("temp-wave-line").setAttribute("points", linePointsString);
 
-        buildDriftTable();    // build structure ONCE
-        updateDriftTable();   // then update data
+    // 2. Draw the fill area
+    // We take the line, add a point at the Bottom-Right, then Bottom-Left to close the shape
+    const fillPointsString = linePointsString + ` ${width},${height} 0,${height}`;
+    
+    const fillPoly = document.getElementById("temp-wave-fill");
+    if (fillPoly) {
+        fillPoly.setAttribute("points", fillPointsString);
+    }
+}
 
-        select.addEventListener("change", () => {
-            buildDriftTable();   // rebuild only when selector changes
-            updateDriftTable();
+ 
+    
+
+/* ======================================================
+   NAHLA DRIFT TABLE v2 — GMT rollover, no flicker,
+   restored hour labels, stable highlight.
+   ====================================================== */
+
+// Format GMT date (e.g. "26 Nov")
+function formatUtcDateShort(d) {
+    return d.toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "short",
+        timeZone: "UTC"
+    }).replace(",", "");
+}
+
+// Compute real NLT midnight for a given GMT date
+function computeNltMidnightForDate(dateObj) {
+    const diffSeconds = (dateObj - CYCLE_ANCHOR) / 1000;
+    const wrapped = mod(diffSeconds, DAY_LENGTH_SECONDS);
+    const secondsUntilMidnight = DAY_LENGTH_SECONDS - wrapped;
+    return new Date(dateObj.getTime() + secondsUntilMidnight * 1000);
+}
+
+// Compute cycle number
+function computeCycleNumber(dateObj) {
+    const nlt0 = computeNltMidnightForDate(dateObj);
+    const diff = (nlt0 - CYCLE_ANCHOR) / 1000;
+    return Math.floor(diff / DAY_LENGTH_SECONDS) + 1;
+}
+
+// Cache last GMT day to prevent flicker
+let lastBuiltDay = null;
+
+function buildDriftTable(force = false) {
+    const now = new Date();
+
+    // Today's GMT date at 00:00:00
+    const today = new Date(Date.UTC(
+        now.getUTCFullYear(),
+        now.getUTCMonth(),
+        now.getUTCDate()
+    ));
+
+    // Only rebuild ONCE per GMT day
+    if (!force && lastBuiltDay === today.getTime()) return;
+    lastBuiltDay = today.getTime();
+
+    const body = document.getElementById("drift-table-body");
+    body.innerHTML = "";
+
+    const rowsToShow = parseInt(document.getElementById("drift-rows-select").value, 10);
+
+    // First row = yesterday
+    const firstDate = new Date(today);
+    firstDate.setUTCDate(today.getUTCDate() - 1);
+
+    for (let i = 0; i < rowsToShow; i++) {
+        const d = new Date(firstDate);
+        d.setUTCDate(firstDate.getUTCDate() + i);
+
+        const nltMidnight = computeNltMidnightForDate(d);
+        const cycle = computeCycleNumber(d);
+
+        const row = document.createElement("div");
+        row.className = "drift-row";
+
+        // Cycle #
+        const cycleCell = document.createElement("div");
+        cycleCell.className = "drift-cell drift-cycle";
+        cycleCell.textContent = `#${cycle}`;
+        row.appendChild(cycleCell);
+
+        // GMT Date
+        const dateCell = document.createElement("div");
+        dateCell.className = "drift-cell drift-date";
+        dateCell.textContent = formatUtcDateShort(d);
+        row.appendChild(dateCell);
+
+        // NLT 00:00 time (HH:MM:SS)
+        const timeCell = document.createElement("div");
+        timeCell.className = "drift-cell drift-time";
+        timeCell.textContent = nltMidnight.toISOString().split("T")[1].split(".")[0];
+        row.appendChild(timeCell);
+
+        // Bar cell
+        const barCell = document.createElement("div");
+        barCell.className = "drift-bar-cell";
+
+        const barTrack = document.createElement("div");
+        barTrack.className = "drift-bar-track";
+
+        // Hour markers
+        for (let h = 0; h < 24; h++) {
+            const mk = document.createElement("div");
+            mk.className = "drift-bar-hour-marker";
+            mk.style.left = `${(h / 24) * 100}%`;
+            barTrack.appendChild(mk);
+        }
+
+        // Midnight marker
+        const seconds =
+            nltMidnight.getUTCHours() * 3600 +
+            nltMidnight.getUTCMinutes() * 60 +
+            nltMidnight.getUTCSeconds();
+
+        const pos = (seconds / 86400) * 100;
+
+        const marker = document.createElement("div");
+        marker.className = "drift-bar-marker";
+        marker.style.left = `${pos}%`;
+        barTrack.appendChild(marker);
+
+        barCell.appendChild(barTrack);
+
+        // Hour labels restored
+        const labels = document.createElement("div");
+        labels.className = "drift-bar-labels";
+
+        ["00:00", "12:00", "23:59"].forEach(t => {
+            const span = document.createElement("span");
+            span.textContent = t;
+            labels.appendChild(span);
         });
 
-        setInterval(updateDriftTable, 1000); // smooth updates, no blinking
-    });
-})();
+        barCell.appendChild(labels);
+        row.appendChild(barCell);
 
+        // Highlight today's row
+        if (d.getTime() === today.getTime()) {
+            row.classList.add("drift-row-current");
+        }
+
+        body.appendChild(row);
+    }
+}
+
+// Update only clocks every second (no table rebuild)
+function updateDriftPanelClocks() {
+    const now = new Date();
+
+    // GMT Clock
+    document.getElementById("drift-gmt-clock").textContent =
+        now.toISOString().split("T")[1].split(".")[0];
+
+    const cycle = get_cycle_state(now);
+    const wrapped = cycle.wrappedSeconds;
+
+    const h = Math.floor(wrapped / 3600);
+    const m = Math.floor((wrapped % 3600) / 60);
+    const s = Math.floor(wrapped % 60);
+
+    document.getElementById("drift-nlt-clock").textContent =
+        `${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
+}
+
+       function updateDriftAnchorInfo() {
+    const footer = document.getElementById("drift-anchor-info");
+    if (!footer) return;
+
+    footer.textContent = `Cycle Anchor: ${CYCLE_ANCHOR.toISOString()} • Day Length: 25h 26m 10s`;
+}
+
+function updateWeatherPanel() {
+    try {
+        const now = new Date();
+        // Check if cycle calculator exists before running
+        if (typeof get_cycle_state !== "function") return;
+        
+        const cycle = get_cycle_state(now);
+
+        // 1. Update the Text (Safely)
+        const tempElement = document.getElementById("weather-temp");
+        if (tempElement && typeof getNahlaTempKelvin === "function") {
+            tempElement.textContent = getNahlaTempKelvin(cycle.wrappedSeconds);
+        }
+
+        // 2. Update the Dot Position (Safely)
+        // We double check if updateTempDot exists to prevent crashes
+        if (typeof updateTempDot === "function") {
+            updateTempDot(cycle.wrappedSeconds);
+        }
+
+    } catch (err) {
+        // If weather fails, log it but DO NOT crash the other trackers
+        console.error("Weather Panel Error:", err);
+    }
+}
+
+
+
+// Timer — stable, no-flicker
+setInterval(() => {
+    updateDriftPanelClocks();
+    buildDriftTable(); // no rebuild unless GMT day changed
+}, 1000);
+
+// First build
+buildDriftTable(true);
+updateDriftPanelClocks();
+updateDriftAnchorInfo();
+buildTemperatureWave();
+       
 
 
     </script>
