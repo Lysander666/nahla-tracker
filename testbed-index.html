@@ -2202,25 +2202,7 @@ function buildTemperatureWave() {
     document.getElementById("temp-wave-line").setAttribute("points", points.join(" "));
 }
 
-       function updateTempDot(wrappedSeconds) {
-    const dot = document.getElementById("temp-wave-dot");
-    if (!dot) return;
-
-    const waveWidth = 260;
-    const waveHeight = 60;
-
-    const t = wrappedSeconds / DAY_LENGTH_SECONDS;  // 0 → 1 over NLT
-    const angle = t * 2 * Math.PI;
-    const norm = (Math.sin(angle - Math.PI / 2) + 1) / 2;
-
-    const dotX = t * waveWidth;
-    const dotY = waveHeight - (norm * (waveHeight - 10)) - 5;
-
-    dot.setAttribute("cx", dotX);
-    dot.setAttribute("cy", dotY);
-}
-
-
+ 
     
 
 /* ======================================================
