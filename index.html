@@ -2432,7 +2432,7 @@ function buildDriftTable(force = false) {
 
         row.appendChild(barCell);
 
-        // ----- Highlight today's row + TODAY badge -----
+        /* ----- Highlight today's row + TODAY badge -----
         if (dateAtMidnight.getTime() === todayGmt.getTime()) {
             row.classList.add("drift-row-current");
 
@@ -2440,7 +2440,7 @@ function buildDriftTable(force = false) {
             badge.className = "today-badge";
             badge.textContent = "TODAY";
             cycleCell.appendChild(badge);
-        }
+        } */
 
         body.appendChild(row);
     }
