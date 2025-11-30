@@ -1114,6 +1114,19 @@
     text-align: center;
 }
 
+.today-badge {
+    display: inline-block;
+    margin-left: 8px;
+    padding: 2px 6px;
+    font-size: 0.65rem;
+    color: #fff;
+    background: #0af;
+    border-radius: 4px;
+    text-transform: uppercase;
+    opacity: 0.85;
+}
+       
+
 /* Responsive tweak */
 
 @media (max-width: 800px) {
@@ -2299,57 +2312,66 @@ function computeCycleNumber(dateObj) {
 let lastBuiltDay = null;
 
 function buildDriftTable(force = false) {
+
+    // Reset highlight state so only one row gets the TODAY badge
+    window.__highlightedRowFound__ = false;
+
     const now = new Date();
 
-    // Today's GMT date at 00:00:00
-    const today = new Date(Date.UTC(
+    // Today's GMT midnight (for comparing GMT dates)
+    const todayGmt = new Date(Date.UTC(
         now.getUTCFullYear(),
         now.getUTCMonth(),
         now.getUTCDate()
     ));
 
-    // Only rebuild ONCE per GMT day
-    if (!force && lastBuiltDay === today.getTime()) return;
-    lastBuiltDay = today.getTime();
+    // Optimization: prevent rebuilding if we stay on the same day
+    if (!force && lastBuiltDay === todayGmt.getTime()) return;
+    lastBuiltDay = todayGmt.getTime();
 
     const body = document.getElementById("drift-table-body");
     body.innerHTML = "";
 
     const rowsToShow = parseInt(document.getElementById("drift-rows-select").value, 10);
 
-    // First row = yesterday
-    const firstDate = new Date(today);
-    firstDate.setUTCDate(today.getUTCDate() - 1);
+    // Determine current cycle based on NOW
+    const diffSeconds = (now - CYCLE_ANCHOR) / 1000;
+    const currentCycleIndex = Math.floor(diffSeconds / DAY_LENGTH_SECONDS);
 
-    for (let i = 0; i < rowsToShow; i++) {
-        const d = new Date(firstDate);
-        d.setUTCDate(firstDate.getUTCDate() + i);
+    // Build the rows, one per NLT cycle
+    for (let i = -1; i < rowsToShow; i++) {
 
-        const nltMidnight = computeNltMidnightForDate(d);
-        const cycle = computeCycleNumber(d);
+        const targetCycleIndex = currentCycleIndex + i;
+        const displayCycleNum = targetCycleIndex + 1;
 
+        // Exact UTC timestamp for this cycle's NLT midnight
+        const cycleStartTime = new Date(
+            CYCLE_ANCHOR.getTime() + targetCycleIndex * DAY_LENGTH_SECONDS * 1000
+        );
+
+        // Row structure
         const row = document.createElement("div");
         row.className = "drift-row";
 
-        // Cycle #
+        // ----- CELL 1: Cycle Number -----
         const cycleCell = document.createElement("div");
         cycleCell.className = "drift-cell drift-cycle";
-        cycleCell.textContent = `#${cycle}`;
+        cycleCell.textContent = `#${displayCycleNum}`;
         row.appendChild(cycleCell);
 
-        // GMT Date
+        // ----- CELL 2: GMT Date -----
         const dateCell = document.createElement("div");
         dateCell.className = "drift-cell drift-date";
-        dateCell.textContent = formatUtcDateShort(d);
+        dateCell.textContent = formatUtcDateShort(cycleStartTime);
         row.appendChild(dateCell);
 
-        // NLT 00:00 time (HH:MM:SS)
+        // ----- CELL 3: GMT Time -----
         const timeCell = document.createElement("div");
         timeCell.className = "drift-cell drift-time";
-        timeCell.textContent = nltMidnight.toISOString().split("T")[1].split(".")[0];
+        timeCell.textContent = cycleStartTime.toISOString().split("T")[1].split(".")[0];
         row.appendChild(timeCell);
 
-        // Bar cell
+        // ----- CELL 4: Bar Chart -----
         const barCell = document.createElement("div");
         barCell.className = "drift-bar-cell";
 
@@ -2364,13 +2386,13 @@ function buildDriftTable(force = false) {
             barTrack.appendChild(mk);
         }
 
-        // Midnight marker
-        const seconds =
-            nltMidnight.getUTCHours() * 3600 +
-            nltMidnight.getUTCMinutes() * 60 +
-            nltMidnight.getUTCSeconds();
+        // Marker position
+        const secondsInGmtDay =
+            cycleStartTime.getUTCHours() * 3600 +
+            cycleStartTime.getUTCMinutes() * 60 +
+            cycleStartTime.getUTCSeconds();
 
-        const pos = (seconds / 86400) * 100;
+        const pos = (secondsInGmtDay / 86400) * 100;
 
         const marker = document.createElement("div");
         marker.className = "drift-bar-marker";
@@ -2379,27 +2401,47 @@ function buildDriftTable(force = false) {
 
         barCell.appendChild(barTrack);
 
-        // Hour labels restored
         const labels = document.createElement("div");
         labels.className = "drift-bar-labels";
-
         ["00:00", "12:00", "23:59"].forEach(t => {
             const span = document.createElement("span");
             span.textContent = t;
             labels.appendChild(span);
         });
-
         barCell.appendChild(labels);
+
         row.appendChild(barCell);
 
-        // Highlight today's row
-        if (d.getTime() === today.getTime()) {
+        // ------------------------------------------------------------
+        // ⭐ NEW OPTION B HIGHLIGHT LOGIC ⭐
+        // Highlight the row that represents "today", even if no cycle
+        // starts today. This picks the most recent cycle <= today.
+        // ------------------------------------------------------------
+
+        const cycleDate = new Date(Date.UTC(
+            cycleStartTime.getUTCFullYear(),
+            cycleStartTime.getUTCMonth(),
+            cycleStartTime.getUTCDate()
+        )).getTime();
+
+        if (!window.__highlightedRowFound__ && cycleDate <= todayGmt.getTime()) {
+
             row.classList.add("drift-row-current");
+
+            // Add TODAY badge
+            const badge = document.createElement("span");
+            badge.className = "today-badge";
+            badge.textContent = "TODAY";
+            cycleCell.appendChild(badge);
+
+            window.__highlightedRowFound__ = true;
         }
 
+        // Append the finished row
         body.appendChild(row);
     }
 }
+
 
 // Update only clocks every second (no table rebuild)
 function updateDriftPanelClocks() {
