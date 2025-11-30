@@ -1114,6 +1114,19 @@
     text-align: center;
 }
 
+   .today-badge {
+    display: inline-block;
+    margin-left: 8px;
+    padding: 2px 6px;
+    font-size: 0.65rem;
+    color: #fff;
+    background: #0af;
+    border-radius: 4px;
+    text-transform: uppercase;
+    opacity: 0.85;
+}
+       
+
 /* Responsive tweak */
 
 @media (max-width: 800px) {
@@ -2304,55 +2317,79 @@ let lastBuiltDay = null;
 function buildDriftTable(force = false) {
     const now = new Date();
 
-    // Today's GMT date at 00:00:00
-    const today = new Date(Date.UTC(
+    // Today's GMT midnight
+    const todayGmt = new Date(Date.UTC(
         now.getUTCFullYear(),
         now.getUTCMonth(),
         now.getUTCDate()
     ));
 
-    // Only rebuild ONCE per GMT day
-    if (!force && lastBuiltDay === today.getTime()) return;
-    lastBuiltDay = today.getTime();
+    // Only rebuild once per GMT day unless forced
+    if (!force && lastBuiltDay === todayGmt.getTime()) return;
+    lastBuiltDay = todayGmt.getTime();
 
     const body = document.getElementById("drift-table-body");
     body.innerHTML = "";
 
     const rowsToShow = parseInt(document.getElementById("drift-rows-select").value, 10);
 
-    // First row = yesterday
-    const firstDate = new Date(today);
-    firstDate.setUTCDate(today.getUTCDate() - 1);
+    // Loop over GMT days (calendar rows)
+    // Start yesterday (i = -1) for context
+    for (let i = -1; i < rowsToShow; i++) {
 
-    for (let i = 0; i < rowsToShow; i++) {
-        const d = new Date(firstDate);
-        d.setUTCDate(firstDate.getUTCDate() + i);
-
-        const nltMidnight = computeNltMidnightForDate(d);
-        const cycle = computeCycleNumber(d);
+        // This row's GMT date at 00:00
+        const dateAtMidnight = new Date(todayGmt.getTime() + i * 86400000);
 
         const row = document.createElement("div");
         row.className = "drift-row";
 
-        // Cycle #
+        // ----- CELL 1: Cycle # (or placeholder) -----
         const cycleCell = document.createElement("div");
         cycleCell.className = "drift-cell drift-cycle";
-        cycleCell.textContent = `#${cycle}`;
-        row.appendChild(cycleCell);
 
-        // GMT Date
+        // ----- CELL 2: GMT Date -----
         const dateCell = document.createElement("div");
         dateCell.className = "drift-cell drift-date";
-        dateCell.textContent = formatUtcDateShort(d);
+        dateCell.textContent = formatUtcDateShort(dateAtMidnight);
+        row.appendChild(cycleCell);
         row.appendChild(dateCell);
 
-        // NLT 00:00 time (HH:MM:SS)
+        // ----- Determine if an NLT midnight occurs on this GMT date -----
+        // Range for this GMT day in seconds since anchor
+        const diffSecStart = (dateAtMidnight - CYCLE_ANCHOR) / 1000;
+        const diffSecEnd = (dateAtMidnight.getTime() + 86400000 - CYCLE_ANCHOR.getTime()) / 1000;
+
+        let cycleIndex = null;
+        let cycleStartTime = null;
+
+        if (diffSecEnd > 0) {
+            // First possible cycle index that could fall in this day
+            let candidate = Math.ceil(diffSecStart / DAY_LENGTH_SECONDS);
+            if (candidate < 0) candidate = 0;
+
+            const cycleStartSec = candidate * DAY_LENGTH_SECONDS;
+
+            if (cycleStartSec >= diffSecStart && cycleStartSec < diffSecEnd) {
+                cycleIndex = candidate;
+                cycleStartTime = new Date(CYCLE_ANCHOR.getTime() + cycleStartSec * 1000);
+            }
+        }
+
+        // ----- CELL 3: GMT Time (or placeholder) -----
         const timeCell = document.createElement("div");
         timeCell.className = "drift-cell drift-time";
-        timeCell.textContent = nltMidnight.toISOString().split("T")[1].split(".")[0];
+
+        if (cycleIndex !== null) {
+            cycleCell.textContent = `#${cycleIndex + 1}`;
+            timeCell.textContent = cycleStartTime.toISOString().split("T")[1].split(".")[0];
+        } else {
+            // No NLT midnight this GMT day
+            cycleCell.textContent = "#—";
+            timeCell.textContent = "No NLT midnight this day";
+        }
         row.appendChild(timeCell);
 
-        // Bar cell
+        // ----- CELL 4: Bar Chart -----
         const barCell = document.createElement("div");
         barCell.className = "drift-bar-cell";
 
@@ -2367,37 +2404,42 @@ function buildDriftTable(force = false) {
             barTrack.appendChild(mk);
         }
 
-        // Midnight marker
-        const seconds =
-            nltMidnight.getUTCHours() * 3600 +
-            nltMidnight.getUTCMinutes() * 60 +
-            nltMidnight.getUTCSeconds();
+        // If we have an NLT midnight on this day, show the marker
+        if (cycleIndex !== null) {
+            const secondsInGmtDay =
+                cycleStartTime.getUTCHours() * 3600 +
+                cycleStartTime.getUTCMinutes() * 60 +
+                cycleStartTime.getUTCSeconds();
 
-        const pos = (seconds / 86400) * 100;
+            const pos = (secondsInGmtDay / 86400) * 100;
 
-        const marker = document.createElement("div");
-        marker.className = "drift-bar-marker";
-        marker.style.left = `${pos}%`;
-        barTrack.appendChild(marker);
+            const marker = document.createElement("div");
+            marker.className = "drift-bar-marker";
+            marker.style.left = `${pos}%`;
+            barTrack.appendChild(marker);
+        }
 
         barCell.appendChild(barTrack);
 
-        // Hour labels restored
         const labels = document.createElement("div");
         labels.className = "drift-bar-labels";
-
         ["00:00", "12:00", "23:59"].forEach(t => {
             const span = document.createElement("span");
             span.textContent = t;
             labels.appendChild(span);
         });
-
         barCell.appendChild(labels);
+
         row.appendChild(barCell);
 
-        // Highlight today's row
-        if (d.getTime() === today.getTime()) {
+        // ----- Highlight today's row + TODAY badge -----
+        if (dateAtMidnight.getTime() === todayGmt.getTime()) {
             row.classList.add("drift-row-current");
+
+            const badge = document.createElement("span");
+            badge.className = "today-badge";
+            badge.textContent = "TODAY";
+            cycleCell.appendChild(badge);
         }
 
         body.appendChild(row);
