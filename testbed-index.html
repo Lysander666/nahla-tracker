@@ -2314,14 +2314,14 @@ let lastBuiltDay = null;
 function buildDriftTable(force = false) {
     const now = new Date();
 
-    // Today's GMT midnight (for date comparison)
+    // Today's GMT midnight
     const todayGmt = new Date(Date.UTC(
         now.getUTCFullYear(),
         now.getUTCMonth(),
         now.getUTCDate()
     ));
 
-    // Optimization: rebuild only once per GMT day unless forced
+    // Only rebuild once per GMT day unless forced
     if (!force && lastBuiltDay === todayGmt.getTime()) return;
     lastBuiltDay = todayGmt.getTime();
 
@@ -2330,46 +2330,63 @@ function buildDriftTable(force = false) {
 
     const rowsToShow = parseInt(document.getElementById("drift-rows-select").value, 10);
 
-    // Current cycle index based on *now*
-    const diffSeconds = (now - CYCLE_ANCHOR) / 1000;
-    const currentCycleIndex = Math.floor(diffSeconds / DAY_LENGTH_SECONDS);
-
-    // We will choose which row to highlight AFTER building all rows
-    let rowToHighlight = null;
-    let cycleCellToHighlight = null;
-
-    // Build rows: one per Nahla cycle
+    // Loop over GMT days (calendar rows)
+    // Start yesterday (i = -1) for context
     for (let i = -1; i < rowsToShow; i++) {
-        const targetCycleIndex = currentCycleIndex + i;
-        const displayCycleNum = targetCycleIndex + 1;
 
-        // Exact UTC time when this NLT 00:00 occurs
-        const cycleStartTime = new Date(
-            CYCLE_ANCHOR.getTime() + targetCycleIndex * DAY_LENGTH_SECONDS * 1000
-        );
+        // This row's GMT date at 00:00
+        const dateAtMidnight = new Date(todayGmt.getTime() + i * 86400000);
 
         const row = document.createElement("div");
         row.className = "drift-row";
 
-        // ---- CELL 1: Cycle # ----
+        // ----- CELL 1: Cycle # (or placeholder) -----
         const cycleCell = document.createElement("div");
         cycleCell.className = "drift-cell drift-cycle";
-        cycleCell.textContent = `#${displayCycleNum}`;
-        row.appendChild(cycleCell);
 
-        // ---- CELL 2: GMT Date ----
+        // ----- CELL 2: GMT Date -----
         const dateCell = document.createElement("div");
         dateCell.className = "drift-cell drift-date";
-        dateCell.textContent = formatUtcDateShort(cycleStartTime);
+        dateCell.textContent = formatUtcDateShort(dateAtMidnight);
+        row.appendChild(cycleCell);
         row.appendChild(dateCell);
 
-        // ---- CELL 3: GMT Time ----
+        // ----- Determine if an NLT midnight occurs on this GMT date -----
+        // Range for this GMT day in seconds since anchor
+        const diffSecStart = (dateAtMidnight - CYCLE_ANCHOR) / 1000;
+        const diffSecEnd = (dateAtMidnight.getTime() + 86400000 - CYCLE_ANCHOR.getTime()) / 1000;
+
+        let cycleIndex = null;
+        let cycleStartTime = null;
+
+        if (diffSecEnd > 0) {
+            // First possible cycle index that could fall in this day
+            let candidate = Math.ceil(diffSecStart / DAY_LENGTH_SECONDS);
+            if (candidate < 0) candidate = 0;
+
+            const cycleStartSec = candidate * DAY_LENGTH_SECONDS;
+
+            if (cycleStartSec >= diffSecStart && cycleStartSec < diffSecEnd) {
+                cycleIndex = candidate;
+                cycleStartTime = new Date(CYCLE_ANCHOR.getTime() + cycleStartSec * 1000);
+            }
+        }
+
+        // ----- CELL 3: GMT Time (or placeholder) -----
         const timeCell = document.createElement("div");
         timeCell.className = "drift-cell drift-time";
-        timeCell.textContent = cycleStartTime.toISOString().split("T")[1].split(".")[0];
+
+        if (cycleIndex !== null) {
+            cycleCell.textContent = `#${cycleIndex + 1}`;
+            timeCell.textContent = cycleStartTime.toISOString().split("T")[1].split(".")[0];
+        } else {
+            // No NLT midnight this GMT day
+            cycleCell.textContent = "#—";
+            timeCell.textContent = "No NLT midnight this day";
+        }
         row.appendChild(timeCell);
 
-        // ---- CELL 4: Bar chart ----
+        // ----- CELL 4: Bar Chart -----
         const barCell = document.createElement("div");
         barCell.className = "drift-bar-cell";
 
@@ -2384,18 +2401,20 @@ function buildDriftTable(force = false) {
             barTrack.appendChild(mk);
         }
 
-        // Marker position within GMT day
-        const secondsInGmtDay =
-            cycleStartTime.getUTCHours() * 3600 +
-            cycleStartTime.getUTCMinutes() * 60 +
-            cycleStartTime.getUTCSeconds();
+        // If we have an NLT midnight on this day, show the marker
+        if (cycleIndex !== null) {
+            const secondsInGmtDay =
+                cycleStartTime.getUTCHours() * 3600 +
+                cycleStartTime.getUTCMinutes() * 60 +
+                cycleStartTime.getUTCSeconds();
 
-        const pos = (secondsInGmtDay / 86400) * 100;
+            const pos = (secondsInGmtDay / 86400) * 100;
 
-        const marker = document.createElement("div");
-        marker.className = "drift-bar-marker";
-        marker.style.left = `${pos}%`;
-        barTrack.appendChild(marker);
+            const marker = document.createElement("div");
+            marker.className = "drift-bar-marker";
+            marker.style.left = `${pos}%`;
+            barTrack.appendChild(marker);
+        }
 
         barCell.appendChild(barTrack);
 
@@ -2410,32 +2429,20 @@ function buildDriftTable(force = false) {
 
         row.appendChild(barCell);
 
-        // ---- Decide if this row is the best candidate for "today" ----
-        const cycleDate = new Date(Date.UTC(
-            cycleStartTime.getUTCFullYear(),
-            cycleStartTime.getUTCMonth(),
-            cycleStartTime.getUTCDate()
-        )).getTime();
+        // ----- Highlight today's row + TODAY badge -----
+        if (dateAtMidnight.getTime() === todayGmt.getTime()) {
+            row.classList.add("drift-row-current");
 
-        // We want the *latest* cycle date that is not after today.
-        if (cycleDate <= todayGmt.getTime()) {
-            rowToHighlight = row;
-            cycleCellToHighlight = cycleCell;
+            const badge = document.createElement("span");
+            badge.className = "today-badge";
+            badge.textContent = "TODAY";
+            cycleCell.appendChild(badge);
         }
 
         body.appendChild(row);
     }
-
-    // Apply highlight and TODAY badge after all rows are built
-    if (rowToHighlight && cycleCellToHighlight) {
-        rowToHighlight.classList.add("drift-row-current");
-
-        const badge = document.createElement("span");
-        badge.className = "today-badge";
-        badge.textContent = "TODAY";
-        cycleCellToHighlight.appendChild(badge);
-    }
 }
+
 
 
 // Update only clocks every second (no table rebuild)
