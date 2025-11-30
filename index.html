@@ -2512,6 +2512,14 @@ updateDriftPanelClocks();
 updateDriftAnchorInfo();
 buildTemperatureWave();
 
+// ===========================================
+// FORCE DRIFT-TABLE REBUILD WHEN USER CHANGES ROW SELECT
+// ===========================================
+document.getElementById("drift-rows-select").addEventListener("change", () => {
+    buildDriftTable(true); // Force rebuild even if same GMT day
+});
+       
+
 
 /* (function() {
     const TAGLINES = [
