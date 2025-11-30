@@ -585,7 +585,7 @@
             box-shadow: 0 0 18px rgba(97, 218, 251, 0.18);
         }
         
-        .lightbox {
+        . {
             display: none;
             position: fixed;
             top: 0;
@@ -599,18 +599,18 @@
             cursor: pointer;
         }
         
-        .lightbox.active {
+        ..active {
             display: flex;
         }
         
-        .lightbox img {
+        . img {
             max-width: 90%;
             max-height: 90%;
             border-radius: 8px;
             box-shadow: 0 0 30px rgba(97, 218, 251, 0.3);
         }
         
-        .lightbox-close {
+        .-close {
             position: absolute;
             top: 30px;
             right: 40px;
@@ -621,7 +621,7 @@
             transition: color 0.2s;
         }
         
-        .lightbox-close:hover {
+        .-close:hover {
             color: #61dafb;
         }
             
@@ -658,6 +658,33 @@
         .gallery-container {
             scrollbar-width: none;
         }
+
+       .lightbox-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 60px;
+    color: #fff;
+    cursor: pointer;
+    padding: 20px;
+    opacity: 0.7;
+    user-select: none;
+    transition: opacity 0.2s, transform 0.2s;
+}
+
+.lightbox-arrow:hover {
+    opacity: 1;
+    transform: translateY(-50%) scale(1.15);
+}
+
+#lightbox-prev {
+    left: 40px;
+}
+
+#lightbox-next {
+    right: 40px;
+}
+
 
         .audio-btn {
             background: none;
@@ -1503,10 +1530,13 @@
             </div>
         </div>
 
-        <div class="lightbox" id="lightbox" onclick="closeLightbox()">
-            <span class="lightbox-close">&times;</span>
-            <img id="lightbox-image" src="" alt="Enlarged view">
-        </div>
+<div id="lightbox" class="lightbox">
+    <span id="lightbox-prev" class="lightbox-arrow">&#10094;</span>
+    <img id="lightbox-image">
+    <span id="lightbox-next" class="lightbox-arrow">&#10095;</span>
+    <span class="lightbox-close">&times;</span>
+</div>
+
 
         <div id="notes-box">
             <h2>🌕 Nahla News Network 🌌</h2>
@@ -2008,6 +2038,53 @@ document.addEventListener('keydown', function(event) {
         closeLightbox();
     }
 });
+
+       // =========================
+// LIGHTBOX NAVIGATION LOGIC
+// =========================
+
+let galleryImages = [];
+let currentImageIndex = 0;
+
+// Build gallery image list from DOM
+document.querySelectorAll('.gallery-item img').forEach((img, index) => {
+    galleryImages.push(img.src);
+});
+
+// Override openLightbox to track index
+function openLightbox(imageSrc) {
+    const lightbox = document.getElementById('lightbox');
+    const lightboxImage = document.getElementById('lightbox-image');
+
+    currentImageIndex = galleryImages.indexOf(imageSrc);
+    lightboxImage.src = imageSrc;
+
+    lightbox.classList.add('active');
+}
+
+// Navigation functions
+function showNextImage() {
+    currentImageIndex = (currentImageIndex + 1) % galleryImages.length;
+    document.getElementById('lightbox-image').src = galleryImages[currentImageIndex];
+}
+
+function showPrevImage() {
+    currentImageIndex = (currentImageIndex - 1 + galleryImages.length) % galleryImages.length;
+    document.getElementById('lightbox-image').src = galleryImages[currentImageIndex];
+}
+
+// Arrow buttons
+document.getElementById('lightbox-next').addEventListener('click', showNextImage);
+document.getElementById('lightbox-prev').addEventListener('click', showPrevImage);
+
+// Keyboard support
+document.addEventListener('keydown', function(e) {
+    if (!document.getElementById('lightbox').classList.contains('active')) return;
+
+    if (e.key === 'ArrowRight') showNextImage();
+    if (e.key === 'ArrowLeft') showPrevImage();
+});
+
 
 // Gallery draggable
 const gallery = document.querySelector('.gallery-container');
