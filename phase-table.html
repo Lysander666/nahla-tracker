@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nahla Galactic Phases</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=VT323&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap">
+    
+    <style>
+        body { 
+            background-color: #1a1a1a; 
+            color: #e0e0e0; 
+            font-family: "Inter", sans-serif; 
+            line-height: 1.6; 
+            padding: 40px 20px;
+            margin: 0;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: #61dafb;
+            font-family: "Consolas", monospace;
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #888;
+            font-size: 0.9rem;
+            margin-bottom: 40px;
+            font-family: monospace;
+        }
+
+        /* Table Styling */
+        .phase-table-wrapper {
+            border: 1px solid #444;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: #222;
+            font-family: monospace;
+            font-size: 1rem;
+        }
+
+        thead {
+            background-color: #111;
+            border-bottom: 2px solid #333;
+        }
+
+        th {
+            padding: 15px;
+            text-align: left;
+            color: #61dafb;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 600;
+        }
+
+        td {
+            padding: 14px 15px;
+            border-bottom: 1px solid #333;
+            color: #ccc;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover {
+            background-color: #2a2a2a;
+        }
+
+        /* Specific Column Styles */
+        .col-phase { width: 80px; text-align: center; color: #777; }
+        .col-greek { color: #fff; font-weight: bold; }
+        .col-time  { color: #61dafb; font-family: "Consolas", monospace; }
+        .col-desc  { color: #bbb; }
+
+        .greek-symbol {
+            display: inline-block;
+            width: 20px;
+            color: #61dafb;
+            margin-right: 5px;
+        }
+
+        /* Day/Night highlighting */
+        .row-day { border-left: 4px solid #61dafb; }
+        .row-night { border-left: 4px solid #555; background-color: #1e1e1e; }
+
+        .back-link {
+            display: block;
+            margin-top: 30px;
+            text-align: center;
+            color: #61dafb;
+            text-decoration: none;
+            font-family: monospace;
+            border: 1px solid #333;
+            padding: 10px;
+            border-radius: 6px;
+            width: 200px;
+            margin-left: auto;
+            margin-right: auto;
+            transition: all 0.2s;
+        }
+
+        .back-link:hover {
+            background-color: #333;
+            border-color: #61dafb;
+        }
+
+        @media (max-width: 600px) {
+            th, td { padding: 10px; font-size: 0.85rem; }
+            .col-desc { font-size: 0.8rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Nahla Phase Cycle</h1>
+    <div class="subtitle">The 12-Phase Galactic Band Standard • Day Length: 25h 26m 10s</div>
+
+    <div class="phase-table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th class="col-phase">#</th>
+                    <th>Greek Designation</th>
+                    <th>Start (NLT)</th>
+                    <th>Atmospheric Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- DAY PHASES -->
+                <tr class="row-day">
+                    <td class="col-phase">0</td>
+                    <td class="col-greek"><span class="greek-symbol">α</span> Alpha</td>
+                    <td class="col-time">00:00:00</td>
+                    <td class="col-desc">Astronomical dawn; first light</td>
+                </tr>
+                <tr class="row-day">
+                    <td class="col-phase">1</td>
+                    <td class="col-greek"><span class="greek-symbol">β</span> Beta</td>
+                    <td class="col-time">02:07:10</td>
+                    <td class="col-desc">Brightening sunrise arc</td>
+                </tr>
+                <tr class="row-day">
+                    <td class="col-phase">2</td>
+                    <td class="col-greek"><span class="greek-symbol">γ</span> Gamma</td>
+                    <td class="col-time">04:14:21</td>
+                    <td class="col-desc">Morning light, sun climbing</td>
+                </tr>
+                <tr class="row-day">
+                    <td class="col-phase">3</td>
+                    <td class="col-greek"><span class="greek-symbol">δ</span> Delta</td>
+                    <td class="col-time">06:21:32</td>
+                    <td class="col-desc">Approaching midday</td>
+                </tr>
+                <tr class="row-day">
+                    <td class="col-phase">4</td>
+                    <td class="col-greek"><span class="greek-symbol">ε</span> Epsilon</td>
+                    <td class="col-time">08:28:43</td>
+                    <td class="col-desc">Solar zenith; shortest shadows</td>
+                </tr>
+                <tr class="row-day">
+                    <td class="col-phase">5</td>
+                    <td class="col-greek"><span class="greek-symbol">ζ</span> Zeta</td>
+                    <td class="col-time">10:35:54</td>
+                    <td class="col-desc">Early afternoon warmth</td>
+                </tr>
+                <tr class="row-day">
+                    <td class="col-phase">6</td>
+                    <td class="col-greek"><span class="greek-symbol">η</span> Eta</td>
+                    <td class="col-time">12:43:05</td>
+                    <td class="col-desc">Mid-afternoon decline</td>
+                </tr>
+                <tr class="row-day">
+                    <td class="col-phase">7</td>
+                    <td class="col-greek"><span class="greek-symbol">θ</span> Theta</td>
+                    <td class="col-time">14:50:15</td>
+                    <td class="col-desc">Golden-angle late afternoon</td>
+                </tr>
+                <tr class="row-day">
+                    <td class="col-phase">8</td>
+                    <td class="col-greek"><span class="greek-symbol">ι</span> Iota</td>
+                    <td class="col-time">16:57:26</td>
+                    <td class="col-desc">Sunset colour shift</td>
+                </tr>
+                
+                <!-- NIGHT PHASES -->
+                <tr class="row-night">
+                    <td class="col-phase">9</td>
+                    <td class="col-greek"><span class="greek-symbol">κ</span> Kappa</td>
+                    <td class="col-time">19:04:37</td>
+                    <td class="col-desc">Twilight glow</td>
+                </tr>
+                <tr class="row-night">
+                    <td class="col-phase">10</td>
+                    <td class="col-greek"><span class="greek-symbol">λ</span> Lambda</td>
+                    <td class="col-time">21:11:48</td>
+                    <td class="col-desc">Deep night; thermal minimum begins</td>
+                </tr>
+                <tr class="row-night">
+                    <td class="col-phase">11</td>
+                    <td class="col-greek"><span class="greek-symbol">μ</span> Mu</td>
+                    <td class="col-time">23:18:59</td>
+                    <td class="col-desc">Pre-dawn calm; horizon coldest</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <a href="index.html" class="back-link">← Return to Tracker</a>
+</div>
+
+</body>
+</html>
