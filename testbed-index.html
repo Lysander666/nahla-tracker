@@ -107,7 +107,7 @@
     font-family: Consolas, "Courier New", monospace;
     text-shadow: 0 0 8px rgba(97,218,251,0.4);
     opacity: 0;
-    animation: taglineFade 1s ease-out forwards;
+    animation: taglineFade 0.25s ease-out forwards;
 }
 
 @keyframes taglineFade {
@@ -585,7 +585,7 @@
             box-shadow: 0 0 18px rgba(97, 218, 251, 0.18);
         }
         
-        . {
+        .lightbox {
             display: none;
             position: fixed;
             top: 0;
@@ -599,18 +599,18 @@
             cursor: pointer;
         }
         
-        ..active {
+        .lightbox.active {
             display: flex;
         }
         
-        . img {
+        .lightbox img {
             max-width: 90%;
             max-height: 90%;
             border-radius: 8px;
             box-shadow: 0 0 30px rgba(97, 218, 251, 0.3);
         }
         
-        .-close {
+        .lightbox-close {
             position: absolute;
             top: 30px;
             right: 40px;
@@ -621,7 +621,7 @@
             transition: color 0.2s;
         }
         
-        .-close:hover {
+        .lightbox-close:hover {
             color: #61dafb;
         }
             
@@ -658,33 +658,6 @@
         .gallery-container {
             scrollbar-width: none;
         }
-
-       .lightbox-arrow {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 60px;
-    color: #fff;
-    cursor: pointer;
-    padding: 20px;
-    opacity: 0.7;
-    user-select: none;
-    transition: opacity 0.2s, transform 0.2s;
-}
-
-.lightbox-arrow:hover {
-    opacity: 1;
-    transform: translateY(-50%) scale(1.15);
-}
-
-#lightbox-prev {
-    left: 40px;
-}
-
-#lightbox-next {
-    right: 40px;
-}
-
 
         .audio-btn {
             background: none;
@@ -1141,7 +1114,7 @@
     text-align: center;
 }
 
-.today-badge {
+   .today-badge {
     display: inline-block;
     margin-left: 8px;
     padding: 2px 6px;
@@ -1251,7 +1224,7 @@
     </div>
 </div>
 
-<div class="header-tagline" id="tagline"></div>
+<div class="header-tagline">A study in sulphur</div>
 
         <div id="tracker">
             <div id="status">Loading...</div>
@@ -1530,17 +1503,17 @@
             </div>
         </div>
 
-<div id="lightbox" class="lightbox">
-    <span id="lightbox-prev" class="lightbox-arrow">&#10094;</span>
-    <img id="lightbox-image">
-    <span id="lightbox-next" class="lightbox-arrow">&#10095;</span>
-    <span class="lightbox-close">&times;</span>
-</div>
-
+        <div class="lightbox" id="lightbox" onclick="closeLightbox()">
+            <span class="lightbox-close">&times;</span>
+            <img id="lightbox-image" src="" alt="Enlarged view">
+        </div>
 
         <div id="notes-box">
             <h2>🌕 Nahla News Network 🌌</h2>
-            <div id="notes"><p><strong>27/11/3311: Nahla Tracker is in beta!:</strong> Now is a good time to consider NT <strong>feature complete</strong> - the phase clock governs everything such as galactic band cycle, NLT, NCT, drift time
+            <div id="notes"><p>This project started as a simple question: <strong>what happens if you choose a moon at random and study it as if it were the most important world in the galaxy?</strong>
+
+               Nahla became that moon and this tracker became the answer.</p>  <br>
+               <p><strong>27/11/3311: Nahla Tracker is in beta!:</strong> Now is a good time to consider NT <strong>feature complete</strong> - the phase clock governs everything such as galactic band cycle, NLT, NCT, drift time
                and temperature, and it's time to stop things from getting overcomplicated while they're still stable! From now on we will focus on minor design improvements, bug fixes, stability and reliability. If you really like NT, please consider heading to <a class="cyan link" href="https://ko-fi.com/lysander" target="blank">Ko-fi</a> 
                to buy us a macchiato! ☕ 🌕
                <p><strong>25/11/3311: Live drift chart added:</strong> This shows GMT offset to NLT.
@@ -1559,7 +1532,7 @@
                 <br>
                 Day—night cycles beyond Earth vary according to the orbital and rotational dynamics of their respective worlds, rather than adhering to Earth's 24-hour rhythm.
                 <p></p>
-                <small>Nahla Tracker is a personal project of Lysander666 - <a class="cyan-link" href="https://bsky.app/profile/lysander666.bsky.social" target="_blank">@lysander666.bsky.social</a></small>
+                <small>Nahla Tracker for Elite Dangerous is a personal project of Lysander666 - <a class="cyan-link" href="https://bsky.app/profile/lysander666.bsky.social" target="_blank">@lysander666.bsky.social</a></small>
             </div>
         </div>
  <div id="drift-panel">
@@ -2039,53 +2012,6 @@ document.addEventListener('keydown', function(event) {
     }
 });
 
-       // =========================
-// LIGHTBOX NAVIGATION LOGIC
-// =========================
-
-let galleryImages = [];
-let currentImageIndex = 0;
-
-// Build gallery image list from DOM
-document.querySelectorAll('.gallery-item img').forEach((img, index) => {
-    galleryImages.push(img.src);
-});
-
-// Override openLightbox to track index
-function openLightbox(imageSrc) {
-    const lightbox = document.getElementById('lightbox');
-    const lightboxImage = document.getElementById('lightbox-image');
-
-    currentImageIndex = galleryImages.indexOf(imageSrc);
-    lightboxImage.src = imageSrc;
-
-    lightbox.classList.add('active');
-}
-
-// Navigation functions
-function showNextImage() {
-    currentImageIndex = (currentImageIndex + 1) % galleryImages.length;
-    document.getElementById('lightbox-image').src = galleryImages[currentImageIndex];
-}
-
-function showPrevImage() {
-    currentImageIndex = (currentImageIndex - 1 + galleryImages.length) % galleryImages.length;
-    document.getElementById('lightbox-image').src = galleryImages[currentImageIndex];
-}
-
-// Arrow buttons
-document.getElementById('lightbox-next').addEventListener('click', showNextImage);
-document.getElementById('lightbox-prev').addEventListener('click', showPrevImage);
-
-// Keyboard support
-document.addEventListener('keydown', function(e) {
-    if (!document.getElementById('lightbox').classList.contains('active')) return;
-
-    if (e.key === 'ArrowRight') showNextImage();
-    if (e.key === 'ArrowLeft') showPrevImage();
-});
-
-
 // Gallery draggable
 const gallery = document.querySelector('.gallery-container');
 
@@ -2520,8 +2446,6 @@ function buildDriftTable(force = false) {
     }
 }
 
-
-
 // Update only clocks every second (no table rebuild)
 function updateDriftPanelClocks() {
     const now = new Date();
@@ -2588,37 +2512,34 @@ updateDriftPanelClocks();
 updateDriftAnchorInfo();
 buildTemperatureWave();
 
- // ===========================================
+// ===========================================
 // FORCE DRIFT-TABLE REBUILD WHEN USER CHANGES ROW SELECT
 // ===========================================
 document.getElementById("drift-rows-select").addEventListener("change", () => {
     buildDriftTable(true); // Force rebuild even if same GMT day
 });
+       
 
 
-
-(function() {
+/* (function() {
     const TAGLINES = [
-        "A hand-picked moon in a galaxy of trillions.",
-        "One quiet moon chosen from countless worlds.",
-        "A single speck in a trillion-world sky.",
-        "A lonely moon pulled from the noise of the galaxy.",
-        "A moon at random. A study with intention.",
+        "A single speck in a trillion-world sky",
+        "A lonely moon pulled from the noise of the galaxy",
         "A random moon. A deliberate obsession.",
-        "A chosen sanctuary in the chaos of stars.",
-        "Where randomness meets ritual.",
-        "A moon like any other. A moon like no other.",
-        "Selected at random. Studied with devotion.",
-        "One moon. Endless study.",
-        "Deep in the void, only one moon matters.",
-        "Randomising meaning.",
+        "A chosen sanctuary in the chaos of stars",
+        "Where randomness meets ritual",
+        "A moon like any other - a moon like no other",
+        "Deep in the void, only one moon matters",
+        "Randomising meaning",
+        "A study in sulphur",
+        "Arbitrary rock, absolute analysis",
     ];
 
     const taglineEl = document.getElementById("tagline");
     if (taglineEl) {
         taglineEl.textContent = TAGLINES[Math.floor(Math.random() * TAGLINES.length)];
     }
-})();
+})(); */
        
 
 
