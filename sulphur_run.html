@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Sulphur Run - Nahla SRV Simulator</title>
+    <title>Sulphur Run - Starry Edition</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=VT323&display=swap">
     <link rel="icon" type="image/png" sizes="16x16" href="faviconmain16.png">
     <link rel="icon" type="image/png" sizes="32x32" href="favicon32@2x.png">
@@ -236,8 +236,9 @@
 
 <script>
 /**
- * SULPHUR RUN - OPTIMIZED STABLE BUILD
- * Fixes: Audio Node Throttling, Gradient Caching, Particle Shadow Optimization
+ * SULPHUR RUN - STABLE + BEAUTIFUL STARS EDITION
+ * Optimized for performance: Object Pooling, Audio Limiting, Cached Gradients
+ * Enhanced Visuals: "Breathing" Stars, Color Variation
  */
 
 const canvas = document.getElementById('gameCanvas');
@@ -262,7 +263,7 @@ const LIGHTING = {
     DAWN:  { skyTop: '#2b1a05', skyBot: '#5e3205', ground: '#362305', haze: 'rgba(212, 162, 78, 0.15)', stars: 0.2 }, 
     DAY:   { skyTop: '#0a0a1f', skyBot: '#2d2d5c', ground: '#5c481e', haze: 'rgba(150, 150, 200, 0.1)', stars: 0.1 }, 
     DUSK:  { skyTop: '#1f0505', skyBot: '#5c1200', ground: '#331200', haze: 'rgba(150, 50, 0, 0.15)', stars: 0.3 }, 
-    NIGHT: { skyTop: '#050505', skyBot: '#0a0505', ground: '#1a1205', haze: 'rgba(0,0,0,0)', stars: 0.8 }  
+    NIGHT: { skyTop: '#050505', skyBot: '#0a0505', ground: '#1a1205', haze: 'rgba(0,0,0,0)', stars: 0.95 }  
 };
 
 // --- GAME STATE ---
@@ -292,7 +293,7 @@ if (bgm) {
 }
 
 // --- OPTIMIZED CACHING ---
-let cachedBeamGrad = null; // Cache the gradient
+let cachedBeamGrad = null;
 
 function getBeamGradient() {
     if (!cachedBeamGrad) {
@@ -328,11 +329,11 @@ const rover = {
         this.angle += (targetAngle - this.angle) * 0.1;
         ctx.rotate(this.angle);
 
-        // SOFT HEADLIGHT BEAM (OPTIMIZED)
+        // HEADLIGHT
         ctx.save();
         ctx.translate(15, 0); 
         ctx.rotate(0.1); 
-        ctx.fillStyle = getBeamGradient(); // Use cached gradient
+        ctx.fillStyle = getBeamGradient();
         ctx.beginPath();
         ctx.moveTo(0, -5);
         ctx.lineTo(130, -35); 
@@ -448,29 +449,40 @@ const rover = {
 let obstacles = [];
 let samples = []; 
 let particles = [];
-let stars = [];
 let projectiles = [];
 let miniCraters = []; 
 let meteors = [];
 let dustStreaks = [];
+
+// --- ENHANCED STARS ---
+// Increased count, added color variation
 let starsSlow = [];
 let starsMed = [];
 let starsFast = [];
 
 function initStars() {
     starsSlow = []; starsMed = []; starsFast = [];
-    for(let i=0; i<40; i++) starsSlow.push(createStar(0.1));
-    for(let i=0; i<30; i++) starsMed.push(createStar(0.5));
-    for(let i=0; i<20; i++) starsFast.push(createStar(1.2));
+    // Significantly increased star counts
+    for(let i=0; i<150; i++) starsSlow.push(createStar(0.1));
+    for(let i=0; i<80; i++) starsMed.push(createStar(0.4));
+    for(let i=0; i<40; i++) starsFast.push(createStar(1.2));
 }
 
 function createStar(speedMult) {
+    // Random star colors for "beauty"
+    const r = Math.random();
+    let color = '255, 255, 255'; // Default white
+    if (r > 0.9) color = '100, 200, 255'; // Cyan tint
+    else if (r > 0.8) color = '255, 220, 100'; // Gold tint
+    
     return {
         x: Math.random() * canvas.width,
         y: Math.random() * (GROUND_Y - 50),
-        size: Math.random() * 1.5,
+        size: Math.random() * 1.8,
         speedMult: speedMult,
-        twinkle: Math.random()
+        // Individual phase for breathing effect
+        phase: Math.random() * Math.PI * 2,
+        color: color
     };
 }
 
@@ -556,12 +568,12 @@ window.addEventListener('contextmenu', e => e.preventDefault());
 const AudioContext = window.AudioContext || window.webkitAudioContext;
 const actx = new AudioContext();
 
-// CONCURRENCY LIMITER: Prevents audio subsystem crash by limiting active notes
+// CONCURRENCY LIMITER: Prevents audio subsystem crash
 let activeSounds = 0;
 const MAX_SIMULTANEOUS_SOUNDS = 10;
 
 function playSound(type) {
-    if (activeSounds >= MAX_SIMULTANEOUS_SOUNDS) return; // Drop sound if too busy
+    if (activeSounds >= MAX_SIMULTANEOUS_SOUNDS) return; 
     if (actx.state === 'suspended') actx.resume();
 
     activeSounds++;
@@ -573,7 +585,6 @@ function playSound(type) {
     filter.connect(gain);
     gain.connect(actx.destination);
 
-    // Guaranteed cleanup
     osc.onended = function() {
         osc.disconnect();
         gain.disconnect();
@@ -956,7 +967,6 @@ function update() {
     [starsSlow, starsMed, starsFast].forEach(layer => {
         layer.forEach(star => {
             star.x -= (gameSpeed * star.speedMult * 0.1); 
-            star.twinkle += 0.1;
             if(star.x < 0) star.x = canvas.width;
         });
     });
@@ -980,10 +990,15 @@ function draw() {
     ctx.fillStyle = skyGrad;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+    // --- DRAW ENHANCED STARS ---
     [starsSlow, starsMed].forEach(layer => {
         layer.forEach(star => {
-            const opacity = 0.3 + Math.abs(Math.sin(star.twinkle)) * 0.7;
-            ctx.fillStyle = `rgba(255, 255, 255, ${opacity * activeStars})`; 
+            // New "Breathing" Opacity Math
+            // Uses sine wave + individual phase to create non-uniform twinkling
+            const breath = Math.sin(frames * 0.05 + star.phase);
+            const opacity = (0.4 + breath * 0.4) * activeStars; // 0.0 to 0.8
+            
+            ctx.fillStyle = `rgba(${star.color}, ${opacity})`; 
             ctx.fillRect(star.x, star.y, star.size, star.size);
         });
     });
@@ -1029,8 +1044,10 @@ function draw() {
     ctx.restore();
 
     starsFast.forEach(star => {
-        const opacity = 0.3 + Math.abs(Math.sin(star.twinkle)) * 0.7;
-        ctx.fillStyle = `rgba(255, 255, 255, ${opacity})`;
+        // Fast stars twinkle sharper
+        const breath = Math.sin(frames * 0.1 + star.phase);
+        const opacity = (0.5 + breath * 0.5);
+        ctx.fillStyle = `rgba(${star.color}, ${opacity})`;
         ctx.fillRect(star.x, star.y, star.size, star.size);
     });
 
