@@ -118,14 +118,15 @@
             50% { opacity: 0; }
         }
 
-        @keyframes titlePulse {
+        /* NEW CYAN PULSE ANIMATION */
+        @keyframes titlePulseCyan {
             0% {
-                text-shadow: 0 0 8px #d4a24e;
-                border-color: rgba(212, 162, 78, 0.5);
+                text-shadow: 0 0 5px #61dafb, 0 0 10px rgba(97, 218, 251, 0.3);
+                opacity: 0.9;
             }
             100% {
-                text-shadow: 0 0 20px #d4a24e, 0 0 10px #ffd700;
-                border-color: #d4a24e;
+                text-shadow: 0 0 20px #61dafb, 0 0 30px #a2e9fb;
+                opacity: 1;
             }
         }
 
@@ -144,20 +145,23 @@
             transition: color 1s ease, border-color 1s ease, text-shadow 1s ease;
         }
 
+        /* UPDATED TITLE STYLING */
         .hud-title {
             position: absolute;
             top: 25px;
             right: 25px;
-            font-size: 1.8rem;
-            color: #d4a24e;
-            text-shadow: 0 0 10px #d4a24e;
-            background: rgba(0, 0, 0, 0.6);
-            padding: 8px 20px;
-            border-right: 4px solid #d4a24e;
-            box-shadow: 0 0 10px rgba(0,0,0,0.5);
-            letter-spacing: 2px;
+            font-size: 2.5rem; /* Slightly larger since box is gone */
+            color: #61dafb;    /* Cyan Base Color */
+            /* Removed Box Styling */
+            background: transparent;
+            padding: 0;
+            border: none;
+            box-shadow: none;
+            
+            letter-spacing: 4px; /* Wider spacing for holographic look */
             display: none;
-            animation: titlePulse 2s ease-in-out infinite alternate;
+            /* New Cyan Animation */
+            animation: titlePulseCyan 3s ease-in-out infinite alternate;
         }
 
         .controls-hint {
@@ -207,6 +211,8 @@
             DIST: <span id="score-dist">0</span>m <span style="color:#555">|</span> 
             DATA: <span id="score-data" style="color:#fff">0</span> <span style="color:#555">|</span> 
             PHASE: <span id="score-phase" style="font-weight:bold; color: #61dafb; text-shadow: 0 0 5px #61dafb;">α</span> <span style="color:#555">|</span>
+            <!-- NEW LOOP COUNTER -->
+            LOOP: <span id="score-loop" style="color:#d4a24e">1</span> <span style="color:#555">|</span>
             SPD: <span id="score-speed" style="color:#fff">0</span> km/h
         </div>
 
@@ -245,14 +251,14 @@
             <p>DISTANCE: <span id="final-dist" style="color:#fff">0</span>m</p>
             <p>DATA COLLECTED: <span id="final-data" style="color:#fff">0</span></p>
             <p>MAX PHASE: <span id="final-phase" style="color:#fff">α</span></p>
-            <p class="blink">[PRESS SPACE or CLICK MOUSE TO REDEPLOY]</p>
+            <p class="blink">[PRESS SPACE TO REBOOT]</p>
         </div>
     </div>
 
 <script>
 /**
- * SULPHUR RUN - FINAL STABLE EDITION (ENHANCED MOUNTAINS)
- * Features: Smoother Mountains, Theme-Synced Mountain Color, Faster Speed, Stable Logic
+ * SULPHUR RUN - LOOP COUNTER EDITION
+ * Features: Loop Counter, Smoother Mountains, Theme-Synced Mountain Color, Faster Speed, Stable Logic
  */
 
 const canvas = document.getElementById('gameCanvas');
@@ -328,7 +334,6 @@ function initMountains() {
     mountains = [];
     let h = 100;
     for (let i = 0; i < MOUNTAIN_SEGMENTS * 2; i++) {
-        // SMOOTHER: Random variation reduced from 40 to 20 for rolling hills
         h += (Math.random() - 0.5) * 20; 
         h = Math.max(50, Math.min(150, h)); 
         mountains.push(h);
@@ -491,9 +496,9 @@ let starsFast = [];
 
 function initStars() {
     starsSlow = []; starsMed = []; starsFast = [];
-    for(let i=0; i<300; i++) starsSlow.push(createStar(0.1));
-    for(let i=0; i<160; i++) starsMed.push(createStar(0.4));
-    for(let i=0; i<80; i++) starsFast.push(createStar(1.2));
+    for(let i=0; i<150; i++) starsSlow.push(createStar(0.1));
+    for(let i=0; i<80; i++) starsMed.push(createStar(0.4));
+    for(let i=0; i<40; i++) starsFast.push(createStar(1.2));
 }
 
 function createStar(speedMult) {
@@ -750,6 +755,7 @@ function startGame() {
     updateTheme(); 
     document.getElementById('score-data').innerText = "0";
     document.getElementById('score-phase').innerText = "α";
+    document.getElementById('score-loop').innerText = "1";
 
     if(bgm && bgm.paused) {
         bgm.play().catch(e => console.log("Audio requires interaction", e));
@@ -811,6 +817,9 @@ function update() {
 
     if (newLoopIndex !== currentLoopIndex) {
         currentLoopIndex = newLoopIndex;
+        // LOOP UPDATE: +1 to start at 1
+        document.getElementById('score-loop').innerText = currentLoopIndex + 1;
+        
         currentThemeIndex = currentLoopIndex % THEMES.length;
         updateTheme();
         gameSpeed += 1.0; 
@@ -1085,7 +1094,6 @@ function draw() {
     });
 
     // --- DRAW MOUNTAINS (NEW & SMOOTHER) ---
-    // Color is now 85% mixed with black to create "darker phase color"
     const mountainColor = lerpColor(theme.main, '#000000', 0.85); 
     ctx.fillStyle = mountainColor;
     
