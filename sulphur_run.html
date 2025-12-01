@@ -675,17 +675,31 @@ function getTargetLighting() {
 }
 
 // Color interpolation helper
-function lerpColor(a, b, amount) { 
-    var ah = parseInt(a.replace(/#/g, ''), 16),
-        ar = ah >> 16, ag = ah >> 8 & 0xff, ab = ah & 0xff,
-        bh = parseInt(b.replace(/#/g, ''), 16),
-        br = bh >> 16, bg = bh >> 8 & 0xff, bb = bh & 0xff,
-        rr = ar + amount * (br - ar),
-        rg = ag + amount * (bg - ag),
-        rb = ab + amount * (bb - ab);
+function lerpColor(a, b, t) {
+    // If either is rgba(), defer to rgba lerper
+    if (a.startsWith("rgba") || b.startsWith("rgba")) {
+        return lerpRgba(a, b, t);
+    }
 
-    return '#' + ((1 << 24) + (rr << 16) + (rg << 8) + (rb | 0)).toString(16).slice(1);
+    // Normal hex interpolation
+    const ah = parseInt(a.slice(1), 16);
+    const bh = parseInt(b.slice(1), 16);
+
+    const ar = (ah >> 16) & 0xff,
+          ag = (ah >> 8) & 0xff,
+          ab = ah & 0xff;
+
+    const br = (bh >> 16) & 0xff,
+          bg = (bh >> 8) & 0xff,
+          bb = bh & 0xff;
+
+    const rr = Math.round(ar + (br - ar) * t);
+    const rg = Math.round(ag + (bg - ag) * t);
+    const rb = Math.round(ab + (bb - ab) * t);
+
+    return `#${((1 << 24) + (rr << 16) + (rg << 8) + rb).toString(16).slice(1)}`;
 }
+
 
 // RGBA interpolation helper for haze
 function lerpRgba(a, b, amount) {
