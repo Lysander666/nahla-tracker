@@ -69,7 +69,7 @@
             background: radial-gradient(circle, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.7) 100%);
         }
 
-        #start-screen, #game-over-screen {
+        #start-screen, #game-over-screen, #pause-screen {
             background: rgba(10, 5, 5, 0.9);
             padding: 40px 60px;
             /* Border updated to AMBER default */
@@ -123,11 +123,11 @@
             50% { opacity: 0; }
         }
 
-        /* NEW PULSE ANIMATION FOR TITLE */
+        /* NEW AGGRESSIVE PULSE ANIMATION FOR TITLE */
         @keyframes titlePulse {
-            0% { opacity: 0.8; text-shadow: 0 0 8px #d4a24e; }
-            50% { opacity: 1.0; text-shadow: 0 0 15px #d4a24e; }
-            100% { opacity: 0.8; text-shadow: 0 0 8px #d4a24e; }
+            0% { opacity: 0.6; text-shadow: 0 0 5px #d4a24e; transform: scale(1); }
+            50% { opacity: 1.0; text-shadow: 0 0 25px #d4a24e, 0 0 10px #fff; transform: scale(1.03); }
+            100% { opacity: 0.6; text-shadow: 0 0 5px #d4a24e; transform: scale(1); }
         }
 
         .hud {
@@ -151,8 +151,8 @@
             right: 25px;
             font-size: 1.8rem;
             color: #d4a24e; /* Amber */
-            /* Apply Pulse Animation */
-            animation: titlePulse 3s ease-in-out infinite;
+            /* Apply Aggressive Pulse Animation */
+            animation: titlePulse 2s ease-in-out infinite;
             
             background: rgba(0, 0, 0, 0.6);
             padding: 8px 20px;
@@ -224,7 +224,8 @@
             
             <div class="controls-hint">
                 <span style="color:#d4a24e">SHOOT:</span> Left-Click / Enter <br>
-                <span style="color:#fff">JUMP:</span> Right-Click / Space
+                <span style="color:#fff">JUMP:</span> Right-Click / Space <br>
+                <span style="color:#888; font-size: 0.9rem;">PAUSE: P &nbsp;|&nbsp; EXIT: Esc</span>
             </div>
             <div class="tip-small">
                 AVOID: Craters, Tech Debris & <span style="color:#FF4444">Meteors</span><br>
@@ -233,10 +234,16 @@
             </div>
         </div>
 
+        <div class="ui-layer" id="pause-screen" style="display: none;">
+            <h1>SYSTEM PAUSED</h1>
+            <p class="blink">[PRESS P TO RESUME]</p>
+            <p style="font-size: 1rem; color: #888; margin-top: 20px;">PRESS ESC TO QUIT</p>
+        </div>
+
         <div class="ui-layer" id="game-over-screen" style="display: none;">
             <div class="game-over-title">SULPHUR RUN // TERMINATED</div>
             <h1>CRITICAL FAILURE</h1>
-            <p style="color:#ff4444; text-shadow: 0 0 10px red;">SRV IN REPAIR!</p>
+            <p style="color:#ff4444; text-shadow: 0 0 10px red;">SRV DESTROYED</p>
             <p>DISTANCE: <span id="final-dist" style="color:#fff">0</span>m</p>
             <p>DATA COLLECTED: <span id="final-data" style="color:#fff">0</span></p>
             <p>MAX PHASE: <span id="final-phase" style="color:#fff">α</span></p>
@@ -246,7 +253,7 @@
 
 <script>
 /**
- * NAHLA SRV MINIGAME - NEON EDITION + COMBAT + MUSIC + DOUBLE JUMP + PHASES + DAY/NIGHT + FADE + SELECTION FIX + PULSING TITLE + MORE STARS
+ * NAHLA SRV MINIGAME - NEON EDITION + COMBAT + MUSIC + DOUBLE JUMP + PHASES + DAY/NIGHT + FADE + SELECTION FIX + PAUSE/ESC + CRASH FIX + STRONG PULSE
  */
 
 const canvas = document.getElementById('gameCanvas');
@@ -280,7 +287,7 @@ const LIGHTING = {
 };
 
 // --- GAME STATE ---
-let gameState = 'START'; 
+let gameState = 'START'; // START, PLAYING, GAMEOVER, PAUSED
 let frames = 0;
 let gameSpeed = 4;
 let scoreDist = 0;
@@ -358,7 +365,7 @@ const rover = {
         ctx.shadowBlur = 0; 
 
         // COCKPIT - Dynamic Theme Color
-        const theme = THEMES[currentThemeIndex];
+        const theme = THEMES[currentThemeIndex] || THEMES[0]; // Safety check
         ctx.fillStyle = theme.main;
         ctx.shadowColor = theme.main;
         ctx.shadowBlur = 10;
@@ -426,7 +433,7 @@ const rover = {
             playSound('jump');
             
             // Particles
-            const theme = THEMES[currentThemeIndex];
+            const theme = THEMES[currentThemeIndex] || THEMES[0];
             const pColor = this.jumps === 2 ? theme.main : '#d4a24e'; 
             for(let i=0; i<8; i++) {
                 particles.push({
@@ -475,17 +482,16 @@ let starsFast = [];
 
 function initStars() {
     starsSlow = []; starsMed = []; starsFast = [];
-    // INCREASED STAR COUNT
-    for(let i=0; i<80; i++) starsSlow.push(createStar(0.1)); // More slow stars
-    for(let i=0; i<70; i++) starsMed.push(createStar(0.5));  // More medium stars
-    for(let i=0; i<50; i++) starsFast.push(createStar(1.2)); // More fast stars
+    for(let i=0; i<40; i++) starsSlow.push(createStar(0.1));
+    for(let i=0; i<30; i++) starsMed.push(createStar(0.5));
+    for(let i=0; i<20; i++) starsFast.push(createStar(1.2));
 }
 
 function createStar(speedMult) {
     return {
         x: Math.random() * canvas.width,
         y: Math.random() * (GROUND_Y - 50),
-        size: Math.random() * 2.5, // INCREASED SIZE (was 1.5)
+        size: Math.random() * 1.5,
         speedMult: speedMult,
         twinkle: Math.random()
     };
@@ -677,8 +683,10 @@ function getTargetLighting() {
     return LIGHTING.NIGHT;
 }
 
-// Color interpolation helper
+// Color interpolation helper WITH SAFETY
 function lerpColor(a, b, amount) { 
+    if (!a || !b) return a || '#000000'; // Safety check
+
     var ah = parseInt(a.replace(/#/g, ''), 16),
         ar = ah >> 16, ag = ah >> 8 & 0xff, ab = ah & 0xff,
         bh = parseInt(b.replace(/#/g, ''), 16),
@@ -690,12 +698,13 @@ function lerpColor(a, b, amount) {
     return '#' + ((1 << 24) + (rr << 16) + (rg << 8) + (rb | 0)).toString(16).slice(1);
 }
 
-// RGBA interpolation helper for haze
+// RGBA interpolation helper WITH SAFETY
 function lerpRgba(a, b, amount) {
-    // Simple parser for "rgba(r, g, b, a)"
+    if (!a || !b) return a || 'rgba(0,0,0,0)'; // Safety check
+
     const parse = (c) => {
         const parts = c.match(/[\d.]+/g);
-        return parts.map(Number);
+        return parts ? parts.map(Number) : [0,0,0,0];
     };
     const [r1, g1, b1, a1] = parse(a);
     const [r2, g2, b2, a2] = parse(b);
@@ -714,7 +723,7 @@ function lerp(start, end, amt) {
 }
 
 function updateTheme() {
-    const theme = THEMES[currentThemeIndex];
+    const theme = THEMES[currentThemeIndex] || THEMES[0]; // Safety check
     
     // Update DOM styles
     const container = document.getElementById('game-container');
@@ -732,8 +741,6 @@ function updateTheme() {
     hud.style.borderColor = theme.main;
     hud.style.color = theme.main;
     hud.style.textShadow = `0 0 8px ${theme.main}`;
-    // Phase color is now forced to CYAN in HTML, so we don't update it here.
-    // hudPhase.style.color = theme.main; 
 
     // Start Screen Elements (for next restart)
     startScreen.style.borderColor = theme.main;
@@ -1039,7 +1046,7 @@ function update() {
             document.getElementById('score-data').innerText = scoreData;
             samples.splice(i, 1);
             
-            const theme = THEMES[currentThemeIndex];
+            const theme = THEMES[currentThemeIndex] || THEMES[0];
             for(let j=0; j<8; j++) {
                 particles.push({
                     x: s.x, y: s.y,
@@ -1078,9 +1085,9 @@ function update() {
 }
 
 function draw() {
-    const theme = THEMES[currentThemeIndex];
+    const theme = THEMES[currentThemeIndex] || THEMES[0]; // Safety check
     
-    // Calculate interpolated lighting
+    // Calculate interpolated lighting with safety
     const activeSkyTop = lerpColor(currentLighting.skyTop, targetLighting.skyTop, transitionProgress);
     const activeSkyBot = lerpColor(currentLighting.skyBot, targetLighting.skyBot, transitionProgress);
     const activeGround = lerpColor(currentLighting.ground, targetLighting.ground, transitionProgress);
