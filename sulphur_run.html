@@ -26,17 +26,17 @@
 
         #game-container {
             position: relative;
-            /* RESIZED TO 1000px */
             width: 1000px;
             height: 500px;
             border: 2px solid #444;
-            /* NEON GLOW BORDER */
+            /* Box shadow updated to AMBER default */
             box-shadow: 
                 0 0 10px #d4a24e, 
                 0 0 40px rgba(212, 162, 78, 0.2), 
                 inset 0 0 80px rgba(0,0,0,0.8);
             background-color: #08060a; 
             image-rendering: pixelated;
+            transition: box-shadow 1s ease;
         }
 
         canvas {
@@ -62,29 +62,29 @@
         #start-screen, #game-over-screen {
             background: rgba(10, 5, 5, 0.9);
             padding: 40px 60px;
-            border: 2px solid #61dafb;
-            /* UI GLOW */
-            box-shadow: 0 0 20px rgba(97, 218, 251, 0.4), inset 0 0 20px rgba(97, 218, 251, 0.1);
+            /* Border updated to AMBER default */
+            border: 2px solid #d4a24e;
+            box-shadow: 0 0 20px rgba(212, 162, 78, 0.4), inset 0 0 20px rgba(212, 162, 78, 0.1);
             text-align: center;
             pointer-events: auto;
-            transform: skew(-2deg); /* Sci-fi tilt */
+            transform: skew(-2deg);
+            transition: border-color 1s ease, box-shadow 1s ease;
         }
 
         h1 {
             color: #fff;
             margin: 0 0 10px 0;
             font-size: 4rem;
-            /* RETRO TEXT SHADOW */
             text-shadow: 
-                2px 2px 0px #d4a24e, 
-                -2px -2px 0px #61dafb,
+                2px 2px 0px #444, 
+                -2px -2px 0px #444,
                 0 0 15px rgba(255,255,255,0.5);
             letter-spacing: 2px;
             text-transform: uppercase;
         }
 
         .game-over-title {
-            color: #d4a24e; /* Sulphur Gold */
+            color: #d4a24e;
             font-size: 1.8rem;
             margin-bottom: 10px;
             text-transform: uppercase;
@@ -102,8 +102,8 @@
 
         .blink {
             animation: blinker 0.8s steps(2, start) infinite;
-            color: #fbd061; 
-            text-shadow: 0 0 10px #fbd061;
+            color: #fff; 
+            text-shadow: 0 0 10px #fff;
             margin-top: 30px;
             display: block;
             font-size: 2rem;
@@ -118,13 +118,14 @@
             top: 25px;
             left: 25px;
             font-size: 1.8rem;
-            color: #61dafb;
-            text-shadow: 0 0 8px #61dafb;
+            color: #d4a24e; /* Updated to AMBER default */
+            text-shadow: 0 0 8px #d4a24e;
             display: none;
             background: rgba(0, 0, 0, 0.6);
             padding: 8px 20px;
             border-left: 4px solid #d4a24e;
             box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            transition: color 1s ease, border-color 1s ease, text-shadow 1s ease;
         }
 
         .controls-hint {
@@ -167,53 +168,76 @@
 <body>
 
     <div id="game-container">
-        <!-- RESIZED CANVAS TO 1000x500 -->
         <canvas id="gameCanvas" width="1000" height="500"></canvas>
         
-        <!-- MUSIC PLAYER (Hidden) -->
         <audio id="bgm" loop preload="auto"></audio>
 
         <div class="hud" id="hud">
-            DIST: <span id="score-dist">0</span>m <span style="color:#555">|</span> DATA: <span id="score-data" style="color:#fbd061">0</span> <span style="color:#555">|</span> SPD: <span id="score-speed" style="color:#ff4444">0</span> km/h
+            DIST: <span id="score-dist">0</span>m <span style="color:#555">|</span> 
+            DATA: <span id="score-data" style="color:#fff">0</span> <span style="color:#555">|</span> 
+            <!-- Phase color forced to Cyan -->
+            PHASE: <span id="score-phase" style="font-weight:bold; color: #61dafb; text-shadow: 0 0 5px #61dafb;">α</span> <span style="color:#555">|</span>
+            SPD: <span id="score-speed" style="color:#fff">0</span> km/h
         </div>
 
         <div class="ui-layer" id="start-screen">
-            <h1>SULPHUR RUN</h1>
+            <h1 id="title-text" style="text-shadow: 2px 2px 0px #444, -2px -2px 0px #d4a24e;">SULPHUR RUN</h1>
             <p>SRV SIMULATION // NAHLA SURFACE</p>
-            <p class="blink">[PRESS SPACE TO START]</p>
+            <p class="blink" id="start-blink">[PRESS SPACE TO START]</p>
             
             <div class="controls-hint">
-                <span style="color:#61dafb">SHOOT:</span> Left-Click / Enter <br>
-                <span style="color:#fbd061">JUMP:</span> Right-Click / Space
+                <span style="color:#d4a24e">SHOOT:</span> Left-Click / Enter <br>
+                <span style="color:#fff">JUMP:</span> Right-Click / Space
             </div>
             <div class="tip-small">
-                <span style="color:#FFBF00">AVOID:</span> Gadgets & Tech Debris (Indestructible)<br>
-                <span style="color:#FF00FF">DESTROY:</span> Rocks & Spikes<br>
-                <span style="color:#61dafb">COLLECT:</span> Blue Nodes for Data Points
+                AVOID: Craters, Tech Debris & <span style="color:#FF4444">Meteors</span><br>
+                DESTROY: Rocks & Spikes<br>
+                COLLECT: <span id="node-hint-color" style="color:#d4a24e">Glowing Nodes</span> for Phases
             </div>
         </div>
 
         <div class="ui-layer" id="game-over-screen" style="display: none;">
             <div class="game-over-title">SULPHUR RUN // TERMINATED</div>
             <h1>CRITICAL FAILURE</h1>
-            <p style="color:#ff4444; text-shadow: 0 0 10px red;">SRV DESTROYED</p>
+            <p style="color:#ff4444; text-shadow: 0 0 10px red;">SRV IN REPAIR!</p>
             <p>DISTANCE: <span id="final-dist" style="color:#fff">0</span>m</p>
-            <p>DATA COLLECTED: <span id="final-data" style="color:#fbd061">0</span></p>
+            <p>DATA COLLECTED: <span id="final-data" style="color:#fff">0</span></p>
+            <p>MAX PHASE: <span id="final-phase" style="color:#fff">α</span></p>
             <p class="blink">[PRESS SPACE TO REBOOT]</p>
         </div>
     </div>
 
 <script>
 /**
- * NAHLA SRV MINIGAME - NEON EDITION + COMBAT + MUSIC
+ * NAHLA SRV MINIGAME - NEON EDITION + COMBAT + MUSIC + DOUBLE JUMP + PHASES + DAY/NIGHT + FADE
  */
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
 // --- MUSIC CONFIGURATION ---
-const MUSIC_FILE = 'nahla_theme.mp3'; // <--- EDIT THIS FILENAME to match your mp3
-const MUSIC_VOLUME = 0.5; // 0.0 to 1.0
+const MUSIC_FILE = 'nahla_theme.mp3'; 
+const MUSIC_VOLUME = 0.5;
+
+// --- THEME & PHASE CONFIGURATION ---
+const THEMES = [
+    { name: 'SULPHUR', main: '#d4a24e', glow: 'rgba(212, 162, 78, 0.4)', text: '#d4a24e' }, // 1. Amber (Start)
+    { name: 'CYAN',    main: '#61dafb', glow: 'rgba(97, 218, 251, 0.4)', text: '#61dafb' }, // 2. Cyan
+    { name: 'MAGENTA', main: '#ff61c7', glow: 'rgba(255, 97, 199, 0.4)', text: '#ff61c7' }, // 3. Magenta
+    { name: 'RED',     main: '#ff4444', glow: 'rgba(255, 68, 68, 0.4)',  text: '#ff4444' }  // 4. Red
+];
+
+const GREEK_PHASES = ['α','β','γ','δ','ε','ζ','η','θ','ι','κ','λ','μ'];
+const POINTS_PER_PHASE = 100; 
+
+// --- DAY/NIGHT CYCLE CONFIG ---
+// Sky Colors (Top, Bottom) & Ambient Light
+const LIGHTING = {
+    DAWN:  { skyTop: '#1a0d00', skyBot: '#4d2600', ground: '#2b1d05', stars: 0.3 }, // Alpha-Gamma (0-2)
+    DAY:   { skyTop: '#0a0a1a', skyBot: '#1f1f3d', ground: '#4a3b18', stars: 0.1 }, // Delta-Zeta (3-5)
+    DUSK:  { skyTop: '#1a0505', skyBot: '#4d1a00', ground: '#2b1000', stars: 0.3 }, // Eta-Iota (6-8)
+    NIGHT: { skyTop: '#050505', skyBot: '#0a0505', ground: '#1a1205', stars: 0.8 }  // Kappa-Mu (9-11)
+};
 
 // --- GAME STATE ---
 let gameState = 'START'; 
@@ -222,10 +246,20 @@ let gameSpeed = 4;
 let scoreDist = 0;
 let scoreData = 0;
 
+// Theme & Lighting State
+let currentThemeIndex = 0;
+let currentPhaseIndex = 0;
+let currentLoopIndex = 0;
+
+// Lighting Transition Variables
+let currentLighting = LIGHTING.DAWN;
+let targetLighting = LIGHTING.DAWN;
+let transitionProgress = 1.0; // 0.0 to 1.0
+const TRANSITION_SPEED = 0.016; // Approx 1 second at 60fps (1/60)
+
 // --- CONFIG ---
 const GRAVITY = 0.25; 
-const JUMP_FORCE = -8.5; // Slightly stronger jump for bigger screen
-// ADJUSTED GROUND Y FOR 500px HEIGHT
+const JUMP_FORCE = -8.5; 
 const GROUND_Y = 400; 
 
 // --- MUSIC SETUP ---
@@ -245,6 +279,8 @@ const rover = {
     dy: 0,
     grounded: true,
     angle: 0,
+    jumps: 0,
+    maxJumps: 2,
     
     draw: function() {
         ctx.save();
@@ -255,18 +291,21 @@ const rover = {
         this.angle += (targetAngle - this.angle) * 0.1;
         ctx.rotate(this.angle);
 
-        // HEADLIGHT BEAM (Reduced Intensity)
+        // SOFT HEADLIGHT BEAM 
         ctx.save();
         ctx.translate(15, 0); 
         ctx.rotate(0.1); 
-        const beamGrad = ctx.createLinearGradient(0, 0, 150, 0);
-        beamGrad.addColorStop(0, 'rgba(255, 255, 255, 0.2)'); 
+        
+        const beamGrad = ctx.createRadialGradient(0, 0, 0, 0, 0, 140);
+        beamGrad.addColorStop(0, 'rgba(255, 255, 255, 0.15)'); 
+        beamGrad.addColorStop(0.6, 'rgba(255, 255, 255, 0.05)'); 
         beamGrad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+        
         ctx.fillStyle = beamGrad;
         ctx.beginPath();
         ctx.moveTo(0, -5);
-        ctx.lineTo(120, -30); 
-        ctx.lineTo(120, 30);
+        ctx.lineTo(130, -35); 
+        ctx.arc(0, 0, 130, -0.25, 0.25); 
         ctx.lineTo(0, 5);
         ctx.fill();
         ctx.restore();
@@ -278,9 +317,10 @@ const rover = {
         ctx.fillRect(-20, -10, 40, 16); 
         ctx.shadowBlur = 0; 
 
-        // COCKPIT
-        ctx.fillStyle = '#61dafb';
-        ctx.shadowColor = '#61dafb';
+        // COCKPIT - Dynamic Theme Color
+        const theme = THEMES[currentThemeIndex];
+        ctx.fillStyle = theme.main;
+        ctx.shadowColor = theme.main;
         ctx.shadowBlur = 10;
         ctx.fillRect(-5, -14, 14, 8);
         ctx.shadowBlur = 0; 
@@ -308,6 +348,8 @@ const rover = {
     },
 
     update: function() {
+        const wasGrounded = this.grounded;
+
         this.dy += GRAVITY;
         this.y += this.dy;
 
@@ -315,28 +357,54 @@ const rover = {
             this.y = GROUND_Y - this.height/2;
             this.dy = 0;
             this.grounded = true;
+            this.jumps = 0; 
         } else {
             this.grounded = false;
+        }
+
+        // Landing Sparks
+        if (!wasGrounded && this.grounded) {
+            for(let i=0; i<5; i++) {
+                particles.push({
+                    x: this.x + Math.random() * 40 - 20,
+                    y: GROUND_Y,
+                    vx: Math.random() * 4 - 2,
+                    vy: Math.random() * -2,
+                    life: 15,
+                    color: '#ffaa00',
+                    size: 1.5
+                });
+            }
         }
     },
 
     jump: function() {
-        if (this.grounded) {
+        if (this.grounded || this.jumps < this.maxJumps) {
             this.dy = JUMP_FORCE;
             this.grounded = false;
+            this.jumps++;
             playSound('jump');
             
+            // Particles
+            const theme = THEMES[currentThemeIndex];
+            const pColor = this.jumps === 2 ? theme.main : '#d4a24e'; 
             for(let i=0; i<8; i++) {
                 particles.push({
                     x: this.x + 10,
-                    y: GROUND_Y,
+                    y: this.y + 10,
                     vx: -2 - Math.random() * 2,
-                    vy: -1 - Math.random() * 2,
+                    vy: 2 + Math.random() * 2, 
                     life: 30,
-                    color: '#d4a24e',
+                    color: pColor,
                     size: Math.random() * 3
                 });
             }
+        }
+    },
+
+    cutJump: function() {
+        if (this.dy < -2) {
+            this.dy *= 0.5;
         }
     },
 
@@ -356,16 +424,30 @@ let samples = [];
 let particles = [];
 let stars = [];
 let projectiles = [];
-let miniCraters = []; // Decorative foreground craters
+let miniCraters = []; 
+let meteors = [];
+let dustStreaks = [];
 
-for(let i=0; i<80; i++) { // More stars for bigger screen
-    stars.push({
+// Star Layers
+let starsSlow = [];
+let starsMed = [];
+let starsFast = [];
+
+function initStars() {
+    starsSlow = []; starsMed = []; starsFast = [];
+    for(let i=0; i<40; i++) starsSlow.push(createStar(0.1));
+    for(let i=0; i<30; i++) starsMed.push(createStar(0.5));
+    for(let i=0; i<20; i++) starsFast.push(createStar(1.2));
+}
+
+function createStar(speedMult) {
+    return {
         x: Math.random() * canvas.width,
         y: Math.random() * (GROUND_Y - 50),
         size: Math.random() * 1.5,
-        speed: Math.random() * 0.2 + 0.05,
+        speedMult: speedMult,
         twinkle: Math.random()
-    });
+    };
 }
 
 // --- INPUT ---
@@ -378,6 +460,12 @@ const handleInput = (action) => {
     else if (gameState === 'GAMEOVER') resetGame();
 };
 
+const handleRelease = (action) => {
+    if (gameState === 'PLAYING' && action === 'jump') {
+        rover.cutJump();
+    }
+}
+
 window.addEventListener('keydown', e => {
     if (e.code === 'Space' || e.code === 'ArrowUp') {
         e.preventDefault();
@@ -389,25 +477,36 @@ window.addEventListener('keydown', e => {
     }
 });
 
+window.addEventListener('keyup', e => {
+    if (e.code === 'Space' || e.code === 'ArrowUp') {
+        handleRelease('jump');
+    }
+});
+
 // Touch controls
 window.addEventListener('touchstart', e => {
     e.preventDefault();
     const touchX = e.touches[0].clientX;
-    const width = window.innerWidth;
     const rect = canvas.getBoundingClientRect();
     const relativeX = touchX - rect.left;
-    
     if (relativeX < rect.width / 2) handleInput('shoot');
     else handleInput('jump');
 }, {passive: false});
+
+window.addEventListener('touchend', e => {
+    handleRelease('jump');
+});
 
 // Mouse Click
 window.addEventListener('mousedown', e => {
     if (e.button === 0) handleInput('shoot'); // Left Click
     if (e.button === 2) { // Right Click
-        e.preventDefault(); // Stop context menu
+        e.preventDefault(); 
         handleInput('jump');
     }
+});
+window.addEventListener('mouseup', e => {
+    if (e.button === 2) handleRelease('jump');
 });
 window.addEventListener('contextmenu', e => e.preventDefault()); 
 
@@ -488,21 +587,98 @@ function playSound(type) {
 
 // --- LOGIC ---
 
+function getTargetLighting() {
+    // UPDATED: 3 Phases per lighting state
+    // 0-2 = Dawn
+    // 3-5 = Day
+    // 6-8 = Dusk
+    // 9-11 = Night
+    
+    if (currentPhaseIndex <= 2) return LIGHTING.DAWN;
+    if (currentPhaseIndex <= 5) return LIGHTING.DAY;
+    if (currentPhaseIndex <= 8) return LIGHTING.DUSK;
+    return LIGHTING.NIGHT;
+}
+
+// Color interpolation helper
+function lerpColor(a, b, amount) { 
+    // Expects hex strings like #RRGGBB
+    var ah = parseInt(a.replace(/#/g, ''), 16),
+        ar = ah >> 16, ag = ah >> 8 & 0xff, ab = ah & 0xff,
+        bh = parseInt(b.replace(/#/g, ''), 16),
+        br = bh >> 16, bg = bh >> 8 & 0xff, bb = bh & 0xff,
+        rr = ar + amount * (br - ar),
+        rg = ag + amount * (bg - ag),
+        rb = ab + amount * (bb - ab);
+
+    return '#' + ((1 << 24) + (rr << 16) + (rg << 8) + (rb | 0)).toString(16).slice(1);
+}
+
+// Value interpolation helper
+function lerp(start, end, amt) {
+    return (1 - amt) * start + amt * end;
+}
+
+function updateTheme() {
+    const theme = THEMES[currentThemeIndex];
+    
+    // Update DOM styles
+    const container = document.getElementById('game-container');
+    const hud = document.getElementById('hud');
+    const hudPhase = document.getElementById('score-phase');
+    const startBlink = document.getElementById('start-blink');
+    const titleText = document.getElementById('title-text');
+    const startScreen = document.getElementById('start-screen');
+    const nodeHintColor = document.getElementById('node-hint-color');
+
+    // Box Shadow Glow
+    container.style.boxShadow = `0 0 10px ${theme.main}, 0 0 40px ${theme.glow}, inset 0 0 80px rgba(0,0,0,0.8)`;
+    
+    // HUD Colors
+    hud.style.borderColor = theme.main;
+    hud.style.color = theme.main;
+    hud.style.textShadow = `0 0 8px ${theme.main}`;
+    // Phase color is now forced to CYAN in HTML, so we don't update it here.
+    // hudPhase.style.color = theme.main; 
+
+    // Start Screen Elements (for next restart)
+    startScreen.style.borderColor = theme.main;
+    startBlink.style.color = theme.main;
+    startBlink.style.textShadow = `0 0 10px ${theme.main}`;
+    titleText.style.textShadow = `2px 2px 0px #444, -2px -2px 0px ${theme.main}`;
+    nodeHintColor.style.color = theme.main;
+}
+
 function startGame() {
     gameState = 'PLAYING';
     document.getElementById('start-screen').style.display = 'none';
     document.getElementById('game-over-screen').style.display = 'none';
     document.getElementById('hud').style.display = 'block';
+    
     gameSpeed = 4;
     scoreDist = 0;
     scoreData = 0;
+    currentThemeIndex = 0;
+    currentPhaseIndex = 0;
+    currentLoopIndex = 0;
+    
+    // Reset lighting
+    currentLighting = LIGHTING.DAWN;
+    targetLighting = LIGHTING.DAWN;
+    transitionProgress = 1.0;
+
     obstacles = [];
     samples = [];
     projectiles = [];
     miniCraters = [];
+    meteors = [];
+    dustStreaks = [];
+    initStars();
+    
+    updateTheme(); // Reset to Amber
     document.getElementById('score-data').innerText = "0";
+    document.getElementById('score-phase').innerText = "α";
 
-    // Play Music
     if(bgm && bgm.paused) {
         bgm.play().catch(e => console.log("Audio requires interaction", e));
     }
@@ -511,6 +687,7 @@ function startGame() {
 function resetGame() {
     rover.y = GROUND_Y;
     rover.dy = 0;
+    rover.jumps = 0;
     startGame();
 }
 
@@ -518,11 +695,10 @@ function spawnObstacle() {
     const r = Math.random();
     let type = 'ROCK';
     
-    // Weighted spawn chances
     if (r > 0.8) type = 'CRATER';
-    else if (r > 0.6) type = 'DEBRIS'; // Indestructible
-    else if (r > 0.45) type = 'SPIKE'; // Destroyable
-    else type = 'ROCK'; // Standard
+    else if (r > 0.6) type = 'DEBRIS'; 
+    else if (r > 0.45) type = 'SPIKE'; 
+    else type = 'ROCK'; 
 
     obstacles.push({
         x: canvas.width + 50,
@@ -544,12 +720,30 @@ function spawnSample() {
 }
 
 function spawnMiniCrater() {
-    // Small decorative craters in foreground
     miniCraters.push({
         x: canvas.width + 20,
-        y: GROUND_Y + 15 + Math.random() * 30, // Random depth in foreground
+        y: GROUND_Y + 15 + Math.random() * 30, 
         width: 10 + Math.random() * 15,
         height: 3 + Math.random() * 3
+    });
+}
+
+function spawnMeteor() {
+    meteors.push({
+        x: canvas.width + Math.random() * 200,
+        y: -50,
+        vx: -8 - Math.random() * 4,
+        vy: 4 + Math.random() * 2,
+        size: 4 + Math.random() * 4
+    });
+}
+
+function spawnDustStreak() {
+    dustStreaks.push({
+        x: canvas.width + 50,
+        y: GROUND_Y - 10 - Math.random() * 100,
+        length: 20 + Math.random() * 40,
+        speed: 8 + Math.random() * 4
     });
 }
 
@@ -558,13 +752,61 @@ function update() {
 
     frames++;
     scoreDist += 0.1;
-    if (frames % 600 === 0) gameSpeed += 0.5;
+    
+    // --- LIGHTING TRANSITION LOGIC ---
+    // Smoothly interpolate current lighting values towards target
+    if (transitionProgress < 1.0) {
+        transitionProgress += TRANSITION_SPEED;
+        if (transitionProgress > 1.0) transitionProgress = 1.0;
+        
+        // No direct "currentLighting = lerp(...)" because we need per-frame interpolation
+        // Instead, we calculate "renderLighting" in draw() based on currentLighting (start) and targetLighting (end)
+    }
+
+    // --- PHASE & THEME LOGIC ---
+    // Calculate current phase based on data score
+    let totalPhases = Math.floor(scoreData / POINTS_PER_PHASE);
+    let newPhaseIndex = totalPhases % 12;
+    let newLoopIndex = Math.floor(totalPhases / 12);
+    
+    // Check for changes
+    if (newPhaseIndex !== currentPhaseIndex) {
+        currentPhaseIndex = newPhaseIndex;
+        // Update HUD text
+        document.getElementById('score-phase').innerText = GREEK_PHASES[currentPhaseIndex];
+        // Little sound or flash?
+        playSound('collect'); // Use collect sound for now
+        
+        // TRIGGER LIGHTING CHANGE
+        // Capture current state as start point
+        // NOTE: Ideally we'd capture the *actual* current visible state, 
+        // but for simplicity we assume transition finished. 
+        // If rapid changes happen, visual jumps might occur, but with 100pts per phase it's rare.
+        currentLighting = targetLighting; 
+        targetLighting = getTargetLighting();
+        transitionProgress = 0.0; // Start transition
+    }
+
+    if (newLoopIndex !== currentLoopIndex) {
+        currentLoopIndex = newLoopIndex;
+        // Change Theme
+        currentThemeIndex = currentLoopIndex % THEMES.length;
+        updateTheme();
+        
+        // DIFFICULTY BUMP per loop
+        gameSpeed += 1.0; 
+    }
+
+    // Time-based speed up (Reduced frequency since we have loop-based speed up)
+    if (frames % 1200 === 0) gameSpeed += 0.5;
 
     rover.update();
 
     if (frames % 100 === 0 && Math.random() > 0.3) spawnObstacle();
     if (frames % 150 === 0 && Math.random() > 0.4) spawnSample();
     if (frames % 40 === 0 && Math.random() > 0.5) spawnMiniCrater();
+    if (frames % 300 === 0 && Math.random() > 0.6) spawnMeteor(); 
+    if (frames % 60 === 0) spawnDustStreak();
 
     // Update Projectiles
     for (let i = projectiles.length - 1; i >= 0; i--) {
@@ -574,14 +816,50 @@ function update() {
         if (p.life <= 0) projectiles.splice(i, 1);
     }
 
-    // Mini Craters (Decoration)
+    // Mini Craters 
     for (let i = miniCraters.length - 1; i >= 0; i--) {
         let mc = miniCraters[i];
         mc.x -= gameSpeed;
         if(mc.x < -50) miniCraters.splice(i, 1);
     }
 
-    // Obstacles Collision & Logic
+    // Dust Streaks
+    for (let i = dustStreaks.length - 1; i >= 0; i--) {
+        let d = dustStreaks[i];
+        d.x -= (gameSpeed + d.speed); 
+        if(d.x < -100) dustStreaks.splice(i, 1);
+    }
+
+    // Meteors
+    for (let i = meteors.length - 1; i >= 0; i--) {
+        let m = meteors[i];
+        m.x += m.vx;
+        m.y += m.vy;
+        
+        let dx = (rover.x + rover.width/2) - m.x;
+        let dy = (rover.y + rover.height/2) - m.y;
+        if (Math.sqrt(dx*dx + dy*dy) < 30) {
+             gameState = 'GAMEOVER';
+             playSound('hit');
+             document.getElementById('game-over-screen').style.display = 'flex';
+             document.getElementById('final-dist').innerText = Math.floor(scoreDist);
+             document.getElementById('final-data').innerText = scoreData;
+             document.getElementById('final-phase').innerText = GREEK_PHASES[currentPhaseIndex];
+        }
+
+        if (m.y > GROUND_Y) {
+            for(let j=0; j<5; j++) {
+                particles.push({
+                    x: m.x, y: GROUND_Y,
+                    vx: Math.random()*4 - 2, vy: -Math.random()*3,
+                    life: 20, color: '#ff4444'
+                });
+            }
+            meteors.splice(i, 1);
+        }
+    }
+
+    // Obstacles Collision 
     for (let i = obstacles.length - 1; i >= 0; i--) {
         let obs = obstacles[i];
         obs.x -= gameSpeed;
@@ -590,18 +868,16 @@ function update() {
         if (obs.type === 'ROCK' || obs.type === 'SPIKE') {
             for (let k = projectiles.length - 1; k >= 0; k--) {
                 let proj = projectiles[k];
-                // Simple box check
                 if (proj.x > obs.x && proj.x < obs.x + obs.width &&
                     proj.y > obs.y - obs.height + 10 && proj.y < obs.y + 10) {
                     
-                    // Hit!
                     obs.hp--;
-                    projectiles.splice(k, 1); // Remove bullet
+                    projectiles.splice(k, 1); 
                     
                     if (obs.hp <= 0) {
-                        // Destroy Rock
                         playSound('explode');
-                        scoreData += 10; // Bonus for shooting
+                        scoreData += 10; 
+                        // Note: Data update handled by update loop phase check next frame
                         document.getElementById('score-data').innerText = scoreData;
                         
                         // Debris
@@ -616,14 +892,13 @@ function update() {
                                 size: Math.random()*3
                             });
                         }
-                        obstacles.splice(i, 1); // Remove rock
-                        break; // Stop checking this obstacle
+                        obstacles.splice(i, 1); 
+                        break; 
                     }
                 }
             }
-            if (obstacles[i] !== obs) continue; // If removed, skip rover collision check
+            if (obstacles[i] !== obs) continue; 
         }
-        // NOTE: DEBRIS and CRATERS are ignored by projectiles
 
         // 2. Rover vs Obstacle
         let hit = false;
@@ -635,12 +910,10 @@ function update() {
             let oLeft = obs.x;
             let oRight = obs.x + obs.width;
             let oTop = obs.y - obs.height + 10;
-            // Debris is taller, Spikes are sharper
             if(obs.type === 'SPIKE') oTop -= 10;
             
             if (rRight > oLeft && rLeft < oRight && rBottom > oTop) hit = true;
         } else {
-            // Crater logic (unchanged)
             let holeLeft = obs.x + 5;
             let holeRight = obs.x + obs.width - 5;
             if (rover.grounded && rover.x > holeLeft && rover.x < holeRight) hit = true;
@@ -652,6 +925,7 @@ function update() {
             document.getElementById('game-over-screen').style.display = 'flex';
             document.getElementById('final-dist').innerText = Math.floor(scoreDist);
             document.getElementById('final-data').innerText = scoreData;
+            document.getElementById('final-phase').innerText = GREEK_PHASES[currentPhaseIndex];
             
             for(let j=0; j<30; j++) {
                 particles.push({
@@ -681,11 +955,12 @@ function update() {
             document.getElementById('score-data').innerText = scoreData;
             samples.splice(i, 1);
             
+            const theme = THEMES[currentThemeIndex];
             for(let j=0; j<8; j++) {
                 particles.push({
                     x: s.x, y: s.y,
                     vx: (Math.random()-0.5)*6, vy: (Math.random()-0.5)*6,
-                    life: 20, color: '#61dafb', size: 2
+                    life: 20, color: theme.main, size: 2
                 });
             }
             continue;
@@ -705,10 +980,12 @@ function update() {
     }
 
     // Stars
-    stars.forEach(star => {
-        star.x -= star.speed;
-        star.twinkle += 0.05;
-        if(star.x < 0) star.x = canvas.width;
+    [starsSlow, starsMed, starsFast].forEach(layer => {
+        layer.forEach(star => {
+            star.x -= (gameSpeed * star.speedMult * 0.1); 
+            star.twinkle += 0.05;
+            if(star.x < 0) star.x = canvas.width;
+        });
     });
 
     document.getElementById('score-dist').innerText = Math.floor(scoreDist);
@@ -716,28 +993,38 @@ function update() {
 }
 
 function draw() {
-    // 1. CLEAR
+    const theme = THEMES[currentThemeIndex];
+    
+    // Calculate interpolated lighting
+    const activeSkyTop = lerpColor(currentLighting.skyTop, targetLighting.skyTop, transitionProgress);
+    const activeSkyBot = lerpColor(currentLighting.skyBot, targetLighting.skyBot, transitionProgress);
+    const activeGround = lerpColor(currentLighting.ground, targetLighting.ground, transitionProgress);
+    const activeStars  = lerp(currentLighting.stars, targetLighting.stars, transitionProgress);
+
+    // 1. CLEAR - Dynamic Day/Night Cycle
     const skyGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
-    skyGrad.addColorStop(0, '#0a0505'); 
-    skyGrad.addColorStop(1, '#1a1005'); 
+    skyGrad.addColorStop(0, activeSkyTop); 
+    skyGrad.addColorStop(1, activeSkyBot); 
     ctx.fillStyle = skyGrad;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     // 2. STARS
-    stars.forEach(star => {
-        // Change opacity to 0.3 -> 1.0 range so stars are more visible
-        const opacity = 0.65 + Math.sin(star.twinkle) * 0.35;
-        ctx.fillStyle = `rgba(255, 255, 255, ${opacity})`;
-        ctx.fillRect(star.x, star.y, star.size, star.size);
+    [starsSlow, starsMed].forEach(layer => {
+        layer.forEach(star => {
+            const opacity = 0.5 + Math.sin(star.twinkle) * 0.5;
+            ctx.fillStyle = `rgba(255, 255, 255, ${opacity * activeStars})`; 
+            ctx.fillRect(star.x, star.y, star.size, star.size);
+        });
     });
 
-    // REBEKAH (Red Gas Giant - Repositioned for wide screen)
+    // REBEKAH
     ctx.save();
-    ctx.translate(750, 180); // CENTERED BETTER FOR 1000px WIDTH
-    ctx.shadowColor = '#ff0044';
+    ctx.translate(750, 180); 
+    // Outer Glow uses Theme Color
+    ctx.shadowColor = theme.main;
     ctx.shadowBlur = 60;
     ctx.beginPath();
-    ctx.arc(0, 0, 60, 0, Math.PI*2); // Bigger Planet
+    ctx.arc(0, 0, 60, 0, Math.PI*2); 
     ctx.fillStyle = '#000'; 
     ctx.fill();
     ctx.shadowBlur = 0; 
@@ -746,24 +1033,29 @@ function draw() {
     ctx.rotate(-0.2);
     ctx.scale(1, 0.3); 
     ctx.beginPath();
-    ctx.arc(0, 0, 120, 0, Math.PI*2); // Bigger Rings
-    ctx.strokeStyle = 'rgba(97, 218, 251, 0.2)';
+    ctx.arc(0, 0, 120, 0, Math.PI*2); 
+    // Rings are ALWAYS cyan as requested
+    ctx.strokeStyle = 'rgba(97, 218, 251, 0.4)';
     ctx.lineWidth = 18;
     ctx.stroke();
     ctx.beginPath();
     ctx.arc(0, 0, 100, 0, Math.PI*2);
-    ctx.strokeStyle = 'rgba(97, 218, 251, 0.6)'; 
+    // Inner rings ALWAYS cyan
+    ctx.strokeStyle = '#61dafb';
     ctx.lineWidth = 3;
     ctx.stroke();
     ctx.restore();
     
+    // Planet body stays Red-ish usually, or should it change?
+    // Let's keep the planet body stable but tint it slightly?
+    // For now, keep the deep red aesthetic as it's the "character" of the planet
     const grad = ctx.createLinearGradient(-50, -50, 50, 50);
     grad.addColorStop(0, '#4a0000'); 
     grad.addColorStop(0.5, '#800000'); 
     grad.addColorStop(1, '#200000'); 
     ctx.fillStyle = grad;
     ctx.beginPath();
-    ctx.arc(0, 0, 62, 0, Math.PI*2); // Bigger Body
+    ctx.arc(0, 0, 62, 0, Math.PI*2); 
     ctx.fill();
     ctx.fillStyle = 'rgba(255, 100, 100, 0.1)';
     ctx.beginPath();
@@ -771,12 +1063,20 @@ function draw() {
     ctx.fill();
     ctx.restore();
 
-    // 3. GROUND
-    ctx.fillStyle = '#1a1205'; 
+    // Fast Stars
+    starsFast.forEach(star => {
+        const opacity = 0.5 + Math.sin(star.twinkle) * 0.5;
+        ctx.fillStyle = `rgba(255, 255, 255, ${opacity})`;
+        ctx.fillRect(star.x, star.y, star.size, star.size);
+    });
+
+    // 3. GROUND - Dynamic Lighting
+    ctx.fillStyle = activeGround; 
     ctx.fillRect(0, GROUND_Y + 10, canvas.width, canvas.height - GROUND_Y);
-    ctx.strokeStyle = '#d4a24e'; 
+    // Horizon line changes with theme
+    ctx.strokeStyle = theme.main; 
     ctx.lineWidth = 2;
-    ctx.shadowColor = '#d4a24e';
+    ctx.shadowColor = theme.main;
     ctx.shadowBlur = 10;
     ctx.beginPath();
     ctx.moveTo(0, GROUND_Y + 10);
@@ -784,13 +1084,12 @@ function draw() {
     ctx.stroke();
     ctx.shadowBlur = 0; 
 
-    // MINI CRATERS (Decoration)
-    ctx.fillStyle = '#0f0a02'; // Darker than ground
+    // MINI CRATERS
+    ctx.fillStyle = '#0f0a02'; 
     miniCraters.forEach(mc => {
         ctx.beginPath();
         ctx.ellipse(mc.x, mc.y, mc.width, mc.height, 0, 0, Math.PI*2);
         ctx.fill();
-        // Highlight rim
         ctx.strokeStyle = '#2a1e0a';
         ctx.lineWidth = 1;
         ctx.stroke();
@@ -810,29 +1109,24 @@ function draw() {
             ctx.stroke();
         } 
         else if (obs.type === 'DEBRIS') {
-            // Indestructible Tech Debris (Black box with lights)
             ctx.fillStyle = '#080808'; 
             ctx.fillRect(obs.x, GROUND_Y + 10 - 25, 30, 25);
-            // Border
             ctx.strokeStyle = '#333';
             ctx.lineWidth = 1;
             ctx.strokeRect(obs.x, GROUND_Y + 10 - 25, 30, 25);
-            // Blinking Lights
             const blink = Math.sin(frames * 0.2) > 0;
             ctx.fillStyle = blink ? '#ff0000' : '#330000';
             ctx.fillRect(obs.x + 5, GROUND_Y + 10 - 20, 4, 4);
-            ctx.fillStyle = !blink ? '#00ccff' : '#003344';
+            ctx.fillStyle = !blink ? theme.main : '#003344'; // Tech lights match theme
             ctx.fillRect(obs.x + 20, GROUND_Y + 10 - 15, 4, 4);
         }
         else if (obs.type === 'SPIKE') {
-            // Sulphur Spike (Destroyable)
             ctx.fillStyle = '#d4a24e'; 
             ctx.beginPath();
             ctx.moveTo(obs.x, GROUND_Y + 10);
-            ctx.lineTo(obs.x + 10, GROUND_Y + 10 - 40); // Tall spike
+            ctx.lineTo(obs.x + 10, GROUND_Y + 10 - 40); 
             ctx.lineTo(obs.x + 20, GROUND_Y + 10);
             ctx.fill();
-            // Highlight
             ctx.strokeStyle = '#ffe082';
             ctx.lineWidth = 1;
             ctx.stroke();
@@ -854,6 +1148,7 @@ function draw() {
         ctx.rotate(s.rotation);
         ctx.fillStyle = '#fff';
         ctx.fillRect(-2, -2, 4, 4);
+        // Samples are ALWAYS cyan as requested
         ctx.strokeStyle = '#61dafb';
         ctx.lineWidth = 2;
         ctx.shadowColor = '#61dafb';
@@ -875,7 +1170,7 @@ function draw() {
     rover.draw();
 
     // 7. PROJECTILES
-    ctx.fillStyle = '#fbd061'; // Gold bullets
+    ctx.fillStyle = '#fbd061'; 
     ctx.shadowColor = '#fbd061';
     ctx.shadowBlur = 5;
     projectiles.forEach(p => {
@@ -886,12 +1181,35 @@ function draw() {
     // 8. PARTICLES
     particles.forEach(p => {
         ctx.fillStyle = p.color || '#aaa';
-        if(p.color === '#ff4444' || p.color === '#61dafb') {
+        if(p.color === '#ff4444' || p.color === theme.main) {
             ctx.shadowColor = p.color;
             ctx.shadowBlur = 5;
         }
         ctx.fillRect(p.x, p.y, p.size || 2, p.size || 2);
         ctx.shadowBlur = 0;
+    });
+
+    // 9. METEORS
+    meteors.forEach(m => {
+        ctx.fillStyle = '#ff4400';
+        ctx.shadowColor = '#ff8800';
+        ctx.shadowBlur = 15;
+        ctx.beginPath();
+        ctx.arc(m.x, m.y, m.size, 0, Math.PI*2);
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(255, 68, 0, 0.5)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(m.x, m.y);
+        ctx.lineTo(m.x - m.vx*3, m.y - m.vy*3);
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+    });
+
+    // 10. DUST STREAKS
+    ctx.fillStyle = 'rgba(212, 162, 78, 0.2)';
+    dustStreaks.forEach(d => {
+        ctx.fillRect(d.x, d.y, d.length, 1);
     });
 }
 
