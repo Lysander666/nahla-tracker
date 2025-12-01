@@ -118,7 +118,6 @@
             50% { opacity: 0; }
         }
 
-        /* NEW ANIMATION FOR TITLE GLOW */
         @keyframes titlePulse {
             0% {
                 text-shadow: 0 0 8px #d4a24e;
@@ -158,7 +157,6 @@
             box-shadow: 0 0 10px rgba(0,0,0,0.5);
             letter-spacing: 2px;
             display: none;
-            /* APPLIED ANIMATION HERE - RUNS ON GPU */
             animation: titlePulse 2s ease-in-out infinite alternate;
         }
 
@@ -217,7 +215,7 @@
         <div class="ui-layer" id="start-screen">
             <h1 id="title-text" style="text-shadow: 2px 2px 0px #444, -2px -2px 0px #d4a24e;">SULPHUR RUN</h1>
             <p>SRV SIMULATION // NAHLA SURFACE</p>
-            <p class="blink" id="start-blink">[PRESS SPACE TO START]</p>
+            <p class="blink" id="start-blink">[PRESS SPACE or CLICK MOUSE TO START]</p>
             
             <div class="controls-hint">
                 <span style="color:#d4a24e">SHOOT:</span> Left-Click / Enter <br>
@@ -232,7 +230,6 @@
     <span id="node-hint-color" style="color:#d4a24e">Glowing Nodes</span> 
     for Phases
 </div>
-
         </div>
 
         <div class="ui-layer" id="pause-screen" style="display: none;">
@@ -248,15 +245,14 @@
             <p>DISTANCE: <span id="final-dist" style="color:#fff">0</span>m</p>
             <p>DATA COLLECTED: <span id="final-data" style="color:#fff">0</span></p>
             <p>MAX PHASE: <span id="final-phase" style="color:#fff">α</span></p>
-            <p class="blink">[PRESS SPACE TO REBOOT]</p>
+            <p class="blink">[PRESS SPACE or CLICK MOUSE TO REDEPLOY]</p>
         </div>
     </div>
 
 <script>
 /**
- * SULPHUR RUN - FINAL STABLE EDITION
- * Optimized for performance: Object Pooling, Audio Limiting, Cached Gradients
- * Enhanced Visuals: "Breathing" Stars, Color Variation, CSS Title Glow
+ * SULPHUR RUN - FINAL STABLE EDITION (ENHANCED MOUNTAINS)
+ * Features: Smoother Mountains, Theme-Synced Mountain Color, Faster Speed, Stable Logic
  */
 
 const canvas = document.getElementById('gameCanvas');
@@ -287,7 +283,7 @@ const LIGHTING = {
 // --- GAME STATE ---
 let gameState = 'START';
 let frames = 0;
-let gameSpeed = 4;
+let gameSpeed = 5; 
 let scoreDist = 0;
 let scoreData = 0;
 
@@ -322,6 +318,23 @@ function getBeamGradient() {
     }
     return cachedBeamGrad;
 }
+
+// --- MOUNTAINS (NEW VISUALS) ---
+let mountains = [];
+const MOUNTAIN_SEGMENTS = 20;
+const SEGMENT_WIDTH = 60; 
+
+function initMountains() {
+    mountains = [];
+    let h = 100;
+    for (let i = 0; i < MOUNTAIN_SEGMENTS * 2; i++) {
+        // SMOOTHER: Random variation reduced from 40 to 20 for rolling hills
+        h += (Math.random() - 0.5) * 20; 
+        h = Math.max(50, Math.min(150, h)); 
+        mountains.push(h);
+    }
+}
+let mountainScroll = 0;
 
 // --- ENTITIES ---
 
@@ -472,42 +485,36 @@ let miniCraters = [];
 let meteors = [];
 let dustStreaks = [];
 
-// --- ENHANCED STARS ---
-// Increased count, added color variation
 let starsSlow = [];
 let starsMed = [];
 let starsFast = [];
 
 function initStars() {
     starsSlow = []; starsMed = []; starsFast = [];
-    // Significantly increased star counts
     for(let i=0; i<150; i++) starsSlow.push(createStar(0.1));
     for(let i=0; i<80; i++) starsMed.push(createStar(0.4));
     for(let i=0; i<40; i++) starsFast.push(createStar(1.2));
 }
 
 function createStar(speedMult) {
-    // Random star colors for "beauty"
     const r = Math.random();
-    let color = '255, 255, 255'; // Default white
-    if (r > 0.9) color = '100, 200, 255'; // Cyan tint
-    else if (r > 0.8) color = '255, 220, 100'; // Gold tint
+    let color = '255, 255, 255'; 
+    if (r > 0.9) color = '100, 200, 255'; 
+    else if (r > 0.8) color = '255, 220, 100'; 
     
     return {
         x: Math.random() * canvas.width,
         y: Math.random() * (GROUND_Y - 50),
         size: Math.random() * 1.8,
         speedMult: speedMult,
-        // Individual phase for breathing effect
         phase: Math.random() * Math.PI * 2,
         color: color
     };
 }
 
-// SAFE PARTICLE ADDER (Prevents memory overflow)
 function addParticle(p) {
     if (particles.length > 60) {
-        particles.shift(); // Remove oldest
+        particles.shift(); 
     }
     particles.push(p);
 }
@@ -586,7 +593,6 @@ window.addEventListener('contextmenu', e => e.preventDefault());
 const AudioContext = window.AudioContext || window.webkitAudioContext;
 const actx = new AudioContext();
 
-// CONCURRENCY LIMITER: Prevents audio subsystem crash
 let activeSounds = 0;
 const MAX_SIMULTANEOUS_SOUNDS = 10;
 
@@ -720,7 +726,8 @@ function startGame() {
     document.getElementById('hud').style.display = 'block';
     document.getElementById('hud-title').style.display = 'block';
     
-    gameSpeed = 4;
+    // UPDATED SPEED: Starts at 5 instead of 4
+    gameSpeed = 5;
     scoreDist = 0;
     scoreData = 0;
     currentThemeIndex = 0;
@@ -738,6 +745,7 @@ function startGame() {
     meteors = [];
     dustStreaks = [];
     initStars();
+    initMountains();
     
     updateTheme(); 
     document.getElementById('score-data').innerText = "0";
@@ -781,7 +789,7 @@ function update() {
     if (gameState !== 'PLAYING') return;
 
     frames++;
-    scoreDist += 0.1;
+    scoreDist += 0.1 * (gameSpeed / 4); 
     
     if (transitionProgress < 1.0) {
         transitionProgress += TRANSITION_SPEED;
@@ -809,6 +817,18 @@ function update() {
     }
 
     if (frames % 1200 === 0) gameSpeed += 0.5;
+
+    // SCROLL MOUNTAINS (Parallax)
+    mountainScroll -= gameSpeed * 0.2;
+    if (mountainScroll <= -SEGMENT_WIDTH) {
+        mountainScroll += SEGMENT_WIDTH;
+        mountains.shift();
+        let lastH = mountains[mountains.length-1];
+        // SMOOTHER: Reduced variation from 40 to 20
+        let nextH = lastH + (Math.random()-0.5) * 20;
+        nextH = Math.max(50, Math.min(150, nextH));
+        mountains.push(nextH);
+    }
 
     rover.update();
 
@@ -1008,20 +1028,16 @@ function draw() {
     ctx.fillStyle = skyGrad;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // --- DRAW ENHANCED STARS ---
     [starsSlow, starsMed].forEach(layer => {
         layer.forEach(star => {
-            // New "Breathing" Opacity Math
-            // Uses sine wave + individual phase to create non-uniform twinkling
             const breath = Math.sin(frames * 0.05 + star.phase);
-            const opacity = (0.4 + breath * 0.4) * activeStars; // 0.0 to 0.8
-            
+            const opacity = (0.4 + breath * 0.4) * activeStars;
             ctx.fillStyle = `rgba(${star.color}, ${opacity})`; 
             ctx.fillRect(star.x, star.y, star.size, star.size);
         });
     });
 
-    // REBEKAH
+    // REBEKAH (Planet)
     ctx.save();
     ctx.translate(750, 180); 
     ctx.shadowColor = theme.main;
@@ -1062,12 +1078,27 @@ function draw() {
     ctx.restore();
 
     starsFast.forEach(star => {
-        // Fast stars twinkle sharper
         const breath = Math.sin(frames * 0.1 + star.phase);
         const opacity = (0.5 + breath * 0.5);
         ctx.fillStyle = `rgba(${star.color}, ${opacity})`;
         ctx.fillRect(star.x, star.y, star.size, star.size);
     });
+
+    // --- DRAW MOUNTAINS (NEW & SMOOTHER) ---
+    // Color is now 85% mixed with black to create "darker phase color"
+    const mountainColor = lerpColor(theme.main, '#000000', 0.85); 
+    ctx.fillStyle = mountainColor;
+    
+    ctx.beginPath();
+    ctx.moveTo(0, GROUND_Y + 10);
+    for (let i = 0; i < mountains.length; i++) {
+        let mx = mountainScroll + i * SEGMENT_WIDTH;
+        let my = GROUND_Y + 10 - mountains[i];
+        ctx.lineTo(mx, my);
+    }
+    ctx.lineTo(canvas.width, GROUND_Y + 10);
+    ctx.fill();
+
 
     // GROUND
     ctx.fillStyle = activeGround; 
@@ -1176,7 +1207,6 @@ function draw() {
     });
     ctx.shadowBlur = 0;
 
-    // OPTIMIZED PARTICLES: No shadowBlur for tiny particles
     particles.forEach(p => {
         ctx.fillStyle = p.color || '#aaa';
         if ((p.color === '#ff4444' || p.color === theme.main) && p.size > 3) {
