@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Sulphur Run - Starry Edition</title>
+    <title>Sulphur Run - Final Edition</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=VT323&display=swap">
     <link rel="icon" type="image/png" sizes="16x16" href="faviconmain16.png">
     <link rel="icon" type="image/png" sizes="32x32" href="favicon32@2x.png">
@@ -118,6 +118,18 @@
             50% { opacity: 0; }
         }
 
+        /* NEW ANIMATION FOR TITLE GLOW */
+        @keyframes titlePulse {
+            0% {
+                text-shadow: 0 0 8px #d4a24e;
+                border-color: rgba(212, 162, 78, 0.5);
+            }
+            100% {
+                text-shadow: 0 0 20px #d4a24e, 0 0 10px #ffd700;
+                border-color: #d4a24e;
+            }
+        }
+
         .hud {
             position: absolute;
             top: 25px;
@@ -146,6 +158,8 @@
             box-shadow: 0 0 10px rgba(0,0,0,0.5);
             letter-spacing: 2px;
             display: none;
+            /* APPLIED ANIMATION HERE - RUNS ON GPU */
+            animation: titlePulse 2s ease-in-out infinite alternate;
         }
 
         .controls-hint {
@@ -236,9 +250,9 @@
 
 <script>
 /**
- * SULPHUR RUN - STABLE + BEAUTIFUL STARS EDITION
+ * SULPHUR RUN - FINAL STABLE EDITION
  * Optimized for performance: Object Pooling, Audio Limiting, Cached Gradients
- * Enhanced Visuals: "Breathing" Stars, Color Variation
+ * Enhanced Visuals: "Breathing" Stars, Color Variation, CSS Title Glow
  */
 
 const canvas = document.getElementById('gameCanvas');
