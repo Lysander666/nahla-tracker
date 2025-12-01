@@ -21,8 +21,9 @@
 
         #game-container {
             position: relative;
-            width: 800px;
-            height: 400px;
+            /* RESIZED TO 1000px */
+            width: 1000px;
+            height: 500px;
             border: 2px solid #444;
             /* NEON GLOW BORDER */
             box-shadow: 
@@ -55,7 +56,7 @@
 
         #start-screen, #game-over-screen {
             background: rgba(10, 5, 5, 0.9);
-            padding: 30px 50px;
+            padding: 40px 60px;
             border: 2px solid #61dafb;
             /* UI GLOW */
             box-shadow: 0 0 20px rgba(97, 218, 251, 0.4), inset 0 0 20px rgba(97, 218, 251, 0.1);
@@ -67,7 +68,7 @@
         h1 {
             color: #fff;
             margin: 0 0 10px 0;
-            font-size: 3.5rem;
+            font-size: 4rem;
             /* RETRO TEXT SHADOW */
             text-shadow: 
                 2px 2px 0px #d4a24e, 
@@ -77,8 +78,18 @@
             text-transform: uppercase;
         }
 
+        .game-over-title {
+            color: #d4a24e; /* Sulphur Gold */
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            opacity: 0.9;
+            text-shadow: 0 0 5px #d4a24e;
+        }
+
         p {
-            font-size: 1.4rem;
+            font-size: 1.6rem;
             color: #ccc;
             text-shadow: 0 0 5px rgba(0,0,0,0.8);
             margin: 5px 0;
@@ -88,9 +99,9 @@
             animation: blinker 0.8s steps(2, start) infinite;
             color: #fbd061; 
             text-shadow: 0 0 10px #fbd061;
-            margin-top: 25px;
+            margin-top: 30px;
             display: block;
-            font-size: 1.6rem;
+            font-size: 2rem;
         }
 
         @keyframes blinker {
@@ -99,33 +110,33 @@
 
         .hud {
             position: absolute;
-            top: 20px;
-            left: 20px;
-            font-size: 1.6rem;
+            top: 25px;
+            left: 25px;
+            font-size: 1.8rem;
             color: #61dafb;
             text-shadow: 0 0 8px #61dafb;
             display: none;
             background: rgba(0, 0, 0, 0.6);
-            padding: 5px 15px;
+            padding: 8px 20px;
             border-left: 4px solid #d4a24e;
             box-shadow: 0 0 10px rgba(0,0,0,0.5);
         }
 
         .controls-hint {
-            margin-top: 25px;
-            font-size: 1.1rem;
+            margin-top: 30px;
+            font-size: 1.2rem;
             color: #888;
             border-top: 1px solid #444;
-            padding-top: 15px;
+            padding-top: 20px;
             text-transform: uppercase;
             letter-spacing: 1px;
             line-height: 1.8;
         }
 
         .tip-small {
-            font-size: 0.9rem;
+            font-size: 1rem;
             color: #666;
-            margin-top: 10px;
+            margin-top: 15px;
             text-transform: none;
             letter-spacing: 0;
         }
@@ -151,7 +162,8 @@
 <body>
 
     <div id="game-container">
-        <canvas id="gameCanvas" width="800" height="400"></canvas>
+        <!-- RESIZED CANVAS TO 1000x500 -->
+        <canvas id="gameCanvas" width="1000" height="500"></canvas>
         
         <!-- MUSIC PLAYER (Hidden) -->
         <audio id="bgm" loop preload="auto"></audio>
@@ -177,6 +189,7 @@
         </div>
 
         <div class="ui-layer" id="game-over-screen" style="display: none;">
+            <div class="game-over-title">SULPHUR RUN // TERMINATED</div>
             <h1>CRITICAL FAILURE</h1>
             <p style="color:#ff4444; text-shadow: 0 0 10px red;">SRV DESTROYED</p>
             <p>DISTANCE: <span id="final-dist" style="color:#fff">0</span>m</p>
@@ -206,8 +219,9 @@ let scoreData = 0;
 
 // --- CONFIG ---
 const GRAVITY = 0.25; 
-const JUMP_FORCE = -7.5;
-const GROUND_Y = 320;
+const JUMP_FORCE = -8.5; // Slightly stronger jump for bigger screen
+// ADJUSTED GROUND Y FOR 500px HEIGHT
+const GROUND_Y = 400; 
 
 // --- MUSIC SETUP ---
 const bgm = document.getElementById('bgm');
@@ -339,7 +353,7 @@ let stars = [];
 let projectiles = [];
 let miniCraters = []; // Decorative foreground craters
 
-for(let i=0; i<60; i++) {
+for(let i=0; i<80; i++) { // More stars for bigger screen
     stars.push({
         x: Math.random() * canvas.width,
         y: Math.random() * (GROUND_Y - 50),
@@ -706,19 +720,19 @@ function draw() {
 
     // 2. STARS
     stars.forEach(star => {
-        // Change opacity to 0.1 -> 0.9 range so stars don't disappear
-        const opacity = 0.5 + Math.sin(star.twinkle) * 0.4;
+        // Change opacity to 0.3 -> 1.0 range so stars are more visible
+        const opacity = 0.65 + Math.sin(star.twinkle) * 0.35;
         ctx.fillStyle = `rgba(255, 255, 255, ${opacity})`;
         ctx.fillRect(star.x, star.y, star.size, star.size);
     });
 
-    // REBEKAH
+    // REBEKAH (Red Gas Giant - Repositioned for wide screen)
     ctx.save();
-    ctx.translate(650, 150);
+    ctx.translate(750, 180); // CENTERED BETTER FOR 1000px WIDTH
     ctx.shadowColor = '#ff0044';
     ctx.shadowBlur = 60;
     ctx.beginPath();
-    ctx.arc(0, 0, 48, 0, Math.PI*2);
+    ctx.arc(0, 0, 60, 0, Math.PI*2); // Bigger Planet
     ctx.fillStyle = '#000'; 
     ctx.fill();
     ctx.shadowBlur = 0; 
@@ -727,28 +741,28 @@ function draw() {
     ctx.rotate(-0.2);
     ctx.scale(1, 0.3); 
     ctx.beginPath();
-    ctx.arc(0, 0, 100, 0, Math.PI*2);
+    ctx.arc(0, 0, 120, 0, Math.PI*2); // Bigger Rings
     ctx.strokeStyle = 'rgba(97, 218, 251, 0.2)';
-    ctx.lineWidth = 15;
+    ctx.lineWidth = 18;
     ctx.stroke();
     ctx.beginPath();
-    ctx.arc(0, 0, 90, 0, Math.PI*2);
+    ctx.arc(0, 0, 100, 0, Math.PI*2);
     ctx.strokeStyle = 'rgba(97, 218, 251, 0.6)'; 
-    ctx.lineWidth = 2;
+    ctx.lineWidth = 3;
     ctx.stroke();
     ctx.restore();
     
-    const grad = ctx.createLinearGradient(-40, -40, 40, 40);
+    const grad = ctx.createLinearGradient(-50, -50, 50, 50);
     grad.addColorStop(0, '#4a0000'); 
     grad.addColorStop(0.5, '#800000'); 
     grad.addColorStop(1, '#200000'); 
     ctx.fillStyle = grad;
     ctx.beginPath();
-    ctx.arc(0, 0, 50, 0, Math.PI*2);
+    ctx.arc(0, 0, 62, 0, Math.PI*2); // Bigger Body
     ctx.fill();
     ctx.fillStyle = 'rgba(255, 100, 100, 0.1)';
     ctx.beginPath();
-    ctx.arc(-15, -15, 10, 0, Math.PI*2);
+    ctx.arc(-20, -20, 15, 0, Math.PI*2);
     ctx.fill();
     ctx.restore();
 
