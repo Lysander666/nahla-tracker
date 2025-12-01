@@ -22,6 +22,7 @@
             justify-content: center;
             height: 100vh;
             overflow: hidden;
+            /* Prevent selection on body too, just in case */
             user-select: none;
             -webkit-user-select: none;
         }
@@ -31,6 +32,7 @@
             width: 1000px;
             height: 500px;
             border: 2px solid #444;
+            /* Box shadow updated to AMBER default */
             box-shadow: 
                 0 0 10px #d4a24e, 
                 0 0 40px rgba(212, 162, 78, 0.2), 
@@ -38,8 +40,13 @@
             background-color: #08060a; 
             image-rendering: pixelated;
             transition: box-shadow 1s ease;
+            
+            /* PREVENT TEXT SELECTION */
             user-select: none; 
-            cursor: crosshair;
+            -webkit-user-select: none; /* Safari/Chrome */
+            -moz-user-select: none;    /* Firefox */
+            -ms-user-select: none;     /* IE/Edge */
+            cursor: crosshair;         /* Game-like cursor */
         }
 
         canvas {
@@ -65,6 +72,7 @@
         #start-screen, #game-over-screen, #pause-screen {
             background: rgba(10, 5, 5, 0.9);
             padding: 40px 60px;
+            /* Border updated to AMBER default */
             border: 2px solid #d4a24e;
             box-shadow: 0 0 20px rgba(212, 162, 78, 0.4), inset 0 0 20px rgba(212, 162, 78, 0.1);
             text-align: center;
@@ -115,18 +123,12 @@
             50% { opacity: 0; }
         }
 
-        @keyframes titlePulse {
-            0% { opacity: 0.6; text-shadow: 0 0 5px #d4a24e; transform: scale(1); }
-            50% { opacity: 1.0; text-shadow: 0 0 25px #d4a24e, 0 0 10px #fff; transform: scale(1.03); }
-            100% { opacity: 0.6; text-shadow: 0 0 5px #d4a24e; transform: scale(1); }
-        }
-
         .hud {
             position: absolute;
             top: 25px;
             left: 25px;
             font-size: 1.8rem;
-            color: #d4a24e; 
+            color: #d4a24e; /* Updated to AMBER default */
             text-shadow: 0 0 8px #d4a24e;
             display: none;
             background: rgba(0, 0, 0, 0.6);
@@ -141,14 +143,14 @@
             top: 25px;
             right: 25px;
             font-size: 1.8rem;
-            color: #d4a24e; 
-            animation: titlePulse 2s ease-in-out infinite;
+            color: #d4a24e; /* Amber */
+            text-shadow: 0 0 10px #d4a24e;
             background: rgba(0, 0, 0, 0.6);
             padding: 8px 20px;
             border-right: 4px solid #d4a24e;
             box-shadow: 0 0 10px rgba(0,0,0,0.5);
             letter-spacing: 2px;
-            display: none; 
+            display: none; /* Hidden on start screen */
         }
 
         .controls-hint {
@@ -170,6 +172,7 @@
             letter-spacing: 0;
         }
 
+        /* SCANLINES */
         #game-container::after {
             content: " ";
             display: block;
@@ -191,15 +194,18 @@
 
     <div id="game-container">
         <canvas id="gameCanvas" width="1000" height="500"></canvas>
+        
         <audio id="bgm" loop preload="auto"></audio>
 
         <div class="hud" id="hud">
             DIST: <span id="score-dist">0</span>m <span style="color:#555">|</span> 
             DATA: <span id="score-data" style="color:#fff">0</span> <span style="color:#555">|</span> 
+            <!-- Phase color forced to Cyan -->
             PHASE: <span id="score-phase" style="font-weight:bold; color: #61dafb; text-shadow: 0 0 5px #61dafb;">α</span> <span style="color:#555">|</span>
             SPD: <span id="score-speed" style="color:#fff">0</span> km/h
         </div>
 
+        <!-- Persistent Title in Top Right -->
         <div class="hud-title" id="hud-title">SULPHUR RUN</div>
 
         <div class="ui-layer" id="start-screen">
@@ -228,7 +234,7 @@
         <div class="ui-layer" id="game-over-screen" style="display: none;">
             <div class="game-over-title">SULPHUR RUN // TERMINATED</div>
             <h1>CRITICAL FAILURE</h1>
-            <p style="color:#ff4444; text-shadow: 0 0 10px red;">SRV DESTROYED</p>
+            <p style="color:#ff4444; text-shadow: 0 0 10px red;">SRV IN REPAIR!</p>
             <p>DISTANCE: <span id="final-dist" style="color:#fff">0</span>m</p>
             <p>DATA COLLECTED: <span id="final-data" style="color:#fff">0</span></p>
             <p>MAX PHASE: <span id="final-phase" style="color:#fff">α</span></p>
@@ -238,8 +244,7 @@
 
 <script>
 /**
- * NAHLA SRV MINIGAME v4.0
- * STABILITY FIXES + ULTRA STARS + CLASSIC REBEKAH/METEORS
+ * NAHLA SRV MINIGAME - NEON EDITION + COMBAT + MUSIC + DOUBLE JUMP + PHASES + DAY/NIGHT + FADE + SELECTION FIX + PAUSE/ESC
  */
 
 const canvas = document.getElementById('gameCanvas');
@@ -249,68 +254,347 @@ const ctx = canvas.getContext('2d');
 const MUSIC_FILE = 'nahla_theme.mp3'; 
 const MUSIC_VOLUME = 0.5;
 
-    
-// --- BACKGROUND MUSIC SETUP ---
-const bgm = document.getElementById("bgm");
-bgm.src = MUSIC_FILE;
-bgm.volume = MUSIC_VOLUME;
-
-// Most browsers require interaction before playback:
-document.addEventListener("click", () => {
-    if (bgm.paused) bgm.play().catch(()=>{});
-}, { once: true });
-
-document.addEventListener("keydown", () => {
-    if (bgm.paused) bgm.play().catch(()=>{});
-}, { once: true });
-
-// --- CONFIGURATION ---
+// --- THEME & PHASE CONFIGURATION ---
 const THEMES = [
-    { name: 'SULPHUR', main: '#d4a24e', glow: 'rgba(212, 162, 78, 0.4)' },
-    { name: 'CYAN',    main: '#61dafb', glow: 'rgba(97, 218, 251, 0.4)' },
-    { name: 'MAGENTA', main: '#ff61c7', glow: 'rgba(255, 97, 199, 0.4)' },
-    { name: 'RED',     main: '#ff4444', glow: 'rgba(255, 68, 68, 0.4)'  }
+    { name: 'SULPHUR', main: '#d4a24e', glow: 'rgba(212, 162, 78, 0.4)', text: '#d4a24e' }, // 1. Amber (Start)
+    { name: 'CYAN',    main: '#61dafb', glow: 'rgba(97, 218, 251, 0.4)', text: '#61dafb' }, // 2. Cyan
+    { name: 'MAGENTA', main: '#ff61c7', glow: 'rgba(255, 97, 199, 0.4)', text: '#ff61c7' }, // 3. Magenta
+    { name: 'RED',     main: '#ff4444', glow: 'rgba(255, 68, 68, 0.4)',  text: '#ff4444' }  // 4. Red
 ];
 
+const GREEK_PHASES = ['α','β','γ','δ','ε','ζ','η','θ','ι','κ','λ','μ'];
+const POINTS_PER_PHASE = 100; 
+
+// --- DAY/NIGHT CYCLE CONFIG (UPDATED FOR BLOOM/HAZE) ---
 const LIGHTING = {
+    // Dawn: Hazy orange/brown
     DAWN:  { skyTop: '#2b1a05', skyBot: '#5e3205', ground: '#362305', haze: 'rgba(212, 162, 78, 0.15)', stars: 0.2 }, 
+    // Day: Bright "Space Haze", darker sky top, bright horizon
     DAY:   { skyTop: '#0a0a1f', skyBot: '#2d2d5c', ground: '#5c481e', haze: 'rgba(150, 150, 200, 0.1)', stars: 0.1 }, 
+    // Dusk: Deep Red/Purple fade
     DUSK:  { skyTop: '#1f0505', skyBot: '#5c1200', ground: '#331200', haze: 'rgba(150, 50, 0, 0.15)', stars: 0.3 }, 
-    NIGHT: { skyTop: '#050505', skyBot: '#0a0505', ground: '#1a1205', haze: 'rgba(0,0,0,0)', stars: 0.9 }  
+    // Night: Deep void, no haze, high contrast
+    NIGHT: { skyTop: '#050505', skyBot: '#0a0505', ground: '#1a1205', haze: 'rgba(0,0,0,0)', stars: 0.8 }  
 };
 
-const GREEK_PHASES = ['α','β','γ','δ','ε','ζ','η','θ','ι','κ','λ','μ'];
-const POINTS_PER_PHASE = 100;
-const GRAVITY = 0.25; 
-const JUMP_FORCE = -8.5; 
-const GROUND_Y = 400; 
-const MAX_PARTICLES = 100; // SAFETY CAP to prevent memory leaks
-
-// --- STATE ---
-let gameState = 'START';
+// --- GAME STATE ---
+let gameState = 'START'; // START, PLAYING, GAMEOVER, PAUSED
 let frames = 0;
 let gameSpeed = 4;
 let scoreDist = 0;
 let scoreData = 0;
+
+// Theme & Lighting State
 let currentThemeIndex = 0;
 let currentPhaseIndex = 0;
+let currentLoopIndex = 0;
+
+// Lighting Transition Variables
 let currentLighting = LIGHTING.DAWN;
 let targetLighting = LIGHTING.DAWN;
 let transitionProgress = 1.0; 
+const TRANSITION_SPEED = 0.016; 
 
-// --- AUDIO SYSTEM (CRASH PROOFING) ---
+// --- CONFIG ---
+const GRAVITY = 0.25; 
+const JUMP_FORCE = -8.5; 
+const GROUND_Y = 400; 
+
+// --- MUSIC SETUP ---
+const bgm = document.getElementById('bgm');
+if (bgm) {
+    bgm.src = MUSIC_FILE;
+    bgm.volume = MUSIC_VOLUME;
+}
+
+// --- ENTITIES ---
+
+const rover = {
+    x: 100,
+    y: GROUND_Y,
+    width: 40,
+    height: 20,
+    dy: 0,
+    grounded: true,
+    angle: 0,
+    jumps: 0,
+    maxJumps: 2,
+    
+    draw: function() {
+        ctx.save();
+        ctx.translate(this.x + this.width/2, this.y + this.height/2);
+        
+        let targetAngle = Math.min(Math.max(this.dy * 0.05, -0.3), 0.3);
+        if(this.grounded) targetAngle = 0;
+        this.angle += (targetAngle - this.angle) * 0.1;
+        ctx.rotate(this.angle);
+
+        // SOFT HEADLIGHT BEAM 
+        ctx.save();
+        ctx.translate(15, 0); 
+        ctx.rotate(0.1); 
+        
+        const beamGrad = ctx.createRadialGradient(0, 0, 0, 0, 0, 140);
+        beamGrad.addColorStop(0, 'rgba(255, 255, 255, 0.15)'); 
+        beamGrad.addColorStop(0.6, 'rgba(255, 255, 255, 0.05)'); 
+        beamGrad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+        
+        ctx.fillStyle = beamGrad;
+        ctx.beginPath();
+        ctx.moveTo(0, -5);
+        ctx.lineTo(130, -35); 
+        ctx.arc(0, 0, 130, -0.25, 0.25); 
+        ctx.lineTo(0, 5);
+        ctx.fill();
+        ctx.restore();
+
+        // CHASSIS
+        ctx.fillStyle = '#222';
+        ctx.shadowColor = '#000';
+        ctx.shadowBlur = 5;
+        ctx.fillRect(-20, -10, 40, 16); 
+        ctx.shadowBlur = 0; 
+
+        // COCKPIT - Dynamic Theme Color
+        const theme = THEMES[currentThemeIndex];
+        ctx.fillStyle = theme.main;
+        ctx.shadowColor = theme.main;
+        ctx.shadowBlur = 10;
+        ctx.fillRect(-5, -14, 14, 8);
+        ctx.shadowBlur = 0; 
+        
+        // WHEELS
+        ctx.fillStyle = '#111';
+        const bounce = this.grounded ? Math.sin(frames * 0.5) * 1 : 0;
+        
+        const drawWheel = (ox, oy) => {
+            ctx.beginPath(); 
+            ctx.arc(ox, oy, 6, 0, Math.PI*2); 
+            ctx.fill();
+            ctx.strokeStyle = '#555';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+            ctx.fillStyle = '#444';
+            ctx.fillRect(ox-1, oy-1, 2, 2);
+        };
+
+        drawWheel(-15, 8 + bounce);
+        drawWheel(0, 8 - bounce);
+        drawWheel(15, 8 + bounce);
+
+        ctx.restore();
+    },
+
+    update: function() {
+        const wasGrounded = this.grounded;
+
+        this.dy += GRAVITY;
+        this.y += this.dy;
+
+        if (this.y + this.height/2 >= GROUND_Y) {
+            this.y = GROUND_Y - this.height/2;
+            this.dy = 0;
+            this.grounded = true;
+            this.jumps = 0; 
+        } else {
+            this.grounded = false;
+        }
+
+        // Landing Sparks
+        if (!wasGrounded && this.grounded) {
+            for(let i=0; i<5; i++) {
+                particles.push({
+                    x: this.x + Math.random() * 40 - 20,
+                    y: GROUND_Y,
+                    vx: Math.random() * 4 - 2,
+                    vy: Math.random() * -2,
+                    life: 15,
+                    color: '#ffaa00',
+                    size: 1.5
+                });
+            }
+        }
+    },
+
+    jump: function() {
+        if (this.grounded || this.jumps < this.maxJumps) {
+            this.dy = JUMP_FORCE;
+            this.grounded = false;
+            this.jumps++;
+            playSound('jump');
+            
+            // Particles
+            const theme = THEMES[currentThemeIndex];
+            const pColor = this.jumps === 2 ? theme.main : '#d4a24e'; 
+            for(let i=0; i<8; i++) {
+                particles.push({
+                    x: this.x + 10,
+                    y: this.y + 10,
+                    vx: -2 - Math.random() * 2,
+                    vy: 2 + Math.random() * 2, 
+                    life: 30,
+                    color: pColor,
+                    size: Math.random() * 3
+                });
+            }
+        }
+    },
+
+    cutJump: function() {
+        if (this.dy < -2) {
+            this.dy *= 0.5;
+        }
+    },
+
+    shoot: function() {
+        projectiles.push({
+            x: this.x + 30,
+            y: this.y + 5,
+            vx: 12,
+            life: 60
+        });
+        playSound('shoot');
+    }
+};
+
+let obstacles = [];
+let samples = []; 
+let particles = [];
+let stars = [];
+let projectiles = [];
+let miniCraters = []; 
+let meteors = [];
+let dustStreaks = [];
+
+// Star Layers
+let starsSlow = [];
+let starsMed = [];
+let starsFast = [];
+
+function initStars() {
+    starsSlow = []; starsMed = []; starsFast = [];
+    for(let i=0; i<40; i++) starsSlow.push(createStar(0.1));
+    for(let i=0; i<30; i++) starsMed.push(createStar(0.5));
+    for(let i=0; i<20; i++) starsFast.push(createStar(1.2));
+}
+
+function createStar(speedMult) {
+    return {
+        x: Math.random() * canvas.width,
+        y: Math.random() * (GROUND_Y - 50),
+        size: Math.random() * 1.5,
+        speedMult: speedMult,
+        twinkle: Math.random()
+    };
+}
+
+// --- INPUT ---
+const handleInput = (action) => {
+    if (gameState === 'START') startGame();
+    else if (gameState === 'PLAYING') {
+        if (action === 'jump') rover.jump();
+        if (action === 'shoot') rover.shoot();
+        if (action === 'pause') togglePause();
+    }
+    else if (gameState === 'PAUSED') {
+        if (action === 'pause') togglePause();
+        if (action === 'quit') quitGame();
+    }
+    else if (gameState === 'GAMEOVER') resetGame();
+};
+
+const handleRelease = (action) => {
+    if (gameState === 'PLAYING' && action === 'jump') {
+        rover.cutJump();
+    }
+}
+
+function togglePause() {
+    if (gameState === 'PLAYING') {
+        gameState = 'PAUSED';
+        document.getElementById('pause-screen').style.display = 'flex';
+        if (bgm) bgm.pause(); // Pause music
+    } else if (gameState === 'PAUSED') {
+        gameState = 'PLAYING';
+        document.getElementById('pause-screen').style.display = 'none';
+        if (bgm) bgm.play().catch(e=>{}); // Resume music
+    }
+}
+
+function quitGame() {
+    gameState = 'START';
+    document.getElementById('pause-screen').style.display = 'none';
+    document.getElementById('start-screen').style.display = 'flex';
+    document.getElementById('hud').style.display = 'none';
+    document.getElementById('hud-title').style.display = 'none'; // Hide persistent title on start
+    
+    // Reset visuals slightly so it doesn't look frozen
+    rover.y = GROUND_Y; 
+    obstacles = [];
+    initStars();
+    // Don't reset high scores if we tracked them, but we don't yet.
+}
+
+window.addEventListener('keydown', e => {
+    if (e.code === 'Space' || e.code === 'ArrowUp') {
+        e.preventDefault();
+        handleInput('jump');
+    }
+    if (e.code === 'Enter' || e.code === 'KeyZ') {
+        e.preventDefault();
+        handleInput('shoot');
+    }
+    if (e.code === 'KeyP') {
+        e.preventDefault();
+        handleInput('pause');
+    }
+    if (e.code === 'Escape') {
+        e.preventDefault();
+        if (gameState === 'PAUSED' || gameState === 'PLAYING') {
+            quitGame();
+        }
+    }
+});
+
+window.addEventListener('keyup', e => {
+    if (e.code === 'Space' || e.code === 'ArrowUp') {
+        handleRelease('jump');
+    }
+});
+
+// Touch controls
+window.addEventListener('touchstart', e => {
+    e.preventDefault();
+    const touchX = e.touches[0].clientX;
+    const rect = canvas.getBoundingClientRect();
+    const relativeX = touchX - rect.left;
+    if (relativeX < rect.width / 2) handleInput('shoot');
+    else handleInput('jump');
+}, {passive: false});
+
+window.addEventListener('touchend', e => {
+    handleRelease('jump');
+});
+
+// Mouse Click
+window.addEventListener('mousedown', e => {
+    if (e.button === 0) handleInput('shoot'); // Left Click
+    if (e.button === 2) { // Right Click
+        e.preventDefault(); 
+        handleInput('jump');
+    }
+});
+window.addEventListener('mouseup', e => {
+    if (e.button === 2) handleRelease('jump');
+});
+window.addEventListener('contextmenu', e => e.preventDefault()); 
+
+// --- AUDIO (SFX) ---
 const AudioContext = window.AudioContext || window.webkitAudioContext;
 const actx = new AudioContext();
-let activeSounds = 0;
-const MAX_ACTIVE_SOUNDS = 8; // Limit concurrent sounds to prevent crash
 
 function playSound(type) {
-    if (!actx || actx.state === 'suspended') {
-        if(actx) actx.resume().catch(e => {});
-    }
-    if (activeSounds >= MAX_ACTIVE_SOUNDS) return; // Drop sound if too busy
-
-    activeSounds++;
+    if (actx.state === 'suspended') actx.resume();
     const osc = actx.createOscillator();
     const gain = actx.createGain();
     const filter = actx.createBiquadFilter();
@@ -320,17 +604,18 @@ function playSound(type) {
     gain.connect(actx.destination);
 
     const now = actx.currentTime;
-    let duration = 0.2;
 
     if (type === 'jump') {
         osc.type = 'sawtooth';
+        filter.type = 'lowpass';
         filter.frequency.setValueAtTime(800, now);
         filter.frequency.exponentialRampToValueAtTime(100, now + 0.2);
         osc.frequency.setValueAtTime(150, now);
         osc.frequency.exponentialRampToValueAtTime(50, now + 0.2);
         gain.gain.setValueAtTime(0.15, now);
         gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
-        duration = 0.25;
+        osc.start();
+        osc.stop(now + 0.2);
     } else if (type === 'shoot') {
         osc.type = 'square';
         filter.frequency.setValueAtTime(2000, now);
@@ -338,436 +623,576 @@ function playSound(type) {
         osc.frequency.exponentialRampToValueAtTime(100, now + 0.1);
         gain.gain.setValueAtTime(0.1, now);
         gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
-        duration = 0.15;
+        osc.start();
+        osc.stop(now + 0.1);
     } else if (type === 'explode') {
         osc.type = 'sawtooth'; 
         osc.frequency.setValueAtTime(100, now);
         osc.frequency.exponentialRampToValueAtTime(10, now + 0.3);
         gain.gain.setValueAtTime(0.3, now);
         gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
-        duration = 0.35;
+        osc.start();
+        osc.stop(now + 0.3);
     } else if (type === 'hit') {
         osc.type = 'sawtooth';
         osc.frequency.setValueAtTime(100, now);
         osc.frequency.linearRampToValueAtTime(20, now + 0.4);
         gain.gain.setValueAtTime(0.3, now);
         gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
-        duration = 0.45;
+        osc.start();
+        osc.stop(now + 0.4);
     } else if (type === 'collect') {
         osc.type = 'sine';
         osc.frequency.setValueAtTime(800, now);
         osc.frequency.linearRampToValueAtTime(1600, now + 0.1);
         gain.gain.setValueAtTime(0.1, now);
         gain.gain.linearRampToValueAtTime(0.01, now + 0.15);
-        duration = 0.2;
-    }
-
-    osc.start();
-    osc.stop(now + duration);
-
-    // Guaranteed cleanup
-    setTimeout(() => {
-        osc.disconnect();
-        gain.disconnect();
-        filter.disconnect();
-        activeSounds--;
-    }, duration * 1000 + 50);
-}
-
-// --- ENTITIES ---
-const rover = {
-    x: 100, y: GROUND_Y, width: 40, height: 20,
-    dy: 0, grounded: true, angle: 0, jumps: 0, maxJumps: 2,
-    
-    draw: function() {
-        ctx.save();
-        ctx.translate(this.x + this.width/2, this.y + this.height/2);
-        let targetAngle = this.grounded ? 0 : Math.min(Math.max(this.dy * 0.05, -0.3), 0.3);
-        this.angle += (targetAngle - this.angle) * 0.1;
-        ctx.rotate(this.angle);
-
-        // Headlight
-        ctx.save();
-        ctx.translate(15, 0); 
-        ctx.rotate(0.1); 
-        const beamGrad = ctx.createRadialGradient(0, 0, 0, 0, 0, 140);
-        beamGrad.addColorStop(0, 'rgba(255, 255, 255, 0.15)'); 
-        beamGrad.addColorStop(1, 'rgba(255, 255, 255, 0)');
-        ctx.fillStyle = beamGrad;
-        ctx.beginPath();
-        ctx.moveTo(0, -5); ctx.lineTo(130, -35); ctx.arc(0, 0, 130, -0.25, 0.25); ctx.lineTo(0, 5);
-        ctx.fill();
-        ctx.restore();
-
-        // Chassis & Wheels
-        ctx.fillStyle = '#222'; ctx.fillRect(-20, -10, 40, 16); 
-        const theme = THEMES[currentThemeIndex] || THEMES[0];
-        ctx.fillStyle = theme.main; 
-        ctx.shadowColor = theme.main; ctx.shadowBlur = 10;
-        ctx.fillRect(-5, -14, 14, 8); ctx.shadowBlur = 0; 
+        osc.start();
+        osc.stop(now + 0.15);
         
-        ctx.fillStyle = '#111';
-        const bounce = this.grounded ? Math.sin(frames * 0.5) : 0;
-        [-15, 0, 15].forEach(ox => {
-            ctx.beginPath(); ctx.arc(ox, 8 + (ox===0?-bounce:bounce), 6, 0, Math.PI*2); ctx.fill();
-            ctx.strokeStyle = '#555'; ctx.stroke();
-        });
-        ctx.restore();
-    },
-
-    update: function() {
-        this.dy += GRAVITY;
-        this.y += this.dy;
-        if (this.y + this.height/2 >= GROUND_Y) {
-            if(!this.grounded) createLandParticles(this.x);
-            this.y = GROUND_Y - this.height/2;
-            this.dy = 0;
-            this.grounded = true;
-            this.jumps = 0; 
-        } else this.grounded = false;
-    },
-
-    jump: function() {
-        if (this.grounded || this.jumps < this.maxJumps) {
-            this.dy = JUMP_FORCE;
-            this.grounded = false;
-            this.jumps++;
-            playSound('jump');
-            createJumpParticles(this.x, this.y);
-        }
-    },
-    cutJump: function() { if (this.dy < -2) this.dy *= 0.5; },
-    shoot: function() {
-        projectiles.push({x: this.x + 30, y: this.y + 5, vx: 12, life: 60});
-        playSound('shoot');
+        const osc2 = actx.createOscillator();
+        const gain2 = actx.createGain();
+        osc2.connect(gain2);
+        gain2.connect(actx.destination);
+        osc2.type = 'sine';
+        osc2.frequency.setValueAtTime(1200, now);
+        osc2.frequency.linearRampToValueAtTime(2400, now + 0.1);
+        gain2.gain.setValueAtTime(0.05, now);
+        gain2.gain.linearRampToValueAtTime(0.01, now + 0.15);
+        osc2.start();
+        osc2.stop(now + 0.15);
     }
-};
-
-let obstacles = [];
-let samples = []; 
-let particles = [];
-let projectiles = [];
-let miniCraters = []; 
-let meteors = [];
-let dustStreaks = [];
-
-// --- STAR & NEBULA SYSTEM (VISUAL UPGRADE KEPT) ---
-let stars = [];
-let nebulaClouds = [];
-
-function initStars() {
-    stars = [];
-    nebulaClouds = [];
-    
-    // 1. Nebula Clouds (Background noise)
-    for(let i=0; i<5; i++) {
-        nebulaClouds.push({
-            x: Math.random() * 1000,
-            y: Math.random() * 300,
-            radius: 100 + Math.random() * 200,
-            color: Math.random() > 0.5 ? 'rgba(100, 0, 100, 0.05)' : 'rgba(0, 0, 100, 0.05)',
-            speed: 0.2 + Math.random() * 0.2
-        });
-    }
-
-    // 2. Stars
-    // Layer 0: Distant dust (150 stars)
-    for(let i=0; i<150; i++) stars.push(createStar(0.1, 'small'));
-    // Layer 1: Mid stars (80 stars)
-    for(let i=0; i<80; i++) stars.push(createStar(0.5, 'medium'));
-    // Layer 2: Hero stars (40 stars)
-    for(let i=0; i<40; i++) stars.push(createStar(1.2, 'large'));
 }
 
-function createStar(speed, type) {
-    const tints = ['#fff', '#a8d9ff', '#fff0d4', '#ffcccc']; 
-    const color = tints[Math.floor(Math.random() * tints.length)];
-    return {
-        x: Math.random() * canvas.width,
-        y: Math.random() * (GROUND_Y - 50),
-        size: type === 'small' ? Math.random() : (type === 'medium' ? Math.random()*1.5 : 2 + Math.random()*3),
-        speed: speed,
-        type: type, // small, medium, large
-        color: color,
-        pulse: Math.random() * Math.PI,
-        pulseSpeed: 0.02 + Math.random() * 0.05
+// --- LOGIC ---
+
+function getTargetLighting() {
+    // 0-2 = Dawn, 3-5 = Day, 6-8 = Dusk, 9-11 = Night
+    if (currentPhaseIndex <= 2) return LIGHTING.DAWN;
+    if (currentPhaseIndex <= 5) return LIGHTING.DAY;
+    if (currentPhaseIndex <= 8) return LIGHTING.DUSK;
+    return LIGHTING.NIGHT;
+}
+
+// Color interpolation helper
+function lerpColor(a, b, amount) { 
+    var ah = parseInt(a.replace(/#/g, ''), 16),
+        ar = ah >> 16, ag = ah >> 8 & 0xff, ab = ah & 0xff,
+        bh = parseInt(b.replace(/#/g, ''), 16),
+        br = bh >> 16, bg = bh >> 8 & 0xff, bb = bh & 0xff,
+        rr = ar + amount * (br - ar),
+        rg = ag + amount * (bg - ag),
+        rb = ab + amount * (bb - ab);
+
+    return '#' + ((1 << 24) + (rr << 16) + (rg << 8) + (rb | 0)).toString(16).slice(1);
+}
+
+// RGBA interpolation helper for haze
+function lerpRgba(a, b, amount) {
+    // Simple parser for "rgba(r, g, b, a)"
+    const parse = (c) => {
+        const parts = c.match(/[\d.]+/g);
+        return parts.map(Number);
     };
+    const [r1, g1, b1, a1] = parse(a);
+    const [r2, g2, b2, a2] = parse(b);
+    
+    const r = Math.round(r1 + amount * (r2 - r1));
+    const g = Math.round(g1 + amount * (g2 - g1));
+    const b_ = Math.round(b1 + amount * (b2 - b1));
+    const alpha = a1 + amount * (a2 - a1);
+    
+    return `rgba(${r}, ${g}, ${b_}, ${alpha})`;
 }
 
-function createLandParticles(x) {
-    for(let i=0; i<5; i++) particles.push({ x: x + Math.random()*40-20, y: GROUND_Y, vx: Math.random()*4-2, vy: Math.random()*-2, life: 15, color: '#ffaa00', size: 1.5 });
-}
-function createJumpParticles(x, y) {
-    const theme = THEMES[currentThemeIndex] || THEMES[0];
-    for(let i=0; i<8; i++) particles.push({ x: x+10, y: y+10, vx: -2-Math.random()*2, vy: 2+Math.random()*2, life: 30, color: theme.main, size: Math.random()*3 });
+// Value interpolation helper
+function lerp(start, end, amt) {
+    return (1 - amt) * start + amt * end;
 }
 
-// --- GAME LOOP LOGIC ---
+function updateTheme() {
+    const theme = THEMES[currentThemeIndex];
+    
+    // Update DOM styles
+    const container = document.getElementById('game-container');
+    const hud = document.getElementById('hud');
+    const hudTitle = document.getElementById('hud-title'); // Title update
+    const startBlink = document.getElementById('start-blink');
+    const titleText = document.getElementById('title-text');
+    const startScreen = document.getElementById('start-screen');
+    const nodeHintColor = document.getElementById('node-hint-color');
 
-function spawnEntities() {
-    if (frames % 100 === 0 && Math.random() > 0.3) {
-        const r = Math.random();
-        let type = r>0.8?'CRATER':(r>0.6?'DEBRIS':(r>0.45?'SPIKE':'ROCK'));
-        obstacles.push({x: canvas.width+50, y: GROUND_Y, width: 30, height: 30, type: type, hp: 1});
+    // Box Shadow Glow
+    container.style.boxShadow = `0 0 10px ${theme.main}, 0 0 40px ${theme.glow}, inset 0 0 80px rgba(0,0,0,0.8)`;
+    
+    // HUD Colors
+    hud.style.borderColor = theme.main;
+    hud.style.color = theme.main;
+    hud.style.textShadow = `0 0 8px ${theme.main}`;
+
+    // Persistent Title matches theme if desired, or keep AMBER as requested?
+    // User requested: "probably in a glowing amber font [this doesn't change]"
+    // So we DON'T update hud-title color here.
+
+    // Start Screen Elements (for next restart)
+    startScreen.style.borderColor = theme.main;
+    startBlink.style.color = theme.main;
+    startBlink.style.textShadow = `0 0 10px ${theme.main}`;
+    titleText.style.textShadow = `2px 2px 0px #444, -2px -2px 0px ${theme.main}`;
+    nodeHintColor.style.color = theme.main;
+}
+
+function startGame() {
+    gameState = 'PLAYING';
+    document.getElementById('start-screen').style.display = 'none';
+    document.getElementById('game-over-screen').style.display = 'none';
+    document.getElementById('hud').style.display = 'block';
+    document.getElementById('hud-title').style.display = 'block'; // Show Title
+    
+    gameSpeed = 4;
+    scoreDist = 0;
+    scoreData = 0;
+    currentThemeIndex = 0;
+    currentPhaseIndex = 0;
+    currentLoopIndex = 0;
+    
+    // Reset lighting
+    currentLighting = LIGHTING.DAWN;
+    targetLighting = LIGHTING.DAWN;
+    transitionProgress = 1.0;
+
+    obstacles = [];
+    samples = [];
+    projectiles = [];
+    miniCraters = [];
+    meteors = [];
+    dustStreaks = [];
+    initStars();
+    
+    updateTheme(); // Reset to Amber
+    document.getElementById('score-data').innerText = "0";
+    document.getElementById('score-phase').innerText = "α";
+
+    if(bgm && bgm.paused) {
+        bgm.play().catch(e => console.log("Audio requires interaction", e));
     }
-    if (frames % 150 === 0 && Math.random() > 0.4) {
-        samples.push({x: canvas.width+50, y: GROUND_Y-60-(Math.random()*40), size: 12, rotation: 0});
-    }
-    if (frames % 40 === 0 && Math.random() > 0.5) {
-        miniCraters.push({x: canvas.width+20, y: GROUND_Y+15+Math.random()*30, width: 10+Math.random()*15, height: 3+Math.random()*3});
-    }
-    if (frames % 300 === 0 && Math.random() > 0.6) {
-        meteors.push({x: canvas.width+Math.random()*200, y: -50, vx: -8-Math.random()*4, vy: 4+Math.random()*2, size: 4+Math.random()*4});
-    }
-    if (frames % 60 === 0) {
-        dustStreaks.push({x: canvas.width+50, y: GROUND_Y-10-Math.random()*100, length: 20+Math.random()*40, speed: 8+Math.random()*4});
-    }
+}
+
+function resetGame() {
+    rover.y = GROUND_Y;
+    rover.dy = 0;
+    rover.jumps = 0;
+    startGame();
+}
+
+function spawnObstacle() {
+    const r = Math.random();
+    let type = 'ROCK';
+    
+    if (r > 0.8) type = 'CRATER';
+    else if (r > 0.6) type = 'DEBRIS'; 
+    else if (r > 0.45) type = 'SPIKE'; 
+    else type = 'ROCK'; 
+
+    obstacles.push({
+        x: canvas.width + 50,
+        y: GROUND_Y,
+        width: 30,
+        height: 30,
+        type: type,
+        hp: 1 
+    });
+}
+
+function spawnSample() {
+    samples.push({
+        x: canvas.width + 50,
+        y: GROUND_Y - 60 - (Math.random() * 40),
+        size: 12,
+        rotation: 0
+    });
+}
+
+function spawnMiniCrater() {
+    miniCraters.push({
+        x: canvas.width + 20,
+        y: GROUND_Y + 15 + Math.random() * 30, 
+        width: 10 + Math.random() * 15,
+        height: 3 + Math.random() * 3
+    });
+}
+
+function spawnMeteor() {
+    meteors.push({
+        x: canvas.width + Math.random() * 200,
+        y: -50,
+        vx: -8 - Math.random() * 4,
+        vy: 4 + Math.random() * 2,
+        size: 4 + Math.random() * 4
+    });
+}
+
+function spawnDustStreak() {
+    dustStreaks.push({
+        x: canvas.width + 50,
+        y: GROUND_Y - 10 - Math.random() * 100,
+        length: 20 + Math.random() * 40,
+        speed: 8 + Math.random() * 4
+    });
 }
 
 function update() {
     if (gameState !== 'PLAYING') return;
-    frames++; scoreDist += 0.1;
 
-    // Lighting Transition
-    if (transitionProgress < 1.0) transitionProgress = Math.min(transitionProgress + 0.01, 1.0);
+    frames++;
+    scoreDist += 0.1;
+    
+    // --- LIGHTING TRANSITION LOGIC ---
+    if (transitionProgress < 1.0) {
+        transitionProgress += TRANSITION_SPEED;
+        if (transitionProgress > 1.0) transitionProgress = 1.0;
+    }
 
-    // Phases
+    // --- PHASE & THEME LOGIC ---
     let totalPhases = Math.floor(scoreData / POINTS_PER_PHASE);
-    if ((totalPhases % 12) !== currentPhaseIndex) {
-        currentPhaseIndex = totalPhases % 12;
+    let newPhaseIndex = totalPhases % 12;
+    let newLoopIndex = Math.floor(totalPhases / 12);
+    
+    // Check for changes
+    if (newPhaseIndex !== currentPhaseIndex) {
+        currentPhaseIndex = newPhaseIndex;
         document.getElementById('score-phase').innerText = GREEK_PHASES[currentPhaseIndex];
-        playSound('collect');
-        currentLighting = targetLighting;
+        playSound('collect'); 
         
-        // Determine new lighting
-        if (currentPhaseIndex <= 2) targetLighting = LIGHTING.DAWN;
-        else if (currentPhaseIndex <= 5) targetLighting = LIGHTING.DAY;
-        else if (currentPhaseIndex <= 8) targetLighting = LIGHTING.DUSK;
-        else targetLighting = LIGHTING.NIGHT;
-        transitionProgress = 0.0;
+        // TRIGGER LIGHTING CHANGE
+        currentLighting = targetLighting; 
+        targetLighting = getTargetLighting();
+        transitionProgress = 0.0; // Start transition
     }
 
-    // Loops (Themes)
-    let newLoopIndex = Math.floor(totalPhases / 12);
-    if (Math.floor(scoreData/POINTS_PER_PHASE/12) !== Math.floor((scoreData-10)/POINTS_PER_PHASE/12) && scoreData > 0) {
-        currentThemeIndex = newLoopIndex % THEMES.length;
-        gameSpeed += 1.0;
-        const theme = THEMES[currentThemeIndex];
-        document.getElementById('game-container').style.boxShadow = `0 0 10px ${theme.main}, 0 0 40px ${theme.glow}, inset 0 0 80px rgba(0,0,0,0.8)`;
-        document.getElementById('hud').style.color = theme.main;
-        document.getElementById('hud').style.borderColor = theme.main;
+    if (newLoopIndex !== currentLoopIndex) {
+        currentLoopIndex = newLoopIndex;
+        // Change Theme
+        currentThemeIndex = currentLoopIndex % THEMES.length;
+        updateTheme();
+        
+        // DIFFICULTY BUMP per loop
+        gameSpeed += 1.0; 
     }
+
+    if (frames % 1200 === 0) gameSpeed += 0.5;
 
     rover.update();
-    spawnEntities();
 
-    // CLEANUP & UPDATES
-    projectiles.forEach(p => { p.x += p.vx; p.life--; });
-    projectiles = projectiles.filter(p => p.life > 0);
+    if (frames % 100 === 0 && Math.random() > 0.3) spawnObstacle();
+    if (frames % 150 === 0 && Math.random() > 0.4) spawnSample();
+    if (frames % 40 === 0 && Math.random() > 0.5) spawnMiniCrater();
+    if (frames % 300 === 0 && Math.random() > 0.6) spawnMeteor(); 
+    if (frames % 60 === 0) spawnDustStreak();
 
-    miniCraters.forEach(m => m.x -= gameSpeed);
-    miniCraters = miniCraters.filter(m => m.x > -50);
+    // Update Projectiles
+    for (let i = projectiles.length - 1; i >= 0; i--) {
+        let p = projectiles[i];
+        p.x += p.vx;
+        p.life--;
+        if (p.life <= 0) projectiles.splice(i, 1);
+    }
 
-    dustStreaks.forEach(d => d.x -= (gameSpeed + d.speed));
-    dustStreaks = dustStreaks.filter(d => d.x > -100);
+    // Mini Craters 
+    for (let i = miniCraters.length - 1; i >= 0; i--) {
+        let mc = miniCraters[i];
+        mc.x -= gameSpeed;
+        if(mc.x < -50) miniCraters.splice(i, 1);
+    }
 
-    // Nebula Movement
-    nebulaClouds.forEach(n => {
-        n.x -= n.speed;
-        if(n.x < -200) n.x = canvas.width + 200;
-    });
+    // Dust Streaks
+    for (let i = dustStreaks.length - 1; i >= 0; i--) {
+        let d = dustStreaks[i];
+        d.x -= (gameSpeed + d.speed); 
+        if(d.x < -100) dustStreaks.splice(i, 1);
+    }
 
-    // Star Movement & Pulse
-    stars.forEach(s => {
-        s.x -= (gameSpeed * s.speed * 0.1);
-        s.pulse += s.pulseSpeed;
-        if(s.x < 0) s.x = canvas.width;
-    });
-
-    // Particle Cleanup (CRASH FIX: CAP SIZE)
-    particles.forEach(p => { p.x += p.vx; p.y += p.vy; p.life--; p.vy += 0.1; });
-    particles = particles.filter(p => p.life > 0);
-    if (particles.length > MAX_PARTICLES) particles.splice(0, particles.length - MAX_PARTICLES);
-
-    // Collision & Interaction logic omitted for brevity but preserved in full logic below...
-    checkCollisions();
-
-    // UI Updates
-    document.getElementById('score-dist').innerText = Math.floor(scoreDist);
-    document.getElementById('score-speed').innerText = Math.floor(gameSpeed * 10);
-}
-
-function checkCollisions() {
     // Meteors
     for (let i = meteors.length - 1; i >= 0; i--) {
         let m = meteors[i];
-        m.x += m.vx; m.y += m.vy;
-        let dx = (rover.x + 20) - m.x;
-        let dy = (rover.y + 10) - m.y;
-        if (Math.sqrt(dx*dx + dy*dy) < 30) triggerGameOver();
+        m.x += m.vx;
+        m.y += m.vy;
+        
+        let dx = (rover.x + rover.width/2) - m.x;
+        let dy = (rover.y + rover.height/2) - m.y;
+        if (Math.sqrt(dx*dx + dy*dy) < 30) {
+             gameState = 'GAMEOVER';
+             playSound('hit');
+             document.getElementById('game-over-screen').style.display = 'flex';
+             document.getElementById('final-dist').innerText = Math.floor(scoreDist);
+             document.getElementById('final-data').innerText = scoreData;
+             document.getElementById('final-phase').innerText = GREEK_PHASES[currentPhaseIndex];
+             document.getElementById('hud-title').style.display = 'none'; // Hide persistent title
+        }
+
         if (m.y > GROUND_Y) {
-            for(let j=0; j<5; j++) particles.push({x: m.x, y: GROUND_Y, vx: Math.random()*4-2, vy: -Math.random()*3, life: 20, color: '#ff4444'});
+            for(let j=0; j<5; j++) {
+                particles.push({
+                    x: m.x, y: GROUND_Y,
+                    vx: Math.random()*4 - 2, vy: -Math.random()*3,
+                    life: 20, color: '#ff4444'
+                });
+            }
             meteors.splice(i, 1);
         }
+    }
+
+    // Obstacles Collision 
+    for (let i = obstacles.length - 1; i >= 0; i--) {
+        let obs = obstacles[i];
+        obs.x -= gameSpeed;
+
+        // 1. Projectile vs Obstacle
+        if (obs.type === 'ROCK' || obs.type === 'SPIKE') {
+            for (let k = projectiles.length - 1; k >= 0; k--) {
+                let proj = projectiles[k];
+                if (proj.x > obs.x && proj.x < obs.x + obs.width &&
+                    proj.y > obs.y - obs.height + 10 && proj.y < obs.y + 10) {
+                    
+                    obs.hp--;
+                    projectiles.splice(k, 1); 
+                    
+                    if (obs.hp <= 0) {
+                        playSound('explode');
+                        scoreData += 10; 
+                        document.getElementById('score-data').innerText = scoreData;
+                        
+                        // Debris
+                        for(let j=0; j<10; j++) {
+                            particles.push({
+                                x: obs.x + obs.width/2,
+                                y: obs.y - obs.height/2,
+                                vx: (Math.random()-0.5)*8, 
+                                vy: (Math.random()-0.5)*8,
+                                life: 20, 
+                                color: obs.type === 'SPIKE' ? '#d4a24e' : '#8a7045', 
+                                size: Math.random()*3
+                            });
+                        }
+                        obstacles.splice(i, 1); 
+                        break; 
+                    }
+                }
+            }
+            if (obstacles[i] !== obs) continue; 
+        }
+
+        // 2. Rover vs Obstacle
+        let hit = false;
+        let rLeft = rover.x - 10; 
+        let rRight = rover.x + 10;
+        let rBottom = rover.y + 18;
+
+        if (obs.type === 'ROCK' || obs.type === 'DEBRIS' || obs.type === 'SPIKE') {
+            let oLeft = obs.x;
+            let oRight = obs.x + obs.width;
+            let oTop = obs.y - obs.height + 10;
+            if(obs.type === 'SPIKE') oTop -= 10;
+            
+            if (rRight > oLeft && rLeft < oRight && rBottom > oTop) hit = true;
+        } else {
+            let holeLeft = obs.x + 5;
+            let holeRight = obs.x + obs.width - 5;
+            if (rover.grounded && rover.x > holeLeft && rover.x < holeRight) hit = true;
+        }
+
+        if (hit) {
+            playSound('hit');
+            gameState = 'GAMEOVER';
+            document.getElementById('game-over-screen').style.display = 'flex';
+            document.getElementById('final-dist').innerText = Math.floor(scoreDist);
+            document.getElementById('final-data').innerText = scoreData;
+            document.getElementById('final-phase').innerText = GREEK_PHASES[currentPhaseIndex];
+            document.getElementById('hud-title').style.display = 'none'; // Hide persistent title
+            
+            for(let j=0; j<30; j++) {
+                particles.push({
+                    x: rover.x, y: rover.y,
+                    vx: (Math.random()-0.5)*10, vy: (Math.random()-0.5)*10,
+                    life: 60, color: '#ff4444', size: Math.random()*4
+                });
+            }
+        }
+
+        if (obs.x < -50) obstacles.splice(i, 1);
     }
 
     // Samples
     for (let i = samples.length - 1; i >= 0; i--) {
         let s = samples[i];
-        s.x -= gameSpeed; s.rotation += 0.05;
-        if (Math.sqrt(Math.pow((rover.x+20)-s.x,2) + Math.pow((rover.y+10)-s.y,2)) < 40) {
+        s.x -= gameSpeed;
+        s.rotation += 0.05;
+
+        let dx = (rover.x + rover.width/2) - (s.x);
+        let dy = (rover.y + rover.height/2) - (s.y);
+        let dist = Math.sqrt(dx*dx + dy*dy);
+
+        if (dist < 40) { 
             playSound('collect');
             scoreData += 50;
             document.getElementById('score-data').innerText = scoreData;
             samples.splice(i, 1);
-            const theme = THEMES[currentThemeIndex] || THEMES[0];
-            for(let j=0; j<8; j++) particles.push({x: s.x, y: s.y, vx: (Math.random()-0.5)*6, vy: (Math.random()-0.5)*6, life: 20, color: theme.main, size: 2});
-        } else if (s.x < -50) samples.splice(i, 1);
-    }
-
-    // Obstacles
-    for (let i = obstacles.length - 1; i >= 0; i--) {
-        let obs = obstacles[i];
-        obs.x -= gameSpeed;
-        
-        // Shoot
-        if (obs.type !== 'CRATER') {
-            for (let k = projectiles.length - 1; k >= 0; k--) {
-                let p = projectiles[k];
-                if (p.x > obs.x && p.x < obs.x+30 && p.y > obs.y-30 && p.y < obs.y+10) {
-                    obs.hp--; projectiles.splice(k,1);
-                    if (obs.hp <= 0) {
-                        playSound('explode');
-                        scoreData += 10; document.getElementById('score-data').innerText = scoreData;
-                        for(let j=0; j<10; j++) particles.push({x: obs.x+15, y: obs.y-15, vx: (Math.random()-0.5)*8, vy: (Math.random()-0.5)*8, life: 20, color: obs.type==='SPIKE'?'#d4a24e':'#8a7045'});
-                        obstacles.splice(i, 1);
-                        break;
-                    }
-                }
+            
+            const theme = THEMES[currentThemeIndex];
+            for(let j=0; j<8; j++) {
+                particles.push({
+                    x: s.x, y: s.y,
+                    vx: (Math.random()-0.5)*6, vy: (Math.random()-0.5)*6,
+                    life: 20, color: theme.main, size: 2
+                });
             }
-            if (obstacles[i] !== obs) continue;
+            continue;
         }
 
-        // Crash
-        let hit = false;
-        if (obs.type === 'CRATER') {
-             if (rover.grounded && rover.x > obs.x+5 && rover.x < obs.x+obs.width-5) hit = true;
-        } else {
-             if (rover.x+30 > obs.x && rover.x+10 < obs.x+obs.width && rover.y+18 > obs.y-obs.height+10) hit = true;
-        }
-        if (hit) triggerGameOver();
-        if (obs.x < -50) obstacles.splice(i, 1);
+        if (s.x < -50) samples.splice(i, 1);
     }
-}
 
-function triggerGameOver() {
-    playSound('hit');
-    gameState = 'GAMEOVER';
-    document.getElementById('game-over-screen').style.display = 'flex';
-    document.getElementById('final-dist').innerText = Math.floor(scoreDist);
-    document.getElementById('final-data').innerText = scoreData;
-    document.getElementById('final-phase').innerText = GREEK_PHASES[currentPhaseIndex];
-    document.getElementById('hud-title').style.display = 'none';
-    for(let j=0; j<30; j++) particles.push({x: rover.x, y: rover.y, vx: (Math.random()-0.5)*10, vy: (Math.random()-0.5)*10, life: 60, color: '#ff4444', size: Math.random()*4});
-}
+    // Particles
+    for (let i = particles.length - 1; i >= 0; i--) {
+        let p = particles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.life--;
+        p.vy += 0.1;
+        if(p.life <= 0) particles.splice(i, 1);
+    }
 
-function lerpColor(a, b, amount) { 
-    if (!a || !b) return a || '#000';
-    var ah = parseInt(a.replace(/#/g, ''), 16), ar = ah >> 16, ag = ah >> 8 & 0xff, ab = ah & 0xff,
-        bh = parseInt(b.replace(/#/g, ''), 16), br = bh >> 16, bg = bh >> 8 & 0xff, bb = bh & 0xff,
-        rr = ar + amount * (br - ar), rg = ag + amount * (bg - ag), rb = ab + amount * (bb - ab);
-    return '#' + ((1 << 24) + (rr << 16) + (rg << 8) + (rb | 0)).toString(16).slice(1);
+    // Stars
+    [starsSlow, starsMed, starsFast].forEach(layer => {
+        layer.forEach(star => {
+            star.x -= (gameSpeed * star.speedMult * 0.1); 
+            // TWINKLE: More obvious range (0.3 to 1.0)
+            star.twinkle += 0.1; // Faster twinkle
+            if(star.x < 0) star.x = canvas.width;
+        });
+    });
+
+    document.getElementById('score-dist').innerText = Math.floor(scoreDist);
+    document.getElementById('score-speed').innerText = Math.floor(gameSpeed * 10);
 }
-function lerp(s, e, a) { return (1-a)*s + a*e; }
 
 function draw() {
-    // Colors
+    const theme = THEMES[currentThemeIndex];
+    
+    // Calculate interpolated lighting
     const activeSkyTop = lerpColor(currentLighting.skyTop, targetLighting.skyTop, transitionProgress);
     const activeSkyBot = lerpColor(currentLighting.skyBot, targetLighting.skyBot, transitionProgress);
     const activeGround = lerpColor(currentLighting.ground, targetLighting.ground, transitionProgress);
-    
-    // 1. SKY
+    const activeStars  = lerp(currentLighting.stars, targetLighting.stars, transitionProgress);
+    const activeHaze   = lerpRgba(currentLighting.haze, targetLighting.haze, transitionProgress);
+
+    // 1. CLEAR - Dynamic Day/Night Cycle
     const skyGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
-    skyGrad.addColorStop(0, activeSkyTop); skyGrad.addColorStop(1, activeSkyBot);
-    ctx.fillStyle = skyGrad; ctx.fillRect(0, 0, canvas.width, canvas.height);
+    skyGrad.addColorStop(0, activeSkyTop); 
+    skyGrad.addColorStop(1, activeSkyBot); 
+    ctx.fillStyle = skyGrad;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // 2. NEBULA CLOUDS (Subtle background noise)
-    nebulaClouds.forEach(n => {
-        ctx.save();
-        ctx.fillStyle = n.color;
-        ctx.beginPath();
-        ctx.arc(n.x, n.y, n.radius, 0, Math.PI*2);
-        ctx.fill();
-        ctx.restore();
+    // 2. STARS
+    [starsSlow, starsMed].forEach(layer => {
+        layer.forEach(star => {
+            // TWINKLE: More obvious visual change
+            const opacity = 0.3 + Math.abs(Math.sin(star.twinkle)) * 0.7; // 0.3 to 1.0
+            ctx.fillStyle = `rgba(255, 255, 255, ${opacity * activeStars})`; 
+            ctx.fillRect(star.x, star.y, star.size, star.size);
+        });
     });
 
-    // 3. STARS (Improved)
-    stars.forEach(s => {
-        const pulse = 0.5 + Math.sin(s.pulse) * 0.5; // 0 to 1
-        ctx.globalAlpha = 0.3 + (pulse * 0.7);
-        ctx.fillStyle = s.color;
-        
-        if (s.type === 'large') {
-            // Draw Diamond Shape for large stars
-            ctx.shadowColor = s.color;
-            ctx.shadowBlur = 10 * pulse;
-            ctx.beginPath();
-            ctx.moveTo(s.x, s.y - s.size * 2);
-            ctx.lineTo(s.x + s.size, s.y);
-            ctx.lineTo(s.x, s.y + s.size * 2);
-            ctx.lineTo(s.x - s.size, s.y);
-            ctx.fill();
-            // Horizontal flare
-            ctx.beginPath();
-            ctx.moveTo(s.x - s.size * 2, s.y);
-            ctx.lineTo(s.x + s.size * 2, s.y);
-            ctx.strokeStyle = s.color;
-            ctx.lineWidth = 0.5;
-            ctx.stroke();
-            ctx.shadowBlur = 0;
-        } else {
-            ctx.fillRect(s.x, s.y, s.size, s.size);
-        }
-        ctx.globalAlpha = 1.0;
-    });
-
-    // 4. PLANET (REVERTED TO CLASSIC RED/CRATER STYLE)
+    // REBEKAH
     ctx.save();
     ctx.translate(750, 180); 
-    const theme = THEMES[currentThemeIndex] || THEMES[0];
-    ctx.shadowColor = theme.main; ctx.shadowBlur = 60;
-    ctx.beginPath(); ctx.arc(0, 0, 60, 0, Math.PI*2); ctx.fillStyle = '#000'; ctx.fill(); ctx.shadowBlur = 0; 
-    ctx.save(); ctx.rotate(-0.2); ctx.scale(1, 0.3); 
-    ctx.beginPath(); ctx.arc(0, 0, 120, 0, Math.PI*2); ctx.strokeStyle = 'rgba(97, 218, 251, 0.4)'; ctx.lineWidth = 18; ctx.stroke();
-    ctx.beginPath(); ctx.arc(0, 0, 100, 0, Math.PI*2); ctx.strokeStyle = '#61dafb'; ctx.lineWidth = 3; ctx.stroke();
+    // Outer Glow uses Theme Color
+    ctx.shadowColor = theme.main;
+    ctx.shadowBlur = 60;
+    ctx.beginPath();
+    ctx.arc(0, 0, 60, 0, Math.PI*2); 
+    ctx.fillStyle = '#000'; 
+    ctx.fill();
+    ctx.shadowBlur = 0; 
+
+    ctx.save();
+    ctx.rotate(-0.2);
+    ctx.scale(1, 0.3); 
+    ctx.beginPath();
+    ctx.arc(0, 0, 120, 0, Math.PI*2); 
+    // Rings are ALWAYS cyan as requested
+    ctx.strokeStyle = 'rgba(97, 218, 251, 0.4)';
+    ctx.lineWidth = 18;
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(0, 0, 100, 0, Math.PI*2);
+    // Inner rings ALWAYS cyan
+    ctx.strokeStyle = '#61dafb';
+    ctx.lineWidth = 3;
+    ctx.stroke();
     ctx.restore();
     
-    // Classic Planet Gradient & Spot
+    // Planet body stays Red-ish usually, or should it change?
+    // Let's keep the planet body stable but tint it slightly?
+    // For now, keep the deep red aesthetic as it's the "character" of the planet
     const grad = ctx.createLinearGradient(-50, -50, 50, 50);
     grad.addColorStop(0, '#4a0000'); 
-    grad.addColorStop(0.5, '#800000'); // Restored middle stop
+    grad.addColorStop(0.5, '#800000'); 
     grad.addColorStop(1, '#200000'); 
-    ctx.fillStyle = grad; 
-    ctx.beginPath(); ctx.arc(0, 0, 62, 0, Math.PI*2); ctx.fill();
-    
-    // Restored Crater Spot
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(0, 0, 62, 0, Math.PI*2); 
+    ctx.fill();
     ctx.fillStyle = 'rgba(255, 100, 100, 0.1)';
     ctx.beginPath();
     ctx.arc(-20, -20, 15, 0, Math.PI*2);
     ctx.fill();
     ctx.restore();
 
-    // 5. GROUND
-    ctx.fillStyle = activeGround; ctx.fillRect(0, GROUND_Y+10, canvas.width, canvas.height);
-    ctx.strokeStyle = theme.main; ctx.lineWidth = 2; ctx.shadowColor = theme.main; ctx.shadowBlur = 10;
-    ctx.beginPath(); ctx.moveTo(0, GROUND_Y+10); ctx.lineTo(canvas.width, GROUND_Y+10); ctx.stroke(); ctx.shadowBlur = 0;
+    // Fast Stars
+    starsFast.forEach(star => {
+        const opacity = 0.3 + Math.abs(Math.sin(star.twinkle)) * 0.7;
+        ctx.fillStyle = `rgba(255, 255, 255, ${opacity})`;
+        ctx.fillRect(star.x, star.y, star.size, star.size);
+    });
 
-    // 6. ENTITIES
-    miniCraters.forEach(mc => { ctx.fillStyle = '#0f0a02'; ctx.beginPath(); ctx.ellipse(mc.x, mc.y, mc.width, mc.height, 0, 0, Math.PI*2); ctx.fill(); ctx.strokeStyle = '#2a1e0a'; ctx.stroke(); });
+    // 3. GROUND - Dynamic Lighting
+    // Base Ground Fill
+    ctx.fillStyle = activeGround; 
+    ctx.fillRect(0, GROUND_Y + 10, canvas.width, canvas.height - GROUND_Y);
     
+    // Atmospheric Haze Overlay (Gradient)
+    const hazeGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+    hazeGrad.addColorStop(0, activeHaze); 
+    hazeGrad.addColorStop(0.6, 'rgba(0,0,0,0)');
+    ctx.fillStyle = hazeGrad;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Horizon line changes with theme
+    ctx.strokeStyle = theme.main; 
+    ctx.lineWidth = 2;
+    ctx.shadowColor = theme.main;
+    ctx.shadowBlur = 10;
+    ctx.beginPath();
+    ctx.moveTo(0, GROUND_Y + 10);
+    ctx.lineTo(canvas.width, GROUND_Y + 10);
+    ctx.stroke();
+    ctx.shadowBlur = 0; 
+
+    // MINI CRATERS
+    ctx.fillStyle = '#0f0a02'; 
+    miniCraters.forEach(mc => {
+        ctx.beginPath();
+        ctx.ellipse(mc.x, mc.y, mc.width, mc.height, 0, 0, Math.PI*2);
+        ctx.fill();
+        ctx.strokeStyle = '#2a1e0a';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+    });
+
+    // 4. OBSTACLES
     obstacles.forEach(obs => {
-        if (obs.type === 'ROCK') { 
-            // Reverted Rock Drawing
+        if (obs.type === 'ROCK') {
             ctx.fillStyle = '#5c4d35'; 
             ctx.beginPath();
             ctx.moveTo(obs.x, GROUND_Y + 10);
@@ -777,32 +1202,89 @@ function draw() {
             ctx.strokeStyle = '#8a7045';
             ctx.lineWidth = 2;
             ctx.stroke();
+        } 
+        else if (obs.type === 'DEBRIS') {
+            ctx.fillStyle = '#080808'; 
+            ctx.fillRect(obs.x, GROUND_Y + 10 - 25, 30, 25);
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(obs.x, GROUND_Y + 10 - 25, 30, 25);
+            const blink = Math.sin(frames * 0.2) > 0;
+            ctx.fillStyle = blink ? '#ff0000' : '#330000';
+            ctx.fillRect(obs.x + 5, GROUND_Y + 10 - 20, 4, 4);
+            ctx.fillStyle = !blink ? theme.main : '#003344'; // Tech lights match theme
+            ctx.fillRect(obs.x + 20, GROUND_Y + 10 - 15, 4, 4);
         }
-        else if (obs.type === 'DEBRIS') { ctx.fillStyle = '#080808'; ctx.fillRect(obs.x, GROUND_Y-15, 30, 25); ctx.fillStyle = Math.sin(frames*0.2)>0?'#f00':'#300'; ctx.fillRect(obs.x+5, GROUND_Y-10, 4, 4); }
-        else if (obs.type === 'SPIKE') { ctx.fillStyle = '#d4a24e'; ctx.beginPath(); ctx.moveTo(obs.x, GROUND_Y+10); ctx.lineTo(obs.x+10, GROUND_Y-30); ctx.lineTo(obs.x+20, GROUND_Y+10); ctx.fill(); }
-        else { ctx.fillStyle = '#050402'; ctx.fillRect(obs.x, GROUND_Y+10, 30, 20); }
+        else if (obs.type === 'SPIKE') {
+            ctx.fillStyle = '#d4a24e'; 
+            ctx.beginPath();
+            ctx.moveTo(obs.x, GROUND_Y + 10);
+            ctx.lineTo(obs.x + 10, GROUND_Y + 10 - 40); 
+            ctx.lineTo(obs.x + 20, GROUND_Y + 10);
+            ctx.fill();
+            ctx.strokeStyle = '#ffe082';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+        }
+        else {
+            // CRATER
+            ctx.fillStyle = '#050402'; 
+            ctx.fillRect(obs.x, GROUND_Y + 10, obs.width, 20);
+            ctx.fillStyle = '#b88a3b'; 
+            ctx.fillRect(obs.x, GROUND_Y + 10, 4, 4);
+            ctx.fillRect(obs.x + obs.width - 4, GROUND_Y + 10, 4, 4);
+        }
     });
 
+    // 5. SAMPLES
+    ctx.save();
     samples.forEach(s => {
-        ctx.save(); ctx.translate(s.x, s.y); ctx.rotate(s.rotation);
-        ctx.fillStyle = '#fff'; ctx.fillRect(-2, -2, 4, 4);
-        ctx.strokeStyle = '#61dafb'; ctx.lineWidth = 2; ctx.shadowColor = '#61dafb'; ctx.shadowBlur = 15;
-        ctx.beginPath(); ctx.moveTo(0, -s.size); ctx.lineTo(s.size, 0); ctx.lineTo(0, s.size); ctx.lineTo(-s.size, 0); ctx.closePath(); ctx.stroke();
-        ctx.shadowBlur = 0; ctx.restore();
+        ctx.translate(s.x, s.y);
+        ctx.rotate(s.rotation);
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(-2, -2, 4, 4);
+        // Samples are ALWAYS cyan as requested
+        ctx.strokeStyle = '#61dafb';
+        ctx.lineWidth = 2;
+        ctx.shadowColor = '#61dafb';
+        ctx.shadowBlur = 15; 
+        ctx.beginPath();
+        ctx.moveTo(0, -s.size);
+        ctx.lineTo(s.size, 0);
+        ctx.lineTo(0, s.size);
+        ctx.lineTo(-s.size, 0);
+        ctx.closePath();
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+        ctx.rotate(-s.rotation);
+        ctx.translate(-s.x, -s.y);
     });
+    ctx.restore();
 
+    // 6. ROVER
     rover.draw();
 
-    ctx.fillStyle = '#fbd061';
-    projectiles.forEach(p => ctx.fillRect(p.x, p.y, 8, 3));
-    
+    // 7. PROJECTILES
+    ctx.fillStyle = '#fbd061'; 
+    ctx.shadowColor = '#fbd061';
+    ctx.shadowBlur = 5;
+    projectiles.forEach(p => {
+        ctx.fillRect(p.x, p.y, 8, 3);
+    });
+    ctx.shadowBlur = 0;
+
+    // 8. PARTICLES
     particles.forEach(p => {
-        ctx.fillStyle = p.color;
-        if(p.color==='#ff4444' || p.color===theme.main) { ctx.shadowColor = p.color; ctx.shadowBlur = 5; }
-        ctx.fillRect(p.x, p.y, p.size||2, p.size||2); ctx.shadowBlur = 0;
+        ctx.fillStyle = p.color || '#aaa';
+        if(p.color === '#ff4444' || p.color === theme.main) {
+            ctx.shadowColor = p.color;
+            ctx.shadowBlur = 5;
+        }
+        ctx.fillRect(p.x, p.y, p.size || 2, p.size || 2);
+        ctx.shadowBlur = 0;
     });
 
-    // METEORS (REVERTED TO CLASSIC STYLE WITH TAIL)
+    // 9. METEORS
     meteors.forEach(m => {
         ctx.fillStyle = '#ff4400';
         ctx.shadowColor = '#ff8800';
@@ -810,20 +1292,25 @@ function draw() {
         ctx.beginPath();
         ctx.arc(m.x, m.y, m.size, 0, Math.PI*2);
         ctx.fill();
-        
-        // Classic Tail Logic
         ctx.strokeStyle = 'rgba(255, 68, 0, 0.5)';
         ctx.lineWidth = 2;
         ctx.beginPath();
         ctx.moveTo(m.x, m.y);
         ctx.lineTo(m.x - m.vx*3, m.y - m.vy*3);
         ctx.stroke();
-        
         ctx.shadowBlur = 0;
     });
 
+    // 10. DUST STREAKS
     ctx.fillStyle = 'rgba(212, 162, 78, 0.2)';
-    dustStreaks.forEach(d => ctx.fillRect(d.x, d.y, d.length, 1));
+    dustStreaks.forEach(d => {
+        ctx.fillRect(d.x, d.y, d.length, 1);
+    });
+    
+    // PAUSED OVERLAY DRAWING
+    if (gameState === 'PAUSED') {
+        // Optional: Draw overlay on canvas if desired, but DOM element handles it well.
+    }
 }
 
 function loop() {
@@ -832,51 +1319,9 @@ function loop() {
     requestAnimationFrame(loop);
 }
 
-// --- CONTROLS ---
-const handleInput = (a) => {
-    if (gameState==='START') startGame();
-    else if (gameState==='PLAYING') { if(a==='jump') rover.jump(); if(a==='shoot') rover.shoot(); if(a==='pause') togglePause(); }
-    else if (gameState==='PAUSED') { if(a==='pause') togglePause(); if(a==='quit') quitGame(); }
-    else if (gameState==='GAMEOVER') resetGame();
-}
-function togglePause() { 
-    gameState = gameState==='PLAYING'?'PAUSED':'PLAYING'; 
-    document.getElementById('pause-screen').style.display = gameState==='PAUSED'?'flex':'none';
-    if(bgm) gameState==='PAUSED'?bgm.pause():bgm.play().catch(e=>{});
-}
-function quitGame() {
-    gameState='START';
-    document.getElementById('pause-screen').style.display='none';
-    document.getElementById('start-screen').style.display='flex';
-    document.getElementById('hud').style.display='none';
-    document.getElementById('hud-title').style.display='none';
-    rover.y = GROUND_Y; obstacles=[]; initStars();
-}
-function startGame() {
-    gameState='PLAYING';
-    document.getElementById('start-screen').style.display='none';
-    document.getElementById('game-over-screen').style.display='none';
-    document.getElementById('hud').style.display='block';
-    document.getElementById('hud-title').style.display='block';
-    gameSpeed=4; scoreDist=0; scoreData=0; obstacles=[]; samples=[]; particles=[]; projectiles=[]; miniCraters=[]; meteors=[];
-    initStars();
-    if(bgm && bgm.paused) bgm.play().catch(e=>{});
-}
-function resetGame() { rover.y=GROUND_Y; rover.dy=0; rover.jumps=0; startGame(); }
-
-window.addEventListener('keydown', e => {
-    if(e.code==='Space'||e.code==='ArrowUp') {e.preventDefault(); handleInput('jump');}
-    if(e.code==='Enter'||e.code==='KeyZ') {e.preventDefault(); handleInput('shoot');}
-    if(e.code==='KeyP') {e.preventDefault(); handleInput('pause');}
-    if(e.code==='Escape') {e.preventDefault(); if(gameState==='PAUSED'||gameState==='PLAYING') quitGame();}
-});
-window.addEventListener('keyup', e => { if(e.code==='Space'||e.code==='ArrowUp') rover.cutJump(); });
-window.addEventListener('mousedown', e => { if(e.button===0)handleInput('shoot'); if(e.button===2){e.preventDefault();handleInput('jump');} });
-window.addEventListener('mouseup', e => { if(e.button===2)rover.cutJump(); });
-window.addEventListener('contextmenu', e => e.preventDefault());
-
-initStars();
+// Start Loop
 loop();
+
 </script>
 </body>
 </html>
