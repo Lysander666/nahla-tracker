@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sulphur Run - Nahla SRV Simulator</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=VT323&display=swap">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #050505;
+            color: #eee;
+            font-family: 'VT323', monospace;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        #game-container {
+            position: relative;
+            width: 800px;
+            height: 400px;
+            border: 2px solid #444;
+            /* NEON GLOW BORDER */
+            box-shadow: 
+                0 0 10px #d4a24e, 
+                0 0 40px rgba(212, 162, 78, 0.2), 
+                inset 0 0 80px rgba(0,0,0,0.8);
+            background-color: #08060a; 
+            image-rendering: pixelated;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        .ui-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: radial-gradient(circle, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.7) 100%);
+        }
+
+        #start-screen, #game-over-screen {
+            background: rgba(10, 5, 5, 0.9);
+            padding: 30px 50px;
+            border: 2px solid #61dafb;
+            /* UI GLOW */
+            box-shadow: 0 0 20px rgba(97, 218, 251, 0.4), inset 0 0 20px rgba(97, 218, 251, 0.1);
+            text-align: center;
+            pointer-events: auto;
+            transform: skew(-2deg); /* Sci-fi tilt */
+        }
+
+        h1 {
+            color: #fff;
+            margin: 0 0 10px 0;
+            font-size: 3.5rem;
+            /* RETRO TEXT SHADOW */
+            text-shadow: 
+                2px 2px 0px #d4a24e, 
+                -2px -2px 0px #61dafb,
+                0 0 15px rgba(255,255,255,0.5);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        p {
+            font-size: 1.4rem;
+            color: #ccc;
+            text-shadow: 0 0 5px rgba(0,0,0,0.8);
+            margin: 5px 0;
+        }
+
+        .blink {
+            animation: blinker 0.8s steps(2, start) infinite;
+            color: #fbd061; 
+            text-shadow: 0 0 10px #fbd061;
+            margin-top: 25px;
+            display: block;
+            font-size: 1.6rem;
+        }
+
+        @keyframes blinker {
+            50% { opacity: 0; }
+        }
+
+        .hud {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 1.6rem;
+            color: #61dafb;
+            text-shadow: 0 0 8px #61dafb;
+            display: none;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 5px 15px;
+            border-left: 4px solid #d4a24e;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+        }
+
+        .controls-hint {
+            margin-top: 25px;
+            font-size: 1.1rem;
+            color: #888;
+            border-top: 1px solid #444;
+            padding-top: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            line-height: 1.8;
+        }
+
+        .tip-small {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 10px;
+            text-transform: none;
+            letter-spacing: 0;
+        }
+
+        /* SCANLINES */
+        #game-container::after {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            background: 
+                linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%),
+                radial-gradient(circle, rgba(0,0,0,0) 60%, rgba(139, 0, 0, 0.1) 100%);
+            background-size: 100% 4px, 100% 100%;
+            z-index: 10;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="game-container">
+        <canvas id="gameCanvas" width="800" height="400"></canvas>
+        
+        <!-- MUSIC PLAYER (Hidden) -->
+        <audio id="bgm" loop preload="auto"></audio>
+
+        <div class="hud" id="hud">
+            DIST: <span id="score-dist">0</span>m <span style="color:#555">|</span> DATA: <span id="score-data" style="color:#fbd061">0</span> <span style="color:#555">|</span> SPD: <span id="score-speed" style="color:#ff4444">0</span> km/h
+        </div>
+
+        <div class="ui-layer" id="start-screen">
+            <h1>SULPHUR RUN</h1>
+            <p>SRV SIMULATION // NAHLA SURFACE</p>
+            <p class="blink">[PRESS SPACE TO START]</p>
+            
+            <div class="controls-hint">
+                <span style="color:#61dafb">SHOOT:</span> Left-Click / Enter <br>
+                <span style="color:#fbd061">JUMP:</span> Right-Click / Space
+            </div>
+            <div class="tip-small">
+                AVOID: Craters & Tech Debris (Indestructible)<br>
+                DESTROY: Rocks & Spikes<br>
+                <span style="color:#61dafb">COLLECT:</span> Blue Nodes for Data Points
+            </div>
+        </div>
+
+        <div class="ui-layer" id="game-over-screen" style="display: none;">
+            <h1>CRITICAL FAILURE</h1>
+            <p style="color:#ff4444; text-shadow: 0 0 10px red;">SRV DESTROYED</p>
+            <p>DISTANCE: <span id="final-dist" style="color:#fff">0</span>m</p>
+            <p>DATA COLLECTED: <span id="final-data" style="color:#fbd061">0</span></p>
+            <p class="blink">[PRESS SPACE TO REBOOT]</p>
+        </div>
+    </div>
+
+<script>
+/**
+ * NAHLA SRV MINIGAME - NEON EDITION + COMBAT + MUSIC
+ */
+
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+
+// --- MUSIC CONFIGURATION ---
+const MUSIC_FILE = 'nahla_theme.mp3'; // <--- EDIT THIS FILENAME to match your mp3
+const MUSIC_VOLUME = 0.5; // 0.0 to 1.0
+
+// --- GAME STATE ---
+let gameState = 'START'; 
+let frames = 0;
+let gameSpeed = 4;
+let scoreDist = 0;
+let scoreData = 0;
+
+// --- CONFIG ---
+const GRAVITY = 0.25; 
+const JUMP_FORCE = -7.5;
+const GROUND_Y = 320;
+
+// --- MUSIC SETUP ---
+const bgm = document.getElementById('bgm');
+if (bgm) {
+    bgm.src = MUSIC_FILE;
+    bgm.volume = MUSIC_VOLUME;
+}
+
+// --- ENTITIES ---
+
+const rover = {
+    x: 100,
+    y: GROUND_Y,
+    width: 40,
+    height: 20,
+    dy: 0,
+    grounded: true,
+    angle: 0,
+    
+    draw: function() {
+        ctx.save();
+        ctx.translate(this.x + this.width/2, this.y + this.height/2);
+        
+        let targetAngle = Math.min(Math.max(this.dy * 0.05, -0.3), 0.3);
+        if(this.grounded) targetAngle = 0;
+        this.angle += (targetAngle - this.angle) * 0.1;
+        ctx.rotate(this.angle);
+
+        // HEADLIGHT BEAM (Reduced Intensity)
+        ctx.save();
+        ctx.translate(15, 0); 
+        ctx.rotate(0.1); 
+        const beamGrad = ctx.createLinearGradient(0, 0, 150, 0);
+        beamGrad.addColorStop(0, 'rgba(255, 255, 255, 0.2)'); 
+        beamGrad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+        ctx.fillStyle = beamGrad;
+        ctx.beginPath();
+        ctx.moveTo(0, -5);
+        ctx.lineTo(120, -30); 
+        ctx.lineTo(120, 30);
+        ctx.lineTo(0, 5);
+        ctx.fill();
+        ctx.restore();
+
+        // CHASSIS
+        ctx.fillStyle = '#222';
+        ctx.shadowColor = '#000';
+        ctx.shadowBlur = 5;
+        ctx.fillRect(-20, -10, 40, 16); 
+        ctx.shadowBlur = 0; 
+
+        // COCKPIT
+        ctx.fillStyle = '#61dafb';
+        ctx.shadowColor = '#61dafb';
+        ctx.shadowBlur = 10;
+        ctx.fillRect(-5, -14, 14, 8);
+        ctx.shadowBlur = 0; 
+        
+        // WHEELS
+        ctx.fillStyle = '#111';
+        const bounce = this.grounded ? Math.sin(frames * 0.5) * 1 : 0;
+        
+        const drawWheel = (ox, oy) => {
+            ctx.beginPath(); 
+            ctx.arc(ox, oy, 6, 0, Math.PI*2); 
+            ctx.fill();
+            ctx.strokeStyle = '#555';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+            ctx.fillStyle = '#444';
+            ctx.fillRect(ox-1, oy-1, 2, 2);
+        };
+
+        drawWheel(-15, 8 + bounce);
+        drawWheel(0, 8 - bounce);
+        drawWheel(15, 8 + bounce);
+
+        ctx.restore();
+    },
+
+    update: function() {
+        this.dy += GRAVITY;
+        this.y += this.dy;
+
+        if (this.y + this.height/2 >= GROUND_Y) {
+            this.y = GROUND_Y - this.height/2;
+            this.dy = 0;
+            this.grounded = true;
+        } else {
+            this.grounded = false;
+        }
+    },
+
+    jump: function() {
+        if (this.grounded) {
+            this.dy = JUMP_FORCE;
+            this.grounded = false;
+            playSound('jump');
+            
+            for(let i=0; i<8; i++) {
+                particles.push({
+                    x: this.x + 10,
+                    y: GROUND_Y,
+                    vx: -2 - Math.random() * 2,
+                    vy: -1 - Math.random() * 2,
+                    life: 30,
+                    color: '#d4a24e',
+                    size: Math.random() * 3
+                });
+            }
+        }
+    },
+
+    shoot: function() {
+        projectiles.push({
+            x: this.x + 30,
+            y: this.y + 5,
+            vx: 12,
+            life: 60
+        });
+        playSound('shoot');
+    }
+};
+
+let obstacles = [];
+let samples = []; 
+let particles = [];
+let stars = [];
+let projectiles = [];
+let miniCraters = []; // Decorative foreground craters
+
+for(let i=0; i<60; i++) {
+    stars.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * (GROUND_Y - 50),
+        size: Math.random() * 1.5,
+        speed: Math.random() * 0.2 + 0.05,
+        twinkle: Math.random()
+    });
+}
+
+// --- INPUT ---
+const handleInput = (action) => {
+    if (gameState === 'START') startGame();
+    else if (gameState === 'PLAYING') {
+        if (action === 'jump') rover.jump();
+        if (action === 'shoot') rover.shoot();
+    }
+    else if (gameState === 'GAMEOVER') resetGame();
+};
+
+window.addEventListener('keydown', e => {
+    if (e.code === 'Space' || e.code === 'ArrowUp') {
+        e.preventDefault();
+        handleInput('jump');
+    }
+    if (e.code === 'Enter' || e.code === 'KeyZ') {
+        e.preventDefault();
+        handleInput('shoot');
+    }
+});
+
+// Touch controls
+window.addEventListener('touchstart', e => {
+    e.preventDefault();
+    const touchX = e.touches[0].clientX;
+    const width = window.innerWidth;
+    const rect = canvas.getBoundingClientRect();
+    const relativeX = touchX - rect.left;
+    
+    if (relativeX < rect.width / 2) handleInput('shoot');
+    else handleInput('jump');
+}, {passive: false});
+
+// Mouse Click
+window.addEventListener('mousedown', e => {
+    if (e.button === 0) handleInput('shoot'); // Left Click
+    if (e.button === 2) { // Right Click
+        e.preventDefault(); // Stop context menu
+        handleInput('jump');
+    }
+});
+window.addEventListener('contextmenu', e => e.preventDefault()); 
+
+// --- AUDIO (SFX) ---
+const AudioContext = window.AudioContext || window.webkitAudioContext;
+const actx = new AudioContext();
+
+function playSound(type) {
+    if (actx.state === 'suspended') actx.resume();
+    const osc = actx.createOscillator();
+    const gain = actx.createGain();
+    const filter = actx.createBiquadFilter();
+    
+    osc.connect(filter);
+    filter.connect(gain);
+    gain.connect(actx.destination);
+
+    const now = actx.currentTime;
+
+    if (type === 'jump') {
+        osc.type = 'sawtooth';
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(800, now);
+        filter.frequency.exponentialRampToValueAtTime(100, now + 0.2);
+        osc.frequency.setValueAtTime(150, now);
+        osc.frequency.exponentialRampToValueAtTime(50, now + 0.2);
+        gain.gain.setValueAtTime(0.15, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+        osc.start();
+        osc.stop(now + 0.2);
+    } else if (type === 'shoot') {
+        osc.type = 'square';
+        filter.frequency.setValueAtTime(2000, now);
+        osc.frequency.setValueAtTime(800, now);
+        osc.frequency.exponentialRampToValueAtTime(100, now + 0.1);
+        gain.gain.setValueAtTime(0.1, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+        osc.start();
+        osc.stop(now + 0.1);
+    } else if (type === 'explode') {
+        osc.type = 'sawtooth'; 
+        osc.frequency.setValueAtTime(100, now);
+        osc.frequency.exponentialRampToValueAtTime(10, now + 0.3);
+        gain.gain.setValueAtTime(0.3, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+        osc.start();
+        osc.stop(now + 0.3);
+    } else if (type === 'hit') {
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(100, now);
+        osc.frequency.linearRampToValueAtTime(20, now + 0.4);
+        gain.gain.setValueAtTime(0.3, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+        osc.start();
+        osc.stop(now + 0.4);
+    } else if (type === 'collect') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(800, now);
+        osc.frequency.linearRampToValueAtTime(1600, now + 0.1);
+        gain.gain.setValueAtTime(0.1, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.15);
+        osc.start();
+        osc.stop(now + 0.15);
+        
+        const osc2 = actx.createOscillator();
+        const gain2 = actx.createGain();
+        osc2.connect(gain2);
+        gain2.connect(actx.destination);
+        osc2.type = 'sine';
+        osc2.frequency.setValueAtTime(1200, now);
+        osc2.frequency.linearRampToValueAtTime(2400, now + 0.1);
+        gain2.gain.setValueAtTime(0.05, now);
+        gain2.gain.linearRampToValueAtTime(0.01, now + 0.15);
+        osc2.start();
+        osc2.stop(now + 0.15);
+    }
+}
+
+// --- LOGIC ---
+
+function startGame() {
+    gameState = 'PLAYING';
+    document.getElementById('start-screen').style.display = 'none';
+    document.getElementById('game-over-screen').style.display = 'none';
+    document.getElementById('hud').style.display = 'block';
+    gameSpeed = 4;
+    scoreDist = 0;
+    scoreData = 0;
+    obstacles = [];
+    samples = [];
+    projectiles = [];
+    miniCraters = [];
+    document.getElementById('score-data').innerText = "0";
+
+    // Play Music
+    if(bgm && bgm.paused) {
+        bgm.play().catch(e => console.log("Audio requires interaction", e));
+    }
+}
+
+function resetGame() {
+    rover.y = GROUND_Y;
+    rover.dy = 0;
+    startGame();
+}
+
+function spawnObstacle() {
+    const r = Math.random();
+    let type = 'ROCK';
+    
+    // Weighted spawn chances
+    if (r > 0.8) type = 'CRATER';
+    else if (r > 0.6) type = 'DEBRIS'; // Indestructible
+    else if (r > 0.45) type = 'SPIKE'; // Destroyable
+    else type = 'ROCK'; // Standard
+
+    obstacles.push({
+        x: canvas.width + 50,
+        y: GROUND_Y,
+        width: 30,
+        height: 30,
+        type: type,
+        hp: 1 
+    });
+}
+
+function spawnSample() {
+    samples.push({
+        x: canvas.width + 50,
+        y: GROUND_Y - 60 - (Math.random() * 40),
+        size: 12,
+        rotation: 0
+    });
+}
+
+function spawnMiniCrater() {
+    // Small decorative craters in foreground
+    miniCraters.push({
+        x: canvas.width + 20,
+        y: GROUND_Y + 15 + Math.random() * 30, // Random depth in foreground
+        width: 10 + Math.random() * 15,
+        height: 3 + Math.random() * 3
+    });
+}
+
+function update() {
+    if (gameState !== 'PLAYING') return;
+
+    frames++;
+    scoreDist += 0.1;
+    if (frames % 600 === 0) gameSpeed += 0.5;
+
+    rover.update();
+
+    if (frames % 100 === 0 && Math.random() > 0.3) spawnObstacle();
+    if (frames % 150 === 0 && Math.random() > 0.4) spawnSample();
+    if (frames % 40 === 0 && Math.random() > 0.5) spawnMiniCrater();
+
+    // Update Projectiles
+    for (let i = projectiles.length - 1; i >= 0; i--) {
+        let p = projectiles[i];
+        p.x += p.vx;
+        p.life--;
+        if (p.life <= 0) projectiles.splice(i, 1);
+    }
+
+    // Mini Craters (Decoration)
+    for (let i = miniCraters.length - 1; i >= 0; i--) {
+        let mc = miniCraters[i];
+        mc.x -= gameSpeed;
+        if(mc.x < -50) miniCraters.splice(i, 1);
+    }
+
+    // Obstacles Collision & Logic
+    for (let i = obstacles.length - 1; i >= 0; i--) {
+        let obs = obstacles[i];
+        obs.x -= gameSpeed;
+
+        // 1. Projectile vs Obstacle
+        if (obs.type === 'ROCK' || obs.type === 'SPIKE') {
+            for (let k = projectiles.length - 1; k >= 0; k--) {
+                let proj = projectiles[k];
+                // Simple box check
+                if (proj.x > obs.x && proj.x < obs.x + obs.width &&
+                    proj.y > obs.y - obs.height + 10 && proj.y < obs.y + 10) {
+                    
+                    // Hit!
+                    obs.hp--;
+                    projectiles.splice(k, 1); // Remove bullet
+                    
+                    if (obs.hp <= 0) {
+                        // Destroy Rock
+                        playSound('explode');
+                        scoreData += 10; // Bonus for shooting
+                        document.getElementById('score-data').innerText = scoreData;
+                        
+                        // Debris
+                        for(let j=0; j<10; j++) {
+                            particles.push({
+                                x: obs.x + obs.width/2,
+                                y: obs.y - obs.height/2,
+                                vx: (Math.random()-0.5)*8, 
+                                vy: (Math.random()-0.5)*8,
+                                life: 20, 
+                                color: obs.type === 'SPIKE' ? '#d4a24e' : '#8a7045', 
+                                size: Math.random()*3
+                            });
+                        }
+                        obstacles.splice(i, 1); // Remove rock
+                        break; // Stop checking this obstacle
+                    }
+                }
+            }
+            if (obstacles[i] !== obs) continue; // If removed, skip rover collision check
+        }
+        // NOTE: DEBRIS and CRATERS are ignored by projectiles
+
+        // 2. Rover vs Obstacle
+        let hit = false;
+        let rLeft = rover.x - 10; 
+        let rRight = rover.x + 10;
+        let rBottom = rover.y + 18;
+
+        if (obs.type === 'ROCK' || obs.type === 'DEBRIS' || obs.type === 'SPIKE') {
+            let oLeft = obs.x;
+            let oRight = obs.x + obs.width;
+            let oTop = obs.y - obs.height + 10;
+            // Debris is taller, Spikes are sharper
+            if(obs.type === 'SPIKE') oTop -= 10;
+            
+            if (rRight > oLeft && rLeft < oRight && rBottom > oTop) hit = true;
+        } else {
+            // Crater logic (unchanged)
+            let holeLeft = obs.x + 5;
+            let holeRight = obs.x + obs.width - 5;
+            if (rover.grounded && rover.x > holeLeft && rover.x < holeRight) hit = true;
+        }
+
+        if (hit) {
+            playSound('hit');
+            gameState = 'GAMEOVER';
+            document.getElementById('game-over-screen').style.display = 'flex';
+            document.getElementById('final-dist').innerText = Math.floor(scoreDist);
+            document.getElementById('final-data').innerText = scoreData;
+            
+            for(let j=0; j<30; j++) {
+                particles.push({
+                    x: rover.x, y: rover.y,
+                    vx: (Math.random()-0.5)*10, vy: (Math.random()-0.5)*10,
+                    life: 60, color: '#ff4444', size: Math.random()*4
+                });
+            }
+        }
+
+        if (obs.x < -50) obstacles.splice(i, 1);
+    }
+
+    // Samples
+    for (let i = samples.length - 1; i >= 0; i--) {
+        let s = samples[i];
+        s.x -= gameSpeed;
+        s.rotation += 0.05;
+
+        let dx = (rover.x + rover.width/2) - (s.x);
+        let dy = (rover.y + rover.height/2) - (s.y);
+        let dist = Math.sqrt(dx*dx + dy*dy);
+
+        if (dist < 40) { 
+            playSound('collect');
+            scoreData += 50;
+            document.getElementById('score-data').innerText = scoreData;
+            samples.splice(i, 1);
+            
+            for(let j=0; j<8; j++) {
+                particles.push({
+                    x: s.x, y: s.y,
+                    vx: (Math.random()-0.5)*6, vy: (Math.random()-0.5)*6,
+                    life: 20, color: '#61dafb', size: 2
+                });
+            }
+            continue;
+        }
+
+        if (s.x < -50) samples.splice(i, 1);
+    }
+
+    // Particles
+    for (let i = particles.length - 1; i >= 0; i--) {
+        let p = particles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.life--;
+        p.vy += 0.1;
+        if(p.life <= 0) particles.splice(i, 1);
+    }
+
+    // Stars
+    stars.forEach(star => {
+        star.x -= star.speed;
+        star.twinkle += 0.05;
+        if(star.x < 0) star.x = canvas.width;
+    });
+
+    document.getElementById('score-dist').innerText = Math.floor(scoreDist);
+    document.getElementById('score-speed').innerText = Math.floor(gameSpeed * 10);
+}
+
+function draw() {
+    // 1. CLEAR
+    const skyGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+    skyGrad.addColorStop(0, '#0a0505'); 
+    skyGrad.addColorStop(1, '#1a1005'); 
+    ctx.fillStyle = skyGrad;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // 2. STARS
+    stars.forEach(star => {
+        // Change opacity to 0.1 -> 0.9 range so stars don't disappear
+        const opacity = 0.5 + Math.sin(star.twinkle) * 0.4;
+        ctx.fillStyle = `rgba(255, 255, 255, ${opacity})`;
+        ctx.fillRect(star.x, star.y, star.size, star.size);
+    });
+
+    // REBEKAH
+    ctx.save();
+    ctx.translate(650, 150);
+    ctx.shadowColor = '#ff0044';
+    ctx.shadowBlur = 60;
+    ctx.beginPath();
+    ctx.arc(0, 0, 48, 0, Math.PI*2);
+    ctx.fillStyle = '#000'; 
+    ctx.fill();
+    ctx.shadowBlur = 0; 
+
+    ctx.save();
+    ctx.rotate(-0.2);
+    ctx.scale(1, 0.3); 
+    ctx.beginPath();
+    ctx.arc(0, 0, 100, 0, Math.PI*2);
+    ctx.strokeStyle = 'rgba(97, 218, 251, 0.2)';
+    ctx.lineWidth = 15;
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(0, 0, 90, 0, Math.PI*2);
+    ctx.strokeStyle = 'rgba(97, 218, 251, 0.6)'; 
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    ctx.restore();
+    
+    const grad = ctx.createLinearGradient(-40, -40, 40, 40);
+    grad.addColorStop(0, '#4a0000'); 
+    grad.addColorStop(0.5, '#800000'); 
+    grad.addColorStop(1, '#200000'); 
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(0, 0, 50, 0, Math.PI*2);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(255, 100, 100, 0.1)';
+    ctx.beginPath();
+    ctx.arc(-15, -15, 10, 0, Math.PI*2);
+    ctx.fill();
+    ctx.restore();
+
+    // 3. GROUND
+    ctx.fillStyle = '#1a1205'; 
+    ctx.fillRect(0, GROUND_Y + 10, canvas.width, canvas.height - GROUND_Y);
+    ctx.strokeStyle = '#d4a24e'; 
+    ctx.lineWidth = 2;
+    ctx.shadowColor = '#d4a24e';
+    ctx.shadowBlur = 10;
+    ctx.beginPath();
+    ctx.moveTo(0, GROUND_Y + 10);
+    ctx.lineTo(canvas.width, GROUND_Y + 10);
+    ctx.stroke();
+    ctx.shadowBlur = 0; 
+
+    // MINI CRATERS (Decoration)
+    ctx.fillStyle = '#0f0a02'; // Darker than ground
+    miniCraters.forEach(mc => {
+        ctx.beginPath();
+        ctx.ellipse(mc.x, mc.y, mc.width, mc.height, 0, 0, Math.PI*2);
+        ctx.fill();
+        // Highlight rim
+        ctx.strokeStyle = '#2a1e0a';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+    });
+
+    // 4. OBSTACLES
+    obstacles.forEach(obs => {
+        if (obs.type === 'ROCK') {
+            ctx.fillStyle = '#5c4d35'; 
+            ctx.beginPath();
+            ctx.moveTo(obs.x, GROUND_Y + 10);
+            ctx.lineTo(obs.x + obs.width/2, GROUND_Y + 10 - obs.height);
+            ctx.lineTo(obs.x + obs.width, GROUND_Y + 10);
+            ctx.fill();
+            ctx.strokeStyle = '#8a7045';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+        } 
+        else if (obs.type === 'DEBRIS') {
+            // Indestructible Tech Debris (Black box with lights)
+            ctx.fillStyle = '#080808'; 
+            ctx.fillRect(obs.x, GROUND_Y + 10 - 25, 30, 25);
+            // Border
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(obs.x, GROUND_Y + 10 - 25, 30, 25);
+            // Blinking Lights
+            const blink = Math.sin(frames * 0.2) > 0;
+            ctx.fillStyle = blink ? '#ff0000' : '#330000';
+            ctx.fillRect(obs.x + 5, GROUND_Y + 10 - 20, 4, 4);
+            ctx.fillStyle = !blink ? '#00ccff' : '#003344';
+            ctx.fillRect(obs.x + 20, GROUND_Y + 10 - 15, 4, 4);
+        }
+        else if (obs.type === 'SPIKE') {
+            // Sulphur Spike (Destroyable)
+            ctx.fillStyle = '#d4a24e'; 
+            ctx.beginPath();
+            ctx.moveTo(obs.x, GROUND_Y + 10);
+            ctx.lineTo(obs.x + 10, GROUND_Y + 10 - 40); // Tall spike
+            ctx.lineTo(obs.x + 20, GROUND_Y + 10);
+            ctx.fill();
+            // Highlight
+            ctx.strokeStyle = '#ffe082';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+        }
+        else {
+            // CRATER
+            ctx.fillStyle = '#050402'; 
+            ctx.fillRect(obs.x, GROUND_Y + 10, obs.width, 20);
+            ctx.fillStyle = '#b88a3b'; 
+            ctx.fillRect(obs.x, GROUND_Y + 10, 4, 4);
+            ctx.fillRect(obs.x + obs.width - 4, GROUND_Y + 10, 4, 4);
+        }
+    });
+
+    // 5. SAMPLES
+    ctx.save();
+    samples.forEach(s => {
+        ctx.translate(s.x, s.y);
+        ctx.rotate(s.rotation);
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(-2, -2, 4, 4);
+        ctx.strokeStyle = '#61dafb';
+        ctx.lineWidth = 2;
+        ctx.shadowColor = '#61dafb';
+        ctx.shadowBlur = 15; 
+        ctx.beginPath();
+        ctx.moveTo(0, -s.size);
+        ctx.lineTo(s.size, 0);
+        ctx.lineTo(0, s.size);
+        ctx.lineTo(-s.size, 0);
+        ctx.closePath();
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+        ctx.rotate(-s.rotation);
+        ctx.translate(-s.x, -s.y);
+    });
+    ctx.restore();
+
+    // 6. ROVER
+    rover.draw();
+
+    // 7. PROJECTILES
+    ctx.fillStyle = '#fbd061'; // Gold bullets
+    ctx.shadowColor = '#fbd061';
+    ctx.shadowBlur = 5;
+    projectiles.forEach(p => {
+        ctx.fillRect(p.x, p.y, 8, 3);
+    });
+    ctx.shadowBlur = 0;
+
+    // 8. PARTICLES
+    particles.forEach(p => {
+        ctx.fillStyle = p.color || '#aaa';
+        if(p.color === '#ff4444' || p.color === '#61dafb') {
+            ctx.shadowColor = p.color;
+            ctx.shadowBlur = 5;
+        }
+        ctx.fillRect(p.x, p.y, p.size || 2, p.size || 2);
+        ctx.shadowBlur = 0;
+    });
+}
+
+function loop() {
+    update();
+    draw();
+    requestAnimationFrame(loop);
+}
+
+// Start Loop
+loop();
+
+</script>
+</body>
+</html>
