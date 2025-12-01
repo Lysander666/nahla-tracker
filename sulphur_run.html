@@ -249,6 +249,21 @@ const ctx = canvas.getContext('2d');
 const MUSIC_FILE = 'nahla_theme.mp3'; 
 const MUSIC_VOLUME = 0.5;
 
+    
+// --- BACKGROUND MUSIC SETUP ---
+const bgm = document.getElementById("bgm");
+bgm.src = MUSIC_FILE;
+bgm.volume = MUSIC_VOLUME;
+
+// Most browsers require interaction before playback:
+document.addEventListener("click", () => {
+    if (bgm.paused) bgm.play().catch(()=>{});
+}, { once: true });
+
+document.addEventListener("keydown", () => {
+    if (bgm.paused) bgm.play().catch(()=>{});
+}, { once: true });
+
 // --- CONFIGURATION ---
 const THEMES = [
     { name: 'SULPHUR', main: '#d4a24e', glow: 'rgba(212, 162, 78, 0.4)' },
