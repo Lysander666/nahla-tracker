@@ -22,6 +22,9 @@
             justify-content: center;
             height: 100vh;
             overflow: hidden;
+            /* Prevent selection on body too, just in case */
+            user-select: none;
+            -webkit-user-select: none;
         }
 
         #game-container {
@@ -37,6 +40,13 @@
             background-color: #08060a; 
             image-rendering: pixelated;
             transition: box-shadow 1s ease;
+            
+            /* PREVENT TEXT SELECTION */
+            user-select: none; 
+            -webkit-user-select: none; /* Safari/Chrome */
+            -moz-user-select: none;    /* Firefox */
+            -ms-user-select: none;     /* IE/Edge */
+            cursor: crosshair;         /* Game-like cursor */
         }
 
         canvas {
@@ -209,7 +219,7 @@
 
 <script>
 /**
- * NAHLA SRV MINIGAME - NEON EDITION + COMBAT + MUSIC + DOUBLE JUMP + PHASES + DAY/NIGHT + FADE
+ * NAHLA SRV MINIGAME - NEON EDITION + COMBAT + MUSIC + DOUBLE JUMP + PHASES + DAY/NIGHT + FADE + SELECTION FIX
  */
 
 const canvas = document.getElementById('gameCanvas');
@@ -230,13 +240,16 @@ const THEMES = [
 const GREEK_PHASES = ['α','β','γ','δ','ε','ζ','η','θ','ι','κ','λ','μ'];
 const POINTS_PER_PHASE = 100; 
 
-// --- DAY/NIGHT CYCLE CONFIG ---
-// Sky Colors (Top, Bottom) & Ambient Light
+// --- DAY/NIGHT CYCLE CONFIG (UPDATED FOR BLOOM/HAZE) ---
 const LIGHTING = {
-    DAWN:  { skyTop: '#1a0d00', skyBot: '#4d2600', ground: '#2b1d05', stars: 0.3 }, // Alpha-Gamma (0-2)
-    DAY:   { skyTop: '#0a0a1a', skyBot: '#1f1f3d', ground: '#4a3b18', stars: 0.1 }, // Delta-Zeta (3-5)
-    DUSK:  { skyTop: '#1a0505', skyBot: '#4d1a00', ground: '#2b1000', stars: 0.3 }, // Eta-Iota (6-8)
-    NIGHT: { skyTop: '#050505', skyBot: '#0a0505', ground: '#1a1205', stars: 0.8 }  // Kappa-Mu (9-11)
+    // Dawn: Hazy orange/brown
+    DAWN:  { skyTop: '#2b1a05', skyBot: '#5e3205', ground: '#362305', haze: 'rgba(212, 162, 78, 0.15)', stars: 0.2 }, 
+    // Day: Bright "Space Haze", darker sky top, bright horizon
+    DAY:   { skyTop: '#0a0a1f', skyBot: '#2d2d5c', ground: '#5c481e', haze: 'rgba(150, 150, 200, 0.1)', stars: 0.1 }, 
+    // Dusk: Deep Red/Purple fade
+    DUSK:  { skyTop: '#1f0505', skyBot: '#5c1200', ground: '#331200', haze: 'rgba(150, 50, 0, 0.15)', stars: 0.3 }, 
+    // Night: Deep void, no haze, high contrast
+    NIGHT: { skyTop: '#050505', skyBot: '#0a0505', ground: '#1a1205', haze: 'rgba(0,0,0,0)', stars: 0.8 }  
 };
 
 // --- GAME STATE ---
@@ -254,8 +267,8 @@ let currentLoopIndex = 0;
 // Lighting Transition Variables
 let currentLighting = LIGHTING.DAWN;
 let targetLighting = LIGHTING.DAWN;
-let transitionProgress = 1.0; // 0.0 to 1.0
-const TRANSITION_SPEED = 0.016; // Approx 1 second at 60fps (1/60)
+let transitionProgress = 1.0; 
+const TRANSITION_SPEED = 0.016; 
 
 // --- CONFIG ---
 const GRAVITY = 0.25; 
@@ -588,12 +601,7 @@ function playSound(type) {
 // --- LOGIC ---
 
 function getTargetLighting() {
-    // UPDATED: 3 Phases per lighting state
-    // 0-2 = Dawn
-    // 3-5 = Day
-    // 6-8 = Dusk
-    // 9-11 = Night
-    
+    // 0-2 = Dawn, 3-5 = Day, 6-8 = Dusk, 9-11 = Night
     if (currentPhaseIndex <= 2) return LIGHTING.DAWN;
     if (currentPhaseIndex <= 5) return LIGHTING.DAY;
     if (currentPhaseIndex <= 8) return LIGHTING.DUSK;
@@ -602,7 +610,6 @@ function getTargetLighting() {
 
 // Color interpolation helper
 function lerpColor(a, b, amount) { 
-    // Expects hex strings like #RRGGBB
     var ah = parseInt(a.replace(/#/g, ''), 16),
         ar = ah >> 16, ag = ah >> 8 & 0xff, ab = ah & 0xff,
         bh = parseInt(b.replace(/#/g, ''), 16),
@@ -612,6 +619,24 @@ function lerpColor(a, b, amount) {
         rb = ab + amount * (bb - ab);
 
     return '#' + ((1 << 24) + (rr << 16) + (rg << 8) + (rb | 0)).toString(16).slice(1);
+}
+
+// RGBA interpolation helper for haze
+function lerpRgba(a, b, amount) {
+    // Simple parser for "rgba(r, g, b, a)"
+    const parse = (c) => {
+        const parts = c.match(/[\d.]+/g);
+        return parts.map(Number);
+    };
+    const [r1, g1, b1, a1] = parse(a);
+    const [r2, g2, b2, a2] = parse(b);
+    
+    const r = Math.round(r1 + amount * (r2 - r1));
+    const g = Math.round(g1 + amount * (g2 - g1));
+    const b_ = Math.round(b1 + amount * (b2 - b1));
+    const alpha = a1 + amount * (a2 - a1);
+    
+    return `rgba(${r}, ${g}, ${b_}, ${alpha})`;
 }
 
 // Value interpolation helper
@@ -625,7 +650,6 @@ function updateTheme() {
     // Update DOM styles
     const container = document.getElementById('game-container');
     const hud = document.getElementById('hud');
-    const hudPhase = document.getElementById('score-phase');
     const startBlink = document.getElementById('start-blink');
     const titleText = document.getElementById('title-text');
     const startScreen = document.getElementById('start-screen');
@@ -638,8 +662,6 @@ function updateTheme() {
     hud.style.borderColor = theme.main;
     hud.style.color = theme.main;
     hud.style.textShadow = `0 0 8px ${theme.main}`;
-    // Phase color is now forced to CYAN in HTML, so we don't update it here.
-    // hudPhase.style.color = theme.main; 
 
     // Start Screen Elements (for next restart)
     startScreen.style.borderColor = theme.main;
@@ -754,17 +776,12 @@ function update() {
     scoreDist += 0.1;
     
     // --- LIGHTING TRANSITION LOGIC ---
-    // Smoothly interpolate current lighting values towards target
     if (transitionProgress < 1.0) {
         transitionProgress += TRANSITION_SPEED;
         if (transitionProgress > 1.0) transitionProgress = 1.0;
-        
-        // No direct "currentLighting = lerp(...)" because we need per-frame interpolation
-        // Instead, we calculate "renderLighting" in draw() based on currentLighting (start) and targetLighting (end)
     }
 
     // --- PHASE & THEME LOGIC ---
-    // Calculate current phase based on data score
     let totalPhases = Math.floor(scoreData / POINTS_PER_PHASE);
     let newPhaseIndex = totalPhases % 12;
     let newLoopIndex = Math.floor(totalPhases / 12);
@@ -772,16 +789,10 @@ function update() {
     // Check for changes
     if (newPhaseIndex !== currentPhaseIndex) {
         currentPhaseIndex = newPhaseIndex;
-        // Update HUD text
         document.getElementById('score-phase').innerText = GREEK_PHASES[currentPhaseIndex];
-        // Little sound or flash?
-        playSound('collect'); // Use collect sound for now
+        playSound('collect'); 
         
         // TRIGGER LIGHTING CHANGE
-        // Capture current state as start point
-        // NOTE: Ideally we'd capture the *actual* current visible state, 
-        // but for simplicity we assume transition finished. 
-        // If rapid changes happen, visual jumps might occur, but with 100pts per phase it's rare.
         currentLighting = targetLighting; 
         targetLighting = getTargetLighting();
         transitionProgress = 0.0; // Start transition
@@ -797,7 +808,6 @@ function update() {
         gameSpeed += 1.0; 
     }
 
-    // Time-based speed up (Reduced frequency since we have loop-based speed up)
     if (frames % 1200 === 0) gameSpeed += 0.5;
 
     rover.update();
@@ -877,7 +887,6 @@ function update() {
                     if (obs.hp <= 0) {
                         playSound('explode');
                         scoreData += 10; 
-                        // Note: Data update handled by update loop phase check next frame
                         document.getElementById('score-data').innerText = scoreData;
                         
                         // Debris
@@ -1000,6 +1009,7 @@ function draw() {
     const activeSkyBot = lerpColor(currentLighting.skyBot, targetLighting.skyBot, transitionProgress);
     const activeGround = lerpColor(currentLighting.ground, targetLighting.ground, transitionProgress);
     const activeStars  = lerp(currentLighting.stars, targetLighting.stars, transitionProgress);
+    const activeHaze   = lerpRgba(currentLighting.haze, targetLighting.haze, transitionProgress);
 
     // 1. CLEAR - Dynamic Day/Night Cycle
     const skyGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
@@ -1046,9 +1056,6 @@ function draw() {
     ctx.stroke();
     ctx.restore();
     
-    // Planet body stays Red-ish usually, or should it change?
-    // Let's keep the planet body stable but tint it slightly?
-    // For now, keep the deep red aesthetic as it's the "character" of the planet
     const grad = ctx.createLinearGradient(-50, -50, 50, 50);
     grad.addColorStop(0, '#4a0000'); 
     grad.addColorStop(0.5, '#800000'); 
@@ -1071,8 +1078,17 @@ function draw() {
     });
 
     // 3. GROUND - Dynamic Lighting
+    // Base Ground Fill
     ctx.fillStyle = activeGround; 
     ctx.fillRect(0, GROUND_Y + 10, canvas.width, canvas.height - GROUND_Y);
+    
+    // Atmospheric Haze Overlay (Gradient)
+    const hazeGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+    hazeGrad.addColorStop(0, activeHaze); 
+    hazeGrad.addColorStop(0.6, 'rgba(0,0,0,0)');
+    ctx.fillStyle = hazeGrad;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
     // Horizon line changes with theme
     ctx.strokeStyle = theme.main; 
     ctx.lineWidth = 2;
