@@ -403,7 +403,7 @@ const rover = {
         // Landing Sparks
         if (!wasGrounded && this.grounded) {
             for(let i=0; i<5; i++) {
-                addParticles({
+                particles.push({
                     x: this.x + Math.random() * 40 - 20,
                     y: GROUND_Y,
                     vx: Math.random() * 4 - 2,
@@ -427,7 +427,7 @@ const rover = {
             const theme = THEMES[currentThemeIndex];
             const pColor = this.jumps === 2 ? theme.main : '#d4a24e'; 
             for(let i=0; i<8; i++) {
-                addParticles({
+                particles.push({
                     x: this.x + 10,
                     y: this.y + 10,
                     vx: -2 - Math.random() * 2,
@@ -465,9 +465,6 @@ let projectiles = [];
 let miniCraters = []; 
 let meteors = [];
 let dustStreaks = [];
-
-let lastShootTime = 0;
-const SHOOT_COOLDOWN = 150; // ms    
 
 // Star Layers
 let starsSlow = [];
@@ -543,11 +540,10 @@ window.addEventListener('keydown', e => {
         e.preventDefault();
         handleInput('jump');
     }
-if (e.code === 'Enter' || e.code === 'KeyZ') {
-    e.preventDefault();
-    if (e.repeat) return;  // ADD THIS LINE
-    handleInput('shoot');
-}
+    if (e.code === 'Enter' || e.code === 'KeyZ') {
+        e.preventDefault();
+        handleInput('shoot');
+    }
     if (e.code === 'KeyP') {
         e.preventDefault();
         handleInput('pause');
@@ -667,13 +663,6 @@ function playSound(type) {
         osc2.stop(now + 0.15);
     }
 }
-
-function addParticles(particleData) {
-    addParticles(particleData);
-    if (particles.length > 500) {
-        particles = particles.slice(-400);  // Keep last 400
-    }
-}    
 
 // --- LOGIC ---
 
@@ -957,7 +946,7 @@ function update() {
 
         if (m.y > GROUND_Y) {
             for(let j=0; j<5; j++) {
-                addParticles({
+                particles.push({
                     x: m.x, y: GROUND_Y,
                     vx: Math.random()*4 - 2, vy: -Math.random()*3,
                     life: 20, color: '#ff4444'
@@ -989,7 +978,7 @@ function update() {
                         
                         // Debris
                         for(let j=0; j<10; j++) {
-                            addParticles({
+                            particles.push({
                                 x: obs.x + obs.width/2,
                                 y: obs.y - obs.height/2,
                                 vx: (Math.random()-0.5)*8, 
@@ -1036,7 +1025,7 @@ function update() {
             document.getElementById('hud-title').style.display = 'none'; // Hide persistent title
             
             for(let j=0; j<30; j++) {
-                addParticles({
+                particles.push({
                     x: rover.x, y: rover.y,
                     vx: (Math.random()-0.5)*10, vy: (Math.random()-0.5)*10,
                     life: 60, color: '#ff4444', size: Math.random()*4
@@ -1065,7 +1054,7 @@ function update() {
             
             const theme = THEMES[currentThemeIndex];
             for(let j=0; j<8; j++) {
-                addParticles({
+                particles.push({
                     x: s.x, y: s.y,
                     vx: (Math.random()-0.5)*6, vy: (Math.random()-0.5)*6,
                     life: 20, color: theme.main, size: 2
