@@ -130,6 +130,26 @@
             }
         }
 
+        .titlePulseAmber {
+    animation: titlePulseAmber 2.2s ease-in-out infinite;
+}
+
+@keyframes titlePulseAmber {
+    0% {
+        color: #d4a24e;
+        text-shadow: 0 0 4px #d4a24e55;
+    }
+    50% {
+        color: #ffcc66;
+        text-shadow: 0 0 8px #ffcc6677;
+    }
+    100% {
+        color: #d4a24e;
+        text-shadow: 0 0 4px #d4a24e55;
+    }
+}
+
+
         .hud {
             position: absolute;
             top: 25px;
@@ -161,7 +181,7 @@
             letter-spacing: 4px; /* Wider spacing for holographic look */
             display: none;
             /* New Cyan Animation */
-            animation: titlePulseCyan 3s ease-in-out infinite alternate;
+            animation: titlePulseAmber 2s ease-in-out infinite alternate;
         }
 
         .controls-hint {
