@@ -69,7 +69,7 @@
             background: radial-gradient(circle, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.7) 100%);
         }
 
-        #start-screen, #game-over-screen, #pause-screen {
+        #start-screen, #game-over-screen {
             background: rgba(10, 5, 5, 0.9);
             padding: 40px 60px;
             /* Border updated to AMBER default */
@@ -123,6 +123,13 @@
             50% { opacity: 0; }
         }
 
+        /* NEW PULSE ANIMATION FOR TITLE */
+        @keyframes titlePulse {
+            0% { opacity: 0.8; text-shadow: 0 0 8px #d4a24e; }
+            50% { opacity: 1.0; text-shadow: 0 0 15px #d4a24e; }
+            100% { opacity: 0.8; text-shadow: 0 0 8px #d4a24e; }
+        }
+
         .hud {
             position: absolute;
             top: 25px;
@@ -144,7 +151,9 @@
             right: 25px;
             font-size: 1.8rem;
             color: #d4a24e; /* Amber */
-            text-shadow: 0 0 10px #d4a24e;
+            /* Apply Pulse Animation */
+            animation: titlePulse 3s ease-in-out infinite;
+            
             background: rgba(0, 0, 0, 0.6);
             padding: 8px 20px;
             border-right: 4px solid #d4a24e;
@@ -215,20 +224,13 @@
             
             <div class="controls-hint">
                 <span style="color:#d4a24e">SHOOT:</span> Left-Click / Enter <br>
-                <span style="color:#fff">JUMP:</span> Right-Click / Space <br>
-                <span style="color:#888; font-size: 0.9rem;">PAUSE: P &nbsp;|&nbsp; EXIT: Esc</span>
+                <span style="color:#fff">JUMP:</span> Right-Click / Space
             </div>
             <div class="tip-small">
                 AVOID: Craters, Tech Debris & <span style="color:#FF4444">Meteors</span><br>
                 DESTROY: Rocks & Spikes<br>
                 COLLECT: <span id="node-hint-color" style="color:#d4a24e">Glowing Nodes</span> for Phases
             </div>
-        </div>
-
-        <div class="ui-layer" id="pause-screen" style="display: none;">
-            <h1>SYSTEM PAUSED</h1>
-            <p class="blink">[PRESS P TO RESUME]</p>
-            <p style="font-size: 1rem; color: #888; margin-top: 20px;">PRESS ESC TO QUIT</p>
         </div>
 
         <div class="ui-layer" id="game-over-screen" style="display: none;">
@@ -244,7 +246,7 @@
 
 <script>
 /**
- * NAHLA SRV MINIGAME - NEON EDITION + COMBAT + MUSIC + DOUBLE JUMP + PHASES + DAY/NIGHT + FADE + SELECTION FIX + PAUSE/ESC
+ * NAHLA SRV MINIGAME - NEON EDITION + COMBAT + MUSIC + DOUBLE JUMP + PHASES + DAY/NIGHT + FADE + SELECTION FIX + PULSING TITLE + MORE STARS
  */
 
 const canvas = document.getElementById('gameCanvas');
@@ -278,7 +280,7 @@ const LIGHTING = {
 };
 
 // --- GAME STATE ---
-let gameState = 'START'; // START, PLAYING, GAMEOVER, PAUSED
+let gameState = 'START'; 
 let frames = 0;
 let gameSpeed = 4;
 let scoreDist = 0;
@@ -473,16 +475,17 @@ let starsFast = [];
 
 function initStars() {
     starsSlow = []; starsMed = []; starsFast = [];
-    for(let i=0; i<40; i++) starsSlow.push(createStar(0.1));
-    for(let i=0; i<30; i++) starsMed.push(createStar(0.5));
-    for(let i=0; i<20; i++) starsFast.push(createStar(1.2));
+    // INCREASED STAR COUNT
+    for(let i=0; i<80; i++) starsSlow.push(createStar(0.1)); // More slow stars
+    for(let i=0; i<70; i++) starsMed.push(createStar(0.5));  // More medium stars
+    for(let i=0; i<50; i++) starsFast.push(createStar(1.2)); // More fast stars
 }
 
 function createStar(speedMult) {
     return {
         x: Math.random() * canvas.width,
         y: Math.random() * (GROUND_Y - 50),
-        size: Math.random() * 1.5,
+        size: Math.random() * 2.5, // INCREASED SIZE (was 1.5)
         speedMult: speedMult,
         twinkle: Math.random()
     };
@@ -716,7 +719,7 @@ function updateTheme() {
     // Update DOM styles
     const container = document.getElementById('game-container');
     const hud = document.getElementById('hud');
-    const hudTitle = document.getElementById('hud-title'); // Title update
+    const hudPhase = document.getElementById('score-phase');
     const startBlink = document.getElementById('start-blink');
     const titleText = document.getElementById('title-text');
     const startScreen = document.getElementById('start-screen');
@@ -729,10 +732,8 @@ function updateTheme() {
     hud.style.borderColor = theme.main;
     hud.style.color = theme.main;
     hud.style.textShadow = `0 0 8px ${theme.main}`;
-
-    // Persistent Title matches theme if desired, or keep AMBER as requested?
-    // User requested: "probably in a glowing amber font [this doesn't change]"
-    // So we DON'T update hud-title color here.
+    // Phase color is now forced to CYAN in HTML, so we don't update it here.
+    // hudPhase.style.color = theme.main; 
 
     // Start Screen Elements (for next restart)
     startScreen.style.borderColor = theme.main;
@@ -1066,7 +1067,7 @@ function update() {
     [starsSlow, starsMed, starsFast].forEach(layer => {
         layer.forEach(star => {
             star.x -= (gameSpeed * star.speedMult * 0.1); 
-            // TWINKLE: More obvious range (0.3 to 1.0)
+            // TWINKLE: Obvious
             star.twinkle += 0.1; // Faster twinkle
             if(star.x < 0) star.x = canvas.width;
         });
@@ -1096,7 +1097,6 @@ function draw() {
     // 2. STARS
     [starsSlow, starsMed].forEach(layer => {
         layer.forEach(star => {
-            // TWINKLE: More obvious visual change
             const opacity = 0.3 + Math.abs(Math.sin(star.twinkle)) * 0.7; // 0.3 to 1.0
             ctx.fillStyle = `rgba(255, 255, 255, ${opacity * activeStars})`; 
             ctx.fillRect(star.x, star.y, star.size, star.size);
