@@ -1121,7 +1121,7 @@ function draw() {
     ctx.save();
     ctx.translate(750, 180); 
     
-    // 1. Outer Glow (Atmosphere)
+    // 1. Atmosphere Glow
     ctx.shadowColor = theme.main;
     ctx.shadowBlur = 60;
     ctx.beginPath();
@@ -1130,7 +1130,7 @@ function draw() {
     ctx.fill();
     ctx.shadowBlur = 0; 
 
-    // 2. Rings (Behind)
+    // 2. Rings
     ctx.save();
     ctx.rotate(-0.2);
     ctx.scale(1, 0.3); 
@@ -1146,20 +1146,20 @@ function draw() {
     ctx.stroke();
     ctx.restore();
     
-    // 3. Planet Body (Now Spherical)
-    // We use a Radial Gradient offset to the top-left (-25, -25) to simulate light direction
-    const sphereGrad = ctx.createRadialGradient(-25, -25, 5, 0, 0, 62);
-    sphereGrad.addColorStop(0, '#a31818');   // Highlight (Lighter Red)
-    sphereGrad.addColorStop(0.4, '#590505'); // Mid-tone (Base Red)
-    sphereGrad.addColorStop(1, '#1a0101');   // Shadow (Deep Dark Red)
+    // 3. Planet Body (2D Style - More Opaque/Solid)
+    const grad = ctx.createLinearGradient(-50, -50, 50, 50);
+    // These colors are brighter and "heavier" than before
+    grad.addColorStop(0, '#8a1c1c');   // Solid Lighter Red
+    grad.addColorStop(0.5, '#b30000'); // Rich Standard Red
+    grad.addColorStop(1, '#4a0000');   // Dark Red (but not black)
     
-    ctx.fillStyle = sphereGrad;
+    ctx.fillStyle = grad;
     ctx.beginPath();
     ctx.arc(0, 0, 62, 0, Math.PI*2); 
     ctx.fill();
 
-    // 4. Surface Detail (Crater/Storm)
-    ctx.fillStyle = 'rgba(255, 100, 100, 0.05)';
+    // 4. Surface Detail (The "Storm" Spot)
+    ctx.fillStyle = 'rgba(255, 100, 100, 0.1)'; // Kept faint
     ctx.beginPath();
     ctx.arc(-20, -20, 15, 0, Math.PI*2);
     ctx.fill();
