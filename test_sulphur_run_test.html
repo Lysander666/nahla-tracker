@@ -1117,54 +1117,100 @@ function draw() {
         });
     });
 
-// REBEKAH (Planet)
-    ctx.save();
-    ctx.translate(750, 180); 
-    
-    // 1. Atmosphere Glow
-    ctx.shadowColor = theme.main;
-    ctx.shadowBlur = 60;
-    ctx.beginPath();
-    ctx.arc(0, 0, 60, 0, Math.PI*2); 
-    ctx.fillStyle = '#000'; 
-    ctx.fill();
-    ctx.shadowBlur = 0; 
+// -----------------------------------------
+// REBEKAH — Gas Giant with Bands + Glow
+// -----------------------------------------
+ctx.save();
+ctx.translate(750, 180);
 
-    // 2. Rings
-    ctx.save();
-    ctx.rotate(-0.2);
-    ctx.scale(1, 0.3); 
-    ctx.beginPath();
-    ctx.arc(0, 0, 120, 0, Math.PI*2); 
-    ctx.strokeStyle = 'rgba(97, 218, 251, 0.4)';
-    ctx.lineWidth = 18;
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.arc(0, 0, 100, 0, Math.PI*2);
-    ctx.strokeStyle = '#61dafb';
-    ctx.lineWidth = 3;
-    ctx.stroke();
-    ctx.restore();
-    
-    // 3. Planet Body (2D Style - More Opaque/Solid)
-    const grad = ctx.createLinearGradient(-50, -50, 50, 50);
-    // These colors are brighter and "heavier" than before
-    grad.addColorStop(0, '#8a1c1c');   // Solid Lighter Red
-    grad.addColorStop(0.5, '#b30000'); // Rich Standard Red
-    grad.addColorStop(1, '#4a0000');   // Dark Red (but not black)
-    
-    ctx.fillStyle = grad;
-    ctx.beginPath();
-    ctx.arc(0, 0, 62, 0, Math.PI*2); 
-    ctx.fill();
+// ===== PLANET SHADOW + VOLUME =====
+ctx.shadowColor = theme.main;
+ctx.shadowBlur = 60;
 
-    // 4. Surface Detail (The "Storm" Spot)
-    ctx.fillStyle = 'rgba(255, 100, 100, 0.1)'; // Kept faint
-    ctx.beginPath();
-    ctx.arc(-20, -20, 15, 0, Math.PI*2);
-    ctx.fill();
-    
-    ctx.restore();
+// Base sphere (black core)
+ctx.beginPath();
+ctx.arc(0, 0, 60, 0, Math.PI * 2);
+ctx.fillStyle = "#000";
+ctx.fill();
+ctx.shadowBlur = 0;
+
+// ===== RINGS (3-band metallic set) =====
+ctx.save();
+ctx.rotate(-0.23);
+ctx.scale(1.15, 0.32);
+
+// Outer soft ring
+ctx.beginPath();
+ctx.arc(0, 0, 135, 0, Math.PI * 2);
+ctx.strokeStyle = "rgba(120, 200, 255, 0.20)";
+ctx.lineWidth = 22;
+ctx.stroke();
+
+// Mid bright ring
+ctx.beginPath();
+ctx.arc(0, 0, 118, 0, Math.PI * 2);
+ctx.strokeStyle = "rgba(150, 230, 255, 0.85)";
+ctx.lineWidth = 4;
+ctx.stroke();
+
+// Inner darker band
+ctx.beginPath();
+ctx.arc(0, 0, 98, 0, Math.PI * 2);
+ctx.strokeStyle = "rgba(60, 120, 150, 0.40)";
+ctx.lineWidth = 2;
+ctx.stroke();
+
+ctx.restore();
+
+// ===== PLANET BODY GRADIENT =====
+const grad = ctx.createRadialGradient(-25, -35, 10, 0, 0, 72);
+grad.addColorStop(0, "#a40000");
+grad.addColorStop(0.45, "#650000");
+grad.addColorStop(1, "#120000");
+
+ctx.fillStyle = grad;
+ctx.beginPath();
+ctx.arc(0, 0, 62, 0, Math.PI * 2);
+ctx.fill();
+
+// ===== GAS GIANT BANDING =====
+ctx.save();
+ctx.rotate(0.15);
+ctx.globalAlpha = 0.13;
+
+for (let y = -55; y <= 55; y += 12) {
+    ctx.fillStyle = (y / 12) % 2 === 0 ? "rgba(255, 90, 90, 0.45)" :
+                                      "rgba(140, 0, 0, 0.45)";
+    ctx.fillRect(-75, y, 150, 8);
+}
+
+ctx.restore();
+
+// ===== ATMOSPHERIC RIM GLOW =====
+const rim = ctx.createRadialGradient(0, 0, 58, 0, 0, 82);
+rim.addColorStop(0, "rgba(255, 150, 80, 0.45)");
+rim.addColorStop(1, "rgba(255, 150, 80, 0)");
+
+ctx.fillStyle = rim;
+ctx.beginPath();
+ctx.arc(0, 0, 82, 0, Math.PI * 2);
+ctx.fill();
+
+// ===== RING SHADOW ACROSS PLANET =====
+ctx.save();
+ctx.rotate(-0.23);
+ctx.scale(1.12, 0.32);
+ctx.globalAlpha = 0.15;
+
+ctx.beginPath();
+ctx.ellipse(0, 0, 150, 45, 0, 0, Math.PI * 2);
+ctx.fillStyle = "black";
+ctx.fill();
+
+ctx.restore();
+
+ctx.restore();
+
 
     starsFast.forEach(star => {
         const breath = Math.sin(frames * 0.1 + star.phase);
