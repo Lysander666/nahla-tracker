@@ -1125,7 +1125,37 @@ ctx.translate(750, 180);
 ctx.shadowColor = theme.main;
 ctx.shadowBlur = 60;
 
-// Main planet with radial gradient for depth
+// BACK HALF OF RINGS (behind planet)
+ctx.shadowBlur = 0;
+ctx.save();
+ctx.rotate(-0.2);
+ctx.scale(1, 0.3); 
+
+// Outer ring back half
+ctx.beginPath();
+ctx.arc(0, 0, 120, 0, Math.PI); // Only bottom half
+ctx.strokeStyle = 'rgba(97, 218, 251, 0.5)';
+ctx.lineWidth = 18;
+ctx.stroke();
+
+// Inner ring back half with gradient
+const ringGradBack = ctx.createLinearGradient(-100, 0, 100, 0);
+ringGradBack.addColorStop(0, 'rgba(97, 218, 251, 0.4)');
+ringGradBack.addColorStop(0.5, 'rgba(97, 218, 251, 1)');
+ringGradBack.addColorStop(1, 'rgba(97, 218, 251, 0.4)');
+
+ctx.beginPath();
+ctx.arc(0, 0, 100, 0, Math.PI); // Only bottom half
+ctx.strokeStyle = ringGradBack;
+ctx.lineWidth = 4;
+ctx.stroke();
+
+ctx.restore();
+
+// PLANET
+ctx.shadowColor = theme.main;
+ctx.shadowBlur = 60;
+
 const planetGrad = ctx.createRadialGradient(-15, -15, 10, 0, 0, 62);
 planetGrad.addColorStop(0, '#a83232'); // Bright highlight
 planetGrad.addColorStop(0.3, '#800000'); // Mid tone
@@ -1144,41 +1174,31 @@ ctx.beginPath();
 ctx.arc(-18, -18, 20, 0, Math.PI*2);
 ctx.fill();
 
-// Ring shadow on planet (behind rings)
-ctx.save();
-ctx.rotate(-0.2);
-ctx.scale(1, 0.3);
-ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
-ctx.beginPath();
-ctx.arc(0, 5, 115, 0, Math.PI); // Shadow cast by rings
-ctx.fill();
-ctx.restore();
-
-// Rings
+// FRONT HALF OF RINGS (in front of planet)
 ctx.save();
 ctx.rotate(-0.2);
 ctx.scale(1, 0.3); 
 
-// Outer ring (more transparent)
+// Outer ring front half
 ctx.beginPath();
-ctx.arc(0, 0, 120, 0, Math.PI*2); 
+ctx.arc(0, 0, 120, Math.PI, Math.PI * 2); // Only top half
 ctx.strokeStyle = 'rgba(97, 218, 251, 0.5)';
 ctx.lineWidth = 18;
 ctx.stroke();
 
-// Inner ring with gradient for depth
-const ringGrad = ctx.createLinearGradient(-100, 0, 100, 0);
-ringGrad.addColorStop(0, 'rgba(97, 218, 251, 0.4)');
-ringGrad.addColorStop(0.5, 'rgba(97, 218, 251, 1)');
-ringGrad.addColorStop(1, 'rgba(97, 218, 251, 0.4)');
+// Inner ring front half with gradient
+const ringGradFront = ctx.createLinearGradient(-100, 0, 100, 0);
+ringGradFront.addColorStop(0, 'rgba(97, 218, 251, 0.4)');
+ringGradFront.addColorStop(0.5, 'rgba(97, 218, 251, 1)');
+ringGradFront.addColorStop(1, 'rgba(97, 218, 251, 0.4)');
 
 ctx.beginPath();
-ctx.arc(0, 0, 100, 0, Math.PI*2);
-ctx.strokeStyle = ringGrad;
+ctx.arc(0, 0, 100, Math.PI, Math.PI * 2); // Only top half
+ctx.strokeStyle = ringGradFront;
 ctx.lineWidth = 4;
 ctx.stroke();
 
-// Ring highlight on top edge
+// Ring highlight on front edge
 ctx.beginPath();
 ctx.arc(0, -2, 100, Math.PI, Math.PI * 2);
 ctx.strokeStyle = 'rgba(150, 235, 255, 0.8)';
