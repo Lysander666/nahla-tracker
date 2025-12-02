@@ -802,8 +802,8 @@ function startGame() {
     document.getElementById('hud').style.display = 'block';
     document.getElementById('hud-title').style.display = 'block';
     
-    // UPDATED SPEED: Starts at 5 instead of 4
-    gameSpeed = 5;
+    // UPDATED SPEED: Starts at 7 for faster start
+    gameSpeed = 7;
     scoreDist = 0;
     scoreData = 0;
     currentThemeIndex = 0;
@@ -1122,27 +1122,33 @@ function draw() {
     ctx.translate(750, 180); 
     ctx.shadowColor = theme.main;
     ctx.shadowBlur = 60;
+    
+    // Black background for planet
     ctx.beginPath();
     ctx.arc(0, 0, 60, 0, Math.PI*2); 
     ctx.fillStyle = '#000'; 
     ctx.fill();
     ctx.shadowBlur = 0; 
 
+    // 1. BACK RINGS (Top Half) - Drawn BEHIND planet
     ctx.save();
     ctx.rotate(-0.2);
     ctx.scale(1, 0.3); 
+    
     ctx.beginPath();
-    ctx.arc(0, 0, 120, 0, Math.PI*2); 
+    ctx.arc(0, 0, 120, Math.PI, 0); // Top half (Back)
     ctx.strokeStyle = 'rgba(97, 218, 251, 0.4)';
     ctx.lineWidth = 18;
     ctx.stroke();
+
     ctx.beginPath();
-    ctx.arc(0, 0, 100, 0, Math.PI*2);
+    ctx.arc(0, 0, 100, Math.PI, 0); // Top half (Back)
     ctx.strokeStyle = '#61dafb';
     ctx.lineWidth = 3;
     ctx.stroke();
     ctx.restore();
     
+    // 2. PLANET BODY
     const grad = ctx.createLinearGradient(-50, -50, 50, 50);
     grad.addColorStop(0, '#4a0000'); 
     grad.addColorStop(0.5, '#800000'); 
@@ -1155,7 +1161,26 @@ function draw() {
     ctx.beginPath();
     ctx.arc(-20, -20, 15, 0, Math.PI*2);
     ctx.fill();
+
+    // 3. FRONT RINGS (Bottom Half) - Drawn IN FRONT of planet
+    ctx.save();
+    ctx.rotate(-0.2);
+    ctx.scale(1, 0.3); 
+    
+    ctx.beginPath();
+    ctx.arc(0, 0, 120, 0, Math.PI); // Bottom half (Front)
+    ctx.strokeStyle = 'rgba(97, 218, 251, 0.4)';
+    ctx.lineWidth = 18;
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.arc(0, 0, 100, 0, Math.PI); // Bottom half (Front)
+    ctx.strokeStyle = '#61dafb';
+    ctx.lineWidth = 3;
+    ctx.stroke();
     ctx.restore();
+
+    ctx.restore(); // End Rebekah
 
     starsFast.forEach(star => {
         const breath = Math.sin(frames * 0.1 + star.phase);
