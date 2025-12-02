@@ -1117,9 +1117,11 @@ function draw() {
         });
     });
 
-    // REBEKAH (Planet)
+// REBEKAH (Planet)
     ctx.save();
     ctx.translate(750, 180); 
+    
+    // 1. Outer Glow (Atmosphere)
     ctx.shadowColor = theme.main;
     ctx.shadowBlur = 60;
     ctx.beginPath();
@@ -1128,6 +1130,7 @@ function draw() {
     ctx.fill();
     ctx.shadowBlur = 0; 
 
+    // 2. Rings (Behind)
     ctx.save();
     ctx.rotate(-0.2);
     ctx.scale(1, 0.3); 
@@ -1143,18 +1146,24 @@ function draw() {
     ctx.stroke();
     ctx.restore();
     
-    const grad = ctx.createLinearGradient(-50, -50, 50, 50);
-    grad.addColorStop(0, '#4a0000'); 
-    grad.addColorStop(0.5, '#800000'); 
-    grad.addColorStop(1, '#200000'); 
-    ctx.fillStyle = grad;
+    // 3. Planet Body (Now Spherical)
+    // We use a Radial Gradient offset to the top-left (-25, -25) to simulate light direction
+    const sphereGrad = ctx.createRadialGradient(-25, -25, 5, 0, 0, 62);
+    sphereGrad.addColorStop(0, '#a31818');   // Highlight (Lighter Red)
+    sphereGrad.addColorStop(0.4, '#590505'); // Mid-tone (Base Red)
+    sphereGrad.addColorStop(1, '#1a0101');   // Shadow (Deep Dark Red)
+    
+    ctx.fillStyle = sphereGrad;
     ctx.beginPath();
     ctx.arc(0, 0, 62, 0, Math.PI*2); 
     ctx.fill();
-    ctx.fillStyle = 'rgba(255, 100, 100, 0.1)';
+
+    // 4. Surface Detail (Crater/Storm)
+    ctx.fillStyle = 'rgba(255, 100, 100, 0.05)';
     ctx.beginPath();
     ctx.arc(-20, -20, 15, 0, Math.PI*2);
     ctx.fill();
+    
     ctx.restore();
 
     starsFast.forEach(star => {
