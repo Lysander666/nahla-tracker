@@ -1126,6 +1126,98 @@ function draw() {
         ctx.fillRect(star.x, star.y, star.size, star.size);
     });
 
+    // REBEKAH (Planet)
+ctx.save();
+ctx.translate(750, 180); 
+
+// Minimal glow for background effect
+ctx.shadowColor = theme.main;
+ctx.shadowBlur = 15; // Much more subtle
+
+// BACK HALF OF RINGS (behind planet at bottom)
+ctx.shadowBlur = 0;
+ctx.save();
+ctx.rotate(-0.2);
+ctx.scale(1, 0.3); 
+
+// Outer ring back half (bottom)
+ctx.beginPath();
+ctx.arc(0, 0, 120, Math.PI, Math.PI * 2); // Bottom half
+ctx.strokeStyle = 'rgba(97, 218, 251, 0.2)'; // Even more subtle
+ctx.lineWidth = 18;
+ctx.stroke();
+
+// Inner ring back half
+const ringGradBack = ctx.createLinearGradient(-100, 0, 100, 0);
+ringGradBack.addColorStop(0, 'rgba(97, 218, 251, 0.15)');
+ringGradBack.addColorStop(0.5, 'rgba(97, 218, 251, 0.4)');
+ringGradBack.addColorStop(1, 'rgba(97, 218, 251, 0.15)');
+
+ctx.beginPath();
+ctx.arc(0, 0, 100, Math.PI, Math.PI * 2); // Bottom half
+ctx.strokeStyle = ringGradBack;
+ctx.lineWidth = 4;
+ctx.stroke();
+
+ctx.restore();
+
+// PLANET (much more muted colors for background)
+ctx.shadowColor = theme.main;
+ctx.shadowBlur = 15;
+
+const planetGrad = ctx.createRadialGradient(-15, -15, 10, 0, 0, 62);
+planetGrad.addColorStop(0, '#6a1818'); // Much dimmer highlight
+planetGrad.addColorStop(0.3, '#4d0000'); // Darker mid tone
+planetGrad.addColorStop(0.7, '#2a0000'); // Even darker
+planetGrad.addColorStop(1, '#0d0000'); // Very dark edge
+
+ctx.beginPath();
+ctx.arc(0, 0, 62, 0, Math.PI*2); 
+ctx.fillStyle = planetGrad;
+ctx.fill();
+
+// Very subtle specular highlight
+ctx.shadowBlur = 0;
+ctx.fillStyle = 'rgba(150, 80, 80, 0.15)'; // Much more subtle
+ctx.beginPath();
+ctx.arc(-18, -18, 20, 0, Math.PI*2);
+ctx.fill();
+
+// FRONT HALF OF RINGS (in front of planet at top)
+ctx.save();
+ctx.rotate(-0.2);
+ctx.scale(1, 0.3); 
+
+// Outer ring front half (top)
+ctx.beginPath();
+ctx.arc(0, 0, 120, 0, Math.PI); // Top half
+ctx.strokeStyle = 'rgba(97, 218, 251, 0.25)'; // More subtle
+ctx.lineWidth = 18;
+ctx.stroke();
+
+// Inner ring front half
+const ringGradFront = ctx.createLinearGradient(-100, 0, 100, 0);
+ringGradFront.addColorStop(0, 'rgba(97, 218, 251, 0.2)');
+ringGradFront.addColorStop(0.5, 'rgba(97, 218, 251, 0.5)');
+ringGradFront.addColorStop(1, 'rgba(97, 218, 251, 0.2)');
+
+ctx.beginPath();
+ctx.arc(0, 0, 100, 0, Math.PI); // Top half
+ctx.strokeStyle = ringGradFront;
+ctx.lineWidth = 4;
+ctx.stroke();
+
+// Very subtle ring highlight on front edge
+ctx.beginPath();
+ctx.arc(0, -2, 100, 0, Math.PI);
+ctx.strokeStyle = 'rgba(150, 235, 255, 0.3)'; // Much more subtle
+ctx.lineWidth = 2;
+ctx.stroke();
+
+ctx.restore();
+
+ctx.restore();
+
     // --- DRAW MOUNTAINS (NEW & SMOOTHER) ---
     const mountainColor = lerpColor(theme.main, '#000000', 0.85); 
     ctx.fillStyle = mountainColor;
@@ -1279,98 +1371,6 @@ function draw() {
         ctx.fillRect(d.x, d.y, d.length, 1);
     });
 }
-
-    // REBEKAH (Planet)
-ctx.save();
-ctx.translate(750, 180); 
-
-// Minimal glow for background effect
-ctx.shadowColor = theme.main;
-ctx.shadowBlur = 15; // Much more subtle
-
-// BACK HALF OF RINGS (behind planet at bottom)
-ctx.shadowBlur = 0;
-ctx.save();
-ctx.rotate(-0.2);
-ctx.scale(1, 0.3); 
-
-// Outer ring back half (bottom)
-ctx.beginPath();
-ctx.arc(0, 0, 120, Math.PI, Math.PI * 2); // Bottom half
-ctx.strokeStyle = 'rgba(97, 218, 251, 0.2)'; // Even more subtle
-ctx.lineWidth = 18;
-ctx.stroke();
-
-// Inner ring back half
-const ringGradBack = ctx.createLinearGradient(-100, 0, 100, 0);
-ringGradBack.addColorStop(0, 'rgba(97, 218, 251, 0.15)');
-ringGradBack.addColorStop(0.5, 'rgba(97, 218, 251, 0.4)');
-ringGradBack.addColorStop(1, 'rgba(97, 218, 251, 0.15)');
-
-ctx.beginPath();
-ctx.arc(0, 0, 100, Math.PI, Math.PI * 2); // Bottom half
-ctx.strokeStyle = ringGradBack;
-ctx.lineWidth = 4;
-ctx.stroke();
-
-ctx.restore();
-
-// PLANET (much more muted colors for background)
-ctx.shadowColor = theme.main;
-ctx.shadowBlur = 15;
-
-const planetGrad = ctx.createRadialGradient(-15, -15, 10, 0, 0, 62);
-planetGrad.addColorStop(0, '#6a1818'); // Much dimmer highlight
-planetGrad.addColorStop(0.3, '#4d0000'); // Darker mid tone
-planetGrad.addColorStop(0.7, '#2a0000'); // Even darker
-planetGrad.addColorStop(1, '#0d0000'); // Very dark edge
-
-ctx.beginPath();
-ctx.arc(0, 0, 62, 0, Math.PI*2); 
-ctx.fillStyle = planetGrad;
-ctx.fill();
-
-// Very subtle specular highlight
-ctx.shadowBlur = 0;
-ctx.fillStyle = 'rgba(150, 80, 80, 0.15)'; // Much more subtle
-ctx.beginPath();
-ctx.arc(-18, -18, 20, 0, Math.PI*2);
-ctx.fill();
-
-// FRONT HALF OF RINGS (in front of planet at top)
-ctx.save();
-ctx.rotate(-0.2);
-ctx.scale(1, 0.3); 
-
-// Outer ring front half (top)
-ctx.beginPath();
-ctx.arc(0, 0, 120, 0, Math.PI); // Top half
-ctx.strokeStyle = 'rgba(97, 218, 251, 0.25)'; // More subtle
-ctx.lineWidth = 18;
-ctx.stroke();
-
-// Inner ring front half
-const ringGradFront = ctx.createLinearGradient(-100, 0, 100, 0);
-ringGradFront.addColorStop(0, 'rgba(97, 218, 251, 0.2)');
-ringGradFront.addColorStop(0.5, 'rgba(97, 218, 251, 0.5)');
-ringGradFront.addColorStop(1, 'rgba(97, 218, 251, 0.2)');
-
-ctx.beginPath();
-ctx.arc(0, 0, 100, 0, Math.PI); // Top half
-ctx.strokeStyle = ringGradFront;
-ctx.lineWidth = 4;
-ctx.stroke();
-
-// Very subtle ring highlight on front edge
-ctx.beginPath();
-ctx.arc(0, -2, 100, 0, Math.PI);
-ctx.strokeStyle = 'rgba(150, 235, 255, 0.3)'; // Much more subtle
-ctx.lineWidth = 2;
-ctx.stroke();
-
-ctx.restore();
-
-ctx.restore();
 
 function loop() {
     update();
