@@ -1117,89 +1117,74 @@ function draw() {
         });
     });
 
-// -----------------------------------------
-// REBEKAH — Fixed for Sulphur Run Theme
-// -----------------------------------------
+// REBEKAH (Planet)
 ctx.save();
-ctx.translate(750, 180);
+ctx.translate(750, 180); 
 
-// BASE SHADOW
+// Planet shadow/glow
 ctx.shadowColor = theme.main;
-ctx.shadowBlur = 40;
+ctx.shadowBlur = 60;
+
+// Main planet with radial gradient for depth
+const planetGrad = ctx.createRadialGradient(-15, -15, 10, 0, 0, 62);
+planetGrad.addColorStop(0, '#a83232'); // Bright highlight
+planetGrad.addColorStop(0.3, '#800000'); // Mid tone
+planetGrad.addColorStop(0.7, '#4a0000'); // Darker
+planetGrad.addColorStop(1, '#1a0000'); // Edge shadow
+
 ctx.beginPath();
-ctx.arc(0, 0, 60, 0, Math.PI * 2);
-ctx.fillStyle = "#000";
+ctx.arc(0, 0, 62, 0, Math.PI*2); 
+ctx.fillStyle = planetGrad;
 ctx.fill();
+
+// Additional specular highlight
 ctx.shadowBlur = 0;
-
-// ===== RINGS (muted cyan, lower opacity) =====
-ctx.save();
-ctx.rotate(-0.23);
-ctx.scale(1.15, 0.32);
-
+ctx.fillStyle = 'rgba(255, 150, 150, 0.3)';
 ctx.beginPath();
-ctx.arc(0, 0, 125, 0, Math.PI * 2);
-ctx.strokeStyle = "rgba(120,200,255,0.15)";
+ctx.arc(-18, -18, 20, 0, Math.PI*2);
+ctx.fill();
+
+// Ring shadow on planet (behind rings)
+ctx.save();
+ctx.rotate(-0.2);
+ctx.scale(1, 0.3);
+ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+ctx.beginPath();
+ctx.arc(0, 5, 115, 0, Math.PI); // Shadow cast by rings
+ctx.fill();
+ctx.restore();
+
+// Rings
+ctx.save();
+ctx.rotate(-0.2);
+ctx.scale(1, 0.3); 
+
+// Outer ring (more transparent)
+ctx.beginPath();
+ctx.arc(0, 0, 120, 0, Math.PI*2); 
+ctx.strokeStyle = 'rgba(97, 218, 251, 0.5)';
 ctx.lineWidth = 18;
 ctx.stroke();
 
-ctx.beginPath();
-ctx.arc(0, 0, 110, 0, Math.PI * 2);
-ctx.strokeStyle = "rgba(150,230,255,0.55)";
-ctx.lineWidth = 3;
-ctx.stroke();
+// Inner ring with gradient for depth
+const ringGrad = ctx.createLinearGradient(-100, 0, 100, 0);
+ringGrad.addColorStop(0, 'rgba(97, 218, 251, 0.4)');
+ringGrad.addColorStop(0.5, 'rgba(97, 218, 251, 1)');
+ringGrad.addColorStop(1, 'rgba(97, 218, 251, 0.4)');
 
 ctx.beginPath();
-ctx.arc(0, 0, 95, 0, Math.PI * 2);
-ctx.strokeStyle = "rgba(80,130,160,0.35)";
+ctx.arc(0, 0, 100, 0, Math.PI*2);
+ctx.strokeStyle = ringGrad;
+ctx.lineWidth = 4;
+ctx.stroke();
+
+// Ring highlight on top edge
+ctx.beginPath();
+ctx.arc(0, -2, 100, Math.PI, Math.PI * 2);
+ctx.strokeStyle = 'rgba(150, 235, 255, 0.8)';
 ctx.lineWidth = 2;
 ctx.stroke();
 
-ctx.restore();
-
-// ===== PLANET GRADIENT — darker & subtler =====
-const grad = ctx.createRadialGradient(-20, -30, 10, 0, 0, 70);
-grad.addColorStop(0, "#5a0000");
-grad.addColorStop(0.5, "#360000");
-grad.addColorStop(1, "#100000");
-
-ctx.fillStyle = grad;
-ctx.beginPath();
-ctx.arc(0, 0, 62, 0, Math.PI * 2);
-ctx.fill();
-
-// ===== GAS GIANT BANDS (VERY subtle) =====
-ctx.save();
-ctx.rotate(0.12);
-ctx.globalAlpha = 0.08;
-
-for (let y = -55; y <= 55; y += 11) {
-    ctx.fillStyle = (y / 11) % 2 === 0 ? "rgba(180,40,40,0.4)" :
-                                      "rgba(90,0,0,0.4)";
-    ctx.fillRect(-74, y, 148, 7);
-}
-
-ctx.restore();
-
-// ===== ATMOSPHERIC RIM — reduced brightness =====
-const rim = ctx.createRadialGradient(0, 0, 60, 0, 0, 80);
-rim.addColorStop(0, "rgba(255,150,80,0.18)");
-rim.addColorStop(1, "rgba(255,150,80,0)");
-
-ctx.fillStyle = rim;
-ctx.beginPath();
-ctx.arc(0, 0, 80, 0, Math.PI * 2);
-ctx.fill();
-
-// ===== RING SHADOW (barely visible) =====
-ctx.save();
-ctx.rotate(-0.23);
-ctx.scale(1.12, 0.32);
-ctx.globalAlpha = 0.06; // VERY low
-ctx.beginPath();
-ctx.ellipse(0, 0, 150, 45, 0, 0, Math.PI * 2);
-ctx.fillStyle = "black";
-ctx.fill();
 ctx.restore();
 
 ctx.restore();
