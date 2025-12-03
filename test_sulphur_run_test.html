@@ -804,7 +804,7 @@ function startGame() {
     document.getElementById('hud-title').style.display = 'block';
     
     // UPDATED SPEED: Starts at 7 for faster start
-    gameSpeed = 7;
+    gameSpeed = 8;
     scoreDist = 0;
     scoreData = 0;
     currentThemeIndex = 0;
@@ -1106,15 +1106,22 @@ function update() {
         if(p.life <= 0) particles.splice(i, 1);
     }
 
-    [starsSlow, starsMed, starsFast].forEach(layer => {
-        layer.forEach(star => {
-            star.x -= (gameSpeed * star.speedMult * 0.1); 
-            if(star.x < 0) star.x = canvas.width;
-        });
-    });
+// --- STAR LAYERS ---
+[starsSlow, starsMed, starsFast].forEach(layer => {
+    layer.forEach(star => {
+        star.x -= (gameSpeed * star.speedMult * 0.1);
 
-    document.getElementById('score-dist').innerText = Math.floor(scoreDist);
-    document.getElementById('score-speed').innerText = Math.floor(gameSpeed * 10);
+        if (star.x < 0) {
+            star.x = canvas.width;
+        }
+    });
+});
+
+// --- HUD UPDATES ---
+document.getElementById('score-dist').innerText = Math.floor(scoreDist);
+
+// CHANGED: Removed (*10) multiplier so speed displays as actual gameSpeed
+document.getElementById('score-speed').innerText = Math.floor(gameSpeed);
 }
 
 function draw() {
