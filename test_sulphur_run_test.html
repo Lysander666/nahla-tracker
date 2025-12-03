@@ -85,10 +85,12 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            background: radial-gradient(circle, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.7) 100%);
+            /* Subtler gradient so game is visible behind UI */
+            background: radial-gradient(circle, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.4) 100%);
         }
 
-        #start-screen, #game-over-screen, #pause-screen {
+        /* NEW: Centered Box Style for Menus */
+        .menu-box {
             background: rgba(10, 5, 5, 0.9);
             padding: 20px 40px; 
             border: 2px solid #d4a24e;
@@ -260,40 +262,49 @@
 
         <div class="hud-title" id="hud-title">SULPHUR RUN</div>
 
+        <!-- Start Screen -->
         <div class="ui-layer" id="start-screen">
-            <h1 id="title-text" style="text-shadow: 2px 2px 0px #444, -2px -2px 0px #d4a24e;">SULPHUR RUN v0.2</h1>
-            <p>SRV SIMULATION // NAHLA SURFACE</p>
-            <p class="blink" id="start-blink">[PRESS SPACE or CLICK MOUSE TO START]</p>
-            
-            <div class="controls-hint">
-                <span style="color:#d4a24e">SHOOT:</span> Left-Click / Enter <br>
-                <span style="color:#fff">JUMP / DOUBLE JUMP:</span> Right-Click / Space <br>
-                <span style="color:#888; font-size: 0.9rem;">PAUSE: P &nbsp;|&nbsp; EXIT: Esc</span>
+            <div class="menu-box">
+                <h1 id="title-text" style="text-shadow: 2px 2px 0px #444, -2px -2px 0px #d4a24e;">SULPHUR RUN v0.2</h1>
+                <p>SRV SIMULATION // NAHLA SURFACE</p>
+                <p class="blink" id="start-blink">[PRESS SPACE or CLICK MOUSE TO START]</p>
+                
+                <div class="controls-hint">
+                    <span style="color:#d4a24e">SHOOT:</span> Left-Click / Enter <br>
+                    <span style="color:#fff">JUMP / DOUBLE JUMP:</span> Right-Click / Space <br>
+                    <span style="color:#888; font-size: 0.9rem;">PAUSE: P &nbsp;|&nbsp; EXIT: Esc</span>
+                </div>
+                <div class="tip-small" style="font-size:1.2em;">
+                    <span style="color:#00FFFF">AVOID</span>: Gadgets, Tech Debris & 
+                    <span style="color:#FF4444">Meteors</span><br>
+                    <span style="color:#FF10F0">DESTROY</span>: Rocks & Spikes<br>
+                    <span style="color:#2CFF05">COLLECT</span>: 
+                    <span id="node-hint-color" style="color:#d4a24e">Glowing Nodes</span> 
+                    for Phases
+                </div>
             </div>
-<div class="tip-small" style="font-size:1.2em;">
-    <span style="color:#00FFFF">AVOID</span>: Gadgets, Tech Debris & 
-    <span style="color:#FF4444">Meteors</span><br>
-    <span style="color:#FF10F0">DESTROY</span>: Rocks & Spikes<br>
-    <span style="color:#2CFF05">COLLECT</span>: 
-    <span id="node-hint-color" style="color:#d4a24e">Glowing Nodes</span> 
-    for Phases
-</div>
         </div>
 
+        <!-- Pause Screen -->
         <div class="ui-layer" id="pause-screen" style="display: none;">
-            <h1>SYSTEM PAUSED</h1>
-            <p class="blink">[PRESS P TO RESUME]</p>
-            <p style="font-size: 1rem; color: #888; margin-top: 20px;">PRESS ESC TO QUIT</p>
+            <div class="menu-box">
+                <h1>SYSTEM PAUSED</h1>
+                <p class="blink">[PRESS P TO RESUME]</p>
+                <p style="font-size: 1rem; color: #888; margin-top: 20px;">PRESS ESC TO QUIT</p>
+            </div>
         </div>
 
+        <!-- Game Over Screen -->
         <div class="ui-layer" id="game-over-screen" style="display: none;">
-            <div class="game-over-title">SULPHUR RUN // TERMINATED</div>
-            <h1>CRITICAL FAILURE</h1>
-            <p style="color:#ff4444; text-shadow: 0 0 10px red;">SRV IN REPAIR!</p>
-            <p>DISTANCE: <span id="final-dist" style="color:#fff">0</span>m</p>
-            <p>DATA COLLECTED: <span id="final-data" style="color:#fff">0</span></p>
-            <p>MAX PHASE: <span id="final-phase" style="color:#fff">α</span></p>
-            <p class="blink">[PRESS SPACE TO REBOOT]</p>
+            <div class="menu-box">
+                <div class="game-over-title">SULPHUR RUN // TERMINATED</div>
+                <h1>CRITICAL FAILURE</h1>
+                <p style="color:#ff4444; text-shadow: 0 0 10px red;">SRV IN REPAIR!</p>
+                <p>DISTANCE: <span id="final-dist" style="color:#fff">0</span>m</p>
+                <p>DATA COLLECTED: <span id="final-data" style="color:#fff">0</span></p>
+                <p>MAX PHASE: <span id="final-phase" style="color:#fff">α</span></p>
+                <p class="blink">[PRESS SPACE TO REBOOT]</p>
+            </div>
         </div>
     </div>
 
@@ -327,8 +338,10 @@ if (/Mobi|Android|iPhone|iPad|iPod|Opera Mini|IEMobile/i.test(navigator.userAgen
 
 
 /**
- * SULPHUR RUN - ECLIPSE EDITION (v22)
- * Features: "Hope" (Cool Blue/White Sun) & Rich Amber Eclipse
+ * SULPHUR RUN - SCREENSHOT EDITION (v25)
+ * Features: 
+ * - Freeze-frame Pause with transparent background
+ * - Centered Menu Boxes
  */
 
 const canvas = document.getElementById('gameCanvas');
@@ -349,11 +362,32 @@ const THEMES = [
 const GREEK_PHASES = ['α','β','γ','δ','ε','ζ','η','θ','ι','κ','λ','μ'];
 const POINTS_PER_PHASE = 100; 
 
+// UPDATED LIGHTING OBJECT WITH SPECIFIC CRATER COLORS
 const LIGHTING = {
-    DAWN:  { skyTop: '#2b1a05', skyBot: '#5e3205', ground: '#362305', haze: 'rgba(212, 162, 78, 0.15)', stars: 0.2 }, 
-    DAY:   { skyTop: '#0a0a1f', skyBot: '#2d2d5c', ground: '#8a5a15', haze: 'rgba(199, 130, 0, 0.18)', stars: 0.1 }, 
-    DUSK:  { skyTop: '#1f0505', skyBot: '#5c1200', ground: '#331200', haze: 'rgba(150, 50, 0, 0.15)', stars: 0.3 }, 
-    NIGHT: { skyTop: '#050505', skyBot: '#0a0505', ground: '#1a1205', haze: 'rgba(0,0,0,0)', stars: 0.95 }  
+    DAWN: { 
+        skyTop: '#2b1a05', skyBot: '#5e3205', ground: '#362305', 
+        haze: 'rgba(212, 162, 78, 0.15)', stars: 0.2,
+        craterFill: 'rgba(15, 10, 5, 0.9)', craterStroke: 'rgba(35, 25, 10, 0.8)' 
+    }, 
+    
+    // ETHEREAL DAY: Lighter Sky, Stronger Warm Haze, Subtle Craters
+    DAY: { 
+        skyTop: '#2d3b4f', skyBot: '#7a6040', ground: '#c78200', 
+        haze: 'rgba(230, 200, 150, 0.45)', stars: 0.1, // Much heavier, dreamlike haze
+        craterFill: 'rgba(80, 50, 20, 0.3)', craterStroke: 'rgba(90, 60, 30, 0.2)' // Subtle shadows
+    }, 
+    
+    DUSK: { 
+        skyTop: '#1f0505', skyBot: '#5c1200', ground: '#331200', 
+        haze: 'rgba(150, 50, 0, 0.15)', stars: 0.3,
+        craterFill: 'rgba(20, 10, 5, 0.9)', craterStroke: 'rgba(40, 20, 10, 0.8)'
+    }, 
+    
+    NIGHT: { 
+        skyTop: '#050505', skyBot: '#0a0505', ground: '#1a1205', 
+        haze: 'rgba(0,0,0,0)', stars: 0.95,
+        craterFill: 'rgba(10, 5, 2, 0.95)', craterStroke: 'rgba(30, 20, 10, 0.8)'
+    }  
 };
 
 // --- GAME STATE ---
@@ -785,12 +819,20 @@ function updateTheme() {
     const titleText = document.getElementById('title-text');
     const startScreen = document.getElementById('start-screen');
     const nodeHintColor = document.getElementById('node-hint-color');
+    const pauseScreen = document.getElementById('pause-screen');
+    const gameOverScreen = document.getElementById('game-over-screen');
 
     container.style.boxShadow = `0 0 10px ${theme.main}, 0 0 40px ${theme.glow}, inset 0 0 80px rgba(0,0,0,0.8)`;
     hud.style.borderColor = theme.main;
     hud.style.color = theme.main;
     hud.style.textShadow = `0 0 8px ${theme.main}`;
-    startScreen.style.borderColor = theme.main;
+    
+    // Update Menu Box styles specifically
+    const menuBoxes = document.querySelectorAll('.menu-box');
+    menuBoxes.forEach(box => {
+        box.style.borderColor = theme.main;
+    });
+
     startBlink.style.color = theme.main;
     startBlink.style.textShadow = `0 0 10px ${theme.main}`;
     titleText.style.textShadow = `2px 2px 0px #444, -2px -2px 0px ${theme.main}`;
@@ -1164,6 +1206,10 @@ function draw() {
     const activeGround = lerpColor(currentLighting.ground, targetLighting.ground, transitionProgress);
     const activeStars  = lerp(currentLighting.stars, targetLighting.stars, transitionProgress);
     const activeHaze   = lerpRgba(currentLighting.haze, targetLighting.haze, transitionProgress);
+    
+    // NEW: Lerp Crater Colors
+    const activeCraterFill = lerpRgba(currentLighting.craterFill, targetLighting.craterFill, transitionProgress);
+    const activeCraterStroke = lerpRgba(currentLighting.craterStroke, targetLighting.craterStroke, transitionProgress);
 
     const skyGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
     skyGrad.addColorStop(0, activeSkyTop); 
@@ -1364,13 +1410,14 @@ function draw() {
     ctx.stroke();
     ctx.shadowBlur = 0; 
 
-    ctx.fillStyle = 'rgba(30, 20, 10, 0.5)'; 
+    // --- DRAW DYNAMIC CRATERS ---
+    // Uses phase-specific coloring (Dark in night, Transparent in day)
+    ctx.fillStyle = activeCraterFill; 
     miniCraters.forEach(mc => {
         ctx.beginPath();
         ctx.ellipse(mc.x, mc.y, mc.width, mc.height, 0, 0, Math.PI*2);
         ctx.fill();
-        // Softer, semi-transparent stroke
-        ctx.strokeStyle = 'rgba(50, 30, 15, 0.3)';
+        ctx.strokeStyle = activeCraterStroke;
         ctx.lineWidth = 1;
         ctx.stroke();
     });
