@@ -911,20 +911,22 @@ function update() {
         transitionProgress = 0.0;
     }
 
+// ... inside function update() ...
+
     if (newLoopIndex !== currentLoopIndex) {
         currentLoopIndex = newLoopIndex;
-        // LOOP UPDATE: +1 to start at 1
-        document.getElementById('score-loop').innerText = currentLoopIndex + 1;
-        
-        currentThemeIndex = currentLoopIndex % THEMES.length;
+        // ... (loop update logic) ...
         updateTheme();
         gameSpeed += 1.0; 
     }
 
-    if (frames % 1200 === 0) gameSpeed += 0.5;
+    // --- REPLACE THE OLD SPEED LOGIC WITH THIS ---
+    // Increase speed by 0.1 every 240 frames (approx 4 seconds)
+    if (frames % 240 === 0) gameSpeed += 0.1; 
 
     // SCROLL MOUNTAINS (Parallax)
     mountainScroll -= gameSpeed * 0.2;
+    // ...
     if (mountainScroll <= -SEGMENT_WIDTH) {
         mountainScroll += SEGMENT_WIDTH;
         mountains.shift();
