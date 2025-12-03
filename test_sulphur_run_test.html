@@ -90,12 +90,12 @@
 
         #start-screen, #game-over-screen, #pause-screen {
             background: rgba(10, 5, 5, 0.9);
-            padding: 10px 20px; /* Reduced padding so the frame hugs the text tighter */
+            padding: 20px 40px; 
             border: 2px solid #d4a24e;
             box-shadow: 0 0 20px rgba(212, 162, 78, 0.4), inset 0 0 20px rgba(212, 162, 78, 0.1);
             text-align: center;
             pointer-events: auto;
-            transform: skew(-2deg); /* Restored the lean/skew you liked */
+            transform: skew(-2deg); 
             transition: border-color 1s ease, box-shadow 1s ease;
         }
 
@@ -254,7 +254,6 @@
             DIST: <span id="score-dist">0</span>m <span style="color:#555">|</span> 
             DATA: <span id="score-data" style="color:#fff">0</span> <span style="color:#555">|</span> 
             PHASE: <span id="score-phase" style="font-weight:bold; color: #61dafb; text-shadow: 0 0 5px #61dafb;">α</span> <span style="color:#555">|</span>
-            <!-- NEW LOOP COUNTER -->
             LOOP: <span id="score-loop" style="color:#d4a24e">1</span> <span style="color:#555">|</span>
             SPD: <span id="score-speed" style="color:#fff">0</span> km/h
         </div>
@@ -262,7 +261,7 @@
         <div class="hud-title" id="hud-title">SULPHUR RUN</div>
 
         <div class="ui-layer" id="start-screen">
-            <h1 id="title-text" style="text-shadow: 2px 2px 0px #444, -2px -2px 0px #d4a24e;">SULPHUR RUN v0.2</h1>
+            <h1 id="title-text" style="text-shadow: 2px 2px 0px #444, -2px -2px 0px #d4a24e;">SULPHUR RUN</h1>
             <p>SRV SIMULATION // NAHLA SURFACE</p>
             <p class="blink" id="start-blink">[PRESS SPACE or CLICK MOUSE TO START]</p>
             
@@ -328,8 +327,8 @@ if (/Mobi|Android|iPhone|iPad|iPod|Opera Mini|IEMobile/i.test(navigator.userAgen
 
 
 /**
- * SULPHUR RUN - LOOP COUNTER EDITION
- * Features: Loop Counter, Smoother Mountains, Theme-Synced Mountain Color, Faster Speed, Stable Logic
+ * SULPHUR RUN - ECLIPSE EDITION (v22)
+ * Features: "Hope" (Cool Blue/White Sun) & Rich Amber Eclipse
  */
 
 const canvas = document.getElementById('gameCanvas');
@@ -352,7 +351,6 @@ const POINTS_PER_PHASE = 100;
 
 const LIGHTING = {
     DAWN:  { skyTop: '#2b1a05', skyBot: '#5e3205', ground: '#362305', haze: 'rgba(212, 162, 78, 0.15)', stars: 0.2 }, 
-    // UPDATED DAY GROUND COLOR to Richer Golden Amber
     DAY:   { skyTop: '#0a0a1f', skyBot: '#2d2d5c', ground: '#c78200', haze: 'rgba(150, 150, 200, 0.1)', stars: 0.1 }, 
     DUSK:  { skyTop: '#1f0505', skyBot: '#5c1200', ground: '#331200', haze: 'rgba(150, 50, 0, 0.15)', stars: 0.3 }, 
     NIGHT: { skyTop: '#050505', skyBot: '#0a0505', ground: '#1a1205', haze: 'rgba(0,0,0,0)', stars: 0.95 }  
@@ -364,6 +362,8 @@ let frames = 0;
 let gameSpeed = 5; 
 let scoreDist = 0;
 let scoreData = 0;
+// Visual smoothing for the sun movement
+let visualScore = 0; 
 
 let currentThemeIndex = 0;
 let currentPhaseIndex = 0;
@@ -561,6 +561,7 @@ let projectiles = [];
 let miniCraters = []; 
 let meteors = [];
 let dustStreaks = [];
+let bgMeteors = []; // NEW: Background meteors
 
 let starsSlow = [];
 let starsMed = [];
@@ -736,7 +737,7 @@ function playSound(type) {
         gain.gain.setValueAtTime(0.1, now);
         gain.gain.linearRampToValueAtTime(0.01, now + 0.15);
         duration = 0.15;
-    }
+    } 
 
     osc.start();
     osc.stop(now + duration);
@@ -804,9 +805,10 @@ function startGame() {
     document.getElementById('hud-title').style.display = 'block';
     
     // UPDATED SPEED: Starts at 7 for faster start
-    gameSpeed = 8;
+    gameSpeed = 7;
     scoreDist = 0;
     scoreData = 0;
+    visualScore = 0; // Reset visual score for sun
     currentThemeIndex = 0;
     currentPhaseIndex = 0;
     currentLoopIndex = 0;
@@ -821,6 +823,7 @@ function startGame() {
     miniCraters = [];
     meteors = [];
     dustStreaks = [];
+    bgMeteors = [];
     initStars();
     initMountains();
     
@@ -875,6 +878,17 @@ function spawnSample() {
     });
 }
 
+function spawnBgMeteor() {
+    bgMeteors.push({
+        x: canvas.width + Math.random() * 200,
+        y: Math.random() * 200, // High in sky
+        length: 40 + Math.random() * 60,
+        speed: 12 + Math.random() * 4, // Fast, but visually behind
+        alpha: 0.3 + Math.random() * 0.3
+    });
+}
+
+
 function spawnMiniCrater() {
     miniCraters.push({ x: canvas.width + 20, y: GROUND_Y + 15 + Math.random() * 30, width: 10 + Math.random() * 15, height: 3 + Math.random() * 3 });
 }
@@ -891,6 +905,15 @@ function update() {
     if (gameState !== 'PLAYING') return;
 
     frames++;
+
+    // SMOOTH SUN MOVEMENT: Lerp visualScore towards real scoreData with VERY slow speed
+    if (visualScore < scoreData) {
+        // Reduced from 0.05 to 0.01 for much smoother, slower catch-up
+        visualScore += (scoreData - visualScore) * 0.01;
+        // Snap only when very close
+        if (Math.abs(scoreData - visualScore) < 0.5) visualScore = scoreData;
+    }
+
     scoreDist += 0.1 * (gameSpeed / 4); 
     
     if (transitionProgress < 1.0) {
@@ -911,22 +934,22 @@ function update() {
         transitionProgress = 0.0;
     }
 
-// ... inside function update() ...
-
     if (newLoopIndex !== currentLoopIndex) {
         currentLoopIndex = newLoopIndex;
-        // ... (loop update logic) ...
+        // LOOP UPDATE: +1 to start at 1
+        document.getElementById('score-loop').innerText = currentLoopIndex + 1;
+        
+        currentThemeIndex = currentLoopIndex % THEMES.length;
         updateTheme();
         gameSpeed += 1.0; 
     }
 
-    // --- REPLACE THE OLD SPEED LOGIC WITH THIS ---
-    // Increase speed by 0.1 every 240 frames (approx 4 seconds)
-    if (frames % 240 === 0) gameSpeed += 0.1; 
+    // NEW LOGIC: Increase speed by 0.1 every 240 frames (approx 4 seconds)
+    // This allows the decimal to climb incrementally (7.0 -> 7.1 -> 7.2)
+    if (frames % 240 === 0) gameSpeed += 0.1;
 
     // SCROLL MOUNTAINS (Parallax)
     mountainScroll -= gameSpeed * 0.2;
-    // ...
     if (mountainScroll <= -SEGMENT_WIDTH) {
         mountainScroll += SEGMENT_WIDTH;
         mountains.shift();
@@ -941,9 +964,14 @@ function update() {
 
     if (frames % 100 === 0 && Math.random() > 0.3) spawnObstacle();
     if (frames % 150 === 0 && Math.random() > 0.4) spawnSample();
+    
+    // SPAWN RATES
+    if (frames % 120 === 0 && Math.random() > 0.4) spawnBgMeteor(); // New Background Meteors
+
     if (frames % 40 === 0 && Math.random() > 0.5) spawnMiniCrater();
     if (frames % 300 === 0 && Math.random() > 0.6) spawnMeteor(); 
     if (frames % 60 === 0) spawnDustStreak();
+
 
     for (let i = projectiles.length - 1; i >= 0; i--) {
         let p = projectiles[i];
@@ -962,6 +990,13 @@ function update() {
         let d = dustStreaks[i];
         d.x -= (gameSpeed + d.speed); 
         if(d.x < -100) dustStreaks.splice(i, 1);
+    }
+
+    // BG METEORS UPDATE
+    for (let i = bgMeteors.length - 1; i >= 0; i--) {
+        let bm = bgMeteors[i];
+        bm.x -= bm.speed;
+        if (bm.x < -100) bgMeteors.splice(i, 1);
     }
 
     for (let i = meteors.length - 1; i >= 0; i--) {
@@ -992,6 +1027,7 @@ function update() {
             meteors.splice(i, 1);
         }
     }
+
 
     for (let i = obstacles.length - 1; i >= 0; i--) {
         let obs = obstacles[i];
@@ -1108,21 +1144,15 @@ function update() {
         if(p.life <= 0) particles.splice(i, 1);
     }
 
-// --- STAR LAYERS ---
-[starsSlow, starsMed, starsFast].forEach(layer => {
-    layer.forEach(star => {
-        star.x -= (gameSpeed * star.speedMult * 0.1);
-
-        if (star.x < 0) {
-            star.x = canvas.width;
-        }
+    [starsSlow, starsMed, starsFast].forEach(layer => {
+        layer.forEach(star => {
+            star.x -= (gameSpeed * star.speedMult * 0.1); 
+            if(star.x < 0) star.x = canvas.width;
+        });
     });
-});
 
-// --- HUD UPDATES ---
-document.getElementById('score-dist').innerText = Math.floor(scoreDist);
-
-// This .toFixed(1) section ensures the game speed is not a x10 multiplier and shows 1 decimal place (e.g. "7.5")
+    document.getElementById('score-dist').innerText = Math.floor(scoreDist);
+    // CHANGED: Use toFixed(1) for a single decimal place
     document.getElementById('score-speed').innerText = gameSpeed.toFixed(1);
 }
 
@@ -1150,9 +1180,83 @@ function draw() {
         });
     });
 
+    // --- DRAW BACKGROUND METEORS (Behind mountains) ---
+    ctx.save();
+    bgMeteors.forEach(bm => {
+        ctx.strokeStyle = `rgba(255, 255, 255, ${bm.alpha})`;
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(bm.x, bm.y);
+        ctx.lineTo(bm.x - bm.length, bm.y - bm.length * 0.2); // Slight angle up/left trail
+        ctx.stroke();
+    });
+    ctx.restore();
+
+    // --- DRAW "HOPE" (THE SUN) ---
+    // Only visible during phases 0-8 (Dawn to Dusk)
+    let loopScore = visualScore % (12 * POINTS_PER_PHASE);
+    let dayRange = 9 * POINTS_PER_PHASE; // 900 points is the end of Dusk
+    
+    let sunX = -999;
+    let sunY = -999;
+
+    if (loopScore < dayRange) {
+        let t = loopScore / dayRange; // 0.0 (Dawn Start) to 1.0 (Dusk End)
+        
+        // Arc Logic:
+        // X moves from Left (50) to Right (950)
+        // Y moves in a sine wave: Peaks at t=0.5 (Noon)
+        sunX = 100 + t * (canvas.width - 200);
+        sunY = 350 - Math.sin(t * Math.PI) * 280; // High arc
+
+        ctx.save();
+        ctx.translate(sunX, sunY);
+        // Glow (Subtle and smaller)
+        const sunGlow = ctx.createRadialGradient(0, 0, 5, 0, 0, 30); // Reduced radius 40 -> 30
+        sunGlow.addColorStop(0, 'rgba(204, 242, 255, 0.5)'); // Cyan/Blue White, Lower Opacity
+        sunGlow.addColorStop(0.4, 'rgba(204, 242, 255, 0.1)'); // Fading out
+        sunGlow.addColorStop(1, 'rgba(204, 242, 255, 0)');
+        ctx.fillStyle = sunGlow;
+        ctx.fillRect(-30, -30, 60, 60);
+
+        // Core (Slightly smaller, Cold Blue/White)
+        ctx.fillStyle = 'rgba(230, 247, 255, 0.8)';
+        ctx.beginPath();
+        ctx.arc(0, 0, 5, 0, Math.PI*2); // Reduced core 6 -> 5
+        ctx.fill();
+        ctx.restore();
+    }
+
+
     // REBEKAH (Planet)
     ctx.save();
     ctx.translate(750, 180); 
+
+    // --- ECLIPSE CHECK ---
+    // Planet center is (750, 180) in world space.
+    // Calculate distance
+    let dx = sunX - 750;
+    let dy = sunY - 180;
+    let dist = Math.sqrt(dx*dx + dy*dy);
+    
+    // Planet radius is 60. If sun is within ~75px, trigger eclipse glow.
+    if (dist < 75) {
+        let alpha = 1 - (dist / 75); // Stronger when closer to center
+        
+        // Amber/White Back Glow - MORE AMBER/GOLD
+        let eclipseGrad = ctx.createRadialGradient(0, 0, 58, 0, 0, 100);
+        eclipseGrad.addColorStop(0, `rgba(255, 191, 0, ${alpha})`); // Deep Amber/Gold
+        eclipseGrad.addColorStop(0.2, `rgba(255, 223, 128, ${alpha * 0.8})`); // Soft Yellow/White
+        eclipseGrad.addColorStop(1, 'rgba(0,0,0,0)');
+        
+        ctx.globalCompositeOperation = 'source-over'; // Default
+        ctx.fillStyle = eclipseGrad;
+        ctx.beginPath();
+        ctx.arc(0, 0, 100, 0, Math.PI*2);
+        ctx.fill();
+    }
+
+    
     ctx.shadowColor = theme.main;
     ctx.shadowBlur = 60;
     
