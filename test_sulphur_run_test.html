@@ -1364,13 +1364,13 @@ function draw() {
     ctx.stroke();
     ctx.shadowBlur = 0; 
 
-ctx.fillStyle = '#3b2a12';   // soft crater shadow (the magic fix)
-ctx.strokeStyle = '#5a4020'; // warm rim highlight that blends
+    ctx.fillStyle = 'rgba(30, 20, 10, 0.5)'; 
     miniCraters.forEach(mc => {
         ctx.beginPath();
         ctx.ellipse(mc.x, mc.y, mc.width, mc.height, 0, 0, Math.PI*2);
         ctx.fill();
-        ctx.strokeStyle = '#2a1e0a';
+        // Softer, semi-transparent stroke
+        ctx.strokeStyle = 'rgba(50, 30, 15, 0.3)';
         ctx.lineWidth = 1;
         ctx.stroke();
     });
