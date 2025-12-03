@@ -90,12 +90,12 @@
 
         #start-screen, #game-over-screen, #pause-screen {
             background: rgba(10, 5, 5, 0.9);
-            padding: 40px 60px;
+            padding: 10px 20px; /* Reduced padding so the frame hugs the text tighter */
             border: 2px solid #d4a24e;
             box-shadow: 0 0 20px rgba(212, 162, 78, 0.4), inset 0 0 20px rgba(212, 162, 78, 0.1);
             text-align: center;
             pointer-events: auto;
-            transform: skew(-2deg);
+            transform: skew(-2deg); /* Restored the lean/skew you liked */
             transition: border-color 1s ease, box-shadow 1s ease;
         }
 
@@ -848,7 +848,31 @@ function spawnObstacle() {
 }
 
 function spawnSample() {
-    samples.push({ x: canvas.width + 50, y: GROUND_Y - 60 - (Math.random() * 40), size: 12, rotation: 0 });
+    const r = Math.random();
+    let value = 50;
+    let color = '#61dafb'; // Default Cyan (Blue)
+
+    // Logic: 
+    // Amber (100pts) is ~13% chance (approx 1/5th frequency of blue)
+    // Pink (75pts) is ~22% chance (approx 1/3rd frequency of blue)
+    // Blue (50pts) is ~65% chance (remaining)
+    
+    if (r > 0.87) { 
+        value = 100;
+        color = '#d4a24e'; // Amber
+    } else if (r > 0.65) { 
+        value = 75;
+        color = '#ff61c7'; // Pink/Magenta
+    }
+
+    samples.push({ 
+        x: canvas.width + 50, 
+        y: GROUND_Y - 60 - (Math.random() * 40), 
+        size: 12, 
+        rotation: 0,
+        value: value, 
+        color: color 
+    });
 }
 
 function spawnMiniCrater() {
@@ -1056,16 +1080,15 @@ function update() {
 
         if (dist < 40) { 
             playSound('collect');
-            scoreData += 50;
+            scoreData += s.value; // UPDATED: Use dynamic value
             document.getElementById('score-data').innerText = scoreData;
             samples.splice(i, 1);
             
-            const theme = THEMES[currentThemeIndex];
             for(let j=0; j<8; j++) {
                 addParticle({
                     x: s.x, y: s.y,
                     vx: (Math.random()-0.5)*6, vy: (Math.random()-0.5)*6,
-                    life: 20, color: theme.main, size: 2
+                    life: 20, color: s.color, size: 2 // UPDATED: Use dynamic color
                 });
             }
             continue;
@@ -1285,9 +1308,9 @@ function draw() {
         ctx.rotate(s.rotation);
         ctx.fillStyle = '#fff';
         ctx.fillRect(-2, -2, 4, 4);
-        ctx.strokeStyle = '#61dafb';
+        ctx.strokeStyle = s.color; // UPDATED: Use dynamic color
         ctx.lineWidth = 2;
-        ctx.shadowColor = '#61dafb';
+        ctx.shadowColor = s.color; // UPDATED: Use dynamic color
         ctx.shadowBlur = 15; 
         ctx.beginPath();
         ctx.moveTo(0, -s.size);
