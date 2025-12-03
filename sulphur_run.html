@@ -88,16 +88,22 @@
             background: radial-gradient(circle, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.7) 100%);
         }
 
-#start-screen, #game-over-screen, #pause-screen {
-            background: rgba(10, 5, 5, 0.9);
-            padding: 40px 60px;
-            border: 2px solid #d4a24e;
-            box-shadow: 0 0 20px rgba(212, 162, 78, 0.4), inset 0 0 20px rgba(212, 162, 78, 0.1);
-            text-align: center;
-            pointer-events: auto;
-            /* transform: skew(-2deg); REMOVED TO FIX OFFSET */
-            transition: border-color 1s ease, box-shadow 1s ease;
-        }
+#start-screen,
+#game-over-screen,
+#pause-screen {
+    background: rgba(10, 5, 5, 0.9);
+    padding: 20px 40px;        /* Reduced padding so the frame hugs the text tighter */
+    border: 2px solid #d4a24e;
+    box-shadow: 
+        0 0 20px rgba(212, 162, 78, 0.4),
+        inset 0 0 20px rgba(212, 162, 78, 0.1);
+    text-align: center;
+    pointer-events: auto;
+    transform: skew(-2deg);    /* Restored the lean/skew you liked */
+    transition: 
+        border-color 1s ease,
+        box-shadow 1s ease;
+}
         
         h1 {
             color: #fff;
