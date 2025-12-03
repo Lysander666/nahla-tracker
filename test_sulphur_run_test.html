@@ -1364,8 +1364,8 @@ function draw() {
     ctx.stroke();
     ctx.shadowBlur = 0; 
 
-    ctx.fillStyle = '#251b0b';   // deep warm ochre shadow
-    ctx.strokeStyle = '#3a2810'; // soft warm rim
+ctx.fillStyle = '#3b2a12';   // soft crater shadow (the magic fix)
+ctx.strokeStyle = '#5a4020'; // warm rim highlight that blends
     miniCraters.forEach(mc => {
         ctx.beginPath();
         ctx.ellipse(mc.x, mc.y, mc.width, mc.height, 0, 0, Math.PI*2);
