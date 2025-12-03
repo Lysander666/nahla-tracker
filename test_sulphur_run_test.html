@@ -352,7 +352,8 @@ const POINTS_PER_PHASE = 100;
 
 const LIGHTING = {
     DAWN:  { skyTop: '#2b1a05', skyBot: '#5e3205', ground: '#362305', haze: 'rgba(212, 162, 78, 0.15)', stars: 0.2 }, 
-    DAY:   { skyTop: '#0a0a1f', skyBot: '#2d2d5c', ground: '#5c481e', haze: 'rgba(150, 150, 200, 0.1)', stars: 0.1 }, 
+    // UPDATED DAY GROUND COLOR to Richer Golden Amber
+    DAY:   { skyTop: '#0a0a1f', skyBot: '#2d2d5c', ground: '#c78200', haze: 'rgba(150, 150, 200, 0.1)', stars: 0.1 }, 
     DUSK:  { skyTop: '#1f0505', skyBot: '#5c1200', ground: '#331200', haze: 'rgba(150, 50, 0, 0.15)', stars: 0.3 }, 
     NIGHT: { skyTop: '#050505', skyBot: '#0a0505', ground: '#1a1205', haze: 'rgba(0,0,0,0)', stars: 0.95 }  
 };
@@ -802,8 +803,8 @@ function startGame() {
     document.getElementById('hud').style.display = 'block';
     document.getElementById('hud-title').style.display = 'block';
     
-    // UPDATED SPEED: Starts at 5 instead of 4
-    gameSpeed = 5;
+    // UPDATED SPEED: Starts at 7 for faster start
+    gameSpeed = 7;
     scoreDist = 0;
     scoreData = 0;
     currentThemeIndex = 0;
@@ -1117,7 +1118,70 @@ function draw() {
         });
     });
 
+    // REBEKAH (Planet)
+    ctx.save();
+    ctx.translate(750, 180); 
+    ctx.shadowColor = theme.main;
+    ctx.shadowBlur = 60;
+    
+    // Black background for planet
+    ctx.beginPath();
+    ctx.arc(0, 0, 60, 0, Math.PI*2); 
+    ctx.fillStyle = '#000'; 
+    ctx.fill();
+    ctx.shadowBlur = 0; 
 
+    // 1. BACK RINGS (Top Half) - Drawn BEHIND planet
+    ctx.save();
+    ctx.rotate(-0.2);
+    ctx.scale(1, 0.3); 
+    
+    ctx.beginPath();
+    ctx.arc(0, 0, 120, Math.PI, 0); // Top half (Back)
+    ctx.strokeStyle = 'rgba(97, 218, 251, 0.4)';
+    ctx.lineWidth = 18;
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.arc(0, 0, 100, Math.PI, 0); // Top half (Back)
+    ctx.strokeStyle = '#61dafb';
+    ctx.lineWidth = 3;
+    ctx.stroke();
+    ctx.restore();
+    
+    // 2. PLANET BODY
+    const grad = ctx.createLinearGradient(-50, -50, 50, 50);
+    grad.addColorStop(0, '#4a0000'); 
+    grad.addColorStop(0.5, '#800000'); 
+    grad.addColorStop(1, '#200000'); 
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(0, 0, 62, 0, Math.PI*2); 
+    ctx.fill();
+    ctx.fillStyle = 'rgba(255, 100, 100, 0.1)';
+    ctx.beginPath();
+    ctx.arc(-20, -20, 15, 0, Math.PI*2);
+    ctx.fill();
+
+    // 3. FRONT RINGS (Bottom Half) - Drawn IN FRONT of planet
+    ctx.save();
+    ctx.rotate(-0.2);
+    ctx.scale(1, 0.3); 
+    
+    ctx.beginPath();
+    ctx.arc(0, 0, 120, 0, Math.PI); // Bottom half (Front)
+    ctx.strokeStyle = 'rgba(97, 218, 251, 0.4)';
+    ctx.lineWidth = 18;
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.arc(0, 0, 100, 0, Math.PI); // Bottom half (Front)
+    ctx.strokeStyle = '#61dafb';
+    ctx.lineWidth = 3;
+    ctx.stroke();
+    ctx.restore();
+
+    ctx.restore(); // End Rebekah
 
     starsFast.forEach(star => {
         const breath = Math.sin(frames * 0.1 + star.phase);
@@ -1125,98 +1189,6 @@ function draw() {
         ctx.fillStyle = `rgba(${star.color}, ${opacity})`;
         ctx.fillRect(star.x, star.y, star.size, star.size);
     });
-
-    // REBEKAH (Planet)
-ctx.save();
-ctx.translate(750, 180); 
-
-// Minimal glow for background effect
-ctx.shadowColor = theme.main;
-ctx.shadowBlur = 15; // Much more subtle
-
-// BACK HALF OF RINGS (behind planet at bottom)
-ctx.shadowBlur = 0;
-ctx.save();
-ctx.rotate(-0.2);
-ctx.scale(1, 0.3); 
-
-// Outer ring back half (bottom)
-ctx.beginPath();
-ctx.arc(0, 0, 120, Math.PI, Math.PI * 2); // Bottom half
-ctx.strokeStyle = 'rgba(97, 218, 251, 0.2)'; // Even more subtle
-ctx.lineWidth = 18;
-ctx.stroke();
-
-// Inner ring back half
-const ringGradBack = ctx.createLinearGradient(-100, 0, 100, 0);
-ringGradBack.addColorStop(0, 'rgba(97, 218, 251, 0.15)');
-ringGradBack.addColorStop(0.5, 'rgba(97, 218, 251, 0.4)');
-ringGradBack.addColorStop(1, 'rgba(97, 218, 251, 0.15)');
-
-ctx.beginPath();
-ctx.arc(0, 0, 100, Math.PI, Math.PI * 2); // Bottom half
-ctx.strokeStyle = ringGradBack;
-ctx.lineWidth = 4;
-ctx.stroke();
-
-ctx.restore();
-
-// PLANET (much more muted colors for background)
-ctx.shadowColor = theme.main;
-ctx.shadowBlur = 15;
-
-const planetGrad = ctx.createRadialGradient(-15, -15, 10, 0, 0, 62);
-planetGrad.addColorStop(0, '#6a1818'); // Much dimmer highlight
-planetGrad.addColorStop(0.3, '#4d0000'); // Darker mid tone
-planetGrad.addColorStop(0.7, '#2a0000'); // Even darker
-planetGrad.addColorStop(1, '#0d0000'); // Very dark edge
-
-ctx.beginPath();
-ctx.arc(0, 0, 62, 0, Math.PI*2); 
-ctx.fillStyle = planetGrad;
-ctx.fill();
-
-// Very subtle specular highlight
-ctx.shadowBlur = 0;
-ctx.fillStyle = 'rgba(150, 80, 80, 0.15)'; // Much more subtle
-ctx.beginPath();
-ctx.arc(-18, -18, 20, 0, Math.PI*2);
-ctx.fill();
-
-// FRONT HALF OF RINGS (in front of planet at top)
-ctx.save();
-ctx.rotate(-0.2);
-ctx.scale(1, 0.3); 
-
-// Outer ring front half (top)
-ctx.beginPath();
-ctx.arc(0, 0, 120, 0, Math.PI); // Top half
-ctx.strokeStyle = 'rgba(97, 218, 251, 0.25)'; // More subtle
-ctx.lineWidth = 18;
-ctx.stroke();
-
-// Inner ring front half
-const ringGradFront = ctx.createLinearGradient(-100, 0, 100, 0);
-ringGradFront.addColorStop(0, 'rgba(97, 218, 251, 0.2)');
-ringGradFront.addColorStop(0.5, 'rgba(97, 218, 251, 0.5)');
-ringGradFront.addColorStop(1, 'rgba(97, 218, 251, 0.2)');
-
-ctx.beginPath();
-ctx.arc(0, 0, 100, 0, Math.PI); // Top half
-ctx.strokeStyle = ringGradFront;
-ctx.lineWidth = 4;
-ctx.stroke();
-
-// Very subtle ring highlight on front edge
-ctx.beginPath();
-ctx.arc(0, -2, 100, 0, Math.PI);
-ctx.strokeStyle = 'rgba(150, 235, 255, 0.3)'; // Much more subtle
-ctx.lineWidth = 2;
-ctx.stroke();
-
-ctx.restore();
-
-ctx.restore();
 
     // --- DRAW MOUNTAINS (NEW & SMOOTHER) ---
     const mountainColor = lerpColor(theme.main, '#000000', 0.85); 
