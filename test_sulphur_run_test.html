@@ -1120,8 +1120,8 @@ function update() {
 // --- HUD UPDATES ---
 document.getElementById('score-dist').innerText = Math.floor(scoreDist);
 
-// CHANGED: Removed (*10) multiplier so speed displays as actual gameSpeed
-document.getElementById('score-speed').innerText = Math.floor(gameSpeed);
+// This .toFixed(1) section ensures the game speed is not a x10 multiplier and shows 1 decimal place (e.g. "7.5")
+    document.getElementById('score-speed').innerText = gameSpeed.toFixed(1);
 }
 
 function draw() {
