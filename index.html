@@ -1799,19 +1799,17 @@ function get_sun_state_index(phaseIndex0) {
 }
 
 function get_hope_indicator(phaseIndex0) {
-    // Hope is visible from α (0) to ι (8) inclusive
     if (phaseIndex0 <= 8) {
-        const sunState = get_sun_state_index(phaseIndex0);
+        const sunState = Math.min(get_sun_state_index(phaseIndex0), 3); // Cap at 3
         const symbols = ["🌅","☀️","🔆","🌄"];
         const arc = ["─","─","─","─","─","─"];
         arc[sunState] = symbols[sunState];
         return `<strong>Hope:</strong> [${arc.join("")}]`;
     }
 
-    // κ (9) to μ (11) = below horizon
     return "<strong>Hope:</strong> [────────] (below horizon)";
 }
-
+       
 function get_galactic_band_indicator(phaseNumber) {
     const phaseLabel = `<span class="phase-highlight">Phase ${greekPhase(phaseNumber)}</span>`;
 
