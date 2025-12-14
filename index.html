@@ -1696,13 +1696,16 @@ function setPhaseAnchor(observedTimestampString, observedPhaseNumber) {
     }
 
     const offsetSeconds = (observedPhaseNumber - 1) * PHASE_LENGTH_SECONDS;
-    const correctedAnchorMs = observedTime.getTime() - offsetSeconds * 1000;
+    
+    // FIX ADDED HERE: Subtract 50ms to prevent floating point floor errors
+    // (e.g. 10.9999 becoming 10 instead of 11)
+    const correctedAnchorMs = observedTime.getTime() - (offsetSeconds * 1000) - 50;
 
     window.CYCLE_ANCHOR = new Date(correctedAnchorMs);
 
     console.log(
         `%c[SYNC] Galactic Band Anchor Updated\n` +
-        `Observed Phase: ${observedPhaseNumber}\n` +
+        `Observed Phase: ${observedPhaseNumber} (${greekPhase(observedPhaseNumber)})\n` +
         `Observed Time: ${observedTime.toISOString()}\n` +
         `New CYCLE_ANCHOR: ${window.CYCLE_ANCHOR.toISOString()}`,
         "color: cyan; font-weight: bold;"
