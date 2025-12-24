@@ -50,8 +50,11 @@
             justify-content: center;
             background: rgba(0,0,0,0.7);
             z-index: 20;
-            pointer-events: auto; /* Ensure clicks register here */
-            cursor: pointer;
+            pointer-events: none; /* Let the JS handle inputs globally */
+        }
+
+        .active-ui {
+            pointer-events: auto; /* Actually, we capture globally now, but keep visual focus */
         }
 
         .hidden {
@@ -121,8 +124,7 @@
     <div class="split-line" id="split-line" style="display:none;"></div>
 
     <!-- START SCREEN -->
-    <!-- We add onclick directly here to guarantee it fires -->
-    <div class="ui-layer" id="start-screen" onclick="triggerStart()">
+    <div class="ui-layer" id="start-screen">
         <h1>SULPHUR<br>RUN</h1>
         <p style="color:#61dafb; letter-spacing: 2px;">PORTRAIT MODE</p>
         
@@ -135,7 +137,7 @@
     </div>
 
     <!-- GAME OVER SCREEN -->
-    <div class="ui-layer hidden" id="game-over-screen" onclick="triggerStart()">
+    <div class="ui-layer hidden" id="game-over-screen">
         <h1 style="color:#ff4444;">CRITICAL<br>FAILURE</h1>
         <p>DISTANCE: <span id="final-dist">0</span>m</p>
         <p>DATA: <span id="final-data" style="color:#61dafb">0</span></p>
@@ -599,7 +601,11 @@ function gameOver() {
 // --- UNIVERSAL INPUT HANDLING ---
 
 function handleInput(yPos) {
-    if (gameState !== 'PLAYING') return;
+    // If not playing, any tap starts the game
+    if (gameState === 'START' || gameState === 'GAMEOVER') {
+        triggerStart();
+        return;
+    }
 
     // Split Screen: Top 55% Jump, Bottom 45% Shoot
     const splitY = SCREEN_H * 0.55;
@@ -613,19 +619,13 @@ function handleInput(yPos) {
 
 // 1. Mouse Down (Desktop/Testing)
 window.addEventListener('mousedown', (e) => {
-    // If we click on the UI layers, let the onclick handler do its job.
-    // If UI is hidden, we handle game input.
-    if (gameState === 'PLAYING') {
-        handleInput(e.clientY);
-    }
+    handleInput(e.clientY);
 });
 
 // 2. Touch Start (Mobile)
 window.addEventListener('touchstart', (e) => {
     e.preventDefault(); // Stop scrolling/zooming
-    if (gameState === 'PLAYING') {
-        handleInput(e.touches[0].clientY);
-    }
+    handleInput(e.touches[0].clientY);
 }, {passive: false});
 
 // 3. Keyboard (Desktop Alt)
