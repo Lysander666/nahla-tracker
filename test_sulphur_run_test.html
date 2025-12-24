@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Sulphur Run - Vertical</title>
+    <title>Sulphur Run: Portrait</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
@@ -19,7 +19,7 @@
             height: 100vh;
             width: 100vw;
             overflow: hidden;
-            touch-action: none;
+            touch-action: none; /* Critical for game controls */
             user-select: none;
             -webkit-user-select: none;
         }
@@ -28,8 +28,8 @@
             position: relative;
             width: 100%;
             height: 100%;
-            background-color: #08060a;
-            overflow: hidden;
+            background-color: #08060a; 
+            image-rendering: pixelated; /* Crisp retro look */
         }
 
         canvas {
@@ -38,463 +38,680 @@
             height: 100%;
         }
 
-        /* HUD: Moved to top center for portrait visibility */
-        .hud {
-            position: absolute;
-            top: 5%;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 90%;
-            display: flex;
-            justify-content: space-between;
-            font-size: 1.8rem;
-            color: #d4a24e;
-            text-shadow: 0 0 5px #000;
-            z-index: 10;
-            pointer-events: none;
-        }
-
-        /* UI Overlays */
+        /* UI LAYERS */
         .ui-layer {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
-            display: flex; flex-direction: column;
-            align-items: center; justify-content: center;
-            background: rgba(0,0,0,0.85);
-            z-index: 20;
-            text-align: center;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0,0,0,0.6);
+            z-index: 10;
         }
         
-        .active-ui { pointer-events: auto; }
-        .hidden-ui { display: none !important; pointer-events: none; }
+        .active-ui { pointer-events: auto; background: rgba(0,0,0,0.85); }
+        .hidden { display: none !important; }
 
-        h1 { font-size: 3.5rem; color: #d4a24e; margin: 0 0 10px 0; line-height: 0.9; }
-        p { font-size: 1.4rem; color: #ccc; margin: 10px 20px; }
-        .blink { animation: blink 1s infinite; color: #fff; font-size: 1.8rem; margin-top: 30px; }
-        @keyframes blink { 50% { opacity:0; } }
+        h1 {
+            color: #d4a24e;
+            font-size: 4rem;
+            margin: 0;
+            text-shadow: 2px 2px 0px #444, -2px -2px 0px #444;
+            line-height: 0.9;
+            text-align: center;
+        }
 
-        /* SPLIT SCREEN CONTROLS VISUALIZER */
-        /* We draw a faint line to show the player where the zones are */
-        .control-divider {
+        p { font-size: 1.5rem; color: #ccc; margin: 10px 0; text-align: center; }
+        
+        .blink { animation: blinker 1s infinite; color: #fff; margin-top: 20px; }
+        @keyframes blinker { 50% { opacity: 0; } }
+
+        /* HUD */
+        .hud {
             position: absolute;
-            top: 60%; 
-            left: 10%;
-            width: 80%;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 1.5rem;
+            color: #d4a24e;
+            text-shadow: 0 0 5px #d4a24e;
+            z-index: 5;
             pointer-events: none;
         }
-        
-        .zone-label {
+
+        /* CONTROLS GUIDE OVERLAY */
+        .controls-guide {
+            margin-top: 30px;
+            border: 1px dashed #444;
+            padding: 15px;
+            background: rgba(0,0,0,0.5);
+        }
+        .zone-hint { display: block; margin: 5px 0; font-size: 1.2rem; }
+
+        /* VISUAL SEPARATOR FOR TOUCH ZONES */
+        #touch-divider {
             position: absolute;
-            font-size: 1.2rem;
-            color: rgba(255,255,255,0.2);
+            top: 55%; /* Slightly lower than center */
+            left: 5%;
+            width: 90%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
             pointer-events: none;
-            width: 100%;
-            text-align: center;
+            z-index: 4;
         }
     </style>
 </head>
 <body>
 
-    <div id="game-container">
-        <canvas id="gameCanvas"></canvas>
+<div id="game-container">
+    <canvas id="gameCanvas"></canvas>
+
+    <div class="hud" id="hud" style="display:none;">
+        <span>DIST: <span id="score-dist" style="color:#fff">0</span>m</span>
+        <span>DATA: <span id="score-data" style="color:#61dafb">0</span></span>
+    </div>
+    
+    <div id="touch-divider" style="display:none;"></div>
+
+    <div class="ui-layer active-ui" id="start-screen">
+        <h1>SULPHUR<br>RUN</h1>
+        <p style="letter-spacing: 2px; color: #61dafb;">PORTRAIT SYSTEM</p>
         
-        <div class="hud" id="hud" style="display:none;">
-            <span>DIST: <span id="score-dist" style="color:#fff">0</span></span>
-            <span>DATA: <span id="score-data" style="color:#61dafb">0</span></span>
+        <div class="controls-guide">
+            <span class="zone-hint" style="color:#d4a24e">⬆ TOP ZONE: JUMP</span>
+            <span class="zone-hint" style="color:#ff4444">⬇ BOTTOM ZONE: SHOOT</span>
         </div>
-
-        <div class="control-divider" id="divider" style="display:none;"></div>
-        <div class="zone-label" id="lbl-jump" style="top: 40%; display:none;">( TAP TOP TO JUMP )</div>
-        <div class="zone-label" id="lbl-shoot" style="top: 80%; display:none;">( TAP BOTTOM TO SHOOT )</div>
-
-        <div class="ui-layer active-ui" id="start-screen">
-            <h1>SULPHUR<br>RUN</h1>
-            <p style="color:#61dafb; letter-spacing: 2px;">VERTICAL PROTOCOL</p>
-            <div style="margin: 20px 0; border: 1px solid #333; padding: 10px; width: 80%;">
-                <span style="color:#d4a24e">TOP ZONE:</span> JUMP<br>
-                <span style="color:#ff4444">BOTTOM ZONE:</span> SHOOT
-            </div>
-            <p class="blink">[ TAP TO START ]</p>
-        </div>
-
-        <div class="ui-layer hidden-ui" id="game-over-screen">
-            <h1 style="color:#ff4444">CRITICAL<br>FAILURE</h1>
-            <p>DISTANCE: <span id="final-dist">0</span>m</p>
-            <p>DATA: <span id="final-data" style="color:#61dafb; font-size: 2rem;">0</span></p>
-            <p class="blink">[ TAP TO REBOOT ]</p>
-        </div>
+        
+        <p class="blink">[ TAP SCREEN TO START ]</p>
     </div>
 
-    <audio id="bgm" loop preload="auto" src="nahla_theme.mp3"></audio>
+    <div class="ui-layer hidden" id="game-over-screen">
+        <h1 style="color:#ff4444; font-size:3rem;">CRITICAL<br>FAILURE</h1>
+        <p>DISTANCE: <span id="final-dist">0</span></p>
+        <p>DATA: <span id="final-data" style="color:#61dafb">0</span></p>
+        <p class="blink">[ TAP TO REBOOT ]</p>
+    </div>
+</div>
+
+<audio id="bgm" loop preload="auto" src="nahla_theme.mp3"></audio>
 
 <script>
-/** SULPHUR RUN - TRUE PORTRAIT EDITION **/
+/** * SULPHUR RUN - HIGH FIDELITY PORTRAIT ENGINE 
+ * Restoring original physics, visuals, and distinct collision groups.
+ */
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 const bgm = document.getElementById('bgm');
 
-// --- RESIZE LOGIC ---
-// We set the canvas to match the screen exactly
+// --- RESIZE HANDLING ---
+let SCREEN_W = window.innerWidth;
+let SCREEN_H = window.innerHeight;
+// Ground is fixed at 85% down the screen
+let GROUND_Y = SCREEN_H * 0.85;
+
 function resize() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    // Recalculate Ground based on screen height
-    // Ground is 15% from bottom
-    GROUND_Y = canvas.height * 0.85; 
+    SCREEN_W = window.innerWidth;
+    SCREEN_H = window.innerHeight;
+    canvas.width = SCREEN_W;
+    canvas.height = SCREEN_H;
+    GROUND_Y = SCREEN_H * 0.85;
+    // Stars need regeneration on resize to cover new area
+    initStars(); 
 }
 window.addEventListener('resize', resize);
+resize(); // Initial call
 
-// --- AUDIO ENGINE ---
+// --- AUDIO SYSTEM (Web Audio API) ---
 const AudioContext = window.AudioContext || window.webkitAudioContext;
 const actx = new AudioContext();
 
+function resumeAudio() {
+    if (actx.state === 'suspended') actx.resume();
+    if (bgm && bgm.paused) bgm.play().catch(()=>{});
+}
+
 function playSound(type) {
-    if(actx.state === 'suspended') actx.resume();
+    if (actx.state === 'suspended') return;
     const osc = actx.createOscillator();
     const gain = actx.createGain();
-    osc.connect(gain); gain.connect(actx.destination);
-    
     const now = actx.currentTime;
-    if(type === 'jump') {
+    
+    osc.connect(gain);
+    gain.connect(actx.destination);
+
+    if (type === 'jump') {
+        osc.type = 'sawtooth';
         osc.frequency.setValueAtTime(150, now);
-        osc.frequency.linearRampToValueAtTime(300, now + 0.15);
+        osc.frequency.exponentialRampToValueAtTime(50, now + 0.2);
         gain.gain.setValueAtTime(0.1, now);
-        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+        gain.gain.linearRampToValueAtTime(0, now + 0.2);
         osc.start(now); osc.stop(now + 0.2);
-    } else if(type === 'shoot') {
+    } else if (type === 'shoot') {
         osc.type = 'square';
-        osc.frequency.setValueAtTime(600, now);
+        osc.frequency.setValueAtTime(800, now);
         osc.frequency.exponentialRampToValueAtTime(100, now + 0.1);
-        gain.gain.setValueAtTime(0.05, now);
+        gain.gain.setValueAtTime(0.08, now);
         gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
         osc.start(now); osc.stop(now + 0.1);
-    } else if(type === 'hit') {
+    } else if (type === 'hit') { // Bad sound
         osc.type = 'sawtooth';
         osc.frequency.setValueAtTime(100, now);
-        osc.frequency.linearRampToValueAtTime(20, now + 0.3);
+        osc.frequency.linearRampToValueAtTime(20, now + 0.4);
         gain.gain.setValueAtTime(0.2, now);
-        gain.gain.linearRampToValueAtTime(0, now + 0.3);
-        osc.start(now); osc.stop(now + 0.3);
-    } else if(type === 'collect') {
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+        osc.start(now); osc.stop(now + 0.4);
+    } else if (type === 'collect') { // Good sound
         osc.type = 'sine';
-        osc.frequency.setValueAtTime(1200, now);
+        osc.frequency.setValueAtTime(600, now);
+        osc.frequency.linearRampToValueAtTime(1200, now + 0.1);
         gain.gain.setValueAtTime(0.1, now);
-        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
-        osc.start(now); osc.stop(now + 0.1);
+        gain.gain.linearRampToValueAtTime(0, now + 0.15);
+        osc.start(now); osc.stop(now + 0.15);
     }
 }
 
-// --- GAME VARS ---
-let GROUND_Y = 500; // Will be overwritten by resize()
+// --- GAME STATE ---
 let gameState = 'START';
 let frames = 0;
-let gameSpeed = 5; // Slower start for narrow screens
-let score = 0;
-let dist = 0;
+let gameSpeed = 6; 
+let scoreDist = 0;
+let scoreData = 0;
 
-let rover = { x: 30, y: 0, w: 40, h: 20, dy: 0, grounded: false, jumps: 0 };
+// PHYSICS CONSTANTS (Matches Original Feel)
+const GRAVITY = 0.25; 
+const JUMP_FORCE = -8.5; // Original was -8.5, keeping it close relative to scaling
+
+// ENTITY LISTS
 let obstacles = [];
+let samples = []; // The "Nodes"
 let projectiles = [];
-let stars = [];
 let particles = [];
+let stars = [];
 
-// Initialize Size
-resize();
+// --- THE ROVER ---
+const rover = {
+    x: 40, // Fixed horizontal position (Left side)
+    y: 0,
+    width: 40,
+    height: 20,
+    dy: 0,
+    grounded: false,
+    jumps: 0,
+    maxJumps: 2,
+    angle: 0,
 
-function initGame() {
-    gameState = 'PLAYING';
-    score = 0;
-    dist = 0;
-    gameSpeed = 6;
-    frames = 0;
-    obstacles = [];
-    projectiles = [];
-    particles = [];
-    rover.y = GROUND_Y - 20;
-    rover.dy = 0;
-    
-    // UI Updates
-    document.getElementById('start-screen').classList.add('hidden-ui');
-    document.getElementById('start-screen').classList.remove('active-ui');
-    document.getElementById('game-over-screen').classList.add('hidden-ui');
-    document.getElementById('game-over-screen').classList.remove('active-ui');
-    
-    document.getElementById('hud').style.display = 'flex';
-    document.getElementById('divider').style.display = 'block';
-    document.getElementById('lbl-jump').style.display = 'block';
-    document.getElementById('lbl-shoot').style.display = 'block';
+    reset: function() {
+        this.y = GROUND_Y - 20;
+        this.dy = 0;
+        this.jumps = 0;
+        this.angle = 0;
+        this.grounded = true;
+    },
 
-    // Start Music
-    if(bgm && bgm.paused) bgm.play().catch(e => console.log(e));
-    if(actx.state === 'suspended') actx.resume();
-    
-    // Create Background Stars
+    update: function() {
+        this.dy += GRAVITY;
+        this.y += this.dy;
+
+        // Ground Collision
+        if (this.y + this.height/2 >= GROUND_Y) {
+            this.y = GROUND_Y - this.height/2;
+            this.dy = 0;
+            this.grounded = true;
+            this.jumps = 0;
+            this.angle = 0;
+        } else {
+            this.grounded = false;
+            // Tilt effect when jumping
+            let targetAngle = Math.min(Math.max(this.dy * 0.05, -0.3), 0.3);
+            this.angle += (targetAngle - this.angle) * 0.1;
+        }
+    },
+
+    jump: function() {
+        if (this.grounded || this.jumps < this.maxJumps) {
+            this.dy = JUMP_FORCE;
+            this.grounded = false;
+            this.jumps++;
+            playSound('jump');
+            // Dust particles
+            for(let i=0; i<5; i++) createParticle(this.x+20, this.y+20, '#d4a24e');
+        }
+    },
+
+    shoot: function() {
+        // Cooldown check (simple frame check)
+        if (frames % 15 !== 0 && frames % 16 !== 0 && frames % 17 !== 0) { // rudimentary throttle
+             projectiles.push({
+                x: this.x + 30,
+                y: this.y + 5,
+                vx: 12, // Bullet speed
+                life: 60
+            });
+            playSound('shoot');
+        }
+    },
+
+    draw: function() {
+        ctx.save();
+        ctx.translate(this.x + this.width/2, this.y + this.height/2);
+        ctx.rotate(this.angle);
+
+        // 1. Headlight (Gradient Cone)
+        /* Expensive to create every frame, ideally cached, but fine for modern phones */
+        let beam = ctx.createRadialGradient(80, 0, 0, 80, 0, 100);
+        beam.addColorStop(0, 'rgba(255, 255, 255, 0.1)');
+        beam.addColorStop(1, 'rgba(255, 255, 255, 0)');
+        ctx.fillStyle = beam;
+        ctx.beginPath();
+        ctx.moveTo(10, -5);
+        ctx.lineTo(150, -40);
+        ctx.lineTo(150, 40);
+        ctx.lineTo(10, 5);
+        ctx.fill();
+
+        // 2. Chassis
+        ctx.fillStyle = '#222';
+        ctx.fillRect(-20, -10, 40, 16); 
+        
+        // 3. Cockpit (Theme Color)
+        ctx.fillStyle = '#d4a24e'; 
+        ctx.shadowColor = '#d4a24e';
+        ctx.shadowBlur = 10;
+        ctx.fillRect(-5, -14, 14, 8);
+        ctx.shadowBlur = 0;
+
+        // 4. Wheels
+        ctx.fillStyle = '#111';
+        const bounce = this.grounded ? Math.sin(frames * 0.5) * 1 : 0;
+        const drawWheel = (ox, oy) => {
+            ctx.beginPath(); ctx.arc(ox, oy, 6, 0, Math.PI*2); ctx.fill();
+            ctx.strokeStyle = '#555'; ctx.stroke();
+        };
+        drawWheel(-15, 8 + bounce);
+        drawWheel(0, 8 - bounce);
+        drawWheel(15, 8 + bounce);
+
+        ctx.restore();
+    }
+};
+
+// --- OBJECT MANAGEMENT ---
+
+function initStars() {
     stars = [];
-    for(let i=0; i<80; i++) {
+    for(let i=0; i<70; i++) {
         stars.push({
-            x: Math.random() * canvas.width,
-            y: Math.random() * GROUND_Y,
+            x: Math.random() * SCREEN_W,
+            y: Math.random() * (GROUND_Y - 50),
             size: Math.random() * 2,
-            speed: Math.random() * 0.5
+            speed: Math.random() * 0.5 + 0.1
         });
     }
 }
 
+function createParticle(x, y, color) {
+    particles.push({
+        x: x, y: y,
+        vx: (Math.random()-0.5)*4,
+        vy: (Math.random()-0.5)*4,
+        life: 20,
+        color: color
+    });
+}
+
 function spawnObstacle() {
-    let type = Math.random() > 0.6 ? 'SPIKE' : 'ROCK';
-    if(Math.random() > 0.9) type = 'DRONE'; // Floating enemy
-    
+    const r = Math.random();
+    let type = r > 0.5 ? 'ROCK' : 'SPIKE';
     obstacles.push({
-        x: canvas.width + 50,
-        y: type === 'DRONE' ? GROUND_Y - 50 - Math.random()*40 : GROUND_Y,
+        x: SCREEN_W + 50,
+        y: GROUND_Y,
         w: 30, h: 30,
         type: type,
         hp: 1
     });
 }
 
+function spawnSample() {
+    // This is the "Node" - Separate form obstacles!
+    samples.push({
+        x: SCREEN_W + 50,
+        y: GROUND_Y - 40 - Math.random() * 60, // Floating in air
+        size: 10,
+        val: 50,
+        rot: 0
+    });
+}
+
+// --- MAIN LOOP ---
+
 function update() {
-    if(gameState !== 'PLAYING') return;
-
     frames++;
-    dist += 0.1;
-    gameSpeed += 0.001; // Slow acceleration
+    gameSpeed += 0.002; // Slow acceleration
+    scoreDist += 0.1;
 
-    // Difficulty
-    if(frames % 100 === 0 && Math.random() > 0.2) spawnObstacle();
+    // --- PARALLAX BACKGROUND ---
+    stars.forEach(s => {
+        s.x -= s.speed;
+        if(s.x < 0) s.x = SCREEN_W;
+    });
 
-    // Rover Physics
-    rover.dy += 0.6; // Gravity
-    rover.y += rover.dy;
+    // --- ROVER ---
+    rover.update();
 
-    if(rover.y > GROUND_Y - 20) {
-        rover.y = GROUND_Y - 20;
-        rover.dy = 0;
-        rover.grounded = true;
-        rover.jumps = 0;
-    } else {
-        rover.grounded = false;
-    }
+    // --- SPAWNING ---
+    if(frames % 120 === 0 && Math.random() > 0.3) spawnObstacle();
+    if(frames % 160 === 0 && Math.random() > 0.2) spawnSample();
 
-    // Projectiles
+    // --- PROJECTILES ---
     for(let i=projectiles.length-1; i>=0; i--) {
         let p = projectiles[i];
         p.x += p.vx;
-        if(p.x > canvas.width) projectiles.splice(i,1);
+        p.life--;
+        if(p.life <= 0 || p.x > SCREEN_W) projectiles.splice(i,1);
     }
 
-    // Obstacles
+    // --- OBSTACLES (The Bad Things) ---
     for(let i=obstacles.length-1; i>=0; i--) {
         let o = obstacles[i];
         o.x -= gameSpeed;
 
-        // Collision Check
-        let hit = false;
-        // Simple AABB
-        if (rover.x < o.x + o.w && rover.x + rover.w > o.x &&
-            rover.y < o.y && rover.y + rover.h > o.y - o.h) {
-            
-            // Special case for ground obstacles vs jumping
-            if(o.type !== 'DRONE' && rover.y + rover.h <= o.y - o.h + 10) {
-                // Safe (jumping over)
-            } else {
-                hit = true;
-            }
-            
-            // Re-check strict collision for simple shapes
-            if(o.type === 'ROCK' || o.type === 'SPIKE') {
-                // We simplify collision: if rover bottom is below obstacle top
-                 if(rover.y + rover.h > o.y - o.h + 5) hit = true;
-            }
-            if(o.type === 'DRONE') {
-                if(rover.y < o.y + 10 && rover.y + rover.h > o.y - 10) hit = true;
+        // Collision: Rover vs Obstacle
+        // Simple AABB logic
+        // Only hit if rover is low enough (not jumping over)
+        let roverBottom = rover.y + rover.height/2;
+        let obsTop = o.y - o.h + 10; // visual adjustment
+
+        if(rover.x + rover.width/2 > o.x && 
+           rover.x - rover.width/2 < o.x + o.w &&
+           roverBottom > obsTop) {
+             
+             playSound('hit');
+             gameState = 'GAMEOVER';
+             endGame();
+        }
+
+        // Collision: Projectile vs Obstacle
+        for(let j=projectiles.length-1; j>=0; j--) {
+            let p = projectiles[j];
+            if(p.x > o.x && p.x < o.x + o.w && p.y > o.y - o.h) {
+                // Hit!
+                playSound('collect'); // Reusing satisfying sound for destroy
+                for(let k=0; k<8; k++) createParticle(o.x+15, o.y-15, '#d4a24e');
+                projectiles.splice(j,1);
+                obstacles.splice(i,1);
+                scoreData += 10;
+                break; // Stop checking bullets for this obstacle
             }
         }
 
-        if(hit) {
-            playSound('hit');
-            gameOver();
-        }
-
-        // Projectile Hit
-        for(let k=projectiles.length-1; k>=0; k--) {
-            let p = projectiles[k];
-            // Hitbox logic
-            let pHit = false;
-            if(o.type === 'DRONE') {
-                if(p.x > o.x && p.x < o.x+30 && p.y > o.y-15 && p.y < o.y+15) pHit = true;
-            } else {
-                if(p.x > o.x && p.x < o.x+30 && p.y > o.y-30) pHit = true;
-            }
-
-            if(pHit) {
-                o.hp--;
-                projectiles.splice(k,1);
-                if(o.hp <= 0) {
-                    score += 50;
-                    playSound('collect');
-                    // Explosion particles
-                    for(let j=0; j<5; j++) particles.push({x: o.x, y: o.y-15, vx: Math.random()*4-2, vy: Math.random()*-4, life: 20});
-                    obstacles.splice(i,1);
-                }
-                break;
-            }
-        }
-        
         if(o.x < -50 && obstacles[i]) obstacles.splice(i,1);
     }
 
-    // Stars
-    stars.forEach(s => {
-        s.x -= gameSpeed * s.speed;
-        if(s.x < 0) s.x = canvas.width;
-    });
+    // --- SAMPLES (The Nodes - Good Things!) ---
+    for(let i=samples.length-1; i>=0; i--) {
+        let s = samples[i];
+        s.x -= gameSpeed;
+        s.rot += 0.1;
 
-    // Particles
+        // Distance check for collection
+        let dx = (rover.x + rover.width/2) - s.x;
+        let dy = (rover.y + rover.height/2) - s.y;
+        let dist = Math.sqrt(dx*dx + dy*dy);
+
+        if(dist < 40) { // Collection radius
+            playSound('collect');
+            scoreData += 100;
+            // Particles
+            for(let k=0; k<5; k++) createParticle(s.x, s.y, '#61dafb');
+            samples.splice(i,1);
+            continue;
+        }
+
+        if(s.x < -50) samples.splice(i,1);
+    }
+
+    // --- PARTICLES ---
     for(let i=particles.length-1; i>=0; i--) {
         let p = particles[i];
         p.x += p.vx; p.y += p.vy; p.life--;
         if(p.life <= 0) particles.splice(i,1);
     }
 
-    // UI
-    document.getElementById('score-dist').innerText = Math.floor(dist);
-    document.getElementById('score-data').innerText = score;
+    // UI Updates
+    document.getElementById('score-dist').innerText = Math.floor(scoreDist);
+    document.getElementById('score-data').innerText = scoreData;
 }
 
 function draw() {
-    // Clear & Sky
-    const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
-    grad.addColorStop(0, '#050510');
-    grad.addColorStop(1, '#2a1a1a');
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    // 1. CLEAR & SKY
+    let skyGrad = ctx.createLinearGradient(0, 0, 0, SCREEN_H);
+    skyGrad.addColorStop(0, '#050510');
+    skyGrad.addColorStop(1, '#2b1a05'); // dawn/dust look
+    ctx.fillStyle = skyGrad;
+    ctx.fillRect(0, 0, SCREEN_W, SCREEN_H);
 
-    // Planet (Hope) - Big background element
-    ctx.fillStyle = '#000';
-    ctx.beginPath(); ctx.arc(canvas.width * 0.7, 150, 40, 0, Math.PI*2); ctx.fill();
+    // 2. STARS
+    ctx.fillStyle = '#fff';
+    stars.forEach(s => {
+        // Twinkle
+        if(Math.random() > 0.95) ctx.fillStyle = '#61dafb';
+        else ctx.fillStyle = '#fff';
+        ctx.fillRect(s.x, s.y, s.size, s.size);
+    });
+
+    // 3. REBEKAH (The Planet) - RESTORED ORIGINAL VISUALS
+    // Positioned high in the portrait sky
+    let planetX = SCREEN_W * 0.7;
+    let planetY = SCREEN_H * 0.25;
+    let planetScale = 0.6; // Scale down slightly for mobile width
+
+    ctx.save();
+    ctx.translate(planetX, planetY);
+    ctx.scale(planetScale, planetScale);
+
+    // Planet Body (Red/Maroon Gradient)
+    let pGrad = ctx.createLinearGradient(-50, -50, 50, 50);
+    pGrad.addColorStop(0, '#4a0000');
+    pGrad.addColorStop(0.5, '#800000');
+    pGrad.addColorStop(1, '#200000');
+    ctx.fillStyle = pGrad;
+    ctx.beginPath();
+    ctx.arc(0, 0, 60, 0, Math.PI*2);
+    ctx.fill();
+    
+    // Planet Shadow/Glow
+    ctx.shadowColor = '#800000';
+    ctx.shadowBlur = 20;
+    ctx.stroke(); // trigger shadow
+    ctx.shadowBlur = 0;
+
+    // Rings (Cyan, tilted)
+    ctx.rotate(-0.3);
+    ctx.scale(1, 0.3); // Flatten circle to ellipse
+    
+    // Ring 1 (Faint)
+    ctx.beginPath();
+    ctx.arc(0, 0, 120, 0, Math.PI*2);
+    ctx.strokeStyle = 'rgba(97, 218, 251, 0.3)';
+    ctx.lineWidth = 15;
+    ctx.stroke();
+
+    // Ring 2 (Sharp)
+    ctx.beginPath();
+    ctx.arc(0, 0, 100, 0, Math.PI*2);
     ctx.strokeStyle = '#61dafb';
     ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.arc(canvas.width * 0.7, 150, 40, 0, Math.PI*2); ctx.stroke();
+    ctx.stroke();
 
-    // Stars
-    ctx.fillStyle = '#fff';
-    stars.forEach(s => ctx.fillRect(s.x, s.y, s.size, s.size));
-
-    // Ground
-    const groundGrad = ctx.createLinearGradient(0, GROUND_Y, 0, canvas.height);
-    groundGrad.addColorStop(0, '#3a2a1a');
-    groundGrad.addColorStop(1, '#110a05');
-    ctx.fillStyle = groundGrad;
-    ctx.fillRect(0, GROUND_Y, canvas.width, canvas.height - GROUND_Y);
-    
-    // Grid line on ground top
-    ctx.strokeStyle = '#d4a24e';
-    ctx.lineWidth = 3;
-    ctx.beginPath(); ctx.moveTo(0, GROUND_Y); ctx.lineTo(canvas.width, GROUND_Y); ctx.stroke();
-
-    // Rover
-    ctx.save();
-    ctx.translate(rover.x + rover.w/2, rover.y + rover.h/2);
-    // Dynamic Tilt
-    ctx.rotate(rover.dy * 0.05);
-    // Body
-    ctx.fillStyle = '#d4a24e';
-    ctx.fillRect(-20, -10, 40, 16);
-    // Cockpit
-    ctx.fillStyle = '#61dafb';
-    ctx.shadowColor = '#61dafb'; ctx.shadowBlur = 10;
-    ctx.fillRect(0, -14, 12, 8);
-    ctx.shadowBlur = 0;
-    // Wheels
-    ctx.fillStyle = '#111';
-    const bounce = rover.grounded ? Math.sin(frames*0.8)*1.5 : 0;
-    ctx.beginPath(); ctx.arc(-15, 8+bounce, 7, 0, 6.28); ctx.fill();
-    ctx.beginPath(); ctx.arc(15, 8-bounce, 7, 0, 6.28); ctx.fill();
     ctx.restore();
 
-    // Obstacles
+    // 4. GROUND
+    ctx.fillStyle = '#1a1205';
+    ctx.fillRect(0, GROUND_Y, SCREEN_W, SCREEN_H - GROUND_Y);
+    // Horizon Line
+    ctx.strokeStyle = '#d4a24e';
+    ctx.lineWidth = 2;
+    ctx.beginPath(); 
+    ctx.moveTo(0, GROUND_Y); 
+    ctx.lineTo(SCREEN_W, GROUND_Y); 
+    ctx.stroke();
+
+    // 5. OBSTACLES
     obstacles.forEach(o => {
-        if(o.type === 'ROCK') {
-            ctx.fillStyle = '#654';
-            ctx.beginPath(); ctx.moveTo(o.x, GROUND_Y); ctx.lineTo(o.x+15, GROUND_Y-o.h); ctx.lineTo(o.x+30, GROUND_Y); ctx.fill();
-        } else if (o.type === 'SPIKE') {
+        if (o.type === 'ROCK') {
+            ctx.fillStyle = '#5c4d35';
+            ctx.strokeStyle = '#8a7045';
+            ctx.beginPath();
+            ctx.moveTo(o.x, GROUND_Y);
+            ctx.lineTo(o.x + o.w/2, GROUND_Y - o.h);
+            ctx.lineTo(o.x + o.w, GROUND_Y);
+            ctx.fill(); ctx.stroke();
+        } else { // SPIKE
             ctx.fillStyle = '#d4a24e';
-            ctx.beginPath(); ctx.moveTo(o.x, GROUND_Y); ctx.lineTo(o.x+10, GROUND_Y-35); ctx.lineTo(o.x+20, GROUND_Y); ctx.fill();
-        } else if (o.type === 'DRONE') {
-            ctx.fillStyle = '#ff4444';
-            ctx.beginPath(); ctx.arc(o.x+15, o.y, 10, 0, 6.28); ctx.fill();
-            ctx.fillStyle = '#fff'; ctx.fillRect(o.x+10, o.y-2, 10, 4); // eye
+            ctx.beginPath();
+            ctx.moveTo(o.x, GROUND_Y);
+            ctx.lineTo(o.x + 10, GROUND_Y - 40); // Taller, thinner
+            ctx.lineTo(o.x + 20, GROUND_Y);
+            ctx.fill();
         }
     });
 
-    // Projectiles
-    ctx.fillStyle = '#ff0';
-    ctx.shadowColor = '#ff0'; ctx.shadowBlur = 5;
-    projectiles.forEach(p => ctx.fillRect(p.x, p.y, 10, 4));
+    // 6. SAMPLES (Rotating Nodes)
+    samples.forEach(s => {
+        ctx.save();
+        ctx.translate(s.x, s.y);
+        ctx.rotate(s.rot);
+        ctx.fillStyle = '#fff';
+        ctx.shadowColor = '#61dafb';
+        ctx.shadowBlur = 15;
+        // Diamond shape
+        ctx.beginPath();
+        ctx.moveTo(0, -10);
+        ctx.lineTo(10, 0);
+        ctx.lineTo(0, 10);
+        ctx.lineTo(-10, 0);
+        ctx.fill();
+        ctx.restore();
+    });
+
+    // 7. ROVER
+    rover.draw();
+
+    // 8. PROJECTILES
+    ctx.fillStyle = '#fff';
+    ctx.shadowColor = '#ffff00';
+    ctx.shadowBlur = 10;
+    projectiles.forEach(p => {
+        ctx.fillRect(p.x, p.y, 12, 4);
+    });
     ctx.shadowBlur = 0;
 
-    // Particles
-    ctx.fillStyle = '#d4a24e';
-    particles.forEach(p => ctx.fillRect(p.x, p.y, 3, 3));
+    // 9. PARTICLES
+    particles.forEach(p => {
+        ctx.fillStyle = p.color;
+        ctx.fillRect(p.x, p.y, 3, 3);
+    });
 }
 
 function loop() {
-    requestAnimationFrame(loop);
-    update();
-    draw();
+    if (gameState === 'PLAYING') {
+        update();
+        draw();
+        requestAnimationFrame(loop);
+    }
 }
 
-function gameOver() {
-    gameState = 'GAMEOVER';
-    document.getElementById('final-dist').innerText = Math.floor(dist);
-    document.getElementById('final-data').innerText = score;
-    document.getElementById('game-over-screen').classList.remove('hidden-ui');
-    document.getElementById('game-over-screen').classList.add('active-ui');
-    document.getElementById('hud').style.display = 'none';
-    document.getElementById('divider').style.display = 'none';
-    document.getElementById('lbl-jump').style.display = 'none';
-    document.getElementById('lbl-shoot').style.display = 'none';
-}
+// --- STATE MANAGEMENT ---
 
-// --- TOUCH HANDLING ---
-window.addEventListener('touchstart', e => {
-    e.preventDefault();
-    const t = e.touches[0];
-    const clickY = t.clientY;
+function startGame() {
+    // Hide Start Screen
+    const startUI = document.getElementById('start-screen');
+    startUI.classList.remove('active-ui');
+    startUI.classList.add('hidden');
     
-    if(gameState === 'START' || gameState === 'GAMEOVER') {
-        initGame();
+    // Hide Game Over
+    const overUI = document.getElementById('game-over-screen');
+    overUI.classList.remove('active-ui');
+    overUI.classList.add('hidden');
+
+    // Show HUD
+    document.getElementById('hud').style.display = 'flex';
+    document.getElementById('touch-divider').style.display = 'block';
+
+    // Reset Vars
+    rover.reset();
+    obstacles = [];
+    samples = [];
+    projectiles = [];
+    particles = [];
+    scoreDist = 0;
+    scoreData = 0;
+    gameSpeed = 6;
+    frames = 0;
+    
+    gameState = 'PLAYING';
+    resumeAudio();
+    loop();
+}
+
+function endGame() {
+    // Show Game Over
+    const overUI = document.getElementById('game-over-screen');
+    overUI.classList.remove('hidden');
+    overUI.classList.add('active-ui');
+    
+    // Update Score UI
+    document.getElementById('final-dist').innerText = Math.floor(scoreDist);
+    document.getElementById('final-data').innerText = scoreData;
+    
+    // Hide HUD
+    document.getElementById('hud').style.display = 'none';
+    document.getElementById('touch-divider').style.display = 'none';
+}
+
+// --- INPUTS ---
+
+// TOUCH (Mobile)
+window.addEventListener('touchstart', (e) => {
+    e.preventDefault(); // Stop scrolling
+    
+    if (gameState === 'START' || gameState === 'GAMEOVER') {
+        startGame();
         return;
     }
 
-    // CONTROL SCHEME:
-    // Top 60% of screen = JUMP
-    // Bottom 40% of screen = SHOOT
-    // This allows thumbs to rest naturally at bottom for shooting
-    if (clickY < window.innerHeight * 0.6) {
-        if(rover.jumps < 2) { 
-            rover.dy = -10; 
-            rover.jumps++; 
-            rover.grounded = false; 
-            playSound('jump');
-        }
+    // Split Screen Control Logic
+    // Bottom 45% = Shoot
+    // Top 55% = Jump
+    const touchY = e.touches[0].clientY;
+    const splitPoint = SCREEN_H * 0.55;
+
+    if (touchY > splitPoint) {
+        rover.shoot();
     } else {
-        // Cooldown check for shooting
-        rover.shootCooldown = rover.shootCooldown || 0;
-        if(frames - rover.shootCooldown > 10) {
-            projectiles.push({x: rover.x + 30, y: rover.y + 10, vx: 12});
-            playSound('shoot');
-            rover.shootCooldown = frames;
-        }
+        rover.jump();
     }
 }, {passive: false});
 
-// Loop
-loop();
+// KEYBOARD (Desktop Testing)
+window.addEventListener('keydown', (e) => {
+    if (e.code === 'Space' || e.code === 'ArrowUp') {
+        if (gameState !== 'PLAYING') startGame();
+        else rover.jump();
+    }
+    if (e.code === 'Enter' || e.code === 'KeyZ') {
+         if (gameState === 'PLAYING') rover.shoot();
+    }
+});
+
+// INITIALIZE
+initStars();
+draw(); // Draw one frame so it's not black
 
 </script>
 </body>
