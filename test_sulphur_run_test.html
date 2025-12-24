@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Sulphur Run - Mobile Edition</title>
+    <title>Sulphur Run - Vertical</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
@@ -16,70 +16,20 @@
             background-color: #050505;
             color: #eee;
             font-family: 'VT323', monospace;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
             height: 100vh;
             width: 100vw;
             overflow: hidden;
-            touch-action: none; /* Prevents scrolling on mobile */
-        }
-
-        #game-wrapper {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            touch-action: none;
+            user-select: none;
+            -webkit-user-select: none;
         }
 
         #game-container {
             position: relative;
-            width: 1000px;
-            height: 500px;
-            border: 2px solid #444;
-            box-shadow: 0 0 10px #d4a24e;
-            background-color: #08060a; 
-            image-rendering: pixelated;
-            user-select: none; 
-            -webkit-user-select: none;
-        }
-
-        /* MOBILE PORTRAIT TRANSFORMATION */
-        @media (orientation: portrait) {
-            #game-container {
-                /* Rotate 90 degrees to fit portrait phone */
-                transform: rotate(90deg);
-                /* Scale to fit width of phone height */
-                width: 100vh; 
-                height: 50vh; /* Aspect ratio maintenance */
-                max-width: 90vh; /* Safety margin */
-                max-height: 45vh;
-            }
-            /* Adjust controls hint for mobile */
-            .controls-hint { font-size: 1.5rem !important; }
-            .tip-small { font-size: 1.2rem !important; }
-        }
-
-        /* MOBILE LANDSCAPE / DESKTOP */
-        @media (orientation: landscape) {
-            #game-container {
-                transform: none;
-                max-width: 95vw;
-                max-height: 95vh;
-                /* Maintain aspect ratio */
-                width: 1000px;
-                height: 500px;
-            }
-            /* Responsive scaling for smaller landscape screens */
-            @media (max-width: 1000px) {
-                #game-container {
-                    width: 90vw;
-                    height: 45vw;
-                }
-            }
+            width: 100%;
+            height: 100%;
+            background-color: #08060a;
+            overflow: hidden;
         }
 
         canvas {
@@ -88,337 +38,462 @@
             height: 100%;
         }
 
-        .ui-layer {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            background: radial-gradient(circle, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.7) 100%);
-        }
-
-        #start-screen, #game-over-screen, #pause-screen {
-            background: rgba(10, 5, 5, 0.9);
-            padding: 20px; 
-            border: 2px solid #d4a24e;
-            text-align: center;
-            pointer-events: auto;
-            /* Counter-rotate text on mobile so it's readable upright? 
-               No, we want the player to turn the phone sideways physically 
-               even if the app is portrait. But user asked for portrait app. 
-               We will keep UI inside the game container so it rotates WITH the game. */
-        }
-
-        h1 { font-size: 3rem; margin: 0; color: #fff; text-shadow: 2px 2px 0 #444; }
-        p { font-size: 1.5rem; color: #ccc; margin: 10px 0; }
-        .blink { animation: blinker 1s infinite; color: #fff; }
-        @keyframes blinker { 50% { opacity: 0; } }
-
+        /* HUD: Moved to top center for portrait visibility */
         .hud {
             position: absolute;
-            top: 10px; left: 10px;
-            font-size: 1.5rem;
+            top: 5%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            display: flex;
+            justify-content: space-between;
+            font-size: 1.8rem;
             color: #d4a24e;
-            background: rgba(0,0,0,0.5);
-            padding: 5px 10px;
-            border-left: 3px solid #d4a24e;
-            display: none;
+            text-shadow: 0 0 5px #000;
+            z-index: 10;
+            pointer-events: none;
         }
 
-        .controls-hint { margin-top: 20px; font-size: 1rem; color: #888; border-top: 1px solid #444; padding-top: 10px; }
+        /* UI Overlays */
+        .ui-layer {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            background: rgba(0,0,0,0.85);
+            z-index: 20;
+            text-align: center;
+        }
+        
+        .active-ui { pointer-events: auto; }
+        .hidden-ui { display: none !important; pointer-events: none; }
+
+        h1 { font-size: 3.5rem; color: #d4a24e; margin: 0 0 10px 0; line-height: 0.9; }
+        p { font-size: 1.4rem; color: #ccc; margin: 10px 20px; }
+        .blink { animation: blink 1s infinite; color: #fff; font-size: 1.8rem; margin-top: 30px; }
+        @keyframes blink { 50% { opacity:0; } }
+
+        /* SPLIT SCREEN CONTROLS VISUALIZER */
+        /* We draw a faint line to show the player where the zones are */
+        .control-divider {
+            position: absolute;
+            top: 60%; 
+            left: 10%;
+            width: 80%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            pointer-events: none;
+        }
+        
+        .zone-label {
+            position: absolute;
+            font-size: 1.2rem;
+            color: rgba(255,255,255,0.2);
+            pointer-events: none;
+            width: 100%;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
 
-    <div id="game-wrapper">
-        <div id="game-container">
-            <canvas id="gameCanvas" width="1000" height="500"></canvas>
-            
-            <div class="hud" id="hud">
-                DIST: <span id="score-dist">0</span> <span style="color:#555">|</span> 
-                DATA: <span id="score-data" style="color:#fff">0</span> <span style="color:#555">|</span> 
-                PHASE: <span id="score-phase" style="color: #61dafb">α</span>
-            </div>
+    <div id="game-container">
+        <canvas id="gameCanvas"></canvas>
+        
+        <div class="hud" id="hud" style="display:none;">
+            <span>DIST: <span id="score-dist" style="color:#fff">0</span></span>
+            <span>DATA: <span id="score-data" style="color:#61dafb">0</span></span>
+        </div>
 
-            <div class="ui-layer" id="start-screen">
-                <h1 id="title-text">SULPHUR RUN</h1>
-                <p>MOBILE EDITION</p>
-                <p class="blink">[TAP TO START]</p>
-                <div class="controls-hint">
-                    RIGHT SIDE (Top): JUMP<br>
-                    LEFT SIDE (Bottom): SHOOT
-                </div>
-            </div>
+        <div class="control-divider" id="divider" style="display:none;"></div>
+        <div class="zone-label" id="lbl-jump" style="top: 40%; display:none;">( TAP TOP TO JUMP )</div>
+        <div class="zone-label" id="lbl-shoot" style="top: 80%; display:none;">( TAP BOTTOM TO SHOOT )</div>
 
-            <div class="ui-layer" id="game-over-screen" style="display: none;">
-                <h1>CRITICAL FAILURE</h1>
-                <p style="color:#ff4444;">SRV DESTROYED</p>
-                <p>SCORE: <span id="final-data">0</span></p>
-                <p class="blink">[TAP TO REBOOT]</p>
+        <div class="ui-layer active-ui" id="start-screen">
+            <h1>SULPHUR<br>RUN</h1>
+            <p style="color:#61dafb; letter-spacing: 2px;">VERTICAL PROTOCOL</p>
+            <div style="margin: 20px 0; border: 1px solid #333; padding: 10px; width: 80%;">
+                <span style="color:#d4a24e">TOP ZONE:</span> JUMP<br>
+                <span style="color:#ff4444">BOTTOM ZONE:</span> SHOOT
             </div>
+            <p class="blink">[ TAP TO START ]</p>
+        </div>
+
+        <div class="ui-layer hidden-ui" id="game-over-screen">
+            <h1 style="color:#ff4444">CRITICAL<br>FAILURE</h1>
+            <p>DISTANCE: <span id="final-dist">0</span>m</p>
+            <p>DATA: <span id="final-data" style="color:#61dafb; font-size: 2rem;">0</span></p>
+            <p class="blink">[ TAP TO REBOOT ]</p>
         </div>
     </div>
 
+    <audio id="bgm" loop preload="auto" src="nahla_theme.mp3"></audio>
+
 <script>
-/** SULPHUR RUN ENGINE (MOBILE OPTIMIZED) */
+/** SULPHUR RUN - TRUE PORTRAIT EDITION **/
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
+const bgm = document.getElementById('bgm');
 
-// --- AUDIO SYSTEM ---
-// We use a simplified synth for mobile performance and to avoid loading MP3s 
-const AudioContext = window.AudioContext || window.webkitAudioContext;
-let actx = new AudioContext();
-
-function resumeAudio() {
-    if (actx.state === 'suspended') {
-        actx.resume();
-    }
+// --- RESIZE LOGIC ---
+// We set the canvas to match the screen exactly
+function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    // Recalculate Ground based on screen height
+    // Ground is 15% from bottom
+    GROUND_Y = canvas.height * 0.85; 
 }
+window.addEventListener('resize', resize);
+
+// --- AUDIO ENGINE ---
+const AudioContext = window.AudioContext || window.webkitAudioContext;
+const actx = new AudioContext();
 
 function playSound(type) {
-    if (actx.state === 'suspended') return;
+    if(actx.state === 'suspended') actx.resume();
     const osc = actx.createOscillator();
     const gain = actx.createGain();
-    const now = actx.currentTime;
+    osc.connect(gain); gain.connect(actx.destination);
     
-    osc.connect(gain);
-    gain.connect(actx.destination);
-
-    if (type === 'jump') {
+    const now = actx.currentTime;
+    if(type === 'jump') {
         osc.frequency.setValueAtTime(150, now);
-        osc.frequency.exponentialRampToValueAtTime(300, now + 0.1);
+        osc.frequency.linearRampToValueAtTime(300, now + 0.15);
         gain.gain.setValueAtTime(0.1, now);
         gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
         osc.start(now); osc.stop(now + 0.2);
-    } else if (type === 'shoot') {
+    } else if(type === 'shoot') {
         osc.type = 'square';
-        osc.frequency.setValueAtTime(400, now);
+        osc.frequency.setValueAtTime(600, now);
         osc.frequency.exponentialRampToValueAtTime(100, now + 0.1);
+        gain.gain.setValueAtTime(0.05, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+        osc.start(now); osc.stop(now + 0.1);
+    } else if(type === 'hit') {
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(100, now);
+        osc.frequency.linearRampToValueAtTime(20, now + 0.3);
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.linearRampToValueAtTime(0, now + 0.3);
+        osc.start(now); osc.stop(now + 0.3);
+    } else if(type === 'collect') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(1200, now);
         gain.gain.setValueAtTime(0.1, now);
         gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
         osc.start(now); osc.stop(now + 0.1);
-    } else if (type === 'collect') {
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(800, now);
-        osc.frequency.linearRampToValueAtTime(1200, now + 0.1);
-        gain.gain.setValueAtTime(0.1, now);
-        gain.gain.linearRampToValueAtTime(0.01, now + 0.15);
-        osc.start(now); osc.stop(now + 0.15);
-    } else if (type === 'hit') {
-        osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(100, now);
-        gain.gain.setValueAtTime(0.2, now);
-        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
-        osc.start(now); osc.stop(now + 0.3);
     }
 }
 
-// --- GAME CONFIG ---
+// --- GAME VARS ---
+let GROUND_Y = 500; // Will be overwritten by resize()
 let gameState = 'START';
 let frames = 0;
-let gameSpeed = 6;
-let scoreDist = 0;
-let scoreData = 0;
-const GRAVITY = 0.5; // Slightly higher gravity for snappier mobile feel
-const GROUND_Y = 400;
+let gameSpeed = 5; // Slower start for narrow screens
+let score = 0;
+let dist = 0;
 
-// --- ENTITIES ---
-const rover = {
-    x: 100, y: GROUND_Y, width: 40, height: 20, dy: 0, grounded: true, jumps: 0,
-    draw: function() {
-        ctx.save();
-        ctx.translate(this.x + 20, this.y + 10);
-        // Chassis
-        ctx.fillStyle = '#d4a24e';
-        ctx.fillRect(-20, -10, 40, 16);
-        // Cockpit
-        ctx.fillStyle = '#61dafb';
-        ctx.fillRect(0, -14, 15, 8);
-        // Wheels
-        ctx.fillStyle = '#222';
-        ctx.beginPath(); ctx.arc(-15, 8, 7, 0, Math.PI*2); ctx.fill();
-        ctx.beginPath(); ctx.arc(15, 8, 7, 0, Math.PI*2); ctx.fill();
-        ctx.restore();
-    },
-    update: function() {
-        this.dy += GRAVITY;
-        this.y += this.dy;
-        if (this.y > GROUND_Y - 10) {
-            this.y = GROUND_Y - 10;
-            this.dy = 0;
-            this.grounded = true;
-            this.jumps = 0;
-        } else {
-            this.grounded = false;
-        }
-    },
-    jump: function() {
-        if (this.jumps < 2) {
-            this.dy = -10;
-            this.jumps++;
-            this.grounded = false;
-            playSound('jump');
-        }
-    },
-    shoot: function() {
-        projectiles.push({x: this.x + 40, y: this.y + 5, vx: 15, life: 60});
-        playSound('shoot');
-    }
-};
-
+let rover = { x: 30, y: 0, w: 40, h: 20, dy: 0, grounded: false, jumps: 0 };
 let obstacles = [];
 let projectiles = [];
-let particles = [];
 let stars = [];
+let particles = [];
 
-function initStars() {
-    stars = [];
-    for(let i=0; i<50; i++) {
-        stars.push({x: Math.random()*1000, y: Math.random()*400, s: Math.random()*2});
-    }
-}
+// Initialize Size
+resize();
 
-function startGame() {
-    resumeAudio(); // Important for mobile!
+function initGame() {
     gameState = 'PLAYING';
-    document.getElementById('start-screen').style.display = 'none';
-    document.getElementById('game-over-screen').style.display = 'none';
-    document.getElementById('hud').style.display = 'block';
-    scoreData = 0;
+    score = 0;
+    dist = 0;
     gameSpeed = 6;
+    frames = 0;
     obstacles = [];
     projectiles = [];
-    initStars();
+    particles = [];
+    rover.y = GROUND_Y - 20;
+    rover.dy = 0;
+    
+    // UI Updates
+    document.getElementById('start-screen').classList.add('hidden-ui');
+    document.getElementById('start-screen').classList.remove('active-ui');
+    document.getElementById('game-over-screen').classList.add('hidden-ui');
+    document.getElementById('game-over-screen').classList.remove('active-ui');
+    
+    document.getElementById('hud').style.display = 'flex';
+    document.getElementById('divider').style.display = 'block';
+    document.getElementById('lbl-jump').style.display = 'block';
+    document.getElementById('lbl-shoot').style.display = 'block';
+
+    // Start Music
+    if(bgm && bgm.paused) bgm.play().catch(e => console.log(e));
+    if(actx.state === 'suspended') actx.resume();
+    
+    // Create Background Stars
+    stars = [];
+    for(let i=0; i<80; i++) {
+        stars.push({
+            x: Math.random() * canvas.width,
+            y: Math.random() * GROUND_Y,
+            size: Math.random() * 2,
+            speed: Math.random() * 0.5
+        });
+    }
 }
 
 function spawnObstacle() {
-    const type = Math.random() > 0.5 ? 'ROCK' : 'SPIKE';
-    obstacles.push({x: 1050, y: GROUND_Y, w: 30, h: 30, type: type, hp: 1});
+    let type = Math.random() > 0.6 ? 'SPIKE' : 'ROCK';
+    if(Math.random() > 0.9) type = 'DRONE'; // Floating enemy
+    
+    obstacles.push({
+        x: canvas.width + 50,
+        y: type === 'DRONE' ? GROUND_Y - 50 - Math.random()*40 : GROUND_Y,
+        w: 30, h: 30,
+        type: type,
+        hp: 1
+    });
 }
 
-// --- LOOP ---
-function loop() {
-    requestAnimationFrame(loop);
-    
-    // Background
-    ctx.fillStyle = '#0a0a15';
-    ctx.fillRect(0, 0, 1000, 500);
-    
+function update() {
+    if(gameState !== 'PLAYING') return;
+
+    frames++;
+    dist += 0.1;
+    gameSpeed += 0.001; // Slow acceleration
+
+    // Difficulty
+    if(frames % 100 === 0 && Math.random() > 0.2) spawnObstacle();
+
+    // Rover Physics
+    rover.dy += 0.6; // Gravity
+    rover.y += rover.dy;
+
+    if(rover.y > GROUND_Y - 20) {
+        rover.y = GROUND_Y - 20;
+        rover.dy = 0;
+        rover.grounded = true;
+        rover.jumps = 0;
+    } else {
+        rover.grounded = false;
+    }
+
+    // Projectiles
+    for(let i=projectiles.length-1; i>=0; i--) {
+        let p = projectiles[i];
+        p.x += p.vx;
+        if(p.x > canvas.width) projectiles.splice(i,1);
+    }
+
+    // Obstacles
+    for(let i=obstacles.length-1; i>=0; i--) {
+        let o = obstacles[i];
+        o.x -= gameSpeed;
+
+        // Collision Check
+        let hit = false;
+        // Simple AABB
+        if (rover.x < o.x + o.w && rover.x + rover.w > o.x &&
+            rover.y < o.y && rover.y + rover.h > o.y - o.h) {
+            
+            // Special case for ground obstacles vs jumping
+            if(o.type !== 'DRONE' && rover.y + rover.h <= o.y - o.h + 10) {
+                // Safe (jumping over)
+            } else {
+                hit = true;
+            }
+            
+            // Re-check strict collision for simple shapes
+            if(o.type === 'ROCK' || o.type === 'SPIKE') {
+                // We simplify collision: if rover bottom is below obstacle top
+                 if(rover.y + rover.h > o.y - o.h + 5) hit = true;
+            }
+            if(o.type === 'DRONE') {
+                if(rover.y < o.y + 10 && rover.y + rover.h > o.y - 10) hit = true;
+            }
+        }
+
+        if(hit) {
+            playSound('hit');
+            gameOver();
+        }
+
+        // Projectile Hit
+        for(let k=projectiles.length-1; k>=0; k--) {
+            let p = projectiles[k];
+            // Hitbox logic
+            let pHit = false;
+            if(o.type === 'DRONE') {
+                if(p.x > o.x && p.x < o.x+30 && p.y > o.y-15 && p.y < o.y+15) pHit = true;
+            } else {
+                if(p.x > o.x && p.x < o.x+30 && p.y > o.y-30) pHit = true;
+            }
+
+            if(pHit) {
+                o.hp--;
+                projectiles.splice(k,1);
+                if(o.hp <= 0) {
+                    score += 50;
+                    playSound('collect');
+                    // Explosion particles
+                    for(let j=0; j<5; j++) particles.push({x: o.x, y: o.y-15, vx: Math.random()*4-2, vy: Math.random()*-4, life: 20});
+                    obstacles.splice(i,1);
+                }
+                break;
+            }
+        }
+        
+        if(o.x < -50 && obstacles[i]) obstacles.splice(i,1);
+    }
+
     // Stars
-    ctx.fillStyle = '#fff';
     stars.forEach(s => {
-        s.x -= gameSpeed * 0.1;
-        if(s.x < 0) s.x = 1000;
-        ctx.fillRect(s.x, s.y, s.s, s.s);
+        s.x -= gameSpeed * s.speed;
+        if(s.x < 0) s.x = canvas.width;
     });
 
-    // Ground
-    ctx.fillStyle = '#332211';
-    ctx.fillRect(0, GROUND_Y+10, 1000, 90);
-    ctx.strokeStyle = '#d4a24e';
-    ctx.beginPath(); ctx.moveTo(0, GROUND_Y+10); ctx.lineTo(1000, GROUND_Y+10); ctx.stroke();
-
-    if (gameState === 'PLAYING') {
-        frames++;
-        if (frames % 100 === 0) spawnObstacle();
-        
-        rover.update();
-        rover.draw();
-        
-        // Projectiles
-        ctx.fillStyle = '#ff0';
-        for (let i = projectiles.length-1; i>=0; i--) {
-            let p = projectiles[i];
-            p.x += p.vx;
-            p.life--;
-            ctx.fillRect(p.x, p.y, 10, 4);
-            if(p.life <= 0) projectiles.splice(i,1);
-        }
-
-        // Obstacles
-        for (let i = obstacles.length-1; i>=0; i--) {
-            let o = obstacles[i];
-            o.x -= gameSpeed;
-            
-            // Draw
-            ctx.fillStyle = o.type === 'ROCK' ? '#776655' : '#ff4444';
-            ctx.fillRect(o.x, GROUND_Y - 20, o.w, 30);
-
-            // Collision - Rover
-            if (rover.x < o.x + o.w && rover.x + rover.width > o.x &&
-                rover.y < GROUND_Y + 10 && rover.y + rover.height > GROUND_Y - 20) {
-                
-                playSound('hit');
-                gameState = 'GAMEOVER';
-                document.getElementById('final-data').innerText = scoreData;
-                document.getElementById('game-over-screen').style.display = 'flex';
-                document.getElementById('hud').style.display = 'none';
-            }
-
-            // Collision - Projectile
-            for (let k = projectiles.length-1; k>=0; k--) {
-                let p = projectiles[k];
-                if (p.x > o.x && p.x < o.x + o.w && p.y > GROUND_Y - 20) {
-                    playSound('collect');
-                    obstacles.splice(i, 1);
-                    projectiles.splice(k, 1);
-                    scoreData += 10;
-                    document.getElementById('score-data').innerText = scoreData;
-                    break; // break projectile loop
-                }
-            }
-            if (o.x < -50 && obstacles[i]) obstacles.splice(i, 1);
-        }
-    } else {
-        rover.draw(); // Draw rover even if paused/gameover
+    // Particles
+    for(let i=particles.length-1; i>=0; i--) {
+        let p = particles[i];
+        p.x += p.vx; p.y += p.vy; p.life--;
+        if(p.life <= 0) particles.splice(i,1);
     }
+
+    // UI
+    document.getElementById('score-dist').innerText = Math.floor(dist);
+    document.getElementById('score-data').innerText = score;
 }
 
-// --- INPUTS ---
-window.addEventListener('keydown', e => {
-    if(e.code === 'Space') { 
-        if(gameState==='START' || gameState==='GAMEOVER') startGame();
-        else rover.jump();
-    }
-    if(e.code === 'Enter') rover.shoot();
-});
+function draw() {
+    // Clear & Sky
+    const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+    grad.addColorStop(0, '#050510');
+    grad.addColorStop(1, '#2a1a1a');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-// TOUCH CONTROLS (Portrait logic: Top half Jump, Bottom half Shoot)
+    // Planet (Hope) - Big background element
+    ctx.fillStyle = '#000';
+    ctx.beginPath(); ctx.arc(canvas.width * 0.7, 150, 40, 0, Math.PI*2); ctx.fill();
+    ctx.strokeStyle = '#61dafb';
+    ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(canvas.width * 0.7, 150, 40, 0, Math.PI*2); ctx.stroke();
+
+    // Stars
+    ctx.fillStyle = '#fff';
+    stars.forEach(s => ctx.fillRect(s.x, s.y, s.size, s.size));
+
+    // Ground
+    const groundGrad = ctx.createLinearGradient(0, GROUND_Y, 0, canvas.height);
+    groundGrad.addColorStop(0, '#3a2a1a');
+    groundGrad.addColorStop(1, '#110a05');
+    ctx.fillStyle = groundGrad;
+    ctx.fillRect(0, GROUND_Y, canvas.width, canvas.height - GROUND_Y);
+    
+    // Grid line on ground top
+    ctx.strokeStyle = '#d4a24e';
+    ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.moveTo(0, GROUND_Y); ctx.lineTo(canvas.width, GROUND_Y); ctx.stroke();
+
+    // Rover
+    ctx.save();
+    ctx.translate(rover.x + rover.w/2, rover.y + rover.h/2);
+    // Dynamic Tilt
+    ctx.rotate(rover.dy * 0.05);
+    // Body
+    ctx.fillStyle = '#d4a24e';
+    ctx.fillRect(-20, -10, 40, 16);
+    // Cockpit
+    ctx.fillStyle = '#61dafb';
+    ctx.shadowColor = '#61dafb'; ctx.shadowBlur = 10;
+    ctx.fillRect(0, -14, 12, 8);
+    ctx.shadowBlur = 0;
+    // Wheels
+    ctx.fillStyle = '#111';
+    const bounce = rover.grounded ? Math.sin(frames*0.8)*1.5 : 0;
+    ctx.beginPath(); ctx.arc(-15, 8+bounce, 7, 0, 6.28); ctx.fill();
+    ctx.beginPath(); ctx.arc(15, 8-bounce, 7, 0, 6.28); ctx.fill();
+    ctx.restore();
+
+    // Obstacles
+    obstacles.forEach(o => {
+        if(o.type === 'ROCK') {
+            ctx.fillStyle = '#654';
+            ctx.beginPath(); ctx.moveTo(o.x, GROUND_Y); ctx.lineTo(o.x+15, GROUND_Y-o.h); ctx.lineTo(o.x+30, GROUND_Y); ctx.fill();
+        } else if (o.type === 'SPIKE') {
+            ctx.fillStyle = '#d4a24e';
+            ctx.beginPath(); ctx.moveTo(o.x, GROUND_Y); ctx.lineTo(o.x+10, GROUND_Y-35); ctx.lineTo(o.x+20, GROUND_Y); ctx.fill();
+        } else if (o.type === 'DRONE') {
+            ctx.fillStyle = '#ff4444';
+            ctx.beginPath(); ctx.arc(o.x+15, o.y, 10, 0, 6.28); ctx.fill();
+            ctx.fillStyle = '#fff'; ctx.fillRect(o.x+10, o.y-2, 10, 4); // eye
+        }
+    });
+
+    // Projectiles
+    ctx.fillStyle = '#ff0';
+    ctx.shadowColor = '#ff0'; ctx.shadowBlur = 5;
+    projectiles.forEach(p => ctx.fillRect(p.x, p.y, 10, 4));
+    ctx.shadowBlur = 0;
+
+    // Particles
+    ctx.fillStyle = '#d4a24e';
+    particles.forEach(p => ctx.fillRect(p.x, p.y, 3, 3));
+}
+
+function loop() {
+    requestAnimationFrame(loop);
+    update();
+    draw();
+}
+
+function gameOver() {
+    gameState = 'GAMEOVER';
+    document.getElementById('final-dist').innerText = Math.floor(dist);
+    document.getElementById('final-data').innerText = score;
+    document.getElementById('game-over-screen').classList.remove('hidden-ui');
+    document.getElementById('game-over-screen').classList.add('active-ui');
+    document.getElementById('hud').style.display = 'none';
+    document.getElementById('divider').style.display = 'none';
+    document.getElementById('lbl-jump').style.display = 'none';
+    document.getElementById('lbl-shoot').style.display = 'none';
+}
+
+// --- TOUCH HANDLING ---
 window.addEventListener('touchstart', e => {
-    e.preventDefault(); // Stop scrolling
-    resumeAudio();
-
+    e.preventDefault();
+    const t = e.touches[0];
+    const clickY = t.clientY;
+    
     if(gameState === 'START' || gameState === 'GAMEOVER') {
-        startGame();
+        initGame();
         return;
     }
 
-    const touchY = e.touches[0].clientY;
-    const height = window.innerHeight;
-
-    // In portrait mode with rotation, the logic flips visually.
-    // If phone is portrait, we are rotated 90deg.
-    // The "Right" of the game is the Top of the phone.
-    // The "Left" of the game is the Bottom of the phone.
-    
-    // Simple logic:
-    // Tap Top of Phone = Jump
-    // Tap Bottom of Phone = Shoot
-    
-    if (touchY < height / 2) {
-        rover.jump(); // Top half
+    // CONTROL SCHEME:
+    // Top 60% of screen = JUMP
+    // Bottom 40% of screen = SHOOT
+    // This allows thumbs to rest naturally at bottom for shooting
+    if (clickY < window.innerHeight * 0.6) {
+        if(rover.jumps < 2) { 
+            rover.dy = -10; 
+            rover.jumps++; 
+            rover.grounded = false; 
+            playSound('jump');
+        }
     } else {
-        rover.shoot(); // Bottom half
+        // Cooldown check for shooting
+        rover.shootCooldown = rover.shootCooldown || 0;
+        if(frames - rover.shootCooldown > 10) {
+            projectiles.push({x: rover.x + 30, y: rover.y + 10, vx: 12});
+            playSound('shoot');
+            rover.shootCooldown = frames;
+        }
     }
 }, {passive: false});
 
-initStars();
+// Loop
 loop();
 
 </script>
