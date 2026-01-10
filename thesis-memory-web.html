@@ -27,25 +27,44 @@
         .node-transition { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
         .lucide { display: inline-block; vertical-align: middle; }
         
-        /* Ensure the grid doesn't overflow height-wise on smaller screens */
-        @media (max-height: 800px) {
-            #grid-container { transform: scale(0.75); transform-origin: center center; }
+        .workspace-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: calc(100vh - 64px); 
+            overflow: hidden;
+            position: relative;
         }
-        @media (max-height: 700px) {
-            #grid-container { transform: scale(0.65); transform-origin: center center; }
+
+        #scaling-wrapper {
+            transition: transform 0.2s ease-out;
+            transform-origin: center center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .drag-ghost {
+            opacity: 0.2;
+            filter: grayscale(1);
+        }
+
+        .drag-over-target {
+            box-shadow: 0 0 0 2px #6366f1, 0 0 20px rgba(99, 102, 241, 0.4);
+            transform: scale(1.02);
+            z-index: 50;
         }
     </style>
 </head>
-<body class="bg-[#020204] text-slate-100 overflow-hidden h-screen w-screen">
+<body class="bg-[#020204] text-slate-100 overflow-hidden h-screen w-screen font-sans">
     <div id="root"></div>
 
     <script type="text/babel">
         const { useState, useEffect, useMemo, useRef } = React;
         
-        // --- ENVIRONMENT DETECTION ---
         const isCanvasEnv = typeof __firebase_config !== 'undefined';
         
-        // --- YOUR FIREBASE CONFIG ---
         const myProductionConfig = {
             apiKey: "AIzaSyCCAMapMCPHeXUvmR0DF4ERl8ay58Rz37w",
             authDomain: "thesis-memory-web.firebaseapp.com",
@@ -58,7 +77,6 @@
         const firebaseConfig = isCanvasEnv ? JSON.parse(__firebase_config) : myProductionConfig;
         const platformAppId = isCanvasEnv ? (typeof __app_id !== 'undefined' ? __app_id : 'thesis-memory-web') : 'production';
 
-        // Initialize Firebase
         const firebase = window.firebase;
         if (!firebase.apps.length) {
             firebase.initializeApp(firebaseConfig);
@@ -66,7 +84,6 @@
         const auth = firebase.auth();
         const db = firebase.firestore();
 
-        // --- ICON COMPONENT HELPER ---
         const Icon = ({ name, size = 16, className = "" }) => {
             const iconRef = useRef(null);
             useEffect(() => {
@@ -82,7 +99,7 @@
                     window.lucide.createIcons();
                 }
             }, [name, size, className]);
-            return <span ref={iconRef} className="flex items-center justify-center leading-none" />;
+            return <span ref={iconRef} className="flex items-center justify-center leading-none shrink-0" />;
         };
 
         const App = () => {
@@ -91,7 +108,12 @@
             const [saveStatus, setSaveStatus] = useState('synced');
             const [errorMessage, setErrorMessage] = useState(null);
             
-            // Auth Modal State
+            const [scale, setScale] = useState(1);
+            const [titleFontSize, setTitleFontSize] = useState(10); 
+            const [sectionOrder, setSectionOrder] = useState([0, 1, 2, 3, 4, 5, 6, 7]);
+            const [draggedIndex, setDraggedIndex] = useState(null);
+            const [dragOverIndex, setDragOverIndex] = useState(null);
+
             const [showAuthModal, setShowAuthModal] = useState(false);
             const [email, setEmail] = useState('');
             const [password, setPassword] = useState('');
@@ -108,15 +130,29 @@
             ]);
 
             const sections = [
-                { color: "text-blue-400", border: "border-blue-500/30", bg: "bg-blue-500/5", dot: "bg-blue-500" },
-                { color: "text-emerald-400", border: "border-emerald-500/30", bg: "bg-emerald-500/5", dot: "bg-emerald-500" },
-                { color: "text-amber-400", border: "border-amber-500/30", bg: "bg-amber-500/5", dot: "bg-amber-500" },
-                { color: "text-purple-400", border: "border-purple-500/30", bg: "bg-purple-500/5", dot: "bg-purple-500" },
-                { color: "text-pink-400", border: "border-pink-500/30", bg: "bg-pink-500/5", dot: "bg-pink-500" },
-                { color: "text-orange-400", border: "border-orange-500/30", bg: "bg-orange-500/5", dot: "bg-orange-500" },
-                { color: "text-indigo-400", border: "border-indigo-500/30", bg: "bg-indigo-500/5", dot: "bg-indigo-500" },
-                { color: "text-cyan-400", border: "border-cyan-500/30", bg: "bg-cyan-500/5", dot: "bg-cyan-500" }
+                { id: 0, color: "text-blue-400", border: "border-blue-500/30", bg: "bg-blue-500/5", dot: "bg-blue-500" },
+                { id: 1, color: "text-emerald-400", border: "border-emerald-500/30", bg: "bg-emerald-500/5", dot: "bg-emerald-500" },
+                { id: 2, color: "text-amber-400", border: "border-amber-500/30", bg: "bg-amber-500/10", dot: "bg-amber-500" },
+                { id: 3, color: "text-purple-400", border: "border-purple-500/30", bg: "bg-purple-500/5", dot: "bg-purple-500" },
+                { id: 4, color: "text-pink-400", border: "border-pink-500/30", bg: "bg-pink-500/10", dot: "bg-pink-500" },
+                { id: 5, color: "text-orange-400", border: "border-orange-500/30", bg: "bg-orange-500/10", dot: "bg-orange-500" },
+                { id: 6, color: "text-indigo-400", border: "border-indigo-500/30", bg: "bg-indigo-500/10", dot: "bg-indigo-500" },
+                { id: 7, color: "text-cyan-400", border: "border-cyan-500/30", bg: "bg-cyan-500/5", dot: "bg-cyan-500" }
             ];
+
+            useEffect(() => {
+                const handleResize = () => {
+                    const sidebarWidth = window.innerWidth > 1024 ? 450 : 320;
+                    const availableWidth = window.innerWidth - sidebarWidth - 60; 
+                    const availableHeight = window.innerHeight - 100;
+                    const baseWidth = 950;
+                    const baseHeight = 750;
+                    setScale(Math.min(availableWidth / baseWidth, availableHeight / baseHeight, 1));
+                };
+                window.addEventListener('resize', handleResize);
+                handleResize();
+                return () => window.removeEventListener('resize', handleResize);
+            }, []);
 
             useEffect(() => {
                 const performAuth = async () => {
@@ -126,9 +162,7 @@
                         } else if (!auth.currentUser) {
                             await auth.signInAnonymously();
                         }
-                    } catch (err) {
-                        setErrorMessage("Authentication failed. Ensure Firebase Auth is configured.");
-                    }
+                    } catch (err) { console.error(err); }
                 };
                 performAuth();
                 const unsubscribe = auth.onAuthStateChanged((u) => {
@@ -140,13 +174,10 @@
 
             useEffect(() => {
                 if (!user) return;
-                
-                let docRef;
-                if (isCanvasEnv) {
-                    docRef = db.collection('artifacts').doc(platformAppId).collection('users').doc(user.uid).collection('state').doc('memoryWeb');
-                } else {
-                    docRef = db.collection('thesis_data').doc(platformAppId).collection('users').doc(user.uid);
-                }
+                const pathPrefix = isCanvasEnv ? 'artifacts' : 'thesis_data';
+                const docRef = isCanvasEnv 
+                    ? db.collection('artifacts').doc(platformAppId).collection('users').doc(user.uid).collection('state').doc('memoryWeb')
+                    : db.collection('thesis_data').doc(platformAppId).collection('users').doc(user.uid);
                 
                 const unsubscribe = docRef.onSnapshot((docSnap) => {
                     if (docSnap.exists) {
@@ -154,37 +185,38 @@
                         if (data.nodesData) setNodesData(data.nodesData);
                         if (data.connections) setConnections(data.connections);
                         if (data.sectionTitles) setSectionTitles(data.sectionTitles);
-                    } else {
-                        setNodesData({});
-                        setConnections([]);
+                        if (data.sectionOrder) setSectionOrder(data.sectionOrder);
+                        if (data.titleFontSize) setTitleFontSize(data.titleFontSize);
                     }
                     setLoading(false);
                 }, (err) => {
-                    setErrorMessage("Sync Error: Update Firestore Rules to allow access.");
+                    setErrorMessage("Connection Error: Check rules or network.");
                     setLoading(false);
                 });
                 return () => unsubscribe();
             }, [user]);
 
-            const saveData = async (newNodes, newTitles, newConns) => {
+            const saveData = async (updates = {}) => {
                 if (!user) return;
                 setSaveStatus('saving');
                 try {
-                    let docRef;
-                    if (isCanvasEnv) {
-                        docRef = db.collection('artifacts').doc(platformAppId).collection('users').doc(user.uid).collection('state').doc('memoryWeb');
-                    } else {
-                        docRef = db.collection('thesis_data').doc(platformAppId).collection('users').doc(user.uid);
-                    }
+                    const docRef = isCanvasEnv 
+                        ? db.collection('artifacts').doc(platformAppId).collection('users').doc(user.uid).collection('state').doc('memoryWeb')
+                        : db.collection('thesis_data').doc(platformAppId).collection('users').doc(user.uid);
 
-                    await docRef.set({
-                        nodesData: newNodes || nodesData,
-                        sectionTitles: newTitles || sectionTitles,
-                        connections: newConns || connections,
+                    const finalData = {
+                        nodesData: updates.nodesData || nodesData,
+                        sectionTitles: updates.sectionTitles || sectionTitles,
+                        connections: updates.connections || connections,
+                        sectionOrder: updates.sectionOrder || sectionOrder,
+                        titleFontSize: updates.titleFontSize || titleFontSize,
                         lastUpdated: new Date().toISOString()
-                    }, { merge: true });
+                    };
+
+                    await docRef.set(finalData, { merge: true });
                     setSaveStatus('synced');
                 } catch (err) {
+                    console.error(err);
                     setSaveStatus('error');
                 }
             };
@@ -200,8 +232,6 @@
                         await auth.signInWithEmailAndPassword(email, password);
                     }
                     setShowAuthModal(false);
-                    setEmail('');
-                    setPassword('');
                 } catch (err) {
                     setErrorMessage(err.message);
                 } finally {
@@ -215,6 +245,39 @@
                 setErrorMessage(null);
             };
 
+            const handleDragStart = (e, index) => {
+                setDraggedIndex(index);
+                e.dataTransfer.effectAllowed = 'move';
+                // Transparent image for better ghosting effect
+                const img = new Image();
+                img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+                e.dataTransfer.setDragImage(img, 0, 0);
+            };
+
+            const handleDragOver = (e, index) => {
+                e.preventDefault();
+                if (draggedIndex !== index) {
+                    setDragOverIndex(index);
+                }
+            };
+
+            const handleDrop = (e, targetIndex) => {
+                e.preventDefault();
+                setDragOverIndex(null);
+                if (draggedIndex === null || draggedIndex === targetIndex) {
+                    setDraggedIndex(null);
+                    return;
+                }
+
+                const newOrder = [...sectionOrder];
+                const item = newOrder.splice(draggedIndex, 1)[0];
+                newOrder.splice(targetIndex, 0, item);
+                
+                setSectionOrder(newOrder);
+                setDraggedIndex(null);
+                saveData({ sectionOrder: newOrder });
+            };
+
             const getNodeKey = (sIdx, nIdx) => `${sIdx}-${nIdx}`;
             const getGlobalIndex = (sIdx, nIdx) => (sIdx * 8) + nIdx + 1;
 
@@ -226,7 +289,7 @@
                         if (!connections.includes(newConn)) {
                             const updatedConns = [...connections, newConn];
                             setConnections(updatedConns);
-                            saveData(null, null, updatedConns);
+                            saveData({ connections: updatedConns });
                         }
                     }
                     setLinkingNode(null);
@@ -238,7 +301,7 @@
             const removeConnection = (connStr) => {
                 const updated = connections.filter(c => c !== connStr);
                 setConnections(updated);
-                saveData(null, null, updated);
+                saveData({ connections: updated });
             };
 
             const updateNodeData = (field, value) => {
@@ -246,17 +309,23 @@
                 const key = getNodeKey(selectedNode.sIdx, selectedNode.nIdx);
                 const updatedNodes = { ...nodesData, [key]: { ...(nodesData[key] || {}), [field]: value } };
                 setNodesData(updatedNodes);
-                saveData(updatedNodes, null, null);
+                saveData({ nodesData: updatedNodes });
             };
 
             const updateSectionTitle = (index, value) => {
                 const newTitles = [...sectionTitles];
                 newTitles[index] = value;
                 setSectionTitles(newTitles);
-                saveData(null, newTitles, null);
+                saveData({ sectionTitles: newTitles });
             };
 
-            if (loading && !errorMessage) return <div className="h-screen flex items-center justify-center font-mono text-xs text-indigo-500 bg-[#020204]">Establishing Sync...</div>;
+            const adjustFontSize = (dir) => {
+                const newSize = Math.max(6, Math.min(32, titleFontSize + dir));
+                setTitleFontSize(newSize);
+                saveData({ titleFontSize: newSize });
+            }
+
+            if (loading && !errorMessage) return <div className="h-screen flex items-center justify-center font-mono text-xs text-indigo-500 bg-[#020204]">Initializing Web...</div>;
 
             return (
                 <div className="h-screen flex flex-col font-sans bg-[#020204] overflow-hidden">
@@ -270,6 +339,12 @@
                                 <div className="flex items-center gap-2 mt-0.5">
                                     <div className={`text-[10px] uppercase font-bold ${saveStatus === 'synced' ? 'text-emerald-500' : 'text-indigo-400'}`}>
                                         {saveStatus === 'saving' ? 'Syncing...' : 'Cloud Active'}
+                                    </div>
+                                    <div className="h-3 w-px bg-white/10 mx-2" />
+                                    <div className="flex items-center gap-1">
+                                        <span className="text-[9px] text-slate-500 uppercase tracking-tighter">Titles</span>
+                                        <button onClick={() => adjustFontSize(-1)} className="w-5 h-5 flex items-center justify-center bg-white/5 hover:bg-white/10 rounded border border-white/10 text-xs">-</button>
+                                        <button onClick={() => adjustFontSize(1)} className="w-5 h-5 flex items-center justify-center bg-white/5 hover:bg-white/10 rounded border border-white/10 text-xs">+</button>
                                     </div>
                                 </div>
                             </div>
@@ -286,7 +361,7 @@
                                     </button>
                                 </div>
                             ) : (
-                                <button onClick={() => setShowAuthModal(true)} className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-lg shadow-indigo-600/20">
+                                <button onClick={() => setShowAuthModal(true)} className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-lg">
                                     <Icon name="LogIn" size={14} /> SYNC ACCOUNT
                                 </button>
                             )}
@@ -294,51 +369,76 @@
                     </header>
 
                     <main className="flex-1 flex overflow-hidden">
-                        <section className="flex-1 relative node-grid-bg flex items-center justify-center p-4 lg:p-8 overflow-hidden">
-                            <div id="grid-container" className="relative z-20 grid grid-cols-2 gap-4 lg:gap-8 p-6 lg:p-10 bg-black/40 rounded-[3rem] lg:rounded-[4rem] border border-white/5 backdrop-blur-md shadow-2xl transition-transform duration-500">
-                                {errorMessage && !showAuthModal && (
-                                    <div className="absolute -top-12 left-0 right-0 text-center text-red-400 text-[10px] bg-red-500/10 p-2 rounded-lg border border-red-500/50 flex items-center justify-center gap-2">
-                                        {errorMessage} 
-                                        <button onClick={() => setErrorMessage(null)} className="hover:text-white"><Icon name="X" size={12} /></button>
-                                    </div>
-                                )}
-                                {sections.map((section, sIdx) => (
-                                    <div key={sIdx} className={`p-3 lg:p-5 rounded-2xl lg:rounded-3xl border ${section.bg} ${section.border} flex flex-col gap-2 lg:gap-4 shadow-inner node-transition`}>
-                                        <div className={`text-[9px] lg:text-[10px] font-bold uppercase tracking-widest ${section.color}`}>{sectionTitles[sIdx]}</div>
-                                        <div className="grid grid-cols-4 gap-2 lg:gap-3">
-                                            {Array.from({ length: 8 }).map((_, nIdx) => {
-                                                const key = getNodeKey(sIdx, nIdx);
-                                                const selected = selectedNode?.sIdx === sIdx && selectedNode?.nIdx === nIdx;
-                                                const hasConcept = !!nodesData[key]?.concept;
-                                                const isLinked = connections.some(c => c.includes(key));
-                                                const isLinkingSource = linkingNode === key;
-
-                                                return (
-                                                    <button key={nIdx} id={`node-${sIdx}-${nIdx}`} onClick={() => handleNodeClick(sIdx, nIdx)} 
-                                                        className={`w-10 h-10 lg:w-12 lg:h-12 rounded-xl lg:rounded-2xl flex flex-col items-center justify-center transition-all duration-300 relative ${selected ? 'bg-white/10 ring-2 ring-indigo-500 scale-110 z-10 shadow-[0_0_20px_rgba(99,102,241,0.3)]' : 'bg-[#0a0a0f] border border-white/5 hover:border-white/20'} ${isLinkingSource ? 'animate-pulse ring-2 ring-emerald-500' : ''}`}
-                                                    >
-                                                        <span className={`text-[8px] lg:text-[10px] font-mono mb-0.5 lg:mb-1 ${selected ? 'text-indigo-300' : 'text-slate-600'}`}>{getGlobalIndex(sIdx, nIdx)}</span>
-                                                        <div className={`w-1.5 h-1.5 lg:w-2 lg:h-2 rounded-full transition-all duration-500 ${hasConcept ? section.dot : 'bg-slate-800'}`} />
-                                                        {isLinked && <div className="absolute inset-1.5 rounded-lg lg:rounded-xl border border-indigo-500/20 pointer-events-none" />}
-                                                    </button>
-                                                );
-                                            })}
+                        <section className="flex-1 relative node-grid-bg workspace-container overflow-hidden p-4 lg:p-8">
+                            <div id="scaling-wrapper" style={{ transform: `scale(${scale})` }}>
+                                <div id="grid-container" className="grid grid-cols-2 gap-8 p-10 bg-black/40 rounded-[4rem] border border-white/5 backdrop-blur-md shadow-2xl relative">
+                                    {errorMessage && !showAuthModal && (
+                                        <div className="absolute -top-12 left-0 right-0 text-center text-red-400 text-[10px] bg-red-500/10 p-2 rounded-lg border border-red-500/50 flex items-center justify-center gap-2 z-50">
+                                            <Icon name="AlertCircle" size={12} /> {errorMessage} 
+                                            <button onClick={() => setErrorMessage(null)} className="hover:text-white"><Icon name="X" size={12} /></button>
                                         </div>
-                                    </div>
-                                ))}
+                                    )}
+                                    {sectionOrder.map((sectionId, displayIdx) => {
+                                        const section = sections.find(s => s.id === sectionId);
+                                        return (
+                                            <div 
+                                                key={section.id} 
+                                                onDragOver={(e) => handleDragOver(e, displayIdx)}
+                                                onDragLeave={() => setDragOverIndex(null)}
+                                                onDrop={(e) => handleDrop(e, displayIdx)}
+                                                className={`p-5 rounded-3xl border ${section.bg} ${section.border} flex flex-col gap-4 shadow-inner node-transition relative ${draggedIndex === displayIdx ? 'drag-ghost' : ''} ${dragOverIndex === displayIdx ? 'drag-over-target' : ''}`}
+                                            >
+                                                <div className="flex items-center justify-between pointer-events-none">
+                                                    <div className={`font-bold uppercase tracking-widest ${section.color}`} style={{ fontSize: `${titleFontSize}px` }}>
+                                                        {sectionTitles[section.id]}
+                                                    </div>
+                                                    <div 
+                                                        draggable="true"
+                                                        onDragStart={(e) => {
+                                                            e.stopPropagation();
+                                                            handleDragStart(e, displayIdx);
+                                                        }}
+                                                        className="cursor-grab active:cursor-grabbing opacity-30 hover:opacity-100 transition-opacity pointer-events-auto p-1"
+                                                    >
+                                                        <Icon name="GripHorizontal" size={14} className="text-slate-400" />
+                                                    </div>
+                                                </div>
+                                                <div className="grid grid-cols-4 gap-3">
+                                                    {Array.from({ length: 8 }).map((_, nIdx) => {
+                                                        const key = getNodeKey(section.id, nIdx);
+                                                        const selected = selectedNode?.sIdx === section.id && selectedNode?.nIdx === nIdx;
+                                                        const hasConcept = !!nodesData[key]?.concept;
+                                                        const isLinked = connections.some(c => c.includes(key));
+                                                        const isLinkingSource = linkingNode === key;
+
+                                                        return (
+                                                            <button key={nIdx} id={`node-${section.id}-${nIdx}`} onClick={() => handleNodeClick(section.id, nIdx)} 
+                                                                className={`w-12 h-12 rounded-2xl flex flex-col items-center justify-center transition-all duration-300 relative ${selected ? 'bg-white/10 ring-2 ring-indigo-500 scale-110 z-10 shadow-[0_0_20px_rgba(79,70,229,0.4)]' : 'bg-[#0a0a0f] border border-white/5 hover:border-white/20'} ${isLinkingSource ? 'animate-pulse ring-2 ring-emerald-500' : ''}`}
+                                                            >
+                                                                <span className={`text-[10px] font-mono mb-1 ${selected ? 'text-indigo-300' : 'text-slate-600'}`}>{getGlobalIndex(section.id, nIdx)}</span>
+                                                                <div className={`w-2 h-2 rounded-full transition-all duration-500 ${hasConcept ? section.dot : 'bg-slate-800'}`} />
+                                                                {isLinked && <div className="absolute inset-2 rounded-xl border border-indigo-500/20 pointer-events-none" />}
+                                                            </button>
+                                                        );
+                                                    })}
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
                             </div>
                         </section>
 
                         <aside className="w-[320px] lg:w-[450px] border-l border-white/5 bg-[#050508] p-6 lg:p-10 flex flex-col gap-8 lg:gap-10 overflow-y-auto shadow-2xl z-40 shrink-0">
                             {selectedNode ? (
-                                <div className="flex flex-col gap-6 lg:gap-8 animate-in slide-in-from-right duration-300">
+                                <div className="flex flex-col gap-8 animate-in slide-in-from-right duration-300">
                                     <div>
                                         <div className="text-[10px] text-indigo-400 uppercase font-bold tracking-widest mb-1">Node {getGlobalIndex(selectedNode.sIdx, selectedNode.nIdx)}</div>
                                         <h2 className="text-3xl lg:text-4xl font-thin text-white tracking-tight leading-none">Memory Node Detail</h2>
                                     </div>
                                     
-                                    <div className="flex flex-col gap-4 lg:gap-6">
-                                        <div className="flex flex-col gap-2 p-3 lg:p-4 bg-white/5 rounded-xl lg:rounded-2xl border border-white/5 group hover:border-white/10 transition-colors">
+                                    <div className="flex flex-col gap-6">
+                                        <div className="flex flex-col gap-2 p-4 bg-white/5 rounded-2xl border border-white/5 group hover:border-white/10 transition-colors">
                                             <label className="text-[9px] text-slate-500 uppercase font-bold tracking-widest flex items-center gap-2">
                                                 <Icon name="Edit3" size={12} className="text-slate-400" /> Cluster Name
                                             </label>
@@ -347,55 +447,58 @@
                                                 className="bg-transparent text-white text-sm font-semibold focus:outline-none focus:text-indigo-400 transition-colors" />
                                         </div>
 
-                                        <div className="flex flex-col gap-1 lg:gap-2">
+                                        <div className="flex flex-col gap-2">
                                             <label className="text-[10px] text-slate-500 uppercase font-bold tracking-widest ml-1">Cognitive Concept</label>
                                             <input type="text" value={nodesData[getNodeKey(selectedNode.sIdx, selectedNode.nIdx)]?.concept || ""} 
                                                 onChange={(e) => updateNodeData('concept', e.target.value)}
-                                                className="bg-white/5 border border-white/10 rounded-xl p-3 lg:p-4 focus:ring-1 ring-indigo-500 outline-none text-white text-sm lg:text-base transition-all" placeholder="Enter core idea..." />
+                                                className="bg-white/5 border border-white/10 rounded-xl p-4 focus:ring-1 ring-indigo-500 outline-none text-white transition-all" placeholder="Enter core idea..." />
                                         </div>
-                                        <div className="flex flex-col gap-1 lg:gap-2">
+                                        <div className="flex flex-col gap-2">
                                             <label className="text-[10px] text-slate-500 uppercase font-bold tracking-widest ml-1">Citation</label>
                                             <input type="text" value={nodesData[getNodeKey(selectedNode.sIdx, selectedNode.nIdx)]?.citation || ""} 
                                                 onChange={(e) => updateNodeData('citation', e.target.value)}
-                                                className="bg-white/5 border border-white/10 rounded-xl p-3 lg:p-4 focus:ring-1 ring-indigo-500 outline-none text-white text-sm transition-all" placeholder="e.g. Smith (2024)" />
+                                                className="bg-white/5 border border-white/10 rounded-xl p-4 focus:ring-1 ring-indigo-500 outline-none text-white transition-all" placeholder="e.g. Smith (2024)" />
                                         </div>
-                                        <div className="flex flex-col gap-1 lg:gap-2">
+                                        <div className="flex flex-col gap-2">
                                             <label className="text-[10px] text-slate-500 uppercase font-bold tracking-widest ml-1">Notes</label>
                                             <textarea value={nodesData[getNodeKey(selectedNode.sIdx, selectedNode.nIdx)]?.notes || ""} 
                                                 onChange={(e) => updateNodeData('notes', e.target.value)}
-                                                className="bg-white/5 border border-white/10 rounded-xl p-3 lg:p-4 h-32 lg:h-48 resize-none focus:ring-1 ring-indigo-500 outline-none text-slate-300 text-xs lg:text-sm transition-all" placeholder="Describe the connection..." />
+                                                className="bg-white/5 border border-white/10 rounded-xl p-4 h-48 resize-none focus:ring-1 ring-indigo-500 outline-none text-slate-300 text-sm transition-all" placeholder="Describe the connection..." />
                                         </div>
 
                                         <button onClick={() => setLinkingNode(getNodeKey(selectedNode.sIdx, selectedNode.nIdx))} 
-                                            className={`py-3 lg:py-4 rounded-xl font-bold text-xs tracking-widest transition-all ${linkingNode === getNodeKey(selectedNode.sIdx, selectedNode.nIdx) ? 'bg-emerald-500 text-black shadow-[0_0_20px_rgba(16,185,129,0.3)]' : 'bg-indigo-600 text-white shadow-[0_0_20px_rgba(79,70,229,0.2)] hover:scale-[1.02]'}`}>
+                                            className={`py-4 rounded-xl font-bold text-xs tracking-widest transition-all ${linkingNode === getNodeKey(selectedNode.sIdx, selectedNode.nIdx) ? 'bg-emerald-500 text-black shadow-[0_0_20px_rgba(16,185,129,0.3)]' : 'bg-indigo-600 text-white shadow-[0_0_20px_rgba(79,70,229,0.2)] hover:scale-[1.02] hover:bg-indigo-500'}`}>
                                             {linkingNode ? "PICK TARGET NODE..." : "ATTACH LOGICAL THREAD"}
                                         </button>
                                     </div>
 
-                                    <div className="flex flex-col gap-4 pt-4 lg:pt-8 border-t border-white/5">
-                                        <h3 className="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Linked Knowledge</h3>
-                                        <div className="flex flex-col gap-2">
+                                    <div className="flex flex-col gap-6 pt-8 border-t border-white/5">
+                                        <h3 className="text-sm text-indigo-400 uppercase font-bold tracking-[0.2em]">Linked Knowledge</h3>
+                                        <div className="flex flex-col gap-4">
                                             {connections.filter(c => c.includes(getNodeKey(selectedNode.sIdx, selectedNode.nIdx))).map(conn => {
                                                 const otherKey = conn.split(':').find(k => k !== getNodeKey(selectedNode.sIdx, selectedNode.nIdx));
                                                 const [oSIdx, oNIdx] = otherKey.split('-').map(Number);
                                                 const otherData = nodesData[otherKey];
+                                                const otherSection = sections.find(s => s.id === oSIdx);
                                                 return (
-                                                    <div key={conn} className="flex items-center justify-between p-2 lg:p-3 bg-white/5 rounded-xl border border-white/5 text-[10px] hover:border-white/20 transition-colors group/link">
-                                                        <div className="flex items-center gap-2 overflow-hidden">
-                                                            <div className={`w-2 h-2 rounded-full shrink-0 ${sections[oSIdx].dot}`} />
-                                                            <span className="text-slate-300 truncate">{sectionTitles[oSIdx]} • #{getGlobalIndex(oSIdx, oNIdx)}</span>
+                                                    <div key={conn} className="flex items-center justify-between p-5 bg-white/5 rounded-2xl border border-white/10 hover:border-indigo-500/30 transition-all group/link overflow-hidden shadow-sm">
+                                                        <div className="flex flex-col gap-1.5 overflow-hidden flex-1">
+                                                            <div className="flex items-center gap-2">
+                                                                <div className={`w-2.5 h-2.5 rounded-full shrink-0 ${otherSection.dot}`} />
+                                                                <span className="text-xs text-slate-400 uppercase font-bold tracking-tight truncate">{sectionTitles[oSIdx]} • #{getGlobalIndex(oSIdx, oNIdx)}</span>
+                                                            </div>
+                                                            <div className="text-slate-100 text-xl font-medium italic truncate leading-tight">
+                                                                {otherData?.concept || "Unmapped Node"}
+                                                            </div>
                                                         </div>
-                                                        <div className="flex items-center gap-2 shrink-0">
-                                                            <span className="text-indigo-400 font-bold italic truncate max-w-[80px] lg:max-w-[120px]">{otherData?.concept || "Unmapped"}</span>
-                                                            <button onClick={(e) => { e.stopPropagation(); removeConnection(conn); }} className="p-1 text-red-400 hover:text-red-500 transition-all">
-                                                                <Icon name="Trash2" size={12} />
-                                                            </button>
-                                                        </div>
+                                                        <button onClick={(e) => { e.stopPropagation(); removeConnection(conn); }} className="p-3 text-red-400/50 hover:text-red-500 transition-all ml-4 bg-red-500/5 rounded-lg opacity-0 group-hover/link:opacity-100">
+                                                            <Icon name="Trash2" size={24} />
+                                                        </button>
                                                     </div>
                                                 );
                                             })}
                                             {connections.filter(c => c.includes(getNodeKey(selectedNode.sIdx, selectedNode.nIdx))).length === 0 && (
-                                                <div className="text-center py-4 text-slate-700 text-[10px] uppercase tracking-wider italic">No threads attached</div>
+                                                <div className="text-center py-8 text-slate-600 text-sm uppercase tracking-wider italic border border-dashed border-white/5 rounded-2xl">No threads attached</div>
                                             )}
                                         </div>
                                     </div>
@@ -409,10 +512,10 @@
                         </aside>
                     </main>
 
-                    {/* Authentication Modal */}
+                    {/* Auth Modal */}
                     {showAuthModal && (
                         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-md p-4 animate-in fade-in duration-300">
-                            <div className="w-full max-w-sm bg-[#0a0a0f] border border-white/10 rounded-[2.5rem] p-8 lg:p-10 shadow-2xl space-y-8 relative">
+                            <div className="w-full max-w-sm bg-[#0a0a0f] border border-white/10 rounded-[2.5rem] p-10 shadow-2xl space-y-8 relative">
                                 <button onClick={() => { setShowAuthModal(false); setErrorMessage(null); }} className="absolute top-6 right-6 text-slate-500 hover:text-white">
                                     <Icon name="X" size={20} />
                                 </button>
@@ -420,13 +523,7 @@
                                     <h3 className="text-2xl font-thin tracking-tight text-white">{isRegistering ? 'Create Thesis Account' : 'Cloud Login'}</h3>
                                     <p className="text-xs text-slate-500 uppercase tracking-widest">Access your web on any device.</p>
                                 </div>
-
-                                {errorMessage && (
-                                    <div className="bg-red-500/10 border border-red-500/30 text-red-400 text-[10px] p-3 rounded-xl leading-relaxed">
-                                        {errorMessage}
-                                    </div>
-                                )}
-
+                                {errorMessage && <div className="bg-red-500/10 border border-red-500/30 text-red-400 text-[10px] p-3 rounded-xl leading-relaxed">{errorMessage}</div>}
                                 <form onSubmit={handleEmailAuth} className="space-y-4">
                                     <div className="space-y-1">
                                         <label className="text-[9px] text-slate-500 uppercase tracking-widest font-bold ml-1">Email</label>
@@ -434,15 +531,14 @@
                                     </div>
                                     <div className="space-y-1">
                                         <label className="text-[9px] text-slate-500 uppercase tracking-widest font-bold ml-1">Password</label>
-                                        <input required type="password" value={password} onChange={e => setPassword(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-1 focus:ring-indigo-500/50" placeholder="••••••••" />
+                                        <input required type="password" minLength="6" value={password} onChange={e => setPassword(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-1 focus:ring-indigo-500/50" placeholder="••••••••" />
                                     </div>
                                     <button type="submit" disabled={authLoading} className="w-full py-4 bg-indigo-600 hover:bg-indigo-500 rounded-xl font-bold text-sm transition-all shadow-lg flex items-center justify-center gap-3">
                                         {authLoading ? <Icon name="Loader2" size={16} className="animate-spin" /> : (isRegistering ? 'Register & Sync' : 'Login & Sync')}
                                     </button>
                                 </form>
-
                                 <div className="text-center">
-                                    <button onClick={() => { setIsRegistering(!isRegistering); setErrorMessage(null); }} className="text-[10px] text-slate-500 hover:text-indigo-400 uppercase font-bold tracking-widest transition-colors underline underline-offset-4">
+                                    <button type="button" onClick={() => { setIsRegistering(!isRegistering); setErrorMessage(null); }} className="text-[10px] text-slate-500 hover:text-indigo-400 uppercase font-bold tracking-widest transition-colors underline underline-offset-4">
                                         {isRegistering ? 'Back to Login' : 'Need a permanent account? Register'}
                                     </button>
                                 </div>
