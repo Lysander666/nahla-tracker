@@ -23,10 +23,12 @@
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
+        
         .node-grid-bg { background: radial-gradient(circle at center, #0f172a 0%, #020617 100%); }
         .node-transition { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
         .lucide { display: inline-block; vertical-align: middle; }
         
+        /* Master container for the scaling workspace */
         .workspace-container {
             display: flex;
             align-items: center;
@@ -43,6 +45,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            will-change: transform;
         }
 
         .drag-ghost {
@@ -140,15 +143,29 @@
                 { id: 7, color: "text-cyan-400", border: "border-cyan-500/30", bg: "bg-cyan-500/5", dot: "bg-cyan-500" }
             ];
 
+            // AUTO-SCALING LOGIC
             useEffect(() => {
                 const handleResize = () => {
-                    const sidebarWidth = window.innerWidth > 1024 ? 450 : 320;
-                    const availableWidth = window.innerWidth - sidebarWidth - 60; 
-                    const availableHeight = window.innerHeight - 100;
-                    const baseWidth = 950;
-                    const baseHeight = 750;
-                    setScale(Math.min(availableWidth / baseWidth, availableHeight / baseHeight, 1));
+                    const sidebarWidth = window.innerWidth > 1200 ? 450 : (window.innerWidth > 1024 ? 380 : 320);
+                    const headerHeight = 64;
+                    const padding = 60; // Safe margin
+                    
+                    const availableWidth = window.innerWidth - sidebarWidth - padding; 
+                    const availableHeight = window.innerHeight - headerHeight - padding;
+                    
+                    // The "Natural" size of the 2-column grid at scale 1.0
+                    // Calculated based on block size + gaps
+                    const baseWidth = 980;
+                    const baseHeight = 780;
+                    
+                    const scaleW = availableWidth / baseWidth;
+                    const scaleH = availableHeight / baseHeight;
+                    
+                    // Never scale up past 1, but scale down as much as needed
+                    const newScale = Math.min(scaleW, scaleH, 1);
+                    setScale(newScale);
                 };
+                
                 window.addEventListener('resize', handleResize);
                 handleResize();
                 return () => window.removeEventListener('resize', handleResize);
@@ -190,7 +207,7 @@
                     }
                     setLoading(false);
                 }, (err) => {
-                    setErrorMessage("Connection Error: Check rules or network.");
+                    setErrorMessage("Connection Error: Update rules or check internet.");
                     setLoading(false);
                 });
                 return () => unsubscribe();
@@ -248,7 +265,6 @@
             const handleDragStart = (e, index) => {
                 setDraggedIndex(index);
                 e.dataTransfer.effectAllowed = 'move';
-                // Transparent image for better ghosting effect
                 const img = new Image();
                 img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
                 e.dataTransfer.setDragImage(img, 0, 0);
@@ -351,8 +367,8 @@
                         </div>
                         <div className="flex items-center gap-4">
                             {user && !user.isAnonymous ? (
-                                <div className="flex items-center gap-3">
-                                    <div className="hidden md:flex flex-col items-end">
+                                <div className="flex items-center gap-3 text-right">
+                                    <div className="hidden md:flex flex-col">
                                         <span className="text-[9px] text-slate-600 uppercase font-bold tracking-tighter">Verified User</span>
                                         <span className="text-[10px] text-indigo-400 font-mono">{user.email}</span>
                                     </div>
@@ -369,7 +385,7 @@
                     </header>
 
                     <main className="flex-1 flex overflow-hidden">
-                        <section className="flex-1 relative node-grid-bg workspace-container overflow-hidden p-4 lg:p-8">
+                        <section className="flex-1 relative node-grid-bg workspace-container overflow-hidden p-4">
                             <div id="scaling-wrapper" style={{ transform: `scale(${scale})` }}>
                                 <div id="grid-container" className="grid grid-cols-2 gap-8 p-10 bg-black/40 rounded-[4rem] border border-white/5 backdrop-blur-md shadow-2xl relative">
                                     {errorMessage && !showAuthModal && (
@@ -429,7 +445,7 @@
                             </div>
                         </section>
 
-                        <aside className="w-[320px] lg:w-[450px] border-l border-white/5 bg-[#050508] p-6 lg:p-10 flex flex-col gap-8 lg:gap-10 overflow-y-auto shadow-2xl z-40 shrink-0">
+                        <aside className="w-[320px] lg:w-[380px] xl:w-[450px] border-l border-white/5 bg-[#050508] p-6 lg:p-10 flex flex-col gap-8 lg:gap-10 overflow-y-auto shadow-2xl z-40 shrink-0 transition-all duration-300">
                             {selectedNode ? (
                                 <div className="flex flex-col gap-8 animate-in slide-in-from-right duration-300">
                                     <div>
@@ -521,7 +537,7 @@
                                 </button>
                                 <div className="text-center space-y-2">
                                     <h3 className="text-2xl font-thin tracking-tight text-white">{isRegistering ? 'Create Thesis Account' : 'Cloud Login'}</h3>
-                                    <p className="text-xs text-slate-500 uppercase tracking-widest">Access your web on any device.</p>
+                                    <p className="text-xs text-slate-500 uppercase tracking-widest text-center">Sync your research anywhere.</p>
                                 </div>
                                 {errorMessage && <div className="bg-red-500/10 border border-red-500/30 text-red-400 text-[10px] p-3 rounded-xl leading-relaxed">{errorMessage}</div>}
                                 <form onSubmit={handleEmailAuth} className="space-y-4">
