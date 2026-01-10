@@ -26,9 +26,17 @@
         .node-grid-bg { background: radial-gradient(circle at center, #0f172a 0%, #020617 100%); }
         .node-transition { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
         .lucide { display: inline-block; vertical-align: middle; }
+        
+        /* Ensure the grid doesn't overflow height-wise on smaller screens */
+        @media (max-height: 800px) {
+            #grid-container { transform: scale(0.75); transform-origin: center center; }
+        }
+        @media (max-height: 700px) {
+            #grid-container { transform: scale(0.65); transform-origin: center center; }
+        }
     </style>
 </head>
-<body class="bg-[#020204] text-slate-100 overflow-hidden">
+<body class="bg-[#020204] text-slate-100 overflow-hidden h-screen w-screen">
     <div id="root"></div>
 
     <script type="text/babel">
@@ -88,6 +96,7 @@
             const [email, setEmail] = useState('');
             const [password, setPassword] = useState('');
             const [isRegistering, setIsRegistering] = useState(false);
+            const [authLoading, setAuthLoading] = useState(false);
 
             const [selectedNode, setSelectedNode] = useState(null);
             const [linkingNode, setLinkingNode] = useState(null);
@@ -114,14 +123,11 @@
                     try {
                         if (isCanvasEnv && typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
                             await auth.signInWithCustomToken(__initial_auth_token);
-                        } else {
-                            // Only sign in anonymously if no user session exists
-                            if (!auth.currentUser) {
-                                await auth.signInAnonymously();
-                            }
+                        } else if (!auth.currentUser) {
+                            await auth.signInAnonymously();
                         }
                     } catch (err) {
-                        setErrorMessage("Auth Error: Ensure Email & Anonymous Auth are enabled in Firebase.");
+                        setErrorMessage("Authentication failed. Ensure Firebase Auth is configured.");
                     }
                 };
                 performAuth();
@@ -149,13 +155,12 @@
                         if (data.connections) setConnections(data.connections);
                         if (data.sectionTitles) setSectionTitles(data.sectionTitles);
                     } else {
-                        // Reset if account is empty
                         setNodesData({});
                         setConnections([]);
                     }
                     setLoading(false);
                 }, (err) => {
-                    setErrorMessage("Permission Denied: Check your Firestore Rules.");
+                    setErrorMessage("Sync Error: Update Firestore Rules to allow access.");
                     setLoading(false);
                 });
                 return () => unsubscribe();
@@ -187,6 +192,7 @@
             const handleEmailAuth = async (e) => {
                 e.preventDefault();
                 setErrorMessage(null);
+                setAuthLoading(true);
                 try {
                     if (isRegistering) {
                         await auth.createUserWithEmailAndPassword(email, password);
@@ -198,6 +204,8 @@
                     setPassword('');
                 } catch (err) {
                     setErrorMessage(err.message);
+                } finally {
+                    setAuthLoading(false);
                 }
             };
 
@@ -248,10 +256,10 @@
                 saveData(null, newTitles, null);
             };
 
-            if (loading && !errorMessage) return <div className="h-screen flex items-center justify-center font-mono text-xs text-indigo-500 bg-[#020204]">Syncing Neural Map...</div>;
+            if (loading && !errorMessage) return <div className="h-screen flex items-center justify-center font-mono text-xs text-indigo-500 bg-[#020204]">Establishing Sync...</div>;
 
             return (
-                <div className="h-screen flex flex-col font-sans bg-[#020204]">
+                <div className="h-screen flex flex-col font-sans bg-[#020204] overflow-hidden">
                     <header className="p-4 border-b border-white/5 flex justify-between items-center bg-[#050508]/80 backdrop-blur-xl z-50">
                         <div className="flex items-center gap-4">
                             <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-600/20">
@@ -278,7 +286,7 @@
                                     </button>
                                 </div>
                             ) : (
-                                <button onClick={() => setShowAuthModal(true)} className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-all">
+                                <button onClick={() => setShowAuthModal(true)} className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-lg shadow-indigo-600/20">
                                     <Icon name="LogIn" size={14} /> SYNC ACCOUNT
                                 </button>
                             )}
@@ -286,18 +294,18 @@
                     </header>
 
                     <main className="flex-1 flex overflow-hidden">
-                        <section className="flex-1 relative node-grid-bg flex items-center justify-center p-8 overflow-hidden">
-                            <div id="grid-container" className="relative z-20 grid grid-cols-2 gap-8 p-10 bg-black/40 rounded-[4rem] border border-white/5 backdrop-blur-md shadow-2xl scale-[0.9] xl:scale-100">
-                                {errorMessage && (
-                                    <div className="absolute -top-12 left-0 right-0 text-center text-red-400 text-xs bg-red-500/10 p-2 rounded-lg border border-red-500/50 flex items-center justify-center gap-2">
+                        <section className="flex-1 relative node-grid-bg flex items-center justify-center p-4 lg:p-8 overflow-hidden">
+                            <div id="grid-container" className="relative z-20 grid grid-cols-2 gap-4 lg:gap-8 p-6 lg:p-10 bg-black/40 rounded-[3rem] lg:rounded-[4rem] border border-white/5 backdrop-blur-md shadow-2xl transition-transform duration-500">
+                                {errorMessage && !showAuthModal && (
+                                    <div className="absolute -top-12 left-0 right-0 text-center text-red-400 text-[10px] bg-red-500/10 p-2 rounded-lg border border-red-500/50 flex items-center justify-center gap-2">
                                         {errorMessage} 
                                         <button onClick={() => setErrorMessage(null)} className="hover:text-white"><Icon name="X" size={12} /></button>
                                     </div>
                                 )}
                                 {sections.map((section, sIdx) => (
-                                    <div key={sIdx} className={`p-5 rounded-3xl border ${section.bg} ${section.border} flex flex-col gap-4 shadow-inner node-transition`}>
-                                        <div className={`text-[10px] font-bold uppercase tracking-widest ${section.color}`}>{sectionTitles[sIdx]}</div>
-                                        <div className="grid grid-cols-4 gap-3">
+                                    <div key={sIdx} className={`p-3 lg:p-5 rounded-2xl lg:rounded-3xl border ${section.bg} ${section.border} flex flex-col gap-2 lg:gap-4 shadow-inner node-transition`}>
+                                        <div className={`text-[9px] lg:text-[10px] font-bold uppercase tracking-widest ${section.color}`}>{sectionTitles[sIdx]}</div>
+                                        <div className="grid grid-cols-4 gap-2 lg:gap-3">
                                             {Array.from({ length: 8 }).map((_, nIdx) => {
                                                 const key = getNodeKey(sIdx, nIdx);
                                                 const selected = selectedNode?.sIdx === sIdx && selectedNode?.nIdx === nIdx;
@@ -307,11 +315,11 @@
 
                                                 return (
                                                     <button key={nIdx} id={`node-${sIdx}-${nIdx}`} onClick={() => handleNodeClick(sIdx, nIdx)} 
-                                                        className={`w-12 h-12 rounded-2xl flex flex-col items-center justify-center transition-all duration-300 relative ${selected ? 'bg-white/10 ring-2 ring-indigo-500 scale-110 z-10' : 'bg-[#0a0a0f] border border-white/5 hover:border-white/20'} ${isLinkingSource ? 'animate-pulse ring-2 ring-emerald-500' : ''}`}
+                                                        className={`w-10 h-10 lg:w-12 lg:h-12 rounded-xl lg:rounded-2xl flex flex-col items-center justify-center transition-all duration-300 relative ${selected ? 'bg-white/10 ring-2 ring-indigo-500 scale-110 z-10 shadow-[0_0_20px_rgba(99,102,241,0.3)]' : 'bg-[#0a0a0f] border border-white/5 hover:border-white/20'} ${isLinkingSource ? 'animate-pulse ring-2 ring-emerald-500' : ''}`}
                                                     >
-                                                        <span className={`text-[10px] font-mono mb-1 ${selected ? 'text-indigo-300' : 'text-slate-600'}`}>{getGlobalIndex(sIdx, nIdx)}</span>
-                                                        <div className={`w-2 h-2 rounded-full transition-all duration-500 ${hasConcept ? section.dot : 'bg-slate-800'}`} />
-                                                        {isLinked && <div className="absolute inset-2 rounded-xl border border-indigo-500/20 pointer-events-none" />}
+                                                        <span className={`text-[8px] lg:text-[10px] font-mono mb-0.5 lg:mb-1 ${selected ? 'text-indigo-300' : 'text-slate-600'}`}>{getGlobalIndex(sIdx, nIdx)}</span>
+                                                        <div className={`w-1.5 h-1.5 lg:w-2 lg:h-2 rounded-full transition-all duration-500 ${hasConcept ? section.dot : 'bg-slate-800'}`} />
+                                                        {isLinked && <div className="absolute inset-1.5 rounded-lg lg:rounded-xl border border-indigo-500/20 pointer-events-none" />}
                                                     </button>
                                                 );
                                             })}
@@ -321,16 +329,16 @@
                             </div>
                         </section>
 
-                        <aside className="w-[450px] border-l border-white/5 bg-[#050508] p-10 flex flex-col gap-10 overflow-y-auto shadow-2xl z-40">
+                        <aside className="w-[320px] lg:w-[450px] border-l border-white/5 bg-[#050508] p-6 lg:p-10 flex flex-col gap-8 lg:gap-10 overflow-y-auto shadow-2xl z-40 shrink-0">
                             {selectedNode ? (
-                                <div className="flex flex-col gap-8 animate-in slide-in-from-right duration-300">
+                                <div className="flex flex-col gap-6 lg:gap-8 animate-in slide-in-from-right duration-300">
                                     <div>
                                         <div className="text-[10px] text-indigo-400 uppercase font-bold tracking-widest mb-1">Node {getGlobalIndex(selectedNode.sIdx, selectedNode.nIdx)}</div>
-                                        <h2 className="text-4xl font-thin text-white tracking-tight">Memory Node Detail</h2>
+                                        <h2 className="text-3xl lg:text-4xl font-thin text-white tracking-tight leading-none">Memory Node Detail</h2>
                                     </div>
                                     
-                                    <div className="flex flex-col gap-6">
-                                        <div className="flex flex-col gap-2 p-4 bg-white/5 rounded-2xl border border-white/5 group hover:border-white/10 transition-colors">
+                                    <div className="flex flex-col gap-4 lg:gap-6">
+                                        <div className="flex flex-col gap-2 p-3 lg:p-4 bg-white/5 rounded-xl lg:rounded-2xl border border-white/5 group hover:border-white/10 transition-colors">
                                             <label className="text-[9px] text-slate-500 uppercase font-bold tracking-widest flex items-center gap-2">
                                                 <Icon name="Edit3" size={12} className="text-slate-400" /> Cluster Name
                                             </label>
@@ -339,32 +347,32 @@
                                                 className="bg-transparent text-white text-sm font-semibold focus:outline-none focus:text-indigo-400 transition-colors" />
                                         </div>
 
-                                        <div className="flex flex-col gap-2">
-                                            <label className="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Cognitive Concept</label>
+                                        <div className="flex flex-col gap-1 lg:gap-2">
+                                            <label className="text-[10px] text-slate-500 uppercase font-bold tracking-widest ml-1">Cognitive Concept</label>
                                             <input type="text" value={nodesData[getNodeKey(selectedNode.sIdx, selectedNode.nIdx)]?.concept || ""} 
                                                 onChange={(e) => updateNodeData('concept', e.target.value)}
-                                                className="bg-white/5 border border-white/10 rounded-xl p-4 focus:ring-1 ring-indigo-500 outline-none text-white transition-all" placeholder="Enter core idea..." />
+                                                className="bg-white/5 border border-white/10 rounded-xl p-3 lg:p-4 focus:ring-1 ring-indigo-500 outline-none text-white text-sm lg:text-base transition-all" placeholder="Enter core idea..." />
                                         </div>
-                                        <div className="flex flex-col gap-2">
-                                            <label className="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Citation</label>
+                                        <div className="flex flex-col gap-1 lg:gap-2">
+                                            <label className="text-[10px] text-slate-500 uppercase font-bold tracking-widest ml-1">Citation</label>
                                             <input type="text" value={nodesData[getNodeKey(selectedNode.sIdx, selectedNode.nIdx)]?.citation || ""} 
                                                 onChange={(e) => updateNodeData('citation', e.target.value)}
-                                                className="bg-white/5 border border-white/10 rounded-xl p-4 focus:ring-1 ring-indigo-500 outline-none text-white transition-all" placeholder="e.g. Smith (2024)" />
+                                                className="bg-white/5 border border-white/10 rounded-xl p-3 lg:p-4 focus:ring-1 ring-indigo-500 outline-none text-white text-sm transition-all" placeholder="e.g. Smith (2024)" />
                                         </div>
-                                        <div className="flex flex-col gap-2">
-                                            <label className="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Notes</label>
+                                        <div className="flex flex-col gap-1 lg:gap-2">
+                                            <label className="text-[10px] text-slate-500 uppercase font-bold tracking-widest ml-1">Notes</label>
                                             <textarea value={nodesData[getNodeKey(selectedNode.sIdx, selectedNode.nIdx)]?.notes || ""} 
                                                 onChange={(e) => updateNodeData('notes', e.target.value)}
-                                                className="bg-white/5 border border-white/10 rounded-xl p-4 h-48 resize-none focus:ring-1 ring-indigo-500 outline-none text-slate-300 text-sm transition-all" placeholder="Describe the connection..." />
+                                                className="bg-white/5 border border-white/10 rounded-xl p-3 lg:p-4 h-32 lg:h-48 resize-none focus:ring-1 ring-indigo-500 outline-none text-slate-300 text-xs lg:text-sm transition-all" placeholder="Describe the connection..." />
                                         </div>
 
                                         <button onClick={() => setLinkingNode(getNodeKey(selectedNode.sIdx, selectedNode.nIdx))} 
-                                            className={`py-4 rounded-xl font-bold text-xs tracking-widest transition-all ${linkingNode === getNodeKey(selectedNode.sIdx, selectedNode.nIdx) ? 'bg-emerald-500 text-black shadow-[0_0_20px_rgba(16,185,129,0.3)]' : 'bg-indigo-600 text-white shadow-[0_0_20px_rgba(79,70,229,0.2)] hover:scale-[1.02] hover:bg-indigo-500'}`}>
+                                            className={`py-3 lg:py-4 rounded-xl font-bold text-xs tracking-widest transition-all ${linkingNode === getNodeKey(selectedNode.sIdx, selectedNode.nIdx) ? 'bg-emerald-500 text-black shadow-[0_0_20px_rgba(16,185,129,0.3)]' : 'bg-indigo-600 text-white shadow-[0_0_20px_rgba(79,70,229,0.2)] hover:scale-[1.02]'}`}>
                                             {linkingNode ? "PICK TARGET NODE..." : "ATTACH LOGICAL THREAD"}
                                         </button>
                                     </div>
 
-                                    <div className="flex flex-col gap-4 pt-8 border-t border-white/5">
+                                    <div className="flex flex-col gap-4 pt-4 lg:pt-8 border-t border-white/5">
                                         <h3 className="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Linked Knowledge</h3>
                                         <div className="flex flex-col gap-2">
                                             {connections.filter(c => c.includes(getNodeKey(selectedNode.sIdx, selectedNode.nIdx))).map(conn => {
@@ -372,14 +380,14 @@
                                                 const [oSIdx, oNIdx] = otherKey.split('-').map(Number);
                                                 const otherData = nodesData[otherKey];
                                                 return (
-                                                    <div key={conn} className="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5 text-[10px] hover:border-white/20 transition-colors group/link">
-                                                        <div className="flex items-center gap-2">
-                                                            <div className={`w-2 h-2 rounded-full ${sections[oSIdx].dot}`} />
-                                                            <span className="text-slate-300">{sectionTitles[oSIdx]} • Node {getGlobalIndex(oSIdx, oNIdx)}</span>
+                                                    <div key={conn} className="flex items-center justify-between p-2 lg:p-3 bg-white/5 rounded-xl border border-white/5 text-[10px] hover:border-white/20 transition-colors group/link">
+                                                        <div className="flex items-center gap-2 overflow-hidden">
+                                                            <div className={`w-2 h-2 rounded-full shrink-0 ${sections[oSIdx].dot}`} />
+                                                            <span className="text-slate-300 truncate">{sectionTitles[oSIdx]} • #{getGlobalIndex(oSIdx, oNIdx)}</span>
                                                         </div>
-                                                        <div className="flex items-center gap-2">
-                                                            <span className="text-indigo-400 font-bold italic truncate max-w-[120px]">{otherData?.concept || "Unmapped"}</span>
-                                                            <button onClick={(e) => { e.stopPropagation(); removeConnection(conn); }} className="opacity-0 group-hover/link:opacity-100 p-1 text-red-400 hover:text-red-500 transition-all">
+                                                        <div className="flex items-center gap-2 shrink-0">
+                                                            <span className="text-indigo-400 font-bold italic truncate max-w-[80px] lg:max-w-[120px]">{otherData?.concept || "Unmapped"}</span>
+                                                            <button onClick={(e) => { e.stopPropagation(); removeConnection(conn); }} className="p-1 text-red-400 hover:text-red-500 transition-all">
                                                                 <Icon name="Trash2" size={12} />
                                                             </button>
                                                         </div>
@@ -403,33 +411,39 @@
 
                     {/* Authentication Modal */}
                     {showAuthModal && (
-                        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-300">
-                            <div className="w-full max-w-sm bg-[#0a0a0f] border border-white/10 rounded-[2.5rem] p-8 shadow-2xl space-y-8 relative">
-                                <button onClick={() => setShowAuthModal(false)} className="absolute top-6 right-6 text-slate-500 hover:text-white">
+                        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-md p-4 animate-in fade-in duration-300">
+                            <div className="w-full max-w-sm bg-[#0a0a0f] border border-white/10 rounded-[2.5rem] p-8 lg:p-10 shadow-2xl space-y-8 relative">
+                                <button onClick={() => { setShowAuthModal(false); setErrorMessage(null); }} className="absolute top-6 right-6 text-slate-500 hover:text-white">
                                     <Icon name="X" size={20} />
                                 </button>
                                 <div className="text-center space-y-2">
-                                    <h3 className="text-2xl font-thin tracking-tight">Thesis Sync</h3>
-                                    <p className="text-xs text-slate-500 uppercase tracking-widest">Log in to access your web anywhere.</p>
+                                    <h3 className="text-2xl font-thin tracking-tight text-white">{isRegistering ? 'Create Thesis Account' : 'Cloud Login'}</h3>
+                                    <p className="text-xs text-slate-500 uppercase tracking-widest">Access your web on any device.</p>
                                 </div>
 
+                                {errorMessage && (
+                                    <div className="bg-red-500/10 border border-red-500/30 text-red-400 text-[10px] p-3 rounded-xl leading-relaxed">
+                                        {errorMessage}
+                                    </div>
+                                )}
+
                                 <form onSubmit={handleEmailAuth} className="space-y-4">
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] text-slate-500 uppercase tracking-widest font-bold ml-1">Email</label>
-                                        <input required type="email" value={email} onChange={e => setEmail(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50" />
+                                    <div className="space-y-1">
+                                        <label className="text-[9px] text-slate-500 uppercase tracking-widest font-bold ml-1">Email</label>
+                                        <input required type="email" value={email} onChange={e => setEmail(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-1 focus:ring-indigo-500/50" placeholder="your@email.com" />
                                     </div>
-                                    <div className="space-y-2">
-                                        <label className="text-[10px] text-slate-500 uppercase tracking-widest font-bold ml-1">Password</label>
-                                        <input required type="password" value={password} onChange={e => setPassword(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50" />
+                                    <div className="space-y-1">
+                                        <label className="text-[9px] text-slate-500 uppercase tracking-widest font-bold ml-1">Password</label>
+                                        <input required type="password" value={password} onChange={e => setPassword(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-1 focus:ring-indigo-500/50" placeholder="••••••••" />
                                     </div>
-                                    <button type="submit" className="w-full py-4 bg-indigo-600 hover:bg-indigo-500 rounded-xl font-bold text-sm transition-all">
-                                        {isRegistering ? 'Create Account' : 'Sign In'}
+                                    <button type="submit" disabled={authLoading} className="w-full py-4 bg-indigo-600 hover:bg-indigo-500 rounded-xl font-bold text-sm transition-all shadow-lg flex items-center justify-center gap-3">
+                                        {authLoading ? <Icon name="Loader2" size={16} className="animate-spin" /> : (isRegistering ? 'Register & Sync' : 'Login & Sync')}
                                     </button>
                                 </form>
 
                                 <div className="text-center">
-                                    <button onClick={() => setIsRegistering(!isRegistering)} className="text-[10px] text-slate-500 hover:text-indigo-400 uppercase font-bold tracking-widest">
-                                        {isRegistering ? 'Have an account? Login' : 'Need an account? Register'}
+                                    <button onClick={() => { setIsRegistering(!isRegistering); setErrorMessage(null); }} className="text-[10px] text-slate-500 hover:text-indigo-400 uppercase font-bold tracking-widest transition-colors underline underline-offset-4">
+                                        {isRegistering ? 'Back to Login' : 'Need a permanent account? Register'}
                                     </button>
                                 </div>
                             </div>
