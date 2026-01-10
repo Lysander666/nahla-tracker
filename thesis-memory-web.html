@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thesis Memory Architecture</title>
+    <!-- Tailwind CSS for Styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- React & Babel for Browser-side Compilation -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Firebase SDK (Compat versions for easier browser integration) -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+    <style>
+        @keyframes dash { to { stroke-dashoffset: -100; } }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
+        .node-grid-bg { background: radial-gradient(circle at center, #0f172a 0%, #020617 100%); }
+        .node-transition { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .lucide { display: inline-block; vertical-align: middle; }
+    </style>
+</head>
+<body class="bg-[#020204] text-slate-100 overflow-hidden">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useMemo, useRef } = React;
+        
+        // --- ENVIRONMENT DETECTION ---
+        const isCanvasEnv = typeof __firebase_config !== 'undefined';
+        
+        // --- YOUR FIREBASE CONFIG ---
+        const myProductionConfig = {
+            apiKey: "AIzaSyCCAMapMCPHeXUvmR0DF4ERl8ay58Rz37w",
+            authDomain: "thesis-memory-web.firebaseapp.com",
+            projectId: "thesis-memory-web",
+            storageBucket: "thesis-memory-web.firebasestorage.app",
+            messagingSenderId: "1000243001742",
+            appId: "1:1000243001742:web:e367ebe8af3f6dcef14cdf"
+        };
+
+        const firebaseConfig = isCanvasEnv ? JSON.parse(__firebase_config) : myProductionConfig;
+        const platformAppId = isCanvasEnv ? (typeof __app_id !== 'undefined' ? __app_id : 'thesis-memory-web') : 'thesis-memory-web-v1';
+
+        // Initialize Firebase
+        const firebase = window.firebase;
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        // --- ICON COMPONENT HELPER ---
+        const Icon = ({ name, size = 16, className = "" }) => {
+            const iconRef = useRef(null);
+            useEffect(() => {
+                if (window.lucide && iconRef.current) {
+                    iconRef.current.innerHTML = '';
+                    const i = document.createElement('i');
+                    const kebabName = name.replace(/([a-z0-9]|(?=[A-Z]))([A-Z])/g, '$1-$2').toLowerCase().replace(/^-/, '');
+                    i.setAttribute('data-lucide', kebabName);
+                    if (className) i.setAttribute('class', className);
+                    i.style.width = size + 'px';
+                    i.style.height = size + 'px';
+                    iconRef.current.appendChild(i);
+                    window.lucide.createIcons();
+                }
+            }, [name, size, className]);
+            return <span ref={iconRef} className="flex items-center justify-center leading-none" />;
+        };
+
+        const App = () => {
+            const [user, setUser] = useState(null);
+            const [loading, setLoading] = useState(true);
+            const [saveStatus, setSaveStatus] = useState('synced');
+            const [errorMessage, setErrorMessage] = useState(null);
+            const [selectedNode, setSelectedNode] = useState(null);
+            const [linkingNode, setLinkingNode] = useState(null);
+            const [nodesData, setNodesData] = useState({});
+            const [connections, setConnections] = useState([]);
+            const [sectionTitles, setSectionTitles] = useState([
+                "Theoretical Framework", "Literature Review", "Methodology", "Analysis Phase A",
+                "Analysis Phase B", "Discussion", "Synthesis", "Conclusion"
+            ]);
+
+            const sections = [
+                { color: "text-blue-400", border: "border-blue-500/30", bg: "bg-blue-500/5", dot: "bg-blue-500" },
+                { color: "text-emerald-400", border: "border-emerald-500/30", bg: "bg-emerald-500/5", dot: "bg-emerald-500" },
+                { color: "text-amber-400", border: "border-amber-500/30", bg: "bg-amber-500/5", dot: "bg-amber-500" },
+                { color: "text-purple-400", border: "border-purple-500/30", bg: "bg-purple-500/5", dot: "bg-purple-500" },
+                { color: "text-pink-400", border: "border-pink-500/30", bg: "bg-pink-500/5", dot: "bg-pink-500" },
+                { color: "text-orange-400", border: "border-orange-500/30", bg: "bg-orange-500/5", dot: "bg-orange-500" },
+                { color: "text-indigo-400", border: "border-indigo-500/30", bg: "bg-indigo-500/5", dot: "bg-indigo-500" },
+                { color: "text-cyan-400", border: "border-cyan-500/30", bg: "bg-cyan-500/5", dot: "bg-cyan-500" }
+            ];
+
+            useEffect(() => {
+                const performAuth = async () => {
+                    try {
+                        if (isCanvasEnv && typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                            await auth.signInWithCustomToken(__initial_auth_token);
+                        } else {
+                            await auth.signInAnonymously();
+                        }
+                    } catch (err) {
+                        console.error("Auth failed:", err);
+                        setErrorMessage("Authentication failed. Please check your project configuration.");
+                    }
+                };
+                performAuth();
+                const unsubscribe = auth.onAuthStateChanged((u) => {
+                    setUser(u);
+                    if (!u) setLoading(false);
+                });
+                return () => unsubscribe();
+            }, []);
+
+            useEffect(() => {
+                if (!user) return;
+                
+                // Helper to get correct path based on environment
+                let docRef;
+                if (isCanvasEnv) {
+                    docRef = db.collection('artifacts').doc(platformAppId).collection('users').doc(user.uid).collection('state').doc('memoryWeb');
+                } else {
+                    docRef = db.collection('memory_webs').doc(platformAppId).collection('users').doc(user.uid);
+                }
+                
+                const unsubscribe = docRef.onSnapshot((docSnap) => {
+                    if (docSnap.exists) {
+                        const data = docSnap.data();
+                        if (data.nodesData) setNodesData(data.nodesData);
+                        if (data.connections) setConnections(data.connections);
+                        if (data.sectionTitles) setSectionTitles(data.sectionTitles);
+                    }
+                    setLoading(false);
+                }, (err) => {
+                    console.error("Firestore access error:", err);
+                    setErrorMessage("Missing or insufficient permissions. Ensure Firestore Rules are set to allow reads and writes.");
+                    setLoading(false);
+                });
+                return () => unsubscribe();
+            }, [user]);
+
+            const saveData = async (newNodes, newConns, newTitles) => {
+                if (!user) return;
+                setSaveStatus('saving');
+                try {
+                    let docRef;
+                    if (isCanvasEnv) {
+                        docRef = db.collection('artifacts').doc(platformAppId).collection('users').doc(user.uid).collection('state').doc('memoryWeb');
+                    } else {
+                        docRef = db.collection('memory_webs').doc(platformAppId).collection('users').doc(user.uid);
+                    }
+
+                    await docRef.set({
+                        nodesData: newNodes || nodesData,
+                        connections: newConns || connections,
+                        sectionTitles: newTitles || sectionTitles,
+                        lastUpdated: new Date().toISOString()
+                    }, { merge: true });
+                    setSaveStatus('synced');
+                } catch (err) {
+                    console.error("Save error:", err);
+                    setSaveStatus('error');
+                }
+            };
+
+            const getNodeKey = (sIdx, nIdx) => `${sIdx}-${nIdx}`;
+            const getGlobalIndex = (sIdx, nIdx) => (sIdx * 8) + nIdx + 1;
+
+            const handleNodeClick = (sIdx, nIdx) => {
+                const key = getNodeKey(sIdx, nIdx);
+                if (linkingNode) {
+                    if (linkingNode !== key) {
+                        const newConn = [linkingNode, key].sort().join(':');
+                        if (!connections.includes(newConn)) {
+                            const updatedConns = [...connections, newConn];
+                            setConnections(updatedConns);
+                            saveData(null, updatedConns, null);
+                        }
+                    }
+                    setLinkingNode(null);
+                } else {
+                    setSelectedNode({ sIdx, nIdx });
+                }
+            };
+
+            const updateNodeData = (field, value) => {
+                if (!selectedNode) return;
+                const key = getNodeKey(selectedNode.sIdx, selectedNode.nIdx);
+                const updatedNodes = { ...nodesData, [key]: { ...(nodesData[key] || {}), [field]: value } };
+                setNodesData(updatedNodes);
+                saveData(updatedNodes, null, null);
+            };
+
+            const updateSectionTitle = (index, value) => {
+                const newTitles = [...sectionTitles];
+                newTitles[index] = value;
+                setSectionTitles(newTitles);
+                saveData(null, null, newTitles);
+            };
+
+            if (loading && !errorMessage) return (
+                <div className="h-screen flex flex-col items-center justify-center font-mono text-xs uppercase tracking-widest text-indigo-500 bg-[#020204]">
+                    <Icon name="Loader2" size={32} className="animate-spin mb-4" />
+                    Initializing Memory Web...
+                </div>
+            );
+
+            return (
+                <div className="h-screen flex flex-col font-sans bg-[#020204]">
+                    <header className="p-4 border-b border-white/5 flex justify-between items-center bg-[#050508]/80 backdrop-blur-xl z-50">
+                        <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-600/20">
+                                <Icon name="Network" size={22} className="text-white" />
+                            </div>
+                            <div>
+                                <h1 className="text-sm font-bold tracking-widest uppercase text-slate-200">Thesis Memory Architecture</h1>
+                                <div className="flex items-center gap-2 mt-0.5">
+                                    <span className="text-[10px] text-slate-500 uppercase tracking-wider">{connections.length} Threads Linked</span>
+                                    <div className={`text-[10px] uppercase font-bold ${saveStatus === 'synced' ? 'text-emerald-500' : 'text-indigo-400'}`}>
+                                        {saveStatus === 'saving' ? 'Saving...' : saveStatus}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-4">
+                            <div className="text-[10px] text-slate-500 font-mono hidden sm:block">UID: {user?.uid.slice(0,8)}</div>
+                            <button className="bg-white/5 text-slate-300 p-2 rounded-lg border border-white/5 hover:bg-white/10 transition-colors">
+                                <Icon name="Share2" size={16} />
+                            </button>
+                        </div>
+                    </header>
+
+                    <main className="flex-1 flex overflow-hidden">
+                        <section className="flex-1 relative node-grid-bg flex items-center justify-center p-8 overflow-hidden">
+                            <svg className="absolute inset-0 w-full h-full pointer-events-none z-10">
+                                {connections.map(conn => {
+                                    const [start, end] = conn.split(':');
+                                    const [s1, n1] = start.split('-').map(Number);
+                                    const [s2, n2] = end.split('-').map(Number);
+                                    const node1 = document.getElementById(`node-${s1}-${n1}`)?.getBoundingClientRect();
+                                    const node2 = document.getElementById(`node-${s2}-${n2}`)?.getBoundingClientRect();
+                                    const container = document.getElementById('grid-container')?.getBoundingClientRect();
+                                    if (!node1 || !node2 || !container) return null;
+                                    return (
+                                        <line key={conn} 
+                                            x1={node1.left + node1.width/2 - container.left} y1={node1.top + node1.height/2 - container.top}
+                                            x2={node2.left + node2.width/2 - container.left} y2={node2.top + node2.height/2 - container.top}
+                                            stroke="rgba(129, 140, 248, 0.4)" strokeWidth="2" strokeDasharray="4 4" style={{animation: 'dash 25s linear infinite'}}
+                                        />
+                                    );
+                                })}
+                            </svg>
+
+                            <div id="grid-container" className="relative z-20 grid grid-cols-2 gap-8 p-10 bg-black/40 rounded-[4rem] border border-white/5 backdrop-blur-md shadow-2xl scale-[0.9] xl:scale-100">
+                                {errorMessage && <div className="absolute -top-12 left-0 right-0 text-center text-red-400 text-xs bg-red-500/10 p-2 rounded-lg border border-red-500/50">{errorMessage}</div>}
+                                {sections.map((section, sIdx) => (
+                                    <div key={sIdx} className={`p-5 rounded-3xl border ${section.bg} ${section.border} flex flex-col gap-4 shadow-inner node-transition`}>
+                                        <div className={`text-[10px] font-bold uppercase tracking-widest ${section.color}`}>{sectionTitles[sIdx]}</div>
+                                        <div className="grid grid-cols-4 gap-3">
+                                            {Array.from({ length: 8 }).map((_, nIdx) => {
+                                                const key = getNodeKey(sIdx, nIdx);
+                                                const selected = selectedNode?.sIdx === sIdx && selectedNode?.nIdx === nIdx;
+                                                const hasConcept = !!nodesData[key]?.concept;
+                                                return (
+                                                    <button key={nIdx} id={`node-${sIdx}-${nIdx}`} onClick={() => handleNodeClick(sIdx, nIdx)} 
+                                                        className={`w-12 h-12 rounded-2xl flex flex-col items-center justify-center transition-all duration-300 relative ${selected ? 'bg-white/10 ring-2 ring-indigo-500 scale-110 z-10' : 'bg-[#0a0a0f] border border-white/5 hover:border-white/20'}`}
+                                                    >
+                                                        <span className={`text-[10px] font-mono mb-1 ${selected ? 'text-indigo-300' : 'text-slate-600'}`}>{getGlobalIndex(sIdx, nIdx)}</span>
+                                                        <div className={`w-2 h-2 rounded-full transition-all duration-500 ${hasConcept ? section.dot : 'bg-slate-800'}`} />
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </section>
+
+                        <aside className="w-[450px] border-l border-white/5 bg-[#050508] p-10 flex flex-col gap-10 overflow-y-auto shadow-2xl z-40">
+                            {selectedNode ? (
+                                <div className="flex flex-col gap-8 animate-in slide-in-from-right duration-300">
+                                    <div>
+                                        <div className="text-[10px] text-indigo-400 uppercase font-bold tracking-widest mb-1">Node {getGlobalIndex(selectedNode.sIdx, selectedNode.nIdx)}</div>
+                                        <h2 className="text-4xl font-thin text-white tracking-tight">Inspector</h2>
+                                    </div>
+                                    
+                                    <div className="flex flex-col gap-6">
+                                        <div className="flex flex-col gap-2 p-4 bg-white/5 rounded-2xl border border-white/5 group hover:border-white/10 transition-colors">
+                                            <label className="text-[9px] text-slate-500 uppercase font-bold tracking-widest flex items-center gap-2">
+                                                <Icon name="Edit3" size={12} className="text-slate-400" /> Cluster Label
+                                            </label>
+                                            <input type="text" value={sectionTitles[selectedNode.sIdx]} 
+                                                onChange={(e) => updateSectionTitle(selectedNode.sIdx, e.target.value)}
+                                                className="bg-transparent text-white text-sm font-semibold focus:outline-none focus:text-indigo-400 transition-colors" />
+                                        </div>
+
+                                        <div className="flex flex-col gap-2">
+                                            <label className="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Cognitive Concept</label>
+                                            <input type="text" value={nodesData[getNodeKey(selectedNode.sIdx, selectedNode.nIdx)]?.concept || ""} 
+                                                onChange={(e) => updateNodeData('concept', e.target.value)}
+                                                className="bg-white/5 border border-white/10 rounded-xl p-4 focus:ring-1 ring-indigo-500 outline-none text-white placeholder:text-slate-700 transition-all" placeholder="The core idea..." />
+                                        </div>
+                                        <div className="flex flex-col gap-2">
+                                            <label className="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Citation</label>
+                                            <input type="text" value={nodesData[getNodeKey(selectedNode.sIdx, selectedNode.nIdx)]?.citation || ""} 
+                                                onChange={(e) => updateNodeData('citation', e.target.value)}
+                                                className="bg-white/5 border border-white/10 rounded-xl p-4 focus:ring-1 ring-indigo-500 outline-none text-white placeholder:text-slate-700 transition-all" placeholder="e.g., Foucault (1975)" />
+                                        </div>
+                                        <div className="flex flex-col gap-2">
+                                            <label className="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Notes</label>
+                                            <textarea value={nodesData[getNodeKey(selectedNode.sIdx, selectedNode.nIdx)]?.notes || ""} 
+                                                onChange={(e) => updateNodeData('notes', e.target.value)}
+                                                className="bg-white/5 border border-white/10 rounded-xl p-4 h-32 resize-none focus:ring-1 ring-indigo-500 outline-none text-slate-300 placeholder:text-slate-700 text-sm transition-all" placeholder="Detailed recollection..." />
+                                        </div>
+                                        <button onClick={() => setLinkingNode(getNodeKey(selectedNode.sIdx, selectedNode.nIdx))} 
+                                            className={`py-4 rounded-xl font-bold text-xs tracking-widest transition-all ${linkingNode === getNodeKey(selectedNode.sIdx, selectedNode.nIdx) ? 'bg-emerald-500 text-black shadow-[0_0_20px_rgba(16,185,129,0.3)]' : 'bg-indigo-600 text-white shadow-[0_0_20px_rgba(79,70,229,0.2)] hover:scale-[1.02] hover:bg-indigo-500'}`}>
+                                            {linkingNode ? "PICK TARGET NODE..." : "ATTACH LOGICAL THREAD"}
+                                        </button>
+                                    </div>
+
+                                    {/* Connection List for current node */}
+                                    <div className="flex flex-col gap-4 pt-8 border-t border-white/5">
+                                        <h3 className="text-[10px] text-slate-500 uppercase font-bold">Active Connections</h3>
+                                        <div className="flex flex-col gap-2">
+                                            {connections.filter(c => c.includes(getNodeKey(selectedNode.sIdx, selectedNode.nIdx))).map(conn => {
+                                                const otherKey = conn.split(':').find(k => k !== getNodeKey(selectedNode.sIdx, selectedNode.nIdx));
+                                                const [oSIdx, oNIdx] = otherKey.split('-').map(Number);
+                                                const otherData = nodesData[otherKey];
+                                                return (
+                                                    <div key={conn} className="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5 text-[10px] hover:border-white/20 transition-colors">
+                                                        <div className="flex items-center gap-2">
+                                                            <div className={`w-2 h-2 rounded-full ${sections[oSIdx].dot}`} />
+                                                            <span className="text-slate-300">{sectionTitles[oSIdx]} • Node {getGlobalIndex(oSIdx, oNIdx)}</span>
+                                                        </div>
+                                                        <span className="text-indigo-400 font-bold italic truncate max-w-[150px]">{otherData?.concept || "Unmapped"}</span>
+                                                    </div>
+                                                );
+                                            })}
+                                            {connections.filter(c => c.includes(getNodeKey(selectedNode.sIdx, selectedNode.nIdx))).length === 0 && (
+                                                <div className="text-center py-4 text-slate-700 text-[10px] uppercase tracking-wider italic">No threads attached</div>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="flex-1 flex flex-col items-center justify-center text-slate-600 text-xs uppercase tracking-widest gap-4 opacity-50">
+                                    <Icon name="Brain" size={32} className="text-slate-400" />
+                                    Select a node to inspect
+                                </div>
+                            )}
+                        </aside>
+                    </main>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
