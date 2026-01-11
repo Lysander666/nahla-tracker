@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <link rel="icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text x='50' y='50' font-size='72' text-anchor='middle' dominant-baseline='central'>🔗</text></svg>">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Thesis Memory Web</title>
@@ -20,7 +21,7 @@
 
     <style>
         @keyframes dash { to { stroke-dashoffset: -100; } }
-        ::-webkit-scrollbar { width: 7px; }
+        ::-webkit-scrollbar { width: 10px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
         
@@ -444,7 +445,7 @@
                                                                     {emoji ? (
                                                                         <span className="text-base leading-none">{emoji}</span>
                                                                     ) : (
-                                                                        <div className={`w-2 h-2 rounded-full transition-all duration-500 ${hasConcept ? section.dot : 'bg-slate-800'}`} />
+                                                                        <div className={`w-2 h-2 rounded-full transition-all duration-500 ${hasConcept ? section.dot : 'bg-slate-600'}`} />
                                                                     )}
                                                                 </div>
                                                                 {isLinked && <div className="absolute inset-2 rounded-xl border border-indigo-500/20 pointer-events-none" />}
@@ -509,7 +510,7 @@
                                         <div className="flex flex-col gap-4 py-2 border-y border-white/5">
                                             <div className="flex items-center justify-between">
                                                 <h3 className="text-[10px] text-indigo-400 uppercase font-bold tracking-[0.2em]">Linked Knowledge</h3>
-                                                <span className="text-[9px] text-slate-600 uppercase font-mono">{connections.filter(c => c.includes(getNodeKey(selectedNode.sIdx, selectedNode.nIdx))).length} Threads</span>
+                                                <span className="text-[9px] text-slate-300 uppercase font-mono">{connections.filter(c => c.includes(getNodeKey(selectedNode.sIdx, selectedNode.nIdx))).length} Threads</span>
                                             </div>
                                             <div className="flex flex-col gap-2">
                                                 {connections.filter(c => c.includes(getNodeKey(selectedNode.sIdx, selectedNode.nIdx))).map(conn => {
