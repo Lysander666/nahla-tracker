@@ -147,8 +147,8 @@
             const [draggedCardIndex, setDraggedCardIndex] = useState(null);
             const [dragOverCardIndex, setDragOverCardIndex] = useState(null);
 
-            // QoL: Track hovered node
             const [hoveredNodeKey, setHoveredNodeKey] = useState(null);
+            const [hoveredSymbol, setHoveredSymbol] = useState(null);
 
             const [showAuthModal, setShowAuthModal] = useState(false);
             const [email, setEmail] = useState('');
@@ -176,7 +176,26 @@
                 { id: 7, color: "text-cyan-400", border: "border-cyan-500/30", bg: "bg-cyan-500/5", dot: "bg-cyan-500" }
             ];
 
-            const quickEmojis = ["🟢", "📗", "🌱", "🧪", "🟡", "💡", "⚠️", "🧩", "🔵", "🔗", "🌐", "⚙️", "🟣", "🌸", "💗", "🩸"];
+            const quickEmojis = ["🟢", "📗", "🌱", "🧪", "🟡", "💡", "⚠️", "🧩", "🔵", "🔗", "🌐", "⚙️", "🟣", "🌸", "❤️", "🩸"];
+
+            const symbolMeanings = {
+                "🟢": "Theory: core claim",
+                "📗": "Theory: conceptual grounding",
+                "🌱": "Theory: emergence",
+                "🧪": "Theory: conceptual example",
+                "🟡": "Fix: clarification required",
+                "💡": "Fix: provisional insight",
+                "⚠️": "Fix: theoretical limitation",
+                "🧩": "Fix: puzzle or more research needed",
+                "🔵": "Texts: scholarly reference",
+                "🔗": "Texts: explicit linkage",
+                "🌐": "Texts: networked discourse",
+                "⚙️": "Texts: Methodological operation",
+                "🟣": "Data: key analytical data",
+                "🌸": "Data: culturally significant data",
+                "❤️": "Data: effective or identity data",
+                "🩸": "Data: high-stakes evidence"
+            };
 
             useEffect(() => {
                 const timer = setInterval(() => setTime(new Date()), 1000);
@@ -555,8 +574,8 @@
 
                                                                 {/* CONCEPT HOVER TOOLTIP */}
                                                                 {hoveredNodeKey === key && conceptText && (
-                                                                    <div className="absolute bottom-full mb-3 left-1/2 -translate-x-1/2 px-3 py-2 bg-[#050508]/95 border border-indigo-500/40 rounded-xl shadow-2xl z-[100] pointer-events-none min-w-[140px] max-w-[220px] backdrop-blur-md tooltip-animate">
-                                                                        <div className="flex items-center gap-1.5 mb-1 opacity-50">
+                                                                    <div className="absolute bottom-full mb-3 left-1/2 -translate-x-1/2 px-3 py-2 bg-[#050508]/95 border border-indigo-500/40 rounded-xl shadow-2xl z-[100] pointer-events-none min-w-[140px] max-w-[220px] backdrop-blur-md tooltip-animate text-center">
+                                                                        <div className="flex items-center justify-center gap-1.5 mb-1 opacity-50">
                                                                             <Icon name="Brain" size={10} className="text-indigo-400" />
                                                                             <span className="text-[8px] text-indigo-300 uppercase font-black tracking-widest">Cognitive Core</span>
                                                                         </div>
@@ -595,16 +614,29 @@
                                                 className="bg-transparent text-white text-sm font-semibold focus:outline-none focus:text-indigo-400 transition-colors" />
                                         </div>
 
-                                        <div className="flex flex-col gap-3 p-4 bg-white/5 rounded-2xl border border-white/5">
+                                        <div className="flex flex-col gap-3 p-4 bg-white/5 rounded-2xl border border-white/5 relative">
                                             <label className="text-[9px] text-slate-500 uppercase font-bold tracking-widest flex items-center gap-2">
                                                 <Icon name="Zap" size={12} className="text-slate-400" /> Cognitive Symbol
                                             </label>
-                                            <div className="flex flex-wrap gap-2 mb-2">
+                                            <div className="flex flex-wrap gap-2 mb-2 relative">
                                                 {quickEmojis.map(e => (
-                                                    <button key={e} onClick={() => updateNodeData('emoji', e)} 
-                                                        className={`w-8 h-8 flex items-center justify-center rounded-lg bg-white/5 hover:bg-white/10 transition-all text-base quick-emoji ${nodesData[getNodeKey(selectedNode.sIdx, selectedNode.nIdx)]?.emoji === e ? 'ring-2 ring-indigo-500 bg-white/10' : ''}`}
+                                                    <button 
+                                                        key={e} 
+                                                        onClick={() => updateNodeData('emoji', e)} 
+                                                        onMouseEnter={() => setHoveredSymbol(e)}
+                                                        onMouseLeave={() => setHoveredSymbol(null)}
+                                                        className={`w-8 h-8 flex items-center justify-center rounded-lg bg-white/5 hover:bg-white/10 transition-all text-base quick-emoji relative ${nodesData[getNodeKey(selectedNode.sIdx, selectedNode.nIdx)]?.emoji === e ? 'ring-2 ring-indigo-500 bg-white/10' : ''}`}
                                                     >
                                                         {e}
+                                                        {/* SYMBOL TOOLTIP */}
+                                                        {hoveredSymbol === e && (
+                                                            <div className="fixed lg:absolute bottom-full mb-2 left-1/2 -translate-x-1/2 px-2 py-1.5 bg-[#0a0a0f] border border-white/10 rounded-lg shadow-2xl z-[150] pointer-events-none min-w-[120px] backdrop-blur-md tooltip-animate">
+                                                                <div className="text-white text-[9px] uppercase font-bold tracking-tighter whitespace-nowrap text-center">
+                                                                    {symbolMeanings[e]}
+                                                                </div>
+                                                                <div className="absolute top-full left-1/2 -translate-x-1/2 border-[4px] border-transparent border-t-[#0a0a0f]" />
+                                                            </div>
+                                                        )}
                                                     </button>
                                                 ))}
                                                 <button onClick={() => updateNodeData('emoji', '')} className="text-[9px] text-slate-500 uppercase font-bold px-2 hover:text-red-400 transition-colors">Clear</button>
