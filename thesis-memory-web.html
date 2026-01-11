@@ -128,6 +128,7 @@
             const [sectionOrder, setSectionOrder] = useState([0, 1, 2, 3, 4, 5, 6, 7]);
             const [sectionColors, setSectionColors] = useState(["blue", "emerald", "amber", "purple", "blue", "emerald", "amber", "purple"]);
             const [activeColorPicker, setActiveColorPicker] = useState(null);
+            const [searchQuery, setSearchQuery] = useState("");
             
             const [draggedIndex, setDraggedIndex] = useState(null);
             const [dragOverIndex, setDragOverIndex] = useState(null);
@@ -158,6 +159,18 @@
             ]);
 
             const fileInputRef = useRef(null);
+
+            useEffect(() => {
+                const handleKeyDown = (e) => {
+                    if (e.key === 'Escape') {
+                        setSelectedNode(null);
+                        setActiveColorPicker(null);
+                        setLinkingNode(null);
+                    }
+                };
+                window.addEventListener('keydown', handleKeyDown);
+                return () => window.removeEventListener('keydown', handleKeyDown);
+            }, []);
 
             const getSectionTheme = (colorKey) => {
                 const themes = {
@@ -283,6 +296,46 @@
                 const link = document.createElement('a');
                 link.href = url;
                 link.download = `thesis-memory-web-backup-${new Date().toISOString().split('T')[0]}.json`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+            };
+
+            const exportMarkdown = () => {
+                let md = `# Thesis Memory Web: Research Outline\nExported: ${new Date().toLocaleString()}\n\n---\n\n`;
+                sectionOrder.forEach(sIdx => {
+                    md += `## Cluster: ${sectionTitles[sIdx]}\n\n`;
+                    let hasContent = false;
+                    for(let nIdx=0; nIdx<8; nIdx++) {
+                        const key = getNodeKey(sIdx, nIdx);
+                        const data = nodesData[key];
+                        if (data?.concept || data?.notes) {
+                            hasContent = true;
+                            md += `### Node ${getGlobalIndex(sIdx, nIdx)}: ${data.emoji || ''} ${data.concept || 'Untitled'}\n`;
+                            if (data.citation) md += `**Citation:** ${data.citation}\n\n`;
+                            if (data.notes) md += `**Notes:**\n${data.notes}\n\n`;
+                            
+                            const myConns = connections.filter(c => c.includes(key));
+                            if (myConns.length > 0) {
+                                md += `*Threads:* `;
+                                const threadNames = myConns.map(c => {
+                                    const otherKey = c.split(':').find(k => k !== key);
+                                    const [oSIdx, oNIdx] = otherKey.split('-').map(Number);
+                                    return `${sectionTitles[oSIdx]} #${getGlobalIndex(oSIdx, oNIdx)}`;
+                                });
+                                md += threadNames.join(', ') + `\n\n`;
+                            }
+                        }
+                    }
+                    if (!hasContent) md += `*No nodes mapped in this cluster.*\n\n`;
+                    md += `---\n\n`;
+                });
+                const blob = new Blob([md], { type: 'text/markdown' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `thesis-narrative-outline-${new Date().toISOString().split('T')[0]}.md`;
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
@@ -424,28 +477,37 @@
 
             return (
                 <div className="h-screen flex flex-col font-sans bg-[#020204] overflow-hidden">
-                    <header className="p-4 border-b border-white/5 flex justify-between items-center bg-[#050508]/80 backdrop-blur-xl z-50">
+                    <header className="p-4 border-b border-white/5 flex justify-between items-center bg-[#050508]/80 backdrop-blur-xl z-50 relative">
                         <div className="flex items-center gap-4">
                             <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-600/20">
                                 <Icon name="Network" size={22} className="text-white" />
                             </div>
-                            <div>
+                            <div className="flex flex-col">
                                 <h1 className="text-sm font-bold tracking-widest uppercase text-slate-200">Thesis Memory Web v0.24 🌌</h1>
                                 <div className="flex items-center gap-2 mt-0.5">
                                     <div className={`text-[10px] uppercase font-bold ${saveStatus === 'synced' ? 'text-emerald-500' : 'text-indigo-400'}`}>
                                         {saveStatus === 'saving' ? 'Syncing...' : 'Cloud Active'}
                                     </div>
-                                    <div className="h-3 w-px bg-white/10 mx-2" />
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-[9px] text-slate-500 uppercase tracking-tighter">Titles</span>
+                                    <div className="h-3 w-px bg-white/10 mx-1" />
+                                    <div className="flex items-center gap-1.5">
                                         <button onClick={() => adjustFontSize(-1)} className="w-5 h-5 flex items-center justify-center bg-white/5 hover:bg-white/10 rounded border border-white/10 text-xs">-</button>
                                         <button onClick={() => adjustFontSize(1)} className="w-5 h-5 flex items-center justify-center bg-white/5 hover:bg-white/10 rounded border border-white/10 text-xs">+</button>
-                                        <div className="px-2 min-w-[32px] text-center bg-indigo-500/10 rounded border border-indigo-500/20 text-[9px] font-black text-indigo-400">
-                                            {titleFontSize - 5}
-                                        </div>
                                     </div>
                                 </div>
                             </div>
+                        </div>
+
+                        {/* CENTERED SUBTLE SEARCH */}
+                        <div className="absolute left-1/2 -translate-x-1/2 hidden md:flex items-center bg-black/60 border border-white/5 rounded-xl px-4 py-1.5 gap-2 focus-within:bg-black focus-within:border-indigo-500/30 transition-all">
+                            <Icon name="Search" size={12} className="text-slate-600" />
+                            <input 
+                                type="text" 
+                                placeholder="search memory web" 
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="bg-transparent border-none outline-none text-[10px] font-medium text-slate-400 placeholder:text-slate-800 w-48 tracking-wider lowercase"
+                            />
+                            {searchQuery && <button onClick={() => setSearchQuery("")} className="text-slate-600 hover:text-white transition-colors"><Icon name="X" size={12}/></button>}
                         </div>
 
                         <div className="flex items-center gap-6">
@@ -534,14 +596,22 @@
                                                         const key = getNodeKey(sectionId, nIdx);
                                                         const selected = selectedNode?.sIdx === sectionId && selectedNode?.nIdx === nIdx;
                                                         const hasConcept = !!nodesData[key]?.concept;
-                                                        const conceptText = nodesData[key]?.concept;
+                                                        const conceptText = nodesData[key]?.concept || "";
                                                         const emoji = nodesData[key]?.emoji;
                                                         const isLinked = connections.some(c => c.includes(key));
                                                         const isLinkingSource = linkingNode === key;
+
+                                                        const isSearchMatch = searchQuery && (
+                                                            conceptText.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                                                            (nodesData[key]?.notes || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+                                                            (nodesData[key]?.citation || "").toLowerCase().includes(searchQuery.toLowerCase())
+                                                        );
+                                                        const searchDimmed = searchQuery && !isSearchMatch;
+
                                                         return (
                                                             <button key={nIdx} id={`node-${sectionId}-${nIdx}`} onClick={(e) => { e.stopPropagation(); handleNodeClick(sectionId, nIdx); }} 
                                                                 onMouseEnter={() => setHoveredNodeKey(key)} onMouseLeave={() => setHoveredNodeKey(null)}
-                                                                className={`w-12 h-12 rounded-2xl flex flex-col items-center justify-center transition-all duration-300 relative ${selected ? 'bg-white/10 ring-2 ring-indigo-500 scale-110 z-10 shadow-[0_0_20px_rgba(79,70,229,0.4)]' : 'bg-[#0a0a0f] border border-white/5 hover:border-white/20'} ${isLinkingSource ? 'animate-pulse ring-2 ring-emerald-500' : ''}`}>
+                                                                className={`w-12 h-12 rounded-2xl flex flex-col items-center justify-center transition-all duration-300 relative ${selected ? 'bg-white/10 ring-2 ring-indigo-500 scale-110 z-10 shadow-[0_0_20px_rgba(79,70,229,0.4)]' : 'bg-[#0a0a0f] border border-white/5 hover:border-white/20'} ${isLinkingSource ? 'animate-pulse ring-2 ring-emerald-500' : ''} ${searchDimmed ? 'opacity-10 grayscale' : ''} ${isSearchMatch ? 'ring-2 ring-indigo-400 scale-105 z-10 shadow-[0_0_15px_rgba(99,102,241,0.5)]' : ''}`}>
                                                                 <span className={`font-mono mb-1 ${selected ? 'text-indigo-300' : 'text-slate-400'}`} style={{ fontSize: `${Math.max(titleFontSize, 9)}px` }}>{getGlobalIndex(sectionId, nIdx)}</span>
                                                                 <div className="h-4 flex items-center justify-center">{emoji ? <span className="text-base leading-none">{emoji}</span> : <div className={`w-2 h-2 rounded-full transition-all duration-500 ${hasConcept ? theme.dot : 'bg-slate-600'}`} />}</div>
                                                                 {isLinked && <div className="absolute inset-2 rounded-xl border border-indigo-500/20 pointer-events-none" />}
@@ -555,7 +625,7 @@
                                                                          }}>
                                                                         <div className="flex items-center justify-center gap-1.5 mb-1.5 opacity-50">
                                                                             <Icon name="Brain" size={Math.max(8, titleFontSize - 2)} className="text-indigo-400" />
-                                                                            <span className="text-indigo-300 uppercase font-black tracking-widest" style={{ fontSize: `${Math.max(6, titleFontSize - 4)}px` }}>Cognitive Core</span>
+                                                                            <span className="text-indigo-300 uppercase font-black tracking-widest text-[8px]">Cognitive Core</span>
                                                                         </div>
                                                                         <div className="text-slate-100 leading-tight font-medium italic break-words" style={{ fontSize: `${titleFontSize + 3}px` }}>"{conceptText}"</div>
                                                                         <div className="absolute top-full left-1/2 -translate-x-1/2 border-[6px] border-transparent border-t-[#000000]" />
@@ -635,7 +705,6 @@
                                                                 );
                                                             });
                                                         })()}
-                                                        {connections.filter(c => c.includes(getNodeKey(selectedNode.sIdx, selectedNode.nIdx))).length === 0 && (<div className="text-center py-4 text-slate-700 text-[9px] uppercase tracking-wider italic border border-dashed border-white/5 rounded-xl">No active connections</div>)}
                                                     </div>
                                                 </div>
                                                 <div className="flex flex-col gap-2"><label className="text-[10px] text-slate-500 uppercase font-bold tracking-widest ml-1">Citation</label><input type="text" value={nodesData[getNodeKey(selectedNode.sIdx, selectedNode.nIdx)]?.citation || ""} onChange={(e) => updateNodeData('citation', e.target.value)} className="bg-white/5 border border-white/10 rounded-xl p-4 focus:ring-1 ring-indigo-500 outline-none text-white transition-all" placeholder="e.g. Smith (2024)" /></div>
@@ -661,6 +730,10 @@
                                             <button onClick={handleImportClick} className="flex flex-col items-center justify-center gap-2 p-3 bg-white/5 hover:bg-white/10 border border-white/5 rounded-2xl transition-all group shadow-sm">
                                                 <Icon name="Upload" size={16} className="text-slate-500 group-hover:text-indigo-400" />
                                                 <span className="text-[9px] font-bold text-slate-400 group-hover:text-white uppercase tracking-tighter">Import JSON</span>
+                                            </button>
+                                            <button onClick={exportMarkdown} className="flex flex-col items-center justify-center gap-2 p-3 bg-white/5 hover:bg-white/10 border border-white/5 rounded-2xl transition-all group shadow-sm col-span-2">
+                                                <Icon name="FileText" size={16} className="text-slate-500 group-hover:text-amber-400" />
+                                                <span className="text-[9px] font-bold text-slate-400 group-hover:text-white uppercase tracking-tighter">Narrative Outline (.md)</span>
                                             </button>
                                             <input type="file" ref={fileInputRef} onChange={handleFileChange} accept=".json" className="hidden" />
                                         </div>
@@ -705,12 +778,8 @@
                                                 <li><strong className="text-slate-200">Semantic Taxonomy:</strong> Categorize claims using theoretical, textual, and data-driven symbols.</li>
                                                 <li><strong className="text-slate-200">Logical Threads:</strong> Create bidirectional links between memory nodes across clusters.</li>
                                                 <li><strong className="text-slate-200">Cloud Sync:</strong> Persistent state management via Firestore with local backup options.</li>
-                                                <li><strong className="text-slate-200">Spatial Grid:</strong> Eight 2x4 clusters providing a stable mental map of complex concepts.</li>
+                                                <li><strong className="text-slate-200">Narrative Linearization:</strong> Export your web as a structured Markdown outline to begin drafting.</li>
                                             </ul>
-                                        </section>
-                                        <section className="space-y-2">
-                                            <h4 className="text-white font-bold uppercase text-[11px] tracking-widest border-b border-white/5 pb-1">Notes</h4>
-                                            <p>This tool is designed to bridge the gap between fragmented notes and a linear narrative. Use the JSON export frequently to maintain physical copies of your research state.</p>
                                         </section>
                                     </div>
                                     <button onClick={() => setShowAboutModal(false)} className="w-full py-4 bg-indigo-600 hover:bg-indigo-500 rounded-xl font-bold text-sm text-white transition-all shadow-lg uppercase tracking-widest mt-4">Return to Research</button>
