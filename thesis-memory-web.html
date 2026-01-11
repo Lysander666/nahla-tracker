@@ -152,6 +152,9 @@
 
             const [showAuthModal, setShowAuthModal] = useState(false);
             const [showImportConfirm, setShowImportConfirm] = useState(null);
+            const [showResetConfirm, setShowResetConfirm] = useState(false);
+            const [resetConfirmInput, setResetConfirmInput] = useState("");
+            
             const [email, setEmail] = useState('');
             const [password, setPassword] = useState('');
             const [isRegistering, setIsRegistering] = useState(false);
@@ -267,12 +270,12 @@
                         : db.collection('thesis_data').doc(platformAppId).collection('users').doc(user.uid);
 
                     const finalData = {
-                        nodesData: updates.nodesData || nodesData,
-                        sectionTitles: updates.sectionTitles || sectionTitles,
-                        connections: updates.connections || connections,
-                        sectionOrder: updates.sectionOrder || sectionOrder,
-                        sectionColors: updates.sectionColors || sectionColors,
-                        titleFontSize: updates.titleFontSize || titleFontSize,
+                        nodesData: updates.nodesData !== undefined ? updates.nodesData : nodesData,
+                        sectionTitles: updates.sectionTitles !== undefined ? updates.sectionTitles : sectionTitles,
+                        connections: updates.connections !== undefined ? updates.connections : connections,
+                        sectionOrder: updates.sectionOrder !== undefined ? updates.sectionOrder : sectionOrder,
+                        sectionColors: updates.sectionColors !== undefined ? updates.sectionColors : sectionColors,
+                        titleFontSize: updates.titleFontSize !== undefined ? updates.titleFontSize : titleFontSize,
                         lastUpdated: new Date().toISOString()
                     };
 
@@ -334,6 +337,28 @@
                 setTitleFontSize(titleFontSize);
                 saveData({ nodesData, sectionTitles, connections, sectionOrder, sectionColors, titleFontSize });
                 setShowImportConfirm(null);
+                setSelectedNode(null);
+            };
+
+            const resetWeb = () => {
+                if (resetConfirmInput !== 'Y') return;
+                const blankData = {
+                    nodesData: {},
+                    connections: [],
+                    sectionTitles: ["Cluster 1", "Cluster 2", "Cluster 3", "Cluster 4", "Cluster 5", "Cluster 6", "Cluster 7", "Cluster 8"],
+                    sectionOrder: [0, 1, 2, 3, 4, 5, 6, 7],
+                    sectionColors: ["blue", "emerald", "amber", "purple", "blue", "emerald", "amber", "purple"],
+                    titleFontSize: 10
+                };
+                setNodesData(blankData.nodesData);
+                setConnections(blankData.connections);
+                setSectionTitles(blankData.sectionTitles);
+                setSectionOrder(blankData.sectionOrder);
+                setSectionColors(blankData.sectionColors);
+                setTitleFontSize(blankData.titleFontSize);
+                saveData(blankData);
+                setShowResetConfirm(false);
+                setResetConfirmInput("");
                 setSelectedNode(null);
             };
 
@@ -541,7 +566,6 @@
                     </header>
 
                     <main className="flex-1 flex overflow-hidden">
-                        {/* Background click logic removed as requested */}
                         <section className={`flex-1 relative node-grid-bg workspace-container ${draggedIndex !== null ? 'dragging-active' : ''}`}>
                             <div id="scaling-wrapper" style={{ transform: `scale(${scale})`, marginTop: `${topMargin}px` }} onClick={(e) => e.stopPropagation()}>
                                 <div id="grid-container" className="grid grid-cols-2 gap-8 p-10 bg-black/40 rounded-[4rem] border border-white/5 backdrop-blur-md shadow-2xl relative">
@@ -731,16 +755,23 @@
                                             <Icon name="HardDrive" size={12} className="text-indigo-400" /> Data Management
                                         </h3>
                                         <div className="grid grid-cols-2 gap-3 pb-2">
-                                            <button onClick={exportData} className="flex flex-col items-center justify-center gap-2 p-4 bg-white/5 hover:bg-white/10 border border-white/5 rounded-2xl transition-all group shadow-sm">
-                                                <Icon name="Download" size={18} className="text-slate-500 group-hover:text-emerald-400" />
+                                            <button onClick={exportData} className="flex flex-col items-center justify-center gap-2 p-3 bg-white/5 hover:bg-white/10 border border-white/5 rounded-2xl transition-all group shadow-sm">
+                                                <Icon name="Download" size={16} className="text-slate-500 group-hover:text-emerald-400" />
                                                 <span className="text-[9px] font-bold text-slate-400 group-hover:text-white uppercase tracking-tighter">Export JSON</span>
                                             </button>
-                                            <button onClick={handleImportClick} className="flex flex-col items-center justify-center gap-2 p-4 bg-white/5 hover:bg-white/10 border border-white/5 rounded-2xl transition-all group shadow-sm">
-                                                <Icon name="Upload" size={18} className="text-slate-500 group-hover:text-indigo-400" />
+                                            <button onClick={handleImportClick} className="flex flex-col items-center justify-center gap-2 p-3 bg-white/5 hover:bg-white/10 border border-white/5 rounded-2xl transition-all group shadow-sm">
+                                                <Icon name="Upload" size={16} className="text-slate-500 group-hover:text-indigo-400" />
                                                 <span className="text-[9px] font-bold text-slate-400 group-hover:text-white uppercase tracking-tighter">Import JSON</span>
                                             </button>
                                             <input type="file" ref={fileInputRef} onChange={handleFileChange} accept=".json" className="hidden" />
                                         </div>
+                                        {/* DISCREET RESET BUTTON */}
+                                        <button 
+                                            onClick={() => { setShowResetConfirm(true); setResetConfirmInput(""); }}
+                                            className="mt-2 text-[10px] text-slate-600 hover:text-red-400 font-bold uppercase tracking-widest transition-colors flex items-center justify-center gap-2 py-2"
+                                        >
+                                            <Icon name="RefreshCcw" size={10} /> Initialize New Web
+                                        </button>
                                     </div>
                                     <div className="pb-8 opacity-20 hover:opacity-70 transition-opacity text-center">
                                         <div className="text-[12px] text-slate-500 uppercase tracking-[0.2em] mb-1.5"><a href="https://lysander666.github.io/nahla-tracker/" target="_blank" rel="noopener noreferrer" className="hover:text-indigo-400 transition-colors underline underline-offset-4 font-bold">Back to Nahla Tracker</a></div>
@@ -751,6 +782,7 @@
                         </aside>
                     </main>
 
+                    {/* AUTH MODAL */}
                     {showAuthModal && (
                         <div className="fixed inset-0 z-[100] flex items-center justify-center modal-overlay p-4 animate-in fade-in duration-300">
                             <div className="w-full max-w-sm bg-[#0a0a0f] border border-white/10 rounded-[2.5rem] p-10 shadow-2xl space-y-8 relative">
@@ -770,6 +802,7 @@
                         </div>
                     )}
 
+                    {/* IMPORT CONFIRMATION MODAL */}
                     {showImportConfirm && (
                         <div className="fixed inset-0 z-[110] flex items-center justify-center modal-overlay p-4 animate-in zoom-in duration-200">
                             <div className="w-full max-w-md bg-[#0a0a0f] border border-white/10 rounded-[2.5rem] p-8 lg:p-12 shadow-2xl space-y-6 text-center">
@@ -781,6 +814,46 @@
                                 <div className="flex flex-col gap-3 pt-4">
                                     <button onClick={applyImport} className="w-full py-4 bg-indigo-600 hover:bg-indigo-500 rounded-xl font-bold text-sm transition-all shadow-lg">PROCEED WITH IMPORT</button>
                                     <button onClick={() => setShowImportConfirm(null)} className="w-full py-4 bg-white/5 hover:bg-white/10 rounded-xl font-bold text-sm text-slate-400 transition-all uppercase tracking-widest">Cancel</button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* RESET CONFIRMATION MODAL */}
+                    {showResetConfirm && (
+                        <div className="fixed inset-0 z-[110] flex items-center justify-center modal-overlay p-4 animate-in zoom-in duration-200">
+                            <div className="w-full max-w-md bg-[#0a0a0f] border border-white/10 rounded-[2.5rem] p-8 lg:p-12 shadow-2xl space-y-6 text-center">
+                                <div className="w-16 h-16 bg-red-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-red-500/20">
+                                    <Icon name="RefreshCcw" size={32} className="text-red-500" />
+                                </div>
+                                <h3 className="text-2xl font-thin tracking-tight text-white">Wipe Memory Web?</h3>
+                                <p className="text-sm text-slate-400 leading-relaxed">Are you sure you want to do this? This will <strong className="text-white uppercase">delete all current nodes and logical threads</strong> and reset the web to a blank state.</p>
+                                
+                                <div className="space-y-4 py-4">
+                                    <p className="text-[10px] text-slate-500 uppercase font-black tracking-widest">Extra Verification Required</p>
+                                    <div className="flex flex-col items-center gap-2">
+                                        <label className="text-[11px] text-slate-400">Type <span className="text-white font-bold">'Y'</span> to confirm</label>
+                                        <input 
+                                            type="text" 
+                                            maxLength="1"
+                                            value={resetConfirmInput}
+                                            onChange={(e) => setResetConfirmInput(e.target.value.toUpperCase())}
+                                            className="w-12 h-12 bg-white/5 border border-white/10 rounded-xl text-center text-xl font-bold text-white focus:outline-none focus:ring-2 focus:ring-red-500/50 transition-all"
+                                            placeholder="?"
+                                            autoFocus
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="flex flex-col gap-3">
+                                    <button onClick={() => setShowResetConfirm(false)} className="w-full py-4 bg-red-600 hover:bg-red-500 text-white rounded-xl font-bold text-sm transition-all shadow-lg uppercase tracking-widest">No, Keep My Data</button>
+                                    <button 
+                                        onClick={resetWeb} 
+                                        disabled={resetConfirmInput !== 'Y'}
+                                        className={`w-full py-4 rounded-xl font-bold text-sm transition-all uppercase tracking-widest ${resetConfirmInput === 'Y' ? 'bg-white/10 text-white hover:bg-white/20' : 'bg-white/5 text-slate-700 cursor-not-allowed'}`}
+                                    >
+                                        Yes, Reset Everything
+                                    </button>
                                 </div>
                             </div>
                         </div>
