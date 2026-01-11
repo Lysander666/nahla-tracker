@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+    <!DOCTYPE html>
 <html lang="en">
 <head>
     <link rel="icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text x='50' y='50' font-size='72' text-anchor='middle' dominant-baseline='central'>🔗</text></svg>">
@@ -115,6 +115,7 @@
         };
 
         const App = () => {
+            const [time, setTime] = useState(new Date());
             const [user, setUser] = useState(null);
             const [loading, setLoading] = useState(true);
             const [saveStatus, setSaveStatus] = useState('synced');
@@ -153,6 +154,21 @@
             ];
 
             const quickEmojis = ["🧠", "📚", "🔬", "⚖️", "💡", "📝", "🐟", "🏁", "⚠️", "🔄", "🧩", "🌍"];
+
+            // This updates the time every 1000ms (1 second)
+        useEffect(() => {
+        const timer = setInterval(() => setTime(new Date()), 1000);
+        return () => clearInterval(timer); // Clean up on close
+        }, []);
+
+        // This formats the time specifically to GMT
+        const gmtString = time.toLocaleTimeString('en-GB', { 
+        timeZone: 'GMT', 
+        hour: '2-digit', 
+        minute: '2-digit', 
+        second: '2-digit',
+        hour12: false 
+});
 
             // AUTO-SCALING LOGIC
             useEffect(() => {
@@ -373,6 +389,16 @@
                                 </div>
                             </div>
                         </div>
+
+
+                        {/* GMT DIGITAL CLOCK */}
+                <div className="flex flex-col items-end mr-2 px-3 border-r border-white/5">
+                <span className="text-[8px] text-slate-600 uppercase font-bold tracking-widest">GMT/UTC</span>
+                <span className="text-[11px] text-cyan-400 font-mono font-bold tracking-tighter">
+            {gmtString}
+                </span>
+                </div>
+                        
                         <div className="flex items-center gap-4">
                             {user && !user.isAnonymous ? (
                                 <div className="flex items-center gap-3 text-right">
