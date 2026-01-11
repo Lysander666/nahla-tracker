@@ -50,17 +50,8 @@
             will-change: transform;
         }
 
-        .drag-ghost { 
-            opacity: 0.15; 
-            transform: scale(0.95);
-            filter: blur(2px);
-        }
-
-        .dragging-active .cluster-card:not(.drag-ghost):not(.drag-over-target) {
-            opacity: 0.6;
-            transform: scale(0.98);
-        }
-
+        .drag-ghost { opacity: 0.15; transform: scale(0.95); filter: blur(2px); }
+        .dragging-active .cluster-card:not(.drag-ghost):not(.drag-over-target) { opacity: 0.6; transform: scale(0.98); }
         .drag-over-target {
             box-shadow: 0 0 0 2px #6366f1, 0 20px 40px rgba(99, 102, 241, 0.3);
             transform: translateY(-8px) scale(1.03) rotate(1deg) !important;
@@ -72,9 +63,7 @@
         .quick-emoji:hover { transform: scale(1.2); }
         .card-drag-over { border-color: #6366f1 !important; background-color: rgba(99, 102, 241, 0.1) !important; transform: translateY(-2px); }
 
-        .tooltip-animate {
-            animation: tooltip-in 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-        }
+        .tooltip-animate { animation: tooltip-in 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
         @keyframes tooltip-in {
             from { opacity: 0; transform: translate(-50%, 10px) scale(0.9); }
             to { opacity: 1; transform: translate(-50%, 0) scale(1); }
@@ -104,9 +93,7 @@
         const platformAppId = isCanvasEnv ? (typeof __app_id !== 'undefined' ? __app_id : 'thesis-memory-web') : 'production';
 
         const firebase = window.firebase;
-        if (!firebase.apps.length) {
-            firebase.initializeApp(firebaseConfig);
-        }
+        if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
         const auth = firebase.auth();
         const db = firebase.firestore();
 
@@ -151,6 +138,7 @@
             const [hoveredSymbol, setHoveredSymbol] = useState(null);
 
             const [showAuthModal, setShowAuthModal] = useState(false);
+            const [showAboutModal, setShowAboutModal] = useState(false);
             const [showImportConfirm, setShowImportConfirm] = useState(null);
             const [showResetConfirm, setShowResetConfirm] = useState(false);
             const [resetConfirmInput, setResetConfirmInput] = useState("");
@@ -182,9 +170,7 @@
             };
 
             const colorOptions = ["emerald", "amber", "blue", "purple"];
-
             const quickEmojis = ["🟢", "📗", "🌱", "🧪", "🟡", "💡", "⚠️", "🧩", "🔵", "🔗", "🌐", "⚙️", "🟣", "🌸", "❤️", "🩸"];
-
             const symbolMeanings = {
                 "🟢": "Theory: core claim", "📗": "Theory: conceptual grounding", "🌱": "Theory: emergence", "🧪": "Theory: conceptual example",
                 "🟡": "Fix: clarification required", "💡": "Fix: provisional insight", "⚠️": "Fix: theoretical limitation", "🧩": "Fix: puzzle - research!",
@@ -305,7 +291,6 @@
             };
 
             const handleImportClick = () => { fileInputRef.current?.click(); };
-
             const handleFileChange = (e) => {
                 const file = e.target.files[0];
                 if (!file) return;
@@ -313,14 +298,9 @@
                 reader.onload = (event) => {
                     try {
                         const json = JSON.parse(event.target.result);
-                        if (json.payload && json.payload.nodesData) {
-                            setShowImportConfirm(json.payload);
-                        } else {
-                            setErrorMessage("Invalid backup file format.");
-                        }
-                    } catch (err) {
-                        setErrorMessage("Error reading backup file.");
-                    }
+                        if (json.payload && json.payload.nodesData) { setShowImportConfirm(json.payload); } 
+                        else { setErrorMessage("Invalid backup file format."); }
+                    } catch (err) { setErrorMessage("Error reading backup file."); }
                 };
                 reader.readAsText(file);
                 e.target.value = '';
@@ -329,183 +309,112 @@
             const applyImport = () => {
                 if (!showImportConfirm) return;
                 const { nodesData, sectionTitles, connections, sectionOrder, sectionColors, titleFontSize } = showImportConfirm;
-                setNodesData(nodesData);
-                setSectionTitles(sectionTitles);
-                setConnections(connections);
-                setSectionOrder(sectionOrder);
-                if (sectionColors) setSectionColors(sectionColors);
-                setTitleFontSize(titleFontSize);
+                setNodesData(nodesData); setSectionTitles(sectionTitles); setConnections(connections); setSectionOrder(sectionOrder);
+                if (sectionColors) setSectionColors(sectionColors); setTitleFontSize(titleFontSize);
                 saveData({ nodesData, sectionTitles, connections, sectionOrder, sectionColors, titleFontSize });
-                setShowImportConfirm(null);
-                setSelectedNode(null);
+                setShowImportConfirm(null); setSelectedNode(null);
             };
 
             const resetWeb = () => {
                 if (resetConfirmInput !== 'Y') return;
                 const blankData = {
-                    nodesData: {},
-                    connections: [],
+                    nodesData: {}, connections: [],
                     sectionTitles: ["Cluster 1", "Cluster 2", "Cluster 3", "Cluster 4", "Cluster 5", "Cluster 6", "Cluster 7", "Cluster 8"],
                     sectionOrder: [0, 1, 2, 3, 4, 5, 6, 7],
                     sectionColors: ["blue", "emerald", "amber", "purple", "blue", "emerald", "amber", "purple"],
                     titleFontSize: 10
                 };
-                setNodesData(blankData.nodesData);
-                setConnections(blankData.connections);
-                setSectionTitles(blankData.sectionTitles);
-                setSectionOrder(blankData.sectionOrder);
-                setSectionColors(blankData.sectionColors);
-                setTitleFontSize(blankData.titleFontSize);
-                saveData(blankData);
-                setShowResetConfirm(false);
-                setResetConfirmInput("");
-                setSelectedNode(null);
+                setNodesData(blankData.nodesData); setConnections(blankData.connections); setSectionTitles(blankData.sectionTitles);
+                setSectionOrder(blankData.sectionOrder); setSectionColors(blankData.sectionColors); setTitleFontSize(blankData.titleFontSize);
+                saveData(blankData); setShowResetConfirm(false); setResetConfirmInput(""); setSelectedNode(null);
             };
 
             const handleEmailAuth = async (e) => {
-                e.preventDefault();
-                setErrorMessage(null);
-                setAuthLoading(true);
+                e.preventDefault(); setErrorMessage(null); setAuthLoading(true);
                 try {
-                    if (isRegistering) {
-                        await auth.createUserWithEmailAndPassword(email, password);
-                    } else {
-                        await auth.signInWithEmailAndPassword(email, password);
-                    }
+                    if (isRegistering) { await auth.createUserWithEmailAndPassword(email, password); } 
+                    else { await auth.signInWithEmailAndPassword(email, password); }
                     setShowAuthModal(false);
-                } catch (err) {
-                    setErrorMessage(err.message);
-                } finally {
-                    setAuthLoading(false);
-                }
+                } catch (err) { setErrorMessage(err.message); } finally { setAuthLoading(false); }
             };
 
-            const handleLogout = () => {
-                auth.signOut();
-                setSelectedNode(null);
-                setErrorMessage(null);
-            };
+            const handleLogout = () => { auth.signOut(); setSelectedNode(null); setErrorMessage(null); };
 
             const handleDragStart = (e, index) => {
-                setDraggedIndex(index);
-                e.dataTransfer.effectAllowed = 'move';
-                const img = new Image();
-                img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+                setDraggedIndex(index); e.dataTransfer.effectAllowed = 'move';
+                const img = new Image(); img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
                 e.dataTransfer.setDragImage(img, 0, 0);
             };
 
-            const handleDragOver = (e, index) => {
-                e.preventDefault();
-                if (draggedIndex !== index) setDragOverIndex(index);
-            };
+            const handleDragOver = (e, index) => { e.preventDefault(); if (draggedIndex !== index) setDragOverIndex(index); };
 
             const handleDrop = (e, targetIndex) => {
-                e.preventDefault();
-                setDragOverIndex(null);
-                if (draggedIndex === null || draggedIndex === targetIndex) {
-                    setDraggedIndex(null);
-                    return;
-                }
+                e.preventDefault(); setDragOverIndex(null);
+                if (draggedIndex === null || draggedIndex === targetIndex) { setDraggedIndex(null); return; }
                 const newOrder = [...sectionOrder];
                 const item = newOrder.splice(draggedIndex, 1)[0];
                 newOrder.splice(targetIndex, 0, item);
-                setSectionOrder(newOrder);
-                setDraggedIndex(null);
-                saveData({ sectionOrder: newOrder });
+                setSectionOrder(newOrder); setDraggedIndex(null); saveData({ sectionOrder: newOrder });
             };
 
-            const handleCardDragStart = (e, index) => {
-                setDraggedCardIndex(index);
-                e.dataTransfer.effectAllowed = 'move';
-            };
-
-            const handleCardDragOver = (e, index) => {
-                e.preventDefault();
-                setDragOverCardIndex(index);
-            };
-
+            const handleCardDragStart = (e, index) => { setDraggedCardIndex(index); e.dataTransfer.effectAllowed = 'move'; };
+            const handleCardDragOver = (e, index) => { e.preventDefault(); setDragOverCardIndex(index); };
             const handleCardDrop = (e, targetIndex, sortedConnections, nodeKey) => {
-                e.preventDefault();
-                const sourceIndex = draggedCardIndex;
-                setDraggedCardIndex(null);
-                setDragOverCardIndex(null);
+                e.preventDefault(); const sourceIndex = draggedCardIndex; setDraggedCardIndex(null); setDragOverCardIndex(null);
                 if (sourceIndex === null || sourceIndex === targetIndex) return;
-                const newSorted = [...sortedConnections];
-                const [moved] = newSorted.splice(sourceIndex, 1);
-                newSorted.splice(targetIndex, 0, moved);
+                const newSorted = [...sortedConnections]; const [moved] = newSorted.splice(sourceIndex, 1); newSorted.splice(targetIndex, 0, moved);
                 const updatedNodes = { ...nodesData, [nodeKey]: { ...(nodesData[nodeKey] || {}), connectionOrder: newSorted } };
-                setNodesData(updatedNodes);
-                saveData({ nodesData: updatedNodes });
+                setNodesData(updatedNodes); saveData({ nodesData: updatedNodes });
             };
 
             const getNodeKey = (sIdx, nIdx) => `${sIdx}-${nIdx}`;
             const getGlobalIndex = (sIdx, nIdx) => (sIdx * 8) + nIdx + 1;
 
             const handleNodeClick = (sIdx, nIdx) => {
-                const key = getNodeKey(sIdx, nIdx);
-                setActiveColorPicker(null);
+                const key = getNodeKey(sIdx, nIdx); setActiveColorPicker(null);
                 if (linkingNode) {
                     if (linkingNode !== key) {
                         const newConn = [linkingNode, key].sort().join(':');
                         if (!connections.includes(newConn)) {
-                            const updatedConns = [...connections, newConn];
-                            setConnections(updatedConns);
-                            saveData({ connections: updatedConns });
+                            const updatedConns = [...connections, newConn]; setConnections(updatedConns); saveData({ connections: updatedConns });
                         }
                     }
                     setLinkingNode(null);
-                } else {
-                    setSelectedNode({ sIdx, nIdx });
-                }
+                } else { setSelectedNode({ sIdx, nIdx }); }
             };
 
             const removeConnection = (connStr) => {
-                const updated = connections.filter(c => c !== connStr);
-                setConnections(updated);
+                const updated = connections.filter(c => c !== connStr); setConnections(updated);
                 if (selectedNode) {
                     const nodeKey = getNodeKey(selectedNode.sIdx, selectedNode.nIdx);
                     const oldOrder = nodesData[nodeKey]?.connectionOrder || [];
                     const newOrder = oldOrder.filter(c => c !== connStr);
                     const updatedNodes = { ...nodesData, [nodeKey]: { ...(nodesData[nodeKey] || {}), connectionOrder: newOrder } };
-                    setNodesData(updatedNodes);
-                    saveData({ connections: updated, nodesData: updatedNodes });
-                } else {
-                    saveData({ connections: updated });
-                }
+                    setNodesData(updatedNodes); saveData({ connections: updated, nodesData: updatedNodes });
+                } else { saveData({ connections: updated }); }
             };
 
             const updateNodeData = (field, value) => {
                 if (!selectedNode) return;
                 const key = getNodeKey(selectedNode.sIdx, selectedNode.nIdx);
                 const updatedNodes = { ...nodesData, [key]: { ...(nodesData[key] || {}), [field]: value } };
-                setNodesData(updatedNodes);
-                saveData({ nodesData: updatedNodes });
+                setNodesData(updatedNodes); saveData({ nodesData: updatedNodes });
             };
 
             const updateSectionTitle = (index, value) => {
-                const newTitles = [...sectionTitles];
-                newTitles[index] = value;
-                setSectionTitles(newTitles);
-                saveData({ sectionTitles: newTitles });
+                const newTitles = [...sectionTitles]; newTitles[index] = value;
+                setSectionTitles(newTitles); saveData({ sectionTitles: newTitles });
             };
 
             const changeSectionColor = (index, color) => {
-                const newColors = [...sectionColors];
-                newColors[index] = color;
-                setSectionColors(newColors);
-                saveData({ sectionColors: newColors });
-                setActiveColorPicker(null);
+                const newColors = [...sectionColors]; newColors[index] = color;
+                setSectionColors(newColors); saveData({ sectionColors: newColors }); setActiveColorPicker(null);
             };
 
-            const toggleColorPicker = (e, index) => {
-                e.stopPropagation();
-                setActiveColorPicker(activeColorPicker === index ? null : index);
-            };
-
+            const toggleColorPicker = (e, index) => { e.stopPropagation(); setActiveColorPicker(activeColorPicker === index ? null : index); };
             const adjustFontSize = (dir) => {
                 const newSize = Math.max(6, Math.min(32, titleFontSize + dir));
-                setTitleFontSize(newSize);
-                saveData({ titleFontSize: newSize });
+                setTitleFontSize(newSize); saveData({ titleFontSize: newSize });
             }
 
             if (loading && !errorMessage) return <div className="h-screen flex items-center justify-center font-mono text-xs text-indigo-500 bg-[#020204]">Initializing Web...</div>;
@@ -541,6 +450,18 @@
                         </div>
 
                         <div className="flex items-center gap-6">
+                            {/* ABOUT BUTTON */}
+                            <button 
+                                onClick={() => setShowAboutModal(true)}
+                                className="flex flex-col items-center gap-0.5 group"
+                            >
+                                <span className="text-[8px] text-slate-600 uppercase font-bold tracking-widest group-hover:text-indigo-400 transition-colors">Documentation</span>
+                                <div className="flex items-center gap-1.5 bg-white/5 hover:bg-white/10 border border-white/10 px-3 py-1 rounded-lg transition-all">
+                                    <Icon name="Info" size={12} className="text-indigo-400" />
+                                    <span className="text-[10px] font-bold text-slate-300">ABOUT</span>
+                                </div>
+                            </button>
+
                             <div className="flex flex-col items-end pr-4 border-r border-white/10">
                                 <span className="text-[8px] text-slate-600 uppercase font-bold tracking-widest">GMT/UTC</span>
                                 <span className="text-[11px] text-cyan-400 font-mono font-bold tracking-tighter">{gmtString}</span>
@@ -593,21 +514,15 @@
                                                         <div className={`font-bold uppercase tracking-widest transition-colors ${theme.color}`} style={{ fontSize: `${titleFontSize}px` }}>
                                                             {sectionTitles[sectionId]}
                                                         </div>
-                                                        
                                                         <div className="relative flex items-center">
-                                                            <button 
-                                                                onClick={(e) => toggleColorPicker(e, sectionId)}
-                                                                className={`p-1 rounded-md hover:bg-white/10 transition-colors ${isPickerOpen ? 'text-indigo-400 bg-white/5' : 'text-slate-600 opacity-40 group-hover/section:opacity-100'}`}
-                                                            >
+                                                            <button onClick={(e) => toggleColorPicker(e, sectionId)}
+                                                                className={`p-1 rounded-md hover:bg-white/10 transition-colors ${isPickerOpen ? 'text-indigo-400 bg-white/5' : 'text-slate-600 opacity-40 group-hover/section:opacity-100'}`}>
                                                                 <Icon name="Palette" size={12} />
                                                             </button>
-
                                                             {isPickerOpen && (
                                                                 <div className="absolute left-0 top-full mt-2 flex items-center gap-1.5 bg-black/80 backdrop-blur-xl border border-white/10 p-1.5 rounded-full shadow-2xl z-[60] animate-in fade-in zoom-in-95 duration-200">
                                                                     {colorOptions.map(c => (
-                                                                        <button 
-                                                                            key={c} 
-                                                                            onClick={() => changeSectionColor(sectionId, c)}
+                                                                        <button key={c} onClick={() => changeSectionColor(sectionId, c)}
                                                                             className={`w-3.5 h-3.5 rounded-full transition-all hover:scale-125 ${c === "emerald" ? 'bg-emerald-500' : c === "amber" ? 'bg-amber-500' : c === "blue" ? 'bg-blue-500' : 'bg-purple-500'} ${sectionColors[sectionId] === c ? 'ring-2 ring-white scale-110 shadow-[0_0_8px_rgba(255,255,255,0.4)]' : 'opacity-40 hover:opacity-100'}`}
                                                                         />
                                                                     ))}
@@ -628,27 +543,16 @@
                                                         const emoji = nodesData[key]?.emoji;
                                                         const isLinked = connections.some(c => c.includes(key));
                                                         const isLinkingSource = linkingNode === key;
-
                                                         return (
-                                                            <button key={nIdx} id={`node-${sectionId}-${nIdx}`} 
-                                                                onClick={(e) => { e.stopPropagation(); handleNodeClick(sectionId, nIdx); }} 
-                                                                onMouseEnter={() => setHoveredNodeKey(key)}
-                                                                onMouseLeave={() => setHoveredNodeKey(null)}
-                                                                className={`w-12 h-12 rounded-2xl flex flex-col items-center justify-center transition-all duration-300 relative ${selected ? 'bg-white/10 ring-2 ring-indigo-500 scale-110 z-10 shadow-[0_0_20px_rgba(79,70,229,0.4)]' : 'bg-[#0a0a0f] border border-white/5 hover:border-white/20'} ${isLinkingSource ? 'animate-pulse ring-2 ring-emerald-500' : ''}`}
-                                                            >
-                                                                <span className={`font-mono mb-1 ${selected ? 'text-indigo-300' : 'text-slate-400'}`} style={{ fontSize: `${Math.max(titleFontSize, 9)}px` }}>
-                                                                    {getGlobalIndex(sectionId, nIdx)}
-                                                                </span>
-                                                                <div className="h-4 flex items-center justify-center">
-                                                                    {emoji ? <span className="text-base leading-none">{emoji}</span> : <div className={`w-2 h-2 rounded-full transition-all duration-500 ${hasConcept ? theme.dot : 'bg-slate-600'}`} />}
-                                                                </div>
+                                                            <button key={nIdx} id={`node-${sectionId}-${nIdx}`} onClick={(e) => { e.stopPropagation(); handleNodeClick(sectionId, nIdx); }} 
+                                                                onMouseEnter={() => setHoveredNodeKey(key)} onMouseLeave={() => setHoveredNodeKey(null)}
+                                                                className={`w-12 h-12 rounded-2xl flex flex-col items-center justify-center transition-all duration-300 relative ${selected ? 'bg-white/10 ring-2 ring-indigo-500 scale-110 z-10 shadow-[0_0_20px_rgba(79,70,229,0.4)]' : 'bg-[#0a0a0f] border border-white/5 hover:border-white/20'} ${isLinkingSource ? 'animate-pulse ring-2 ring-emerald-500' : ''}`}>
+                                                                <span className={`font-mono mb-1 ${selected ? 'text-indigo-300' : 'text-slate-400'}`} style={{ fontSize: `${Math.max(titleFontSize, 9)}px` }}>{getGlobalIndex(sectionId, nIdx)}</span>
+                                                                <div className="h-4 flex items-center justify-center">{emoji ? <span className="text-base leading-none">{emoji}</span> : <div className={`w-2 h-2 rounded-full transition-all duration-500 ${hasConcept ? theme.dot : 'bg-slate-600'}`} />}</div>
                                                                 {isLinked && <div className="absolute inset-2 rounded-xl border border-indigo-500/20 pointer-events-none" />}
                                                                 {hoveredNodeKey === key && conceptText && (
                                                                     <div className="absolute bottom-full mb-3 left-1/2 -translate-x-1/2 px-3 py-2 bg-[#050508]/95 border border-indigo-500/40 rounded-xl shadow-2xl z-[100] pointer-events-none backdrop-blur-md tooltip-animate text-center" style={{ minWidth: `${140 + (titleFontSize - 10) * 5}px`, maxWidth: `${220 + (titleFontSize - 10) * 10}px` }}>
-                                                                        <div className="flex items-center justify-center gap-1.5 mb-1 opacity-50">
-                                                                            <Icon name="Brain" size={Math.max(8, titleFontSize - 2)} className="text-indigo-400" />
-                                                                            <span className="text-indigo-300 uppercase font-black tracking-widest" style={{ fontSize: `${Math.max(6, titleFontSize - 4)}px` }}>Cognitive Core</span>
-                                                                        </div>
+                                                                        <div className="flex items-center justify-center gap-1.5 mb-1 opacity-50"><Icon name="Brain" size={Math.max(8, titleFontSize - 2)} className="text-indigo-400" /><span className="text-indigo-300 uppercase font-black tracking-widest" style={{ fontSize: `${Math.max(6, titleFontSize - 4)}px` }}>Cognitive Core</span></div>
                                                                         <div className="text-slate-100 leading-tight font-medium italic break-words" style={{ fontSize: `${titleFontSize + 1}px` }}>"{conceptText}"</div>
                                                                         <div className="absolute top-full left-1/2 -translate-x-1/2 border-[6px] border-transparent border-t-[#050508]/95" />
                                                                     </div>
@@ -705,24 +609,19 @@
                                                             const myConns = connections.filter(c => c.includes(nodeKey));
                                                             const customOrder = nodesData[nodeKey]?.connectionOrder || [];
                                                             const sortedConns = [...myConns].sort((a, b) => {
-                                                                const idxA = customOrder.indexOf(a);
-                                                                const idxB = customOrder.indexOf(b);
+                                                                const idxA = customOrder.indexOf(a); const idxB = customOrder.indexOf(b);
                                                                 if (idxA !== -1 && idxB !== -1) return idxA - idxB;
                                                                 return idxA !== -1 ? -1 : 1;
                                                             });
                                                             return sortedConns.map((conn, idx) => {
                                                                 const otherKey = conn.split(':').find(k => k !== nodeKey);
                                                                 const [oSIdx, oNIdx] = otherKey.split('-').map(Number);
-                                                                const otherData = nodesData[otherKey];
-                                                                const otherTheme = getSectionTheme(sectionColors[oSIdx]);
-                                                                
+                                                                const otherData = nodesData[otherKey]; const otherTheme = getSectionTheme(sectionColors[oSIdx]);
                                                                 return (
                                                                     <div key={conn} draggable="true" onDragStart={(e) => handleCardDragStart(e, idx)} onDragOver={(e) => handleCardDragOver(e, idx)} onDragLeave={() => setDragOverCardIndex(null)} onDrop={(e) => handleCardDrop(e, idx, sortedConns, nodeKey)} className={`flex items-center justify-between p-3 ${otherTheme.bg} rounded-xl border ${otherTheme.border} transition-all group/link overflow-hidden shadow-sm relative ${dragOverCardIndex === idx ? 'card-drag-over' : ''} ${draggedCardIndex === idx ? 'opacity-20' : ''}`}>
                                                                         <div className="flex flex-col gap-1 overflow-hidden flex-1">
                                                                             <div className="flex items-center gap-2">
-                                                                                <div className="shrink-0 flex items-center justify-center w-3">
-                                                                                    {otherData?.emoji ? <span className="text-[10px]">{otherData.emoji}</span> : <div className={`w-1.5 h-1.5 rounded-full ${otherTheme.dot}`} />}
-                                                                                </div>
+                                                                                <div className="shrink-0 flex items-center justify-center w-3">{otherData?.emoji ? <span className="text-[10px]">{otherData.emoji}</span> : <div className={`w-1.5 h-1.5 rounded-full ${otherTheme.dot}`} />}</div>
                                                                                 <span className={`text-[11px] uppercase font-bold tracking-tight truncate ${otherTheme.color}`}>{sectionTitles[oSIdx]} • #{getGlobalIndex(oSIdx, oNIdx)}</span>
                                                                             </div>
                                                                             <div className="text-slate-200 text-sm font-medium italic truncate leading-tight">{otherData?.concept || "Unmapped Node"}</div>
@@ -732,9 +631,7 @@
                                                                 );
                                                             });
                                                         })()}
-                                                        {connections.filter(c => c.includes(getNodeKey(selectedNode.sIdx, selectedNode.nIdx))).length === 0 && (
-                                                            <div className="text-center py-4 text-slate-700 text-[9px] uppercase tracking-wider italic border border-dashed border-white/5 rounded-xl">No active connections</div>
-                                                        )}
+                                                        {connections.filter(c => c.includes(getNodeKey(selectedNode.sIdx, selectedNode.nIdx))).length === 0 && (<div className="text-center py-4 text-slate-700 text-[9px] uppercase tracking-wider italic border border-dashed border-white/5 rounded-xl">No active connections</div>)}
                                                     </div>
                                                 </div>
                                                 <div className="flex flex-col gap-2"><label className="text-[10px] text-slate-500 uppercase font-bold tracking-widest ml-1">Citation</label><input type="text" value={nodesData[getNodeKey(selectedNode.sIdx, selectedNode.nIdx)]?.citation || ""} onChange={(e) => updateNodeData('citation', e.target.value)} className="bg-white/5 border border-white/10 rounded-xl p-4 focus:ring-1 ring-indigo-500 outline-none text-white transition-all" placeholder="e.g. Smith (2024)" /></div>
@@ -751,9 +648,7 @@
 
                                 <div className="mt-auto pt-8 border-t border-white/5 flex flex-col gap-6">
                                     <div className="flex flex-col gap-4">
-                                        <h3 className="text-[10px] text-slate-400 uppercase font-black tracking-widest flex items-center gap-2 px-1">
-                                            <Icon name="HardDrive" size={12} className="text-indigo-400" /> Data Management
-                                        </h3>
+                                        <h3 className="text-[10px] text-slate-400 uppercase font-black tracking-widest flex items-center gap-2 px-1"><Icon name="HardDrive" size={12} className="text-indigo-400" /> Data Management</h3>
                                         <div className="grid grid-cols-2 gap-3 pb-2">
                                             <button onClick={exportData} className="flex flex-col items-center justify-center gap-2 p-3 bg-white/5 hover:bg-white/10 border border-white/5 rounded-2xl transition-all group shadow-sm">
                                                 <Icon name="Download" size={16} className="text-slate-500 group-hover:text-emerald-400" />
@@ -765,11 +660,8 @@
                                             </button>
                                             <input type="file" ref={fileInputRef} onChange={handleFileChange} accept=".json" className="hidden" />
                                         </div>
-                                        {/* DISCREET RESET BUTTON */}
-                                        <button 
-                                            onClick={() => { setShowResetConfirm(true); setResetConfirmInput(""); }}
-                                            className="mt-2 text-[10px] text-slate-600 hover:text-red-400 font-bold uppercase tracking-widest transition-colors flex items-center justify-center gap-2 py-2"
-                                        >
+                                        <button onClick={() => { setShowResetConfirm(true); setResetConfirmInput(""); }}
+                                            className="mt-2 text-[10px] text-slate-600 hover:text-red-400 font-bold uppercase tracking-widest transition-colors flex items-center justify-center gap-2 py-2">
                                             <Icon name="RefreshCcw" size={10} /> Initialize New Web
                                         </button>
                                     </div>
@@ -782,14 +674,61 @@
                         </aside>
                     </main>
 
+                    {/* ABOUT MODAL */}
+                    {showAboutModal && (
+                        <div className="fixed inset-0 z-[120] flex items-center justify-center modal-overlay p-4 animate-in fade-in duration-300">
+                            <div className="w-full max-w-xl bg-[#0a0a0f] border border-white/10 rounded-[2.5rem] p-10 shadow-2xl relative overflow-hidden">
+                                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-emerald-500 opacity-50" />
+                                <button onClick={() => setShowAboutModal(false)} className="absolute top-6 right-6 text-slate-500 hover:text-white transition-colors">
+                                    <Icon name="X" size={20} />
+                                </button>
+                                <div className="space-y-8">
+                                    <div className="text-center space-y-2">
+                                        <div className="w-12 h-12 bg-indigo-600/20 rounded-2xl flex items-center justify-center mx-auto border border-indigo-500/30">
+                                            <Icon name="Network" size={24} className="text-indigo-400" />
+                                        </div>
+                                        <h3 className="text-2xl font-thin tracking-tight text-white mt-4">Thesis Memory Web v0.24</h3>
+                                        <p className="text-[10px] text-indigo-400 uppercase font-black tracking-widest">Cognitive Mapping Interface</p>
+                                    </div>
+                                    
+                                    <div className="space-y-6 text-sm text-slate-400 leading-relaxed max-h-[40vh] overflow-y-auto pr-2 custom-scrollbar">
+                                        <section className="space-y-2">
+                                            <h4 className="text-white font-bold uppercase text-[11px] tracking-widest border-b border-white/5 pb-1">Project Objective</h4>
+                                            <p>A specialised workstation designed for qualitative thesis research, focusing on spatial consistency and semantic categorisation. Built within a 24-hour development cycle on 11th Jan 2026 with a constraint of 1000 lines of code.</p>
+                                        </section>
+                                        
+                                        <section className="space-y-2">
+                                            <h4 className="text-white font-bold uppercase text-[11px] tracking-widest border-b border-white/5 pb-1">Key Interactions</h4>
+                                            <ul className="list-disc pl-4 space-y-1">
+                                                <li><strong className="text-slate-200">Semantic Taxonomy:</strong> Categorise claims using theoretical, textual, and data-driven symbols.</li>
+                                                <li><strong className="text-slate-200">Logical Threads:</strong> Create bidirectional links between memory nodes across clusters.</li>
+                                                <li><strong className="text-slate-200">Cloud Sync:</strong> Persistent state management via Google Firestore with local backup options.</li>
+                                                <li><strong className="text-slate-200">Spatial Grid:</strong> Octant 2x4 clusters providing a stable mental map of complex concepts.</li>
+                                            </ul>
+                                        </section>
+
+                                        <section className="space-y-2">
+                                            <h4 className="text-white font-bold uppercase text-[11px] tracking-widest border-b border-white/5 pb-1">Notes</h4>
+                                            <p>This tool is designed to bridge the gap between fragmented notes and a linear narrative. Use the JSON export to maintain physical copies of your research state.</p>
+                                        </section>
+                                    </div>
+
+                                    <button onClick={() => setShowAboutModal(false)} className="w-full py-4 bg-indigo-600 hover:bg-indigo-500 rounded-xl font-bold text-sm text-white transition-all shadow-lg uppercase tracking-widest mt-4">
+                                        Return to Research
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
                     {/* AUTH MODAL */}
                     {showAuthModal && (
                         <div className="fixed inset-0 z-[100] flex items-center justify-center modal-overlay p-4 animate-in fade-in duration-300">
                             <div className="w-full max-w-sm bg-[#0a0a0f] border border-white/10 rounded-[2.5rem] p-10 shadow-2xl space-y-8 relative">
                                 <button onClick={() => { setShowAuthModal(false); setErrorMessage(null); }} className="absolute top-6 right-6 text-slate-500 hover:text-white"><Icon name="X" size={20} /></button>
                                 <div className="text-center space-y-2">
-                                    <h3 className="text-2xl font-thin tracking-tight text-white">{isRegistering ? 'Create Thesis Account' : 'Cloud Login'}</h3>
-                                    <p className="text-xs text-slate-500 uppercase tracking-widest text-center">Sync your research anywhere.</p>
+                                    <h3 className="text-2xl font-thin tracking-tight text-white">{isRegistering ? 'Create Account' : 'Cloud Login'}</h3>
+                                    <p className="text-xs text-slate-500 uppercase tracking-widest text-center">Sync research anywhere.</p>
                                 </div>
                                 {errorMessage && <div className="bg-red-500/10 border border-red-500/30 text-red-400 text-[10px] p-3 rounded-xl leading-relaxed">{errorMessage}</div>}
                                 <form onSubmit={handleEmailAuth} className="space-y-4">
@@ -797,7 +736,7 @@
                                     <div className="space-y-1"><label className="text-[9px] text-slate-500 uppercase tracking-widest font-bold ml-1">Password</label><input required type="password" minLength="6" value={password} onChange={e => setPassword(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-1 focus:ring-indigo-500/50" placeholder="••••••••" /></div>
                                     <button type="submit" disabled={authLoading} className="w-full py-4 bg-indigo-600 hover:bg-indigo-500 rounded-xl font-bold text-sm transition-all shadow-lg flex items-center justify-center gap-3">{authLoading ? <Icon name="Loader2" size={16} className="animate-spin" /> : (isRegistering ? 'Register & Sync' : 'Login & Sync')}</button>
                                 </form>
-                                <div className="text-center"><button type="button" onClick={() => { setIsRegistering(!isRegistering); setErrorMessage(null); }} className="text-[10px] text-slate-500 hover:text-indigo-400 uppercase font-bold tracking-widest transition-colors underline underline-offset-4">{isRegistering ? 'Back to Login' : 'Need a permanent account? Register'}</button></div>
+                                <div className="text-center"><button type="button" onClick={() => { setIsRegistering(!isRegistering); setErrorMessage(null); }} className="text-[10px] text-slate-500 hover:text-indigo-400 uppercase font-bold tracking-widest transition-colors underline underline-offset-4">{isRegistering ? 'Back to Login' : 'Need an account? Register'}</button></div>
                             </div>
                         </div>
                     )}
@@ -806,13 +745,11 @@
                     {showImportConfirm && (
                         <div className="fixed inset-0 z-[110] flex items-center justify-center modal-overlay p-4 animate-in zoom-in duration-200">
                             <div className="w-full max-w-md bg-[#0a0a0f] border border-white/10 rounded-[2.5rem] p-8 lg:p-12 shadow-2xl space-y-6 text-center">
-                                <div className="w-16 h-16 bg-amber-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-amber-500/20">
-                                    <Icon name="TriangleAlert" size={32} className="text-amber-500" />
-                                </div>
+                                <div className="w-16 h-16 bg-amber-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-amber-500/20"><Icon name="TriangleAlert" size={32} className="text-amber-500" /></div>
                                 <h3 className="text-2xl font-thin tracking-tight text-white">Overwrite Thesis Data?</h3>
                                 <p className="text-sm text-slate-400 leading-relaxed">You are about to import a backup file. This will replace all nodes and connections. <strong className="text-white">This cannot be undone.</strong></p>
                                 <div className="flex flex-col gap-3 pt-4">
-                                    <button onClick={applyImport} className="w-full py-4 bg-indigo-600 hover:bg-indigo-500 rounded-xl font-bold text-sm transition-all shadow-lg">PROCEED WITH IMPORT</button>
+                                    <button onClick={applyImport} className="w-full py-4 bg-indigo-600 hover:bg-indigo-500 rounded-xl font-bold text-sm transition-all shadow-lg uppercase tracking-widest">Proceed with Import</button>
                                     <button onClick={() => setShowImportConfirm(null)} className="w-full py-4 bg-white/5 hover:bg-white/10 rounded-xl font-bold text-sm text-slate-400 transition-all uppercase tracking-widest">Cancel</button>
                                 </div>
                             </div>
@@ -823,37 +760,13 @@
                     {showResetConfirm && (
                         <div className="fixed inset-0 z-[110] flex items-center justify-center modal-overlay p-4 animate-in zoom-in duration-200">
                             <div className="w-full max-w-md bg-[#0a0a0f] border border-white/10 rounded-[2.5rem] p-8 lg:p-12 shadow-2xl space-y-6 text-center">
-                                <div className="w-16 h-16 bg-red-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-red-500/20">
-                                    <Icon name="RefreshCcw" size={32} className="text-red-500" />
-                                </div>
+                                <div className="w-16 h-16 bg-red-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-red-500/20"><Icon name="RefreshCcw" size={32} className="text-red-500" /></div>
                                 <h3 className="text-2xl font-thin tracking-tight text-white">Wipe Memory Web?</h3>
                                 <p className="text-sm text-slate-400 leading-relaxed">Are you sure you want to do this? This will <strong className="text-white uppercase">delete all current nodes and logical threads</strong> and reset the web to a blank state.</p>
-                                
-                                <div className="space-y-4 py-4">
-                                    <p className="text-[10px] text-slate-500 uppercase font-black tracking-widest">Extra Verification Required</p>
-                                    <div className="flex flex-col items-center gap-2">
-                                        <label className="text-[11px] text-slate-400">Type <span className="text-white font-bold">'Y'</span> to confirm</label>
-                                        <input 
-                                            type="text" 
-                                            maxLength="1"
-                                            value={resetConfirmInput}
-                                            onChange={(e) => setResetConfirmInput(e.target.value.toUpperCase())}
-                                            className="w-12 h-12 bg-white/5 border border-white/10 rounded-xl text-center text-xl font-bold text-white focus:outline-none focus:ring-2 focus:ring-red-500/50 transition-all"
-                                            placeholder="?"
-                                            autoFocus
-                                        />
-                                    </div>
-                                </div>
-
+                                <div className="space-y-4 py-4"><p className="text-[10px] text-slate-500 uppercase font-black tracking-widest">Extra Verification Required</p><div className="flex flex-col items-center gap-2"><label className="text-[11px] text-slate-400">Type <span className="text-white font-bold">'Y'</span> to confirm</label><input type="text" maxLength="1" value={resetConfirmInput} onChange={(e) => setResetConfirmInput(e.target.value.toUpperCase())} className="w-12 h-12 bg-white/5 border border-white/10 rounded-xl text-center text-xl font-bold text-white focus:outline-none focus:ring-2 focus:ring-red-500/50 transition-all" placeholder="?" autoFocus /></div></div>
                                 <div className="flex flex-col gap-3">
                                     <button onClick={() => setShowResetConfirm(false)} className="w-full py-4 bg-red-600 hover:bg-red-500 text-white rounded-xl font-bold text-sm transition-all shadow-lg uppercase tracking-widest">No, Keep My Data</button>
-                                    <button 
-                                        onClick={resetWeb} 
-                                        disabled={resetConfirmInput !== 'Y'}
-                                        className={`w-full py-4 rounded-xl font-bold text-sm transition-all uppercase tracking-widest ${resetConfirmInput === 'Y' ? 'bg-white/10 text-white hover:bg-white/20' : 'bg-white/5 text-slate-700 cursor-not-allowed'}`}
-                                    >
-                                        Yes, Reset Everything
-                                    </button>
+                                    <button onClick={resetWeb} disabled={resetConfirmInput !== 'Y'} className={`w-full py-4 rounded-xl font-bold text-sm transition-all uppercase tracking-widest ${resetConfirmInput === 'Y' ? 'bg-white/10 text-white hover:bg-white/20' : 'bg-white/5 text-slate-700 cursor-not-allowed'}`}>Yes, Reset Everything</button>
                                 </div>
                             </div>
                         </div>
