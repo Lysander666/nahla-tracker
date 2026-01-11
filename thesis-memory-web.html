@@ -50,7 +50,6 @@
             will-change: transform;
         }
 
-        /* Improved Drag Visuals */
         .drag-ghost { 
             opacity: 0.15; 
             transform: scale(0.95);
@@ -542,7 +541,8 @@
                     </header>
 
                     <main className="flex-1 flex overflow-hidden">
-                        <section className={`flex-1 relative node-grid-bg workspace-container ${draggedIndex !== null ? 'dragging-active' : ''}`} onClick={() => { setSelectedNode(null); setActiveColorPicker(null); }}>
+                        {/* Background click logic removed as requested */}
+                        <section className={`flex-1 relative node-grid-bg workspace-container ${draggedIndex !== null ? 'dragging-active' : ''}`}>
                             <div id="scaling-wrapper" style={{ transform: `scale(${scale})`, marginTop: `${topMargin}px` }} onClick={(e) => e.stopPropagation()}>
                                 <div id="grid-container" className="grid grid-cols-2 gap-8 p-10 bg-black/40 rounded-[4rem] border border-white/5 backdrop-blur-md shadow-2xl relative">
                                     {errorMessage && !showAuthModal && (
@@ -753,7 +753,7 @@
 
                     {showAuthModal && (
                         <div className="fixed inset-0 z-[100] flex items-center justify-center modal-overlay p-4 animate-in fade-in duration-300">
-                            <div className="w-full max-sm bg-[#0a0a0f] border border-white/10 rounded-[2.5rem] p-10 shadow-2xl space-y-8 relative">
+                            <div className="w-full max-w-sm bg-[#0a0a0f] border border-white/10 rounded-[2.5rem] p-10 shadow-2xl space-y-8 relative">
                                 <button onClick={() => { setShowAuthModal(false); setErrorMessage(null); }} className="absolute top-6 right-6 text-slate-500 hover:text-white"><Icon name="X" size={20} /></button>
                                 <div className="text-center space-y-2">
                                     <h3 className="text-2xl font-thin tracking-tight text-white">{isRegistering ? 'Create Thesis Account' : 'Cloud Login'}</h3>
