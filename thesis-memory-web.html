@@ -187,14 +187,14 @@
                 "💡": "Fix: provisional insight",
                 "⚠️": "Fix: theoretical limitation",
                 "🧩": "Fix: puzzle or more research needed",
-                "🔵": "Texts: scholarly ref.",
+                "🔵": "Texts: scholarly reference",
                 "🔗": "Texts: explicit linkage",
                 "🌐": "Texts: networked discourse",
                 "⚙️": "Texts: Methodological operation",
                 "🟣": "Data: key analytical data",
                 "🌸": "Data: culturally significant data",
                 "❤️": "Data: effective or identity data",
-                "🩸": "Data: high-stakes"
+                "🩸": "Data: high-stakes evidence"
             };
 
             useEffect(() => {
@@ -452,7 +452,7 @@
             if (loading && !errorMessage) return <div className="h-screen flex items-center justify-center font-mono text-xs text-indigo-500 bg-[#020204]">Initializing Web...</div>;
 
             const scaledHeight = 780 * scale + 80;
-            const viewportHeight = window.innerHeight - 64;
+            const viewportHeight = window.innerHeight - 64; 
             const topMargin = scaledHeight < viewportHeight ? (viewportHeight - scaledHeight) / 2 : 0;
 
             return (
@@ -463,7 +463,7 @@
                                 <Icon name="Network" size={22} className="text-white" />
                             </div>
                             <div>
-                                <h1 className="text-sm font-bold tracking-widest uppercase text-slate-200">Thesis Memory Web v0.23 🪐</h1>
+                                <h1 className="text-sm font-bold tracking-widest uppercase text-slate-200">Thesis Memory Web</h1>
                                 <div className="flex items-center gap-2 mt-0.5">
                                     <div className={`text-[10px] uppercase font-bold ${saveStatus === 'synced' ? 'text-emerald-500' : 'text-indigo-400'}`}>
                                         {saveStatus === 'saving' ? 'Syncing...' : 'Cloud Active'}
@@ -612,160 +612,170 @@
                             </div>
                         </section>
 
-                        <aside className="w-[320px] lg:w-[380px] xl:w-[450px] border-l border-white/5 bg-[#050508] p-6 lg:p-10 flex flex-col gap-8 lg:gap-10 overflow-y-auto shadow-2xl z-40 shrink-0 transition-all duration-300">
-                            {selectedNode ? (
-                                <div className="flex flex-col gap-8 animate-in slide-in-from-right duration-300">
-                                    <div>
-                                        <div className="text-[12px] text-indigo-400 uppercase font-bold tracking-widest mb-1">Node {getGlobalIndex(selectedNode.sIdx, selectedNode.nIdx)}</div>
-                                        <h2 className="text-2xl lg:text-3xl font-thin text-white tracking-tight leading-none">Memory Node Detail</h2>
-                                    </div>
-                                    
-                                    <div className="flex flex-col gap-6">
-                                        <div className="flex flex-col gap-2 p-4 bg-white/5 rounded-2xl border border-white/5 group hover:border-white/10 transition-colors">
-                                            <label className="text-[9px] text-slate-500 uppercase font-bold tracking-widest flex items-center gap-2">
-                                                <Icon name="Edit3" size={12} className="text-slate-400" /> Cluster Name
-                                            </label>
-                                            <input type="text" value={sectionTitles[selectedNode.sIdx]} 
-                                                onChange={(e) => updateSectionTitle(selectedNode.sIdx, e.target.value)}
-                                                className="bg-transparent text-white text-sm font-semibold focus:outline-none focus:text-indigo-400 transition-colors" />
+                        <aside className="w-[320px] lg:w-[380px] xl:w-[450px] border-l border-white/5 bg-[#050508] p-6 lg:p-10 flex flex-col shadow-2xl z-40 shrink-0 transition-all duration-300 overflow-y-auto">
+                            <div className="flex-1 flex flex-col gap-8 lg:gap-10">
+                                {selectedNode ? (
+                                    <div className="flex flex-col gap-8 animate-in slide-in-from-right duration-300">
+                                        <div>
+                                            <div className="text-[12px] text-indigo-400 uppercase font-bold tracking-widest mb-1">Node {getGlobalIndex(selectedNode.sIdx, selectedNode.nIdx)}</div>
+                                            <h2 className="text-2xl lg:text-3xl font-thin text-white tracking-tight leading-none">Memory Node Detail</h2>
                                         </div>
-
-                                        <div className="flex flex-col gap-3 p-4 bg-white/5 rounded-2xl border border-white/5 relative">
-                                            <label className="text-[9px] text-slate-500 uppercase font-bold tracking-widest flex items-center gap-2">
-                                                <Icon name="Zap" size={12} className="text-slate-400" /> Cognitive Symbol
-                                            </label>
-                                            <div className="flex flex-wrap gap-2 mb-2 relative">
-                                                {quickEmojis.map(e => (
-                                                    <button 
-                                                        key={e} 
-                                                        onClick={() => updateNodeData('emoji', e)} 
-                                                        onMouseEnter={() => setHoveredSymbol(e)}
-                                                        onMouseLeave={() => setHoveredSymbol(null)}
-                                                        className={`w-8 h-8 flex items-center justify-center rounded-lg bg-white/5 hover:bg-white/10 transition-all text-base quick-emoji relative ${nodesData[getNodeKey(selectedNode.sIdx, selectedNode.nIdx)]?.emoji === e ? 'ring-2 ring-indigo-500 bg-white/10' : ''}`}
-                                                    >
-                                                        {e}
-                                                        {hoveredSymbol === e && (
-                                                            <div className="fixed lg:absolute bottom-full mb-2 left-1/2 -translate-x-1/2 px-2 py-1.5 bg-[#0a0a0f] border border-white/10 rounded-lg shadow-2xl z-[150] pointer-events-none min-w-[120px] backdrop-blur-md tooltip-animate">
-                                                                <div className="text-white text-[9px] uppercase font-bold tracking-tighter whitespace-nowrap text-center">
-                                                                    {symbolMeanings[e]}
-                                                                </div>
-                                                                <div className="absolute top-full left-1/2 -translate-x-1/2 border-[4px] border-transparent border-t-[#0a0a0f]" />
-                                                            </div>
-                                                        )}
-                                                    </button>
-                                                ))}
-                                                <button onClick={() => updateNodeData('emoji', '')} className="text-[9px] text-slate-500 uppercase font-bold px-2 hover:text-red-400 transition-colors">Clear</button>
+                                        
+                                        <div className="flex flex-col gap-6">
+                                            <div className="flex flex-col gap-2 p-4 bg-white/5 rounded-2xl border border-white/5 group hover:border-white/10 transition-colors">
+                                                <label className="text-[9px] text-slate-500 uppercase font-bold tracking-widest flex items-center gap-2">
+                                                    <Icon name="Edit3" size={12} className="text-slate-400" /> Cluster Name
+                                                </label>
+                                                <input type="text" value={sectionTitles[selectedNode.sIdx]} 
+                                                    onChange={(e) => updateSectionTitle(selectedNode.sIdx, e.target.value)}
+                                                    className="bg-transparent text-white text-sm font-semibold focus:outline-none focus:text-indigo-400 transition-colors" />
                                             </div>
-                                            <input type="text" maxLength="2" 
-                                                value={nodesData[getNodeKey(selectedNode.sIdx, selectedNode.nIdx)]?.emoji || ""} 
-                                                onChange={(e) => updateNodeData('emoji', e.target.value)}
-                                                className="bg-black/20 border border-white/5 rounded-lg p-2 text-center text-xl focus:ring-1 ring-indigo-500 outline-none text-white w-full" placeholder="Or paste emoji here..." />
-                                        </div>
 
-                                        <div className="flex flex-col gap-2">
-                                            <label className="text-[10px] text-slate-500 uppercase font-bold tracking-widest ml-1">Cognitive Concept</label>
-                                            <input type="text" value={nodesData[getNodeKey(selectedNode.sIdx, selectedNode.nIdx)]?.concept || ""} 
-                                                onChange={(e) => updateNodeData('concept', e.target.value)}
-                                                className="bg-white/5 border border-white/10 rounded-xl p-4 focus:ring-1 ring-indigo-500 outline-none text-white transition-all font-medium" placeholder="Enter core idea..." />
-                                        </div>
+                                            <div className="flex flex-col gap-3 p-4 bg-white/5 rounded-2xl border border-white/5 relative">
+                                                <label className="text-[9px] text-slate-500 uppercase font-bold tracking-widest flex items-center gap-2">
+                                                    <Icon name="Zap" size={12} className="text-slate-400" /> Cognitive Symbol
+                                                </label>
+                                                <div className="flex flex-wrap gap-2 mb-2 relative">
+                                                    {quickEmojis.map(e => (
+                                                        <button 
+                                                            key={e} 
+                                                            onClick={() => updateNodeData('emoji', e)} 
+                                                            onMouseEnter={() => setHoveredSymbol(e)}
+                                                            onMouseLeave={() => setHoveredSymbol(null)}
+                                                            className={`w-8 h-8 flex items-center justify-center rounded-lg bg-white/5 hover:bg-white/10 transition-all text-base quick-emoji relative ${nodesData[getNodeKey(selectedNode.sIdx, selectedNode.nIdx)]?.emoji === e ? 'ring-2 ring-indigo-500 bg-white/10' : ''}`}
+                                                        >
+                                                            {e}
+                                                            {hoveredSymbol === e && (
+                                                                <div className="fixed lg:absolute bottom-full mb-2 left-1/2 -translate-x-1/2 px-2 py-1.5 bg-[#0a0a0f] border border-white/10 rounded-lg shadow-2xl z-[150] pointer-events-none min-w-[120px] backdrop-blur-md tooltip-animate text-center">
+                                                                    <div className="text-white text-[9px] uppercase font-bold tracking-tighter whitespace-nowrap">
+                                                                        {symbolMeanings[e]}
+                                                                    </div>
+                                                                    <div className="absolute top-full left-1/2 -translate-x-1/2 border-[4px] border-transparent border-t-[#0a0a0f]" />
+                                                                </div>
+                                                            )}
+                                                        </button>
+                                                    ))}
+                                                    <button onClick={() => updateNodeData('emoji', '')} className="text-[9px] text-slate-500 uppercase font-bold px-2 hover:text-red-400 transition-colors">Clear</button>
+                                                </div>
+                                                <input type="text" maxLength="2" 
+                                                    value={nodesData[getNodeKey(selectedNode.sIdx, selectedNode.nIdx)]?.emoji || ""} 
+                                                    onChange={(e) => updateNodeData('emoji', e.target.value)}
+                                                    className="bg-black/20 border border-white/5 rounded-lg p-2 text-center text-xl focus:ring-1 ring-indigo-500 outline-none text-white w-full" placeholder="Or paste emoji here..." />
+                                            </div>
 
-                                        <div className="flex flex-col gap-4 py-2 border-y border-white/5">
-                                            <div className="flex items-center justify-between">
-                                                <h3 className="text-[10px] text-indigo-400 uppercase font-bold tracking-[0.2em]">Linked Knowledge</h3>
-                                                <span className="text-[9px] text-slate-300 uppercase font-mono">{connections.filter(c => c.includes(getNodeKey(selectedNode.sIdx, selectedNode.nIdx))).length} Threads</span>
+                                            <div className="flex flex-col gap-2">
+                                                <label className="text-[10px] text-slate-500 uppercase font-bold tracking-widest ml-1">Cognitive Concept</label>
+                                                <input type="text" value={nodesData[getNodeKey(selectedNode.sIdx, selectedNode.nIdx)]?.concept || ""} 
+                                                    onChange={(e) => updateNodeData('concept', e.target.value)}
+                                                    className="bg-white/5 border border-white/10 rounded-xl p-4 focus:ring-1 ring-indigo-500 outline-none text-white transition-all font-medium" placeholder="Enter core idea..." />
+                                            </div>
+
+                                            <div className="flex flex-col gap-4 py-2 border-y border-white/5">
+                                                <div className="flex items-center justify-between">
+                                                    <h3 className="text-[10px] text-indigo-400 uppercase font-bold tracking-[0.2em]">Linked Knowledge</h3>
+                                                    <span className="text-[9px] text-slate-300 uppercase font-mono">{connections.filter(c => c.includes(getNodeKey(selectedNode.sIdx, selectedNode.nIdx))).length} Threads</span>
+                                                </div>
+                                                <div className="flex flex-col gap-2">
+                                                    {(() => {
+                                                        const nodeKey = getNodeKey(selectedNode.sIdx, selectedNode.nIdx);
+                                                        const myConns = connections.filter(c => c.includes(nodeKey));
+                                                        const customOrder = nodesData[nodeKey]?.connectionOrder || [];
+                                                        
+                                                        const sortedConns = [...myConns].sort((a, b) => {
+                                                            const idxA = customOrder.indexOf(a);
+                                                            const idxB = customOrder.indexOf(b);
+                                                            if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+                                                            if (idxA !== -1) return -1;
+                                                            if (idxB !== -1) return 1;
+                                                            return 0;
+                                                        });
+
+                                                        return sortedConns.map((conn, idx) => {
+                                                            const otherKey = conn.split(':').find(k => k !== nodeKey);
+                                                            const [oSIdx, oNIdx] = otherKey.split('-').map(Number);
+                                                            const otherData = nodesData[otherKey];
+                                                            const otherSection = sections.find(s => s.id === oSIdx);
+                                                            
+                                                            return (
+                                                                <div 
+                                                                    key={conn}
+                                                                    draggable="true"
+                                                                    onDragStart={(e) => handleCardDragStart(e, idx)}
+                                                                    onDragOver={(e) => handleCardDragOver(e, idx)}
+                                                                    onDragLeave={() => setDragOverCardIndex(null)}
+                                                                    onDrop={(e) => handleCardDrop(e, idx, sortedConns, nodeKey)}
+                                                                    className={`flex items-center justify-between p-3 ${otherSection.bg} rounded-xl border ${otherSection.border} transition-all group/link overflow-hidden shadow-sm relative ${dragOverCardIndex === idx ? 'card-drag-over' : ''} ${draggedCardIndex === idx ? 'opacity-20' : ''}`}
+                                                                >
+                                                                    <div className="flex flex-col gap-1 overflow-hidden flex-1">
+                                                                        <div className="flex items-center gap-2">
+                                                                            <div className="shrink-0 flex items-center justify-center w-3">
+                                                                                {otherData?.emoji ? <span className="text-[10px]">{otherData.emoji}</span> : <div className={`w-1.5 h-1.5 rounded-full ${otherSection.dot}`} />}
+                                                                            </div>
+                                                                            <span className="text-[11px] text-cyan-400 uppercase font-bold tracking-tight truncate">{sectionTitles[oSIdx]} • #{getGlobalIndex(oSIdx, oNIdx)}</span>
+                                                                        </div>
+                                                                        <div className="text-slate-200 text-sm font-medium italic truncate leading-tight">
+                                                                            {otherData?.concept || "Unmapped Node"}
+                                                                        </div>
+                                                                    </div>
+                                                                    
+                                                                    <div className="flex items-center gap-1 opacity-0 group-hover/link:opacity-100 transition-opacity ml-2">
+                                                                        <div className="p-1 cursor-grab active:cursor-grabbing text-slate-500 hover:text-indigo-400">
+                                                                            <Icon name="GripVertical" size={14} />
+                                                                        </div>
+                                                                        <button onClick={(e) => { e.stopPropagation(); removeConnection(conn); }} className="p-1.5 text-red-400/30 hover:text-red-500 transition-all bg-red-500/5 rounded-lg">
+                                                                            <Icon name="Trash2" size={14} />
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                            );
+                                                        });
+                                                    })()}
+                                                    
+                                                    {connections.filter(c => c.includes(getNodeKey(selectedNode.sIdx, selectedNode.nIdx))).length === 0 && (
+                                                        <div className="text-center py-4 text-slate-700 text-[9px] uppercase tracking-wider italic border border-dashed border-white/5 rounded-xl">No active connections</div>
+                                                    )}
+                                                </div>
+                                            </div>
+
+                                            <div className="flex flex-col gap-2 mt-2">
+                                                <label className="text-[10px] text-slate-500 uppercase font-bold tracking-widest ml-1">Citation</label>
+                                                <input type="text" value={nodesData[getNodeKey(selectedNode.sIdx, selectedNode.nIdx)]?.citation || ""} 
+                                                    onChange={(e) => updateNodeData('citation', e.target.value)}
+                                                    className="bg-white/5 border border-white/10 rounded-xl p-4 focus:ring-1 ring-indigo-500 outline-none text-white transition-all" placeholder="e.g. Smith (2024)" />
                                             </div>
                                             <div className="flex flex-col gap-2">
-                                                {(() => {
-                                                    const nodeKey = getNodeKey(selectedNode.sIdx, selectedNode.nIdx);
-                                                    const myConns = connections.filter(c => c.includes(nodeKey));
-                                                    const customOrder = nodesData[nodeKey]?.connectionOrder || [];
-                                                    
-                                                    const sortedConns = [...myConns].sort((a, b) => {
-                                                        const idxA = customOrder.indexOf(a);
-                                                        const idxB = customOrder.indexOf(b);
-                                                        if (idxA !== -1 && idxB !== -1) return idxA - idxB;
-                                                        if (idxA !== -1) return -1;
-                                                        if (idxB !== -1) return 1;
-                                                        return 0;
-                                                    });
-
-                                                    return sortedConns.map((conn, idx) => {
-                                                        const otherKey = conn.split(':').find(k => k !== nodeKey);
-                                                        const [oSIdx, oNIdx] = otherKey.split('-').map(Number);
-                                                        const otherData = nodesData[otherKey];
-                                                        const otherSection = sections.find(s => s.id === oSIdx);
-                                                        
-                                                        return (
-                                                            <div 
-                                                                key={conn}
-                                                                draggable="true"
-                                                                onDragStart={(e) => handleCardDragStart(e, idx)}
-                                                                onDragOver={(e) => handleCardDragOver(e, idx)}
-                                                                onDragLeave={() => setDragOverCardIndex(null)}
-                                                                onDrop={(e) => handleCardDrop(e, idx, sortedConns, nodeKey)}
-                                                                /* UPDATED CARD COLOUR: Now matches the source cluster background and border */
-                                                                className={`flex items-center justify-between p-3 ${otherSection.bg} rounded-xl border ${otherSection.border} transition-all group/link overflow-hidden shadow-sm relative ${dragOverCardIndex === idx ? 'card-drag-over' : ''} ${draggedCardIndex === idx ? 'opacity-20' : ''}`}
-                                                                style={{
-                                                                    /* Subtle section-coloured hover effect */
-                                                                    '--hover-border': otherSection.color.replace('text-', '')
-                                                                }}
-                                                            >
-                                                                <div className="flex flex-col gap-1 overflow-hidden flex-1">
-                                                                    <div className="flex items-center gap-2">
-                                                                        <div className="shrink-0 flex items-center justify-center w-3">
-                                                                            {otherData?.emoji ? <span className="text-[10px]">{otherData.emoji}</span> : <div className={`w-1.5 h-1.5 rounded-full ${otherSection.dot}`} />}
-                                                                        </div>
-                                                                        <span className="text-[11px] text-cyan-400 uppercase font-bold tracking-tight truncate">{sectionTitles[oSIdx]} • #{getGlobalIndex(oSIdx, oNIdx)}</span>
-                                                                    </div>
-                                                                    <div className="text-slate-200 text-sm font-medium italic truncate leading-tight">
-                                                                        {otherData?.concept || "Unmapped Node"}
-                                                                    </div>
-                                                                </div>
-                                                                
-                                                                <div className="flex items-center gap-1 opacity-0 group-hover/link:opacity-100 transition-opacity ml-2">
-                                                                    <div className="p-1 cursor-grab active:cursor-grabbing text-slate-500 hover:text-indigo-400">
-                                                                        <Icon name="GripVertical" size={14} />
-                                                                    </div>
-                                                                    <button onClick={(e) => { e.stopPropagation(); removeConnection(conn); }} className="p-1.5 text-red-400/30 hover:text-red-500 transition-all bg-red-500/5 rounded-lg">
-                                                                        <Icon name="Trash2" size={14} />
-                                                                    </button>
-                                                                </div>
-                                                            </div>
-                                                        );
-                                                    });
-                                                })()}
-                                                
-                                                {connections.filter(c => c.includes(getNodeKey(selectedNode.sIdx, selectedNode.nIdx))).length === 0 && (
-                                                    <div className="text-center py-4 text-slate-700 text-[9px] uppercase tracking-wider italic border border-dashed border-white/5 rounded-xl">No active connections</div>
-                                                )}
+                                                <label className="text-[10px] text-slate-500 uppercase font-bold tracking-widest ml-1">Notes</label>
+                                                <textarea value={nodesData[getNodeKey(selectedNode.sIdx, selectedNode.nIdx)]?.notes || ""} 
+                                                    onChange={(e) => updateNodeData('notes', e.target.value)}
+                                                    className="bg-white/5 border border-white/10 rounded-xl p-4 h-48 resize-none focus:ring-1 ring-indigo-500 outline-none text-slate-300 text-sm transition-all" placeholder="Describe the connection..." />
                                             </div>
-                                        </div>
 
-                                        <div className="flex flex-col gap-2 mt-2">
-                                            <label className="text-[10px] text-slate-500 uppercase font-bold tracking-widest ml-1">Citation</label>
-                                            <input type="text" value={nodesData[getNodeKey(selectedNode.sIdx, selectedNode.nIdx)]?.citation || ""} 
-                                                onChange={(e) => updateNodeData('citation', e.target.value)}
-                                                className="bg-white/5 border border-white/10 rounded-xl p-4 focus:ring-1 ring-indigo-500 outline-none text-white transition-all" placeholder="e.g. Smith (2024)" />
+                                            <button onClick={() => setLinkingNode(getNodeKey(selectedNode.sIdx, selectedNode.nIdx))} 
+                                                className={`py-4 rounded-xl font-bold text-xs tracking-widest transition-all ${linkingNode === getNodeKey(selectedNode.sIdx, selectedNode.nIdx) ? 'bg-emerald-500 text-black shadow-[0_0_20px_rgba(16,185,129,0.3)]' : 'bg-indigo-600 text-white shadow-[0_0_20_rgba(79,70,229,0.2)] hover:scale-[1.02] hover:bg-indigo-500'}`}>
+                                                {linkingNode ? "PICK TARGET NODE..." : "ATTACH LOGICAL THREAD"}
+                                            </button>
                                         </div>
-                                        <div className="flex flex-col gap-2">
-                                            <label className="text-[10px] text-slate-500 uppercase font-bold tracking-widest ml-1">Notes</label>
-                                            <textarea value={nodesData[getNodeKey(selectedNode.sIdx, selectedNode.nIdx)]?.notes || ""} 
-                                                onChange={(e) => updateNodeData('notes', e.target.value)}
-                                                className="bg-white/5 border border-white/10 rounded-xl p-4 h-48 resize-none focus:ring-1 ring-indigo-500 outline-none text-slate-300 text-sm transition-all" placeholder="Describe the connection..." />
-                                        </div>
-
-                                        <button onClick={() => setLinkingNode(getNodeKey(selectedNode.sIdx, selectedNode.nIdx))} 
-                                            className={`py-4 rounded-xl font-bold text-xs tracking-widest transition-all ${linkingNode === getNodeKey(selectedNode.sIdx, selectedNode.nIdx) ? 'bg-emerald-500 text-black shadow-[0_0_20px_rgba(16,185,129,0.3)]' : 'bg-indigo-600 text-white shadow-[0_0_20_rgba(79,70,229,0.2)] hover:scale-[1.02] hover:bg-indigo-500'}`}>
-                                            {linkingNode ? "PICK TARGET NODE..." : "ATTACH LOGICAL THREAD"}
-                                        </button>
                                     </div>
+                                ) : (
+                                    <div className="flex-1 flex flex-col items-center justify-center text-slate-600 text-xs uppercase tracking-widest gap-4 opacity-50 py-20">
+                                        <Icon name="Brain" size={32} className="text-slate-400" />
+                                        Select a node to inspect
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* SUBTLE FOOTER: Integrated at bottom of sidebar */}
+                            <div className="mt-10 pt-10 pb-4 opacity-20 hover:opacity-70 transition-opacity text-center border-t border-white/5">
+                                <div className="text-[9px] text-slate-500 uppercase tracking-[0.2em] mb-1.5">
+                                    <a href="https://lysander666.github.io/nahla-tracker/" target="_blank" rel="noopener noreferrer" className="hover:text-indigo-400 transition-colors underline underline-offset-4">
+                                      Back to Nahla Tracker
+                                    </a>
+
                                 </div>
-                            ) : (
-                                <div className="flex-1 flex flex-col items-center justify-center text-slate-600 text-xs uppercase tracking-widest gap-4 opacity-50">
-                                    <Icon name="Brain" size={32} className="text-slate-400" />
-                                    Select a node to inspect
+                                <div className="text-[8px] text-slate-700 uppercase tracking-widest leading-relaxed">
+                                    This tool is offered as-is. Always back up your important data.
                                 </div>
-                            )}
+                            </div>
                         </aside>
                     </main>
 
