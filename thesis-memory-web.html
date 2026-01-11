@@ -32,9 +32,10 @@
         /* Master container for the scaling workspace */
         .workspace-container {
             display: flex;
+            flex-direction: column;
+            align-items: center;
             width: 100%;
             height: calc(100vh - 64px); 
-            /* QoL 2: Changed from overflow: hidden to overflow-y-auto to allow vertical movement */
             overflow-y: auto;
             overflow-x: hidden;
             position: relative;
@@ -42,12 +43,11 @@
 
         #scaling-wrapper {
             transition: transform 0.2s ease-out;
-            transform-origin: center top; /* Changed to top to ensure scrolling starts from the beginning */
+            transform-origin: center top;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: auto; /* Keeps it centered but respects parent's auto scroll */
-            padding: 40px 0; /* Add some breathing room for scrolling */
+            padding: 40px 0;
             will-change: transform;
         }
 
@@ -179,11 +179,13 @@
                 hour12: false 
             });
 
+            // Improved Auto-Scaling & Margin logic to fix Laptop dead-space
             useEffect(() => {
                 const handleResize = () => {
                     const sidebarWidth = window.innerWidth > 1200 ? 450 : (window.innerWidth > 1024 ? 380 : 320);
                     const headerHeight = 64;
-                    const padding = 60; 
+                    // Tighter padding for laptops
+                    const padding = window.innerHeight < 800 ? 30 : 60; 
                     
                     const availableWidth = window.innerWidth - sidebarWidth - padding; 
                     const availableHeight = window.innerHeight - headerHeight - padding;
@@ -420,6 +422,11 @@
 
             if (loading && !errorMessage) return <div className="h-screen flex items-center justify-center font-mono text-xs text-indigo-500 bg-[#020204]">Initializing Web...</div>;
 
+            // Smart Dynamic Centering: Only center if content is smaller than viewport
+            const scaledHeight = 780 * scale + 80; // grid height + padding
+            const viewportHeight = window.innerHeight - 64;
+            const topMargin = scaledHeight < viewportHeight ? (viewportHeight - scaledHeight) / 2 : 0;
+
             return (
                 <div className="h-screen flex flex-col font-sans bg-[#020204] overflow-hidden">
                     <header className="p-4 border-b border-white/5 flex justify-between items-center bg-[#050508]/80 backdrop-blur-xl z-50">
@@ -428,7 +435,7 @@
                                 <Icon name="Network" size={22} className="text-white" />
                             </div>
                             <div>
-                                <h1 className="text-sm font-bold tracking-widest uppercase text-slate-200">Thesis Memory Web v0.2</h1>
+                                <h1 className="text-sm font-bold tracking-widest uppercase text-slate-200">Thesis Memory Web v0.21</h1>
                                 <div className="flex items-center gap-2 mt-0.5">
                                     <div className={`text-[10px] uppercase font-bold ${saveStatus === 'synced' ? 'text-emerald-500' : 'text-indigo-400'}`}>
                                         {saveStatus === 'saving' ? 'Syncing...' : 'Cloud Active'}
@@ -472,9 +479,8 @@
                     </header>
 
                     <main className="flex-1 flex overflow-hidden">
-                        {/* QoL 2: workspace-container is now scrollable */}
-                        <section className="flex-1 relative node-grid-bg workspace-container p-4">
-                            <div id="scaling-wrapper" style={{ transform: `scale(${scale})` }}>
+                        <section className="flex-1 relative node-grid-bg workspace-container">
+                            <div id="scaling-wrapper" style={{ transform: `scale(${scale})`, marginTop: `${topMargin}px` }}>
                                 <div id="grid-container" className="grid grid-cols-2 gap-8 p-10 bg-black/40 rounded-[4rem] border border-white/5 backdrop-blur-md shadow-2xl relative">
                                     {errorMessage && !showAuthModal && (
                                         <div className="absolute -top-12 left-0 right-0 text-center text-red-400 text-[10px] bg-red-500/10 p-2 rounded-lg border border-red-500/50 flex items-center justify-center gap-2 z-50">
@@ -520,8 +526,7 @@
                                                             <button key={nIdx} id={`node-${section.id}-${nIdx}`} onClick={() => handleNodeClick(section.id, nIdx)} 
                                                                 className={`w-12 h-12 rounded-2xl flex flex-col items-center justify-center transition-all duration-300 relative ${selected ? 'bg-white/10 ring-2 ring-indigo-500 scale-110 z-10 shadow-[0_0_20px_rgba(79,70,229,0.4)]' : 'bg-[#0a0a0f] border border-white/5 hover:border-white/20'} ${isLinkingSource ? 'animate-pulse ring-2 ring-emerald-500' : ''}`}
                                                             >
-                                                                {/* QoL 1: Node numbers now scale with the Title Buttons font size (+1 offset for legibility) */}
-                                                                <span className={`font-mono mb-1 ${selected ? 'text-indigo-300' : 'text-slate-400'}`} style={{ fontSize: `${titleFontSize + 1}px` }}>
+                                                                <span className={`font-mono mb-1 ${selected ? 'text-indigo-300' : 'text-slate-400'}`} style={{ fontSize: `${Math.max(titleFontSize, 9)}px` }}>
                                                                     {getGlobalIndex(section.id, nIdx)}
                                                                 </span>
                                                                 <div className="h-4 flex items-center justify-center">
