@@ -75,6 +75,15 @@
             background-color: rgba(99, 102, 241, 0.1) !important;
             transform: translateY(-2px);
         }
+
+        /* Tooltip animation */
+        .tooltip-animate {
+            animation: tooltip-in 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+        @keyframes tooltip-in {
+            from { opacity: 0; transform: translate(-50%, 10px) scale(0.9); }
+            to { opacity: 1; transform: translate(-50%, 0) scale(1); }
+        }
     </style>
 </head>
 <body class="bg-[#020204] text-slate-100 overflow-hidden h-screen w-screen font-sans">
@@ -138,6 +147,9 @@
             const [draggedCardIndex, setDraggedCardIndex] = useState(null);
             const [dragOverCardIndex, setDragOverCardIndex] = useState(null);
 
+            // QoL: Track hovered node
+            const [hoveredNodeKey, setHoveredNodeKey] = useState(null);
+
             const [showAuthModal, setShowAuthModal] = useState(false);
             const [email, setEmail] = useState('');
             const [password, setPassword] = useState('');
@@ -179,12 +191,10 @@
                 hour12: false 
             });
 
-            // Improved Auto-Scaling & Margin logic to fix Laptop dead-space
             useEffect(() => {
                 const handleResize = () => {
                     const sidebarWidth = window.innerWidth > 1200 ? 450 : (window.innerWidth > 1024 ? 380 : 320);
                     const headerHeight = 64;
-                    // Tighter padding for laptops
                     const padding = window.innerHeight < 800 ? 30 : 60; 
                     
                     const availableWidth = window.innerWidth - sidebarWidth - padding; 
@@ -422,8 +432,7 @@
 
             if (loading && !errorMessage) return <div className="h-screen flex items-center justify-center font-mono text-xs text-indigo-500 bg-[#020204]">Initializing Web...</div>;
 
-            // Smart Dynamic Centering: Only center if content is smaller than viewport
-            const scaledHeight = 780 * scale + 80; // grid height + padding
+            const scaledHeight = 780 * scale + 80;
             const viewportHeight = window.innerHeight - 64;
             const topMargin = scaledHeight < viewportHeight ? (viewportHeight - scaledHeight) / 2 : 0;
 
@@ -435,7 +444,7 @@
                                 <Icon name="Network" size={22} className="text-white" />
                             </div>
                             <div>
-                                <h1 className="text-sm font-bold tracking-widest uppercase text-slate-200">Thesis Memory Web v0.21</h1>
+                                <h1 className="text-sm font-bold tracking-widest uppercase text-slate-200">Thesis Memory Web</h1>
                                 <div className="flex items-center gap-2 mt-0.5">
                                     <div className={`text-[10px] uppercase font-bold ${saveStatus === 'synced' ? 'text-emerald-500' : 'text-indigo-400'}`}>
                                         {saveStatus === 'saving' ? 'Syncing...' : 'Cloud Active'}
@@ -518,12 +527,18 @@
                                                         const key = getNodeKey(section.id, nIdx);
                                                         const selected = selectedNode?.sIdx === section.id && selectedNode?.nIdx === nIdx;
                                                         const hasConcept = !!nodesData[key]?.concept;
+                                                        const conceptText = nodesData[key]?.concept;
                                                         const emoji = nodesData[key]?.emoji;
                                                         const isLinked = connections.some(c => c.includes(key));
                                                         const isLinkingSource = linkingNode === key;
 
                                                         return (
-                                                            <button key={nIdx} id={`node-${section.id}-${nIdx}`} onClick={() => handleNodeClick(section.id, nIdx)} 
+                                                            <button 
+                                                                key={nIdx} 
+                                                                id={`node-${section.id}-${nIdx}`} 
+                                                                onClick={() => handleNodeClick(section.id, nIdx)} 
+                                                                onMouseEnter={() => setHoveredNodeKey(key)}
+                                                                onMouseLeave={() => setHoveredNodeKey(null)}
                                                                 className={`w-12 h-12 rounded-2xl flex flex-col items-center justify-center transition-all duration-300 relative ${selected ? 'bg-white/10 ring-2 ring-indigo-500 scale-110 z-10 shadow-[0_0_20px_rgba(79,70,229,0.4)]' : 'bg-[#0a0a0f] border border-white/5 hover:border-white/20'} ${isLinkingSource ? 'animate-pulse ring-2 ring-emerald-500' : ''}`}
                                                             >
                                                                 <span className={`font-mono mb-1 ${selected ? 'text-indigo-300' : 'text-slate-400'}`} style={{ fontSize: `${Math.max(titleFontSize, 9)}px` }}>
@@ -537,6 +552,20 @@
                                                                     )}
                                                                 </div>
                                                                 {isLinked && <div className="absolute inset-2 rounded-xl border border-indigo-500/20 pointer-events-none" />}
+
+                                                                {/* CONCEPT HOVER TOOLTIP */}
+                                                                {hoveredNodeKey === key && conceptText && (
+                                                                    <div className="absolute bottom-full mb-3 left-1/2 -translate-x-1/2 px-3 py-2 bg-[#050508]/95 border border-indigo-500/40 rounded-xl shadow-2xl z-[100] pointer-events-none min-w-[140px] max-w-[220px] backdrop-blur-md tooltip-animate">
+                                                                        <div className="flex items-center gap-1.5 mb-1 opacity-50">
+                                                                            <Icon name="Brain" size={10} className="text-indigo-400" />
+                                                                            <span className="text-[8px] text-indigo-300 uppercase font-black tracking-widest">Cognitive Core</span>
+                                                                        </div>
+                                                                        <div className="text-slate-100 text-[11px] leading-tight font-medium italic break-words">
+                                                                            "{conceptText}"
+                                                                        </div>
+                                                                        <div className="absolute top-full left-1/2 -translate-x-1/2 border-[6px] border-transparent border-t-[#050508]/95" />
+                                                                    </div>
+                                                                )}
                                                             </button>
                                                         );
                                                     })}
