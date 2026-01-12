@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Memory Web Chessboard</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%236366f1%22/><rect width=%2250%22 height=%2250%22 fill=%22rgba(255,255,255,0.4)%22/><rect x=%2250%22 y=%2250%22 width=%2250%22 height=%2250%22 fill=%22rgba(255,255,255,0.4)%22/></svg>">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
@@ -64,6 +65,10 @@
             border-color: #6366f1;
             box-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
             background: rgba(255, 255, 255, 0.1);
+        }
+
+        .chessboard-container {
+            transition: opacity 0.8s ease-in-out, filter 0.8s ease-in-out;
         }
     </style>
 </head>
@@ -174,13 +179,11 @@
 
             const toggleDrill = () => {
                 if (testMode) {
-                    // Cancel current drill
                     setTestMode(false);
                     setTargetNode(null);
                     setStats({ correct: 0, total: 0 });
                     setIsFinished(false);
                 } else {
-                    // Start fresh drill
                     setStats({ correct: 0, total: 0 });
                     setIsFinished(false);
                     setTestMode(true);
@@ -189,7 +192,6 @@
             };
 
             const startNextNode = () => {
-                // If we've already done 8 nodes, don't start another
                 const randomNode = Math.floor(Math.random() * 64) + 1;
                 setTargetNode(randomNode);
                 setFeedback(null);
@@ -198,7 +200,6 @@
                 setTimeout(() => inputRef.current?.focus(), 100);
             };
 
-            // Timer Loop
             useEffect(() => {
                 if (testMode && targetNode && timeLeft > 0 && !feedback && !isFinished) {
                     timerRef.current = setTimeout(() => {
@@ -292,16 +293,17 @@
                                 )}
                                 <button 
                                     onClick={toggleDrill}
-                                    className={`flex items-center gap-3 px-8 py-4 rounded-2xl text-xs font-black uppercase tracking-widest transition-all ${testMode ? 'bg-red-500/10 text-red-400 border border-red-500/30 hover:bg-red-500/20' : 'bg-white text-indigo-900 shadow-2xl shadow-white/10 hover:scale-105 active:scale-95'}`}
+                                    className={`flex items-center gap-3 px-8 py-4 rounded-2xl text-xs font-black uppercase tracking-widest transition-all ${testMode ? 'bg-red-500/10 text-red-400 border border-red-500/30 hover:bg-red-500/20 shadow-lg shadow-red-500/10' : 'bg-white text-indigo-900 shadow-2xl shadow-white/10 hover:scale-105 active:scale-95'}`}
                                 >
                                     <Icon name={testMode ? "XCircle" : "Brain"} size={18} />
-                                    {testMode ? 'Stop/Cancel' : 'Start 8-Node Sprint'}
+                                    {testMode ? 'Abort Sprint' : 'Start 8-Node Sprint'}
                                 </button>
                             </div>
                         </header>
 
                         <div className="grid lg:grid-cols-[1fr_360px] gap-12">
-                            <div className="bg-slate-900/40 p-1.5 rounded-[3.5rem] border border-white/5 shadow-2xl">
+                            {/* Main Chessboard Area with Dimming Effect */}
+                            <div className={`bg-slate-900/40 p-1.5 rounded-[3.5rem] border border-white/5 shadow-2xl chessboard-container ${testMode && !isFinished ? 'opacity-10 grayscale' : 'opacity-100'}`}>
                                 <div className="p-4 bg-black/60 rounded-[3rem] border border-white/10 relative overflow-hidden">
                                     <div className="grid grid-rows-8 gap-2 relative z-10">
                                         {rowColors.map((color, rIdx) => (
@@ -348,14 +350,14 @@
 
                             <aside className="space-y-10">
                                 {testMode ? (
-                                    <div className="bg-indigo-600 p-10 rounded-[3rem] shadow-2xl shadow-indigo-600/40 animate-in slide-in-from-right duration-500 relative overflow-hidden group border-t border-white/30 min-h-[400px] flex flex-col">
+                                    <div className="bg-indigo-600 p-10 rounded-[3rem] shadow-2xl shadow-indigo-600/40 animate-in slide-in-from-right duration-500 relative overflow-hidden group border-t border-white/30 min-h-[440px] flex flex-col">
                                         <div className="absolute -right-6 -top-6 opacity-20 group-hover:rotate-12 transition-transform duration-1000">
                                             <Icon name="Target" size={160} />
                                         </div>
                                         <div className="relative z-10 flex flex-col items-center text-center gap-6 flex-grow justify-center">
                                             {!isFinished ? (
                                                 <>
-                                                    <div className="text-[11px] text-white font-black uppercase tracking-[0.5em]">Identify Cluster ({stats.total + 1}/8)</div>
+                                                    <div className="text-[11px] text-white font-black uppercase tracking-[0.5em]">Cluster Match ({stats.total + 1}/8)</div>
                                                     <div className="text-8xl font-black text-white tracking-tighter font-mono drop-shadow-[0_10px_10px_rgba(0,0,0,0.5)]">
                                                         {targetNode}
                                                     </div>
@@ -365,8 +367,8 @@
                                                             style={{ width: `${(timeLeft / 5000) * 100}%` }}
                                                         />
                                                     </div>
-                                                    <div className="flex flex-col items-center gap-2">
-                                                        <span className="text-[10px] text-white/60 font-black uppercase tracking-widest">Type Row (1-8)</span>
+                                                    <div className="flex flex-col items-center gap-3">
+                                                        <span className="text-[10px] text-white/60 font-black uppercase tracking-widest">Type Row Number (1-8)</span>
                                                         <input
                                                             ref={inputRef}
                                                             type="text"
@@ -381,16 +383,16 @@
                                                 </>
                                             ) : (
                                                 <div className="animate-in zoom-in duration-500">
-                                                    <div className="text-[11px] text-white font-black uppercase tracking-[0.5em] mb-4">Sprint Complete</div>
+                                                    <div className="text-[11px] text-white font-black uppercase tracking-[0.5em] mb-4">Sprint Results</div>
                                                     <div className="text-7xl font-black text-white tracking-tighter font-mono mb-2">
                                                         {Math.round((stats.correct / 8) * 100)}%
                                                     </div>
-                                                    <p className="text-xs text-indigo-200 font-bold mb-8 italic">Precision achieved over 8 nodes.</p>
+                                                    <p className="text-xs text-indigo-200 font-bold mb-8 italic">Precision score based on 8 nodes.</p>
                                                     <button 
                                                         onClick={toggleDrill}
                                                         className="w-full py-4 bg-white text-indigo-900 rounded-2xl font-black uppercase text-xs tracking-widest shadow-xl hover:scale-105 transition-all"
                                                     >
-                                                        Restart Sprint
+                                                        Run New Sprint
                                                     </button>
                                                 </div>
                                             )}
@@ -413,7 +415,7 @@
                                                 <div key={idx} className="flex items-center justify-between group">
                                                     <div className="flex flex-col">
                                                         <span className="text-[11px] font-black text-slate-400 uppercase tracking-tighter">Rank {idx + 1}</span>
-                                                        <span className="text-[10px] font-mono text-slate-600 font-bold">NODE {idx*8+1}—{idx*8+8}</span>
+                                                        <span className="text-[10px] font-mono text-slate-600 font-bold uppercase">Node {idx*8+1}—{idx*8+8}</span>
                                                     </div>
                                                     <div className="flex gap-2 bg-black/60 p-2 rounded-2xl border border-white/10 shadow-inner">
                                                         {Object.keys(colorClasses).map(c => (
@@ -437,7 +439,7 @@
                                             <h3 className="text-xs font-black uppercase tracking-[0.2em] text-indigo-400 italic">Pre-Flight Strategy</h3>
                                         </div>
                                         <p className="text-[12px] text-slate-400 leading-relaxed font-bold italic px-2">
-                                            "A sprint consists of 8 nodes. If you can handle 8 nodes in under 40 seconds, you can handle any viva question."
+                                            "During the sprint, the board will dim. You must rely on the mental map of your colors to identify the cluster instantly."
                                         </p>
                                         <div className="pt-6 border-t border-white/10">
                                            <div className="text-[10px] text-slate-600 font-black uppercase tracking-widest mb-4">Boundary Markers (The 8x Rule):</div>
@@ -453,8 +455,8 @@
                         </div>
                         
                         <footer className="mt-16 py-10 border-t border-white/5 flex justify-between items-center opacity-30">
-                           <div className="text-[10px] text-slate-600 uppercase font-black tracking-[0.4em]">Spatial Mastery Engine v1.4.0</div>
-                           <div className="text-[10px] text-slate-600 uppercase font-black tracking-[0.4em]">8-Node Sprint Protocol Active</div>
+                           <div className="text-[10px] text-slate-600 uppercase font-black tracking-[0.4em]">Spatial Mastery Engine v1.4.1</div>
+                           <div className="text-[10px] text-slate-600 uppercase font-black tracking-[0.4em]">Blackout Mode: Dimming Enabled</div>
                         </footer>
                     </div>
                 </div>
