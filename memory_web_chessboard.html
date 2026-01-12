@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory Web Chessboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=JetBrains+Mono:wght@700&display=swap');
+        
+        body { font-family: 'Inter', sans-serif; background-color: #020617; color: #f8fafc; }
+        .font-mono { font-family: 'JetBrains+Mono', monospace; }
+        
+        .tile-light { 
+            background-color: rgba(255, 255, 255, 0.15); 
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+        .tile-dark { 
+            background-color: rgba(0, 0, 0, 0.5); 
+            border-color: rgba(0, 0, 0, 0.3);
+        }
+        
+        .number-glow { 
+            text-shadow: 0 0 12px rgba(255,255,255,0.4), 0 0 2px rgba(0,0,0,0.8); 
+        }
+
+        .node-button {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .modal-overlay { background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(8px); }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // --- FIREBASE CONFIGURATION ---
+        const isCanvasEnv = typeof __firebase_config !== 'undefined';
+        const myProductionConfig = {
+            apiKey: "AIzaSyCCAMapMCPHeXUvmR0DF4ERl8ay58Rz37w",
+            authDomain: "thesis-memory-web.firebaseapp.com",
+            projectId: "thesis-memory-web",
+            storageBucket: "thesis-memory-web.firebasestorage.app",
+            messagingSenderId: "1000243001742",
+            appId: "1:1000243001742:web:e367ebe8af3f6dcef14cdf"
+        };
+
+        const firebaseConfig = isCanvasEnv ? JSON.parse(__firebase_config) : myProductionConfig;
+        const platformAppId = isCanvasEnv ? (typeof __app_id !== 'undefined' ? __app_id : 'thesis-memory-web') : 'production';
+
+        const firebase = window.firebase;
+        if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        const Icon = ({ name, size = 16, className = "" }) => {
+            const iconRef = useRef(null);
+            useEffect(() => {
+                if (window.lucide && iconRef.current) {
+                    iconRef.current.innerHTML = '';
+                    const i = document.createElement('i');
+                    const kebabName = name.replace(/([a-z0-9]|(?=[A-Z]))([A-Z])/g, '$1-$2').toLowerCase().replace(/^-/, '');
+                    i.setAttribute('data-lucide', kebabName);
+                    if (className) i.setAttribute('class', className);
+                    i.style.width = size + 'px';
+                    i.style.height = size + 'px';
+                    iconRef.current.appendChild(i);
+                    window.lucide.createIcons();
+                }
+            }, [name, size, className]);
+            return <span ref={iconRef} className="flex items-center justify-center shrink-0" />;
+        };
+
+        const App = () => {
+            const [user, setUser] = useState(null);
+            const [rowColors, setRowColors] = useState([
+                'emerald', 'emerald', 'blue', 'blue', 'purple', 'purple', 'amber', 'amber'
+            ]);
+            const [testMode, setTestMode] = useState(false);
+            const [targetNode, setTargetNode] = useState(null);
+            const [feedback, setFeedback] = useState(null);
+            const [stats, setStats] = useState({ correct: 0, total: 0 });
+            const [saveStatus, setSaveStatus] = useState('synced');
+
+            // --- AUTH LOGIC ---
+            useEffect(() => {
+                const performAuth = async () => {
+                    try {
+                        if (isCanvasEnv && typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                            await auth.signInWithCustomToken(__initial_auth_token);
+                        } else if (!auth.currentUser) {
+                            await auth.signInAnonymously();
+                        }
+                    } catch (err) { console.error(err); }
+                };
+                performAuth();
+                const unsubscribe = auth.onAuthStateChanged((u) => setUser(u));
+                return () => unsubscribe();
+            }, []);
+
+            // --- DATA SYNC LOGIC ---
+            useEffect(() => {
+                if (!user) return;
+                const docRef = isCanvasEnv 
+                    ? db.collection('artifacts').doc(platformAppId).collection('users').doc(user.uid).collection('state').doc('trainerConfig')
+                    : db.collection('thesis_data').doc(platformAppId).collection('users').doc(user.uid).collection('trainer').doc('config');
+                
+                const unsubscribe = docRef.onSnapshot((docSnap) => {
+                    if (docSnap.exists) {
+                        const data = docSnap.data();
+                        if (data.rowColors) setRowColors(data.rowColors);
+                    }
+                });
+                return () => unsubscribe();
+            }, [user]);
+
+            const updateRowColor = async (rowIndex, color) => {
+                const newColors = [...rowColors];
+                newColors[rowIndex] = color;
+                setRowColors(newColors);
+                
+                if (!user) return;
+                setSaveStatus('saving');
+                try {
+                    const docRef = isCanvasEnv 
+                        ? db.collection('artifacts').doc(platformAppId).collection('users').doc(user.uid).collection('state').doc('trainerConfig')
+                        : db.collection('thesis_data').doc(platformAppId).collection('users').doc(user.uid).collection('trainer').doc('config');
+                    
+                    await docRef.set({ rowColors: newColors, lastUpdated: new Date().toISOString() }, { merge: true });
+                    setSaveStatus('synced');
+                } catch (err) {
+                    console.error(err);
+                    setSaveStatus('error');
+                }
+            };
+
+            const startTest = () => {
+                const randomNode = Math.floor(Math.random() * 64) + 1;
+                setTargetNode(randomNode);
+                setTestMode(true);
+                setFeedback(null);
+            };
+
+            const handleNodeClick = (nodeNum) => {
+                if (!testMode || !targetNode) return;
+                if (nodeNum === targetNode) {
+                    setFeedback({ success: true, message: "BULLSEYE. Node locked." });
+                    setStats(prev => ({ correct: prev.correct + 1, total: prev.total + 1 }));
+                    setTimeout(startTest, 700);
+                } else {
+                    const targetCluster = Math.ceil(targetNode / 8);
+                    setFeedback({ success: false, message: `MISSED. Node ${targetNode} is in Cluster ${targetCluster}.` });
+                    setStats(prev => ({ ...prev, total: prev.total + 1 }));
+                }
+            };
+
+            const colorClasses = {
+                emerald: 'border-emerald-500/60 text-emerald-300 ring-emerald-500/30 shadow-[inset_0_0_30px_rgba(16,185,129,0.15)]',
+                amber: 'border-amber-500/60 text-amber-300 ring-amber-500/30 shadow-[inset_0_0_30px_rgba(245,158,11,0.15)]',
+                blue: 'border-blue-500/60 text-blue-300 ring-blue-500/30 shadow-[inset_0_0_30px_rgba(59,130,246,0.15)]',
+                purple: 'border-purple-500/60 text-purple-300 ring-purple-500/30 shadow-[inset_0_0_30px_rgba(168,85,247,0.15)]'
+            };
+
+            const btnClasses = {
+                emerald: 'bg-emerald-500',
+                amber: 'bg-amber-500',
+                blue: 'bg-blue-500',
+                purple: 'bg-purple-500'
+            };
+
+            return (
+                <div className="min-h-screen p-4 md:p-8 flex flex-col items-center selection:bg-indigo-500 selection:text-white">
+                    <div className="max-w-6xl w-full">
+                        <header className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
+                            <div className="flex items-center gap-5">
+                                <div className="w-14 h-14 bg-indigo-600 rounded-3xl flex items-center justify-center shadow-2xl shadow-indigo-600/40 border-t border-white/20">
+                                    <Icon name="ShieldCheck" size={32} className="text-white" />
+                                </div>
+                                <div>
+                                    <div className="flex items-center gap-3">
+                                        <h1 className="text-3xl font-black tracking-tight uppercase italic leading-none mb-1">Tactical Chessboard</h1>
+                                        <a href="thesis-memory-web.html" className="text-[10px] bg-white/5 hover:bg-white/10 border border-white/10 px-3 py-1 rounded-full text-slate-400 font-bold flex items-center gap-1.5 transition-all">
+                                            <Icon name="ArrowLeft" size={10} /> Back to Web
+                                        </a>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <p className="text-slate-500 text-[10px] font-black tracking-[0.4em] uppercase">Neural Synchronization Engine</p>
+                                        <div className={`text-[10px] font-bold uppercase ${saveStatus === 'synced' ? 'text-emerald-500/60' : 'text-indigo-400'}`}>
+                                            {saveStatus === 'saving' ? 'Saving...' : 'Cloud Active'}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div className="flex items-center gap-6">
+                                {testMode && (
+                                    <div className="flex flex-col items-end">
+                                        <span className="text-[9px] text-slate-500 font-black uppercase tracking-widest mb-1">Cognitive Precision</span>
+                                        <div className="flex items-baseline gap-1">
+                                            <span className="text-3xl font-mono font-bold text-white leading-none">
+                                                {stats.total > 0 ? Math.round((stats.correct / stats.total) * 100) : 0}
+                                            </span>
+                                            <span className="text-indigo-400 font-bold text-xs">%</span>
+                                        </div>
+                                    </div>
+                                )}
+                                <button 
+                                    onClick={() => { setTestMode(!testMode); setStats({correct: 0, total: 0}); setTargetNode(null); }}
+                                    className={`flex items-center gap-3 px-8 py-4 rounded-2xl text-xs font-black uppercase tracking-widest transition-all ${testMode ? 'bg-red-500/10 text-red-400 border border-red-500/30 hover:bg-red-500/20' : 'bg-white text-indigo-900 shadow-2xl shadow-white/10 hover:scale-105 active:scale-95'}`}
+                                >
+                                    <Icon name={testMode ? "XCircle" : "Brain"} size={18} />
+                                    {testMode ? 'Exit Training' : 'Engage Drill'}
+                                </button>
+                            </div>
+                        </header>
+
+                        <div className="grid lg:grid-cols-[1fr_360px] gap-12">
+                            <div className="bg-slate-900/40 p-1.5 rounded-[3.5rem] border border-white/5 shadow-2xl">
+                                <div className="p-4 bg-black/60 rounded-[3rem] border border-white/10 relative overflow-hidden">
+                                    <div className="grid grid-rows-8 gap-2 relative z-10">
+                                        {rowColors.map((color, rIdx) => (
+                                            <div key={rIdx} className="grid grid-cols-8 gap-2">
+                                                {Array.from({ length: 8 }).map((_, cIdx) => {
+                                                    const nodeNum = (rIdx * 8) + cIdx + 1;
+                                                    const isTarget = testMode && nodeNum === targetNode;
+                                                    const isEndpoint = nodeNum % 8 === 0;
+                                                    const isLightTile = (rIdx + cIdx) % 2 === 0;
+
+                                                    return (
+                                                        <button
+                                                            key={cIdx}
+                                                            onClick={() => handleNodeClick(nodeNum)}
+                                                            className={`
+                                                                aspect-square rounded-2xl border-2 flex flex-col items-center justify-center node-button relative overflow-hidden
+                                                                ${isLightTile ? 'tile-light' : 'tile-dark'}
+                                                                ${colorClasses[color]}
+                                                                ${testMode ? 'hover:scale-[1.05] hover:brightness-150 z-10' : 'cursor-default'}
+                                                                ${isEndpoint ? 'ring-2 ring-white/20' : ''}
+                                                                ${isTarget ? 'ring-[6px] ring-white animate-pulse bg-white/20 z-20 scale-110 shadow-2xl shadow-white/20' : ''}
+                                                            `}
+                                                        >
+                                                            <span className={`text-2xl md:text-3xl font-black font-mono tracking-tighter number-glow ${isTarget ? 'text-white scale-110' : 'opacity-100'}`}>
+                                                                {nodeNum}
+                                                            </span>
+                                                            {isEndpoint && !testMode && (
+                                                                <div className="absolute top-1 right-2 text-[9px] font-black opacity-40 text-white tracking-tighter">8×{rIdx+1}</div>
+                                                            )}
+                                                            {!testMode && <div className="absolute bottom-1 w-6 h-1 rounded-full bg-current opacity-30"></div>}
+                                                        </button>
+                                                    );
+                                                })}
+                                            </div>
+                                        ))}
+                                    </div>
+                                    <div className="absolute inset-0 grid grid-cols-8 grid-rows-8 pointer-events-none opacity-10">
+                                        {Array.from({ length: 64 }).map((_, i) => <div key={i} className="border-[0.5px] border-white/20"></div>)}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <aside className="space-y-10">
+                                <div className="bg-[#0a0a0f] p-8 rounded-[3rem] border border-white/5 shadow-2xl relative overflow-hidden">
+                                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 to-purple-500 opacity-50"></div>
+                                    <h3 className="text-xs font-black uppercase tracking-[0.4em] text-slate-500 mb-8 flex items-center gap-3">
+                                        <Icon name="Palette" size={18} className="text-indigo-500" /> Highlighter Sync
+                                    </h3>
+                                    <div className="space-y-5">
+                                        {rowColors.map((currentColor, idx) => (
+                                            <div key={idx} className="flex items-center justify-between group">
+                                                <div className="flex flex-col">
+                                                    <span className="text-[11px] font-black text-slate-400 uppercase tracking-tighter">Rank {idx + 1}</span>
+                                                    <span className="text-[10px] font-mono text-slate-600 font-bold">NODE {idx*8+1}—{idx*8+8}</span>
+                                                </div>
+                                                <div className="flex gap-2 bg-black/60 p-2 rounded-2xl border border-white/10 shadow-inner">
+                                                    {Object.keys(colorClasses).map(c => (
+                                                        <button
+                                                            key={c}
+                                                            onClick={() => updateRowColor(idx, c)}
+                                                            className={`w-6 h-6 rounded-lg border-2 transition-all ${btnClasses[c]} ${currentColor === c ? 'border-white scale-125 shadow-lg ring-4 ring-white/10' : 'border-transparent opacity-20 hover:opacity-100'}`}
+                                                        />
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {testMode ? (
+                                    <div className="bg-indigo-600 p-10 rounded-[3rem] shadow-2xl shadow-indigo-600/40 animate-in slide-in-from-right duration-500 relative overflow-hidden group border-t border-white/30">
+                                        <div className="absolute -right-6 -top-6 opacity-20 group-hover:rotate-12 transition-transform duration-1000">
+                                            <Icon name="Target" size={160} />
+                                        </div>
+                                        <div className="relative z-10 flex flex-col items-center text-center gap-6">
+                                            <div className="text-[11px] text-white font-black uppercase tracking-[0.5em]">Target Node</div>
+                                            {targetNode ? (
+                                                <>
+                                                    <div className="text-8xl font-black text-white tracking-tighter font-mono drop-shadow-[0_10px_10px_rgba(0,0,0,0.5)]">
+                                                        {targetNode}
+                                                    </div>
+                                                    <div className="bg-black/20 px-4 py-2 rounded-xl text-[10px] text-white font-black uppercase tracking-widest">
+                                                        Recall Cluster Color Now
+                                                    </div>
+                                                </>
+                                            ) : (
+                                                <button onClick={startTest} className="w-full py-5 bg-white text-indigo-900 rounded-2xl font-black uppercase text-sm tracking-widest shadow-2xl hover:scale-105 transition-all">Begin Drill</button>
+                                            )}
+                                            {feedback && (
+                                                <div className={`mt-4 text-xs font-black uppercase tracking-widest px-6 py-3 rounded-2xl bg-black/40 backdrop-blur-md border border-white/10 ${feedback.success ? 'text-emerald-300 shadow-[0_0_20px_rgba(16,185,129,0.3)]' : 'text-red-200 shadow-[0_0_20px_rgba(239,68,68,0.3)]'}`}>
+                                                    {feedback.message}
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="bg-[#0a0a0f] p-8 rounded-[3rem] border border-white/5 space-y-6 shadow-inner">
+                                        <div className="flex items-center gap-3">
+                                            <div className="p-2.5 bg-indigo-500/20 rounded-xl"><Icon name="Target" size={18} className="text-indigo-400" /></div>
+                                            <h3 className="text-xs font-black uppercase tracking-[0.2em] text-indigo-400 italic">Pre-Flight Strategy</h3>
+                                        </div>
+                                        <p className="text-[12px] text-slate-400 leading-relaxed font-bold italic px-2">
+                                            "The grid is your memory theater. Stop counting. Start recognizing."
+                                        </p>
+                                        <div className="pt-6 border-t border-white/10">
+                                           <div className="text-[10px] text-slate-600 font-black uppercase tracking-widest mb-4">Boundary Markers (The 8x Rule):</div>
+                                           <div className="grid grid-cols-4 gap-3">
+                                             {[8, 16, 24, 32, 40, 48, 56, 64].map(n => (
+                                                 <div key={n} className="bg-white/5 py-2.5 rounded-xl text-center text-xs font-mono font-black text-slate-400 border border-white/10 shadow-sm">{n}</div>
+                                             ))}
+                                           </div>
+                                        </div>
+                                    </div>
+                                )}
+                            </aside>
+                        </div>
+                        
+                        <footer className="mt-16 py-10 border-t border-white/5 flex justify-between items-center opacity-30">
+                           <div className="text-[10px] text-slate-600 uppercase font-black tracking-[0.4em]">Spatial Mastery Engine v1.2.2</div>
+                           <div className="text-[10px] text-slate-600 uppercase font-black tracking-[0.4em]">Cloud Persistence Active</div>
+                        </footer>
+                    </div>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
