@@ -470,7 +470,7 @@
                 setTitleFontSize(newSize); saveData({ titleFontSize: newSize });
             }
 
-            if (loading && !errorMessage) return <div className="h-screen flex items-center justify-center font-mono text-xs text-indigo-500 bg-[#020204]">Initializing Web...</div>;
+            if (loading && !errorMessage) return <div className="h-screen flex items-center justify-center font-mono text-xs text-indigo-500 bg-[#020204]">Initialising Web...</div>;
 
             const scaledHeight = 780 * scale + 80;
             const viewportHeight = window.innerHeight - 64; 
@@ -715,7 +715,7 @@
                                             </div>
                                         </div>
                                     ) : (
-                                        <div className="flex flex-col items-center justify-center text-slate-600 text-xs uppercase tracking-widest gap-4 opacity-50 h-[400px]">
+                                        <div className="flex flex-col items-center justify-center text-slate-400 text-xs uppercase tracking-widest gap-4 opacity-50 h-[400px]">
                                             <Icon name="Brain" size={32} className="text-slate-400" /> Select a node to inspect
                                         </div>
                                     )}
