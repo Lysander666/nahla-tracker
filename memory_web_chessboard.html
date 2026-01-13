@@ -118,7 +118,7 @@
         };
 
         const App = () => {
-            const [rowColors, setRowColors] = useState(['emerald', 'emerald', 'blue', 'blue', 'purple', 'purple', 'amber', 'amber']);
+            const [rowColors, setRowColors] = useState(['emerald', 'emerald', 'amber', 'amber', 'blue', 'blue', 'purple', 'purple']);
             const [dialecticMode, setDialecticMode] = useState(false);
             const [integrationMode, setIntegrationMode] = useState(false);
             const [stats, setStats] = useState({ correct: 0, total: 0 });
@@ -199,7 +199,7 @@
 
             // --- INTEGRATION LOGIC ---
             const beginIntegration = () => {
-                setStats({ correct: 0, total: 0 });
+                setStats({ correct: 0, total: 1 });
                 setIsFinished(false);
                 setIntegrationMode(true);
                 setDialecticMode(false);
@@ -337,7 +337,7 @@
                                     <div className="bg-indigo-950/30 p-8 rounded-[2.5rem] shadow-2xl flex flex-col items-center gap-6 text-center border border-indigo-500/20">
                                         {!isFinished ? (
                                             <>
-                                                <div className="text-[10px] font-black uppercase tracking-widest text-indigo-400">Recall Point {stats.total + 1}/8</div>
+                                                <div className="text-[10px] font-black uppercase tracking-widest text-indigo-400">Recall Point {stats.total}/8</div>
                                                 <div className="text-8xl font-black text-white tracking-tighter drop-shadow-2xl">{focalNode}</div>
                                                 <div className="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
                                                     <div className="h-full bg-white timer-bar shadow-[0_0_10px_white]" style={{ width: `${(timeRemaining / 5000) * 100}%` }} />
