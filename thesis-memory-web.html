@@ -1,131 +1,102 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧬</text></svg>">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Memory Web Chess</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%236366f1%22/><rect width=%2250%22 height=%2250%22 fill=%22rgba(255,255,255,0.4)%22/><rect x=%2250%22 y=%2250%22 width=%2250%22 height=%2250%22 fill=%22rgba(255,255,255,0.4)%22/></svg>">
+    <title>Thesis Memory Web</title>
+    <!-- Tailwind CSS for Styling -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- React & Babel for Browser-side Compilation -->
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
     
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+        @keyframes dash { to { stroke-dashoffset: -100; } }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
         
-        body { 
-            font-family: 'Inter', system-ui, -apple-system, sans-serif; 
-            background-color: #020617; 
-            color: #f1f5f9; 
-            overflow-x: hidden; 
+        .node-grid-bg { background: radial-gradient(circle at center, #0f172a 0%, #020617 100%); }
+        .node-transition { transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1); }
+        .lucide { display: inline-block; vertical-align: middle; }
+        
+        .workspace-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            height: calc(100vh - 64px); 
+            overflow-y: auto;
+            overflow-x: hidden;
+            position: relative;
         }
-        
-        .tile-light { background-color: rgba(255, 255, 255, 0.1); border-color: rgba(255, 255, 255, 0.05); }
-        .tile-dark { background-color: rgba(0, 0, 0, 0.4); border-color: rgba(0, 0, 0, 0.2); }
-        
-        .number-glow { text-shadow: 0 0 12px rgba(255,255,255,0.3); }
 
-        .chess-piece {
-            font-size: 2.8rem;
-            cursor: pointer;
-            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
-            user-select: none;
-            line-height: 1;
-            z-index: 30;
-            transition: transform 0.15s ease;
-        }
-        .chess-piece:hover { transform: scale(1.1); }
-        
-        @media (max-width: 640px) {
-            .chess-piece { font-size: 1.8rem; }
-        }
-        
-        .white-piece { color: #ffffff; }
-        .black-piece { color: #64748b; } 
-
-        .tray-area {
-            min-height: 44px;
-            background: rgba(15, 23, 42, 0.8);
-            border: 1px solid rgba(255, 255, 255, 0.05);
+        #scaling-wrapper {
+            transition: transform 0.2s ease-out;
+            transform-origin: center top;
             display: flex;
             align-items: center;
-            gap: 4px;
-            padding: 0 12px;
-            border-radius: 12px;
-            flex-wrap: wrap;
-            overflow: hidden;
+            justify-content: center;
+            padding: 40px 0;
+            will-change: transform;
+            backface-visibility: hidden;
         }
 
-        .board-visual-state { transition: opacity 0.4s ease, filter 0.4s ease; }
-
-        .academic-input {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: white; text-align: center; font-size: 2.5rem; font-weight: 800;
-            width: 80px; height: 80px; border-radius: 16px; outline: none;
-        }
-        .academic-input:focus {
-            border-color: #6366f1;
-            background: rgba(99, 102, 241, 0.05);
+        .drag-ghost { opacity: 0.15; transform: scale(0.95); filter: blur(2px); }
+        .dragging-active .cluster-card:not(.drag-ghost):not(.drag-over-target) { opacity: 0.6; transform: scale(0.98); }
+        .drag-over-target {
+            box-shadow: 0 0 0 2px #6366f1, 0 20px 40px rgba(99, 102, 241, 0.3);
+            transform: translateY(-8px) scale(1.03) rotate(1deg) !important;
+            z-index: 50;
+            background-color: rgba(99, 102, 241, 0.1) !important;
         }
 
-        .legend-card {
-            background: rgba(15, 23, 42, 0.4);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            padding: 1rem;
-            border-radius: 1.5rem;
+        .quick-emoji { cursor: pointer; transition: transform 0.1s; }
+        .quick-emoji:hover { transform: scale(1.2); }
+        .card-drag-over { border-color: #6366f1 !important; background-color: rgba(99, 102, 241, 0.1) !important; transform: translateY(-2px); }
+
+        .tooltip-animate { animation: tooltip-in 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        @keyframes tooltip-in {
+            from { opacity: 0; transform: translate(-50%, 10px) scale(0.9); }
+            to { opacity: 1; transform: translate(-50%, 0) scale(1); }
         }
-        
-        .timer-bar { transition: width 0.1s linear; }
+
+        .modal-overlay { background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(8px); }
     </style>
 </head>
-<body>
+<body class="bg-[#020204] text-slate-100 overflow-hidden h-screen w-screen font-sans">
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect, useRef, useCallback } = React;
-
-        // --- CONSTANTS ---
-        const GLYPHS = {
-            wP: '♙', wN: '♘', wB: '♗', wR: '♖', wQ: '♕', wK: '♔',
-            bP: '♟', bN: '♞', bB: '♝', bR: '♜', bQ: '♛', bK: '♚'
-        };
-
-        const PAWN_HINTS = ['🟡', '💡', '🔵', '🔗', '🌐', '⚙️', '⚠️', '🧩'];
+        const { useState, useEffect, useMemo, useRef } = React;
         
-        const getEmojiHint = (type, square) => {
-            const file = square[0];
-            const fileIdx = file.charCodeAt(0) - 97;
-            switch(type) {
-                case 'k': return '🟢';
-                case 'q': return '📗';
-                case 'r': return fileIdx === 0 ? '🌱' : '🧪';
-                case 'n': return fileIdx === 1 ? '❤️' : '🩸';
-                case 'b': return fileIdx === 2 ? '🟣' : '🌸';
-                case 'p': return PAWN_HINTS[fileIdx];
-                default: return '';
-            }
+        const isCanvasEnv = typeof __firebase_config !== 'undefined';
+        
+        const myProductionConfig = {
+            apiKey: "AIzaSyCCAMapMCPHeXUvmR0DF4ERl8ay58Rz37w",
+            authDomain: "thesis-memory-web.firebaseapp.com",
+            projectId: "thesis-memory-web",
+            storageBucket: "thesis-memory-web.firebasestorage.app",
+            messagingSenderId: "1000243001742",
+            appId: "1:1000243001742:web:e367ebe8af3f6dcef14cdf"
         };
 
-        const PIECE_NAMES = {
-            p: 'Pawn', n: 'Knight', b: 'Bishop', r: 'Rook', q: 'Queen', k: 'King'
-        };
+        const firebaseConfig = isCanvasEnv ? JSON.parse(__firebase_config) : myProductionConfig;
+        const platformAppId = isCanvasEnv ? (typeof __app_id !== 'undefined' ? __app_id : 'thesis-memory-web') : 'production';
 
-        const colorClasses = {
-            emerald: 'border-emerald-500/50 text-emerald-100 shadow-[inset_0_0_20px_rgba(16,185,129,0.05)]',
-            amber: 'border-amber-500/50 text-amber-100 shadow-[inset_0_0_20px_rgba(245,158,11,0.05)]',
-            blue: 'border-blue-500/50 text-blue-100 shadow-[inset_0_0_20px_rgba(59,130,246,0.05)]',
-            purple: 'border-purple-500/50 text-purple-100 shadow-[inset_0_0_20px_rgba(168,85,247,0.05)]'
-        };
-
-        const btnColors = {
-            emerald: 'bg-emerald-500',
-            amber: 'bg-amber-500',
-            blue: 'bg-blue-500',
-            purple: 'bg-purple-500'
-        };
+        const firebase = window.firebase;
+        if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
+        const auth = firebase.auth();
+        const db = firebase.firestore();
 
         const Icon = ({ name, size = 16, className = "" }) => {
             const iconRef = useRef(null);
@@ -136,387 +107,783 @@
                     const kebabName = name.replace(/([a-z0-9]|(?=[A-Z]))([A-Z])/g, '$1-$2').toLowerCase().replace(/^-/, '');
                     i.setAttribute('data-lucide', kebabName);
                     if (className) i.setAttribute('class', className);
-                    i.style.width = size + 'px'; i.style.height = size + 'px';
+                    i.style.width = size + 'px';
+                    i.style.height = size + 'px';
                     iconRef.current.appendChild(i);
                     window.lucide.createIcons();
                 }
             }, [name, size, className]);
-            return <span ref={iconRef} className="flex items-center justify-center shrink-0" />;
+            return <span ref={iconRef} className="flex items-center justify-center leading-none shrink-0" />;
         };
 
         const App = () => {
-            const [sectorColors, setSectorColors] = useState(['emerald', 'emerald', 'amber', 'amber', 'blue', 'blue', 'purple', 'purple']);
-            const [dialecticMode, setDialecticMode] = useState(false);
-            const [integrationMode, setIntegrationMode] = useState(false);
-            const [stats, setStats] = useState({ correct: 0, total: 0 });
-            const [isFinished, setIsFinished] = useState(false);
-            const [aiStrategy, setAiStrategy] = useState('random');
+            const [time, setTime] = useState(new Date());
+            const [user, setUser] = useState(null);
+            const [loading, setLoading] = useState(true);
+            const [saveStatus, setSaveStatus] = useState('synced');
+            const [errorMessage, setErrorMessage] = useState(null);
             
-            const [game, setGame] = useState(new Chess());
-            const [capturedByThesis, setCapturedByThesis] = useState([]); // Pieces captured by White (Black pieces)
-            const [capturedByCritique, setCapturedByCritique] = useState([]); // Pieces captured by Black (White pieces)
-            const [dialogueStatus, setDialogueStatus] = useState("Awaiting opening thesis...");
-            const [selectedSq, setSelectedSq] = useState(null);
-            const [validMoves, setValidMoves] = useState([]);
+            const [scale, setScale] = useState(1);
+            const [titleFontSize, setTitleFontSize] = useState(10); 
+            const [sectionOrder, setSectionOrder] = useState([0, 1, 2, 3, 4, 5, 6, 7]);
+            const [sectionColors, setSectionColors] = useState(["blue", "emerald", "amber", "purple", "blue", "emerald", "amber", "purple"]);
+            const [activeColorPicker, setActiveColorPicker] = useState(null);
+            const [searchQuery, setSearchQuery] = useState("");
+            
+            const [draggedIndex, setDraggedIndex] = useState(null);
+            const [dragOverIndex, setDragOverIndex] = useState(null);
+            const [draggedCardIndex, setDraggedCardIndex] = useState(null);
+            const [dragOverCardIndex, setDragOverCardIndex] = useState(null);
 
-            const [focalNode, setFocalNode] = useState(null);
-            const [timeRemaining, setTimeRemaining] = useState(5000);
-            const [inputVal, setInputVal] = useState('');
-            const [feedback, setFeedback] = useState(null);
-            const inputRef = useRef(null);
+            const [hoveredNodeKey, setHoveredNodeKey] = useState(null);
+            const [hoveredSymbol, setHoveredSymbol] = useState(null);
 
-            const getSectorIndex = (r, c) => {
-                return Math.floor(r / 2) * 2 + Math.floor(c / 4);
+            const [showAuthModal, setShowAuthModal] = useState(false);
+            const [showAboutModal, setShowAboutModal] = useState(false);
+            const [showImportConfirm, setShowImportConfirm] = useState(null);
+            const [showResetConfirm, setShowResetConfirm] = useState(false);
+            const [resetConfirmInput, setResetConfirmInput] = useState("");
+            
+            const [email, setEmail] = useState('');
+            const [password, setPassword] = useState('');
+            const [isRegistering, setIsRegistering] = useState(false);
+            const [authLoading, setAuthLoading] = useState(false);
+
+            const [selectedNode, setSelectedNode] = useState(null);
+            const [linkingNode, setLinkingNode] = useState(null);
+            const [connections, setConnections] = useState([]);
+            const [nodesData, setNodesData] = useState({});
+            const [sectionTitles, setSectionTitles] = useState([
+                "Cluster 1", "Cluster 2", "Cluster 3", "Cluster 4",
+                "Cluster 5", "Cluster 6", "Cluster 7", "Cluster 8"
+            ]);
+
+            const fileInputRef = useRef(null);
+
+            useEffect(() => {
+                const handleKeyDown = (e) => {
+                    if (e.key === 'Escape') {
+                        setSelectedNode(null);
+                        setActiveColorPicker(null);
+                        setLinkingNode(null);
+                        setSearchQuery(""); // Clear search on Escape
+                    }
+                };
+                window.addEventListener('keydown', handleKeyDown);
+                return () => window.removeEventListener('keydown', handleKeyDown);
+            }, []);
+
+            const getSectionTheme = (colorKey) => {
+                const themes = {
+                    emerald: { color: "text-emerald-400", border: "border-emerald-500/30", bg: "bg-emerald-500/5", dot: "bg-emerald-500" },
+                    amber: { color: "text-amber-400", border: "border-amber-500/30", bg: "bg-amber-500/10", dot: "bg-amber-500" },
+                    blue: { color: "text-blue-400", border: "border-blue-500/30", bg: "bg-blue-500/5", dot: "bg-blue-500" },
+                    purple: { color: "text-purple-400", border: "border-purple-500/30", bg: "bg-purple-500/5", dot: "bg-purple-500" }
+                };
+                return themes[colorKey] || themes.blue;
             };
 
-            const updateSectorColor = (idx, color) => {
-                const newColors = [...sectorColors];
-                newColors[idx] = color;
-                setSectorColors(newColors);
+            const colorOptions = ["emerald", "amber", "blue", "purple"];
+            const quickEmojis = ["🟢", "📗", "🌱", "🧪", "🟡", "💡", "⚠️", "🧩", "🔵", "🔗", "🌐", "⚙️", "🟣", "🌸", "❤️", "🩸"];
+            const symbolMeanings = {
+                "🟢": "Theory: core claim", "📗": "Theory: conceptual grounding", "🌱": "Theory: emergence", "🧪": "Theory: conceptual example",
+                "🟡": "Fix: clarification required", "💡": "Fix: provisional insight", "⚠️": "Fix: theoretical limitation", "🧩": "Fix: puzzle - research!",
+                "🔵": "Texts: scholarly ref.", "🔗": "Texts: explicit linkage", "🌐": "Texts: networked discourse", "⚙️": "Texts: Methodological operation",
+                "🟣": "Data: key analytical data", "🌸": "Data: culturally significant data", "❤️": "Data: effective or identity data", "🩸": "Data: high-stakes"
             };
 
-            const evaluateMove = (gameCopy, move) => {
-                const testGame = new Chess(gameCopy.fen());
-                testGame.move(move);
-                let score = 0;
-                const pieceValues = { p: 1, n: 3, b: 3, r: 5, q: 9, k: 0 };
-                
-                testGame.board().forEach(row => {
-                    row.forEach(square => {
-                        if (square) {
-                            const value = pieceValues[square.type];
-                            score += square.color === 'b' ? value : -value;
+            useEffect(() => {
+                const timer = setInterval(() => setTime(new Date()), 1000);
+                return () => clearInterval(timer);
+            }, []);
+
+            const gmtString = time.toLocaleTimeString('en-GB', { 
+                timeZone: 'GMT', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false 
+            });
+
+            useEffect(() => {
+                const handleResize = () => {
+                    const sidebarWidth = window.innerWidth > 1200 ? 450 : (window.innerWidth > 1024 ? 380 : 320);
+                    const headerHeight = 64;
+                    const padding = window.innerHeight < 800 ? 30 : 60; 
+                    const availableWidth = window.innerWidth - sidebarWidth - padding; 
+                    const availableHeight = window.innerHeight - headerHeight - padding;
+                    const baseWidth = 980;
+                    const baseHeight = 780;
+                    const scaleW = availableWidth / baseWidth;
+                    const scaleH = availableHeight / baseHeight;
+                    setScale(Math.min(scaleW, scaleH, 1));
+                };
+                window.addEventListener('resize', handleResize);
+                handleResize();
+                return () => window.removeEventListener('resize', handleResize);
+            }, []);
+
+            useEffect(() => {
+                const performAuth = async () => {
+                    try {
+                        if (isCanvasEnv && typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                            await auth.signInWithCustomToken(__initial_auth_token);
+                        } else if (!auth.currentUser) {
+                            await auth.signInAnonymously();
                         }
-                    });
+                    } catch (err) { console.error(err); }
+                };
+                performAuth();
+                const unsubscribe = auth.onAuthStateChanged((u) => {
+                    setUser(u);
+                    setLoading(false);
                 });
+                return () => unsubscribe();
+            }, []);
 
-                if (move.captured) score += pieceValues[move.captured] * 2;
-                if (testGame.in_check()) score += 3;
-                if (testGame.in_checkmate()) score += 1000;
+            useEffect(() => {
+                if (!user) return;
+                const docRef = isCanvasEnv 
+                    ? db.collection('artifacts').doc(platformAppId).collection('users').doc(user.uid).collection('state').doc('memoryWeb')
+                    : db.collection('thesis_data').doc(platformAppId).collection('users').doc(user.uid);
                 
-                const centerSquares = ['d4', 'd5', 'e4', 'e5'];
-                if (centerSquares.includes(move.to)) score += 0.5;
+                const unsubscribe = docRef.onSnapshot((docSnap) => {
+                    if (docSnap.exists) {
+                        const data = docSnap.data();
+                        if (data.nodesData) setNodesData(data.nodesData);
+                        if (data.connections) setConnections(data.connections);
+                        if (data.sectionTitles) setSectionTitles(data.sectionTitles);
+                        if (data.sectionOrder) setSectionOrder(data.sectionOrder);
+                        if (data.sectionColors) setSectionColors(data.sectionColors);
+                        if (data.titleFontSize) setTitleFontSize(data.titleFontSize);
+                    }
+                    setLoading(false);
+                }, (err) => {
+                    setErrorMessage("Connection Error: Update rules or check internet.");
+                    setLoading(false);
+                });
+                return () => unsubscribe();
+            }, [user]);
 
-                return score;
+            const saveData = async (updates = {}) => {
+                if (!user) return;
+                setSaveStatus('saving');
+                try {
+                    const docRef = isCanvasEnv 
+                        ? db.collection('artifacts').doc(platformAppId).collection('users').doc(user.uid).collection('state').doc('memoryWeb')
+                        : db.collection('thesis_data').doc(platformAppId).collection('users').doc(user.uid);
+
+                    const finalData = {
+                        nodesData: updates.nodesData !== undefined ? updates.nodesData : nodesData,
+                        sectionTitles: updates.sectionTitles !== undefined ? updates.sectionTitles : sectionTitles,
+                        connections: updates.connections !== undefined ? updates.connections : connections,
+                        sectionOrder: updates.sectionOrder !== undefined ? updates.sectionOrder : sectionOrder,
+                        sectionColors: updates.sectionColors !== undefined ? updates.sectionColors : sectionColors,
+                        titleFontSize: updates.titleFontSize !== undefined ? updates.titleFontSize : titleFontSize,
+                        lastUpdated: new Date().toISOString()
+                    };
+
+                    await docRef.set(finalData, { merge: true });
+                    setSaveStatus('synced');
+                } catch (err) {
+                    console.error(err);
+                    setSaveStatus('error');
+                }
             };
 
-            const selectAiMove = (moves) => {
-                if (aiStrategy === 'random') return moves[Math.floor(Math.random() * moves.length)];
-                const movesWithScores = moves.map(move => ({ move, score: evaluateMove(game, move) }));
-                movesWithScores.sort((a, b) => b.score - a.score);
-                const candidatePool = movesWithScores.slice(0, 3);
-                return candidatePool[Math.floor(Math.random() * candidatePool.length)].move;
+            const exportData = () => {
+                const dataToExport = {
+                    version: "0.24", timestamp: new Date().toISOString(),
+                    payload: { nodesData, sectionTitles, connections, sectionOrder, sectionColors, titleFontSize }
+                };
+                const blob = new Blob([JSON.stringify(dataToExport, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `thesis-memory-web-backup-${new Date().toISOString().split('T')[0]}.json`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
             };
 
-            const performMove = useCallback((move) => {
-                const gameCopy = new Chess(game.fen());
-                const result = gameCopy.move(move);
-                if (result) {
-                    setGame(gameCopy);
-                    if (gameCopy.game_over()) {
-                        let outcome = "Inquiry Concluded: ";
-                        if (gameCopy.in_checkmate()) outcome += (result.color === 'w' ? "Thesis Defended (Checkmate)" : "Critique Prevails (Checkmate)");
-                        else if (gameCopy.in_draw()) outcome += "Synthesis Achieved (Draw)";
-                        setDialogueStatus(outcome);
-                    } else {
-                        if (result.captured) {
-                            const side = result.color === 'w' ? 'Thesis' : 'Examiner';
-                            // Store the glyph instead of emoji hint
-                            const capturedColor = result.color === 'w' ? 'b' : 'w';
-                            const pieceGlyph = GLYPHS[capturedColor + result.captured.toUpperCase()];
+            const exportMarkdown = () => {
+                let md = `# Thesis Memory Web: Research Outline\nExported: ${new Date().toLocaleString()}\n\n---\n\n`;
+                sectionOrder.forEach(sIdx => {
+                    md += `## Cluster: ${sectionTitles[sIdx]}\n\n`;
+                    let hasContent = false;
+                    for(let nIdx=0; nIdx<8; nIdx++) {
+                        const key = getNodeKey(sIdx, nIdx);
+                        const data = nodesData[key];
+                        if (data?.concept || data?.notes) {
+                            hasContent = true;
+                            md += `### Node ${getGlobalIndex(sIdx, nIdx)}: ${data.emoji || ''} ${data.concept || 'Untitled'}\n`;
+                            if (data.citation) md += `**Citation:** ${data.citation}\n\n`;
+                            if (data.notes) md += `**Notes:**\n${data.notes}\n\n`;
                             
-                            if (result.color === 'w') {
-                                setCapturedByThesis(prev => [...prev, { glyph: pieceGlyph, color: capturedColor }]);
-                            } else {
-                                setCapturedByCritique(prev => [...prev, { glyph: pieceGlyph, color: capturedColor }]);
+                            const myConns = connections.filter(c => c.includes(key));
+                            if (myConns.length > 0) {
+                                md += `*Threads:* `;
+                                const threadNames = myConns.map(c => {
+                                    const otherKey = c.split(':').find(k => k !== key);
+                                    const [oSIdx, oNIdx] = otherKey.split('-').map(Number);
+                                    return `${sectionTitles[oSIdx]} #${getGlobalIndex(oSIdx, oNIdx)}`;
+                                });
+                                md += threadNames.join(', ') + `\n\n`;
                             }
-                            setDialogueStatus(`${side} addressed the ${PIECE_NAMES[result.captured]} point via ${PIECE_NAMES[result.piece]}.`);
-                        } else {
-                            setDialogueStatus(`${result.color === 'w' ? 'Thesis' : 'Examiner'} positioned ${PIECE_NAMES[result.piece]} at ${result.to}.`);
                         }
                     }
-                    return true;
-                }
-                return false;
-            }, [game]);
-
-            useEffect(() => {
-                if (dialecticMode && game.turn() === 'b' && !game.game_over()) {
-                    const timer = setTimeout(() => {
-                        const moves = game.moves({ verbose: true });
-                        if (moves.length) performMove(selectAiMove(moves));
-                    }, 800);
-                    return () => clearTimeout(timer);
-                }
-            }, [game, dialecticMode, performMove, aiStrategy]);
-
-            const onSqSelect = (sq) => {
-                if (!dialecticMode || game.game_over() || game.turn() === 'b') return;
-                const p = game.get(sq);
-                if (p && p.color === 'w') {
-                    setSelectedSq(sq);
-                    setValidMoves(game.moves({ square: sq, verbose: true }).map(m => m.to));
-                } else if (selectedSq) {
-                    performMove({ from: selectedSq, to: sq, promotion: 'q' });
-                    setSelectedSq(null);
-                    setValidMoves([]);
-                }
+                    if (!hasContent) md += `*No nodes mapped in this cluster.*\n\n`;
+                    md += `---\n\n`;
+                });
+                const blob = new Blob([md], { type: 'text/markdown' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `thesis-narrative-outline-${new Date().toISOString().split('T')[0]}.md`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
             };
 
-            const beginIntegration = () => {
-                setStats({ correct: 0, total: 1 });
-                setIsFinished(false);
-                setIntegrationMode(true);
-                setDialecticMode(false);
-                nextFocalPoint();
+            const handleImportClick = () => { fileInputRef.current?.click(); };
+            const handleFileChange = (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    try {
+                        const json = JSON.parse(event.target.result);
+                        if (json.payload && json.payload.nodesData) { setShowImportConfirm(json.payload); } 
+                        else { setErrorMessage("Invalid backup file format."); }
+                    } catch (err) { setErrorMessage("Error reading backup file."); }
+                };
+                reader.readAsText(file);
+                e.target.value = '';
             };
 
-            const nextFocalPoint = () => {
-                setFocalNode(Math.floor(Math.random() * 64) + 1);
-                setFeedback(null);
-                setTimeRemaining(5000);
-                setInputVal('');
-                setTimeout(() => inputRef.current?.focus(), 100);
+            const applyImport = () => {
+                if (!showImportConfirm) return;
+                const { nodesData, sectionTitles, connections, sectionOrder, sectionColors, titleFontSize } = showImportConfirm;
+                setNodesData(nodesData); setSectionTitles(sectionTitles); setConnections(connections); setSectionOrder(sectionOrder);
+                if (sectionColors) setSectionColors(sectionColors); setTitleFontSize(titleFontSize);
+                saveData({ nodesData, sectionTitles, connections, sectionOrder, sectionColors, titleFontSize });
+                setShowImportConfirm(null); setSelectedNode(null);
             };
 
-            useEffect(() => {
-                let interval;
-                if (integrationMode && !feedback && !isFinished && timeRemaining > 0) {
-                    interval = setInterval(() => setTimeRemaining(t => t - 100), 100);
-                } else if (timeRemaining <= 0 && !feedback && integrationMode && !isFinished) {
-                    evaluate(false, "Timeout");
-                }
-                return () => clearInterval(interval);
-            }, [integrationMode, timeRemaining, feedback, isFinished]);
-
-            const evaluate = (success, msg) => {
-                const targetSector = getSectorIndex(Math.floor((focalNode - 1) / 8), (focalNode - 1) % 8) + 1;
-                const newTotal = stats.total + 1;
-                if (newTotal > 8) {
-                    setStats(s => ({ ...s, correct: success ? s.correct + 1 : s.correct }));
-                    setFeedback({ success, message: success ? "Integrated Successfully" : `Error. Sector: ${targetSector}` });
-                    setTimeout(() => setIsFinished(true), 1500);
-                } else {
-                    setStats(s => ({ ...s, total: newTotal, correct: success ? s.correct + 1 : s.correct }));
-                    setFeedback({ success, message: success ? "Integrated Successfully" : `Error. Sector: ${targetSector}` });
-                    setTimeout(nextFocalPoint, success ? 800 : 2000);
-                }
+            const resetWeb = () => {
+                if (resetConfirmInput !== 'Y') return;
+                const blankData = {
+                    nodesData: {}, connections: [],
+                    sectionTitles: ["Cluster 1", "Cluster 2", "Cluster 3", "Cluster 4", "Cluster 5", "Cluster 6", "Cluster 7", "Cluster 8"],
+                    sectionOrder: [0, 1, 2, 3, 4, 5, 6, 7],
+                    sectionColors: ["blue", "emerald", "amber", "purple", "blue", "emerald", "amber", "purple"],
+                    titleFontSize: 10
+                };
+                setNodesData(blankData.nodesData); setConnections(blankData.connections); setSectionTitles(blankData.sectionTitles);
+                setSectionOrder(blankData.sectionOrder); setSectionColors(blankData.sectionColors); setTitleFontSize(blankData.titleFontSize);
+                saveData(blankData); setShowResetConfirm(false); setResetConfirmInput(""); setSelectedNode(null);
             };
 
-            const getSqId = (r, c) => String.fromCharCode(97 + c) + (8 - r);
+            const handleEmailAuth = async (e) => {
+                e.preventDefault(); setErrorMessage(null); setAuthLoading(true);
+                try {
+                    if (isRegistering) { await auth.createUserWithEmailAndPassword(email, password); } 
+                    else { await auth.signInWithEmailAndPassword(email, password); }
+                    setShowAuthModal(false);
+                } catch (err) { setErrorMessage(err.message); } finally { setAuthLoading(false); }
+            };
+
+            const handleLogout = () => { auth.signOut(); setSelectedNode(null); setErrorMessage(null); };
+
+            const handleDragStart = (e, index) => {
+                setDraggedIndex(index); e.dataTransfer.effectAllowed = 'move';
+                const img = new Image(); img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+                e.dataTransfer.setDragImage(img, 0, 0);
+            };
+
+            const handleDragOver = (e, index) => { e.preventDefault(); if (draggedIndex !== index) setDragOverIndex(index); };
+
+            const handleDrop = (e, targetIndex) => {
+                e.preventDefault(); setDragOverIndex(null);
+                if (draggedIndex === null || draggedIndex === targetIndex) { setDraggedIndex(null); return; }
+                const newOrder = [...sectionOrder];
+                const item = newOrder.splice(draggedIndex, 1)[0];
+                newOrder.splice(targetIndex, 0, item);
+                setSectionOrder(newOrder); setDraggedIndex(null); saveData({ sectionOrder: newOrder });
+            };
+
+            const handleCardDragStart = (e, index) => { setDraggedCardIndex(index); e.dataTransfer.effectAllowed = 'move'; };
+            const handleCardDragOver = (e, index) => { e.preventDefault(); setDragOverCardIndex(index); };
+            const handleCardDrop = (e, targetIndex, sortedConnections, nodeKey) => {
+                e.preventDefault(); const sourceIndex = draggedCardIndex; setDraggedCardIndex(null); setDragOverCardIndex(null);
+                if (sourceIndex === null || sourceIndex === targetIndex) return;
+                const newSorted = [...sortedConnections]; const [moved] = newSorted.splice(sourceIndex, 1); newSorted.splice(targetIndex, 0, moved);
+                const updatedNodes = { ...nodesData, [nodeKey]: { ...(nodesData[nodeKey] || {}), connectionOrder: newSorted } };
+                setNodesData(updatedNodes); saveData({ nodesData: updatedNodes });
+            };
+
+            const getNodeKey = (sIdx, nIdx) => `${sIdx}-${nIdx}`;
+            const getGlobalIndex = (sIdx, nIdx) => (sIdx * 8) + nIdx + 1;
+
+            const handleNodeClick = (sIdx, nIdx) => {
+                const key = getNodeKey(sIdx, nIdx); setActiveColorPicker(null);
+                if (linkingNode) {
+                    if (linkingNode !== key) {
+                        const newConn = [linkingNode, key].sort().join(':');
+                        if (!connections.includes(newConn)) {
+                            const updatedConns = [...connections, newConn]; setConnections(updatedConns); saveData({ connections: updatedConns });
+                        }
+                    }
+                    setLinkingNode(null);
+                } else { setSelectedNode({ sIdx, nIdx }); }
+            };
+
+            const removeConnection = (connStr) => {
+                const updated = connections.filter(c => c !== connStr); setConnections(updated);
+                if (selectedNode) {
+                    const nodeKey = getNodeKey(selectedNode.sIdx, selectedNode.nIdx);
+                    const oldOrder = nodesData[nodeKey]?.connectionOrder || [];
+                    const newOrder = oldOrder.filter(c => c !== connStr);
+                    const updatedNodes = { ...nodesData, [nodeKey]: { ...(nodesData[nodeKey] || {}), connectionOrder: newOrder } };
+                    setNodesData(updatedNodes); saveData({ connections: updated, nodesData: updatedNodes });
+                } else { saveData({ connections: updated }); }
+            };
+
+            const updateNodeData = (field, value) => {
+                if (!selectedNode) return;
+                const key = getNodeKey(selectedNode.sIdx, selectedNode.nIdx);
+                const updatedNodes = { ...nodesData, [key]: { ...(nodesData[key] || {}), [field]: value } };
+                setNodesData(updatedNodes); saveData({ nodesData: updatedNodes });
+            };
+
+            const updateSectionTitle = (index, value) => {
+                const newTitles = [...sectionTitles]; newTitles[index] = value;
+                setSectionTitles(newTitles); saveData({ sectionTitles: newTitles });
+            };
+
+            const changeSectionColor = (index, color) => {
+                const newColors = [...sectionColors]; newColors[index] = color;
+                setSectionColors(newColors); saveData({ sectionColors: newColors }); setActiveColorPicker(null);
+            };
+
+            const toggleColorPicker = (e, index) => { e.stopPropagation(); setActiveColorPicker(activeColorPicker === index ? null : index); };
+            const adjustFontSize = (dir) => {
+                const newSize = Math.max(6, Math.min(32, titleFontSize + dir));
+                setTitleFontSize(newSize); saveData({ titleFontSize: newSize });
+            }
+
+            if (loading && !errorMessage) return <div className="h-screen flex items-center justify-center font-mono text-xs text-indigo-500 bg-[#020204]">Initialising Web...</div>;
+
+            const scaledHeight = 780 * scale + 80;
+            const viewportHeight = window.innerHeight - 64; 
+            const topMargin = scaledHeight < viewportHeight ? (viewportHeight - scaledHeight) / 2 : 0;
 
             return (
-                <div className="min-h-screen p-4 md:p-10 flex flex-col items-center">
-                    <div className="max-w-6xl w-full">
-                        <header className="flex flex-col md:flex-row items-center justify-between gap-6 mb-6">
-                            <div className="flex items-center gap-5">
-                                <div className="w-14 h-14 bg-slate-800 rounded-2xl flex items-center justify-center border border-white/10">
-                                    <Icon name="BookOpen" size={28} className="text-white" />
-                                </div>
-                                <div>
-                                    <h1 className="text-2xl font-black tracking-tight leading-none mb-1 uppercase">Thesis Integration Workspace</h1>
-                                    <div className="flex items-center gap-3">
-                                        <a href="thesis-memory-web.html" className="text-[10px] font-bold uppercase text-slate-500 hover:text-white transition-colors">← Thesis Memory Web</a>
-                                        <span className="text-[10px] font-bold uppercase text-slate-600">v3.1.0</span>
+                <div className="h-screen flex flex-col font-sans bg-[#020204] overflow-hidden">
+                    <header className="p-4 border-b border-white/5 flex justify-between items-center bg-[#050508]/80 backdrop-blur-xl z-50 relative">
+                        <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-600/20">
+                                <Icon name="Network" size={22} className="text-white" />
+                            </div>
+                            <div className="flex flex-col">
+                                <h1 className="text-sm font-bold tracking-widest uppercase text-slate-200">Thesis Memory Web v0.3 🌌</h1>
+                                <div className="flex items-center gap-2 mt-0.5">
+                                    <div className="flex items-center gap-1.5 shrink-0">
+                                        <button onClick={() => adjustFontSize(-1)} className="w-5 h-5 flex items-center justify-center bg-white/5 hover:bg-white/10 rounded border border-white/10 text-xs transition-transform active:scale-90">-</button>
+                                        <button onClick={() => adjustFontSize(1)} className="w-5 h-5 flex items-center justify-center bg-white/5 hover:bg-white/10 rounded border border-white/10 text-xs transition-transform active:scale-90">+</button>
+                                        <span className="text-[10px] font-mono font-bold text-slate-500 ml-1 min-w-[28px] tracking-tighter">{titleFontSize}pt</span>
+                                    </div>
+                                    <div className="h-3 w-px bg-white/10 mx-1 shrink-0" />
+                                    <div className={`text-[10px] uppercase font-bold shrink-0 ${saveStatus === 'synced' ? 'text-emerald-500' : 'text-indigo-400'}`}>
+                                        {saveStatus === 'saving' ? 'Syncing...' : 'Cloud Active'}
                                     </div>
                                 </div>
                             </div>
-                            
-                            <div className="flex items-center gap-3">
-                                <button onClick={() => { setDialecticMode(!dialecticMode); setIntegrationMode(false); setSelectedSq(null); setValidMoves([]); }} className={`px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${dialecticMode ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-slate-400'}`}>
-                                    <Icon name="MessageSquare" size={14} className="inline mr-2"/> {dialecticMode ? 'Inquiry Active' : 'Inquiry Mode'}
-                                </button>
-                                <button onClick={integrationMode ? () => setIntegrationMode(false) : beginIntegration} className={`px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${integrationMode ? 'bg-red-500/10 text-red-400 border border-red-500/20' : 'bg-white text-slate-900 shadow-lg'}`}>
-                                    <Icon name={integrationMode ? "Square" : "Zap"} size={14} className="inline mr-2"/> {integrationMode ? 'Conclude' : 'Memory Sprint'}
-                                </button>
-                            </div>
-                        </header>
-
-                        <div className="bg-white/5 border border-white/10 rounded-2xl p-4 mb-8 text-[11px] leading-relaxed text-slate-400 max-w-2xl shadow-xl">
-                            <strong className="text-white block mb-1 uppercase tracking-wider">About this Workspace</strong>
-                            This dialectical engine facilitates cognitive mapping through strategic engagement. By pairing traditional chess mechanics with symbolic vectors, users reinforce memory clusters while refining theoretical synthesis in the Dialectic Mode. 4x2 sector grids allow for segmented focus during integration.
                         </div>
 
-                        <div className="grid lg:grid-cols-[1fr_360px] gap-8 items-start">
-                            <div className="space-y-4">
-                                {dialecticMode && (
-                                    <div className="flex items-center justify-between px-2">
-                                        <span className="text-[9px] font-black uppercase tracking-widest text-slate-500">Examiner Critiques</span>
-                                        <div className="tray-area flex-1 max-w-[280px]">
-                                            {capturedByCritique.map((p, i) => (
-                                                <span key={i} className={`text-xl leading-none ${p.color === 'w' ? 'text-white' : 'text-slate-500'}`}>
-                                                    {p.glyph}
-                                                </span>
-                                            ))}
-                                        </div>
-                                    </div>
-                                )}
+                        {/* CENTERED SUBTLE SEARCH */}
+                        <div className="absolute left-1/2 -translate-x-1/2 hidden md:flex items-center bg-black/60 border border-white/5 rounded-xl px-4 py-1.5 gap-2 focus-within:bg-black focus-within:border-indigo-500/30 transition-all">
+                            <Icon name="Search" size={12} className="text-slate-400" />
+                            <input 
+                                type="text" 
+                                placeholder="search memory web" 
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="bg-transparent border-none outline-none text-[10px] font-medium text-slate-400 placeholder:text-slate-600 w-48 tracking-wider lowercase"
+                            />
+                            {searchQuery && <button onClick={() => setSearchQuery("")} className="text-slate-400 hover:text-white transition-colors"><Icon name="X" size={12}/></button>}
+                        </div>
 
-                                <div className={`bg-slate-900/60 p-1.5 rounded-[2.5rem] border border-white/5 shadow-2xl board-visual-state ${integrationMode && !isFinished ? 'opacity-10 grayscale' : 'opacity-100'}`}>
-                                    <div className="p-3 bg-black/40 rounded-[2rem] border border-white/5 relative overflow-hidden">
-                                        <div className="grid grid-rows-8 gap-1.5 relative z-10">
-                                            {Array.from({ length: 8 }).map((_, rIdx) => (
-                                                <div key={rIdx} className="grid grid-cols-8 gap-1.5">
-                                                    {Array.from({ length: 8 }).map((_, cIdx) => {
-                                                        const nodeNum = (rIdx * 8) + cIdx + 1;
-                                                        const sectorIdx = getSectorIndex(rIdx, cIdx);
-                                                        const color = sectorColors[sectorIdx];
-                                                        const sqId = getSqId(rIdx, cIdx);
-                                                        const p = game.get(sqId);
-                                                        const isLandmark = nodeNum % 8 === 0;
-                                                        const isLight = (rIdx + cIdx) % 2 === 0;
+                        <div className="flex items-center gap-6">
+                            <button onClick={() => setShowAboutModal(true)} className="flex flex-col items-center gap-0.5 group">
+                                <span className="text-[8px] text-slate-600 uppercase font-bold tracking-widest group-hover:text-indigo-400 transition-colors">Documentation</span>
+                                <div className="flex items-center gap-1.5 bg-white/5 hover:bg-white/10 border border-white/10 px-3 py-1 rounded-lg transition-all">
+                                    <Icon name="Info" size={12} className="text-indigo-400" />
+                                    <span className="text-[10px] font-bold text-slate-300">ABOUT</span>
+                                </div>
+                            </button>
+
+                            <div className="flex flex-col items-end pr-4 border-r border-white/10">
+                                <span className="text-[8px] text-slate-600 uppercase font-bold tracking-widest">GMT/UTC</span>
+                                <span className="text-[12px] text-cyan-400 font-mono font-bold tracking-tighter">{gmtString}</span>
+                            </div>
+                            <div className="flex items-center gap-4">
+                                {user && !user.isAnonymous ? (
+                                    <div className="flex items-center gap-3 text-right">
+                                        <div className="hidden md:flex flex-col">
+                                            <span className="text-[9px] text-slate-600 uppercase font-bold tracking-tighter">Verified User</span>
+                                            <span className="text-[10px] text-indigo-400 font-mono">{user.email}</span>
+                                        </div>
+                                        <button onClick={handleLogout} className="p-2 hover:bg-white/5 rounded-lg text-slate-500 hover:text-red-400 transition-colors">
+                                            <Icon name="LogOut" size={18} />
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <button onClick={() => setShowAuthModal(true)} className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-lg">
+                                        <Icon name="LogIn" size={14} /> SYNC ACCOUNT
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+                    </header>
+
+                    <main className="flex-1 flex overflow-hidden">
+                        <section className={`flex-1 relative node-grid-bg workspace-container ${draggedIndex !== null ? 'dragging-active' : ''}`}>
+                            <div id="scaling-wrapper" style={{ transform: `scale(${scale})`, marginTop: `${topMargin}px` }} onClick={(e) => e.stopPropagation()}>
+                                <div id="grid-container" className="grid grid-cols-2 gap-8 p-10 bg-black/40 rounded-[4rem] border border-white/5 backdrop-blur-md shadow-2xl relative">
+                                    {errorMessage && !showAuthModal && (
+                                        <div className="absolute -top-12 left-0 right-0 text-center text-red-400 text-[10px] bg-red-500/10 p-2 rounded-lg border border-red-500/50 flex items-center justify-center gap-2 z-50">
+                                            <Icon name="AlertCircle" size={12} /> {errorMessage} 
+                                            <button onClick={() => setErrorMessage(null)} className="hover:text-white"><Icon name="X" size={12} /></button>
+                                        </div>
+                                    )}
+                                    {sectionOrder.map((sectionId, displayIdx) => {
+                                        const theme = getSectionTheme(sectionColors[sectionId]);
+                                        const isPickerOpen = activeColorPicker === sectionId;
+                                        const isDragged = draggedIndex === displayIdx;
+                                        const isDragOver = dragOverIndex === displayIdx;
+
+                                        return (
+                                            <div key={sectionId} 
+                                                onDragOver={(e) => handleDragOver(e, displayIdx)}
+                                                onDragLeave={() => setDragOverIndex(null)}
+                                                onDrop={(e) => handleDrop(e, displayIdx)}
+                                                className={`cluster-card p-5 rounded-3xl border ${theme.bg} ${theme.border} flex flex-col gap-4 shadow-inner node-transition relative group/section ${isDragged ? 'drag-ghost' : ''} ${isDragOver ? 'drag-over-target' : ''}`}
+                                            >
+                                                <div className="flex items-center justify-between">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className={`font-bold uppercase tracking-widest transition-colors ${theme.color}`} style={{ fontSize: `${titleFontSize}px` }}>
+                                                            {sectionTitles[sectionId]}
+                                                        </div>
+                                                        <div className="relative flex items-center">
+                                                            <button onClick={(e) => toggleColorPicker(e, sectionId)}
+                                                                className={`p-1 rounded-md hover:bg-white/10 transition-colors ${isPickerOpen ? 'text-indigo-400 bg-white/5' : 'text-slate-300 opacity-80 group-hover/section:opacity-100'}`}>
+                                                                <Icon name="Palette" size={12} />
+                                                            </button>
+                                                            {isPickerOpen && (
+                                                                <div className="absolute left-0 top-full mt-2 flex items-center gap-1.5 bg-black/80 backdrop-blur-xl border border-white/10 p-1.5 rounded-full shadow-2xl z-[60] animate-in fade-in zoom-in-95 duration-200">
+                                                                    {colorOptions.map(c => (
+                                                                        <button key={c} onClick={() => changeSectionColor(sectionId, c)}
+                                                                            className={`w-3.5 h-3.5 rounded-full transition-all hover:scale-125 ${c === "emerald" ? 'bg-emerald-500' : c === "amber" ? 'bg-amber-500' : c === "blue" ? 'bg-blue-500' : 'bg-purple-500'} ${sectionColors[sectionId] === c ? 'ring-2 ring-white scale-110 shadow-[0_0_8px_rgba(255,255,255,0.4)]' : 'opacity-40 hover:opacity-100'}`}
+                                                                        />
+                                                                    ))}
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                    <div draggable="true" onDragStart={(e) => { e.stopPropagation(); handleDragStart(e, displayIdx); }} className="cursor-grab active:cursor-grabbing opacity-70 hover:opacity-100 transition-opacity p-1">
+                                                        <Icon name="GripHorizontal" size={14} className="text-white/60" />
+                                                    </div>
+                                                </div>
+                                                <div className="grid grid-cols-4 gap-3">
+                                                    {Array.from({ length: 8 }).map((_, nIdx) => {
+                                                        const key = getNodeKey(sectionId, nIdx);
+                                                        const selected = selectedNode?.sIdx === sectionId && selectedNode?.nIdx === nIdx;
+                                                        const hasConcept = !!nodesData[key]?.concept;
+                                                        const conceptText = nodesData[key]?.concept || "";
+                                                        const emoji = nodesData[key]?.emoji;
+                                                        const isLinked = connections.some(c => c.includes(key));
+                                                        const isLinkingSource = linkingNode === key;
+
+                                                        const isSearchMatch = searchQuery && (
+                                                            conceptText.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                                                            (nodesData[key]?.notes || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+                                                            (nodesData[key]?.citation || "").toLowerCase().includes(searchQuery.toLowerCase())
+                                                        );
+                                                        const searchDimmed = searchQuery && !isSearchMatch;
 
                                                         return (
-                                                            <div key={cIdx} onClick={() => onSqSelect(sqId)} className={`aspect-square rounded-lg border flex items-center justify-center relative transition-all duration-200 ${isLight ? 'tile-light' : 'tile-dark'} ${selectedSq === sqId ? 'ring-2 ring-indigo-500 z-20 scale-105' : ''} ${colorClasses[color]} ${integrationMode && focalNode === nodeNum ? 'ring-4 ring-white shadow-2xl scale-110 z-20' : ''} ${dialecticMode ? 'cursor-pointer' : 'cursor-default'}`}>
-                                                                <span className={`absolute top-0.5 left-1 text-[8px] font-mono font-bold opacity-30 ${isLandmark ? 'opacity-90 font-black text-white' : ''}`}>{nodeNum}</span>
-                                                                {dialecticMode && validMoves.includes(sqId) && <div className="absolute inset-0 flex items-center justify-center"><div className="w-1.5 h-1.5 bg-indigo-500/50 rounded-full" /></div>}
-                                                                {dialecticMode && p && (
-                                                                    <span className={`chess-piece ${p.color === 'w' ? 'white-piece' : 'black-piece'}`}>
-                                                                        {GLYPHS[p.color + p.type.toUpperCase()]}
-                                                                    </span>
+                                                            <button key={nIdx} id={`node-${sectionId}-${nIdx}`} onClick={(e) => { e.stopPropagation(); handleNodeClick(sectionId, nIdx); }} 
+                                                                onMouseEnter={() => setHoveredNodeKey(key)} onMouseLeave={() => setHoveredNodeKey(null)}
+                                                                className={`w-12 h-12 rounded-2xl flex flex-col items-center justify-center transition-all duration-300 relative ${selected ? 'bg-white/10 ring-2 ring-indigo-500 scale-110 z-10 shadow-[0_0_20px_rgba(79,70,229,0.4)]' : 'bg-[#0a0a0f] border border-white/5 hover:border-white/20'} ${isLinkingSource ? 'animate-pulse ring-2 ring-emerald-500' : ''} ${searchDimmed ? 'opacity-10 grayscale' : ''} ${isSearchMatch ? 'ring-2 ring-indigo-400 scale-105 z-10 shadow-[0_0_15px_rgba(99,102,241,0.5)]' : ''}`}>
+                                                                <span className={`font-mono mb-1 ${selected ? 'text-indigo-300' : 'text-slate-400'}`} style={{ fontSize: `${Math.max(titleFontSize, 9)}px` }}>{getGlobalIndex(sectionId, nIdx)}</span>
+                                                                <div className="h-4 flex items-center justify-center">{emoji ? <span className="text-base leading-none">{emoji}</span> : <div className={`w-2 h-2 rounded-full transition-all duration-500 ${hasConcept ? theme.dot : 'bg-slate-600'}`} />}</div>
+                                                                {isLinked && <div className="absolute inset-2 rounded-xl border border-indigo-500/20 pointer-events-none" />}
+                                                                {hoveredNodeKey === key && conceptText && (
+                                                                    <div className="absolute bottom-full mb-3 left-1/2 -translate-x-1/2 px-4 py-3 bg-[#000000] border border-indigo-500/40 rounded-xl shadow-2xl z-[200] pointer-events-none backdrop-blur-xl tooltip-animate text-center ring-1 ring-white/5" 
+                                                                         style={{ 
+                                                                            minWidth: `${160 + (titleFontSize - 10) * 5}px`, 
+                                                                            maxWidth: `${280 + (titleFontSize - 10) * 10}px`,
+                                                                            transform: `translateX(-50%) scale(${1 / scale})`,
+                                                                            transformOrigin: 'bottom center'
+                                                                         }}>
+                                                                        <div className="flex items-center justify-center gap-1.5 mb-1.5 opacity-50">
+                                                                            <Icon name="Brain" size={Math.max(8, titleFontSize - 2)} className="text-indigo-400" />
+                                                                            <span className="text-indigo-300 uppercase font-black tracking-widest text-[8px]">Cognitive Core</span>
+                                                                        </div>
+                                                                        <div className="text-slate-100 leading-tight font-medium italic break-words" style={{ fontSize: `${titleFontSize + 3}px` }}>"{conceptText}"</div>
+                                                                        <div className="absolute top-full left-1/2 -translate-x-1/2 border-[6px] border-transparent border-t-[#000000]" />
+                                                                    </div>
                                                                 )}
-                                                                {!dialecticMode && <span className={`text-xl font-black tracking-tighter number-glow opacity-90 ${isLandmark ? 'scale-110 text-white' : ''}`}>{nodeNum}</span>}
-                                                            </div>
+                                                            </button>
                                                         );
                                                     })}
                                                 </div>
-                                            ))}
-                                        </div>
-                                    </div>
+                                            </div>
+                                        );
+                                    })}
                                 </div>
-
-                                {dialecticMode && (
-                                    <div className="flex items-center justify-between px-2">
-                                        <div className="tray-area flex-1 max-w-[280px]">
-                                            {capturedByThesis.map((p, i) => (
-                                                <span key={i} className={`text-xl leading-none ${p.color === 'w' ? 'text-white' : 'text-slate-500'}`}>
-                                                    {p.glyph}
-                                                </span>
-                                            ))}
-                                        </div>
-                                        <span className="text-[9px] font-black uppercase tracking-widest text-indigo-400">Thesis Synthesis</span>
-                                    </div>
-                                )}
                             </div>
+                        </section>
 
-                            <aside className="space-y-6">
-                                <div className="legend-card space-y-4">
-                                    <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 mb-4 flex items-center gap-3">
-                                        <Icon name="Compass" size={14} className="text-indigo-400" /> Dialectical Symbols
-                                    </h3>
-                                    <div className="grid grid-cols-2 gap-3">
-                                        <div className="flex items-center gap-3 bg-white/5 p-2 rounded-xl">
-                                            <span className="text-xl">🟢</span>
-                                            <span className="text-[9px] font-bold uppercase text-slate-400">King</span>
-                                        </div>
-                                        <div className="flex items-center gap-3 bg-white/5 p-2 rounded-xl">
-                                            <span className="text-xl">📗</span>
-                                            <span className="text-[9px] font-bold uppercase text-slate-400">Queen</span>
-                                        </div>
-                                    </div>
-                                    <div className="space-y-2">
-                                        <span className="text-[8px] font-black text-slate-600 uppercase tracking-widest">Major Assets (Files A / H)</span>
-                                        <div className="flex justify-between bg-white/5 p-2 rounded-xl">
-                                            <div className="flex items-center gap-2"><span className="text-lg">🌱</span><span className="text-[9px] text-slate-400 uppercase">Rook L</span></div>
-                                            <div className="flex items-center gap-2"><span className="text-[9px] text-slate-400 uppercase text-right">Rook R</span><span className="text-lg">🧪</span></div>
-                                        </div>
-                                        <div className="flex justify-between bg-white/5 p-2 rounded-xl">
-                                            <div className="flex items-center gap-2"><span className="text-lg">❤️</span><span className="text-[9px] text-slate-400 uppercase">Knight L</span></div>
-                                            <div className="flex items-center gap-2"><span className="text-[9px] text-slate-400 uppercase text-right">Knight R</span><span className="text-lg">🩸</span></div>
-                                        </div>
-                                        <div className="flex justify-between bg-white/5 p-2 rounded-xl">
-                                            <div className="flex items-center gap-2"><span className="text-lg">🟣</span><span className="text-[9px] text-slate-400 uppercase">Bishop L</span></div>
-                                            <div className="flex items-center gap-2"><span className="text-[9px] text-slate-400 uppercase text-right">Bishop R</span><span className="text-lg">🌸</span></div>
-                                        </div>
-                                    </div>
-                                    <div className="space-y-2">
-                                        <span className="text-[8px] font-black text-slate-600 uppercase tracking-widest">Pawn Vectors (Files A → H)</span>
-                                        <div className="grid grid-cols-4 gap-2">
-                                            {PAWN_HINTS.map((h, i) => (
-                                                <div key={i} className="bg-white/5 p-1.5 rounded-lg flex flex-col items-center gap-1">
-                                                    <span className="text-lg">{h}</span>
-                                                    <span className="text-[7px] text-slate-500 font-bold uppercase">{String.fromCharCode(65 + i)}</span>
+                        <aside className="w-[320px] lg:w-[380px] xl:w-[450px] border-l border-white/5 bg-[#050508] p-6 lg:p-10 flex flex-col shadow-2xl z-40 shrink-0 transition-all duration-300 overflow-y-auto">
+                            <div className="flex flex-col min-h-full">
+                                <div className="flex-1 pb-10">
+                                    {selectedNode ? (
+                                        <div className="flex flex-col gap-8 animate-in slide-in-from-right duration-300">
+                                            <div>
+                                                <div className="text-[12px] text-indigo-400 uppercase font-bold tracking-widest mb-1">Node {getGlobalIndex(selectedNode.sIdx, selectedNode.nIdx)}</div>
+                                                <h2 className="text-2xl lg:text-3xl font-thin text-white tracking-tight leading-none">Memory Node Detail</h2>
+                                            </div>
+                                            <div className="flex flex-col gap-6">
+                                                <div className="flex flex-col gap-2 p-4 bg-white/5 rounded-2xl border border-white/5 group hover:border-white/10 transition-colors">
+                                                    <label className="text-[9px] text-slate-500 uppercase font-bold tracking-widest flex items-center gap-2"><Icon name="Edit3" size={12} className="text-slate-400" /> Cluster Name</label>
+                                                    <input type="text" value={sectionTitles[selectedNode.sIdx]} onChange={(e) => updateSectionTitle(selectedNode.sIdx, e.target.value)} className="bg-transparent text-white text-sm font-semibold focus:outline-none focus:text-indigo-400 transition-colors" />
                                                 </div>
-                                            ))}
+                                                <div className="flex flex-col gap-3 p-4 bg-white/5 rounded-2xl border border-white/5 relative">
+                                                    <label className="text-[9px] text-slate-500 uppercase font-bold tracking-widest flex items-center gap-2"><Icon name="Zap" size={12} className="text-slate-400" /> Cognitive Symbol</label>
+                                                    <div className="flex flex-wrap gap-2 mb-2 relative">
+                                                        {quickEmojis.map(e => (
+                                                            <button key={e} onClick={() => updateNodeData('emoji', e)} onMouseEnter={() => setHoveredSymbol(e)} onMouseLeave={() => setHoveredSymbol(null)} className={`w-8 h-8 flex items-center justify-center rounded-lg bg-white/5 hover:bg-white/10 transition-all text-base quick-emoji relative ${nodesData[getNodeKey(selectedNode.sIdx, selectedNode.nIdx)]?.emoji === e ? 'ring-2 ring-indigo-500 bg-white/10' : ''}`}>
+                                                                {e}
+                                                                {hoveredSymbol === e && (
+                                                                    <div className="fixed lg:absolute bottom-full mb-2 left-1/2 -translate-x-1/2 px-2 py-1.5 bg-[#0a0a0f] border border-white/10 rounded-lg shadow-2xl z-[150] pointer-events-none min-w-[120px] backdrop-blur-md tooltip-animate text-center">
+                                                                        <div className="text-white text-[9px] uppercase font-bold tracking-tighter whitespace-nowrap">{symbolMeanings[e]}</div>
+                                                                        <div className="absolute top-full left-1/2 -translate-x-1/2 border-[4px] border-transparent border-t-[#0a0a0f]" />
+                                                                    </div>
+                                                                )}
+                                                            </button>
+                                                        ))}
+                                                        <button onClick={() => updateNodeData('emoji', '')} className="text-[9px] text-slate-500 uppercase font-bold px-2 hover:text-red-400 transition-colors">Clear</button>
+                                                    </div>
+                                                    <input type="text" maxLength="2" value={nodesData[getNodeKey(selectedNode.sIdx, selectedNode.nIdx)]?.emoji || ""} onChange={(e) => updateNodeData('emoji', e.target.value)} className="bg-black/20 border border-white/5 rounded-lg p-2 text-center text-xl focus:ring-1 ring-indigo-500 outline-none text-white w-full" placeholder="Or paste emoji here..." />
+                                                </div>
+                                                <div className="flex flex-col gap-2"><label className="text-[10px] text-slate-500 uppercase font-bold tracking-widest ml-1">Cognitive Concept</label><input type="text" value={nodesData[getNodeKey(selectedNode.sIdx, selectedNode.nIdx)]?.concept || ""} onChange={(e) => updateNodeData('concept', e.target.value)} className="bg-white/5 border border-white/10 rounded-xl p-4 focus:ring-1 ring-indigo-500 outline-none text-white transition-all font-medium" placeholder="Enter core idea..." /></div>
+                                                <div className="flex flex-col gap-4 py-2 border-y border-white/5">
+                                                    <div className="flex items-center justify-between"><h3 className="text-[10px] text-indigo-400 uppercase font-bold tracking-[0.2em]">Linked Knowledge</h3><span className="text-[9px] text-slate-300 uppercase font-mono">{connections.filter(c => c.includes(getNodeKey(selectedNode.sIdx, selectedNode.nIdx))).length} Threads</span></div>
+                                                    <div className="flex flex-col gap-2">
+                                                        {(() => {
+                                                            const nodeKey = getNodeKey(selectedNode.sIdx, selectedNode.nIdx);
+                                                            const myConns = connections.filter(c => c.includes(nodeKey));
+                                                            const customOrder = nodesData[nodeKey]?.connectionOrder || [];
+                                                            const sortedConns = [...myConns].sort((a, b) => {
+                                                                const idxA = customOrder.indexOf(a); const idxB = customOrder.indexOf(b);
+                                                                if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+                                                                return idxA !== -1 ? -1 : 1;
+                                                            });
+                                                            return sortedConns.map((conn, idx) => {
+                                                                const otherKey = conn.split(':').find(k => k !== nodeKey);
+                                                                const [oSIdx, oNIdx] = otherKey.split('-').map(Number);
+                                                                const otherData = nodesData[otherKey]; const otherTheme = getSectionTheme(sectionColors[oSIdx]);
+                                                                return (
+                                                                    <div key={conn} draggable="true" onDragStart={(e) => handleCardDragStart(e, idx)} onDragOver={(e) => handleCardDragOver(e, idx)} onDragLeave={() => setDragOverCardIndex(null)} onDrop={(e) => handleCardDrop(e, idx, sortedConns, nodeKey)} className={`flex items-center justify-between p-3 ${otherTheme.bg} rounded-xl border ${otherTheme.border} transition-all group/link overflow-hidden shadow-sm relative ${dragOverCardIndex === idx ? 'card-drag-over' : ''} ${draggedCardIndex === idx ? 'opacity-20' : ''}`}>
+                                                                        <div className="flex flex-col gap-1 overflow-hidden flex-1">
+                                                                            <div className="flex items-center gap-2">
+                                                                                <div className="shrink-0 flex items-center justify-center w-3">{otherData?.emoji ? <span className="text-[10px]">{otherData.emoji}</span> : <div className={`w-1.5 h-1.5 rounded-full ${otherTheme.dot}`} />}</div>
+                                                                                <span className={`text-[11px] uppercase font-bold tracking-tight truncate ${otherTheme.color}`}>{sectionTitles[oSIdx]} • #{getGlobalIndex(oSIdx, oNIdx)}</span>
+                                                                            </div>
+                                                                            <div className="text-slate-200 text-sm font-medium italic truncate leading-tight">{otherData?.concept || "Unmapped Node"}</div>
+                                                                        </div>
+                                                                        <div className="flex items-center gap-1 opacity-0 group-hover/link:opacity-100 transition-opacity ml-2"><div className="p-1 cursor-grab active:cursor-grabbing text-slate-500 hover:text-indigo-400"><Icon name="GripVertical" size={14} /></div><button onClick={(e) => { e.stopPropagation(); removeConnection(conn); }} className="p-1.5 text-red-400/30 hover:text-red-500 transition-all bg-red-500/5 rounded-lg"><Icon name="Trash2" size={14} /></button></div>
+                                                                    </div>
+                                                                );
+                                                            });
+                                                        })()}
+                                                    </div>
+                                                </div>
+                                                <div className="flex flex-col gap-2"><label className="text-[10px] text-slate-500 uppercase font-bold tracking-widest ml-1">Citation</label><input type="text" value={nodesData[getNodeKey(selectedNode.sIdx, selectedNode.nIdx)]?.citation || ""} onChange={(e) => updateNodeData('citation', e.target.value)} className="bg-white/5 border border-white/10 rounded-xl p-4 focus:ring-1 ring-indigo-500 outline-none text-white transition-all" placeholder="e.g. Smith (2024)" /></div>
+                                                <div className="flex flex-col gap-2"><label className="text-[10px] text-slate-500 uppercase font-bold tracking-widest ml-1">Notes</label><textarea value={nodesData[getNodeKey(selectedNode.sIdx, selectedNode.nIdx)]?.notes || ""} onChange={(e) => updateNodeData('notes', e.target.value)} className="bg-white/5 border border-white/10 rounded-xl p-4 h-48 resize-none focus:ring-1 ring-indigo-500 outline-none text-slate-300 text-sm transition-all" placeholder="Describe the connection..." /></div>
+                                                <button onClick={() => setLinkingNode(getNodeKey(selectedNode.sIdx, selectedNode.nIdx))} className={`py-4 rounded-xl font-bold text-xs tracking-widest transition-all ${linkingNode === getNodeKey(selectedNode.sIdx, selectedNode.nIdx) ? 'bg-emerald-500 text-black shadow-[0_0_20px_rgba(16,185,129,0.3)]' : 'bg-indigo-600 text-white shadow-[0_0_20_rgba(79,70,229,0.2)] hover:scale-[1.02] hover:bg-indigo-500'}`}>{linkingNode ? "PICK TARGET NODE..." : "ATTACH LOGICAL THREAD"}</button>
+                                            </div>
                                         </div>
-                                    </div>
+                                    ) : (
+                                        <div className="flex flex-col items-center justify-center text-slate-400 text-xs uppercase tracking-widest gap-4 opacity-50 h-[400px]">
+                                            <Icon name="Brain" size={32} className="text-slate-400" /> Select a node to inspect
+                                        </div>
+                                    )}
                                 </div>
 
-                                {dialecticMode ? (
-                                    <div className="bg-slate-900/40 p-6 rounded-[2.5rem] border border-white/5 shadow-2xl flex flex-col gap-5">
-                                        <div className="bg-white/5 border border-white/10 p-5 rounded-2xl min-h-[100px] flex flex-col justify-center">
-                                            <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest block mb-2">Dialogue Log</span>
-                                            <p className="text-sm font-bold text-white italic leading-snug">"{dialogueStatus}"</p>
+                                <div className="mt-auto pt-8 border-t border-white/5 flex flex-col gap-6">
+                                    <div className="flex flex-col gap-4">
+                                        <h3 className="text-[10px] text-slate-400 uppercase font-black tracking-widest flex items-center gap-2 px-1"><Icon name="HardDrive" size={12} className="text-indigo-400" /> Data Management</h3>
+                                        <div className="grid grid-cols-2 gap-3 pb-2">
+                                            <button onClick={exportData} className="flex flex-col items-center justify-center gap-2 p-3 bg-white/5 hover:bg-white/10 border border-white/5 rounded-2xl transition-all group shadow-sm">
+                                                <Icon name="Download" size={16} className="text-slate-500 group-hover:text-emerald-400" />
+                                                <span className="text-[9px] font-bold text-slate-400 group-hover:text-white uppercase tracking-tighter">Export JSON</span>
+                                            </button>
+                                            <button onClick={handleImportClick} className="flex flex-col items-center justify-center gap-2 p-3 bg-white/5 hover:bg-white/10 border border-white/5 rounded-2xl transition-all group shadow-sm">
+                                                <Icon name="Upload" size={16} className="text-slate-500 group-hover:text-indigo-400" />
+                                                <span className="text-[9px] font-bold text-slate-400 group-hover:text-white uppercase tracking-tighter">Import JSON</span>
+                                            </button>
+                                            <button onClick={exportMarkdown} className="flex flex-col items-center justify-center gap-2 p-3 bg-white/5 hover:bg-white/10 border border-white/5 rounded-2xl transition-all group shadow-sm col-span-2">
+                                                <Icon name="FileText" size={16} className="text-slate-500 group-hover:text-amber-400" />
+                                                <span className="text-[9px] font-bold text-slate-400 group-hover:text-white uppercase tracking-tighter">Narrative Outline (.md)</span>
+                                            </button>
+                                            <input type="file" ref={fileInputRef} onChange={handleFileChange} accept=".json" className="hidden" />
                                         </div>
-                                        
-                                        <div className="bg-white/5 border border-white/10 p-4 rounded-2xl">
-                                            <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest block mb-3">AI Intelligence Mode</span>
-                                            <div className="flex gap-2">
-                                                <button onClick={() => setAiStrategy('random')} className={`flex-1 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${aiStrategy === 'random' ? 'bg-emerald-500 text-white shadow-[0_0_10px_rgba(16,185,129,0.4)]' : 'bg-white/5 text-slate-500 hover:text-slate-300'}`}>Random</button>
-                                                <button onClick={() => setAiStrategy('strategy')} className={`flex-1 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${aiStrategy === 'strategy' ? 'bg-red-500 text-white shadow-[0_0_10px_rgba(239,68,68,0.4)]' : 'bg-white/5 text-slate-500 hover:text-slate-300'}`}>Strategy</button>
-                                            </div>
-                                        </div>
+                                        <button onClick={() => { setShowResetConfirm(true); setResetConfirmInput(""); }}
+                                            className="mt-2 text-[10px] text-slate-600 hover:text-red-400 font-bold uppercase tracking-widest transition-colors flex items-center justify-center gap-2 py-2">
+                                            <Icon name="RefreshCcw" size={10} /> Initialize New Web
+                                        </button>
+                                    </div>
+                                    <div className="pb-8 opacity-50 hover:opacity-80 transition-opacity text-center">
+                                        <div className="text-[12px] text-slate-300 uppercase tracking-[0.2em] mb-1.5"><a href="https://lysander666.github.io/nahla-tracker/" target="_blank" rel="noopener noreferrer" className="hover:text-indigo-400 transition-colors underline underline-offset-4 font-bold">Back to Nahla Tracker</a></div>
+                                        <div className="text-[9px] text-slate-400 uppercase tracking-widest leading-relaxed">This tool is offered as-is. Always back up your data.</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </aside>
+                    </main>
 
-                                        <button onClick={() => { setGame(new Chess()); setCapturedByThesis([]); setCapturedByCritique([]); setDialogueStatus("Inquiry re-initialized."); setValidMoves([]); setSelectedSq(null); }} className="w-full py-3.5 bg-slate-800 rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-slate-700 transition-all border border-white/5">Reset Match</button>
+                    {/* ABOUT MODAL */}
+                    {showAboutModal && (
+                        <div className="fixed inset-0 z-[120] flex items-center justify-center modal-overlay p-4 animate-in fade-in duration-300">
+                            <div className="w-full max-w-xl bg-[#0a0a0f] border border-white/10 rounded-[2.5rem] p-10 shadow-2xl relative overflow-hidden">
+                                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-emerald-500 opacity-50" />
+                                <button onClick={() => setShowAboutModal(false)} className="absolute top-6 right-6 text-slate-500 hover:text-white transition-colors">
+                                    <Icon name="X" size={20} />
+                                </button>
+                                <div className="space-y-8">
+                                    <div className="text-center space-y-2">
+<div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-600/20">
+  <Icon name="Network" size={22} className="text-white" />
+</div>
+
+
+                                        <h3 className="text-2xl font-thin tracking-tight text-white mt-4">Thesis Memory Web v0.3</h3>
+                                        <p className="text-[10px] text-indigo-400 uppercase font-black tracking-widest">Cognitive Mapping Interface</p>
                                     </div>
-                                ) : integrationMode ? (
-                                    <div className="bg-indigo-950/30 p-8 rounded-[2.5rem] shadow-2xl flex flex-col items-center gap-6 text-center border border-indigo-500/20">
-                                        {!isFinished ? (
-                                            <>
-                                                <div className="text-[10px] font-black uppercase tracking-widest text-indigo-400">Recall Point {stats.total}/8</div>
-                                                <div className="text-8xl font-black text-white tracking-tighter drop-shadow-2xl">{focalNode}</div>
-                                                <div className="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
-                                                    <div className="h-full bg-white timer-bar shadow-[0_0_10px_white]" style={{ width: `${(timeRemaining / 5000) * 100}%` }} />
-                                                </div>
-                                                <div className="flex flex-col gap-2">
-                                                    <span className="text-[9px] font-black text-slate-500 uppercase">Sector Map (1-8)</span>
-                                                    <input ref={inputRef} type="text" value={inputVal} onChange={e => {
-                                                        const v = e.target.value;
-                                                        if (/^[1-8]?$/.test(v)) {
-                                                            setInputVal(v);
-                                                            if (v !== '') evaluate(parseInt(v) === Math.ceil(focalNode / 8), "Error");
-                                                        }
-                                                    }} className="academic-input" maxLength="1" autoFocus />
-                                                </div>
-                                            </>
-                                        ) : (
-                                            <div className="space-y-4">
-                                                <div className="text-[10px] font-black uppercase tracking-widest text-indigo-400">Integration Complete</div>
-                                                <div className="text-6xl font-black text-white">{Math.round(stats.correct/8*100)}%</div>
-                                                <button onClick={beginIntegration} className="px-8 py-3 bg-white text-slate-900 rounded-xl font-black uppercase text-[10px] tracking-widest">Restart</button>
-                                            </div>
-                                        )}
-                                        {feedback && !isFinished && <div className={`text-[9px] font-black uppercase tracking-widest px-4 py-2 rounded-lg ${feedback.success ? 'text-emerald-400 bg-emerald-500/10' : 'text-red-400 bg-red-500/10'}`}>{feedback.message}</div>}
+                                    <div className="space-y-6 text-sm text-slate-400 leading-relaxed max-h-[40vh] overflow-y-auto pr-2 custom-scrollbar">
+
+                                        <section className="space-y-2">
+  <h4 className="text-white font-bold uppercase text-[11px] tracking-widest border-b border-white/5 pb-1">
+    Project Objective
+  </h4>
+
+  <p>
+    A specialised workstation designed for qualitative mapped thesis and viva research,
+    focusing on networked conceptual linking and semantic categorisation.
+  </p>
+
+  <p>
+    Built within a 24-hour development cycle on 11th Jan 2026 with a constraint
+    of 1000 lines of code. This is not production-ready though it is pretty stable! Desktop/laptop only. Make sure you use the JSON backup option.
+  </p>
+
+  <br />
+
+  <a
+    href="https://docs.google.com/document/d/1grFfYzQ__skCPU96ulGp3mO1bX5vY-TRFYAA-sKYgeE/edit?usp=sharing"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="block text-center font-bold underline underline-offset-4 hover:text-indigo-400 transition-colors"
+  >
+    Quick Start Guide
+  </a>
+</section>
+
+
+                                        <section className="space-y-2">
+                                            <h4 className="text-white font-bold uppercase text-[11px] tracking-widest border-b border-white/5 pb-1">Key Interactions</h4>
+                                            <ul className="list-disc pl-4 space-y-1">
+                                                <li><strong className="text-slate-200">Semantic Taxonomy:</strong> Categorise concepts using theoretical, textual, and data-driven symbols.</li>
+                                                <li><strong className="text-slate-200">Logical Threads:</strong> Create bidirectional invisible links between memory nodes across 8 clusters and 64 nodes.</li>
+                                                <li><strong className="text-slate-200">Cloud Sync:</strong> Persistent state management via Google Firestore with local backup options.</li>
+                                                <li><strong className="text-slate-200">Narrative Linearisation:</strong> Export your web as a structured Markdown outline.</li>
+                                               <li><strong className="text-slate-200">Contact:</strong>{" "}<a href="https://bsky.app/profile/lysander666.bsky.social" target="_blank" rel="noopener noreferrer" className="underline underline-offset-4 hover:text-indigo-400 transition-colors">bsky.app/profile/lysander666</a></li>
+
+                                                  <br />
+                                                
+                                                <p>
+   Try the Memory Web Chessboard to practise memorising the location of node numbers within their clusters.
+  </p>
+
+<a
+  href="https://lysander666.github.io/nahla-tracker/memory_web_chessboard"
+  target="_blank"
+  rel="noopener noreferrer"
+  className="block text-center font-bold underline underline-offset-4 hover:text-indigo-400 transition-colors mt-3"
+>
+  Access Memory Web Chessboard
+</a>
+                                                
+                                            </ul>
+                                        </section>
                                     </div>
-                                ) : (
-                                    <div className="bg-slate-900/30 p-8 rounded-[2.5rem] border border-white/5 space-y-6">
-                                        <div>
-                                            <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 mb-6 flex items-center gap-3">
-                                                <Icon name="Palette" size={14} className="text-indigo-400" /> Sector Mapping (4x2)
-                                            </h3>
-                                            <div className="grid grid-cols-2 gap-4">
-                                                {sectorColors.map((curr, idx) => (
-                                                    <div key={idx} className="flex flex-col gap-2 bg-black/20 p-3 rounded-xl border border-white/5">
-                                                        <span className="text-[8px] font-black text-slate-500 uppercase">Sec {idx + 1}</span>
-                                                        <div className="flex justify-between gap-1">
-                                                            {['emerald', 'amber', 'blue', 'purple'].map(c => (
-                                                                <button key={c} onClick={() => updateSectorColor(idx, c)} className={`w-3.5 h-3.5 rounded-full border transition-transform ${btnColors[c]} ${curr === c ? 'border-white scale-125 z-10' : 'border-transparent opacity-20 hover:opacity-50'}`} />
-                                                            ))}
-                                                        </div>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
-                            </aside>
+                                    <button onClick={() => setShowAboutModal(false)} className="w-full py-4 bg-indigo-600 hover:bg-indigo-500 rounded-xl font-bold text-sm text-white transition-all shadow-lg uppercase tracking-widest mt-4">Return to Research</button>
+                                </div>
+                            </div>
                         </div>
-                        
-                        <footer className="mt-12 py-8 border-t border-white/5 flex justify-between items-center opacity-30 text-[8px] uppercase font-black tracking-[0.4em] text-slate-600">
-                            <div>Dialectical Mastery Engine v3.1.0</div>
-                            <div>Individual Cognitive Mapping Enabled</div>
-                        </footer>
-                    </div>
+                    )}
+
+                    {/* AUTH MODAL */}
+                    {showAuthModal && (
+                        <div className="fixed inset-0 z-[100] flex items-center justify-center modal-overlay p-4 animate-in fade-in duration-300">
+                            <div className="w-full max-w-md bg-[#0a0a0f] border border-white/10 rounded-[2.5rem] p-10 shadow-2xl space-y-8 relative">
+                                <button onClick={() => { setShowAuthModal(false); setErrorMessage(null); }} className="absolute top-6 right-6 text-slate-500 hover:text-white"><Icon name="X" size={20} /></button>
+                                <div className="text-center space-y-2">
+                                    <h3 className="text-2xl font-thin tracking-tight text-white">{isRegistering ? 'Create Account' : 'Cloud Login'}</h3>
+                                    <p className="text-xs text-slate-500 uppercase tracking-widest text-center">Sync research anywhere.</p>
+                                </div>
+                                {errorMessage && <div className="bg-red-500/10 border border-red-500/30 text-red-400 text-[10px] p-3 rounded-xl leading-relaxed">{errorMessage}</div>}
+                                <form onSubmit={handleEmailAuth} className="space-y-4">
+                                    <div className="space-y-1"><label className="text-[9px] text-slate-500 uppercase tracking-widest font-bold ml-1">Email</label><input required type="email" value={email} onChange={e => setEmail(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-1 focus:ring-indigo-500/50" placeholder="your@email.com" /></div>
+                                    <div className="space-y-1"><label className="text-[9px] text-slate-500 uppercase tracking-widest font-bold ml-1">Password</label><input required type="password" minLength="6" value={password} onChange={e => setPassword(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-1 focus:ring-indigo-500/50" placeholder="••••••••" /></div>
+                                    <button type="submit" disabled={authLoading} className="w-full py-4 bg-indigo-600 hover:bg-indigo-500 rounded-xl font-bold text-sm transition-all shadow-lg flex items-center justify-center gap-3">{authLoading ? <Icon name="Loader2" size={16} className="animate-spin" /> : (isRegistering ? 'Register & Sync' : 'Login & Sync')}</button>
+                                </form>
+                                <div className="text-center"><button type="button" onClick={() => { setIsRegistering(!isRegistering); setErrorMessage(null); }} className="text-[10px] text-slate-500 hover:text-indigo-400 uppercase font-bold tracking-widest transition-colors underline underline-offset-4">{isRegistering ? 'Back to Login' : 'Need an account? Register'}</button></div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* IMPORT CONFIRMATION MODAL */}
+                    {showImportConfirm && (
+                        <div className="fixed inset-0 z-[110] flex items-center justify-center modal-overlay p-4 animate-in zoom-in duration-200">
+                            <div className="w-full max-w-md bg-[#0a0a0f] border border-white/10 rounded-[2.5rem] p-8 lg:p-12 shadow-2xl space-y-6 text-center">
+                                <div className="w-16 h-16 bg-amber-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-amber-500/20"><Icon name="TriangleAlert" size={32} className="text-amber-500" /></div>
+                                <h3 className="text-2xl font-thin tracking-tight text-white">Overwrite Thesis Data?</h3>
+                                <p className="text-sm text-slate-400 leading-relaxed">You are about to import a backup file. This will replace all nodes and connections. <strong className="text-white">This cannot be undone.</strong></p>
+                                <div className="flex flex-col gap-3 pt-4">
+                                    <button onClick={applyImport} className="w-full py-4 bg-indigo-600 hover:bg-indigo-500 rounded-xl font-bold text-sm transition-all shadow-lg uppercase tracking-widest">Proceed with Import</button>
+                                    <button onClick={() => setShowImportConfirm(null)} className="w-full py-4 bg-white/5 hover:bg-white/10 rounded-xl font-bold text-sm text-slate-400 transition-all uppercase tracking-widest">Cancel</button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* RESET CONFIRMATION MODAL */}
+                    {showResetConfirm && (
+                        <div className="fixed inset-0 z-[110] flex items-center justify-center modal-overlay p-4 animate-in zoom-in duration-200">
+                            <div className="w-full max-w-md bg-[#0a0a0f] border border-white/10 rounded-[2.5rem] p-8 lg:p-12 shadow-2xl space-y-6 text-center">
+                                <div className="w-16 h-16 bg-red-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-red-500/20"><Icon name="RefreshCcw" size={32} className="text-red-500" /></div>
+                                <h3 className="text-2xl font-thin tracking-tight text-white">Wipe Memory Web?</h3>
+                                <p className="text-sm text-slate-400 leading-relaxed">Are you sure you want to do this? This will <strong className="text-white uppercase">delete all current nodes and logical threads</strong> and reset the web to a blank state.</p>
+                                <div className="space-y-4 py-4"><p className="text-[10px] text-slate-500 uppercase font-black tracking-widest">Extra Verification Required</p><div className="flex flex-col items-center gap-2"><label className="text-[11px] text-slate-400">Type <span className="text-white font-bold">'Y'</span> to confirm</label><input type="text" maxLength="1" value={resetConfirmInput} onChange={(e) => setResetConfirmInput(e.target.value.toUpperCase())} className="w-12 h-12 bg-white/5 border border-white/10 rounded-xl text-center text-xl font-bold text-white focus:outline-none focus:ring-2 focus:ring-red-500/50 transition-all" placeholder="?" autoFocus /></div></div>
+                                <div className="flex flex-col gap-3">
+                                    <button onClick={() => setShowResetConfirm(false)} className="w-full py-4 bg-red-600 hover:bg-red-500 text-white rounded-xl font-bold text-sm transition-all shadow-lg uppercase tracking-widest">No, Keep My Data</button>
+                                    <button onClick={resetWeb} disabled={resetConfirmInput !== 'Y'} className={`w-full py-4 rounded-xl font-bold text-sm transition-all uppercase tracking-widest ${resetConfirmInput === 'Y' ? 'bg-white/10 text-white hover:bg-white/20' : 'bg-white/5 text-slate-700 cursor-not-allowed'}`}>Yes, Reset Everything</button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </div>
             );
         };
