@@ -218,7 +218,7 @@
                 let interval;
                 if (integrationMode && !feedback && !isFinished && timeRemaining > 0) {
                     interval = setInterval(() => setTimeRemaining(t => t - 100), 100);
-                } else if (timeRemaining <= 0 && !feedback && integrationMode) {
+                } else if (timeRemaining <= 0 && !feedback && integrationMode && !isFinished) {
                     evaluate(false, "Timeout");
                 }
                 return () => clearInterval(interval);
@@ -226,9 +226,10 @@
 
             const evaluate = (success, msg) => {
                 const targetRow = Math.ceil(focalNode / 8);
-                setStats(s => ({ ...s, total: s.total + 1, correct: success ? s.correct + 1 : s.correct }));
+                const newTotal = stats.total + 1;
+                setStats(s => ({ ...s, total: newTotal, correct: success ? s.correct + 1 : s.correct }));
                 setFeedback({ success, message: success ? "Integrated Successfully" : `Error. Cluster: ${targetRow}` });
-                if (stats.total + 1 >= 8) setTimeout(() => setIsFinished(true), 1500);
+                if (newTotal >= 8) setTimeout(() => setIsFinished(true), 1500);
                 else setTimeout(nextFocalPoint, success ? 800 : 2000);
             };
 
