@@ -123,6 +123,7 @@
             const [integrationMode, setIntegrationMode] = useState(false);
             const [stats, setStats] = useState({ correct: 0, total: 0 });
             const [isFinished, setIsFinished] = useState(false);
+            const [aiStrategy, setAiStrategy] = useState('random');
             
             const [game, setGame] = useState(new Chess());
             const [capturedByThesis, setCapturedByThesis] = useState([]);
@@ -145,6 +146,58 @@
             };
 
             // --- INQUIRY LOGIC ---
+            const evaluateMove = (gameCopy, move) => {
+                const testGame = new Chess(gameCopy.fen());
+                testGame.move(move);
+                let score = 0;
+                
+                // Material value
+                const pieceValues = { p: 1, n: 3, b: 3, r: 5, q: 9, k: 0 };
+                const board = testGame.board();
+                board.forEach(row => {
+                    row.forEach(square => {
+                        if (square) {
+                            const value = pieceValues[square.type];
+                            score += square.color === 'b' ? value : -value;
+                        }
+                    });
+                });
+                
+                // Bonus for captures
+                if (move.captured) score += pieceValues[move.captured] * 2;
+                
+                // Bonus for checks
+                if (testGame.in_check()) score += 3;
+                
+                // Bonus for checkmate
+                if (testGame.in_checkmate()) score += 1000;
+                
+                // Center control bonus
+                const centerSquares = ['d4', 'd5', 'e4', 'e5'];
+                if (centerSquares.includes(move.to)) score += 0.5;
+                
+                return score;
+            };
+
+            const selectAiMove = (moves) => {
+                if (aiStrategy === 'random') {
+                    return moves[Math.floor(Math.random() * moves.length)];
+                } else {
+                    // Strategy mode - evaluate all moves
+                    const movesWithScores = moves.map(move => ({
+                        move,
+                        score: evaluateMove(game, move)
+                    }));
+                    
+                    // Sort by score descending
+                    movesWithScores.sort((a, b) => b.score - a.score);
+                    
+                    // Pick from top 3 moves with some randomness
+                    const topMoves = movesWithScores.slice(0, 3);
+                    return topMoves[Math.floor(Math.random() * topMoves.length)].move;
+                }
+            };
+
             const performMove = useCallback((move) => {
                 const gameCopy = new Chess(game.fen());
                 const result = gameCopy.move(move);
@@ -177,12 +230,15 @@
             useEffect(() => {
                 if (dialecticMode && game.turn() === 'b' && !game.game_over()) {
                     const timer = setTimeout(() => {
-                        const moves = game.moves();
-                        if (moves.length) performMove(moves[Math.floor(Math.random() * moves.length)]);
+                        const moves = game.moves({ verbose: true });
+                        if (moves.length) {
+                            const selectedMove = selectAiMove(moves);
+                            performMove(selectedMove);
+                        }
                     }, 800);
                     return () => clearTimeout(timer);
                 }
-            }, [game, dialecticMode, performMove]);
+            }, [game, dialecticMode, performMove, aiStrategy]);
 
             const onSqSelect = (sq) => {
                 if (!dialecticMode || game.game_over() || game.turn() === 'b') return;
@@ -316,6 +372,18 @@
                                         <div className="bg-white/5 border border-white/10 p-5 rounded-2xl">
                                             <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest block mb-2">Dialogue Log</span>
                                             <p className="text-sm font-bold text-white italic leading-snug">"{dialogueStatus}"</p>
+                                        </div>
+                                        
+                                        <div className="bg-white/5 border border-white/10 p-4 rounded-2xl">
+                                            <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest block mb-3">Examiner Intelligence</span>
+                                            <div className="flex gap-2">
+                                                <button onClick={() => setAiStrategy('random')} className={`flex-1 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${aiStrategy === 'random' ? 'bg-emerald-500 text-white' : 'bg-white/5 text-slate-400'}`}>
+                                                    Random
+                                                </button>
+                                                <button onClick={() => setAiStrategy('strategy')} className={`flex-1 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${aiStrategy === 'strategy' ? 'bg-red-500 text-white' : 'bg-white/5 text-slate-400'}`}>
+                                                    Strategy
+                                                </button>
+                                            </div>
                                         </div>
                                         
                                         <div className="space-y-2">
