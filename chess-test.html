@@ -145,7 +145,9 @@
         };
 
         const App = () => {
-            const [rowColors, setRowColors] = useState(['emerald', 'emerald', 'amber', 'amber', 'blue', 'blue', 'purple', 'purple']);
+            // Sector highlighting colors (8 items for 8 4x2 grids)
+            // Persistent during session as requested
+            const [sectorColors, setSectorColors] = useState(['emerald', 'emerald', 'amber', 'amber', 'blue', 'blue', 'purple', 'purple']);
             const [dialecticMode, setDialecticMode] = useState(false);
             const [integrationMode, setIntegrationMode] = useState(false);
             const [stats, setStats] = useState({ correct: 0, total: 0 });
@@ -165,10 +167,15 @@
             const [feedback, setFeedback] = useState(null);
             const inputRef = useRef(null);
 
-            const updateRowColor = (idx, color) => {
-                const newColors = [...rowColors];
+            const getSectorIndex = (r, c) => {
+                // Returns 0-7 based on 4x2 grids
+                return Math.floor(r / 2) * 2 + Math.floor(c / 4);
+            };
+
+            const updateSectorColor = (idx, color) => {
+                const newColors = [...sectorColors];
                 newColors[idx] = color;
-                setRowColors(newColors);
+                setSectorColors(newColors);
             };
 
             const evaluateMove = (gameCopy, move) => {
@@ -280,15 +287,15 @@
             }, [integrationMode, timeRemaining, feedback, isFinished]);
 
             const evaluate = (success, msg) => {
-                const targetRow = Math.ceil(focalNode / 8);
+                const targetSector = getSectorIndex(Math.floor((focalNode - 1) / 8), (focalNode - 1) % 8) + 1;
                 const newTotal = stats.total + 1;
                 if (newTotal > 8) {
                     setStats(s => ({ ...s, correct: success ? s.correct + 1 : s.correct }));
-                    setFeedback({ success, message: success ? "Integrated Successfully" : `Error. Cluster: ${targetRow}` });
+                    setFeedback({ success, message: success ? "Integrated Successfully" : `Error. Sector: ${targetSector}` });
                     setTimeout(() => setIsFinished(true), 1500);
                 } else {
                     setStats(s => ({ ...s, total: newTotal, correct: success ? s.correct + 1 : s.correct }));
-                    setFeedback({ success, message: success ? "Integrated Successfully" : `Error. Cluster: ${targetRow}` });
+                    setFeedback({ success, message: success ? "Integrated Successfully" : `Error. Sector: ${targetSector}` });
                     setTimeout(nextFocalPoint, success ? 800 : 2000);
                 }
             };
@@ -322,9 +329,9 @@
                             </div>
                         </header>
 
-                        <div className="bg-white/5 border border-white/10 rounded-2xl p-4 mb-8 text-[11px] leading-relaxed text-slate-400 max-w-2xl">
+                        <div className="bg-white/5 border border-white/10 rounded-2xl p-4 mb-8 text-[11px] leading-relaxed text-slate-400 max-w-2xl shadow-xl">
                             <strong className="text-white block mb-1 uppercase tracking-wider">About this Workspace</strong>
-                            This dialectical engine facilitates cognitive mapping through strategic engagement. By pairing traditional chess mechanics with symbolic vectors, users reinforce memory clusters while refining theoretical synthesis in the Dialectic Mode.
+                            This dialectical engine facilitates cognitive mapping through strategic engagement. By pairing traditional chess mechanics with symbolic vectors, users reinforce memory clusters while refining theoretical synthesis in the Dialectic Mode. 4x2 sector grids allow for segmented focus during integration.
                         </div>
 
                         <div className="grid lg:grid-cols-[1fr_360px] gap-8 items-start">
@@ -341,17 +348,19 @@
                                 <div className={`bg-slate-900/60 p-1.5 rounded-[2.5rem] border border-white/5 shadow-2xl board-visual-state ${integrationMode && !isFinished ? 'opacity-10 grayscale' : 'opacity-100'}`}>
                                     <div className="p-3 bg-black/40 rounded-[2rem] border border-white/5 relative overflow-hidden">
                                         <div className="grid grid-rows-8 gap-1.5 relative z-10">
-                                            {rowColors.map((color, rIdx) => (
+                                            {Array.from({ length: 8 }).map((_, rIdx) => (
                                                 <div key={rIdx} className="grid grid-cols-8 gap-1.5">
                                                     {Array.from({ length: 8 }).map((_, cIdx) => {
                                                         const nodeNum = (rIdx * 8) + cIdx + 1;
+                                                        const sectorIdx = getSectorIndex(rIdx, cIdx);
+                                                        const color = sectorColors[sectorIdx];
                                                         const sqId = getSqId(rIdx, cIdx);
                                                         const p = game.get(sqId);
                                                         const isLandmark = nodeNum % 8 === 0;
                                                         const isLight = (rIdx + cIdx) % 2 === 0;
 
                                                         return (
-                                                            <div key={cIdx} onClick={() => onSqSelect(sqId)} className={`aspect-square rounded-lg border flex items-center justify-center relative transition-all duration-200 ${isLight ? 'tile-light' : 'tile-dark'} ${selectedSq === sqId ? 'ring-2 ring-indigo-500 z-20 scale-105' : ''} ${colorClasses[color]} ${integrationMode && focalNode === nodeNum ? 'ring-4 ring-white shadow-2xl' : ''} ${dialecticMode ? 'cursor-pointer' : 'cursor-default'}`}>
+                                                            <div key={cIdx} onClick={() => onSqSelect(sqId)} className={`aspect-square rounded-lg border flex items-center justify-center relative transition-all duration-200 ${isLight ? 'tile-light' : 'tile-dark'} ${selectedSq === sqId ? 'ring-2 ring-indigo-500 z-20 scale-105' : ''} ${colorClasses[color]} ${integrationMode && focalNode === nodeNum ? 'ring-4 ring-white shadow-2xl scale-110 z-20' : ''} ${dialecticMode ? 'cursor-pointer' : 'cursor-default'}`}>
                                                                 <span className={`absolute top-0.5 left-1 text-[8px] font-mono font-bold opacity-30 ${isLandmark ? 'opacity-90 font-black text-white' : ''}`}>{nodeNum}</span>
                                                                 {dialecticMode && validMoves.includes(sqId) && <div className="absolute inset-0 flex items-center justify-center"><div className="w-1.5 h-1.5 bg-indigo-500/50 rounded-full" /></div>}
                                                                 {dialecticMode && p && (
@@ -472,15 +481,15 @@
                                     <div className="bg-slate-900/30 p-8 rounded-[2.5rem] border border-white/5 space-y-6">
                                         <div>
                                             <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 mb-6 flex items-center gap-3">
-                                                <Icon name="Palette" size={14} className="text-indigo-400" /> Sector Highlighting
+                                                <Icon name="Palette" size={14} className="text-indigo-400" /> Sector Mapping (4x2)
                                             </h3>
-                                            <div className="space-y-4">
-                                                {rowColors.map((curr, idx) => (
-                                                    <div key={idx} className="flex items-center justify-between">
-                                                        <span className="text-[9px] font-black text-slate-500 uppercase">Sector {idx + 1}</span>
-                                                        <div className="flex gap-1.5 bg-black/40 p-1.5 rounded-full">
+                                            <div className="grid grid-cols-2 gap-4">
+                                                {sectorColors.map((curr, idx) => (
+                                                    <div key={idx} className="flex flex-col gap-2 bg-black/20 p-3 rounded-xl border border-white/5">
+                                                        <span className="text-[8px] font-black text-slate-500 uppercase">Sec {idx + 1}</span>
+                                                        <div className="flex justify-between gap-1">
                                                             {['emerald', 'amber', 'blue', 'purple'].map(c => (
-                                                                <button key={c} onClick={() => updateRowColor(idx, c)} className={`w-4 h-4 rounded-full border ${btnColors[c]} ${curr === c ? 'border-white scale-110' : 'border-transparent opacity-20'}`} />
+                                                                <button key={c} onClick={() => updateSectorColor(idx, c)} className={`w-3.5 h-3.5 rounded-full border transition-transform ${btnColors[c]} ${curr === c ? 'border-white scale-125 z-10' : 'border-transparent opacity-20 hover:opacity-50'}`} />
                                                             ))}
                                                         </div>
                                                     </div>
