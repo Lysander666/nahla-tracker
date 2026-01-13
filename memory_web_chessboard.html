@@ -22,7 +22,6 @@
             overflow-x: hidden; 
         }
         
-        /* The requested square board style */
         .tile-light { background-color: rgba(255, 255, 255, 0.1); border-color: rgba(255, 255, 255, 0.05); }
         .tile-dark { background-color: rgba(0, 0, 0, 0.4); border-color: rgba(0, 0, 0, 0.2); }
         
@@ -37,13 +36,14 @@
             z-index: 30;
             transition: transform 0.15s ease;
         }
+        .chess-piece:hover { transform: scale(1.1); }
+        
         @media (max-width: 640px) {
             .chess-piece { font-size: 1.8rem; }
         }
         
-        .chess-piece:hover { transform: scale(1.1); }
-        .chess-piece.white { color: #ffffff; }
-        .chess-piece.black { color: #64748b; } 
+        .white-piece { color: #ffffff; }
+        .black-piece { color: #64748b; } 
 
         .tray-area {
             min-height: 44px;
@@ -70,6 +70,15 @@
             border-color: #6366f1;
             background: rgba(99, 102, 241, 0.05);
         }
+
+        .legend-card {
+            background: rgba(15, 23, 42, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 1rem;
+            border-radius: 1.5rem;
+        }
+        
+        .timer-bar { transition: width 0.1s linear; }
     </style>
 </head>
 <body>
@@ -79,9 +88,25 @@
         const { useState, useEffect, useRef, useCallback } = React;
 
         // --- CONSTANTS ---
-        const PIECES = {
+        const GLYPHS = {
             wP: '♙', wN: '♘', wB: '♗', wR: '♖', wQ: '♕', wK: '♔',
             bP: '♟', bN: '♞', bB: '♝', bR: '♜', bQ: '♛', bK: '♚'
+        };
+
+        const PAWN_HINTS = ['🟡', '💡', '🔵', '🔗', '🌐', '⚙️', '⚠️', '🧩'];
+        
+        const getEmojiHint = (type, square) => {
+            const file = square[0];
+            const fileIdx = file.charCodeAt(0) - 97;
+            switch(type) {
+                case 'k': return '🟢';
+                case 'q': return '📗';
+                case 'r': return fileIdx === 0 ? '🌱' : '🧪';
+                case 'n': return fileIdx === 1 ? '❤️' : '🩸';
+                case 'b': return fileIdx === 2 ? '🟣' : '🌸';
+                case 'p': return PAWN_HINTS[fileIdx];
+                default: return '';
+            }
         };
 
         const PIECE_NAMES = {
@@ -120,7 +145,7 @@
         };
 
         const App = () => {
-            const [rowColors, setRowColors] = useState(['emerald', 'emerald', 'amber', 'amber', 'blue', 'blue', 'purple', 'purple']);
+            const [sectorColors, setSectorColors] = useState(['emerald', 'emerald', 'amber', 'amber', 'blue', 'blue', 'purple', 'purple']);
             const [dialecticMode, setDialecticMode] = useState(false);
             const [integrationMode, setIntegrationMode] = useState(false);
             const [stats, setStats] = useState({ correct: 0, total: 0 });
@@ -128,8 +153,8 @@
             const [aiStrategy, setAiStrategy] = useState('random');
             
             const [game, setGame] = useState(new Chess());
-            const [capturedByThesis, setCapturedByThesis] = useState([]);
-            const [capturedByCritique, setCapturedByCritique] = useState([]);
+            const [capturedByThesis, setCapturedByThesis] = useState([]); // Pieces captured by White (Black pieces)
+            const [capturedByCritique, setCapturedByCritique] = useState([]); // Pieces captured by Black (White pieces)
             const [dialogueStatus, setDialogueStatus] = useState("Awaiting opening thesis...");
             const [selectedSq, setSelectedSq] = useState(null);
             const [validMoves, setValidMoves] = useState([]);
@@ -140,23 +165,23 @@
             const [feedback, setFeedback] = useState(null);
             const inputRef = useRef(null);
 
-            // --- COLOR UPDATE LOGIC ---
-            const updateRowColor = (idx, color) => {
-                const newColors = [...rowColors];
-                newColors[idx] = color;
-                setRowColors(newColors);
+            const getSectorIndex = (r, c) => {
+                return Math.floor(r / 2) * 2 + Math.floor(c / 4);
             };
 
-            // --- INQUIRY LOGIC ---
+            const updateSectorColor = (idx, color) => {
+                const newColors = [...sectorColors];
+                newColors[idx] = color;
+                setSectorColors(newColors);
+            };
+
             const evaluateMove = (gameCopy, move) => {
                 const testGame = new Chess(gameCopy.fen());
                 testGame.move(move);
                 let score = 0;
-                
-                // Material value
                 const pieceValues = { p: 1, n: 3, b: 3, r: 5, q: 9, k: 0 };
-                const board = testGame.board();
-                board.forEach(row => {
+                
+                testGame.board().forEach(row => {
                     row.forEach(square => {
                         if (square) {
                             const value = pieceValues[square.type];
@@ -164,61 +189,47 @@
                         }
                     });
                 });
-                
-                // Bonus for captures
+
                 if (move.captured) score += pieceValues[move.captured] * 2;
-                
-                // Bonus for checks
                 if (testGame.in_check()) score += 3;
-                
-                // Bonus for checkmate
                 if (testGame.in_checkmate()) score += 1000;
                 
-                // Center control bonus
                 const centerSquares = ['d4', 'd5', 'e4', 'e5'];
                 if (centerSquares.includes(move.to)) score += 0.5;
-                
+
                 return score;
             };
 
             const selectAiMove = (moves) => {
-                if (aiStrategy === 'random') {
-                    return moves[Math.floor(Math.random() * moves.length)];
-                } else {
-                    // Strategy mode - evaluate all moves
-                    const movesWithScores = moves.map(move => ({
-                        move,
-                        score: evaluateMove(game, move)
-                    }));
-                    
-                    // Sort by score descending
-                    movesWithScores.sort((a, b) => b.score - a.score);
-                    
-                    // Pick from top 3 moves with some randomness
-                    const topMoves = movesWithScores.slice(0, 3);
-                    return topMoves[Math.floor(Math.random() * topMoves.length)].move;
-                }
+                if (aiStrategy === 'random') return moves[Math.floor(Math.random() * moves.length)];
+                const movesWithScores = moves.map(move => ({ move, score: evaluateMove(game, move) }));
+                movesWithScores.sort((a, b) => b.score - a.score);
+                const candidatePool = movesWithScores.slice(0, 3);
+                return candidatePool[Math.floor(Math.random() * candidatePool.length)].move;
             };
 
             const performMove = useCallback((move) => {
                 const gameCopy = new Chess(game.fen());
                 const result = gameCopy.move(move);
-                
                 if (result) {
                     setGame(gameCopy);
-                    
                     if (gameCopy.game_over()) {
                         let outcome = "Inquiry Concluded: ";
                         if (gameCopy.in_checkmate()) outcome += (result.color === 'w' ? "Thesis Defended (Checkmate)" : "Critique Prevails (Checkmate)");
                         else if (gameCopy.in_draw()) outcome += "Synthesis Achieved (Draw)";
-                        else if (gameCopy.in_stalemate()) outcome += "Theoretical Stalemate";
                         setDialogueStatus(outcome);
                     } else {
                         if (result.captured) {
                             const side = result.color === 'w' ? 'Thesis' : 'Examiner';
-                            const pIcon = PIECES[(result.color === 'w' ? 'b' : 'w') + result.captured.toUpperCase()];
-                            if (result.color === 'w') setCapturedByThesis(prev => [...prev, pIcon]);
-                            else setCapturedByCritique(prev => [...prev, pIcon]);
+                            // Store the glyph instead of emoji hint
+                            const capturedColor = result.color === 'w' ? 'b' : 'w';
+                            const pieceGlyph = GLYPHS[capturedColor + result.captured.toUpperCase()];
+                            
+                            if (result.color === 'w') {
+                                setCapturedByThesis(prev => [...prev, { glyph: pieceGlyph, color: capturedColor }]);
+                            } else {
+                                setCapturedByCritique(prev => [...prev, { glyph: pieceGlyph, color: capturedColor }]);
+                            }
                             setDialogueStatus(`${side} addressed the ${PIECE_NAMES[result.captured]} point via ${PIECE_NAMES[result.piece]}.`);
                         } else {
                             setDialogueStatus(`${result.color === 'w' ? 'Thesis' : 'Examiner'} positioned ${PIECE_NAMES[result.piece]} at ${result.to}.`);
@@ -233,10 +244,7 @@
                 if (dialecticMode && game.turn() === 'b' && !game.game_over()) {
                     const timer = setTimeout(() => {
                         const moves = game.moves({ verbose: true });
-                        if (moves.length) {
-                            const selectedMove = selectAiMove(moves);
-                            performMove(selectedMove);
-                        }
+                        if (moves.length) performMove(selectAiMove(moves));
                     }, 800);
                     return () => clearTimeout(timer);
                 }
@@ -255,7 +263,6 @@
                 }
             };
 
-            // --- INTEGRATION LOGIC ---
             const beginIntegration = () => {
                 setStats({ correct: 0, total: 1 });
                 setIsFinished(false);
@@ -283,16 +290,15 @@
             }, [integrationMode, timeRemaining, feedback, isFinished]);
 
             const evaluate = (success, msg) => {
-                const targetRow = Math.ceil(focalNode / 8);
+                const targetSector = getSectorIndex(Math.floor((focalNode - 1) / 8), (focalNode - 1) % 8) + 1;
                 const newTotal = stats.total + 1;
-                
                 if (newTotal > 8) {
                     setStats(s => ({ ...s, correct: success ? s.correct + 1 : s.correct }));
-                    setFeedback({ success, message: success ? "Integrated Successfully" : `Error. Cluster: ${targetRow}` });
+                    setFeedback({ success, message: success ? "Integrated Successfully" : `Error. Sector: ${targetSector}` });
                     setTimeout(() => setIsFinished(true), 1500);
                 } else {
                     setStats(s => ({ ...s, total: newTotal, correct: success ? s.correct + 1 : s.correct }));
-                    setFeedback({ success, message: success ? "Integrated Successfully" : `Error. Cluster: ${targetRow}` });
+                    setFeedback({ success, message: success ? "Integrated Successfully" : `Error. Sector: ${targetSector}` });
                     setTimeout(nextFocalPoint, success ? 800 : 2000);
                 }
             };
@@ -302,7 +308,7 @@
             return (
                 <div className="min-h-screen p-4 md:p-10 flex flex-col items-center">
                     <div className="max-w-6xl w-full">
-                        <header className="flex flex-col md:flex-row items-center justify-between gap-6 mb-10">
+                        <header className="flex flex-col md:flex-row items-center justify-between gap-6 mb-6">
                             <div className="flex items-center gap-5">
                                 <div className="w-14 h-14 bg-slate-800 rounded-2xl flex items-center justify-center border border-white/10">
                                     <Icon name="BookOpen" size={28} className="text-white" />
@@ -326,13 +332,22 @@
                             </div>
                         </header>
 
+                        <div className="bg-white/5 border border-white/10 rounded-2xl p-4 mb-8 text-[11px] leading-relaxed text-slate-400 max-w-2xl shadow-xl">
+                            <strong className="text-white block mb-1 uppercase tracking-wider">About this Workspace</strong>
+                            This dialectical engine facilitates cognitive mapping through strategic engagement. By pairing traditional chess mechanics with symbolic vectors, users reinforce memory clusters while refining theoretical synthesis in the Dialectic Mode. 4x2 sector grids allow for segmented focus during integration.
+                        </div>
+
                         <div className="grid lg:grid-cols-[1fr_360px] gap-8 items-start">
                             <div className="space-y-4">
                                 {dialecticMode && (
                                     <div className="flex items-center justify-between px-2">
                                         <span className="text-[9px] font-black uppercase tracking-widest text-slate-500">Examiner Critiques</span>
                                         <div className="tray-area flex-1 max-w-[280px]">
-                                            {capturedByCritique.map((p, i) => <span key={i} className="text-xl text-slate-600 leading-none">{p}</span>)}
+                                            {capturedByCritique.map((p, i) => (
+                                                <span key={i} className={`text-xl leading-none ${p.color === 'w' ? 'text-white' : 'text-slate-500'}`}>
+                                                    {p.glyph}
+                                                </span>
+                                            ))}
                                         </div>
                                     </div>
                                 )}
@@ -340,20 +355,26 @@
                                 <div className={`bg-slate-900/60 p-1.5 rounded-[2.5rem] border border-white/5 shadow-2xl board-visual-state ${integrationMode && !isFinished ? 'opacity-10 grayscale' : 'opacity-100'}`}>
                                     <div className="p-3 bg-black/40 rounded-[2rem] border border-white/5 relative overflow-hidden">
                                         <div className="grid grid-rows-8 gap-1.5 relative z-10">
-                                            {rowColors.map((color, rIdx) => (
+                                            {Array.from({ length: 8 }).map((_, rIdx) => (
                                                 <div key={rIdx} className="grid grid-cols-8 gap-1.5">
                                                     {Array.from({ length: 8 }).map((_, cIdx) => {
                                                         const nodeNum = (rIdx * 8) + cIdx + 1;
+                                                        const sectorIdx = getSectorIndex(rIdx, cIdx);
+                                                        const color = sectorColors[sectorIdx];
                                                         const sqId = getSqId(rIdx, cIdx);
                                                         const p = game.get(sqId);
                                                         const isLandmark = nodeNum % 8 === 0;
                                                         const isLight = (rIdx + cIdx) % 2 === 0;
 
                                                         return (
-                                                            <div key={cIdx} onClick={() => onSqSelect(sqId)} className={`aspect-square rounded-lg border flex items-center justify-center relative transition-all duration-200 ${isLight ? 'tile-light' : 'tile-dark'} ${selectedSq === sqId ? 'ring-2 ring-indigo-500 z-20 scale-105' : ''} ${colorClasses[color]} ${integrationMode && focalNode === nodeNum ? 'ring-4 ring-white shadow-2xl' : ''} ${dialecticMode ? 'cursor-pointer' : 'cursor-default'}`}>
+                                                            <div key={cIdx} onClick={() => onSqSelect(sqId)} className={`aspect-square rounded-lg border flex items-center justify-center relative transition-all duration-200 ${isLight ? 'tile-light' : 'tile-dark'} ${selectedSq === sqId ? 'ring-2 ring-indigo-500 z-20 scale-105' : ''} ${colorClasses[color]} ${integrationMode && focalNode === nodeNum ? 'ring-4 ring-white shadow-2xl scale-110 z-20' : ''} ${dialecticMode ? 'cursor-pointer' : 'cursor-default'}`}>
                                                                 <span className={`absolute top-0.5 left-1 text-[8px] font-mono font-bold opacity-30 ${isLandmark ? 'opacity-90 font-black text-white' : ''}`}>{nodeNum}</span>
                                                                 {dialecticMode && validMoves.includes(sqId) && <div className="absolute inset-0 flex items-center justify-center"><div className="w-1.5 h-1.5 bg-indigo-500/50 rounded-full" /></div>}
-                                                                {dialecticMode && p && <span className={`chess-piece animate-piece ${p.color === 'w' ? 'white' : 'black'}`}>{PIECES[p.color + p.type.toUpperCase()]}</span>}
+                                                                {dialecticMode && p && (
+                                                                    <span className={`chess-piece ${p.color === 'w' ? 'white-piece' : 'black-piece'}`}>
+                                                                        {GLYPHS[p.color + p.type.toUpperCase()]}
+                                                                    </span>
+                                                                )}
                                                                 {!dialecticMode && <span className={`text-xl font-black tracking-tighter number-glow opacity-90 ${isLandmark ? 'scale-110 text-white' : ''}`}>{nodeNum}</span>}
                                                             </div>
                                                         );
@@ -367,7 +388,11 @@
                                 {dialecticMode && (
                                     <div className="flex items-center justify-between px-2">
                                         <div className="tray-area flex-1 max-w-[280px]">
-                                            {capturedByThesis.map((p, i) => <span key={i} className="text-xl text-indigo-400 opacity-80 leading-none">{p}</span>)}
+                                            {capturedByThesis.map((p, i) => (
+                                                <span key={i} className={`text-xl leading-none ${p.color === 'w' ? 'text-white' : 'text-slate-500'}`}>
+                                                    {p.glyph}
+                                                </span>
+                                            ))}
                                         </div>
                                         <span className="text-[9px] font-black uppercase tracking-widest text-indigo-400">Thesis Synthesis</span>
                                     </div>
@@ -375,6 +400,48 @@
                             </div>
 
                             <aside className="space-y-6">
+                                <div className="legend-card space-y-4">
+                                    <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 mb-4 flex items-center gap-3">
+                                        <Icon name="Compass" size={14} className="text-indigo-400" /> Dialectical Symbols
+                                    </h3>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <div className="flex items-center gap-3 bg-white/5 p-2 rounded-xl">
+                                            <span className="text-xl">🟢</span>
+                                            <span className="text-[9px] font-bold uppercase text-slate-400">King</span>
+                                        </div>
+                                        <div className="flex items-center gap-3 bg-white/5 p-2 rounded-xl">
+                                            <span className="text-xl">📗</span>
+                                            <span className="text-[9px] font-bold uppercase text-slate-400">Queen</span>
+                                        </div>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <span className="text-[8px] font-black text-slate-600 uppercase tracking-widest">Major Assets (Files A / H)</span>
+                                        <div className="flex justify-between bg-white/5 p-2 rounded-xl">
+                                            <div className="flex items-center gap-2"><span className="text-lg">🌱</span><span className="text-[9px] text-slate-400 uppercase">Rook L</span></div>
+                                            <div className="flex items-center gap-2"><span className="text-[9px] text-slate-400 uppercase text-right">Rook R</span><span className="text-lg">🧪</span></div>
+                                        </div>
+                                        <div className="flex justify-between bg-white/5 p-2 rounded-xl">
+                                            <div className="flex items-center gap-2"><span className="text-lg">❤️</span><span className="text-[9px] text-slate-400 uppercase">Knight L</span></div>
+                                            <div className="flex items-center gap-2"><span className="text-[9px] text-slate-400 uppercase text-right">Knight R</span><span className="text-lg">🩸</span></div>
+                                        </div>
+                                        <div className="flex justify-between bg-white/5 p-2 rounded-xl">
+                                            <div className="flex items-center gap-2"><span className="text-lg">🟣</span><span className="text-[9px] text-slate-400 uppercase">Bishop L</span></div>
+                                            <div className="flex items-center gap-2"><span className="text-[9px] text-slate-400 uppercase text-right">Bishop R</span><span className="text-lg">🌸</span></div>
+                                        </div>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <span className="text-[8px] font-black text-slate-600 uppercase tracking-widest">Pawn Vectors (Files A → H)</span>
+                                        <div className="grid grid-cols-4 gap-2">
+                                            {PAWN_HINTS.map((h, i) => (
+                                                <div key={i} className="bg-white/5 p-1.5 rounded-lg flex flex-col items-center gap-1">
+                                                    <span className="text-lg">{h}</span>
+                                                    <span className="text-[7px] text-slate-500 font-bold uppercase">{String.fromCharCode(65 + i)}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+
                                 {dialecticMode ? (
                                     <div className="bg-slate-900/40 p-6 rounded-[2.5rem] border border-white/5 shadow-2xl flex flex-col gap-5">
                                         <div className="bg-white/5 border border-white/10 p-5 rounded-2xl min-h-[100px] flex flex-col justify-center">
@@ -383,31 +450,14 @@
                                         </div>
                                         
                                         <div className="bg-white/5 border border-white/10 p-4 rounded-2xl">
-                                            <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest block mb-3">Examiner Intelligence</span>
+                                            <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest block mb-3">AI Intelligence Mode</span>
                                             <div className="flex gap-2">
-                                                <button onClick={() => setAiStrategy('random')} className={`flex-1 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${aiStrategy === 'random' ? 'bg-emerald-500 text-white' : 'bg-white/5 text-slate-400'}`}>
-                                                    Random
-                                                </button>
-                                                <button onClick={() => setAiStrategy('strategy')} className={`flex-1 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${aiStrategy === 'strategy' ? 'bg-red-500 text-white' : 'bg-white/5 text-slate-400'}`}>
-                                                    Strategy
-                                                </button>
-                                            </div>
-                                        </div>
-                                        
-                                        <div className="space-y-2">
-                                            <div className={`p-3 rounded-xl border flex justify-between items-center ${game.turn() === 'w' ? 'bg-white/5 border-white/20' : 'bg-transparent border-transparent opacity-30'}`}>
-                                                <span className="text-[10px] font-black uppercase">Thesis Response</span>
-                                                {game.turn() === 'w' && !game.game_over() && <Icon name="Loader" size={12} className="animate-spin"/>}
-                                            </div>
-                                            <div className={`p-3 rounded-xl border flex justify-between items-center ${game.turn() === 'b' ? 'bg-indigo-500/10 border-indigo-500/30' : 'bg-transparent border-transparent opacity-30'}`}>
-                                                <span className="text-[10px] font-black uppercase text-indigo-400">Examiner Inquiry</span>
-                                                {game.turn() === 'b' && !game.game_over() && <Icon name="Cpu" size={12} className="text-indigo-400 animate-pulse"/>}
+                                                <button onClick={() => setAiStrategy('random')} className={`flex-1 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${aiStrategy === 'random' ? 'bg-emerald-500 text-white shadow-[0_0_10px_rgba(16,185,129,0.4)]' : 'bg-white/5 text-slate-500 hover:text-slate-300'}`}>Random</button>
+                                                <button onClick={() => setAiStrategy('strategy')} className={`flex-1 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${aiStrategy === 'strategy' ? 'bg-red-500 text-white shadow-[0_0_10px_rgba(239,68,68,0.4)]' : 'bg-white/5 text-slate-500 hover:text-slate-300'}`}>Strategy</button>
                                             </div>
                                         </div>
 
-                                        <button onClick={() => { setGame(new Chess()); setCapturedByThesis([]); setCapturedByCritique([]); setDialogueStatus("Inquiry re-initialized."); setValidMoves([]); setSelectedSq(null); }} className="w-full py-3.5 bg-slate-800 rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-slate-700 transition-all border border-white/5">
-                                            Reset Match
-                                        </button>
+                                        <button onClick={() => { setGame(new Chess()); setCapturedByThesis([]); setCapturedByCritique([]); setDialogueStatus("Inquiry re-initialized."); setValidMoves([]); setSelectedSq(null); }} className="w-full py-3.5 bg-slate-800 rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-slate-700 transition-all border border-white/5">Reset Match</button>
                                     </div>
                                 ) : integrationMode ? (
                                     <div className="bg-indigo-950/30 p-8 rounded-[2.5rem] shadow-2xl flex flex-col items-center gap-6 text-center border border-indigo-500/20">
@@ -431,6 +481,7 @@
                                             </>
                                         ) : (
                                             <div className="space-y-4">
+                                                <div className="text-[10px] font-black uppercase tracking-widest text-indigo-400">Integration Complete</div>
                                                 <div className="text-6xl font-black text-white">{Math.round(stats.correct/8*100)}%</div>
                                                 <button onClick={beginIntegration} className="px-8 py-3 bg-white text-slate-900 rounded-xl font-black uppercase text-[10px] tracking-widest">Restart</button>
                                             </div>
@@ -441,15 +492,15 @@
                                     <div className="bg-slate-900/30 p-8 rounded-[2.5rem] border border-white/5 space-y-6">
                                         <div>
                                             <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 mb-6 flex items-center gap-3">
-                                                <Icon name="Palette" size={14} className="text-indigo-400" /> Sector Highlighting
+                                                <Icon name="Palette" size={14} className="text-indigo-400" /> Sector Mapping (4x2)
                                             </h3>
-                                            <div className="space-y-4">
-                                                {rowColors.map((curr, idx) => (
-                                                    <div key={idx} className="flex items-center justify-between">
-                                                        <span className="text-[9px] font-black text-slate-500 uppercase">Sector {idx + 1}</span>
-                                                        <div className="flex gap-1.5 bg-black/40 p-1.5 rounded-full">
+                                            <div className="grid grid-cols-2 gap-4">
+                                                {sectorColors.map((curr, idx) => (
+                                                    <div key={idx} className="flex flex-col gap-2 bg-black/20 p-3 rounded-xl border border-white/5">
+                                                        <span className="text-[8px] font-black text-slate-500 uppercase">Sec {idx + 1}</span>
+                                                        <div className="flex justify-between gap-1">
                                                             {['emerald', 'amber', 'blue', 'purple'].map(c => (
-                                                                <button key={c} onClick={() => updateRowColor(idx, c)} className={`w-4 h-4 rounded-full border ${btnColors[c]} ${curr === c ? 'border-white scale-110' : 'border-transparent opacity-20'}`} />
+                                                                <button key={c} onClick={() => updateSectorColor(idx, c)} className={`w-3.5 h-3.5 rounded-full border transition-transform ${btnColors[c]} ${curr === c ? 'border-white scale-125 z-10' : 'border-transparent opacity-20 hover:opacity-50'}`} />
                                                             ))}
                                                         </div>
                                                     </div>
