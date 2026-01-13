@@ -77,6 +77,8 @@
             padding: 1rem;
             border-radius: 1.5rem;
         }
+        
+        .timer-bar { transition: width 0.1s linear; }
     </style>
 </head>
 <body>
@@ -174,6 +176,7 @@
                 testGame.move(move);
                 let score = 0;
                 const pieceValues = { p: 1, n: 3, b: 3, r: 5, q: 9, k: 0 };
+                
                 testGame.board().forEach(row => {
                     row.forEach(square => {
                         if (square) {
@@ -182,9 +185,14 @@
                         }
                     });
                 });
+
                 if (move.captured) score += pieceValues[move.captured] * 2;
                 if (testGame.in_check()) score += 3;
                 if (testGame.in_checkmate()) score += 1000;
+                
+                const centerSquares = ['d4', 'd5', 'e4', 'e5'];
+                if (centerSquares.includes(move.to)) score += 0.5;
+
                 return score;
             };
 
@@ -192,8 +200,8 @@
                 if (aiStrategy === 'random') return moves[Math.floor(Math.random() * moves.length)];
                 const movesWithScores = moves.map(move => ({ move, score: evaluateMove(game, move) }));
                 movesWithScores.sort((a, b) => b.score - a.score);
-                const topMoves = movesWithScores.slice(0, 3);
-                return topMoves[Math.floor(Math.random() * topMoves.length)].move;
+                const candidatePool = movesWithScores.slice(0, 3);
+                return candidatePool[Math.floor(Math.random() * candidatePool.length)].move;
             };
 
             const performMove = useCallback((move) => {
@@ -209,7 +217,6 @@
                     } else {
                         if (result.captured) {
                             const side = result.color === 'w' ? 'Thesis' : 'Examiner';
-                            // Keep emojis in capture tray for memory assistance
                             const hint = getEmojiHint(result.captured, result.to);
                             if (result.color === 'w') setCapturedByThesis(prev => [...prev, hint]);
                             else setCapturedByCritique(prev => [...prev, hint]);
@@ -291,7 +298,7 @@
             return (
                 <div className="min-h-screen p-4 md:p-10 flex flex-col items-center">
                     <div className="max-w-6xl w-full">
-                        <header className="flex flex-col md:flex-row items-center justify-between gap-6 mb-10">
+                        <header className="flex flex-col md:flex-row items-center justify-between gap-6 mb-6">
                             <div className="flex items-center gap-5">
                                 <div className="w-14 h-14 bg-slate-800 rounded-2xl flex items-center justify-center border border-white/10">
                                     <Icon name="BookOpen" size={28} className="text-white" />
@@ -314,6 +321,11 @@
                                 </button>
                             </div>
                         </header>
+
+                        <div className="bg-white/5 border border-white/10 rounded-2xl p-4 mb-8 text-[11px] leading-relaxed text-slate-400 max-w-2xl">
+                            <strong className="text-white block mb-1 uppercase tracking-wider">About this Workspace</strong>
+                            This dialectical engine facilitates cognitive mapping through strategic engagement. By pairing traditional chess mechanics with symbolic vectors, users reinforce memory clusters while refining theoretical synthesis in the Dialectic Mode.
+                        </div>
 
                         <div className="grid lg:grid-cols-[1fr_360px] gap-8 items-start">
                             <div className="space-y-4">
@@ -372,7 +384,6 @@
                                     <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 mb-4 flex items-center gap-3">
                                         <Icon name="Compass" size={14} className="text-indigo-400" /> Dialectical Symbols
                                     </h3>
-                                    
                                     <div className="grid grid-cols-2 gap-3">
                                         <div className="flex items-center gap-3 bg-white/5 p-2 rounded-xl">
                                             <span className="text-xl">🟢</span>
@@ -383,7 +394,6 @@
                                             <span className="text-[9px] font-bold uppercase text-slate-400">Queen</span>
                                         </div>
                                     </div>
-
                                     <div className="space-y-2">
                                         <span className="text-[8px] font-black text-slate-600 uppercase tracking-widest">Major Assets (Files A / H)</span>
                                         <div className="flex justify-between bg-white/5 p-2 rounded-xl">
@@ -399,7 +409,6 @@
                                             <div className="flex items-center gap-2"><span className="text-[9px] text-slate-400 uppercase text-right">Bishop R</span><span className="text-lg">🌸</span></div>
                                         </div>
                                     </div>
-
                                     <div className="space-y-2">
                                         <span className="text-[8px] font-black text-slate-600 uppercase tracking-widest">Pawn Vectors (Files A → H)</span>
                                         <div className="grid grid-cols-4 gap-2">
@@ -419,9 +428,45 @@
                                             <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest block mb-2">Dialogue Log</span>
                                             <p className="text-sm font-bold text-white italic leading-snug">"{dialogueStatus}"</p>
                                         </div>
-                                        <button onClick={() => { setGame(new Chess()); setCapturedByThesis([]); setCapturedByCritique([]); setDialogueStatus("Inquiry re-initialized."); setValidMoves([]); setSelectedSq(null); }} className="w-full py-3.5 bg-slate-800 rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-slate-700 transition-all border border-white/5">
-                                            Reset Match
-                                        </button>
+                                        
+                                        <div className="bg-white/5 border border-white/10 p-4 rounded-2xl">
+                                            <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest block mb-3">AI Intelligence Mode</span>
+                                            <div className="flex gap-2">
+                                                <button onClick={() => setAiStrategy('random')} className={`flex-1 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${aiStrategy === 'random' ? 'bg-emerald-500 text-white shadow-[0_0_10px_rgba(16,185,129,0.4)]' : 'bg-white/5 text-slate-500 hover:text-slate-300'}`}>Random</button>
+                                                <button onClick={() => setAiStrategy('strategy')} className={`flex-1 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${aiStrategy === 'strategy' ? 'bg-red-500 text-white shadow-[0_0_10px_rgba(239,68,68,0.4)]' : 'bg-white/5 text-slate-500 hover:text-slate-300'}`}>Strategy</button>
+                                            </div>
+                                        </div>
+
+                                        <button onClick={() => { setGame(new Chess()); setCapturedByThesis([]); setCapturedByCritique([]); setDialogueStatus("Inquiry re-initialized."); setValidMoves([]); setSelectedSq(null); }} className="w-full py-3.5 bg-slate-800 rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-slate-700 transition-all border border-white/5">Reset Match</button>
+                                    </div>
+                                ) : integrationMode ? (
+                                    <div className="bg-indigo-950/30 p-8 rounded-[2.5rem] shadow-2xl flex flex-col items-center gap-6 text-center border border-indigo-500/20">
+                                        {!isFinished ? (
+                                            <>
+                                                <div className="text-[10px] font-black uppercase tracking-widest text-indigo-400">Recall Point {stats.total}/8</div>
+                                                <div className="text-8xl font-black text-white tracking-tighter drop-shadow-2xl">{focalNode}</div>
+                                                <div className="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                                                    <div className="h-full bg-white timer-bar shadow-[0_0_10px_white]" style={{ width: `${(timeRemaining / 5000) * 100}%` }} />
+                                                </div>
+                                                <div className="flex flex-col gap-2">
+                                                    <span className="text-[9px] font-black text-slate-500 uppercase">Sector Map (1-8)</span>
+                                                    <input ref={inputRef} type="text" value={inputVal} onChange={e => {
+                                                        const v = e.target.value;
+                                                        if (/^[1-8]?$/.test(v)) {
+                                                            setInputVal(v);
+                                                            if (v !== '') evaluate(parseInt(v) === Math.ceil(focalNode / 8), "Error");
+                                                        }
+                                                    }} className="academic-input" maxLength="1" autoFocus />
+                                                </div>
+                                            </>
+                                        ) : (
+                                            <div className="space-y-4">
+                                                <div className="text-[10px] font-black uppercase tracking-widest text-indigo-400">Integration Complete</div>
+                                                <div className="text-6xl font-black text-white">{Math.round(stats.correct/8*100)}%</div>
+                                                <button onClick={beginIntegration} className="px-8 py-3 bg-white text-slate-900 rounded-xl font-black uppercase text-[10px] tracking-widest">Restart</button>
+                                            </div>
+                                        )}
+                                        {feedback && !isFinished && <div className={`text-[9px] font-black uppercase tracking-widest px-4 py-2 rounded-lg ${feedback.success ? 'text-emerald-400 bg-emerald-500/10' : 'text-red-400 bg-red-500/10'}`}>{feedback.message}</div>}
                                     </div>
                                 ) : (
                                     <div className="bg-slate-900/30 p-8 rounded-[2.5rem] border border-white/5 space-y-6">
@@ -446,6 +491,11 @@
                                 )}
                             </aside>
                         </div>
+                        
+                        <footer className="mt-12 py-8 border-t border-white/5 flex justify-between items-center opacity-30 text-[8px] uppercase font-black tracking-[0.4em] text-slate-600">
+                            <div>Dialectical Mastery Engine v3.1.0</div>
+                            <div>Individual Cognitive Mapping Enabled</div>
+                        </footer>
                     </div>
                 </div>
             );
