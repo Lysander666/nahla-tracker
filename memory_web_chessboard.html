@@ -229,7 +229,7 @@
                 const newTotal = stats.total + 1;
                 setStats(s => ({ ...s, total: newTotal, correct: success ? s.correct + 1 : s.correct }));
                 setFeedback({ success, message: success ? "Integrated Successfully" : `Error. Cluster: ${targetRow}` });
-                if (newTotal >= 8) setTimeout(() => setIsFinished(true), 1500);
+                if (newTotal > 8) setTimeout(() => setIsFinished(true), 1500);
                 else setTimeout(nextFocalPoint, success ? 800 : 2000);
             };
 
