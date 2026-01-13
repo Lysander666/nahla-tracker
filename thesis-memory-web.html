@@ -767,12 +767,12 @@
   href="https://lysander666.github.io/nahla-tracker/memory_web_chessboard"
   target="_blank"
   rel="noopener noreferrer"
-  title="Open Memory Web Chessboard"
+  onClick={(e) => e.stopPropagation()}
+  className="relative z-50 w-12 h-12 bg-indigo-600/20 rounded-2xl flex items-center justify-center border border-indigo-500/30 cursor-pointer"
 >
-  <div className="w-12 h-12 bg-indigo-600/20 rounded-2xl flex items-center justify-center mx-auto border border-indigo-500/30 hover:bg-indigo-600/30 transition-colors">
-    <Icon name="Network" size={24} className="text-indigo-400" />
-  </div>
+  <Icon name="Network" size={24} className="text-indigo-400" />
 </a>
+
 
                                         <h3 className="text-2xl font-thin tracking-tight text-white mt-4">Thesis Memory Web v0.3</h3>
                                         <p className="text-[10px] text-indigo-400 uppercase font-black tracking-widest">Cognitive Mapping Interface</p>
