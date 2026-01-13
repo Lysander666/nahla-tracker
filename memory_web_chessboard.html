@@ -54,6 +54,8 @@
             gap: 4px;
             padding: 0 12px;
             border-radius: 12px;
+            flex-wrap: wrap;
+            overflow: hidden;
         }
 
         .board-visual-state { transition: opacity 0.4s ease, filter 0.4s ease; }
@@ -323,7 +325,7 @@
                                 {dialecticMode && (
                                     <div className="flex items-center justify-between px-2">
                                         <span className="text-[9px] font-black uppercase tracking-widest text-slate-500">Examiner Critiques</span>
-                                        <div className="tray-area w-[220px]">
+                                        <div className="tray-area flex-1 max-w-[280px]">
                                             {capturedByCritique.map((p, i) => <span key={i} className="text-xl text-slate-600 leading-none">{p}</span>)}
                                         </div>
                                     </div>
@@ -358,7 +360,7 @@
 
                                 {dialecticMode && (
                                     <div className="flex items-center justify-between px-2">
-                                        <div className="tray-area w-[220px]">
+                                        <div className="tray-area flex-1 max-w-[280px]">
                                             {capturedByThesis.map((p, i) => <span key={i} className="text-xl text-indigo-400 opacity-80 leading-none">{p}</span>)}
                                         </div>
                                         <span className="text-[9px] font-black uppercase tracking-widest text-indigo-400">Thesis Synthesis</span>
