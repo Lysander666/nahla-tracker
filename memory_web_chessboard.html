@@ -145,7 +145,10 @@
         };
 
         const App = () => {
-            const [sectorColors, setSectorColors] = useState(['emerald', 'emerald', 'amber', 'amber', 'blue', 'blue', 'purple', 'purple']);
+            const [sectorColors, setSectorColors] = useState(() => {
+                const saved = localStorage.getItem('thesis-chessboard-sectors');
+                return saved ? JSON.parse(saved) : ['emerald', 'emerald', 'amber', 'amber', 'blue', 'blue', 'purple', 'purple'];
+            });
             const [dialecticMode, setDialecticMode] = useState(false);
             const [integrationMode, setIntegrationMode] = useState(false);
             const [stats, setStats] = useState({ correct: 0, total: 0 });
