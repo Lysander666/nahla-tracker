@@ -98,7 +98,7 @@
         const auth = firebase.auth();
         const db = firebase.firestore();
 
-        const Icon = ({ name, size = 16, className = "" }) => {
+        const Icon = ({ name, size = 16, className = "", fill = "none" }) => {
             const iconRef = useRef(null);
             useEffect(() => {
                 if (window.lucide && iconRef.current) {
@@ -107,12 +107,13 @@
                     const kebabName = name.replace(/([a-z0-9]|(?=[A-Z]))([A-Z])/g, '$1-$2').toLowerCase().replace(/^-/, '');
                     i.setAttribute('data-lucide', kebabName);
                     if (className) i.setAttribute('class', className);
+                    i.setAttribute('fill', fill); // Pass fill prop
                     i.style.width = size + 'px';
                     i.style.height = size + 'px';
                     iconRef.current.appendChild(i);
                     window.lucide.createIcons();
                 }
-            }, [name, size, className]);
+            }, [name, size, className, fill]);
             return <span ref={iconRef} className="flex items-center justify-center leading-none shrink-0" />;
         };
 
@@ -138,6 +139,7 @@
 
             const [hoveredNodeKey, setHoveredNodeKey] = useState(null);
             const [hoveredSymbol, setHoveredSymbol] = useState(null);
+            const [starredNodes, setStarredNodes] = useState({}); // { [sectionId]: nodeIndex }
 
             const [showAuthModal, setShowAuthModal] = useState(false);
             const [showAboutModal, setShowAboutModal] = useState(false);
@@ -254,6 +256,7 @@
                         if (data.sectionColors) setSectionColors(data.sectionColors);
                         if (data.titleFontSize) setTitleFontSize(data.titleFontSize);
                         if (data.grayscaleMode !== undefined) setGrayscaleMode(data.grayscaleMode);
+                        if (data.starredNodes) setStarredNodes(data.starredNodes);
                     }
                     setLoading(false);
                 }, (err) => {
@@ -279,6 +282,7 @@
                         sectionColors: updates.sectionColors !== undefined ? updates.sectionColors : sectionColors,
                         titleFontSize: updates.titleFontSize !== undefined ? updates.titleFontSize : titleFontSize,
                         grayscaleMode: updates.grayscaleMode !== undefined ? updates.grayscaleMode : grayscaleMode,
+                        starredNodes: updates.starredNodes !== undefined ? updates.starredNodes : starredNodes,
                         lastUpdated: new Date().toISOString()
                     };
 
@@ -292,8 +296,8 @@
 
             const exportData = () => {
                 const dataToExport = {
-                    version: "0.24", timestamp: new Date().toISOString(),
-                    payload: { nodesData, sectionTitles, connections, sectionOrder, sectionColors, titleFontSize, grayscaleMode }
+                    version: "0.25", timestamp: new Date().toISOString(),
+                    payload: { nodesData, sectionTitles, connections, sectionOrder, sectionColors, titleFontSize, grayscaleMode, starredNodes }
                 };
                 const blob = new Blob([JSON.stringify(dataToExport, null, 2)], { type: 'application/json' });
                 const url = URL.createObjectURL(blob);
@@ -314,9 +318,11 @@
                     for(let nIdx=0; nIdx<8; nIdx++) {
                         const key = getNodeKey(sIdx, nIdx);
                         const data = nodesData[key];
-                        if (data?.concept || data?.notes) {
+                        const isStarred = starredNodes[sIdx] === nIdx;
+                        
+                        if (data?.concept || data?.notes || isStarred) {
                             hasContent = true;
-                            md += `### Node ${getGlobalIndex(sIdx, nIdx)}: ${data.emoji || ''} ${data.concept || 'Untitled'}\n`;
+                            md += `### Node ${getGlobalIndex(sIdx, nIdx)}: ${isStarred ? '★ ' : ''}${data.emoji || ''} ${data.concept || 'Untitled'}\n`;
                             if (data.citation) md += `**Citation:** ${data.citation}\n\n`;
                             if (data.notes) md += `**Notes:**\n${data.notes}\n\n`;
                             
@@ -376,6 +382,7 @@
             <attribute id="1" title="Citation" type="string"/>
             <attribute id="2" title="Notes" type="string"/>
             <attribute id="3" title="Emoji" type="string"/>
+            <attribute id="4" title="IsStar" type="boolean"/>
         </attributes>
         <nodes>`;
                 
@@ -384,9 +391,10 @@
                     for(let n=0; n<8; n++) {
                         const key = getNodeKey(s, n);
                         const data = nodesData[key];
-                        // Export if it has content OR is connected
                         const isConnected = connections.some(c => c.includes(key));
-                        if ((data && (data.concept || data.notes || data.emoji)) || isConnected) {
+                        const isStarred = starredNodes[s] === n;
+                        
+                        if ((data && (data.concept || data.notes || data.emoji)) || isConnected || isStarred) {
                             const label = data?.concept ? escapeXML(data.concept) : `Node ${getGlobalIndex(s, n)}`;
                             const clusterName = escapeXML(sectionTitles[s]);
                             const citation = escapeXML(data?.citation);
@@ -401,9 +409,10 @@
                     <attvalue for="1" value="${citation}"/>
                     <attvalue for="2" value="${notes}"/>
                     <attvalue for="3" value="${emoji}"/>
+                    <attvalue for="4" value="${isStarred}"/>
                 </attvalues>
                 <viz:color r="${rgb.r}" g="${rgb.g}" b="${rgb.b}"/>
-                <viz:size value="10.0"/>
+                <viz:size value="${isStarred ? '15.0' : '10.0'}"/>
             </node>`;
                         }
                     }
@@ -454,11 +463,12 @@
 
             const applyImport = () => {
                 if (!showImportConfirm) return;
-                const { nodesData, sectionTitles, connections, sectionOrder, sectionColors, titleFontSize, grayscaleMode } = showImportConfirm;
+                const { nodesData, sectionTitles, connections, sectionOrder, sectionColors, titleFontSize, grayscaleMode, starredNodes } = showImportConfirm;
                 setNodesData(nodesData); setSectionTitles(sectionTitles); setConnections(connections); setSectionOrder(sectionOrder);
                 if (sectionColors) setSectionColors(sectionColors); setTitleFontSize(titleFontSize);
                 if (grayscaleMode !== undefined) setGrayscaleMode(grayscaleMode);
-                saveData({ nodesData, sectionTitles, connections, sectionOrder, sectionColors, titleFontSize, grayscaleMode });
+                if (starredNodes !== undefined) setStarredNodes(starredNodes);
+                saveData({ nodesData, sectionTitles, connections, sectionOrder, sectionColors, titleFontSize, grayscaleMode, starredNodes });
                 setShowImportConfirm(null); setSelectedNode(null);
             };
 
@@ -470,11 +480,12 @@
                     sectionOrder: [0, 1, 2, 3, 4, 5, 6, 7],
                     sectionColors: ["blue", "emerald", "amber", "purple", "blue", "emerald", "amber", "purple"],
                     titleFontSize: 10,
-                    grayscaleMode: false
+                    grayscaleMode: false,
+                    starredNodes: {}
                 };
                 setNodesData(blankData.nodesData); setConnections(blankData.connections); setSectionTitles(blankData.sectionTitles);
                 setSectionOrder(blankData.sectionOrder); setSectionColors(blankData.sectionColors); setTitleFontSize(blankData.titleFontSize);
-                setGrayscaleMode(blankData.grayscaleMode);
+                setGrayscaleMode(blankData.grayscaleMode); setStarredNodes(blankData.starredNodes);
                 saveData(blankData); setShowResetConfirm(false); setResetConfirmInput(""); setSelectedNode(null);
             };
 
@@ -558,6 +569,14 @@
             const changeSectionColor = (index, color) => {
                 const newColors = [...sectionColors]; newColors[index] = color;
                 setSectionColors(newColors); saveData({ sectionColors: newColors }); setActiveColorPicker(null);
+            };
+            
+            const toggleStarNode = (sIdx, nIdx) => {
+                const currentStar = starredNodes[sIdx];
+                const newStar = currentStar === nIdx ? null : nIdx; // Toggle off if same, else set new
+                const newStarredNodes = { ...starredNodes, [sIdx]: newStar };
+                setStarredNodes(newStarredNodes);
+                saveData({ starredNodes: newStarredNodes });
             };
 
             const toggleColorPicker = (e, index) => { e.stopPropagation(); setActiveColorPicker(activeColorPicker === index ? null : index); };
@@ -718,6 +737,7 @@
                                                         const emoji = nodesData[key]?.emoji;
                                                         const isLinked = connections.some(c => c.includes(key));
                                                         const isLinkingSource = linkingNode === key;
+                                                        const isStarred = starredNodes[sectionId] === nIdx;
 
                                                         const isSearchMatch = searchQuery && (
                                                             conceptText.toLowerCase().includes(searchQuery.toLowerCase()) || 
@@ -743,6 +763,7 @@
                                                                         <div className={`w-2 h-2 rounded-full transition-all duration-500 ${hasConcept ? theme.dot : 'bg-slate-600'}`} />
                                                                     )}
                                                                 </div>
+                                                                {isStarred && <div className="absolute top-0.5 right-0.5 text-amber-400"><Icon name="Star" size={10} fill="currentColor" /></div>}
                                                                 {isLinked && <div className="absolute inset-2 rounded-xl border border-indigo-500/50 pointer-events-none" />}
                                                                 {hoveredNodeKey === key && conceptText && (
                                                                     <div className="absolute bottom-full mb-3 left-1/2 -translate-x-1/2 px-4 py-3 bg-[#000000] border border-indigo-500/40 rounded-xl shadow-2xl z-[200] pointer-events-none backdrop-blur-xl tooltip-animate text-center ring-1 ring-white/5" 
@@ -778,8 +799,21 @@
                                         <div className="flex flex-col gap-8 animate-in slide-in-from-right duration-300">
                                             <div>
                                                 <div className="text-[12px] text-indigo-400 uppercase font-bold tracking-widest mb-1">Node {getGlobalIndex(selectedNode.sIdx, selectedNode.nIdx)}</div>
-                                                <h2 className="text-2xl lg:text-3xl font-thin text-white tracking-tight leading-none">Memory Node Detail</h2>
+                                                <h2 className="text-2xl lg:text-3xl font-thin text-white tracking-tight leading-none mb-4">Memory Node Detail</h2>
+                                                
+                                                {/* Cluster Star Toggle */}
+                                                <button 
+                                                    onClick={() => toggleStarNode(selectedNode.sIdx, selectedNode.nIdx)}
+                                                    className={`w-full py-3 px-4 rounded-xl font-bold text-xs uppercase tracking-widest flex items-center justify-between transition-all ${starredNodes[selectedNode.sIdx] === selectedNode.nIdx ? 'bg-amber-500/10 border border-amber-500/50 text-amber-400 shadow-[0_0_15px_rgba(245,158,11,0.2)]' : 'bg-white/5 border border-white/10 text-slate-400 hover:bg-white/10 hover:text-white'}`}
+                                                >
+                                                    <span className="flex items-center gap-2">
+                                                        <Icon name="Star" size={14} fill={starredNodes[selectedNode.sIdx] === selectedNode.nIdx ? "currentColor" : "none"} />
+                                                        {starredNodes[selectedNode.sIdx] === selectedNode.nIdx ? "Cluster Star Active" : "Set as Cluster Star"}
+                                                    </span>
+                                                    {starredNodes[selectedNode.sIdx] === selectedNode.nIdx && <div className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />}
+                                                </button>
                                             </div>
+
                                             <div className="flex flex-col gap-6">
                                                 <div className="flex flex-col gap-2 p-4 bg-white/5 rounded-2xl border border-white/5 group hover:border-white/10 transition-colors">
                                                     <label className="text-[9px] text-slate-500 uppercase font-bold tracking-widest flex items-center gap-2"><Icon name="Edit3" size={12} className="text-slate-400" /> Cluster Name</label>
