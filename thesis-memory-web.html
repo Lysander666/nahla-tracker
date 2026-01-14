@@ -140,6 +140,7 @@
             const [hoveredNodeKey, setHoveredNodeKey] = useState(null);
             const [hoveredSymbol, setHoveredSymbol] = useState(null);
             const [starredNodes, setStarredNodes] = useState({}); // { [sectionId]: nodeIndex }
+            const [gridStarNode, setGridStarNode] = useState(null); // { sIdx, nIdx }
 
             const [showAuthModal, setShowAuthModal] = useState(false);
             const [showAboutModal, setShowAboutModal] = useState(false);
@@ -257,6 +258,7 @@
                         if (data.titleFontSize) setTitleFontSize(data.titleFontSize);
                         if (data.grayscaleMode !== undefined) setGrayscaleMode(data.grayscaleMode);
                         if (data.starredNodes) setStarredNodes(data.starredNodes);
+                        if (data.gridStarNode) setGridStarNode(data.gridStarNode);
                     }
                     setLoading(false);
                 }, (err) => {
@@ -283,6 +285,7 @@
                         titleFontSize: updates.titleFontSize !== undefined ? updates.titleFontSize : titleFontSize,
                         grayscaleMode: updates.grayscaleMode !== undefined ? updates.grayscaleMode : grayscaleMode,
                         starredNodes: updates.starredNodes !== undefined ? updates.starredNodes : starredNodes,
+                        gridStarNode: updates.gridStarNode !== undefined ? updates.gridStarNode : gridStarNode,
                         lastUpdated: new Date().toISOString()
                     };
 
@@ -296,8 +299,8 @@
 
             const exportData = () => {
                 const dataToExport = {
-                    version: "0.25", timestamp: new Date().toISOString(),
-                    payload: { nodesData, sectionTitles, connections, sectionOrder, sectionColors, titleFontSize, grayscaleMode, starredNodes }
+                    version: "0.26", timestamp: new Date().toISOString(),
+                    payload: { nodesData, sectionTitles, connections, sectionOrder, sectionColors, titleFontSize, grayscaleMode, starredNodes, gridStarNode }
                 };
                 const blob = new Blob([JSON.stringify(dataToExport, null, 2)], { type: 'application/json' });
                 const url = URL.createObjectURL(blob);
@@ -319,10 +322,15 @@
                         const key = getNodeKey(sIdx, nIdx);
                         const data = nodesData[key];
                         const isStarred = starredNodes[sIdx] === nIdx;
+                        const isGridStar = gridStarNode?.sIdx === sIdx && gridStarNode?.nIdx === nIdx;
                         
-                        if (data?.concept || data?.notes || isStarred) {
+                        if (data?.concept || data?.notes || isStarred || isGridStar) {
                             hasContent = true;
-                            md += `### Node ${getGlobalIndex(sIdx, nIdx)}: ${isStarred ? '★ ' : ''}${data.emoji || ''} ${data.concept || 'Untitled'}\n`;
+                            let prefix = "";
+                            if (isGridStar) prefix += "★ (GRID STAR) ";
+                            if (isStarred) prefix += "★ (CLUSTER STAR) ";
+
+                            md += `### Node ${getGlobalIndex(sIdx, nIdx)}: ${prefix}${data.emoji || ''} ${data.concept || 'Untitled'}\n`;
                             if (data.citation) md += `**Citation:** ${data.citation}\n\n`;
                             if (data.notes) md += `**Notes:**\n${data.notes}\n\n`;
                             
@@ -382,7 +390,8 @@
             <attribute id="1" title="Citation" type="string"/>
             <attribute id="2" title="Notes" type="string"/>
             <attribute id="3" title="Emoji" type="string"/>
-            <attribute id="4" title="IsStar" type="boolean"/>
+            <attribute id="4" title="IsClusterStar" type="boolean"/>
+            <attribute id="5" title="IsGridStar" type="boolean"/>
         </attributes>
         <nodes>`;
                 
@@ -393,8 +402,9 @@
                         const data = nodesData[key];
                         const isConnected = connections.some(c => c.includes(key));
                         const isStarred = starredNodes[s] === n;
+                        const isGridStar = gridStarNode?.sIdx === s && gridStarNode?.nIdx === n;
                         
-                        if ((data && (data.concept || data.notes || data.emoji)) || isConnected || isStarred) {
+                        if ((data && (data.concept || data.notes || data.emoji)) || isConnected || isStarred || isGridStar) {
                             const label = data?.concept ? escapeXML(data.concept) : `Node ${getGlobalIndex(s, n)}`;
                             const clusterName = escapeXML(sectionTitles[s]);
                             const citation = escapeXML(data?.citation);
@@ -410,9 +420,10 @@
                     <attvalue for="2" value="${notes}"/>
                     <attvalue for="3" value="${emoji}"/>
                     <attvalue for="4" value="${isStarred}"/>
+                    <attvalue for="5" value="${isGridStar}"/>
                 </attvalues>
                 <viz:color r="${rgb.r}" g="${rgb.g}" b="${rgb.b}"/>
-                <viz:size value="${isStarred ? '15.0' : '10.0'}"/>
+                <viz:size value="${isGridStar ? '20.0' : (isStarred ? '15.0' : '10.0')}"/>
             </node>`;
                         }
                     }
@@ -463,12 +474,13 @@
 
             const applyImport = () => {
                 if (!showImportConfirm) return;
-                const { nodesData, sectionTitles, connections, sectionOrder, sectionColors, titleFontSize, grayscaleMode, starredNodes } = showImportConfirm;
+                const { nodesData, sectionTitles, connections, sectionOrder, sectionColors, titleFontSize, grayscaleMode, starredNodes, gridStarNode } = showImportConfirm;
                 setNodesData(nodesData); setSectionTitles(sectionTitles); setConnections(connections); setSectionOrder(sectionOrder);
                 if (sectionColors) setSectionColors(sectionColors); setTitleFontSize(titleFontSize);
                 if (grayscaleMode !== undefined) setGrayscaleMode(grayscaleMode);
                 if (starredNodes !== undefined) setStarredNodes(starredNodes);
-                saveData({ nodesData, sectionTitles, connections, sectionOrder, sectionColors, titleFontSize, grayscaleMode, starredNodes });
+                if (gridStarNode !== undefined) setGridStarNode(gridStarNode);
+                saveData({ nodesData, sectionTitles, connections, sectionOrder, sectionColors, titleFontSize, grayscaleMode, starredNodes, gridStarNode });
                 setShowImportConfirm(null); setSelectedNode(null);
             };
 
@@ -481,11 +493,12 @@
                     sectionColors: ["blue", "emerald", "amber", "purple", "blue", "emerald", "amber", "purple"],
                     titleFontSize: 10,
                     grayscaleMode: false,
-                    starredNodes: {}
+                    starredNodes: {},
+                    gridStarNode: null
                 };
                 setNodesData(blankData.nodesData); setConnections(blankData.connections); setSectionTitles(blankData.sectionTitles);
                 setSectionOrder(blankData.sectionOrder); setSectionColors(blankData.sectionColors); setTitleFontSize(blankData.titleFontSize);
-                setGrayscaleMode(blankData.grayscaleMode); setStarredNodes(blankData.starredNodes);
+                setGrayscaleMode(blankData.grayscaleMode); setStarredNodes(blankData.starredNodes); setGridStarNode(blankData.gridStarNode);
                 saveData(blankData); setShowResetConfirm(false); setResetConfirmInput(""); setSelectedNode(null);
             };
 
@@ -577,6 +590,13 @@
                 const newStarredNodes = { ...starredNodes, [sIdx]: newStar };
                 setStarredNodes(newStarredNodes);
                 saveData({ starredNodes: newStarredNodes });
+            };
+
+            const toggleGridStar = (sIdx, nIdx) => {
+                const isCurrentGridStar = gridStarNode && gridStarNode.sIdx === sIdx && gridStarNode.nIdx === nIdx;
+                const newGridStar = isCurrentGridStar ? null : { sIdx, nIdx };
+                setGridStarNode(newGridStar);
+                saveData({ gridStarNode: newGridStar });
             };
 
             const toggleColorPicker = (e, index) => { e.stopPropagation(); setActiveColorPicker(activeColorPicker === index ? null : index); };
@@ -738,6 +758,7 @@
                                                         const isLinked = connections.some(c => c.includes(key));
                                                         const isLinkingSource = linkingNode === key;
                                                         const isStarred = starredNodes[sectionId] === nIdx;
+                                                        const isGridStar = gridStarNode?.sIdx === sectionId && gridStarNode?.nIdx === nIdx;
 
                                                         const isSearchMatch = searchQuery && (
                                                             conceptText.toLowerCase().includes(searchQuery.toLowerCase()) || 
@@ -764,6 +785,7 @@
                                                                     )}
                                                                 </div>
                                                                 {isStarred && <div className="absolute top-0.5 right-0.5 text-amber-400"><Icon name="Star" size={10} fill="currentColor" /></div>}
+                                                                {isGridStar && <div className="absolute top-0.5 left-0.5 text-amber-400 animate-pulse"><Icon name="Sparkles" size={12} fill="currentColor" /></div>}
                                                                 {isLinked && <div className="absolute inset-2 rounded-xl border border-indigo-500/50 pointer-events-none" />}
                                                                 {hoveredNodeKey === key && conceptText && (
                                                                     <div className="absolute bottom-full mb-3 left-1/2 -translate-x-1/2 px-4 py-3 bg-[#000000] border border-indigo-500/40 rounded-xl shadow-2xl z-[200] pointer-events-none backdrop-blur-xl tooltip-animate text-center ring-1 ring-white/5" 
@@ -801,17 +823,25 @@
                                                 <div className="text-[12px] text-indigo-400 uppercase font-bold tracking-widest mb-1">Node {getGlobalIndex(selectedNode.sIdx, selectedNode.nIdx)}</div>
                                                 <h2 className="text-2xl lg:text-3xl font-thin text-white tracking-tight leading-none mb-4">Memory Node Detail</h2>
                                                 
-                                                {/* Cluster Star Toggle */}
-                                                <button 
-                                                    onClick={() => toggleStarNode(selectedNode.sIdx, selectedNode.nIdx)}
-                                                    className={`w-full py-3 px-4 rounded-xl font-bold text-xs uppercase tracking-widest flex items-center justify-between transition-all ${starredNodes[selectedNode.sIdx] === selectedNode.nIdx ? 'bg-amber-500/10 border border-amber-500/50 text-amber-400 shadow-[0_0_15px_rgba(245,158,11,0.2)]' : 'bg-white/5 border border-white/10 text-slate-400 hover:bg-white/10 hover:text-white'}`}
-                                                >
-                                                    <span className="flex items-center gap-2">
-                                                        <Icon name="Star" size={14} fill={starredNodes[selectedNode.sIdx] === selectedNode.nIdx ? "currentColor" : "none"} />
-                                                        {starredNodes[selectedNode.sIdx] === selectedNode.nIdx ? "Cluster Star Active" : "Set as Cluster Star"}
-                                                    </span>
-                                                    {starredNodes[selectedNode.sIdx] === selectedNode.nIdx && <div className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />}
-                                                </button>
+                                                <div className="grid grid-cols-2 gap-3">
+                                                    {/* Cluster Star Toggle */}
+                                                    <button 
+                                                        onClick={() => toggleStarNode(selectedNode.sIdx, selectedNode.nIdx)}
+                                                        className={`w-full py-3 px-3 rounded-xl font-bold text-[10px] uppercase tracking-widest flex flex-col items-center justify-center gap-2 transition-all ${starredNodes[selectedNode.sIdx] === selectedNode.nIdx ? 'bg-amber-500/10 border border-amber-500/50 text-amber-400 shadow-[0_0_15px_rgba(245,158,11,0.2)]' : 'bg-white/5 border border-white/10 text-slate-400 hover:bg-white/10 hover:text-white'}`}
+                                                    >
+                                                        <Icon name="Star" size={16} fill={starredNodes[selectedNode.sIdx] === selectedNode.nIdx ? "currentColor" : "none"} />
+                                                        {starredNodes[selectedNode.sIdx] === selectedNode.nIdx ? "Cluster Star" : "Set Cluster Star"}
+                                                    </button>
+                                                    
+                                                    {/* Grid Star Toggle */}
+                                                    <button 
+                                                        onClick={() => toggleGridStar(selectedNode.sIdx, selectedNode.nIdx)}
+                                                        className={`w-full py-3 px-3 rounded-xl font-bold text-[10px] uppercase tracking-widest flex flex-col items-center justify-center gap-2 transition-all ${gridStarNode?.sIdx === selectedNode.sIdx && gridStarNode?.nIdx === selectedNode.nIdx ? 'bg-amber-500/20 border border-amber-400 text-amber-300 shadow-[0_0_20px_rgba(251,191,36,0.3)] animate-pulse' : 'bg-white/5 border border-white/10 text-slate-400 hover:bg-white/10 hover:text-white'}`}
+                                                    >
+                                                        <Icon name="Sparkles" size={16} fill={gridStarNode?.sIdx === selectedNode.sIdx && gridStarNode?.nIdx === selectedNode.nIdx ? "currentColor" : "none"} />
+                                                        {gridStarNode?.sIdx === selectedNode.sIdx && gridStarNode?.nIdx === selectedNode.nIdx ? "Grid Star" : "Set Grid Star"}
+                                                    </button>
+                                                </div>
                                             </div>
 
                                             <div className="flex flex-col gap-6">
@@ -970,6 +1000,7 @@
                                             <h4 className="text-white font-bold uppercase text-[11px] tracking-widest border-b border-white/5 pb-1">Key Interactions</h4>
                                             <ul className="list-disc pl-4 space-y-1">
                                                 <li><strong className="text-slate-200">Semantic Taxonomy:</strong> Categorise concepts using theoretical, textual, and data-driven symbols.</li>
+                                                <li><strong className="text-slate-200">Cluster Stars:</strong> Star one node per cluster to designate the single critical "must-know" concept for your defence.</li>
                                                 <li><strong className="text-slate-200">Logical Threads:</strong> Create bidirectional invisible links between memory nodes across 8 clusters and 64 nodes.</li>
                                                 <li><strong className="text-slate-200">Cloud Sync:</strong> Persistent state management via Google Firestore with local backup options.</li>
                                                 <li><strong className="text-slate-200">Narrative Linearisation:</strong> Export your web as a structured Markdown outline.</li>
