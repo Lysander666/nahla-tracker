@@ -46,14 +46,14 @@
         .black-piece { color: #64748b; } 
 
         .tray-area {
-            min-height: 44px;
-            background: rgba(15, 23, 42, 0.8);
+            min-height: 38px;
+            background: rgba(15, 23, 42, 0.6);
             border: 1px solid rgba(255, 255, 255, 0.05);
             display: flex;
             align-items: center;
             gap: 4px;
-            padding: 0 12px;
-            border-radius: 12px;
+            padding: 0 8px;
+            border-radius: 8px;
             flex-wrap: wrap;
             overflow: hidden;
         }
@@ -153,8 +153,8 @@
             const [aiStrategy, setAiStrategy] = useState('random');
             
             const [game, setGame] = useState(new Chess());
-            const [capturedByThesis, setCapturedByThesis] = useState([]); // Pieces captured by White (Black pieces)
-            const [capturedByCritique, setCapturedByCritique] = useState([]); // Pieces captured by Black (White pieces)
+            const [capturedByThesis, setCapturedByThesis] = useState([]); 
+            const [capturedByCritique, setCapturedByCritique] = useState([]); 
             const [dialogueStatus, setDialogueStatus] = useState("Awaiting opening thesis...");
             const [selectedSq, setSelectedSq] = useState(null);
             const [validMoves, setValidMoves] = useState([]);
@@ -221,7 +221,6 @@
                     } else {
                         if (result.captured) {
                             const side = result.color === 'w' ? 'Thesis' : 'Examiner';
-                            // Store the glyph instead of emoji hint
                             const capturedColor = result.color === 'w' ? 'b' : 'w';
                             const pieceGlyph = GLYPHS[capturedColor + result.captured.toUpperCase()];
                             
@@ -339,19 +338,6 @@
 
                         <div className="grid lg:grid-cols-[1fr_360px] gap-8 items-start">
                             <div className="space-y-4">
-                                {dialecticMode && (
-                                    <div className="flex items-center justify-between px-2">
-                                        <span className="text-[9px] font-black uppercase tracking-widest text-slate-500">Examiner Critiques</span>
-                                        <div className="tray-area flex-1 max-w-[280px]">
-                                            {capturedByCritique.map((p, i) => (
-                                                <span key={i} className={`text-xl leading-none ${p.color === 'w' ? 'text-white' : 'text-slate-500'}`}>
-                                                    {p.glyph}
-                                                </span>
-                                            ))}
-                                        </div>
-                                    </div>
-                                )}
-
                                 <div className={`bg-slate-900/60 p-1.5 rounded-[2.5rem] border border-white/5 shadow-2xl board-visual-state ${integrationMode && !isFinished ? 'opacity-10 grayscale' : 'opacity-100'}`}>
                                     <div className="p-3 bg-black/40 rounded-[2rem] border border-white/5 relative overflow-hidden">
                                         <div className="grid grid-rows-8 gap-1.5 relative z-10">
@@ -384,69 +370,38 @@
                                         </div>
                                     </div>
                                 </div>
-
-                                {dialecticMode && (
-                                    <div className="flex items-center justify-between px-2">
-                                        <div className="tray-area flex-1 max-w-[280px]">
-                                            {capturedByThesis.map((p, i) => (
-                                                <span key={i} className={`text-xl leading-none ${p.color === 'w' ? 'text-white' : 'text-slate-500'}`}>
-                                                    {p.glyph}
-                                                </span>
-                                            ))}
-                                        </div>
-                                        <span className="text-[9px] font-black uppercase tracking-widest text-indigo-400">Thesis Synthesis</span>
-                                    </div>
-                                )}
                             </div>
 
                             <aside className="space-y-6">
-                                <div className="legend-card space-y-4">
-                                    <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 mb-4 flex items-center gap-3">
-                                        <Icon name="Compass" size={14} className="text-indigo-400" /> Dialectical Symbols
-                                    </h3>
-                                    <div className="grid grid-cols-2 gap-3">
-                                        <div className="flex items-center gap-3 bg-white/5 p-2 rounded-xl">
-                                            <span className="text-xl">🟢</span>
-                                            <span className="text-[9px] font-bold uppercase text-slate-400">King</span>
-                                        </div>
-                                        <div className="flex items-center gap-3 bg-white/5 p-2 rounded-xl">
-                                            <span className="text-xl">📗</span>
-                                            <span className="text-[9px] font-bold uppercase text-slate-400">Queen</span>
-                                        </div>
-                                    </div>
-                                    <div className="space-y-2">
-                                        <span className="text-[8px] font-black text-slate-600 uppercase tracking-widest">Major Assets (Files A / H)</span>
-                                        <div className="flex justify-between bg-white/5 p-2 rounded-xl">
-                                            <div className="flex items-center gap-2"><span className="text-lg">🌱</span><span className="text-[9px] text-slate-400 uppercase">Rook L</span></div>
-                                            <div className="flex items-center gap-2"><span className="text-[9px] text-slate-400 uppercase text-right">Rook R</span><span className="text-lg">🧪</span></div>
-                                        </div>
-                                        <div className="flex justify-between bg-white/5 p-2 rounded-xl">
-                                            <div className="flex items-center gap-2"><span className="text-lg">❤️</span><span className="text-[9px] text-slate-400 uppercase">Knight L</span></div>
-                                            <div className="flex items-center gap-2"><span className="text-[9px] text-slate-400 uppercase text-right">Knight R</span><span className="text-lg">🩸</span></div>
-                                        </div>
-                                        <div className="flex justify-between bg-white/5 p-2 rounded-xl">
-                                            <div className="flex items-center gap-2"><span className="text-lg">🟣</span><span className="text-[9px] text-slate-400 uppercase">Bishop L</span></div>
-                                            <div className="flex items-center gap-2"><span className="text-[9px] text-slate-400 uppercase text-right">Bishop R</span><span className="text-lg">🌸</span></div>
-                                        </div>
-                                    </div>
-                                    <div className="space-y-2">
-                                        <span className="text-[8px] font-black text-slate-600 uppercase tracking-widest">Pawn Vectors (Files A → H)</span>
-                                        <div className="grid grid-cols-4 gap-2">
-                                            {PAWN_HINTS.map((h, i) => (
-                                                <div key={i} className="bg-white/5 p-1.5 rounded-lg flex flex-col items-center gap-1">
-                                                    <span className="text-lg">{h}</span>
-                                                    <span className="text-[7px] text-slate-500 font-bold uppercase">{String.fromCharCode(65 + i)}</span>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                </div>
-
                                 {dialecticMode ? (
                                     <div className="bg-slate-900/40 p-6 rounded-[2.5rem] border border-white/5 shadow-2xl flex flex-col gap-5">
-                                        <div className="bg-white/5 border border-white/10 p-5 rounded-2xl min-h-[100px] flex flex-col justify-center">
-                                            <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest block mb-2">Dialogue Log</span>
-                                            <p className="text-sm font-bold text-white italic leading-snug">"{dialogueStatus}"</p>
+                                        <div className="bg-white/5 border border-white/10 p-5 rounded-2xl flex flex-col gap-4">
+                                            <div>
+                                                <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest block mb-2">Examiner Critiques</span>
+                                                <div className="tray-area">
+                                                    {capturedByCritique.map((p, i) => (
+                                                        <span key={i} className={`text-xl leading-none ${p.color === 'w' ? 'text-white' : 'text-slate-500'}`}>
+                                                            {p.glyph}
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            </div>
+
+                                            <div className="min-h-[80px] py-2 border-y border-white/5">
+                                                <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest block mb-1">Dialogue Log</span>
+                                                <p className="text-sm font-bold text-white italic leading-snug">"{dialogueStatus}"</p>
+                                            </div>
+
+                                            <div>
+                                                <span className="text-[9px] font-black text-indigo-400 uppercase tracking-widest block mb-2 text-right">Thesis Synthesis</span>
+                                                <div className="tray-area justify-end">
+                                                    {capturedByThesis.map((p, i) => (
+                                                        <span key={i} className={`text-xl leading-none ${p.color === 'w' ? 'text-white' : 'text-slate-500'}`}>
+                                                            {p.glyph}
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            </div>
                                         </div>
                                         
                                         <div className="bg-white/5 border border-white/10 p-4 rounded-2xl">
@@ -509,6 +464,48 @@
                                         </div>
                                     </div>
                                 )}
+
+                                <div className="legend-card space-y-4">
+                                    <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 mb-4 flex items-center gap-3">
+                                        <Icon name="Compass" size={14} className="text-indigo-400" /> Dialectical Symbols
+                                    </h3>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <div className="flex items-center gap-3 bg-white/5 p-2 rounded-xl">
+                                            <span className="text-xl">🟢</span>
+                                            <span className="text-[9px] font-bold uppercase text-slate-400">King</span>
+                                        </div>
+                                        <div className="flex items-center gap-3 bg-white/5 p-2 rounded-xl">
+                                            <span className="text-xl">📗</span>
+                                            <span className="text-[9px] font-bold uppercase text-slate-400">Queen</span>
+                                        </div>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <span className="text-[8px] font-black text-slate-600 uppercase tracking-widest">Major Assets (Files A / H)</span>
+                                        <div className="flex justify-between bg-white/5 p-2 rounded-xl">
+                                            <div className="flex items-center gap-2"><span className="text-lg">🌱</span><span className="text-[9px] text-slate-400 uppercase">Rook L</span></div>
+                                            <div className="flex items-center gap-2"><span className="text-[9px] text-slate-400 uppercase text-right">Rook R</span><span className="text-lg">🧪</span></div>
+                                        </div>
+                                        <div className="flex justify-between bg-white/5 p-2 rounded-xl">
+                                            <div className="flex items-center gap-2"><span className="text-lg">❤️</span><span className="text-[9px] text-slate-400 uppercase">Knight L</span></div>
+                                            <div className="flex items-center gap-2"><span className="text-[9px] text-slate-400 uppercase text-right">Knight R</span><span className="text-lg">🩸</span></div>
+                                        </div>
+                                        <div className="flex justify-between bg-white/5 p-2 rounded-xl">
+                                            <div className="flex items-center gap-2"><span className="text-lg">🟣</span><span className="text-[9px] text-slate-400 uppercase">Bishop L</span></div>
+                                            <div className="flex items-center gap-2"><span className="text-[9px] text-slate-400 uppercase text-right">Bishop R</span><span className="text-lg">🌸</span></div>
+                                        </div>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <span className="text-[8px] font-black text-slate-600 uppercase tracking-widest">Pawn Vectors (Files A → H)</span>
+                                        <div className="grid grid-cols-4 gap-2">
+                                            {PAWN_HINTS.map((h, i) => (
+                                                <div key={i} className="bg-white/5 p-1.5 rounded-lg flex flex-col items-center gap-1">
+                                                    <span className="text-lg">{h}</span>
+                                                    <span className="text-[7px] text-slate-500 font-bold uppercase">{String.fromCharCode(65 + i)}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
                             </aside>
                         </div>
                         
