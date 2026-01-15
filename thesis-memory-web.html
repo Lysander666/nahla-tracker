@@ -127,6 +127,7 @@
             const [scale, setScale] = useState(1);
             const [titleFontSize, setTitleFontSize] = useState(10);
             const [grayscaleMode, setGrayscaleMode] = useState(false); 
+            const [timezoneOffset, setTimezoneOffset] = useState(0);
             const [sectionOrder, setSectionOrder] = useState([0, 1, 2, 3, 4, 5, 6, 7]);
             const [sectionColors, setSectionColors] = useState(["blue", "emerald", "amber", "purple", "blue", "emerald", "amber", "purple"]);
             const [activeColorPicker, setActiveColorPicker] = useState(null);
@@ -214,9 +215,35 @@
                 return () => clearInterval(timer);
             }, []);
 
-            const gmtString = time.toLocaleTimeString('en-GB', { 
-                timeZone: 'GMT', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false 
+            // Timezone Display Logic
+            const displayTime = new Date(time.getTime() + timezoneOffset * 3600000);
+            const timeString = displayTime.toLocaleTimeString('en-GB', { 
+                timeZone: 'UTC', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false 
             });
+            const timeLabel = timezoneOffset === 0 ? "GMT/UTC" : `UTC ${timezoneOffset > 0 ? '+' : ''}${timezoneOffset}`;
+
+            const handleClockClick = (e) => {
+                // Shift click to decrement, regular click to increment
+                const delta = e.shiftKey ? -1 : 1;
+                let newOffset = timezoneOffset + delta;
+                if (newOffset > 14) newOffset = -12; // Cycle limits roughly based on world timezones
+                if (newOffset < -12) newOffset = 14;
+                
+                setTimezoneOffset(newOffset);
+                saveData({ timezoneOffset: newOffset });
+            };
+
+            const handleVivaDrill = () => {
+                const validKeys = Object.keys(nodesData).filter(key => nodesData[key]?.concept);
+                if (validKeys.length === 0) {
+                    setErrorMessage("Map some concepts first!");
+                    setTimeout(() => setErrorMessage(null), 2000);
+                    return;
+                }
+                const randomKey = validKeys[Math.floor(Math.random() * validKeys.length)];
+                const [sIdx, nIdx] = randomKey.split('-').map(Number);
+                setSelectedNode({ sIdx, nIdx });
+            };
 
             useEffect(() => {
                 const handleResize = () => {
@@ -272,6 +299,7 @@
                         if (data.grayscaleMode !== undefined) setGrayscaleMode(data.grayscaleMode);
                         if (data.starredNodes) setStarredNodes(data.starredNodes);
                         if (data.gridStarNode) setGridStarNode(data.gridStarNode);
+                        if (data.timezoneOffset !== undefined) setTimezoneOffset(data.timezoneOffset);
                     }
                     setLoading(false);
                 }, (err) => {
@@ -299,6 +327,7 @@
                         grayscaleMode: updates.grayscaleMode !== undefined ? updates.grayscaleMode : grayscaleMode,
                         starredNodes: updates.starredNodes !== undefined ? updates.starredNodes : starredNodes,
                         gridStarNode: updates.gridStarNode !== undefined ? updates.gridStarNode : gridStarNode,
+                        timezoneOffset: updates.timezoneOffset !== undefined ? updates.timezoneOffset : timezoneOffset,
                         lastUpdated: new Date().toISOString()
                     };
 
@@ -312,8 +341,8 @@
 
             const exportData = () => {
                 const dataToExport = {
-                    version: "0.26", timestamp: new Date().toISOString(),
-                    payload: { nodesData, sectionTitles, connections, sectionOrder, sectionColors, titleFontSize, grayscaleMode, starredNodes, gridStarNode }
+                    version: "0.9-beta", timestamp: new Date().toISOString(),
+                    payload: { nodesData, sectionTitles, connections, sectionOrder, sectionColors, titleFontSize, grayscaleMode, starredNodes, gridStarNode, timezoneOffset }
                 };
                 const blob = new Blob([JSON.stringify(dataToExport, null, 2)], { type: 'application/json' });
                 const url = URL.createObjectURL(blob);
@@ -487,13 +516,14 @@
 
             const applyImport = () => {
                 if (!showImportConfirm) return;
-                const { nodesData, sectionTitles, connections, sectionOrder, sectionColors, titleFontSize, grayscaleMode, starredNodes, gridStarNode } = showImportConfirm;
+                const { nodesData, sectionTitles, connections, sectionOrder, sectionColors, titleFontSize, grayscaleMode, starredNodes, gridStarNode, timezoneOffset } = showImportConfirm;
                 setNodesData(nodesData); setSectionTitles(sectionTitles); setConnections(connections); setSectionOrder(sectionOrder);
                 if (sectionColors) setSectionColors(sectionColors); setTitleFontSize(titleFontSize);
                 if (grayscaleMode !== undefined) setGrayscaleMode(grayscaleMode);
                 if (starredNodes !== undefined) setStarredNodes(starredNodes);
                 if (gridStarNode !== undefined) setGridStarNode(gridStarNode);
-                saveData({ nodesData, sectionTitles, connections, sectionOrder, sectionColors, titleFontSize, grayscaleMode, starredNodes, gridStarNode });
+                if (timezoneOffset !== undefined) setTimezoneOffset(timezoneOffset);
+                saveData({ nodesData, sectionTitles, connections, sectionOrder, sectionColors, titleFontSize, grayscaleMode, starredNodes, gridStarNode, timezoneOffset });
                 setShowImportConfirm(null); setSelectedNode(null);
             };
 
@@ -507,11 +537,12 @@
                     titleFontSize: 10,
                     grayscaleMode: false,
                     starredNodes: {},
-                    gridStarNode: null
+                    gridStarNode: null,
+                    timezoneOffset: 0
                 };
                 setNodesData(blankData.nodesData); setConnections(blankData.connections); setSectionTitles(blankData.sectionTitles);
                 setSectionOrder(blankData.sectionOrder); setSectionColors(blankData.sectionColors); setTitleFontSize(blankData.titleFontSize);
-                setGrayscaleMode(blankData.grayscaleMode); setStarredNodes(blankData.starredNodes); setGridStarNode(blankData.gridStarNode);
+                setGrayscaleMode(blankData.grayscaleMode); setStarredNodes(blankData.starredNodes); setGridStarNode(blankData.gridStarNode); setTimezoneOffset(blankData.timezoneOffset);
                 saveData(blankData); setShowResetConfirm(false); setResetConfirmInput(""); setSelectedNode(null);
             };
 
@@ -638,7 +669,7 @@
                                 <Icon name="Network" size={22} className="text-white" />
                             </div>
                             <div className="flex flex-col">
-                                <h1 className="text-sm font-bold tracking-widest uppercase text-slate-200">Thesis Memory Web v0.4 Alpha 🌌</h1>
+                                <h1 className="text-sm font-bold tracking-widest uppercase text-slate-200">Thesis Memory Web Beta 0.9 🌌</h1>
                                 <div className="flex items-center gap-2 mt-0.5">
                                     <div className="flex items-center gap-1.5 shrink-0">
                                         <button onClick={() => adjustFontSize(-1)} className="w-5 h-5 flex items-center justify-center bg-white/5 hover:bg-white/10 rounded border border-white/10 text-xs transition-transform active:scale-90">-</button>
@@ -675,6 +706,10 @@
                         </div>
 
                         <div className="flex items-center gap-6">
+                            <button onClick={handleVivaDrill} className="w-9 h-9 flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition-all group" title="Viva Drill: Random Question">
+                                <Icon name="Dices" size={16} className="text-slate-500 group-hover:text-indigo-400" />
+                            </button>
+
                             <a href="https://lysander666.github.io/nahla-tracker/memory_web_chessboard" target="_blank" rel="noopener noreferrer" 
                                className="w-9 h-9 flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition-all group"
                                title="Memory Web Chessboard">
@@ -690,8 +725,10 @@
                             </button>
 
                             <div className="flex flex-col items-end pr-4 border-r border-white/10">
-                                <span className="text-[8px] text-slate-600 uppercase font-bold tracking-widest">GMT/UTC</span>
-                                <span className="text-[12px] text-cyan-400 font-mono font-bold tracking-tighter">{gmtString}</span>
+                                <span className="text-[8px] text-slate-600 uppercase font-bold tracking-widest">{timeLabel}</span>
+                                <button onClick={handleClockClick} className="text-[12px] text-cyan-400 font-mono font-bold tracking-tighter hover:text-cyan-200 transition-colors" title="Click to adjust time (+1hr)">
+                                    {timeString}
+                                </button>
                             </div>
                             <div className="flex items-center gap-4">
                                 {user && !user.isAnonymous ? (
@@ -988,7 +1025,7 @@
 </div>
 
 
-                                        <h3 className="text-2xl font-thin tracking-tight text-white mt-4">Thesis Memory Web</h3>
+                                        <h3 className="text-2xl font-thin tracking-tight text-white mt-4">Thesis Memory Web Beta 0.9</h3>
                                         <p className="text-[10px] text-indigo-400 uppercase font-black tracking-widest">Cognitive Mapping Interface</p>
                                     </div>
                                     <div className="space-y-6 text-sm text-slate-400 leading-relaxed max-h-[40vh] overflow-y-auto pr-2 custom-scrollbar">
@@ -1004,7 +1041,7 @@
   </p>
 
   <p>
-    Chiefly built within a 24-hour development cycle on 11th Jan 2026 with a constraint
+    Built within a 24-hour development cycle on 11th Jan 2026 with a constraint
     of 1000 lines of code. This is not production-ready though it is pretty stable! Desktop/laptop only. Make sure you use the JSON backup option.
   </p>
 
@@ -1025,16 +1062,16 @@
                                             <h4 className="text-white font-bold uppercase text-[11px] tracking-widest border-b border-white/5 pb-1">Key Interactions</h4>
                                             <ul className="list-disc pl-4 space-y-1">
                                                 <li><strong className="text-slate-200">Semantic Taxonomy:</strong> Categorise concepts using theoretical, textual, and data-driven symbols.</li>
-                                                <li><strong className="text-slate-200">Cluster Stars:</strong> Star one node per cluster to designate the single critical "must-know" concept for your defence and a Grid Star for your overarching concept.</li>
+                                                <li><strong className="text-slate-200">Cluster Stars:</strong> Star one node per cluster to designate the single critical "must-know" concept for your defence or map a Grid Star for your main concept.</li>
                                                 <li><strong className="text-slate-200">Logical Threads:</strong> Create bidirectional invisible links between memory nodes across 8 clusters and 64 nodes.</li>
                                                 <li><strong className="text-slate-200">Cloud Sync:</strong> Persistent state management via Google Firestore with local backup options.</li>
-                                                <li><strong className="text-slate-200">Narrative Linearisation:</strong> Export your web as a structured Markdown outline or GEFX graph.</li>
+                                                <li><strong className="text-slate-200">Narrative Linearisation:</strong> Export your web as a structured Markdown outline.</li>
                                                <li><strong className="text-slate-200">Contact:</strong>{" "}<a href="https://bsky.app/profile/lysander666.bsky.social" target="_blank" rel="noopener noreferrer" className="underline underline-offset-4 hover:text-indigo-400 transition-colors">bsky.app/profile/lysander666</a></li>
 
                                                   <br />
                                                 
                                                 <p>
-   Try the new Memory Web Chessboard to practise memorising the location of node numbers within their clusters for hard copy thesis annotations.
+   Try the new Memory Web Chessboard to practise memorising the location of node numbers within their clusters.
   </p>
 
 <a
