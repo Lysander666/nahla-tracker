@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Memory Web Chess</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🪐</text></svg>">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -340,45 +340,51 @@
                             </div>
                         </header>
 
-                        <div className="bg-white/5 border border-white/10 rounded-2xl p-4 mb-8 text-[11px] leading-relaxed text-slate-400 max-w-2xl shadow-xl">
-                            <strong className="text-white block mb-1 uppercase tracking-wider">About this Workspace</strong>
-                            This chess engine facilitates cognitive mapping through strategic engagement. Use the Memory Sprint option to remember which clusters (1-8) node numbers are under pressure, which is especially useful if annotating a thesis hard copy with node numbers. Altneratively you can play chess in Inquiry Mode using the Memory Web cognitive symbols as academic discussion tokens of varying versitiliy and imoprtance.
-                        </div>
+                        {/* Moved "About" box from here into the grid below */}
 
                         {/* Layout Change: items-stretch to ensure columns match height */}
                         <div className="grid lg:grid-cols-[1fr_360px] gap-8 items-stretch h-full">
                             
-                            {/* Left Column: Board Container - Direct Grid Item now */}
-                            {/* Added h-full, flex, and justify-center to ensure it fills height and centers board if Right side is taller */}
-                            <div className={`bg-slate-900/60 p-1.5 rounded-[2.5rem] border border-white/5 shadow-2xl board-visual-state flex flex-col justify-center ${integrationMode && !isFinished ? 'opacity-0 grayscale' : 'opacity-100'}`}>
-                                <div className="p-3 bg-black/40 rounded-[2rem] border border-white/5 relative overflow-hidden w-full aspect-square max-h-full">
-                                    <div className="grid grid-rows-8 gap-1.5 relative z-10">
-                                        {Array.from({ length: 8 }).map((_, rIdx) => (
-                                            <div key={rIdx} className="grid grid-cols-8 gap-1.5">
-                                                {Array.from({ length: 8 }).map((_, cIdx) => {
-                                                    const nodeNum = (rIdx * 8) + cIdx + 1;
-                                                    const sectorIdx = getSectorIndex(rIdx, cIdx);
-                                                    const color = sectorColors[sectorIdx];
-                                                    const sqId = getSqId(rIdx, cIdx);
-                                                    const p = game.get(sqId);
-                                                    const isLandmark = nodeNum % 8 === 0;
-                                                    const isLight = (rIdx + cIdx) % 2 === 0;
+                            {/* Left Column Wrapper: Stacks About + Board and stretches height */}
+                            <div className="flex flex-col gap-4 h-full">
+                                
+                                {/* Relocated About Box - Removed max-w-2xl and mb-8 */}
+                                <div className="bg-white/5 border border-white/10 rounded-2xl p-4 text-[11px] leading-relaxed text-slate-400 shadow-xl">
+                                    <strong className="text-white block mb-1 uppercase tracking-wider">About this Workspace</strong>
+                                    This chess engine facilitates cognitive mapping through strategic engagement. Use the Memory Sprint option to remember which clusters (1-8) node numbers are under pressure, which is especially useful if annotating a thesis hard copy with node numbers. Altneratively you can play chess in Inquiry Mode using the Memory Web cognitive symbols as academic discussion tokens of varying versitiliy and imoprtance.
+                                </div>
 
-                                                    return (
-                                                        <div key={cIdx} onClick={() => onSqSelect(sqId)} className={`aspect-square rounded-lg border flex items-center justify-center relative transition-all duration-200 ${isLight ? 'tile-light' : 'tile-dark'} ${selectedSq === sqId ? 'ring-2 ring-indigo-500 z-20 scale-105' : ''} ${colorClasses[color]} ${integrationMode && focalNode === nodeNum ? 'ring-4 ring-white shadow-2xl scale-110 z-20' : ''} ${dialecticMode ? 'cursor-pointer' : 'cursor-default'}`}>
-                                                            <span className={`absolute top-0.5 left-1 text-[8px] font-mono font-bold opacity-30 ${isLandmark ? 'opacity-90 font-black text-white' : ''}`}>{nodeNum}</span>
-                                                            {dialecticMode && validMoves.includes(sqId) && <div className="absolute inset-0 flex items-center justify-center"><div className="w-1.5 h-1.5 bg-indigo-500/50 rounded-full" /></div>}
-                                                            {dialecticMode && p && (
-                                                                <span className={`chess-piece ${p.color === 'w' ? 'white-piece' : 'black-piece'}`}>
-                                                                    {GLYPHS[p.color + p.type.toUpperCase()]}
-                                                                </span>
-                                                            )}
-                                                            {!dialecticMode && <span className={`text-2xl font-academic tracking-tight number-glow opacity-80 ${isLandmark ? 'scale-110 text-white font-medium' : ''}`}>{nodeNum}</span>}
-                                                        </div>
-                                                    );
-                                                })}
-                                            </div>
-                                        ))}
+                                {/* Board Container - Added flex-1 to fill remaining height */}
+                                <div className={`bg-slate-900/60 p-1.5 rounded-[2.5rem] border border-white/5 shadow-2xl board-visual-state flex-1 flex flex-col justify-center ${integrationMode && !isFinished ? 'opacity-5 grayscale' : 'opacity-100'}`}>
+                                    <div className="p-3 bg-black/40 rounded-[2rem] border border-white/5 relative overflow-hidden w-full aspect-square max-h-full">
+                                        <div className="grid grid-rows-8 gap-1.5 relative z-10">
+                                            {Array.from({ length: 8 }).map((_, rIdx) => (
+                                                <div key={rIdx} className="grid grid-cols-8 gap-1.5">
+                                                    {Array.from({ length: 8 }).map((_, cIdx) => {
+                                                        const nodeNum = (rIdx * 8) + cIdx + 1;
+                                                        const sectorIdx = getSectorIndex(rIdx, cIdx);
+                                                        const color = sectorColors[sectorIdx];
+                                                        const sqId = getSqId(rIdx, cIdx);
+                                                        const p = game.get(sqId);
+                                                        const isLandmark = nodeNum % 8 === 0;
+                                                        const isLight = (rIdx + cIdx) % 2 === 0;
+
+                                                        return (
+                                                            <div key={cIdx} onClick={() => onSqSelect(sqId)} className={`aspect-square rounded-lg border flex items-center justify-center relative transition-all duration-200 ${isLight ? 'tile-light' : 'tile-dark'} ${selectedSq === sqId ? 'ring-2 ring-indigo-500 z-20 scale-105' : ''} ${colorClasses[color]} ${integrationMode && focalNode === nodeNum ? 'ring-4 ring-white shadow-2xl scale-110 z-20' : ''} ${dialecticMode ? 'cursor-pointer' : 'cursor-default'}`}>
+                                                                <span className={`absolute top-0.5 left-1 text-[8px] font-mono font-bold opacity-30 ${isLandmark ? 'opacity-90 font-black text-white' : ''}`}>{nodeNum}</span>
+                                                                {dialecticMode && validMoves.includes(sqId) && <div className="absolute inset-0 flex items-center justify-center"><div className="w-1.5 h-1.5 bg-indigo-500/50 rounded-full" /></div>}
+                                                                {dialecticMode && p && (
+                                                                    <span className={`chess-piece ${p.color === 'w' ? 'white-piece' : 'black-piece'}`}>
+                                                                        {GLYPHS[p.color + p.type.toUpperCase()]}
+                                                                    </span>
+                                                                )}
+                                                                {!dialecticMode && <span className={`text-2xl font-academic tracking-tight number-glow opacity-80 ${isLandmark ? 'scale-110 text-white font-medium' : ''}`}>{nodeNum}</span>}
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
+                                            ))}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
