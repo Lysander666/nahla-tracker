@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en"> 
     <head>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🪐</text></svg>">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧬</text></svg>">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Thesis Memory Web</title>
@@ -98,7 +98,8 @@
         const auth = firebase.auth();
         const db = firebase.firestore();
 
-        const Icon = ({ name, size = 16, className = "", fill = "none" }) => {
+        // Optimized Icon component with memoization to prevent unnecessary DOM work
+        const Icon = React.memo(({ name, size = 16, className = "", fill = "none" }) => {
             const iconRef = useRef(null);
             useEffect(() => {
                 if (window.lucide && iconRef.current) {
@@ -115,28 +116,60 @@
                 }
             }, [name, size, className, fill]);
             return <span ref={iconRef} className="flex items-center justify-center leading-none shrink-0" />;
-        };
+        });
 
-        const Icon = ({ name, size = 16, className = "" }) => {
-            const iconRef = useRef(null);
+        // Optimized Orrery Icon
+        const OrreryIcon = React.memo(({ size = 22, className = "" }) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                <g transform="rotate(-45 12 12)">
+                    {/* Central Planet */}
+                    <circle cx="12" cy="12" r="3.2" fill="currentColor" stroke="none" />
+                    
+                    {/* Planet Ring (Immediate) - Rotated to be angled upwards to right */}
+                    <ellipse cx="12" cy="12" rx="6" ry="1.5" stroke="currentColor" transform="rotate(20 12 12)" />
+                    
+                    {/* Inner Moon Orbital Path */}
+                    <ellipse cx="12" cy="12" rx="8" ry="2.8" className="opacity-30" />
+                    
+                    {/* Outer Moon Orbital Path */}
+                    <ellipse cx="12" cy="12" rx="11.5" ry="5" className="opacity-30" />
+                    
+                    {/* Moon 1 (Inner Orbit, Left) */}
+                    <circle cx="4" cy="12" r="1.2" fill="currentColor" stroke="none" />
+                    
+                    {/* Moon 2 (Outer Orbit, Right) */}
+                    <circle cx="23.5" cy="12" r="0.8" fill="currentColor" stroke="none" />
+                </g>
+            </svg>
+        ));
+
+        // Isolated Clock Component to prevent full App re-renders
+        const Clock = ({ timezoneOffset, onAdjust }) => {
+            const [time, setTime] = useState(new Date());
+
             useEffect(() => {
-                if (window.lucide && iconRef.current) {
-                    iconRef.current.innerHTML = '';
-                    const i = document.createElement('i');
-                    const kebabName = name.replace(/([a-z0-9]|(?=[A-Z]))([A-Z])/g, '$1-$2').toLowerCase().replace(/^-/, '');
-                    i.setAttribute('data-lucide', kebabName);
-                    if (className) i.setAttribute('class', className);
-                    i.style.width = size + 'px';
-                    i.style.height = size + 'px';
-                    iconRef.current.appendChild(i);
-                    window.lucide.createIcons();
-                }
-            }, [name, size, className]);
-            return <span ref={iconRef} className="flex items-center justify-center leading-none shrink-0" />;
+                const timer = setInterval(() => setTime(new Date()), 1000);
+                return () => clearInterval(timer);
+            }, []);
+
+            const displayTime = new Date(time.getTime() + timezoneOffset * 3600000);
+            const timeString = displayTime.toLocaleTimeString('en-GB', { 
+                timeZone: 'UTC', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false 
+            });
+            const timeLabel = timezoneOffset === 0 ? "GMT/UTC" : `UTC ${timezoneOffset > 0 ? '+' : ''}${timezoneOffset}`;
+
+            return (
+                <div className="flex flex-col items-end pr-4 border-r border-white/10">
+                    <span className="text-[8px] text-slate-600 uppercase font-bold tracking-widest">{timeLabel}</span>
+                    <button onClick={onAdjust} className="text-[12px] text-cyan-400 font-mono font-bold tracking-tighter hover:text-cyan-200 transition-colors" title="Click to adjust time (+1hr)">
+                        {timeString}
+                    </button>
+                </div>
+            );
         };
 
         const App = () => {
-            const [time, setTime] = useState(new Date());
+            // Main app state
             const [user, setUser] = useState(null);
             const [loading, setLoading] = useState(true);
             const [saveStatus, setSaveStatus] = useState('synced');
@@ -228,18 +261,6 @@
                 "🟣": "Data: key analytical data", "🌸": "Data: culturally significant data", "❤️": "Data: effective or identity data", "🩸": "Data: high-stakes"
             };
 
-            useEffect(() => {
-                const timer = setInterval(() => setTime(new Date()), 1000);
-                return () => clearInterval(timer);
-            }, []);
-
-            // Timezone Display Logic
-            const displayTime = new Date(time.getTime() + timezoneOffset * 3600000);
-            const timeString = displayTime.toLocaleTimeString('en-GB', { 
-                timeZone: 'UTC', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false 
-            });
-            const timeLabel = timezoneOffset === 0 ? "GMT/UTC" : `UTC ${timezoneOffset > 0 ? '+' : ''}${timezoneOffset}`;
-
             const handleClockClick = (e) => {
                 // Shift click to decrement, regular click to increment
                 const delta = e.shiftKey ? -1 : 1;
@@ -305,26 +326,37 @@
                     ? db.collection('artifacts').doc(platformAppId).collection('users').doc(user.uid).collection('state').doc('memoryWeb')
                     : db.collection('thesis_data').doc(platformAppId).collection('users').doc(user.uid);
                 
-                const unsubscribe = docRef.onSnapshot((docSnap) => {
-                    if (docSnap.exists) {
-                        const data = docSnap.data();
-                        if (data.nodesData) setNodesData(data.nodesData);
-                        if (data.connections) setConnections(data.connections);
-                        if (data.sectionTitles) setSectionTitles(data.sectionTitles);
-                        if (data.sectionOrder) setSectionOrder(data.sectionOrder);
-                        if (data.sectionColors) setSectionColors(data.sectionColors);
-                        if (data.titleFontSize) setTitleFontSize(data.titleFontSize);
-                        if (data.grayscaleMode !== undefined) setGrayscaleMode(data.grayscaleMode);
-                        if (data.starredNodes) setStarredNodes(data.starredNodes);
-                        if (data.gridStarNode) setGridStarNode(data.gridStarNode);
-                        if (data.timezoneOffset !== undefined) setTimezoneOffset(data.timezoneOffset);
-                    }
-                    setLoading(false);
-                }, (err) => {
-                    setErrorMessage("Connection Error: Update rules or check internet.");
-                    setLoading(false);
-                });
-                return () => unsubscribe();
+                // REPLACED onSnapshot with a manual polling mechanism to reduce CPU load
+                const loadFromCloud = () => {
+                    docRef.get().then((docSnap) => {
+                        if (docSnap.exists) {
+                            const data = docSnap.data();
+                            if (data.nodesData) setNodesData(data.nodesData);
+                            if (data.connections) setConnections(data.connections);
+                            if (data.sectionTitles) setSectionTitles(data.sectionTitles);
+                            if (data.sectionOrder) setSectionOrder(data.sectionOrder);
+                            if (data.sectionColors) setSectionColors(data.sectionColors);
+                            if (data.titleFontSize) setTitleFontSize(data.titleFontSize);
+                            if (data.grayscaleMode !== undefined) setGrayscaleMode(data.grayscaleMode);
+                            if (data.starredNodes) setStarredNodes(data.starredNodes);
+                            if (data.gridStarNode) setGridStarNode(data.gridStarNode);
+                            if (data.timezoneOffset !== undefined) setTimezoneOffset(data.timezoneOffset);
+                        }
+                        setLoading(false);
+                    }).catch((err) => {
+                        // Silent fail on polling errors to avoid UI flicker, unless purely offline
+                        console.error("Sync error:", err);
+                        if (loading) setLoading(false); 
+                    });
+                };
+
+                // Initial Load
+                loadFromCloud();
+
+                // Poll every 10 seconds (10000ms) instead of real-time listener
+                const intervalId = setInterval(loadFromCloud, 10000);
+
+                return () => clearInterval(intervalId);
             }, [user]);
 
             const saveData = async (updates = {}) => {
@@ -684,7 +716,7 @@
                     <header className="p-4 border-b border-white/5 flex justify-between items-center bg-[#050508]/80 backdrop-blur-xl z-50 relative">
                         <div className="flex items-center gap-4">
                             <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-600/20">
-                                <OrreryIcon size={24} className="text-white" />
+                                <Icon name="Network" size={22} className="text-white" />
                             </div>
                             <div className="flex flex-col">
                                 <h1 className="text-sm font-bold tracking-widest uppercase text-slate-200">Thesis Memory Web Beta 0.9 🌌</h1>
@@ -742,12 +774,8 @@
                                 </div>
                             </button>
 
-                            <div className="flex flex-col items-end pr-4 border-r border-white/10">
-                                <span className="text-[8px] text-slate-600 uppercase font-bold tracking-widest">{timeLabel}</span>
-                                <button onClick={handleClockClick} className="text-[12px] text-cyan-400 font-mono font-bold tracking-tighter hover:text-cyan-200 transition-colors" title="Click to adjust time (+1hr)">
-                                    {timeString}
-                                </button>
-                            </div>
+                            <Clock timezoneOffset={timezoneOffset} onAdjust={handleClockClick} />
+
                             <div className="flex items-center gap-4">
                                 {user && !user.isAnonymous ? (
                                     <div className="flex items-center gap-3 text-right">
@@ -927,7 +955,7 @@
                                             <div className="flex flex-col gap-6">
                                                 <div className="flex flex-col gap-2 p-4 bg-white/5 rounded-2xl border border-white/5 group hover:border-white/10 transition-colors">
                                                     <label className="text-[9px] text-slate-500 uppercase font-bold tracking-widest flex items-center gap-2"><Icon name="Edit3" size={12} className="text-slate-400" /> Cluster Name</label>
-                                                    <input type="text" value={sectionTitles[selectedNode.sIdx]} onChange={(e) => updateSectionTitle(selectedNode.sIdx, e.target.value)} className="bg-transparent text-white text-sm font-semibold focus:outline-none focus:text-indigo-400 transition-colors" />
+                                                    <input type="text" value={sectionTitles[selectedNode.sIdx]} onChange={(e) => updateSectionTitle(selectedNode.sIdx, e.target.value)} className="bg-transparent text-slate-300 text-sm font-semibold focus:outline-none focus:text-indigo-400 transition-colors" />
                                                 </div>
                                                 <div className="flex flex-col gap-3 p-4 bg-white/5 rounded-2xl border border-white/5 relative">
                                                     <label className="text-[9px] text-slate-500 uppercase font-bold tracking-widest flex items-center gap-2"><Icon name="Zap" size={12} className="text-slate-400" /> Cognitive Symbol</label>
@@ -945,9 +973,9 @@
                                                         ))}
                                                         <button onClick={() => updateNodeData('emoji', '')} className="text-[9px] text-slate-500 uppercase font-bold px-2 hover:text-red-400 transition-colors">Clear</button>
                                                     </div>
-                                                    <input type="text" maxLength="2" value={nodesData[getNodeKey(selectedNode.sIdx, selectedNode.nIdx)]?.emoji || ""} onChange={(e) => updateNodeData('emoji', e.target.value)} className="bg-black/20 border border-white/5 rounded-lg p-2 text-center text-xl focus:ring-1 ring-indigo-500 outline-none text-white w-full" style={{ filter: grayscaleMode ? 'grayscale(100%)' : 'none' }} placeholder="Or paste emoji here..." />
+                                                    <input type="text" maxLength="2" value={nodesData[getNodeKey(selectedNode.sIdx, selectedNode.nIdx)]?.emoji || ""} onChange={(e) => updateNodeData('emoji', e.target.value)} className="bg-black/20 border border-white/5 rounded-lg p-2 text-center text-xl focus:ring-1 ring-indigo-500 outline-none text-slate-300 w-full" style={{ filter: grayscaleMode ? 'grayscale(100%)' : 'none' }} placeholder="Or paste emoji here..." />
                                                 </div>
-                                                <div className="flex flex-col gap-2"><label className="text-[10px] text-slate-500 uppercase font-bold tracking-widest ml-1">Cognitive Concept</label><input type="text" value={nodesData[getNodeKey(selectedNode.sIdx, selectedNode.nIdx)]?.concept || ""} onChange={(e) => updateNodeData('concept', e.target.value)} className="bg-white/5 border border-white/10 rounded-xl p-4 focus:ring-1 ring-indigo-500 outline-none text-cyan-500 transition-all font-medium" placeholder="Enter core idea..." /></div>
+                                                <div className="flex flex-col gap-2"><label className="text-[10px] text-slate-500 uppercase font-bold tracking-widest ml-1">Cognitive Concept</label><input type="text" value={nodesData[getNodeKey(selectedNode.sIdx, selectedNode.nIdx)]?.concept || ""} onChange={(e) => updateNodeData('concept', e.target.value)} className="bg-white/5 border border-white/10 rounded-xl p-4 focus:ring-1 ring-indigo-500 outline-none text-slate-300 transition-all font-medium" placeholder="Enter core idea..." /></div>
                                                 <div className="flex flex-col gap-4 py-2 border-y border-white/5">
                                                     <div className="flex items-center justify-between"><h3 className="text-[10px] text-indigo-400 uppercase font-bold tracking-[0.2em]">Linked Knowledge</h3><span className="text-[9px] text-slate-300 uppercase font-mono">{connections.filter(c => c.includes(getNodeKey(selectedNode.sIdx, selectedNode.nIdx))).length} Threads</span></div>
                                                     <div className="flex flex-col gap-2">
@@ -980,7 +1008,7 @@
                                                         })()}
                                                     </div>
                                                 </div>
-                                                <div className="flex flex-col gap-2"><label className="text-[10px] text-slate-500 uppercase font-bold tracking-widest ml-1">Citation</label><input type="text" value={nodesData[getNodeKey(selectedNode.sIdx, selectedNode.nIdx)]?.citation || ""} onChange={(e) => updateNodeData('citation', e.target.value)} className="bg-white/5 border border-white/10 rounded-xl p-4 focus:ring-1 ring-indigo-500 outline-none text-white transition-all" placeholder="e.g. Smith (2024)" /></div>
+                                                <div className="flex flex-col gap-2"><label className="text-[10px] text-slate-500 uppercase font-bold tracking-widest ml-1">Citation</label><input type="text" value={nodesData[getNodeKey(selectedNode.sIdx, selectedNode.nIdx)]?.citation || ""} onChange={(e) => updateNodeData('citation', e.target.value)} className="bg-white/5 border border-white/10 rounded-xl p-4 focus:ring-1 ring-indigo-500 outline-none text-slate-300 transition-all" placeholder="e.g. Smith (2024)" /></div>
                                                 <div className="flex flex-col gap-2"><label className="text-[10px] text-slate-500 uppercase font-bold tracking-widest ml-1">Notes</label><textarea value={nodesData[getNodeKey(selectedNode.sIdx, selectedNode.nIdx)]?.notes || ""} onChange={(e) => updateNodeData('notes', e.target.value)} className="bg-white/5 border border-white/10 rounded-xl p-4 h-48 resize-none focus:ring-1 ring-indigo-500 outline-none text-slate-300 text-sm transition-all" placeholder="Describe the connection..." /></div>
                                                 <button onClick={() => setLinkingNode(getNodeKey(selectedNode.sIdx, selectedNode.nIdx))} className={`py-4 rounded-xl font-bold text-xs tracking-widest transition-all ${linkingNode === getNodeKey(selectedNode.sIdx, selectedNode.nIdx) ? 'bg-emerald-500 text-black shadow-[0_0_20px_rgba(16,185,129,0.3)]' : 'bg-indigo-600 text-white shadow-[0_0_20_rgba(79,70,229,0.2)] hover:scale-[1.02] hover:bg-indigo-500'}`}>{linkingNode ? "PICK TARGET NODE..." : "ATTACH LOGICAL THREAD"}</button>
                                             </div>
@@ -1039,7 +1067,7 @@
                                 <div className="space-y-8">
                                     <div className="text-center space-y-2">
 <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-600/20">
-  <OrreryIcon size={24} className="text-white" />
+  <Icon name="Network" size={22} className="text-white" />
 </div>
 
 
