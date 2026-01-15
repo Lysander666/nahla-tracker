@@ -169,7 +169,7 @@
         };
 
         const App = () => {
-            // Main app state - REMOVED the 'time' state and interval from here to fix CPU usage
+            // Main app state
             const [user, setUser] = useState(null);
             const [loading, setLoading] = useState(true);
             const [saveStatus, setSaveStatus] = useState('synced');
@@ -261,7 +261,10 @@
                 "🟣": "Data: key analytical data", "🌸": "Data: culturally significant data", "❤️": "Data: effective or identity data", "🩸": "Data: high-stakes"
             };
 
-            // REMOVED the useEffect interval that was updating 'time' every second
+            useEffect(() => {
+                const timer = setInterval(() => setTime(new Date()), 1000);
+                return () => clearInterval(timer);
+            }, []);
 
             const handleClockClick = (e) => {
                 // Shift click to decrement, regular click to increment
