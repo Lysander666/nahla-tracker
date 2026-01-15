@@ -168,6 +168,291 @@
             );
         };
 
+        // --- NEW 3D CONSTELLATION GRAPH COMPONENT (CANVAS) ---
+        const ConstellationGraph = ({ nodesData, connections, sectionColors, sectionTitles, onNodeClick, starredNodes, gridStarNode }) => {
+            const canvasRef = useRef(null);
+            const containerRef = useRef(null); // Added ref for container to attach native event listener
+            const [rotation, setRotation] = useState(0); // 0 to 360
+            const [cameraZ, setCameraZ] = useState(200); // Zoom level (lower is closer)
+            const animationRef = useRef(null);
+            const clickTargetsRef = useRef([]); // Store latest frame positions for hit testing
+            
+            // Physics State
+            const simulationRef = useRef({
+                nodes: [],
+                links: [],
+                isRunning: true
+            });
+
+            // Init Simulation Data
+            useEffect(() => {
+                // Preserve positions from previous frame to prevent "resetting" on data refresh
+                const existingNodesMap = new Map(simulationRef.current.nodes.map(n => [n.id, n]));
+                
+                const nodes = [];
+                const links = [];
+                
+                // Add all populated nodes
+                for(let s=0; s<8; s++) {
+                    for(let n=0; n<8; n++) {
+                        const key = `${s}-${n}`;
+                        const data = nodesData[key];
+                        const isStarred = starredNodes[s] === n;
+                        const isGridStar = gridStarNode?.sIdx === s && gridStarNode?.nIdx === n;
+                        
+                        if (data?.concept || data?.notes || isStarred || isGridStar) {
+                            const existing = existingNodesMap.get(key);
+                            nodes.push({
+                                id: key,
+                                label: data.concept || "Untitled",
+                                group: s,
+                                emoji: data.emoji,
+                                radius: isGridStar ? 8 : (isStarred ? 6 : 3),
+                                isGridStar,
+                                isStarred,
+                                // Use existing position if available, otherwise random spawn
+                                x: existing ? existing.x : (Math.random() - 0.5) * 200,
+                                y: existing ? existing.y : (Math.random() - 0.5) * 200,
+                                z: existing ? existing.z : (Math.random() - 0.5) * 200,
+                                vx: existing ? existing.vx : 0, 
+                                vy: existing ? existing.vy : 0, 
+                                vz: existing ? existing.vz : 0
+                            });
+                        }
+                    }
+                }
+
+                // Add links
+                connections.forEach(conn => {
+                    const [source, target] = conn.split(':');
+                    const n1 = nodes.find(n => n.id === source);
+                    const n2 = nodes.find(n => n.id === target);
+                    if (n1 && n2) {
+                        links.push({ source: n1, target: n2 });
+                    }
+                });
+
+                simulationRef.current = { nodes, links, isRunning: true };
+                
+                // Stop physics after 5 seconds to save CPU
+                setTimeout(() => {
+                    if (simulationRef.current) simulationRef.current.isRunning = false;
+                }, 5000);
+
+            }, [nodesData, connections, sectionColors, starredNodes, gridStarNode]);
+
+            // Handle Mouse Wheel Zoom - Using native event listener for non-passive behavior
+            useEffect(() => {
+                const container = containerRef.current;
+                if (!container) return;
+
+                const handleWheel = (e) => {
+                    e.preventDefault(); // This now reliably stops page scrolling
+                    setCameraZ(prev => {
+                        const newZ = prev + e.deltaY * 0.5;
+                        return Math.max(50, Math.min(1000, newZ)); // Clamp zoom levels
+                    });
+                };
+
+                container.addEventListener('wheel', handleWheel, { passive: false });
+                return () => container.removeEventListener('wheel', handleWheel);
+            }, []);
+
+            // Animation Loop
+            useEffect(() => {
+                const canvas = canvasRef.current;
+                const ctx = canvas.getContext('2d');
+                let frameId;
+
+                const colorMap = {
+                    emerald: "#10b981", amber: "#f59e0b", blue: "#3b82f6", purple: "#a855f7"
+                };
+
+                const render = () => {
+                    const { nodes, links, isRunning } = simulationRef.current;
+                    const width = canvas.width;
+                    const height = canvas.height;
+                    const centerX = width / 2;
+                    const centerY = height / 2;
+
+                    // 1. Physics Step (Simple 3D Force)
+                    if (isRunning) {
+                        // Repulsion
+                        for (let i = 0; i < nodes.length; i++) {
+                            for (let j = i + 1; j < nodes.length; j++) {
+                                const a = nodes[i];
+                                const b = nodes[j];
+                                const dx = a.x - b.x;
+                                const dy = a.y - b.y;
+                                const dz = a.z - b.z;
+                                const distSq = dx*dx + dy*dy + dz*dz || 1;
+                                const force = 200 / distSq;
+                                const fx = dx * force;
+                                const fy = dy * force;
+                                const fz = dz * force;
+                                a.vx += fx; a.vy += fy; a.vz += fz;
+                                b.vx -= fx; b.vy -= fy; b.vz -= fz;
+                            }
+                        }
+                        // Attraction (Links)
+                        links.forEach(link => {
+                            const a = link.source;
+                            const b = link.target;
+                            const dx = a.x - b.x;
+                            const dy = a.y - b.y;
+                            const dz = a.z - b.z;
+                            const dist = Math.sqrt(dx*dx + dy*dy + dz*dz) || 1;
+                            const force = (dist - 80) * 0.005; // Spring constant
+                            const fx = (dx/dist) * force;
+                            const fy = (dy/dist) * force;
+                            const fz = (dz/dist) * force;
+                            a.vx -= fx; a.vy -= fy; a.vz -= fz;
+                            b.vx += fx; b.vy += fy; b.vz += fz;
+                        });
+                        // Center Gravity & Velocity Update
+                        nodes.forEach(n => {
+                            n.vx -= n.x * 0.005;
+                            n.vy -= n.y * 0.005;
+                            n.vz -= n.z * 0.005;
+                            n.vx *= 0.9; n.vy *= 0.9; n.vz *= 0.9; // Friction
+                            n.x += n.vx;
+                            n.y += n.vy;
+                            n.z += n.vz;
+                        });
+                    }
+
+                    // 2. Render
+                    ctx.clearRect(0, 0, width, height);
+                    
+                    // Rotate and Project
+                    const rad = (rotation * Math.PI) / 180;
+                    const cos = Math.cos(rad);
+                    const sin = Math.sin(rad);
+
+                    const projectedNodes = nodes.map(n => {
+                        // Rotate around Y axis
+                        const rx = n.x * cos - n.z * sin;
+                        const rz = n.z * cos + n.x * sin;
+                        
+                        // Perspective projection with variable Zoom
+                        const scale = 300 / (300 + rz + cameraZ); 
+                        const screenX = rx * scale + centerX;
+                        const screenY = n.y * scale + centerY;
+                        
+                        return { ...n, sx: screenX, sy: screenY, scale, rz };
+                    });
+
+                    // Sort by Depth (Painter's Algorithm)
+                    projectedNodes.sort((a, b) => b.rz - a.rz);
+                    
+                    // Store for click handling (reverse of painter's algo so we click front items first)
+                    clickTargetsRef.current = projectedNodes;
+
+                    // Draw Links
+                    links.forEach(link => {
+                        const start = projectedNodes.find(n => n.id === link.source.id);
+                        const end = projectedNodes.find(n => n.id === link.target.id);
+                        if (start && end) {
+                            ctx.beginPath();
+                            ctx.moveTo(start.sx, start.sy);
+                            ctx.lineTo(end.sx, end.sy);
+                            // Depth cueing for lines: Average scale determines opacity/width
+                            const avgScale = (start.scale + end.scale) / 2;
+                            ctx.strokeStyle = `rgba(99, 102, 241, ${avgScale * 0.4})`;
+                            ctx.lineWidth = avgScale * 1.5;
+                            ctx.stroke();
+                        }
+                    });
+
+                    // Draw Nodes
+                    projectedNodes.forEach(n => {
+                        const radius = n.radius * n.scale;
+                        const color = colorMap[sectionColors[n.group]] || "#6366f1";
+                        
+                        // Glow for stars
+                        if (n.isGridStar || n.isStarred) {
+                            ctx.beginPath();
+                            ctx.arc(n.sx, n.sy, radius * 1.5, 0, Math.PI * 2);
+                            ctx.fillStyle = `rgba(251, 191, 36, ${n.scale * 0.3})`;
+                            ctx.fill();
+                        }
+
+                        // Main Circle
+                        ctx.beginPath();
+                        ctx.arc(n.sx, n.sy, radius, 0, Math.PI * 2);
+                        ctx.fillStyle = color;
+                        ctx.fill();
+                        
+                        // Border for stars
+                        if (n.isGridStar || n.isStarred) {
+                            ctx.lineWidth = 2 * n.scale;
+                            ctx.strokeStyle = "#fff";
+                            ctx.stroke();
+                        }
+
+                        // Emoji (if close enough)
+                        if (n.emoji && n.scale > 0.6) {
+                            ctx.font = `${10 * n.scale}px sans-serif`;
+                            ctx.textAlign = "center";
+                            ctx.textBaseline = "middle";
+                            ctx.fillText(n.emoji, n.sx, n.sy);
+                        }
+                    });
+
+                    frameId = requestAnimationFrame(render);
+                };
+
+                render();
+                return () => cancelAnimationFrame(frameId);
+            }, [rotation, sectionColors, cameraZ]); 
+
+            const handleClick = (e) => {
+                const rect = canvasRef.current.getBoundingClientRect();
+                const mouseX = e.clientX - rect.left;
+                const mouseY = e.clientY - rect.top;
+                
+                // Hit testing against projected nodes
+                // Iterate backwards to hit the topmost nodes first
+                const targets = clickTargetsRef.current;
+                for (let i = targets.length - 1; i >= 0; i--) {
+                    const node = targets[i];
+                    const radius = node.radius * node.scale;
+                    // Add a bit of padding (5px) to make clicking easier
+                    const dist = Math.sqrt(Math.pow(mouseX - node.sx, 2) + Math.pow(mouseY - node.sy, 2));
+                    if (dist <= radius + 5) {
+                        const [s, n] = node.id.split('-').map(Number);
+                        onNodeClick(s, n);
+                        return; // Stop after first hit
+                    }
+                }
+            };
+
+            return (
+                <div ref={containerRef} className="w-full h-full relative">
+                    <canvas 
+                        ref={canvasRef} 
+                        width={980} 
+                        height={780} 
+                        className="w-full h-full cursor-default" 
+                        onClick={handleClick}
+                        title="Scroll to Zoom, Click Nodes to Select"
+                    />
+                    <div className="absolute bottom-8 left-1/2 -translate-x-1/2 bg-black/60 border border-white/10 px-4 py-2 rounded-full flex items-center gap-3 backdrop-blur-md pointer-events-auto">
+                        <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Orbit</span>
+                        <input 
+                            type="range" 
+                            min="0" 
+                            max="360" 
+                            value={rotation} 
+                            onChange={(e) => setRotation(Number(e.target.value))}
+                            className="w-48 accent-indigo-500 h-1 bg-white/20 rounded-lg appearance-none cursor-pointer"
+                        />
+                        <span className="text-[10px] text-indigo-400 font-mono w-8 text-right">{rotation}°</span>
+                    </div>
+                </div>
+            );
+        };
+
         const App = () => {
             // Main app state
             const [user, setUser] = useState(null);
@@ -178,6 +463,9 @@
             const [scale, setScale] = useState(1);
             const [titleFontSize, setTitleFontSize] = useState(10);
             const [grayscaleMode, setGrayscaleMode] = useState(false); 
+            const [blindMode, setBlindMode] = useState(false);
+            const [constellationMode, setConstellationMode] = useState(false); 
+            // Removed focusedCluster state
             const [timezoneOffset, setTimezoneOffset] = useState(0);
             const [sectionOrder, setSectionOrder] = useState([0, 1, 2, 3, 4, 5, 6, 7]);
             const [sectionColors, setSectionColors] = useState(["blue", "emerald", "amber", "purple", "blue", "emerald", "amber", "purple"]);
@@ -236,11 +524,12 @@
                         setActiveColorPicker(null);
                         setLinkingNode(null);
                         setSearchQuery(""); // Clear search on Escape
+                        if (constellationMode) setConstellationMode(false);
                     }
                 };
                 window.addEventListener('keydown', handleKeyDown);
                 return () => window.removeEventListener('keydown', handleKeyDown);
-            }, []);
+            }, [constellationMode]);
 
             const getSectionTheme = (colorKey) => {
                 const themes = {
@@ -338,6 +627,8 @@
                             if (data.sectionColors) setSectionColors(data.sectionColors);
                             if (data.titleFontSize) setTitleFontSize(data.titleFontSize);
                             if (data.grayscaleMode !== undefined) setGrayscaleMode(data.grayscaleMode);
+                            if (data.blindMode !== undefined) setBlindMode(data.blindMode);
+                            if (data.constellationMode !== undefined) setConstellationMode(data.constellationMode);
                             if (data.starredNodes) setStarredNodes(data.starredNodes);
                             if (data.gridStarNode) setGridStarNode(data.gridStarNode);
                             if (data.timezoneOffset !== undefined) setTimezoneOffset(data.timezoneOffset);
@@ -375,6 +666,8 @@
                         sectionColors: updates.sectionColors !== undefined ? updates.sectionColors : sectionColors,
                         titleFontSize: updates.titleFontSize !== undefined ? updates.titleFontSize : titleFontSize,
                         grayscaleMode: updates.grayscaleMode !== undefined ? updates.grayscaleMode : grayscaleMode,
+                        blindMode: updates.blindMode !== undefined ? updates.blindMode : blindMode,
+                        constellationMode: updates.constellationMode !== undefined ? updates.constellationMode : constellationMode,
                         starredNodes: updates.starredNodes !== undefined ? updates.starredNodes : starredNodes,
                         gridStarNode: updates.gridStarNode !== undefined ? updates.gridStarNode : gridStarNode,
                         timezoneOffset: updates.timezoneOffset !== undefined ? updates.timezoneOffset : timezoneOffset,
@@ -392,7 +685,7 @@
             const exportData = () => {
                 const dataToExport = {
                     version: "0.9-beta", timestamp: new Date().toISOString(),
-                    payload: { nodesData, sectionTitles, connections, sectionOrder, sectionColors, titleFontSize, grayscaleMode, starredNodes, gridStarNode, timezoneOffset }
+                    payload: { nodesData, sectionTitles, connections, sectionOrder, sectionColors, titleFontSize, grayscaleMode, blindMode, constellationMode, starredNodes, gridStarNode, timezoneOffset }
                 };
                 const blob = new Blob([JSON.stringify(dataToExport, null, 2)], { type: 'application/json' });
                 const url = URL.createObjectURL(blob);
@@ -566,14 +859,16 @@
 
             const applyImport = () => {
                 if (!showImportConfirm) return;
-                const { nodesData, sectionTitles, connections, sectionOrder, sectionColors, titleFontSize, grayscaleMode, starredNodes, gridStarNode, timezoneOffset } = showImportConfirm;
+                const { nodesData, sectionTitles, connections, sectionOrder, sectionColors, titleFontSize, grayscaleMode, blindMode, constellationMode, starredNodes, gridStarNode, timezoneOffset } = showImportConfirm;
                 setNodesData(nodesData); setSectionTitles(sectionTitles); setConnections(connections); setSectionOrder(sectionOrder);
                 if (sectionColors) setSectionColors(sectionColors); setTitleFontSize(titleFontSize);
                 if (grayscaleMode !== undefined) setGrayscaleMode(grayscaleMode);
+                if (blindMode !== undefined) setBlindMode(blindMode);
+                if (constellationMode !== undefined) setConstellationMode(constellationMode);
                 if (starredNodes !== undefined) setStarredNodes(starredNodes);
                 if (gridStarNode !== undefined) setGridStarNode(gridStarNode);
                 if (timezoneOffset !== undefined) setTimezoneOffset(timezoneOffset);
-                saveData({ nodesData, sectionTitles, connections, sectionOrder, sectionColors, titleFontSize, grayscaleMode, starredNodes, gridStarNode, timezoneOffset });
+                saveData({ nodesData, sectionTitles, connections, sectionOrder, sectionColors, titleFontSize, grayscaleMode, blindMode, constellationMode, starredNodes, gridStarNode, timezoneOffset });
                 setShowImportConfirm(null); setSelectedNode(null);
             };
 
@@ -586,13 +881,16 @@
                     sectionColors: ["blue", "emerald", "amber", "purple", "blue", "emerald", "amber", "purple"],
                     titleFontSize: 10,
                     grayscaleMode: false,
+                    blindMode: false,
+                    constellationMode: false,
                     starredNodes: {},
                     gridStarNode: null,
                     timezoneOffset: 0
                 };
                 setNodesData(blankData.nodesData); setConnections(blankData.connections); setSectionTitles(blankData.sectionTitles);
                 setSectionOrder(blankData.sectionOrder); setSectionColors(blankData.sectionColors); setTitleFontSize(blankData.titleFontSize);
-                setGrayscaleMode(blankData.grayscaleMode); setStarredNodes(blankData.starredNodes); setGridStarNode(blankData.gridStarNode); setTimezoneOffset(blankData.timezoneOffset);
+                setGrayscaleMode(blankData.grayscaleMode); setBlindMode(blankData.blindMode); setConstellationMode(blankData.constellationMode);
+                setStarredNodes(blankData.starredNodes); setGridStarNode(blankData.gridStarNode); setTimezoneOffset(blankData.timezoneOffset);
                 saveData(blankData); setShowResetConfirm(false); setResetConfirmInput(""); setSelectedNode(null);
             };
 
@@ -705,6 +1003,18 @@
                 saveData({ grayscaleMode: newState });
             };
 
+            const toggleBlindMode = () => {
+                const newState = !blindMode;
+                setBlindMode(newState);
+                saveData({ blindMode: newState });
+            };
+
+            const toggleConstellationMode = () => {
+                const newState = !constellationMode;
+                setConstellationMode(newState);
+                saveData({ constellationMode: newState });
+            };
+
             if (loading && !errorMessage) return <div className="h-screen flex items-center justify-center font-mono text-xs text-indigo-500 bg-[#020204]">Initialising Web...</div>;
 
             const scaledHeight = 780 * scale + 80;
@@ -719,7 +1029,7 @@
                                 <Icon name="Network" size={22} className="text-white" />
                             </div>
                             <div className="flex flex-col">
-                                <h1 className="text-sm font-bold tracking-widest uppercase text-slate-200">Thesis Memory Web v0.4 Alpha 🌌</h1>
+                                <h1 className="text-sm font-bold tracking-widest uppercase text-slate-200">Thesis Memory Web Beta 0.9 🌌</h1>
                                 <div className="flex items-center gap-2 mt-0.5">
                                     <div className="flex items-center gap-1.5 shrink-0">
                                         <button onClick={() => adjustFontSize(-1)} className="w-5 h-5 flex items-center justify-center bg-white/5 hover:bg-white/10 rounded border border-white/10 text-xs transition-transform active:scale-90">-</button>
@@ -733,6 +1043,20 @@
                                         title={grayscaleMode ? "Enable Color Emojis" : "Enable Grayscale Emojis"}
                                     >
                                         <Icon name="Palette" size={12} className={!grayscaleMode ? "opacity-100" : "opacity-50"} /> 
+                                    </button>
+                                    <button 
+                                        onClick={toggleBlindMode}
+                                        className={`flex items-center justify-center w-6 h-6 rounded border transition-all ${blindMode ? 'bg-indigo-500/20 border-indigo-500/50 text-indigo-400' : 'bg-white/5 border-white/10 text-slate-600 hover:text-slate-400'}`}
+                                        title={blindMode ? "Disable Active Recall Mode" : "Enable Active Recall (Blind Mode)"}
+                                    >
+                                        <Icon name={blindMode ? "EyeOff" : "Eye"} size={12} className={blindMode ? "opacity-100" : "opacity-50"} /> 
+                                    </button>
+                                    <button 
+                                        onClick={toggleConstellationMode}
+                                        className={`flex items-center justify-center w-6 h-6 rounded border transition-all ${constellationMode ? 'bg-indigo-500/20 border-indigo-500/50 text-indigo-400' : 'bg-white/5 border-white/10 text-slate-600 hover:text-slate-400'}`}
+                                        title={constellationMode ? "Exit Constellation Mode" : "Enter Constellation Mode"}
+                                    >
+                                        <Icon name="Telescope" size={12} className={constellationMode ? "opacity-100" : "opacity-50"} /> 
                                     </button>
                                     <div className="h-3 w-px bg-white/10 mx-1 shrink-0" />
                                     <div className={`text-[10px] uppercase font-bold shrink-0 ${saveStatus === 'synced' ? 'text-emerald-500' : 'text-indigo-400'}`}>
@@ -798,127 +1122,149 @@
 
                     <main className="flex-1 flex overflow-hidden">
                         <section className={`flex-1 relative node-grid-bg workspace-container ${draggedIndex !== null ? 'dragging-active' : ''}`}>
-                            <div id="scaling-wrapper" style={{ transform: `scale(${scale})`, marginTop: `${topMargin}px` }} onClick={(e) => e.stopPropagation()}>
-                                <div id="grid-container" className="grid grid-cols-2 gap-8 p-10 bg-black/40 rounded-[4rem] border border-white/5 backdrop-blur-md shadow-2xl relative">
-                                    {errorMessage && !showAuthModal && (
-                                        <div className="absolute -top-12 left-0 right-0 text-center text-red-400 text-[10px] bg-red-500/10 p-2 rounded-lg border border-red-500/50 flex items-center justify-center gap-2 z-50">
-                                            <Icon name="AlertCircle" size={12} /> {errorMessage} 
-                                            <button onClick={() => setErrorMessage(null)} className="hover:text-white"><Icon name="X" size={12} /></button>
-                                        </div>
-                                    )}
-                                    {sectionOrder.map((sectionId, displayIdx) => {
+                            <div id="scaling-wrapper" style={{ transform: `scale(${constellationMode ? 1 : scale})`, marginTop: constellationMode ? 0 : `${topMargin}px` }} onClick={(e) => e.stopPropagation()}>
+                                {constellationMode ? (
+                                    <div className="w-[980px] h-[780px] relative bg-black/40 rounded-[4rem] border border-white/5 backdrop-blur-md shadow-2xl overflow-hidden">
+                                        <ConstellationGraph 
+                                            nodesData={nodesData} 
+                                            connections={connections} 
+                                            sectionColors={sectionColors}
+                                            sectionTitles={sectionTitles}
+                                            onNodeClick={(s, n) => { setSelectedNode({ sIdx: s, nIdx: n }); }}
+                                            starredNodes={starredNodes}
+                                            gridStarNode={gridStarNode}
+                                        />
+                                        <button onClick={() => setConstellationMode(false)} className="absolute top-6 right-6 p-2 bg-white/10 hover:bg-white/20 rounded-full text-white transition-all z-10">
+                                            <Icon name="X" size={20} />
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <div id="grid-container" className="grid grid-cols-2 gap-8 p-10 bg-black/40 rounded-[4rem] border border-white/5 backdrop-blur-md shadow-2xl relative">
+                                        {errorMessage && !showAuthModal && (
+                                            <div className="absolute -top-12 left-0 right-0 text-center text-red-400 text-[10px] bg-red-500/10 p-2 rounded-lg border border-red-500/50 flex items-center justify-center gap-2 z-50">
+                                                <Icon name="AlertCircle" size={12} /> {errorMessage} 
+                                                <button onClick={() => setErrorMessage(null)} className="hover:text-white"><Icon name="X" size={12} /></button>
+                                            </div>
+                                        )}
+                                        {sectionOrder.map((sectionId, displayIdx) => {
                                         const theme = getSectionTheme(sectionColors[sectionId]);
                                         const isPickerOpen = activeColorPicker === sectionId;
                                         const isDragged = draggedIndex === displayIdx;
                                         const isDragOver = dragOverIndex === displayIdx;
-
+                                        
                                         return (
                                             <div key={sectionId} 
                                                 onDragOver={(e) => handleDragOver(e, displayIdx)}
                                                 onDragLeave={() => setDragOverIndex(null)}
                                                 onDrop={(e) => handleDrop(e, displayIdx)}
-                                                className={`cluster-card p-5 rounded-3xl border ${theme.bg} ${theme.border} flex flex-col gap-4 shadow-inner node-transition relative group/section ${isDragged ? 'drag-ghost' : ''} ${isDragOver ? 'drag-over-target' : ''}`}
+                                                className={`cluster-card p-5 rounded-3xl border ${theme.bg} ${theme.border} flex flex-col gap-4 shadow-inner node-transition relative group/section 
+                                                    ${isDragged ? 'drag-ghost' : ''} 
+                                                    ${isDragOver ? 'drag-over-target' : ''}`}
                                             >
                                                 <div className="flex items-center justify-between">
                                                     <div className="flex items-center gap-3">
                                                         <div className={`font-bold uppercase tracking-widest transition-colors ${theme.color}`} style={{ fontSize: `${titleFontSize}px` }}>
                                                             {sectionTitles[sectionId]}
                                                         </div>
-                                                        <div className="relative flex items-center">
-                                                            <button onClick={(e) => toggleColorPicker(e, sectionId)}
-                                                                className={`p-1 rounded-md hover:bg-white/10 transition-colors ${isPickerOpen ? 'text-indigo-400 bg-white/5' : 'text-slate-300 opacity-80 group-hover/section:opacity-100'}`}>
-                                                                <Icon name="Palette" size={12} />
-                                                            </button>
-                                                            {isPickerOpen && (
-                                                                <div className="absolute left-0 top-full mt-2 flex items-center gap-1.5 bg-black/80 backdrop-blur-xl border border-white/10 p-1.5 rounded-full shadow-2xl z-[60] animate-in fade-in zoom-in-95 duration-200">
-                                                                    {colorOptions.map(c => (
-                                                                        <button key={c} onClick={() => changeSectionColor(sectionId, c)}
-                                                                            className={`w-3.5 h-3.5 rounded-full transition-all hover:scale-125 ${c === "emerald" ? 'bg-emerald-500' : c === "amber" ? 'bg-amber-500' : c === "blue" ? 'bg-blue-500' : 'bg-purple-500'} ${sectionColors[sectionId] === c ? 'ring-2 ring-white scale-110 shadow-[0_0_8px_rgba(255,255,255,0.4)]' : 'opacity-40 hover:opacity-100'}`}
-                                                                        />
-                                                                    ))}
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                    </div>
-                                                    <div draggable="true" onDragStart={(e) => { e.stopPropagation(); handleDragStart(e, displayIdx); }} className="cursor-grab active:cursor-grabbing opacity-70 hover:opacity-100 transition-opacity p-1">
-                                                        <Icon name="GripHorizontal" size={14} className="text-white/60" />
-                                                    </div>
-                                                </div>
-                                                <div className="grid grid-cols-4 gap-3">
-                                                    {Array.from({ length: 8 }).map((_, nIdx) => {
-                                                        const key = getNodeKey(sectionId, nIdx);
-                                                        const selected = selectedNode?.sIdx === sectionId && selectedNode?.nIdx === nIdx;
-                                                        const hasConcept = !!nodesData[key]?.concept;
-                                                        const conceptText = nodesData[key]?.concept || "";
-                                                        const emoji = nodesData[key]?.emoji;
-                                                        const isLinked = connections.some(c => c.includes(key));
-                                                        const linkCount = connections.filter(c => c.includes(key)).length;
-                                                        const isLinkingSource = linkingNode === key;
-                                                        const isStarred = starredNodes[sectionId] === nIdx;
-                                                        const isGridStar = gridStarNode?.sIdx === sectionId && gridStarNode?.nIdx === nIdx;
-
-                                                        const isSearchMatch = searchQuery && (
-                                                            conceptText.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                                                            (nodesData[key]?.notes || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
-                                                            (nodesData[key]?.citation || "").toLowerCase().includes(searchQuery.toLowerCase())
-                                                        );
-                                                        const searchDimmed = searchQuery && !isSearchMatch;
-
-                                                        // Calculate ratio for dynamic styling
-                                                        const intensityRatio = linkCount / maxConnections;
-
-                                                        return (
-                                                            <button key={nIdx} id={`node-${sectionId}-${nIdx}`} onClick={(e) => { e.stopPropagation(); handleNodeClick(sectionId, nIdx); }} 
-                                                                onMouseEnter={() => setHoveredNodeKey(key)} onMouseLeave={() => setHoveredNodeKey(null)}
-                                                                className={`w-12 h-12 rounded-2xl flex flex-col items-center justify-center transition-all duration-300 relative ${selected ? 'bg-white/10 ring-2 ring-indigo-500 scale-110 z-10 shadow-[0_0_20px_rgba(79,70,229,0.4)]' : 'bg-[#0a0a0f] border border-white/5 hover:border-white/20'} ${isLinkingSource ? 'animate-pulse ring-2 ring-emerald-500' : ''} ${searchDimmed ? 'opacity-10 grayscale' : ''} ${isSearchMatch ? 'ring-2 ring-indigo-400 scale-105 z-10 shadow-[0_0_15px_rgba(99,102,241,0.5)]' : ''}`}>
-                                                                <span className={`font-mono mb-1 ${selected ? 'text-indigo-300' : 'text-slate-400'}`} style={{ fontSize: `${Math.max(titleFontSize, 9)}px` }}>{getGlobalIndex(sectionId, nIdx)}</span>
-                                                                <div className="h-4 flex items-center justify-center">
-                                                                    {emoji ? (
-                                                                        <span 
-                                                                            className={`text-base leading-none transition-all duration-500 ${grayscaleMode ? 'opacity-60' : ''}`} 
-                                                                            style={{ filter: grayscaleMode ? 'grayscale(100%)' : 'none' }}
-                                                                        >
-                                                                            {emoji}
-                                                                        </span>
-                                                                    ) : (
-                                                                        <div className={`w-2 h-2 rounded-full transition-all duration-500 ${hasConcept ? theme.dot : 'bg-slate-600'}`} />
-                                                                    )}
-                                                                </div>
-                                                                {isStarred && <div className="absolute top-0.5 right-0.5 text-amber-400"><Icon name="Star" size={10} fill="currentColor" /></div>}
-                                                                {isGridStar && <div className="absolute top-0.5 left-0.5 text-amber-400 animate-pulse"><Icon name="Sparkles" size={12} fill="currentColor" /></div>}
-                                                                {isLinked && (
-                                                                    <div 
-                                                                        className="absolute inset-2 rounded-xl border pointer-events-none transition-all duration-500" 
-                                                                        style={{ 
-                                                                            borderColor: `rgba(99, 102, 241, ${0.2 + (intensityRatio * 0.4)})`, // Opacity varies from 0.2 to 0.6
-                                                                            borderWidth: `${1 + (intensityRatio * 3)}px` // Thickness varies from 1px to 4px
-                                                                        }} 
-                                                                    />
-                                                                )}
-                                                                {hoveredNodeKey === key && conceptText && (
-                                                                    <div className="absolute bottom-full mb-3 left-1/2 -translate-x-1/2 px-4 py-3 bg-[#000000] border border-indigo-500/40 rounded-xl shadow-2xl z-[200] pointer-events-none backdrop-blur-xl tooltip-animate text-center ring-1 ring-white/5" 
-                                                                         style={{ 
-                                                                            minWidth: `${160 + (titleFontSize - 10) * 5}px`, 
-                                                                            maxWidth: `${280 + (titleFontSize - 10) * 10}px`,
-                                                                            transform: `translateX(-50%) scale(${1 / scale})`,
-                                                                            transformOrigin: 'bottom center'
-                                                                         }}>
-                                                                        <div className="flex items-center justify-center gap-1.5 mb-1.5 opacity-50">
-                                                                            <Icon name="Brain" size={Math.max(8, titleFontSize - 2)} className="text-indigo-400" />
-                                                                            <span className="text-indigo-300 uppercase font-black tracking-widest text-[8px]">Cognitive Core</span>
-                                                                        </div>
-                                                                        <div className="text-slate-100 leading-tight font-medium italic break-words" style={{ fontSize: `${titleFontSize + 3}px` }}>"{conceptText}"</div>
-                                                                        <div className="absolute top-full left-1/2 -translate-x-1/2 border-[6px] border-transparent border-t-[#000000]" />
+                                                            <div className="relative flex items-center">
+                                                                <button onClick={(e) => toggleColorPicker(e, sectionId)}
+                                                                    className={`p-1 rounded-md hover:bg-white/10 transition-colors ${isPickerOpen ? 'text-indigo-400 bg-white/5' : 'text-slate-300 opacity-80 group-hover/section:opacity-100'}`}>
+                                                                    <Icon name="Palette" size={12} />
+                                                                </button>
+                                                                {isPickerOpen && (
+                                                                    <div className="absolute left-0 top-full mt-2 flex items-center gap-1.5 bg-black/80 backdrop-blur-xl border border-white/10 p-1.5 rounded-full shadow-2xl z-[60] animate-in fade-in zoom-in-95 duration-200">
+                                                                        {colorOptions.map(c => (
+                                                                            <button key={c} onClick={() => changeSectionColor(sectionId, c)}
+                                                                                className={`w-3.5 h-3.5 rounded-full transition-all hover:scale-125 ${c === "emerald" ? 'bg-emerald-500' : c === "amber" ? 'bg-amber-500' : c === "blue" ? 'bg-blue-500' : 'bg-purple-500'} ${sectionColors[sectionId] === c ? 'ring-2 ring-white scale-110 shadow-[0_0_8px_rgba(255,255,255,0.4)]' : 'opacity-40 hover:opacity-100'}`}
+                                                                            />
+                                                                        ))}
                                                                     </div>
                                                                 )}
-                                                            </button>
-                                                        );
-                                                    })}
+                                                            </div>
+                                                        </div>
+                                                        <div draggable="true" onDragStart={(e) => { e.stopPropagation(); handleDragStart(e, displayIdx); }} className="cursor-grab active:cursor-grabbing opacity-70 hover:opacity-100 transition-opacity p-1">
+                                                            <Icon name="GripHorizontal" size={14} className="text-white/60" />
+                                                        </div>
+                                                    </div>
+                                                    <div className="grid grid-cols-4 gap-3">
+                                                        {Array.from({ length: 8 }).map((_, nIdx) => {
+                                                            const key = getNodeKey(sectionId, nIdx);
+                                                            const selected = selectedNode?.sIdx === sectionId && selectedNode?.nIdx === nIdx;
+                                                            const hasConcept = !!nodesData[key]?.concept;
+                                                            const conceptText = nodesData[key]?.concept || "";
+                                                            const emoji = nodesData[key]?.emoji;
+                                                            const isLinked = connections.some(c => c.includes(key));
+                                                            const linkCount = connections.filter(c => c.includes(key)).length;
+                                                            const isLinkingSource = linkingNode === key;
+                                                            const isStarred = starredNodes[sectionId] === nIdx;
+                                                            const isGridStar = gridStarNode?.sIdx === sectionId && gridStarNode?.nIdx === nIdx;
+
+                                                            const isSearchMatch = searchQuery && (
+                                                                conceptText.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                                                                (nodesData[key]?.notes || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+                                                                (nodesData[key]?.citation || "").toLowerCase().includes(searchQuery.toLowerCase())
+                                                            );
+                                                            const searchDimmed = searchQuery && !isSearchMatch;
+
+                                                            // Calculate ratio for dynamic styling
+                                                            const intensityRatio = linkCount / maxConnections;
+                                                            
+                                                            // Blind Mode Masking
+                                                            const displayConcept = blindMode ? "•••••••" : conceptText;
+
+                                                            return (
+                                                                <button key={nIdx} id={`node-${sectionId}-${nIdx}`} onClick={(e) => { e.stopPropagation(); handleNodeClick(sectionId, nIdx); }} 
+                                                                    onMouseEnter={() => setHoveredNodeKey(key)} onMouseLeave={() => setHoveredNodeKey(null)}
+                                                                    className={`w-12 h-12 rounded-2xl flex flex-col items-center justify-center transition-all duration-300 relative ${selected ? 'bg-white/10 ring-2 ring-indigo-500 scale-110 z-10 shadow-[0_0_20px_rgba(79,70,229,0.4)]' : 'bg-[#0a0a0f] border border-white/5 hover:border-white/20'} ${isLinkingSource ? 'animate-pulse ring-2 ring-emerald-500' : ''} ${searchDimmed ? 'opacity-10 grayscale' : ''} ${isSearchMatch ? 'ring-2 ring-indigo-400 scale-105 z-10 shadow-[0_0_15px_rgba(99,102,241,0.5)]' : ''}`}>
+                                                                    <span className={`font-mono mb-1 ${selected ? 'text-indigo-300' : 'text-slate-400'}`} style={{ fontSize: `${Math.max(titleFontSize, 9)}px` }}>{getGlobalIndex(sectionId, nIdx)}</span>
+                                                                    <div className="h-4 flex items-center justify-center">
+                                                                        {emoji ? (
+                                                                            <span 
+                                                                                className={`text-base leading-none transition-all duration-500 ${grayscaleMode ? 'opacity-60' : ''}`} 
+                                                                                style={{ filter: grayscaleMode ? 'grayscale(100%)' : 'none' }}
+                                                                            >
+                                                                                {emoji}
+                                                                            </span>
+                                                                        ) : (
+                                                                            <div className={`w-2 h-2 rounded-full transition-all duration-500 ${hasConcept ? theme.dot : 'bg-slate-600'}`} />
+                                                                        )}
+                                                                    </div>
+                                                                    {isStarred && <div className="absolute top-0.5 right-0.5 text-amber-400"><Icon name="Star" size={10} fill="currentColor" /></div>}
+                                                                    {isGridStar && <div className="absolute top-0.5 left-0.5 text-amber-400 animate-pulse"><Icon name="Sparkles" size={12} fill="currentColor" /></div>}
+                                                                    {isLinked && (
+                                                                        <div 
+                                                                            className="absolute inset-2 rounded-xl border pointer-events-none transition-all duration-500" 
+                                                                            style={{ 
+                                                                                borderColor: `rgba(99, 102, 241, ${0.2 + (intensityRatio * 0.4)})`, // Opacity varies from 0.2 to 0.6
+                                                                                borderWidth: `${1 + (intensityRatio * 3)}px` // Thickness varies from 1px to 4px
+                                                                            }} 
+                                                                        />
+                                                                    )}
+                                                                    {hoveredNodeKey === key && conceptText && (
+                                                                        <div className="absolute bottom-full mb-3 left-1/2 -translate-x-1/2 px-4 py-3 bg-[#000000] border border-indigo-500/40 rounded-xl shadow-2xl z-[200] pointer-events-none backdrop-blur-xl tooltip-animate text-center ring-1 ring-white/5" 
+                                                                            style={{ 
+                                                                                minWidth: `${160 + (titleFontSize - 10) * 5}px`, 
+                                                                                maxWidth: `${280 + (titleFontSize - 10) * 10}px`,
+                                                                                transform: `translateX(-50%) scale(${1 / scale})`,
+                                                                                transformOrigin: 'bottom center'
+                                                                            }}>
+                                                                            <div className="flex items-center justify-center gap-1.5 mb-1.5 opacity-50">
+                                                                                <Icon name="Brain" size={Math.max(8, titleFontSize - 2)} className="text-indigo-400" />
+                                                                                <span className="text-indigo-300 uppercase font-black tracking-widest text-[8px]">Cognitive Core</span>
+                                                                            </div>
+                                                                            <div className="text-slate-100 leading-tight font-medium italic break-words" style={{ fontSize: `${titleFontSize + 3}px` }}>"{displayConcept}"</div>
+                                                                            <div className="absolute top-full left-1/2 -translate-x-1/2 border-[6px] border-transparent border-t-[#000000]" />
+                                                                        </div>
+                                                                    )}
+                                                                </button>
+                                                            );
+                                                        })}
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        );
-                                    })}
-                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                )}
                             </div>
                         </section>
 
@@ -1071,7 +1417,7 @@
 </div>
 
 
-                                        <h3 className="text-2xl font-thin tracking-tight text-white mt-4">Thesis Memory Web</h3>
+                                        <h3 className="text-2xl font-thin tracking-tight text-white mt-4">Thesis Memory Web Beta 0.9</h3>
                                         <p className="text-[10px] text-indigo-400 uppercase font-black tracking-widest">Cognitive Mapping Interface</p>
                                     </div>
                                     <div className="space-y-6 text-sm text-slate-400 leading-relaxed max-h-[40vh] overflow-y-auto pr-2 custom-scrollbar">
