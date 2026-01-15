@@ -695,14 +695,19 @@
 
             const toggleFlagNode = (sIdx, nIdx) => {
                 const key = getNodeKey(sIdx, nIdx);
-                const newFlaggedNodes = { ...(flaggedNodes || {}) };
-                const isFlagged = !!newFlaggedNodes[key];
+                const currentFlagged = flaggedNodes || {};
+                const isFlagged = !!currentFlagged[key];
                 
+                const newFlaggedNodes = { ...currentFlagged };
+
                 if (isFlagged) {
-                    delete newFlaggedNodes[key];
+                    // Turn off by setting to null (matches Cluster Star behavior)
+                    newFlaggedNodes[key] = null; 
                 } else {
-                    // Check limit
-                    if (Object.keys(newFlaggedNodes).length >= 16) {
+                    // Only count TRUE values for limit
+                    const activeCount = Object.values(currentFlagged).filter(v => !!v).length;
+                    
+                    if (activeCount >= 16) {
                         setErrorMessage("Maximum 16 flags allowed.");
                         setTimeout(() => setErrorMessage(null), 3000);
                         return;
