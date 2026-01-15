@@ -340,7 +340,7 @@
                         if (data.starredNodes) setStarredNodes(data.starredNodes);
                         if (data.gridStarNode) setGridStarNode(data.gridStarNode);
                         if (data.timezoneOffset !== undefined) setTimezoneOffset(data.timezoneOffset);
-                        if (data.flaggedNodes) setFlaggedNodes(data.flaggedNodes);
+                        if (data.flaggedNodes !== undefined) setFlaggedNodes(data.flaggedNodes);
                     }
                     setLoading(false);
                 }, (err) => {
@@ -695,22 +695,22 @@
 
             const toggleFlagNode = (sIdx, nIdx) => {
                 const key = getNodeKey(sIdx, nIdx);
-                const isFlagged = !!flaggedNodes[key];
+                const currentFlagged = flaggedNodes || {};
+                const isFlagged = !!currentFlagged[key];
                 
-                if (!isFlagged) {
-                    // Check limit
-                    if (Object.keys(flaggedNodes).length >= 16) {
+                let newFlagged;
+
+                if (isFlagged) {
+                    // Cleanly remove key using destructuring to ensure no leftover keys
+                    const { [key]: _, ...rest } = currentFlagged;
+                    newFlagged = rest;
+                } else {
+                    if (Object.keys(currentFlagged).length >= 16) {
                         setErrorMessage("Maximum 16 flags allowed.");
                         setTimeout(() => setErrorMessage(null), 3000);
                         return;
                     }
-                }
-                
-                const newFlagged = { ...flaggedNodes };
-                if (isFlagged) {
-                    delete newFlagged[key];
-                } else {
-                    newFlagged[key] = true;
+                    newFlagged = { ...currentFlagged, [key]: true };
                 }
                 
                 setFlaggedNodes(newFlagged);
