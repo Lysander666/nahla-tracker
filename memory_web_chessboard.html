@@ -355,7 +355,7 @@
                                 </div>
 
                                 {/* Board Container - Added flex-1 to fill remaining height */}
-                                <div className={`bg-slate-900/60 p-1.5 rounded-[2.5rem] border border-white/5 shadow-2xl board-visual-state flex-1 flex flex-col justify-center ${integrationMode && !isFinished ? 'opacity-5 grayscale' : 'opacity-100'}`}>
+                                <div className={`bg-slate-900/60 p-1.5 rounded-[2.5rem] border border-white/5 shadow-2xl board-visual-state flex-1 flex flex-col justify-center ${integrationMode && !isFinished ? 'opacity-0 grayscale' : 'opacity-100'}`}>
                                     <div className="p-3 bg-black/40 rounded-[2rem] border border-white/5 relative overflow-hidden w-full aspect-square max-h-full">
                                         <div className="grid grid-rows-8 gap-1.5 relative z-10">
                                             {Array.from({ length: 8 }).map((_, rIdx) => (
