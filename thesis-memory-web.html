@@ -51,8 +51,8 @@
             backface-visibility: hidden;
         }
 
-        .drag-ghost { opacity: 0.15; transform: scale(0.95); filter: blur(2px); }
-        .dragging-active .cluster-card:not(.drag-ghost):not(.drag-over-target) { opacity: 0.6; transform: scale(0.98); }
+        .drag-ghost { opacity: 0.15; transform: scale(5); filter: blur(2px); }
+        .dragging-active .cluster-card:not(.drag-ghost):not(.drag-over-target) { opacity: 0.6; transform: scale(8); }
         .drag-over-target {
             box-shadow: 0 0 0 2px #6366f1, 0 20px 40px rgba(99, 102, 241, 0.3);
             transform: translateY(-8px) scale(1.03) rotate(1deg) !important;
@@ -66,7 +66,7 @@
 
         .tooltip-animate { animation: tooltip-in 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
         @keyframes tooltip-in {
-            from { opacity: 0; transform: translate(-50%, 10px) scale(0.9); }
+            from { opacity: 0; transform: translate(-50%, 10px) scale(); }
             to { opacity: 1; transform: translate(-50%, 0) scale(1); }
         }
 
@@ -385,7 +385,7 @@
 
             const exportData = () => {
                 const dataToExport = {
-                    version: "0.9-", timestamp: new Date().toISOString(),
+                    version: "-", timestamp: new Date().toISOString(),
                     payload: { nodesData, sectionTitles, connections, sectionOrder, sectionColors, titleFontSize, grayscaleMode, starredNodes, gridStarNode, timezoneOffset }
                 };
                 const blob = new Blob([JSON.stringify(dataToExport, null, 2)], { type: 'application/json' });
@@ -713,7 +713,7 @@
                                 <Icon name="Network" size={22} className="text-white" />
                             </div>
                             <div className="flex flex-col">
-                                <h1 className="text-sm font-bold tracking-widest uppercase text-slate-200">Thesis Memory Web v0.9 🌌</h1>
+                                <h1 className="text-sm font-bold tracking-widest uppercase text-slate-200">Thesis Memory Web v0.9 Beta 🌌</h1>
                                 <div className="flex items-center gap-2 mt-0.5">
                                     <div className="flex items-center gap-1.5 shrink-0">
                                         <button onClick={() => adjustFontSize(-1)} className="w-5 h-5 flex items-center justify-center bg-white/5 hover:bg-white/10 rounded border border-white/10 text-xs transition-transform active:scale-90">-</button>
