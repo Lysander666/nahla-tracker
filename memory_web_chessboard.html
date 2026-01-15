@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
     <title>Memory Web Chess</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🪐</text></svg>">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -350,7 +350,7 @@
                             
                             {/* Left Column: Board Container - Direct Grid Item now */}
                             {/* Added h-full, flex, and justify-center to ensure it fills height and centers board if Right side is taller */}
-                            <div className={`bg-slate-900/60 p-1.5 rounded-[2.5rem] border border-white/5 shadow-2xl board-visual-state flex flex-col justify-center ${integrationMode && !isFinished ? 'opacity-10 grayscale' : 'opacity-100'}`}>
+                            <div className={`bg-slate-900/60 p-1.5 rounded-[2.5rem] border border-white/5 shadow-2xl board-visual-state flex flex-col justify-center ${integrationMode && !isFinished ? 'opacity-5 grayscale' : 'opacity-100'}`}>
                                 <div className="p-3 bg-black/40 rounded-[2rem] border border-white/5 relative overflow-hidden w-full aspect-square max-h-full">
                                     <div className="grid grid-rows-8 gap-1.5 relative z-10">
                                         {Array.from({ length: 8 }).map((_, rIdx) => (
