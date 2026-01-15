@@ -164,6 +164,19 @@
 
             const fileInputRef = useRef(null);
 
+            // Calculate the maximum number of connections any single node has in the entire web
+            const maxConnections = useMemo(() => {
+                if (connections.length === 0) return 1;
+                const counts = {};
+                connections.forEach(conn => {
+                    const [k1, k2] = conn.split(':');
+                    counts[k1] = (counts[k1] || 0) + 1;
+                    counts[k2] = (counts[k2] || 0) + 1;
+                });
+                const max = Math.max(...Object.values(counts));
+                return max > 0 ? max : 1;
+            }, [connections]);
+
             useEffect(() => {
                 const handleKeyDown = (e) => {
                     if (e.key === 'Escape') {
@@ -768,6 +781,9 @@
                                                         );
                                                         const searchDimmed = searchQuery && !isSearchMatch;
 
+                                                        // Calculate ratio for dynamic styling
+                                                        const intensityRatio = linkCount / maxConnections;
+
                                                         return (
                                                             <button key={nIdx} id={`node-${sectionId}-${nIdx}`} onClick={(e) => { e.stopPropagation(); handleNodeClick(sectionId, nIdx); }} 
                                                                 onMouseEnter={() => setHoveredNodeKey(key)} onMouseLeave={() => setHoveredNodeKey(null)}
@@ -791,8 +807,8 @@
                                                                     <div 
                                                                         className="absolute inset-2 rounded-xl border pointer-events-none transition-all duration-500" 
                                                                         style={{ 
-                                                                            borderColor: `rgba(99, 102, 241, ${Math.min(0.2 + (linkCount * 0.08), 0.5)})`,
-                                                                            borderWidth: `${Math.min(1 + (linkCount * 0.4), 4)}px`
+                                                                            borderColor: `rgba(99, 102, 241, ${0.2 + (intensityRatio * 0.4)})`, // Opacity varies from 0.2 to 0.6
+                                                                            borderWidth: `${1 + (intensityRatio * 3)}px` // Thickness varies from 1px to 4px
                                                                         }} 
                                                                     />
                                                                 )}
