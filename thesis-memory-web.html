@@ -695,26 +695,22 @@
 
 const toggleFlagNode = (sIdx, nIdx) => {
     const key = getNodeKey(sIdx, nIdx);
-    const currentFlagged = flaggedNodes || {};
+    const currentFlagged = { ...(flaggedNodes || {}) }; // Create a fresh copy
     const isFlagged = !!currentFlagged[key];
     
-    let newFlagged;
-
     if (isFlagged) {
-        const { [key]: _, ...rest } = currentFlagged;
-        // Use null if empty to avoid empty object issues
-        newFlagged = Object.keys(rest).length > 0 ? rest : {};
+        delete currentFlagged[key]; // Direct deletion
     } else {
         if (Object.keys(currentFlagged).length >= 16) {
             setErrorMessage("Maximum 16 flags allowed.");
             setTimeout(() => setErrorMessage(null), 3000);
             return;
         }
-        newFlagged = { ...currentFlagged, [key]: true };
+        currentFlagged[key] = true;
     }
     
-    setFlaggedNodes(newFlagged);
-    saveData({ flaggedNodes: newFlagged });
+    setFlaggedNodes(currentFlagged);
+    saveData({ flaggedNodes: currentFlagged });
 };
 
             const toggleColorPicker = (e, index) => { e.stopPropagation(); setActiveColorPicker(activeColorPicker === index ? null : index); };
