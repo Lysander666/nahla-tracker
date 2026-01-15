@@ -342,7 +342,7 @@
 
                         <div className="bg-white/5 border border-white/10 rounded-2xl p-4 mb-8 text-[11px] leading-relaxed text-slate-400 max-w-2xl shadow-xl">
                             <strong className="text-white block mb-1 uppercase tracking-wider">About this Workspace</strong>
-                            This dialectical engine facilitates cognitive mapping through strategic engagement. By pairing traditional chess mechanics with symbolic vectors, users reinforce memory clusters while refining theoretical synthesis in the Dialectic Mode. 4x2 sector grids allow for segmented focus during integration.
+                            This chess engine facilitates cognitive mapping through strategic engagement. Use the Memory Sprint option to remember which clusters (1-8) node numbers are under pressure, which is especially useful if annotating a thesis hard copy with node numbers. Altneratively you can play chess in Inquiry Mode using the Memory Web cognitive symbols as academic discussion tokens of varying versitiliy and imoprtance.
                         </div>
 
                         {/* Layout Change: items-stretch to ensure columns match height */}
@@ -350,7 +350,7 @@
                             
                             {/* Left Column: Board Container - Direct Grid Item now */}
                             {/* Added h-full, flex, and justify-center to ensure it fills height and centers board if Right side is taller */}
-                            <div className={`bg-slate-900/60 p-1.5 rounded-[2.5rem] border border-white/5 shadow-2xl board-visual-state flex flex-col justify-center ${integrationMode && !isFinished ? 'opacity-5 grayscale' : 'opacity-100'}`}>
+                            <div className={`bg-slate-900/60 p-1.5 rounded-[2.5rem] border border-white/5 shadow-2xl board-visual-state flex flex-col justify-center ${integrationMode && !isFinished ? 'opacity-3 grayscale' : 'opacity-100'}`}>
                                 <div className="p-3 bg-black/40 rounded-[2rem] border border-white/5 relative overflow-hidden w-full aspect-square max-h-full">
                                     <div className="grid grid-rows-8 gap-1.5 relative z-10">
                                         {Array.from({ length: 8 }).map((_, rIdx) => (
