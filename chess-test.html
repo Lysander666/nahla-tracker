@@ -13,7 +13,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
     
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+        /* Added Lora for the academic look */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Lora:ital,wght@0,400;0,500;0,600;1,400&display=swap');
         
         body { 
             font-family: 'Inter', system-ui, -apple-system, sans-serif; 
@@ -21,11 +22,16 @@
             color: #f1f5f9; 
             overflow-x: hidden; 
         }
+
+        /* New utility class for the academic font */
+        .font-academic {
+            font-family: 'Lora', serif;
+        }
         
         .tile-light { background-color: rgba(255, 255, 255, 0.1); border-color: rgba(255, 255, 255, 0.05); }
         .tile-dark { background-color: rgba(0, 0, 0, 0.4); border-color: rgba(0, 0, 0, 0.2); }
         
-        .number-glow { text-shadow: 0 0 12px rgba(255,255,255,0.3); }
+        .number-glow { text-shadow: 0 0 12px rgba(255,255,255,0.2); }
 
         .chess-piece {
             font-size: 2.8rem;
@@ -46,14 +52,14 @@
         .black-piece { color: #64748b; } 
 
         .tray-area {
-            min-height: 44px;
-            background: rgba(15, 23, 42, 0.8);
+            min-height: 38px;
+            background: rgba(15, 23, 42, 0.6);
             border: 1px solid rgba(255, 255, 255, 0.05);
             display: flex;
             align-items: center;
             gap: 4px;
-            padding: 0 12px;
-            border-radius: 12px;
+            padding: 0 8px;
+            border-radius: 8px;
             flex-wrap: wrap;
             overflow: hidden;
         }
@@ -145,9 +151,10 @@
         };
 
         const App = () => {
-            // Sector highlighting colors (8 items for 8 4x2 grids)
-            // Persistent during session as requested
-            const [sectorColors, setSectorColors] = useState(['emerald', 'emerald', 'amber', 'amber', 'blue', 'blue', 'purple', 'purple']);
+            const [sectorColors, setSectorColors] = useState(() => {
+                const saved = localStorage.getItem('thesis-chessboard-sectors');
+                return saved ? JSON.parse(saved) : ['emerald', 'emerald', 'amber', 'amber', 'blue', 'blue', 'purple', 'purple'];
+            });
             const [dialecticMode, setDialecticMode] = useState(false);
             const [integrationMode, setIntegrationMode] = useState(false);
             const [stats, setStats] = useState({ correct: 0, total: 0 });
@@ -155,8 +162,8 @@
             const [aiStrategy, setAiStrategy] = useState('random');
             
             const [game, setGame] = useState(new Chess());
-            const [capturedByThesis, setCapturedByThesis] = useState([]);
-            const [capturedByCritique, setCapturedByCritique] = useState([]);
+            const [capturedByThesis, setCapturedByThesis] = useState([]); 
+            const [capturedByCritique, setCapturedByCritique] = useState([]); 
             const [dialogueStatus, setDialogueStatus] = useState("Awaiting opening thesis...");
             const [selectedSq, setSelectedSq] = useState(null);
             const [validMoves, setValidMoves] = useState([]);
@@ -168,7 +175,6 @@
             const inputRef = useRef(null);
 
             const getSectorIndex = (r, c) => {
-                // Returns 0-7 based on 4x2 grids
                 return Math.floor(r / 2) * 2 + Math.floor(c / 4);
             };
 
@@ -224,9 +230,14 @@
                     } else {
                         if (result.captured) {
                             const side = result.color === 'w' ? 'Thesis' : 'Examiner';
-                            const hint = getEmojiHint(result.captured, result.to);
-                            if (result.color === 'w') setCapturedByThesis(prev => [...prev, hint]);
-                            else setCapturedByCritique(prev => [...prev, hint]);
+                            const capturedColor = result.color === 'w' ? 'b' : 'w';
+                            const pieceGlyph = GLYPHS[capturedColor + result.captured.toUpperCase()];
+                            
+                            if (result.color === 'w') {
+                                setCapturedByThesis(prev => [...prev, { glyph: pieceGlyph, color: capturedColor }]);
+                            } else {
+                                setCapturedByCritique(prev => [...prev, { glyph: pieceGlyph, color: capturedColor }]);
+                            }
                             setDialogueStatus(`${side} addressed the ${PIECE_NAMES[result.captured]} point via ${PIECE_NAMES[result.piece]}.`);
                         } else {
                             setDialogueStatus(`${result.color === 'w' ? 'Thesis' : 'Examiner'} positioned ${PIECE_NAMES[result.piece]} at ${result.to}.`);
@@ -313,7 +324,7 @@
                                 <div>
                                     <h1 className="text-2xl font-black tracking-tight leading-none mb-1 uppercase">Thesis Integration Workspace</h1>
                                     <div className="flex items-center gap-3">
-                                        <a href="thesis-memory-web.html" className="text-[10px] font-bold uppercase text-slate-500 hover:text-white transition-colors">← Thesis Memory Web</a>
+                                        <a href="https://lysander666.github.io/nahla-tracker/thesis-memory-web" className="text-[10px] font-bold uppercase text-slate-500 hover:text-white transition-colors">← Thesis Memory Web</a>
                                         <span className="text-[10px] font-bold uppercase text-slate-600">v3.1.0</span>
                                     </div>
                                 </div>
@@ -334,17 +345,9 @@
                             This dialectical engine facilitates cognitive mapping through strategic engagement. By pairing traditional chess mechanics with symbolic vectors, users reinforce memory clusters while refining theoretical synthesis in the Dialectic Mode. 4x2 sector grids allow for segmented focus during integration.
                         </div>
 
-                        <div className="grid lg:grid-cols-[1fr_360px] gap-8 items-start">
+                        {/* Layout Change: items-stretch to ensure columns match height */}
+                        <div className="grid lg:grid-cols-[1fr_360px] gap-8 items-stretch">
                             <div className="space-y-4">
-                                {dialecticMode && (
-                                    <div className="flex items-center justify-between px-2">
-                                        <span className="text-[9px] font-black uppercase tracking-widest text-slate-500">Examiner Critiques</span>
-                                        <div className="tray-area flex-1 max-w-[280px]">
-                                            {capturedByCritique.map((p, i) => <span key={i} className="text-lg leading-none">{p}</span>)}
-                                        </div>
-                                    </div>
-                                )}
-
                                 <div className={`bg-slate-900/60 p-1.5 rounded-[2.5rem] border border-white/5 shadow-2xl board-visual-state ${integrationMode && !isFinished ? 'opacity-10 grayscale' : 'opacity-100'}`}>
                                     <div className="p-3 bg-black/40 rounded-[2rem] border border-white/5 relative overflow-hidden">
                                         <div className="grid grid-rows-8 gap-1.5 relative z-10">
@@ -368,7 +371,7 @@
                                                                         {GLYPHS[p.color + p.type.toUpperCase()]}
                                                                     </span>
                                                                 )}
-                                                                {!dialecticMode && <span className={`text-xl font-black tracking-tighter number-glow opacity-90 ${isLandmark ? 'scale-110 text-white' : ''}`}>{nodeNum}</span>}
+                                                                {!dialecticMode && <span className={`text-2xl font-academic tracking-tight number-glow opacity-80 ${isLandmark ? 'scale-110 text-white font-medium' : ''}`}>{nodeNum}</span>}
                                                             </div>
                                                         );
                                                     })}
@@ -377,18 +380,103 @@
                                         </div>
                                     </div>
                                 </div>
-
-                                {dialecticMode && (
-                                    <div className="flex items-center justify-between px-2">
-                                        <div className="tray-area flex-1 max-w-[280px]">
-                                            {capturedByThesis.map((p, i) => <span key={i} className="text-lg leading-none">{p}</span>)}
-                                        </div>
-                                        <span className="text-[9px] font-black uppercase tracking-widest text-indigo-400">Thesis Synthesis</span>
-                                    </div>
-                                )}
                             </div>
 
-                            <aside className="space-y-6">
+                            {/* Layout Change: Flex column with h-full for the aside */}
+                            <aside className="flex flex-col gap-6 h-full">
+                                {dialecticMode ? (
+                                    <div className="bg-slate-900/40 p-6 rounded-[2.5rem] border border-white/5 shadow-2xl flex flex-col gap-5 flex-1">
+                                        <div className="bg-white/5 border border-white/10 p-5 rounded-2xl flex flex-col gap-4">
+                                            <div>
+                                                <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest block mb-2">Examiner Critiques</span>
+                                                <div className="tray-area">
+                                                    {capturedByCritique.map((p, i) => (
+                                                        <span key={i} className={`text-xl leading-none ${p.color === 'w' ? 'text-white' : 'text-slate-500'}`}>
+                                                            {p.glyph}
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            </div>
+
+                                            <div className="min-h-[80px] py-2 border-y border-white/5">
+                                                <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest block mb-1">Dialogue Log</span>
+                                                <p className="text-sm font-bold text-white italic leading-snug">"{dialogueStatus}"</p>
+                                            </div>
+
+                                            <div>
+                                                <span className="text-[9px] font-black text-indigo-400 uppercase tracking-widest block mb-2 text-right">Thesis Synthesis</span>
+                                                <div className="tray-area justify-end">
+                                                    {capturedByThesis.map((p, i) => (
+                                                        <span key={i} className={`text-xl leading-none ${p.color === 'w' ? 'text-white' : 'text-slate-500'}`}>
+                                                            {p.glyph}
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div className="bg-white/5 border border-white/10 p-4 rounded-2xl">
+                                            <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest block mb-3">AI Intelligence Mode</span>
+                                            <div className="flex gap-2">
+                                                <button onClick={() => setAiStrategy('random')} className={`flex-1 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${aiStrategy === 'random' ? 'bg-emerald-500 text-white shadow-[0_0_10px_rgba(16,185,129,0.4)]' : 'bg-white/5 text-slate-500 hover:text-slate-300'}`}>Random</button>
+                                                <button onClick={() => setAiStrategy('strategy')} className={`flex-1 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${aiStrategy === 'strategy' ? 'bg-red-500 text-white shadow-[0_0_10px_rgba(239,68,68,0.4)]' : 'bg-white/5 text-slate-500 hover:text-slate-300'}`}>Strategy</button>
+                                            </div>
+                                        </div>
+
+                                        <button onClick={() => { setGame(new Chess()); setCapturedByThesis([]); setCapturedByCritique([]); setDialogueStatus("Inquiry re-initialized."); setValidMoves([]); setSelectedSq(null); }} className="w-full py-3.5 bg-slate-800 rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-slate-700 transition-all border border-white/5 mt-auto">Reset Match</button>
+                                    </div>
+                                ) : integrationMode ? (
+                                    <div className="bg-indigo-950/30 p-8 rounded-[2.5rem] shadow-2xl flex flex-col items-center gap-6 text-center border border-indigo-500/20 flex-1">
+                                        {!isFinished ? (
+                                            <>
+                                                <div className="text-[10px] font-black uppercase tracking-widest text-indigo-400">Recall Point {stats.total}/8</div>
+                                                <div className="text-8xl font-black text-white tracking-tighter drop-shadow-2xl">{focalNode}</div>
+                                                <div className="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                                                    <div className="h-full bg-white timer-bar shadow-[0_0_10px_white]" style={{ width: `${(timeRemaining / 5000) * 100}%` }} />
+                                                </div>
+                                                <div className="flex flex-col gap-2 w-full">
+                                                    <span className="text-[9px] font-black text-slate-500 uppercase">Sector Map (1-8)</span>
+                                                    <input ref={inputRef} type="text" value={inputVal} onChange={e => {
+                                                        const v = e.target.value;
+                                                        if (/^[1-8]?$/.test(v)) {
+                                                            setInputVal(v);
+                                                            if (v !== '') evaluate(parseInt(v) === Math.ceil(focalNode / 8), "Error");
+                                                        }
+                                                    }} className="academic-input w-full" maxLength="1" autoFocus />
+                                                </div>
+                                            </>
+                                        ) : (
+                                            <div className="space-y-4 my-auto">
+                                                <div className="text-[10px] font-black uppercase tracking-widest text-indigo-400">Integration Complete</div>
+                                                <div className="text-6xl font-black text-white">{Math.round(stats.correct/8*100)}%</div>
+                                                <button onClick={beginIntegration} className="px-8 py-3 bg-white text-slate-900 rounded-xl font-black uppercase text-[10px] tracking-widest">Restart</button>
+                                            </div>
+                                        )}
+                                        {feedback && !isFinished && <div className={`text-[9px] font-black uppercase tracking-widest px-4 py-2 rounded-lg ${feedback.success ? 'text-emerald-400 bg-emerald-500/10' : 'text-red-400 bg-red-500/10'}`}>{feedback.message}</div>}
+                                    </div>
+                                ) : (
+                                    /* Added flex-1 to this container specifically to make it stretch */
+                                    <div className="bg-slate-900/30 p-8 rounded-[2.5rem] border border-white/5 space-y-6 flex-1 flex flex-col">
+                                        <div>
+                                            <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 mb-6 flex items-center gap-3">
+                                                <Icon name="Palette" size={14} className="text-indigo-400" /> Sector Mapping (4x2)
+                                            </h3>
+                                            <div className="grid grid-cols-2 gap-4">
+                                                {sectorColors.map((curr, idx) => (
+                                                    <div key={idx} className="flex flex-col gap-2 bg-black/20 p-3 rounded-xl border border-white/5">
+                                                        <span className="text-[8px] font-black text-slate-500 uppercase">Sec {idx + 1}</span>
+                                                        <div className="flex justify-between gap-1">
+                                                            {['emerald', 'amber', 'blue', 'purple'].map(c => (
+                                                                <button key={c} onClick={() => updateSectorColor(idx, c)} className={`w-3.5 h-3.5 rounded-full border transition-transform ${btnColors[c]} ${curr === c ? 'border-white scale-125 z-10' : 'border-transparent opacity-20 hover:opacity-50'}`} />
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
                                 <div className="legend-card space-y-4">
                                     <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 mb-4 flex items-center gap-3">
                                         <Icon name="Compass" size={14} className="text-indigo-400" /> Dialectical Symbols
@@ -430,74 +518,6 @@
                                         </div>
                                     </div>
                                 </div>
-
-                                {dialecticMode ? (
-                                    <div className="bg-slate-900/40 p-6 rounded-[2.5rem] border border-white/5 shadow-2xl flex flex-col gap-5">
-                                        <div className="bg-white/5 border border-white/10 p-5 rounded-2xl min-h-[100px] flex flex-col justify-center">
-                                            <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest block mb-2">Dialogue Log</span>
-                                            <p className="text-sm font-bold text-white italic leading-snug">"{dialogueStatus}"</p>
-                                        </div>
-                                        
-                                        <div className="bg-white/5 border border-white/10 p-4 rounded-2xl">
-                                            <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest block mb-3">AI Intelligence Mode</span>
-                                            <div className="flex gap-2">
-                                                <button onClick={() => setAiStrategy('random')} className={`flex-1 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${aiStrategy === 'random' ? 'bg-emerald-500 text-white shadow-[0_0_10px_rgba(16,185,129,0.4)]' : 'bg-white/5 text-slate-500 hover:text-slate-300'}`}>Random</button>
-                                                <button onClick={() => setAiStrategy('strategy')} className={`flex-1 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${aiStrategy === 'strategy' ? 'bg-red-500 text-white shadow-[0_0_10px_rgba(239,68,68,0.4)]' : 'bg-white/5 text-slate-500 hover:text-slate-300'}`}>Strategy</button>
-                                            </div>
-                                        </div>
-
-                                        <button onClick={() => { setGame(new Chess()); setCapturedByThesis([]); setCapturedByCritique([]); setDialogueStatus("Inquiry re-initialized."); setValidMoves([]); setSelectedSq(null); }} className="w-full py-3.5 bg-slate-800 rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-slate-700 transition-all border border-white/5">Reset Match</button>
-                                    </div>
-                                ) : integrationMode ? (
-                                    <div className="bg-indigo-950/30 p-8 rounded-[2.5rem] shadow-2xl flex flex-col items-center gap-6 text-center border border-indigo-500/20">
-                                        {!isFinished ? (
-                                            <>
-                                                <div className="text-[10px] font-black uppercase tracking-widest text-indigo-400">Recall Point {stats.total}/8</div>
-                                                <div className="text-8xl font-black text-white tracking-tighter drop-shadow-2xl">{focalNode}</div>
-                                                <div className="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
-                                                    <div className="h-full bg-white timer-bar shadow-[0_0_10px_white]" style={{ width: `${(timeRemaining / 5000) * 100}%` }} />
-                                                </div>
-                                                <div className="flex flex-col gap-2">
-                                                    <span className="text-[9px] font-black text-slate-500 uppercase">Sector Map (1-8)</span>
-                                                    <input ref={inputRef} type="text" value={inputVal} onChange={e => {
-                                                        const v = e.target.value;
-                                                        if (/^[1-8]?$/.test(v)) {
-                                                            setInputVal(v);
-                                                            if (v !== '') evaluate(parseInt(v) === Math.ceil(focalNode / 8), "Error");
-                                                        }
-                                                    }} className="academic-input" maxLength="1" autoFocus />
-                                                </div>
-                                            </>
-                                        ) : (
-                                            <div className="space-y-4">
-                                                <div className="text-[10px] font-black uppercase tracking-widest text-indigo-400">Integration Complete</div>
-                                                <div className="text-6xl font-black text-white">{Math.round(stats.correct/8*100)}%</div>
-                                                <button onClick={beginIntegration} className="px-8 py-3 bg-white text-slate-900 rounded-xl font-black uppercase text-[10px] tracking-widest">Restart</button>
-                                            </div>
-                                        )}
-                                        {feedback && !isFinished && <div className={`text-[9px] font-black uppercase tracking-widest px-4 py-2 rounded-lg ${feedback.success ? 'text-emerald-400 bg-emerald-500/10' : 'text-red-400 bg-red-500/10'}`}>{feedback.message}</div>}
-                                    </div>
-                                ) : (
-                                    <div className="bg-slate-900/30 p-8 rounded-[2.5rem] border border-white/5 space-y-6">
-                                        <div>
-                                            <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 mb-6 flex items-center gap-3">
-                                                <Icon name="Palette" size={14} className="text-indigo-400" /> Sector Mapping (4x2)
-                                            </h3>
-                                            <div className="grid grid-cols-2 gap-4">
-                                                {sectorColors.map((curr, idx) => (
-                                                    <div key={idx} className="flex flex-col gap-2 bg-black/20 p-3 rounded-xl border border-white/5">
-                                                        <span className="text-[8px] font-black text-slate-500 uppercase">Sec {idx + 1}</span>
-                                                        <div className="flex justify-between gap-1">
-                                                            {['emerald', 'amber', 'blue', 'purple'].map(c => (
-                                                                <button key={c} onClick={() => updateSectorColor(idx, c)} className={`w-3.5 h-3.5 rounded-full border transition-transform ${btnColors[c]} ${curr === c ? 'border-white scale-125 z-10' : 'border-transparent opacity-20 hover:opacity-50'}`} />
-                                                            ))}
-                                                        </div>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
                             </aside>
                         </div>
                         
