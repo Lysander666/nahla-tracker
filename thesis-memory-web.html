@@ -693,29 +693,29 @@
                 saveData({ gridStarNode: newGridStar });
             };
 
-            const toggleFlagNode = (sIdx, nIdx) => {
-                const key = getNodeKey(sIdx, nIdx);
-                const currentFlagged = flaggedNodes || {};
-                const isFlagged = !!currentFlagged[key];
-                
-                let newFlagged;
+const toggleFlagNode = (sIdx, nIdx) => {
+    const key = getNodeKey(sIdx, nIdx);
+    const currentFlagged = flaggedNodes || {};
+    const isFlagged = !!currentFlagged[key];
+    
+    let newFlagged;
 
-                if (isFlagged) {
-                    // Cleanly remove key using destructuring to ensure no leftover keys
-                    const { [key]: _, ...rest } = currentFlagged;
-                    newFlagged = rest;
-                } else {
-                    if (Object.keys(currentFlagged).length >= 16) {
-                        setErrorMessage("Maximum 16 flags allowed.");
-                        setTimeout(() => setErrorMessage(null), 3000);
-                        return;
-                    }
-                    newFlagged = { ...currentFlagged, [key]: true };
-                }
-                
-                setFlaggedNodes(newFlagged);
-                saveData({ flaggedNodes: newFlagged });
-            };
+    if (isFlagged) {
+        const { [key]: _, ...rest } = currentFlagged;
+        // Use null if empty to avoid empty object issues
+        newFlagged = Object.keys(rest).length > 0 ? rest : {};
+    } else {
+        if (Object.keys(currentFlagged).length >= 16) {
+            setErrorMessage("Maximum 16 flags allowed.");
+            setTimeout(() => setErrorMessage(null), 3000);
+            return;
+        }
+        newFlagged = { ...currentFlagged, [key]: true };
+    }
+    
+    setFlaggedNodes(newFlagged);
+    saveData({ flaggedNodes: newFlagged });
+};
 
             const toggleColorPicker = (e, index) => { e.stopPropagation(); setActiveColorPicker(activeColorPicker === index ? null : index); };
             const adjustFontSize = (dir) => {
