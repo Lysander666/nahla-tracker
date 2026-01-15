@@ -118,15 +118,15 @@
             return <span ref={iconRef} className="flex items-center justify-center leading-none shrink-0" />;
         });
 
-        // Optimized Orrery Icon
-        const OrreryIcon = React.memo(({ size = 22, className = "" }) => (
+        // Orrery Icon
+        const OrreryIcon = ({ size = 22, className = "" }) => (
             <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
                 <g transform="rotate(-45 12 12)">
                     {/* Central Planet */}
-                    <circle cx="12" cy="12" r="3.2" fill="currentColor" stroke="none" />
+                    <circle cx="12" cy="12" r="2.8" fill="currentColor" stroke="none" />
                     
-                    {/* Planet Ring (Immediate) - Rotated to be angled upwards to right */}
-                    <ellipse cx="12" cy="12" rx="6" ry="1.5" stroke="currentColor" transform="rotate(20 12 12)" />
+                    {/* Planet Ring (Immediate) */}
+                    <ellipse cx="12" cy="12" rx="5" ry="1.2" stroke="currentColor" />
                     
                     {/* Inner Moon Orbital Path */}
                     <ellipse cx="12" cy="12" rx="8" ry="2.8" className="opacity-30" />
@@ -141,7 +141,7 @@
                     <circle cx="23.5" cy="12" r="0.8" fill="currentColor" stroke="none" />
                 </g>
             </svg>
-        ));
+        );
 
         // Isolated Clock Component to prevent full App re-renders
         const Clock = ({ timezoneOffset, onAdjust }) => {
@@ -193,6 +193,7 @@
             const [hoveredSymbol, setHoveredSymbol] = useState(null);
             const [starredNodes, setStarredNodes] = useState({}); // { [sectionId]: nodeIndex }
             const [gridStarNode, setGridStarNode] = useState(null); // { sIdx, nIdx }
+            const [flaggedNodes, setFlaggedNodes] = useState({}); // { [nodeKey]: boolean }
 
             const [showAuthModal, setShowAuthModal] = useState(false);
             const [showAboutModal, setShowAboutModal] = useState(false);
@@ -253,18 +254,13 @@
             };
 
             const colorOptions = ["emerald", "amber", "blue", "purple"];
-            const quickEmojis = ["🟢", "📗", "🌱", "🧪", "🟡", "💡", "⚠️", "🧩", "🔵", "🔗", "🌐", "⚙️", "🟣", "🌸", "❤️", "🩸"];
+            const quickEmojis = ["🟢", "📗", "🌱", "🧪", "🟡", "💡", "⚠️", "🧩", "🔵", "🔗", "🌐", "⚙️", "🟣", "🌸", "💜", "🩸"];
             const symbolMeanings = {
                 "🟢": "Theory: core claim", "📗": "Theory: conceptual grounding", "🌱": "Theory: emergence", "🧪": "Theory: conceptual example",
                 "🟡": "Fix: clarification required", "💡": "Fix: provisional insight", "⚠️": "Fix: theoretical limitation", "🧩": "Fix: puzzle - research!",
                 "🔵": "Texts: scholarly ref.", "🔗": "Texts: explicit linkage", "🌐": "Texts: networked discourse", "⚙️": "Texts: Methodological operation",
-                "🟣": "Data: key analytical data", "🌸": "Data: culturally significant data", "❤️": "Data: effective or identity data", "🩸": "Data: high-stakes"
+                "🟣": "Data: key analytical data", "🌸": "Data: culturally significant data", "💜": "Data: effective or identity data", "🩸": "Data: high-stakes"
             };
-
-            useEffect(() => {
-                const timer = setInterval(() => setTime(new Date()), 1000);
-                return () => clearInterval(timer);
-            }, []);
 
             const handleClockClick = (e) => {
                 // Shift click to decrement, regular click to increment
@@ -344,6 +340,7 @@
                         if (data.starredNodes) setStarredNodes(data.starredNodes);
                         if (data.gridStarNode) setGridStarNode(data.gridStarNode);
                         if (data.timezoneOffset !== undefined) setTimezoneOffset(data.timezoneOffset);
+                        if (data.flaggedNodes) setFlaggedNodes(data.flaggedNodes);
                     }
                     setLoading(false);
                 }, (err) => {
@@ -372,6 +369,7 @@
                         starredNodes: updates.starredNodes !== undefined ? updates.starredNodes : starredNodes,
                         gridStarNode: updates.gridStarNode !== undefined ? updates.gridStarNode : gridStarNode,
                         timezoneOffset: updates.timezoneOffset !== undefined ? updates.timezoneOffset : timezoneOffset,
+                        flaggedNodes: updates.flaggedNodes !== undefined ? updates.flaggedNodes : flaggedNodes,
                         lastUpdated: new Date().toISOString()
                     };
 
@@ -386,7 +384,7 @@
             const exportData = () => {
                 const dataToExport = {
                     version: "-", timestamp: new Date().toISOString(),
-                    payload: { nodesData, sectionTitles, connections, sectionOrder, sectionColors, titleFontSize, grayscaleMode, starredNodes, gridStarNode, timezoneOffset }
+                    payload: { nodesData, sectionTitles, connections, sectionOrder, sectionColors, titleFontSize, grayscaleMode, starredNodes, gridStarNode, timezoneOffset, flaggedNodes }
                 };
                 const blob = new Blob([JSON.stringify(dataToExport, null, 2)], { type: 'application/json' });
                 const url = URL.createObjectURL(blob);
@@ -409,12 +407,14 @@
                         const data = nodesData[key];
                         const isStarred = starredNodes[sIdx] === nIdx;
                         const isGridStar = gridStarNode?.sIdx === sIdx && gridStarNode?.nIdx === nIdx;
+                        const isFlagged = flaggedNodes[key];
                         
-                        if (data?.concept || data?.notes || isStarred || isGridStar) {
+                        if (data?.concept || data?.notes || isStarred || isGridStar || isFlagged) {
                             hasContent = true;
                             let prefix = "";
                             if (isGridStar) prefix += "★ (GRID STAR) ";
                             if (isStarred) prefix += "★ (CLUSTER STAR) ";
+                            if (isFlagged) prefix += "🚩 (WORK FLAG) ";
 
                             md += `### Node ${getGlobalIndex(sIdx, nIdx)}: ${prefix}${data.emoji || ''} ${data.concept || 'Untitled'}\n`;
                             if (data.citation) md += `**Citation:** ${data.citation}\n\n`;
@@ -478,6 +478,7 @@
             <attribute id="3" title="Emoji" type="string"/>
             <attribute id="4" title="IsClusterStar" type="boolean"/>
             <attribute id="5" title="IsGridStar" type="boolean"/>
+            <attribute id="6" title="IsFlagged" type="boolean"/>
         </attributes>
         <nodes>`;
                 
@@ -489,8 +490,9 @@
                         const isConnected = connections.some(c => c.includes(key));
                         const isStarred = starredNodes[s] === n;
                         const isGridStar = gridStarNode?.sIdx === s && gridStarNode?.nIdx === n;
+                        const isFlagged = !!flaggedNodes[key];
                         
-                        if ((data && (data.concept || data.notes || data.emoji)) || isConnected || isStarred || isGridStar) {
+                        if ((data && (data.concept || data.notes || data.emoji)) || isConnected || isStarred || isGridStar || isFlagged) {
                             const label = data?.concept ? escapeXML(data.concept) : `Node ${getGlobalIndex(s, n)}`;
                             const clusterName = escapeXML(sectionTitles[s]);
                             const citation = escapeXML(data?.citation);
@@ -507,6 +509,7 @@
                     <attvalue for="3" value="${emoji}"/>
                     <attvalue for="4" value="${isStarred}"/>
                     <attvalue for="5" value="${isGridStar}"/>
+                    <attvalue for="6" value="${isFlagged}"/>
                 </attvalues>
                 <viz:color r="${rgb.r}" g="${rgb.g}" b="${rgb.b}"/>
                 <viz:size value="${isGridStar ? '20.0' : (isStarred ? '15.0' : '10.0')}"/>
@@ -560,14 +563,15 @@
 
             const applyImport = () => {
                 if (!showImportConfirm) return;
-                const { nodesData, sectionTitles, connections, sectionOrder, sectionColors, titleFontSize, grayscaleMode, starredNodes, gridStarNode, timezoneOffset } = showImportConfirm;
+                const { nodesData, sectionTitles, connections, sectionOrder, sectionColors, titleFontSize, grayscaleMode, starredNodes, gridStarNode, timezoneOffset, flaggedNodes } = showImportConfirm;
                 setNodesData(nodesData); setSectionTitles(sectionTitles); setConnections(connections); setSectionOrder(sectionOrder);
                 if (sectionColors) setSectionColors(sectionColors); setTitleFontSize(titleFontSize);
                 if (grayscaleMode !== undefined) setGrayscaleMode(grayscaleMode);
                 if (starredNodes !== undefined) setStarredNodes(starredNodes);
                 if (gridStarNode !== undefined) setGridStarNode(gridStarNode);
                 if (timezoneOffset !== undefined) setTimezoneOffset(timezoneOffset);
-                saveData({ nodesData, sectionTitles, connections, sectionOrder, sectionColors, titleFontSize, grayscaleMode, starredNodes, gridStarNode, timezoneOffset });
+                if (flaggedNodes !== undefined) setFlaggedNodes(flaggedNodes);
+                saveData({ nodesData, sectionTitles, connections, sectionOrder, sectionColors, titleFontSize, grayscaleMode, starredNodes, gridStarNode, timezoneOffset, flaggedNodes });
                 setShowImportConfirm(null); setSelectedNode(null);
             };
 
@@ -582,11 +586,12 @@
                     grayscaleMode: false,
                     starredNodes: {},
                     gridStarNode: null,
-                    timezoneOffset: 0
+                    timezoneOffset: 0,
+                    flaggedNodes: {}
                 };
                 setNodesData(blankData.nodesData); setConnections(blankData.connections); setSectionTitles(blankData.sectionTitles);
                 setSectionOrder(blankData.sectionOrder); setSectionColors(blankData.sectionColors); setTitleFontSize(blankData.titleFontSize);
-                setGrayscaleMode(blankData.grayscaleMode); setStarredNodes(blankData.starredNodes); setGridStarNode(blankData.gridStarNode); setTimezoneOffset(blankData.timezoneOffset);
+                setGrayscaleMode(blankData.grayscaleMode); setStarredNodes(blankData.starredNodes); setGridStarNode(blankData.gridStarNode); setTimezoneOffset(blankData.timezoneOffset); setFlaggedNodes(blankData.flaggedNodes);
                 saveData(blankData); setShowResetConfirm(false); setResetConfirmInput(""); setSelectedNode(null);
             };
 
@@ -687,6 +692,27 @@
                 saveData({ gridStarNode: newGridStar });
             };
 
+            const toggleFlagNode = (sIdx, nIdx) => {
+                const key = getNodeKey(sIdx, nIdx);
+                const isFlagged = !!flaggedNodes[key];
+                
+                if (isFlagged) {
+                    const newFlags = { ...flaggedNodes };
+                    delete newFlags[key];
+                    setFlaggedNodes(newFlags);
+                    saveData({ flaggedNodes: newFlags });
+                } else {
+                    if (Object.keys(flaggedNodes).length >= 8) {
+                        setErrorMessage("Maximum 8 flags allowed.");
+                        setTimeout(() => setErrorMessage(null), 2000);
+                        return;
+                    }
+                    const newFlags = { ...flaggedNodes, [key]: true };
+                    setFlaggedNodes(newFlags);
+                    saveData({ flaggedNodes: newFlags });
+                }
+            };
+
             const toggleColorPicker = (e, index) => { e.stopPropagation(); setActiveColorPicker(activeColorPicker === index ? null : index); };
             const adjustFontSize = (dir) => {
                 const newSize = Math.max(6, Math.min(32, titleFontSize + dir));
@@ -710,7 +736,7 @@
                     <header className="p-4 border-b border-white/5 flex justify-between items-center bg-[#050508]/80 backdrop-blur-xl z-50 relative">
                         <div className="flex items-center gap-4">
                             <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-600/20">
-                                <Icon name="Network" size={22} className="text-white" />
+                                <OrreryIcon size={22} className="text-white" />
                             </div>
                             <div className="flex flex-col">
                                 <h1 className="text-sm font-bold tracking-widest uppercase text-slate-200">Thesis Memory Web v0.9 Beta 🌌</h1>
@@ -850,6 +876,7 @@
                                                         const isLinkingSource = linkingNode === key;
                                                         const isStarred = starredNodes[sectionId] === nIdx;
                                                         const isGridStar = gridStarNode?.sIdx === sectionId && gridStarNode?.nIdx === nIdx;
+                                                        const isFlagged = flaggedNodes[key];
 
                                                         const isSearchMatch = searchQuery && (
                                                             conceptText.toLowerCase().includes(searchQuery.toLowerCase()) || 
@@ -880,6 +907,7 @@
                                                                 </div>
                                                                 {isStarred && <div className="absolute top-0.5 right-0.5 text-amber-400"><Icon name="Star" size={10} fill="currentColor" /></div>}
                                                                 {isGridStar && <div className="absolute top-0.5 left-0.5 text-amber-400 animate-pulse"><Icon name="Sparkles" size={12} fill="currentColor" /></div>}
+                                                                {isFlagged && <div className="absolute bottom-1 right-1 text-purple-400"><Icon name="Flag" size={10} fill="currentColor" /></div>}
                                                                 {isLinked && (
                                                                     <div 
                                                                         className="absolute inset-2 rounded-xl border pointer-events-none transition-all duration-500" 
@@ -925,23 +953,34 @@
                                                 <div className="text-[12px] text-indigo-400 uppercase font-bold tracking-widest mb-1">Node {getGlobalIndex(selectedNode.sIdx, selectedNode.nIdx)}</div>
                                                 <h2 className="text-2xl lg:text-3xl font-thin text-white tracking-tight leading-none mb-4">Memory Node Detail</h2>
                                                 
-                                                <div className="grid grid-cols-2 gap-3">
-                                                    {/* Cluster Star Toggle */}
+                                                <div className="flex flex-col gap-3">
+                                                    <div className="grid grid-cols-2 gap-3">
+                                                        {/* Cluster Star Toggle */}
+                                                        <button 
+                                                            onClick={() => toggleStarNode(selectedNode.sIdx, selectedNode.nIdx)}
+                                                            className={`w-full py-3 px-3 rounded-xl font-bold text-[10px] uppercase tracking-widest flex flex-col items-center justify-center gap-2 transition-all ${starredNodes[selectedNode.sIdx] === selectedNode.nIdx ? 'bg-amber-500/10 border border-amber-500/50 text-amber-400 shadow-[0_0_15px_rgba(245,158,11,0.2)]' : 'bg-white/5 border border-white/10 text-slate-400 hover:bg-white/10 hover:text-white'}`}
+                                                        >
+                                                            <Icon name="Star" size={16} fill={starredNodes[selectedNode.sIdx] === selectedNode.nIdx ? "currentColor" : "none"} />
+                                                            {starredNodes[selectedNode.sIdx] === selectedNode.nIdx ? "Cluster Star" : "Set Cluster Star"}
+                                                        </button>
+                                                        
+                                                        {/* Grid Star Toggle */}
+                                                        <button 
+                                                            onClick={() => toggleGridStar(selectedNode.sIdx, selectedNode.nIdx)}
+                                                            className={`w-full py-3 px-3 rounded-xl font-bold text-[10px] uppercase tracking-widest flex flex-col items-center justify-center gap-2 transition-all ${gridStarNode?.sIdx === selectedNode.sIdx && gridStarNode?.nIdx === selectedNode.nIdx ? 'bg-amber-500/20 border border-amber-400 text-amber-300 shadow-[0_0_20px_rgba(251,191,36,0.3)] animate-pulse' : 'bg-white/5 border border-white/10 text-slate-400 hover:bg-white/10 hover:text-white'}`}
+                                                        >
+                                                            <Icon name="Sparkles" size={16} fill={gridStarNode?.sIdx === selectedNode.sIdx && gridStarNode?.nIdx === selectedNode.nIdx ? "currentColor" : "none"} />
+                                                            {gridStarNode?.sIdx === selectedNode.sIdx && gridStarNode?.nIdx === selectedNode.nIdx ? "Grid Star" : "Set Grid Star"}
+                                                        </button>
+                                                    </div>
+
+                                                    {/* Work Flag Toggle */}
                                                     <button 
-                                                        onClick={() => toggleStarNode(selectedNode.sIdx, selectedNode.nIdx)}
-                                                        className={`w-full py-3 px-3 rounded-xl font-bold text-[10px] uppercase tracking-widest flex flex-col items-center justify-center gap-2 transition-all ${starredNodes[selectedNode.sIdx] === selectedNode.nIdx ? 'bg-amber-500/10 border border-amber-500/50 text-amber-400 shadow-[0_0_15px_rgba(245,158,11,0.2)]' : 'bg-white/5 border border-white/10 text-slate-400 hover:bg-white/10 hover:text-white'}`}
+                                                        onClick={() => toggleFlagNode(selectedNode.sIdx, selectedNode.nIdx)}
+                                                        className={`w-full py-2 px-3 rounded-xl font-bold text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 transition-all ${flaggedNodes[getNodeKey(selectedNode.sIdx, selectedNode.nIdx)] ? 'bg-purple-500/20 border border-purple-500/50 text-purple-400 shadow-[0_0_15px_rgba(168,85,247,0.3)]' : 'bg-white/5 border border-white/10 text-slate-400 hover:bg-white/10 hover:text-white'}`}
                                                     >
-                                                        <Icon name="Star" size={16} fill={starredNodes[selectedNode.sIdx] === selectedNode.nIdx ? "currentColor" : "none"} />
-                                                        {starredNodes[selectedNode.sIdx] === selectedNode.nIdx ? "Cluster Star" : "Set Cluster Star"}
-                                                    </button>
-                                                    
-                                                    {/* Grid Star Toggle */}
-                                                    <button 
-                                                        onClick={() => toggleGridStar(selectedNode.sIdx, selectedNode.nIdx)}
-                                                        className={`w-full py-3 px-3 rounded-xl font-bold text-[10px] uppercase tracking-widest flex flex-col items-center justify-center gap-2 transition-all ${gridStarNode?.sIdx === selectedNode.sIdx && gridStarNode?.nIdx === selectedNode.nIdx ? 'bg-amber-500/20 border border-amber-400 text-amber-300 shadow-[0_0_20px_rgba(251,191,36,0.3)] animate-pulse' : 'bg-white/5 border border-white/10 text-slate-400 hover:bg-white/10 hover:text-white'}`}
-                                                    >
-                                                        <Icon name="Sparkles" size={16} fill={gridStarNode?.sIdx === selectedNode.sIdx && gridStarNode?.nIdx === selectedNode.nIdx ? "currentColor" : "none"} />
-                                                        {gridStarNode?.sIdx === selectedNode.sIdx && gridStarNode?.nIdx === selectedNode.nIdx ? "Grid Star" : "Set Grid Star"}
+                                                        <Icon name="Flag" size={14} fill={flaggedNodes[getNodeKey(selectedNode.sIdx, selectedNode.nIdx)] ? "currentColor" : "none"} />
+                                                        {flaggedNodes[getNodeKey(selectedNode.sIdx, selectedNode.nIdx)] ? "Work Flag Active" : "Set Work Flag"}
                                                     </button>
                                                 </div>
                                             </div>
@@ -1038,7 +1077,7 @@
                                         </div>
                                         <button onClick={() => { setShowResetConfirm(true); setResetConfirmInput(""); }}
                                             className="mt-2 text-[10px] text-slate-600 hover:text-red-400 font-bold uppercase tracking-widest transition-colors flex items-center justify-center gap-2 py-2">
-                                            <Icon name="RefreshCcw" size={10} /> Initialize New Web
+                                            <Icon name="RefreshCcw" size={10} /> Initialise New Web
                                         </button>
                                     </div>
                                     <div className="pb-8 opacity-50 hover:opacity-80 transition-opacity text-center">
@@ -1061,7 +1100,7 @@
                                 <div className="space-y-8">
                                     <div className="text-center space-y-2">
 <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-600/20">
-  <Icon name="Network" size={22} className="text-white" />
+  <OrreryIcon size={22} className="text-white" />
 </div>
 
 
