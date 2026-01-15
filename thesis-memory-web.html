@@ -693,25 +693,26 @@
                 saveData({ gridStarNode: newGridStar });
             };
 
-const toggleFlagNode = (sIdx, nIdx) => {
-    const key = getNodeKey(sIdx, nIdx);
-    const currentFlagged = { ...(flaggedNodes || {}) }; // Create a fresh copy
-    const isFlagged = !!currentFlagged[key];
-    
-    if (isFlagged) {
-        delete currentFlagged[key]; // Direct deletion
-    } else {
-        if (Object.keys(currentFlagged).length >= 16) {
-            setErrorMessage("Maximum 16 flags allowed.");
-            setTimeout(() => setErrorMessage(null), 3000);
-            return;
-        }
-        currentFlagged[key] = true;
-    }
-    
-    setFlaggedNodes(currentFlagged);
-    saveData({ flaggedNodes: currentFlagged });
-};
+            const toggleFlagNode = (sIdx, nIdx) => {
+                const key = getNodeKey(sIdx, nIdx);
+                const newFlaggedNodes = { ...(flaggedNodes || {}) };
+                const isFlagged = !!newFlaggedNodes[key];
+                
+                if (isFlagged) {
+                    delete newFlaggedNodes[key];
+                } else {
+                    // Check limit
+                    if (Object.keys(newFlaggedNodes).length >= 16) {
+                        setErrorMessage("Maximum 16 flags allowed.");
+                        setTimeout(() => setErrorMessage(null), 3000);
+                        return;
+                    }
+                    newFlaggedNodes[key] = true;
+                }
+                
+                setFlaggedNodes(newFlaggedNodes);
+                saveData({ flaggedNodes: newFlaggedNodes });
+            };
 
             const toggleColorPicker = (e, index) => { e.stopPropagation(); setActiveColorPicker(activeColorPicker === index ? null : index); };
             const adjustFontSize = (dir) => {
