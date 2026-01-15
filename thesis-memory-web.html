@@ -98,7 +98,8 @@
         const auth = firebase.auth();
         const db = firebase.firestore();
 
-        const Icon = ({ name, size = 16, className = "", fill = "none" }) => {
+        // Optimized Icon component with memoization to prevent unnecessary DOM work
+        const Icon = React.memo(({ name, size = 16, className = "", fill = "none" }) => {
             const iconRef = useRef(null);
             useEffect(() => {
                 if (window.lucide && iconRef.current) {
@@ -115,9 +116,10 @@
                 }
             }, [name, size, className, fill]);
             return <span ref={iconRef} className="flex items-center justify-center leading-none shrink-0" />;
-        };
+        });
 
-        const OrreryIcon = ({ size = 22, className = "" }) => (
+        // Optimized Orrery Icon
+        const OrreryIcon = React.memo(({ size = 22, className = "" }) => (
             <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
                 <g transform="rotate(-45 12 12)">
                     {/* Central Planet */}
@@ -139,7 +141,7 @@
                     <circle cx="23.5" cy="12" r="0.8" fill="currentColor" stroke="none" />
                 </g>
             </svg>
-        );
+        ));
 
         // Isolated Clock Component to prevent full App re-renders
         const Clock = ({ timezoneOffset, onAdjust }) => {
@@ -167,7 +169,7 @@
         };
 
         const App = () => {
-            // Main app state - Time removed from here to prevent re-renders
+            // Main app state - REMOVED the 'time' state and interval from here to fix CPU usage
             const [user, setUser] = useState(null);
             const [loading, setLoading] = useState(true);
             const [saveStatus, setSaveStatus] = useState('synced');
@@ -258,6 +260,8 @@
                 "🔵": "Texts: scholarly ref.", "🔗": "Texts: explicit linkage", "🌐": "Texts: networked discourse", "⚙️": "Texts: Methodological operation",
                 "🟣": "Data: key analytical data", "🌸": "Data: culturally significant data", "❤️": "Data: effective or identity data", "🩸": "Data: high-stakes"
             };
+
+            // REMOVED the useEffect interval that was updating 'time' every second
 
             const handleClockClick = (e) => {
                 // Shift click to decrement, regular click to increment
