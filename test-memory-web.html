@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en"> 
     <head>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🪐</text></svg>">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧬</text></svg>">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Thesis Memory Web</title>
@@ -98,7 +98,7 @@
         const auth = firebase.auth();
         const db = firebase.firestore();
 
-        const Icon = ({ name, size = 16, className = "" }) => {
+        const Icon = ({ name, size = 16, className = "", fill = "none" }) => {
             const iconRef = useRef(null);
             useEffect(() => {
                 if (window.lucide && iconRef.current) {
@@ -107,12 +107,13 @@
                     const kebabName = name.replace(/([a-z0-9]|(?=[A-Z]))([A-Z])/g, '$1-$2').toLowerCase().replace(/^-/, '');
                     i.setAttribute('data-lucide', kebabName);
                     if (className) i.setAttribute('class', className);
+                    i.setAttribute('fill', fill); // Pass fill prop
                     i.style.width = size + 'px';
                     i.style.height = size + 'px';
                     iconRef.current.appendChild(i);
                     window.lucide.createIcons();
                 }
-            }, [name, size, className]);
+            }, [name, size, className, fill]);
             return <span ref={iconRef} className="flex items-center justify-center leading-none shrink-0" />;
         };
 
@@ -138,6 +139,8 @@
 
             const [hoveredNodeKey, setHoveredNodeKey] = useState(null);
             const [hoveredSymbol, setHoveredSymbol] = useState(null);
+            const [starredNodes, setStarredNodes] = useState({}); // { [sectionId]: nodeIndex }
+            const [gridStarNode, setGridStarNode] = useState(null); // { sIdx, nIdx }
 
             const [showAuthModal, setShowAuthModal] = useState(false);
             const [showAboutModal, setShowAboutModal] = useState(false);
@@ -254,6 +257,8 @@
                         if (data.sectionColors) setSectionColors(data.sectionColors);
                         if (data.titleFontSize) setTitleFontSize(data.titleFontSize);
                         if (data.grayscaleMode !== undefined) setGrayscaleMode(data.grayscaleMode);
+                        if (data.starredNodes) setStarredNodes(data.starredNodes);
+                        if (data.gridStarNode) setGridStarNode(data.gridStarNode);
                     }
                     setLoading(false);
                 }, (err) => {
@@ -279,6 +284,8 @@
                         sectionColors: updates.sectionColors !== undefined ? updates.sectionColors : sectionColors,
                         titleFontSize: updates.titleFontSize !== undefined ? updates.titleFontSize : titleFontSize,
                         grayscaleMode: updates.grayscaleMode !== undefined ? updates.grayscaleMode : grayscaleMode,
+                        starredNodes: updates.starredNodes !== undefined ? updates.starredNodes : starredNodes,
+                        gridStarNode: updates.gridStarNode !== undefined ? updates.gridStarNode : gridStarNode,
                         lastUpdated: new Date().toISOString()
                     };
 
@@ -292,8 +299,8 @@
 
             const exportData = () => {
                 const dataToExport = {
-                    version: "0.24", timestamp: new Date().toISOString(),
-                    payload: { nodesData, sectionTitles, connections, sectionOrder, sectionColors, titleFontSize, grayscaleMode }
+                    version: "0.26", timestamp: new Date().toISOString(),
+                    payload: { nodesData, sectionTitles, connections, sectionOrder, sectionColors, titleFontSize, grayscaleMode, starredNodes, gridStarNode }
                 };
                 const blob = new Blob([JSON.stringify(dataToExport, null, 2)], { type: 'application/json' });
                 const url = URL.createObjectURL(blob);
@@ -314,9 +321,16 @@
                     for(let nIdx=0; nIdx<8; nIdx++) {
                         const key = getNodeKey(sIdx, nIdx);
                         const data = nodesData[key];
-                        if (data?.concept || data?.notes) {
+                        const isStarred = starredNodes[sIdx] === nIdx;
+                        const isGridStar = gridStarNode?.sIdx === sIdx && gridStarNode?.nIdx === nIdx;
+                        
+                        if (data?.concept || data?.notes || isStarred || isGridStar) {
                             hasContent = true;
-                            md += `### Node ${getGlobalIndex(sIdx, nIdx)}: ${data.emoji || ''} ${data.concept || 'Untitled'}\n`;
+                            let prefix = "";
+                            if (isGridStar) prefix += "★ (GRID STAR) ";
+                            if (isStarred) prefix += "★ (CLUSTER STAR) ";
+
+                            md += `### Node ${getGlobalIndex(sIdx, nIdx)}: ${prefix}${data.emoji || ''} ${data.concept || 'Untitled'}\n`;
                             if (data.citation) md += `**Citation:** ${data.citation}\n\n`;
                             if (data.notes) md += `**Notes:**\n${data.notes}\n\n`;
                             
@@ -376,6 +390,8 @@
             <attribute id="1" title="Citation" type="string"/>
             <attribute id="2" title="Notes" type="string"/>
             <attribute id="3" title="Emoji" type="string"/>
+            <attribute id="4" title="IsClusterStar" type="boolean"/>
+            <attribute id="5" title="IsGridStar" type="boolean"/>
         </attributes>
         <nodes>`;
                 
@@ -384,9 +400,11 @@
                     for(let n=0; n<8; n++) {
                         const key = getNodeKey(s, n);
                         const data = nodesData[key];
-                        // Export if it has content OR is connected
                         const isConnected = connections.some(c => c.includes(key));
-                        if ((data && (data.concept || data.notes || data.emoji)) || isConnected) {
+                        const isStarred = starredNodes[s] === n;
+                        const isGridStar = gridStarNode?.sIdx === s && gridStarNode?.nIdx === n;
+                        
+                        if ((data && (data.concept || data.notes || data.emoji)) || isConnected || isStarred || isGridStar) {
                             const label = data?.concept ? escapeXML(data.concept) : `Node ${getGlobalIndex(s, n)}`;
                             const clusterName = escapeXML(sectionTitles[s]);
                             const citation = escapeXML(data?.citation);
@@ -401,9 +419,11 @@
                     <attvalue for="1" value="${citation}"/>
                     <attvalue for="2" value="${notes}"/>
                     <attvalue for="3" value="${emoji}"/>
+                    <attvalue for="4" value="${isStarred}"/>
+                    <attvalue for="5" value="${isGridStar}"/>
                 </attvalues>
                 <viz:color r="${rgb.r}" g="${rgb.g}" b="${rgb.b}"/>
-                <viz:size value="10.0"/>
+                <viz:size value="${isGridStar ? '20.0' : (isStarred ? '15.0' : '10.0')}"/>
             </node>`;
                         }
                     }
@@ -454,11 +474,13 @@
 
             const applyImport = () => {
                 if (!showImportConfirm) return;
-                const { nodesData, sectionTitles, connections, sectionOrder, sectionColors, titleFontSize, grayscaleMode } = showImportConfirm;
+                const { nodesData, sectionTitles, connections, sectionOrder, sectionColors, titleFontSize, grayscaleMode, starredNodes, gridStarNode } = showImportConfirm;
                 setNodesData(nodesData); setSectionTitles(sectionTitles); setConnections(connections); setSectionOrder(sectionOrder);
                 if (sectionColors) setSectionColors(sectionColors); setTitleFontSize(titleFontSize);
                 if (grayscaleMode !== undefined) setGrayscaleMode(grayscaleMode);
-                saveData({ nodesData, sectionTitles, connections, sectionOrder, sectionColors, titleFontSize, grayscaleMode });
+                if (starredNodes !== undefined) setStarredNodes(starredNodes);
+                if (gridStarNode !== undefined) setGridStarNode(gridStarNode);
+                saveData({ nodesData, sectionTitles, connections, sectionOrder, sectionColors, titleFontSize, grayscaleMode, starredNodes, gridStarNode });
                 setShowImportConfirm(null); setSelectedNode(null);
             };
 
@@ -470,11 +492,13 @@
                     sectionOrder: [0, 1, 2, 3, 4, 5, 6, 7],
                     sectionColors: ["blue", "emerald", "amber", "purple", "blue", "emerald", "amber", "purple"],
                     titleFontSize: 10,
-                    grayscaleMode: false
+                    grayscaleMode: false,
+                    starredNodes: {},
+                    gridStarNode: null
                 };
                 setNodesData(blankData.nodesData); setConnections(blankData.connections); setSectionTitles(blankData.sectionTitles);
                 setSectionOrder(blankData.sectionOrder); setSectionColors(blankData.sectionColors); setTitleFontSize(blankData.titleFontSize);
-                setGrayscaleMode(blankData.grayscaleMode);
+                setGrayscaleMode(blankData.grayscaleMode); setStarredNodes(blankData.starredNodes); setGridStarNode(blankData.gridStarNode);
                 saveData(blankData); setShowResetConfirm(false); setResetConfirmInput(""); setSelectedNode(null);
             };
 
@@ -559,6 +583,21 @@
                 const newColors = [...sectionColors]; newColors[index] = color;
                 setSectionColors(newColors); saveData({ sectionColors: newColors }); setActiveColorPicker(null);
             };
+            
+            const toggleStarNode = (sIdx, nIdx) => {
+                const currentStar = starredNodes[sIdx];
+                const newStar = currentStar === nIdx ? null : nIdx; // Toggle off if same, else set new
+                const newStarredNodes = { ...starredNodes, [sIdx]: newStar };
+                setStarredNodes(newStarredNodes);
+                saveData({ starredNodes: newStarredNodes });
+            };
+
+            const toggleGridStar = (sIdx, nIdx) => {
+                const isCurrentGridStar = gridStarNode && gridStarNode.sIdx === sIdx && gridStarNode.nIdx === nIdx;
+                const newGridStar = isCurrentGridStar ? null : { sIdx, nIdx };
+                setGridStarNode(newGridStar);
+                saveData({ gridStarNode: newGridStar });
+            };
 
             const toggleColorPicker = (e, index) => { e.stopPropagation(); setActiveColorPicker(activeColorPicker === index ? null : index); };
             const adjustFontSize = (dir) => {
@@ -586,7 +625,7 @@
                                 <Icon name="Network" size={22} className="text-white" />
                             </div>
                             <div className="flex flex-col">
-                                <h1 className="text-sm font-bold tracking-widest uppercase text-slate-200">Thesis Memory Web v0.4 🌌</h1>
+                                <h1 className="text-sm font-bold tracking-widest uppercase text-slate-200">Thesis Memory Web v0.3 🌌</h1>
                                 <div className="flex items-center gap-2 mt-0.5">
                                     <div className="flex items-center gap-1.5 shrink-0">
                                         <button onClick={() => adjustFontSize(-1)} className="w-5 h-5 flex items-center justify-center bg-white/5 hover:bg-white/10 rounded border border-white/10 text-xs transition-transform active:scale-90">-</button>
@@ -717,7 +756,10 @@
                                                         const conceptText = nodesData[key]?.concept || "";
                                                         const emoji = nodesData[key]?.emoji;
                                                         const isLinked = connections.some(c => c.includes(key));
+                                                        const linkCount = connections.filter(c => c.includes(key)).length;
                                                         const isLinkingSource = linkingNode === key;
+                                                        const isStarred = starredNodes[sectionId] === nIdx;
+                                                        const isGridStar = gridStarNode?.sIdx === sectionId && gridStarNode?.nIdx === nIdx;
 
                                                         const isSearchMatch = searchQuery && (
                                                             conceptText.toLowerCase().includes(searchQuery.toLowerCase()) || 
@@ -743,7 +785,17 @@
                                                                         <div className={`w-2 h-2 rounded-full transition-all duration-500 ${hasConcept ? theme.dot : 'bg-slate-600'}`} />
                                                                     )}
                                                                 </div>
-                                                                {isLinked && <div className="absolute inset-2 rounded-xl border border-indigo-500/50 pointer-events-none" />}
+                                                                {isStarred && <div className="absolute top-0.5 right-0.5 text-amber-400"><Icon name="Star" size={10} fill="currentColor" /></div>}
+                                                                {isGridStar && <div className="absolute top-0.5 left-0.5 text-amber-400 animate-pulse"><Icon name="Sparkles" size={12} fill="currentColor" /></div>}
+                                                                {isLinked && (
+                                                                    <div 
+                                                                        className="absolute inset-2 rounded-xl border pointer-events-none transition-all duration-500" 
+                                                                        style={{ 
+                                                                            borderColor: `rgba(99, 102, 241, ${Math.min(0.2 + (linkCount * 0.12), 0.85)})`,
+                                                                            borderWidth: linkCount > 4 ? '1.5px' : '1px'
+                                                                        }} 
+                                                                    />
+                                                                )}
                                                                 {hoveredNodeKey === key && conceptText && (
                                                                     <div className="absolute bottom-full mb-3 left-1/2 -translate-x-1/2 px-4 py-3 bg-[#000000] border border-indigo-500/40 rounded-xl shadow-2xl z-[200] pointer-events-none backdrop-blur-xl tooltip-animate text-center ring-1 ring-white/5" 
                                                                          style={{ 
@@ -778,8 +830,29 @@
                                         <div className="flex flex-col gap-8 animate-in slide-in-from-right duration-300">
                                             <div>
                                                 <div className="text-[12px] text-indigo-400 uppercase font-bold tracking-widest mb-1">Node {getGlobalIndex(selectedNode.sIdx, selectedNode.nIdx)}</div>
-                                                <h2 className="text-2xl lg:text-3xl font-thin text-white tracking-tight leading-none">Memory Node Detail</h2>
+                                                <h2 className="text-2xl lg:text-3xl font-thin text-white tracking-tight leading-none mb-4">Memory Node Detail</h2>
+                                                
+                                                <div className="grid grid-cols-2 gap-3">
+                                                    {/* Cluster Star Toggle */}
+                                                    <button 
+                                                        onClick={() => toggleStarNode(selectedNode.sIdx, selectedNode.nIdx)}
+                                                        className={`w-full py-3 px-3 rounded-xl font-bold text-[10px] uppercase tracking-widest flex flex-col items-center justify-center gap-2 transition-all ${starredNodes[selectedNode.sIdx] === selectedNode.nIdx ? 'bg-amber-500/10 border border-amber-500/50 text-amber-400 shadow-[0_0_15px_rgba(245,158,11,0.2)]' : 'bg-white/5 border border-white/10 text-slate-400 hover:bg-white/10 hover:text-white'}`}
+                                                    >
+                                                        <Icon name="Star" size={16} fill={starredNodes[selectedNode.sIdx] === selectedNode.nIdx ? "currentColor" : "none"} />
+                                                        {starredNodes[selectedNode.sIdx] === selectedNode.nIdx ? "Cluster Star" : "Set Cluster Star"}
+                                                    </button>
+                                                    
+                                                    {/* Grid Star Toggle */}
+                                                    <button 
+                                                        onClick={() => toggleGridStar(selectedNode.sIdx, selectedNode.nIdx)}
+                                                        className={`w-full py-3 px-3 rounded-xl font-bold text-[10px] uppercase tracking-widest flex flex-col items-center justify-center gap-2 transition-all ${gridStarNode?.sIdx === selectedNode.sIdx && gridStarNode?.nIdx === selectedNode.nIdx ? 'bg-amber-500/20 border border-amber-400 text-amber-300 shadow-[0_0_20px_rgba(251,191,36,0.3)] animate-pulse' : 'bg-white/5 border border-white/10 text-slate-400 hover:bg-white/10 hover:text-white'}`}
+                                                    >
+                                                        <Icon name="Sparkles" size={16} fill={gridStarNode?.sIdx === selectedNode.sIdx && gridStarNode?.nIdx === selectedNode.nIdx ? "currentColor" : "none"} />
+                                                        {gridStarNode?.sIdx === selectedNode.sIdx && gridStarNode?.nIdx === selectedNode.nIdx ? "Grid Star" : "Set Grid Star"}
+                                                    </button>
+                                                </div>
                                             </div>
+
                                             <div className="flex flex-col gap-6">
                                                 <div className="flex flex-col gap-2 p-4 bg-white/5 rounded-2xl border border-white/5 group hover:border-white/10 transition-colors">
                                                     <label className="text-[9px] text-slate-500 uppercase font-bold tracking-widest flex items-center gap-2"><Icon name="Edit3" size={12} className="text-slate-400" /> Cluster Name</label>
@@ -899,7 +972,7 @@
 </div>
 
 
-                                        <h3 className="text-2xl font-thin tracking-tight text-white mt-4">Thesis Memory Web</h3>
+                                        <h3 className="text-2xl font-thin tracking-tight text-white mt-4">Thesis Memory Web v0.3</h3>
                                         <p className="text-[10px] text-indigo-400 uppercase font-black tracking-widest">Cognitive Mapping Interface</p>
                                     </div>
                                     <div className="space-y-6 text-sm text-slate-400 leading-relaxed max-h-[40vh] overflow-y-auto pr-2 custom-scrollbar">
@@ -936,6 +1009,7 @@
                                             <h4 className="text-white font-bold uppercase text-[11px] tracking-widest border-b border-white/5 pb-1">Key Interactions</h4>
                                             <ul className="list-disc pl-4 space-y-1">
                                                 <li><strong className="text-slate-200">Semantic Taxonomy:</strong> Categorise concepts using theoretical, textual, and data-driven symbols.</li>
+                                                <li><strong className="text-slate-200">Cluster Stars:</strong> Star one node per cluster to designate the single critical "must-know" concept for your defence.</li>
                                                 <li><strong className="text-slate-200">Logical Threads:</strong> Create bidirectional invisible links between memory nodes across 8 clusters and 64 nodes.</li>
                                                 <li><strong className="text-slate-200">Cloud Sync:</strong> Persistent state management via Google Firestore with local backup options.</li>
                                                 <li><strong className="text-slate-200">Narrative Linearisation:</strong> Export your web as a structured Markdown outline.</li>
