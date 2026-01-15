@@ -792,7 +792,7 @@
                                                                         className="absolute inset-2 rounded-xl border pointer-events-none transition-all duration-500" 
                                                                         style={{ 
                                                                             borderColor: `rgba(99, 102, 241, ${Math.min(0.2 + (linkCount * 0.12), 0.85)})`,
-                                                                            borderWidth: linkCount > 4 ? '1.5px' : '1px'
+                                                                            borderWidth: `${Math.min(1 + (linkCount * 0.3), 3)}px`
                                                                         }} 
                                                                     />
                                                                 )}
