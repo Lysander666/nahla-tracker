@@ -117,8 +117,57 @@
             return <span ref={iconRef} className="flex items-center justify-center leading-none shrink-0" />;
         };
 
-        const App = () => {
+        const OrreryIcon = ({ size = 22, className = "" }) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                <g transform="rotate(-45 12 12)">
+                    {/* Central Planet */}
+                    <circle cx="12" cy="12" r="3.2" fill="currentColor" stroke="none" />
+                    
+                    {/* Planet Ring (Immediate) - Rotated to be angled upwards to right */}
+                    <ellipse cx="12" cy="12" rx="6" ry="1.5" stroke="currentColor" transform="rotate(20 12 12)" />
+                    
+                    {/* Inner Moon Orbital Path */}
+                    <ellipse cx="12" cy="12" rx="8" ry="2.8" className="opacity-30" />
+                    
+                    {/* Outer Moon Orbital Path */}
+                    <ellipse cx="12" cy="12" rx="11.5" ry="5" className="opacity-30" />
+                    
+                    {/* Moon 1 (Inner Orbit, Left) */}
+                    <circle cx="4" cy="12" r="1.2" fill="currentColor" stroke="none" />
+                    
+                    {/* Moon 2 (Outer Orbit, Right) */}
+                    <circle cx="23.5" cy="12" r="0.8" fill="currentColor" stroke="none" />
+                </g>
+            </svg>
+        );
+
+        // Isolated Clock Component to prevent full App re-renders
+        const Clock = ({ timezoneOffset, onAdjust }) => {
             const [time, setTime] = useState(new Date());
+
+            useEffect(() => {
+                const timer = setInterval(() => setTime(new Date()), 1000);
+                return () => clearInterval(timer);
+            }, []);
+
+            const displayTime = new Date(time.getTime() + timezoneOffset * 3600000);
+            const timeString = displayTime.toLocaleTimeString('en-GB', { 
+                timeZone: 'UTC', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false 
+            });
+            const timeLabel = timezoneOffset === 0 ? "GMT/UTC" : `UTC ${timezoneOffset > 0 ? '+' : ''}${timezoneOffset}`;
+
+            return (
+                <div className="flex flex-col items-end pr-4 border-r border-white/10">
+                    <span className="text-[8px] text-slate-600 uppercase font-bold tracking-widest">{timeLabel}</span>
+                    <button onClick={onAdjust} className="text-[12px] text-cyan-400 font-mono font-bold tracking-tighter hover:text-cyan-200 transition-colors" title="Click to adjust time (+1hr)">
+                        {timeString}
+                    </button>
+                </div>
+            );
+        };
+
+        const App = () => {
+            // Main app state - Time removed from here to prevent re-renders
             const [user, setUser] = useState(null);
             const [loading, setLoading] = useState(true);
             const [saveStatus, setSaveStatus] = useState('synced');
@@ -209,18 +258,6 @@
                 "🔵": "Texts: scholarly ref.", "🔗": "Texts: explicit linkage", "🌐": "Texts: networked discourse", "⚙️": "Texts: Methodological operation",
                 "🟣": "Data: key analytical data", "🌸": "Data: culturally significant data", "❤️": "Data: effective or identity data", "🩸": "Data: high-stakes"
             };
-
-            useEffect(() => {
-                const timer = setInterval(() => setTime(new Date()), 1000);
-                return () => clearInterval(timer);
-            }, []);
-
-            // Timezone Display Logic
-            const displayTime = new Date(time.getTime() + timezoneOffset * 3600000);
-            const timeString = displayTime.toLocaleTimeString('en-GB', { 
-                timeZone: 'UTC', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false 
-            });
-            const timeLabel = timezoneOffset === 0 ? "GMT/UTC" : `UTC ${timezoneOffset > 0 ? '+' : ''}${timezoneOffset}`;
 
             const handleClockClick = (e) => {
                 // Shift click to decrement, regular click to increment
@@ -724,12 +761,8 @@
                                 </div>
                             </button>
 
-                            <div className="flex flex-col items-end pr-4 border-r border-white/10">
-                                <span className="text-[8px] text-slate-600 uppercase font-bold tracking-widest">{timeLabel}</span>
-                                <button onClick={handleClockClick} className="text-[12px] text-cyan-400 font-mono font-bold tracking-tighter hover:text-cyan-200 transition-colors" title="Click to adjust time (+1hr)">
-                                    {timeString}
-                                </button>
-                            </div>
+                            <Clock timezoneOffset={timezoneOffset} onAdjust={handleClockClick} />
+
                             <div className="flex items-center gap-4">
                                 {user && !user.isAnonymous ? (
                                     <div className="flex items-center gap-3 text-right">
