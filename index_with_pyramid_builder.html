@@ -1223,7 +1223,7 @@ if (container && sourceEl) {
                     )}
 
                     <main className="flex-1 flex overflow-hidden">
-                        {activeTab === \'workspace\' ? (
+                       {activeTab === 'workspace' ? (
                         <section className={`flex-1 relative node-grid-bg workspace-container ${draggedIndex !== null ? 'dragging-active' : ''}`}>
                             <div id="scaling-wrapper" style={{ transform: `scale(${scale})`, marginTop: `${topMargin}px` }} onClick={(e) => e.stopPropagation()}>
                                 <div id="grid-container" className="grid grid-cols-2 gap-8 p-10 bg-black/40 rounded-[4rem] border border-white/5 backdrop-blur-md shadow-2xl relative">
