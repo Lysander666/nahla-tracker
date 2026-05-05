@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>University Portal - Thesis Submission</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            /* Standard boring dark mode background */
+            background-color: #09090b; /* zinc-950 */
+            color: #d4d4d8; /* zinc-300 */
+            overflow-x: hidden;
+            overflow-y: scroll; /* Force vertical scrollbar */
+            font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            transition: background-color 0.1s ease-out;
+        }
+
+        /* Prevent text selection on rapid clicking */
+        .no-select {
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .emoji-particle {
+            position: absolute;
+            pointer-events: none;
+            font-size: 2rem;
+            will-change: transform, opacity;
+            z-index: 50;
+        }
+
+        /* Standard boring portal button that gets slightly smaller when mashed */
+        .portal-btn {
+            transition: transform 0.05s, background-color 0.2s;
+        }
+
+        .portal-btn:active {
+            transform: scale(0.96);
+        }
+
+        /* Screen shake animation for intense mashing */
+        @keyframes shake {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            10% { transform: translate(-1px, -2px) rotate(-1deg); }
+            20% { transform: translate(-3px, 0px) rotate(1deg); }
+            30% { transform: translate(3px, 2px) rotate(0deg); }
+            40% { transform: translate(1px, -1px) rotate(1deg); }
+            50% { transform: translate(-1px, 2px) rotate(-1deg); }
+            60% { transform: translate(-3px, 1px) rotate(0deg); }
+            70% { transform: translate(3px, 1px) rotate(-1deg); }
+            80% { transform: translate(-1px, -1px) rotate(1deg); }
+            90% { transform: translate(1px, 2px) rotate(0deg); }
+            100% { transform: translate(1px, -2px) rotate(-1deg); }
+        }
+        
+        .shake-active {
+            animation: shake 0.2s;
+            animation-iteration-count: infinite;
+        }
+
+        #combo-container {
+            transition: transform 0.1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        /* Outlines to make text pop over emojis */
+        .text-outline {
+            text-shadow: -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000, 0 4px 8px rgba(0,0,0,0.8);
+        }
+
+        .gradient-outline {
+            filter: drop-shadow(2px 0px 0px #000) drop-shadow(-2px 0px 0px #000) drop-shadow(0px 2px 0px #000) drop-shadow(0px -2px 0px #000);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col relative w-full" id="main-body">
+
+    <!-- Fake University Portal Navigation -->
+    <header class="bg-[#18181b] border-b border-[#27272a] px-6 py-3 flex justify-between items-center z-10 w-full no-select">
+        <div class="flex items-center gap-3">
+            <div class="bg-blue-900 text-blue-200 p-2 rounded-md font-serif font-bold text-xl leading-none">
+                U
+            </div>
+            <div>
+                <h1 class="text-zinc-100 font-semibold text-lg leading-tight">University Submissions Portal</h1>
+                <div class="text-xs text-zinc-500 font-mono">SYS_ENV: PROD // SECURE</div>
+            </div>
+        </div>
+        <div class="text-sm text-zinc-400 flex items-center gap-4 hidden sm:flex">
+            <span>Logged in as: <strong>Candidate 08442</strong></span>
+            <span class="px-2 py-1 bg-zinc-800 rounded text-xs border border-zinc-700">Logout</span>
+        </div>
+    </header>
+
+    <!-- Fake Breadcrumbs -->
+    <div class="w-full bg-[#09090b] border-b border-[#27272a] px-6 py-2 text-xs text-blue-400 z-10 no-select">
+        Dashboard > Postgraduate > Doctoral Milestones > <span class="text-zinc-500">Step 4: Final Upload</span>
+    </div>
+
+    <!-- Main Portal Content -->
+    <main class="flex-grow flex items-center justify-center p-4 z-10 relative">
+        <div class="bg-[#18181b] border border-[#27272a] rounded-lg shadow-2xl p-6 sm:p-10 max-w-2xl w-full" id="portal-panel">
+            
+            <div class="mb-6 border-b border-[#27272a] pb-4">
+                <h2 class="text-2xl font-semibold text-zinc-100">Step 4: Final Document Submission</h2>
+                <p class="text-sm text-zinc-400 mt-2">Please review your attached document before final confirmation. This action cannot be undone.</p>
+            </div>
+
+            <!-- Fake File Info -->
+            <div class="space-y-3 mb-8">
+                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center p-3 bg-[#09090b] rounded border border-[#27272a]">
+                    <span class="text-zinc-400 text-sm mb-1 sm:mb-0">Attached File:</span>
+                    <span class="font-mono text-emerald-400 text-sm break-all flex items-center gap-2">
+                        📄 thesis_final_v14_FINAL_USE_THIS_ONE.pdf
+                    </span>
+                </div>
+                <div class="flex justify-between items-center p-3 bg-[#09090b] rounded border border-[#27272a]">
+                    <span class="text-zinc-400 text-sm">Plagiarism Check (Turnitin):</span>
+                    <span class="text-emerald-400 text-sm font-medium">Passed (1.2%)</span>
+                </div>
+                <div class="flex justify-between items-center p-3 bg-[#09090b] rounded border border-[#27272a]">
+                    <span class="text-zinc-400 text-sm">Formatting Guidelines:</span>
+                    <span class="text-emerald-400 text-sm font-medium">Verified</span>
+                </div>
+            </div>
+
+            <!-- Fake Declarations -->
+            <div class="space-y-4 mb-8 text-sm text-zinc-300">
+                <label class="flex items-start gap-3 cursor-pointer group">
+                    <input type="checkbox" id="declaration1" class="mt-1 bg-zinc-900 border-zinc-600 rounded text-blue-600 focus:ring-blue-500 w-4 h-4 transition-colors cursor-pointer">
+                    <span class="group-hover:text-zinc-100 transition-colors">I confirm that this is my original work and I have cited all relevant sources.</span>
+                </label>
+                <label class="flex items-start gap-3 cursor-pointer group">
+                    <input type="checkbox" id="declaration2" class="mt-1 bg-zinc-900 border-zinc-600 rounded text-blue-600 focus:ring-blue-500 w-4 h-4 transition-colors cursor-pointer">
+                    <span class="group-hover:text-zinc-100 transition-colors">I never want to read another paper by Greg Gimmble IV again in my entire life.</span>
+                </label>
+            </div>
+
+            <!-- The Button -->
+            <div class="flex flex-col items-center pt-10 border-t border-[#27272a] relative">
+                
+                <!-- Combo Counter (Moved directly above button) -->
+                <div id="combo-container" class="absolute bottom-[calc(100%-1rem)] left-0 right-0 text-center opacity-0 pointer-events-none z-[60]">
+                    <h2 class="text-3xl font-bold text-pink-400 mb-1 tracking-widest uppercase text-outline" id="combo-message">Nice!</h2>
+                    <div class="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500 gradient-outline" id="combo-count">
+                        x2
+                    </div>
+                </div>
+
+                <button id="celebrate-btn" disabled class="no-select portal-btn bg-blue-600 hover:bg-blue-500 disabled:bg-zinc-800 disabled:text-zinc-500 disabled:border-zinc-700 disabled:shadow-none disabled:cursor-not-allowed text-white font-semibold text-lg sm:text-xl py-4 px-8 rounded-md shadow-lg w-full sm:w-auto border border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-900/50 transition-all duration-300">
+                    I submitted my PhD thesis!
+                </button>
+                <p class="text-zinc-500 text-xs mt-4">
+                    Reference ID: SUB-99482-PhD
+                </p>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Fake Footer to add scrollable content -->
+    <footer class="mt-12 py-8 text-center text-xs text-zinc-600 border-t border-[#27272a] z-10 bg-[#09090b] w-full">
+        <p>&copy; 2026 University Submissions System. All rights reserved.</p>
+        <p class="mt-1">For technical support, please submit a ticket and wait 3-5 business days for a response.</p>
+    </footer>
+
+    <!-- Container for emoji particles -->
+    <div id="particle-container" class="fixed inset-0 pointer-events-none overflow-hidden z-50"></div>
+
+    <!-- Mute Button (Hidden initially) -->
+    <button id="mute-btn" class="fixed bottom-4 right-4 px-5 py-3 rounded-full bg-zinc-800/90 text-zinc-300 hover:bg-zinc-700 hover:text-white transition-colors z-[70] hidden no-select shadow-xl border border-zinc-600 backdrop-blur-md font-medium">
+        🔊 Music On
+    </button>
+
+    <script>
+        const button = document.getElementById('celebrate-btn');
+        const container = document.getElementById('particle-container');
+        const body = document.getElementById('main-body');
+        const portalPanel = document.getElementById('portal-panel');
+        const comboContainer = document.getElementById('combo-container');
+        const comboCountEl = document.getElementById('combo-count');
+        const comboMessageEl = document.getElementById('combo-message');
+        const muteBtn = document.getElementById('mute-btn');
+        const declaration1 = document.getElementById('declaration1');
+        const declaration2 = document.getElementById('declaration2');
+
+        const emojis = ['🎓', '🎉', '🍾', '✨', '🥳', '📜', '🎊', '🥂', '🧠', '🐸', '⭐', '🎈'];
+        
+        let particles = [];
+        let animationFrameId;
+        
+        // Performance limit for older devices
+        const MAX_PARTICLES = 120;
+        
+        // Combo system variables
+        let clickCount = 0;
+        let lastClickTime = 0;
+        let comboTimeout;
+
+        // Messages based on combo count
+        const comboMessages = [
+            { threshold: 5, text: "KEEP GOING!" },
+            { threshold: 15, text: "DOCTOR IN THE HOUSE!" },
+            { threshold: 30, text: "UNSTOPPABLE!" },
+            { threshold: 50, text: "PEER REVIEW THIS!" },
+            { threshold: 80, text: "DEFENSE DESTROYED!" },
+            { threshold: 120, text: "NO MORE REVISIONS!" },
+            { threshold: 200, text: "ACADEMIC LEGEND!" },
+            { threshold: 300, text: "POSTDOC SECURED!" },
+            { threshold: 400, text: "TENURE TRACK!" },
+            { threshold: 500, text: "NATURE FIRST AUTHOR!" },
+            { threshold: 600, text: "DEPARTMENT CHAIR!" },
+            { threshold: 700, text: "NOBEL PRIZE NOMINEE!" },
+            { threshold: 850, text: "TRANSCENDING ACADEMIA!" },
+            { threshold: 1000, text: "1000 CLICKS?! GO TO SLEEP, DOCTOR! (NO REALLY, THAT'S IT!)" }
+        ];
+
+        // "Terrible MIDI" Audio System
+        let audioCtx;
+        let masterGain;
+        let musicPlayed = false;
+        let isMuted = false;
+        let hasSubmitted = false;
+
+        function updateButtonState() {
+            if (hasSubmitted) return;
+            button.disabled = !(declaration1.checked && declaration2.checked);
+        }
+
+        declaration1.addEventListener('change', updateButtonState);
+        declaration2.addEventListener('change', updateButtonState);
+
+        function playBadMusic() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                masterGain = audioCtx.createGain();
+                masterGain.connect(audioCtx.destination);
+                masterGain.gain.setValueAtTime(isMuted ? 0 : 1, audioCtx.currentTime);
+            }
+            
+            const notes = [
+                { f: 261.63, d: 0.2 }, { f: 261.63, d: 0.2 }, { f: 261.63, d: 0.2 }, { f: 261.63, d: 0.2 }, { f: 261.63, d: 0.4 },
+                { f: 0, d: 0.1 }, 
+                { f: 293.66, d: 0.2 }, { f: 329.63, d: 0.2 }, { f: 349.23, d: 0.2 }, { f: 329.63, d: 0.2 }, { f: 293.66, d: 0.5 },
+                { f: 0, d: 0.1 }, 
+                { f: 261.63, d: 0.2 }, { f: 293.66, d: 0.2 }, { f: 329.63, d: 0.2 }, { f: 261.63, d: 0.2 }, 
+                { f: 392.00, d: 0.4 }, { f: 349.23, d: 0.2 }, { f: 329.63, d: 0.2 }, { f: 293.66, d: 0.6 }
+            ];
+
+            let startTime = audioCtx.currentTime;
+            
+            notes.forEach(note => {
+                if (note.f > 0) {
+                    const osc1 = audioCtx.createOscillator();
+                    const osc2 = audioCtx.createOscillator(); 
+                    const gainNode = audioCtx.createGain();
+                    
+                    osc1.type = 'square';
+                    osc2.type = 'sawtooth';
+                    
+                    osc1.frequency.value = note.f + (Math.random() * 30 - 15); 
+                    osc2.frequency.value = note.f * (1 + (Math.random() * 0.08 - 0.04)); 
+                    
+                    osc1.connect(gainNode);
+                    osc2.connect(gainNode);
+                    gainNode.connect(masterGain);
+                    
+                    const jitter = (Math.random() * 0.04) - 0.02;
+                    const actualDuration = note.d + jitter;
+
+                    gainNode.gain.setValueAtTime(0.04, startTime); 
+                    gainNode.gain.setValueAtTime(0, startTime + actualDuration - 0.02);
+                    
+                    osc1.start(startTime);
+                    osc2.start(startTime);
+                    osc1.stop(startTime + actualDuration);
+                    osc2.stop(startTime + actualDuration);
+                }
+                startTime += note.d + (Math.random() * 0.05 - 0.025); 
+            });
+
+            const durationMs = (startTime - audioCtx.currentTime) * 1000;
+            setTimeout(playBadMusic, durationMs);
+        }
+
+        class Particle {
+            constructor(x, y) {
+                this.element = document.createElement('div');
+                this.element.className = 'emoji-particle';
+                this.element.innerText = emojis[Math.floor(Math.random() * emojis.length)];
+                
+                const scale = 0.5 + Math.random() * 1.5;
+                this.x = x;
+                this.y = y;
+                
+                const angle = Math.random() * Math.PI * 2;
+                const velocity = 15 + Math.random() * 25;
+                
+                this.vx = Math.cos(angle) * velocity * 0.8;
+                this.vy = (Math.sin(angle) * velocity) - 15; 
+                
+                this.rotation = Math.random() * 360;
+                this.rotationSpeed = (Math.random() - 0.5) * 20;
+                
+                this.gravity = 0.8;
+                this.friction = 0.98;
+                this.life = 1.0;
+                this.decay = 0.005 + Math.random() * 0.015;
+                this.scale = scale;
+
+                container.appendChild(this.element);
+            }
+
+            update() {
+                this.vy += this.gravity;
+                this.vx *= this.friction;
+                this.vy *= this.friction;
+                
+                this.x += this.vx;
+                this.y += this.vy;
+                
+                this.rotation += this.rotationSpeed;
+                this.life -= this.decay;
+
+                const currentScale = this.scale * (0.5 + this.life * 0.5);
+
+                this.element.style.transform = `translate(${this.x}px, ${this.y}px) rotate(${this.rotation}deg) scale(${currentScale})`;
+                this.element.style.opacity = this.life;
+
+                return this.life > 0;
+            }
+
+            remove() {
+                if (this.element.parentNode) {
+                    this.element.parentNode.removeChild(this.element);
+                }
+            }
+        }
+
+        function animate() {
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
+                if (!p.update()) {
+                    p.remove();
+                    particles.splice(i, 1);
+                }
+            }
+
+            if (particles.length > 0) {
+                animationFrameId = requestAnimationFrame(animate);
+            } else {
+                cancelAnimationFrame(animationFrameId);
+                animationFrameId = null;
+            }
+        }
+
+        function createBurst(x, y, intensity = 1) {
+            const particleCount = Math.floor(15 * intensity);
+            for (let i = 0; i < particleCount; i++) {
+                particles.push(new Particle(x, y));
+            }
+            
+            while (particles.length > MAX_PARTICLES) {
+                const oldestParticle = particles.shift();
+                oldestParticle.remove();
+            }
+            
+            if (!animationFrameId) {
+                animate();
+            }
+        }
+
+        function handleCombo() {
+            const now = Date.now();
+            
+            if (now - lastClickTime > 1500) {
+                clickCount = 0;
+            }
+            
+            clickCount++;
+            lastClickTime = now;
+
+            clearTimeout(comboTimeout);
+
+            if (clickCount > 1) {
+                comboContainer.style.opacity = '1';
+                comboCountEl.innerText = `x${clickCount}`;
+                
+                comboContainer.style.transform = 'scale(1.2)';
+                setTimeout(() => {
+                    comboContainer.style.transform = 'scale(1)';
+                }, 50);
+
+                let currentMessage = "NICE!";
+                for (const msg of comboMessages) {
+                    if (clickCount >= msg.threshold) {
+                        currentMessage = msg.text;
+                    }
+                }
+                comboMessageEl.innerText = currentMessage;
+
+                if (clickCount > 10) {
+                    body.classList.add('shake-active');
+                    setTimeout(() => body.classList.remove('shake-active'), 200);
+                }
+            }
+
+            comboTimeout = setTimeout(() => {
+                comboContainer.style.opacity = '0';
+                clickCount = 0;
+            }, 2000);
+        }
+
+        muteBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            isMuted = !isMuted;
+            muteBtn.innerText = isMuted ? '🔇 Muted' : '🔊 Music On';
+            
+            if (masterGain) {
+                masterGain.gain.setValueAtTime(isMuted ? 0 : 1, audioCtx.currentTime);
+            }
+        });
+
+        function triggerCelebration(e) {
+            if (button.disabled) return;
+            hasSubmitted = true;
+            
+            if (!musicPlayed) {
+                playBadMusic();
+                musicPlayed = true;
+                muteBtn.classList.remove('hidden');
+                
+                // Change button text and color on first click to acknowledge the achievement
+                button.innerHTML = '🎓 CONGRATULATIONS! 🎓';
+                button.classList.remove('bg-blue-600', 'hover:bg-blue-500', 'border-blue-500');
+                button.classList.add('bg-gradient-to-r', 'from-purple-600', 'to-pink-600', 'border-pink-500');
+            }
+
+            let x, y;
+            if (e.type === 'touchstart') {
+                const touch = e.touches[0];
+                x = touch.clientX;
+                y = touch.clientY;
+            } else {
+                x = e.clientX;
+                y = e.clientY;
+            }
+
+            // Keyboard fallback
+            if (x === 0 && y === 0) {
+                const rect = button.getBoundingClientRect();
+                x = rect.left + rect.width / 2;
+                y = rect.top + rect.height / 2;
+            }
+
+            const intensity = Math.min(3, 1 + (clickCount * 0.05));
+            createBurst(x, y, intensity);
+            handleCombo();fne
+
+            // Flash the drab background to neon purple momentarily
+            body.style.backgroundColor = '#3b0764'; // purple-950
+            portalPanel.style.borderColor = '#d946ef'; // fuchsia-500
+            
+            setTimeout(() => {
+                body.style.backgroundColor = ''; // Reverts to CSS default
+                portalPanel.style.borderColor = ''; // Reverts to CSS default
+            }, 100);
+        }
+
+        button.addEventListener('click', triggerCelebration);
+        
+        button.addEventListener('touchstart', (e) => {
+            e.preventDefault(); 
+            if (button.disabled) return;
+            triggerCelebration(e);
+            
+            button.classList.add('scale-95');
+            setTimeout(() => button.classList.remove('scale-95'), 100);
+        });
+
+    </script>
+</body>
+</html>
