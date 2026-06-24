@@ -159,6 +159,29 @@
         </div>
       </section>
 
+      <!-- Leap Year Cycle Monitor Bar (Relocated to the bottom) -->
+      <section class="bg-[#121519] border border-[#1d2228] rounded-lg p-5 shadow-lg relative overflow-hidden">
+        <div class="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#8b5cf6] to-transparent"></div>
+        
+        <div class="flex justify-between items-center mb-3">
+          <span class="text-xs text-[#5cb6e4] font-bold uppercase tracking-widest font-sans">
+            28-Year Leap Cycle Monitor
+          </span>
+          <span id="leap-cycle-text" class="text-xs text-slate-500 font-mono">
+            Cycle Position: Year -- of 28
+          </span>
+        </div>
+        
+        <!-- Visual 28-Year Grid Indicator -->
+        <div id="leap-timeline-grid" class="grid grid-cols-7 sm:grid-cols-14 md:grid-cols-28 gap-1.5 font-mono text-[10px] text-center mb-3">
+          <!-- Populated dynamically via JS: 28 small blocks -->
+        </div>
+        
+        <p id="leap-announcement-text" class="text-xs text-slate-400 font-medium font-sans">
+          --
+        </p>
+      </section>
+
     </div>
 
   </div>
@@ -460,6 +483,61 @@
         const progressPct = (nDate.dayOfYear / nDate.totalDaysInYear) * 100;
         progressBarFill.style.width = `${progressPct}%`;
         progressionText.innerText = `Day ${nDate.dayOfYear} of ${nDate.totalDaysInYear} | ${progressPct.toFixed(2)}% orbital progression complete.`;
+      }
+
+      // --- Leap Year Cycle Monitor Integration ---
+      const currentYear = nDate.year;
+      let yearInCycle = ((currentYear - 1) % 28) + 1;
+      if (yearInCycle <= 0) {
+        yearInCycle += 28;
+      }
+      const leapYearsInCycle = [5, 11, 16, 22, 28];
+
+      document.getElementById('leap-cycle-text').innerText = `Cycle Position: Year ${yearInCycle} of 28`;
+
+      const timelineContainer = document.getElementById('leap-timeline-grid');
+      timelineContainer.innerHTML = ''; // Reset timeline grid
+
+      for (let y = 1; y <= 28; y++) {
+        const block = document.createElement('div');
+        block.innerText = y;
+        
+        const isLeapBlock = leapYearsInCycle.includes(y);
+        const isCurrentBlock = y === yearInCycle;
+        
+        if (isCurrentBlock) {
+          const activeLeap = isNahlaLeapYear(currentYear);
+          if (activeLeap) {
+            block.className = 'bg-purple-500 text-white font-bold rounded p-1 shadow-[0_0_8px_rgba(168,85,247,0.8)] border border-purple-400';
+          } else {
+            block.className = 'bg-[#5cb6e4] text-[#0d0f12] font-bold rounded p-1 shadow-[0_0_8px_rgba(92,182,228,0.8)] border border-[#5cb6e4]';
+          }
+        } else if (isLeapBlock) {
+          block.className = 'bg-purple-950/25 border border-purple-500/40 text-purple-400 rounded p-1';
+        } else {
+          block.className = 'bg-[#0f1115] border border-[#1d2228] text-slate-500 rounded p-1';
+        }
+        timelineContainer.appendChild(block);
+      }
+
+      // Compute details for the next scheduled leap year
+      let yearsUntilLeap = 0;
+      let targetLeapYear = currentYear;
+      for (let offset = 1; offset <= 28; offset++) {
+        if (isNahlaLeapYear(currentYear + offset)) {
+          yearsUntilLeap = offset;
+          targetLeapYear = currentYear + offset;
+          break;
+        }
+      }
+
+      const leapAnnouncement = document.getElementById('leap-announcement-text');
+      if (isNahlaLeapYear(currentYear)) {
+        leapAnnouncement.innerHTML = `⚠️ <span class="text-purple-400 font-bold">CRITICAL ALIGNMENT:</span> Year ${currentYear} is an active LEAP YEAR. The Festival of Kurunnītu expands to 4 days.`;
+      } else {
+        let nextLeapCycleYear = ((targetLeapYear - 1) % 28) + 1;
+        if (nextLeapCycleYear <= 0) nextLeapCycleYear += 28;
+        leapAnnouncement.innerHTML = `Next leap correction occurs in <span class="text-[#5cb6e4] font-bold">${yearsUntilLeap} year(s)</span> (Nahla Year ${targetLeapYear} / Cycle Year ${nextLeapCycleYear}).`;
       }
     }
 
