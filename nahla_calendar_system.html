@@ -4,12 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <!-- Favicons matching master tracker index layout -->
-<link rel="icon" type="image/png" sizes="16x16" href="faviconmain16.png">
-<link rel="icon" type="image/png" sizes="32x32" href="favicon32@2x.png">
-<link rel="icon" type="image/png" sizes="128x128" href="faviconmain128.png">
-<link rel="manifest" href="manifest.json">
-<link rel="icon" type="image/png" sizes="512x512" href="favicon-512.png?v=2">
-<link rel="apple-touch-icon" sizes="180x180" href="favicon-512.png?v=2">
+<link class="canvas-ignore" rel="icon" type="image/png" sizes="16x16" href="faviconmain16.png">
+<link class="canvas-ignore" rel="icon" type="image/png" sizes="32x32" href="favicon32@2x.png">
+<link class="canvas-ignore" rel="icon" type="image/png" sizes="128x128" href="faviconmain128.png">
+<link class="canvas-ignore" rel="manifest" href="manifest.json">
+<link class="canvas-ignore" rel="icon" type="image/png" sizes="512x512" href="favicon-512.png?v=2">
+<link class="canvas-ignore" rel="apple-touch-icon" sizes="180x180" href="favicon-512.png?v=2">
   <title>Nahla Calendar System</title>
   <!-- Google Fonts for the exact clean Monospace typography seen in the screenshot -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -59,7 +59,7 @@
           Nahla Calendar System
         </h1>
         <p class="text-xs text-slate-500 mt-1 uppercase tracking-wider">
-         Hypi Bra EV-P d5-78 | Orbiting Body: Rebekah (6) | Moon: Nahla (6 a)
+          System: Hypi Bra EV-P d5-78 | Orbiting Body: Rebekah (6) | Moon: Nahla (6 a)
         </p>
       </div>
       <a href="index.html" class="px-3 py-1.5 rounded border border-[#1d2228] text-xs text-slate-400 hover:text-[#5cb6e4] hover:border-[#5cb6e4] transition-all font-mono">
@@ -188,8 +188,8 @@
 
   <script>
     // Constants sourced directly from the CMDR's Elite Dangerous Journal Scans
-    // Calibration updated to: July 3, 2026, 06:58:00 UTC
-    const EPOCH_UTC = Date.UTC(2026, 6, 3, 6, 58, 0); 
+    // Calibration updated to: July 3, 2026, 03:10:11.000 UTC (Cycle #19 Midnight alignment from Drift Table)
+    const EPOCH_UTC = Date.UTC(2026, 6, 3, 3, 10, 11); 
     const ROTATION_ANCHOR_UTC = Date.UTC(2025, 6, 20, 19, 8, 49); // Scan timestamp
 
     const MONTHS_LORE = [
@@ -222,7 +222,8 @@
 
     // Main calendar logic engine supporting Year 0 backward coordinates perfectly
     function getNahlaCalendarDate(utcMillis) {
-      const DAY_MS = 86400 * 1000;
+      // 1 Nahla local day = 25h 26m 10s = 91,570 seconds
+      const DAY_MS = 91570 * 1000;
       let year, dayOfYear, msInCurrentDay, totalDaysInYear;
       
       if (utcMillis >= EPOCH_UTC) {
@@ -427,7 +428,7 @@
       // Handle epoch reference labels
       const epochRefSpan = document.getElementById('epoch-ref');
       if (nDate.isYearZero) {
-        epochRefSpan.innerText = "Target Epoch: 2026-07-03 06:58:00 UTC";
+        epochRefSpan.innerText = "Target Epoch: 2026-07-03 03:10:11 UTC";
       } else {
         epochRefSpan.innerText = `Year Alignment: Year ${nDate.year}`;
       }
@@ -453,10 +454,10 @@
       // Update T-Minus targeted label
       document.getElementById('target-milestone-label').innerHTML = `T-Minus to <span class="text-[#5cb6e4] font-bold">${nDate.nextMilestoneName}</span>`;
 
-      // Calculate and push countdown metrics
+      // Calculate and push countdown metrics (redesigned with 91,570-second day structure)
       const totalSecs = Math.floor(nDate.msUntilNextMilestone / 1000);
-      const days = Math.floor(totalSecs / 86400);
-      const hours = Math.floor((totalSecs % 86400) / 3600);
+      const days = Math.floor(totalSecs / 91570);
+      const hours = Math.floor((totalSecs % 91570) / 3600);
       const mins = Math.floor((totalSecs % 3600) / 60);
       const secs = totalSecs % 60;
       const decisecond = Math.floor((nDate.msUntilNextMilestone % 1000) / 100);
@@ -472,9 +473,9 @@
       const progressionText = document.getElementById('progression-text');
 
       if (nDate.isYearZero) {
-        // Calculate Year 0 progress towards Epoch
-        const totalDurationMs = 555 * 86400 * 1000;
-        const msIntoYearZero = (nDate.dayOfYear - 1) * 86400 * 1000 + nDate.msInCurrentDay;
+        // Calculate Year 0 progress towards Epoch (using 91570-second Nahla days)
+        const totalDurationMs = 555 * 91570 * 1000;
+        const msIntoYearZero = (nDate.dayOfYear - 1) * 91570 * 1000 + nDate.msInCurrentDay;
         const progressPct = Math.min(100, (msIntoYearZero / totalDurationMs) * 100);
         
         progressBarFill.style.width = `${progressPct}%`;
