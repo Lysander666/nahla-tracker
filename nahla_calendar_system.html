@@ -454,10 +454,10 @@
       // Update T-Minus targeted label
       document.getElementById('target-milestone-label').innerHTML = `T-Minus to <span class="text-[#5cb6e4] font-bold">${nDate.nextMilestoneName}</span>`;
 
-      // Calculate and push countdown metrics (redesigned with 91,570-second day structure)
+      // Calculate and push countdown metrics (using standard Earth duration constants)
       const totalSecs = Math.floor(nDate.msUntilNextMilestone / 1000);
-      const days = Math.floor(totalSecs / 91570);
-      const hours = Math.floor((totalSecs % 91570) / 3600);
+      const days = Math.floor(totalSecs / 86400); // 86400 standard Earth seconds
+      const hours = Math.floor((totalSecs % 86400) / 3600); // 3600 standard Earth seconds
       const mins = Math.floor((totalSecs % 3600) / 60);
       const secs = totalSecs % 60;
       const decisecond = Math.floor((nDate.msUntilNextMilestone % 1000) / 100);
