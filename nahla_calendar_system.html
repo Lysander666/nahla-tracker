@@ -4,12 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <!-- Favicons matching master tracker index layout -->
-<link class="canvas-ignore" rel="icon" type="image/png" sizes="16x16" href="faviconmain16.png">
-<link class="canvas-ignore" rel="icon" type="image/png" sizes="32x32" href="favicon32@2x.png">
-<link class="canvas-ignore" rel="icon" type="image/png" sizes="128x128" href="faviconmain128.png">
-<link class="canvas-ignore" rel="manifest" href="manifest.json">
-<link class="canvas-ignore" rel="icon" type="image/png" sizes="512x512" href="favicon-512.png?v=2">
-<link class="canvas-ignore" rel="apple-touch-icon" sizes="180x180" href="favicon-512.png?v=2">
+  <link class="canvas-ignore" rel="icon" type="image/png" sizes="16x16" href="faviconmain16.png">
+  <link class="canvas-ignore" rel="icon" type="image/png" sizes="32x32" href="favicon32@2x.png">
+  <link class="canvas-ignore" rel="icon" type="image/png" sizes="128x128" href="faviconmain128.png">
+  <link class="canvas-ignore" rel="manifest" href="manifest.json">
+  <link class="canvas-ignore" rel="icon" type="image/png" sizes="512x512" href="favicon-512.png?v=2">
+  <link class="canvas-ignore" rel="apple-touch-icon" sizes="180x180" href="favicon-512.png?v=2">
   <title>Nahla Calendar System</title>
   <!-- Google Fonts for the exact clean Monospace typography seen in the screenshot -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -59,12 +59,12 @@
           Nahla Calendar System
         </h1>
         <p class="text-xs text-slate-500 mt-1 uppercase tracking-wider">
-          Hypi Bra EV-P d5-78 | Orbiting Body: Rebekah (6) | Moon: Nahla (6 a)
+          System: Hypi Bra EV-P d5-78 | Orbiting Body: Rebekah (6) | Moon: Nahla (6 a)
         </p>
       </div>
       <a href="index.html" class="px-3 py-1.5 rounded border border-[#1d2228] text-xs text-slate-400 hover:text-[#5cb6e4] hover:border-[#5cb6e4] transition-all font-mono">
-    &lt; RETURN TO HUD TRACKER
-  </a>
+        &lt; RETURN TO HUD TRACKER
+      </a>
     </header>
 
     <!-- Main Panel Content -->
@@ -86,19 +86,43 @@
         <!-- Master Telemetry Split Grid: Readout vs Countdown -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
           
-          <!-- Left: Current Active Date Readout -->
-          <div class="bg-[#0f1115] border border-[#1d2228] rounded p-4 flex flex-col justify-center items-center text-center relative min-h-[140px]">
-            <!-- Date is now the primary dominant readout -->
-            <div id="current-date-display" class="text-2xl md:text-3xl font-bold text-[#49d381] tracking-wider uppercase mb-1 font-mono">
-              --
+          <!-- Left: Consolidated Calendar Telemetry Panel (Unified Clock with Phase Symbol, Day, Month, Year readout) -->
+          <div class="bg-[#0f1115] border border-[#1d2228] rounded p-5 flex flex-col justify-between relative min-h-[220px] font-mono">
+            <!-- TOP SECTION: Running NLT Clock with Adjacent Phase Indicator -->
+            <div class="text-center border-b border-[#1d2228]/40 pb-4">
+              <span class="text-xs text-[#5cb6e4] uppercase tracking-widest font-semibold block mb-1.5">Nahla Local Time (NLT)</span>
+              <div class="flex items-center justify-center gap-2 text-2xl md:text-3xl font-bold text-[#5cb6e4] tracking-widest drop-shadow-[0_0_8px_rgba(92,182,228,0.4)]">
+                <span id="nlt-clock-display">--:--:--</span>
+                <span class="text-slate-600 font-light select-none text-xl md:text-2xl">|</span>
+                <span class="text-sm md:text-base font-medium tracking-normal text-[#5cb6e4] select-none">Phase <span id="nlt-phase-indicator" class="font-bold cursor-help" title="Calculating local phase...">--</span></span>
+              </div>
+              <div class="text-[10px] text-slate-400 uppercase tracking-wider mt-2">25h 26m 10s Solar rotation</div>
             </div>
-            <!-- Year is now the smaller secondary anchor -->
-            <div id="current-year-display" class="text-sm font-bold text-slate-300 tracking-widest uppercase mt-0.5 font-mono">
-              YEAR --
+            
+            <!-- BOTTOM SECTION: Standardized Date Compartments (Rearranged: DAY | MONTH | YEAR) -->
+            <div class="grid grid-cols-3 gap-3 text-center mt-4 pt-1">
+              <!-- Left Column: DAY -->
+              <div class="border-r border-[#1d2228]/40">
+                <div class="text-[11px] md:text-xs text-[#5cb6e4] uppercase tracking-widest font-semibold">DAY</div>
+                <div id="hud-day" class="text-xs md:text-sm font-bold text-slate-200 mt-1.5 tracking-wider">-- / --</div>
+                <div id="hud-yday" class="text-[10px] md:text-xs text-slate-500 mt-1">Y-Day: --</div>
+              </div>
+              <!-- Center Column: MONTH -->
+              <div class="border-r border-[#1d2228]/40">
+                <div class="text-[11px] md:text-xs text-[#5cb6e4] uppercase tracking-widest font-semibold">MONTH</div>
+                <div id="hud-month" class="text-xs md:text-sm font-bold text-slate-400 mt-1.5 tracking-wider">-- / --</div>
+                <div id="hud-month-name" class="text-[10px] md:text-xs text-[#49d381] uppercase tracking-wider font-semibold mt-1">--</div>
+              </div>
+              <!-- Right Column: YEAR -->
+              <div>
+                <div class="text-[11px] md:text-xs text-[#5cb6e4] uppercase tracking-widest font-semibold">YEAR</div>
+                <div id="hud-year" class="text-xs md:text-sm font-bold text-slate-200 mt-1.5 tracking-wider">--</div>
+              </div>
             </div>
-            <div id="current-phase-display" class="text-xs text-slate-400 uppercase tracking-widest mt-2">
-              --
-            </div>
+            <!-- Dynamic Backup containers for backwards compatibility DOM calls -->
+            <div class="hidden" id="current-date-display">--</div>
+            <div class="hidden" id="current-year-display">--</div>
+            <div class="hidden" id="current-phase-display">--</div>
           </div>
 
           <!-- Right: T-Minus Target Tracking -->
@@ -145,7 +169,7 @@
       <!-- Calendar Grid Panel -->
       <section class="bg-[#121519] border border-[#1d2228] rounded-lg p-5 shadow-lg">
         <h3 class="text-xs text-[#5cb6e4] mb-4 uppercase tracking-widest font-semibold">
-          The 555 Day Nahlan Calendar Grid - 12 Months at 46 days each
+          The 555-Day Sumerian Calendar Grid
         </h3>
 
         <!-- 12 Months Grid -->
@@ -159,7 +183,7 @@
         </div>
       </section>
 
-      <!-- Leap Year Cycle Monitor Bar (Relocated to the bottom) -->
+      <!-- Leap Year Cycle Monitor Bar -->
       <section class="bg-[#121519] border border-[#1d2228] rounded-lg p-5 shadow-lg relative overflow-hidden">
         <div class="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#8b5cf6] to-transparent"></div>
         
@@ -195,16 +219,16 @@
     const MONTHS_LORE = [
       { name: "Anat", desc: "Goddess of fierce beginnings, war, and rebirth. Welcomes the searing light of Perihelion.", alignment: "Start of Year / Peak Sunlight" },
       { name: "Bau", desc: "Primeval goddess of the healing dawn and the life-giving breath.", alignment: "Late Morning Orbit" },
-      { name: "Uzzayan", desc: "Himyarite goddess of power, might, and healing. Invoked to strengthen the will and bring restoration.", alignment: "Approaching Outer Orbit" },
+      { name: "Uzzayan", desc: "Himyarite goddess of power, might, and healing. Invoked to strengthen the will and heal the sick.", alignment: "Approaching Outer Orbit" },
       { name: "Gula", desc: "Goddess of medicine, healing, and grand transformations.", alignment: "High Horizon Phase" },
-      { name: "Shams", desc: "The brilliant pre-Islamic sun goddess, lady of the heavens, bringing light and vital warmth.", alignment: "Stellar Apex Alignment" },
-      { name: "Ki", desc: "The earth goddess. Honoring Nahla's dense, metal-rich planetary crust.", alignment: "Peak Magnetic Alignment" },
+      { name: "Shams", desc: "The brilliant pre-Islamic sun goddess, lord of the heavens, bringing light and vital warmth.", alignment: "Stellar Apex Alignment" },
+      { name: "Ki", desc: "The Earth goddess. Honoring Nahla's dense, metal-rich planetary crust.", alignment: "Peak Magnetic Alignment" },
       { name: "Mot", desc: "God of dust, sterility, and the burning heat of the primary star.", alignment: "Extreme Heat Run" },
       { name: "Nanaya", desc: "Goddess of cosmic love, beauty, and the gravitationally locked bond of giant and moon.", alignment: "Tidal Symmetrical Node" },
       { name: "Tanuf", desc: "Pre-Islamic South Arabian goddess of high mountain peaks, offering shelter and safe passages through the shadows of the descending orbit.", alignment: "Descending Node" },
       { name: "Nisaba", desc: "Goddess of writing, cosmic records, and mapping the stars.", alignment: "Apsidal Alignment" },
       { name: "Sara", desc: "Guardian of deep subterranean vaults and active metallic magma flows.", alignment: "Volcanic Surge Era" },
-      { name: "Uttu", desc: "Goddess of weaving, spinning final touches to the magnificent webs of Rebekah's rings.", alignment: "Ring Crossing Horizon" }
+      { name: "Uttu", desc: "Goddess of weaving, spinning the magnificent geometric webs of Rebekah's rings.", alignment: "Ring Crossing Horizon" }
     ];
 
     let selectedMonthIndex = 0; // State tracker for current active grid view (0-11, or -1 for Kurunnītu)
@@ -221,8 +245,8 @@
     }
 
     // Main calendar logic engine supporting Year 0 backward coordinates perfectly
+    // 1 Nahla local day = 25h 26m 10s = 91,570 seconds
     function getNahlaCalendarDate(utcMillis) {
-      // 1 Nahla local day = 25h 26m 10s = 91,570 seconds
       const DAY_MS = 91570 * 1000;
       let year, dayOfYear, msInCurrentDay, totalDaysInYear;
       
@@ -253,7 +277,7 @@
           remainingMs -= yearMs;
           year--;
         }
-        totalDaysInYear = getDaysInNahlaYear(year);
+        totalDaysInYear = getNahlaCalendarDateBackwards(year); // Fallback standard checker
         let msFromStartOfYear = (totalDaysInYear * DAY_MS) - remainingMs;
         dayOfYear = Math.floor(msFromStartOfYear / DAY_MS) + 1;
         msInCurrentDay = msFromStartOfYear % DAY_MS;
@@ -292,6 +316,10 @@
         msUntilNextMilestone,
         nextMilestoneName
       };
+    }
+
+    function getNahlaCalendarDateBackwards(year) {
+      return isNahlaLeapYear(year) ? 556 : 555;
     }
 
     // Build the month layout buttons and register click events
@@ -383,7 +411,7 @@
               Traditional Mesopotamian sweet-beer celebration sitting completely outside standard months.
             </p>
             <p class="text-sm text-slate-300 mt-2.5 leading-relaxed font-sans">
-              Named after Kurunnītu, the goddess of brewing and maker of the divine sweet red beer of offerings and divine celebration. This 3-day (4-day in leap years) period represents the transition zone of celestial rest. Standard chronometer measurements pause while Rebekah reaches maximum orbital speeds before resetting back to Anat 1 at Perihelion.
+              Named after Kurunnītu, the divine sweet red beer of offerings and divine celebration. This 3-day (4-day in leap years) period represents the transition zone of celestial rest. Standard chronometer measurements pause while Rebekah reaches maximum orbital speeds, honoring the cosmic harvest immediately before resetting back to Anat 1 at Perihelion.
             </p>
             <div class="mt-3 inline-flex items-center gap-1.5 text-xs text-purple-400 font-sans">
               <span class="w-1.5 h-1.5 rounded-full bg-purple-400"></span>
@@ -433,31 +461,88 @@
         epochRefSpan.innerText = `Year Alignment: Year ${nDate.year}`;
       }
 
-      // Update Live Telemetry Readings inside Dashboard
+      // --- CONSOLIDATED HUD TELEMETRY WRITING ---
+      // 1. Calculate NLT (Nahla Local Time) from current ms progress in the cycle
+      const totalSecsInDay = Math.floor(nDate.msInCurrentDay / 1000);
+      const nltH = Math.floor(totalSecsInDay / 3600);
+      const nltM = Math.floor((totalSecsInDay % 3600) / 60);
+      const nltS = totalSecsInDay % 60;
+      const nltDisplayStr = `${nltH.toString().padStart(2, '0')}:${nltM.toString().padStart(2, '0')}:${nltS.toString().padStart(2, '0')}`;
+      document.getElementById('nlt-clock-display').innerText = nltDisplayStr;
+
+      // Calculate and update current Galactic Band Phase Symbol & Description Tooltip
+      const PHASE_SECS = 91570 / 12;
+      const phaseIndex = Math.floor(totalSecsInDay / PHASE_SECS);
+      const PHASES = [
+        { sym: "α", name: "Alpha", range: "00:00:00 - 02:07:10", desc: "Astronomical dawn; first light" },
+        { sym: "β", name: "Beta", range: "02:07:10 - 04:14:21", desc: "Brightening sunrise arc" },
+        { sym: "γ", name: "Gamma", range: "04:14:21 - 06:21:32", desc: "Morning light, sun climbing (galactic band 90°)" },
+        { sym: "δ", name: "Delta", range: "06:21:32 - 08:28:43", desc: "Approaching midday" },
+        { sym: "ε", name: "Epsilon", range: "08:28:43 - 10:35:54", desc: "Solar zenith; shortest shadows" },
+        { sym: "ζ", name: "Zeta", range: "10:35:54 - 12:43:05", desc: "Early afternoon" },
+        { sym: "η", name: "Eta", range: "12:43:05 - 14:50:15", desc: "Mid-afternoon decline (galactic band 270°)" },
+        { sym: "θ", name: "Theta", range: "14:50:15 - 16:57:26", desc: "Late afternoon" },
+        { sym: "ι", name: "Iota", range: "16:57:26 - 19:04:37", desc: "Early evening/sunset" },
+        { sym: "κ", name: "Kappa", range: "19:04:37 - 21:11:48", desc: "Twilight glow" },
+        { sym: "λ", name: "Lambda", range: "21:11:48 - 23:18:59", desc: "Deep night; thermal minimum begins" },
+        { sym: "μ", name: "Mu", range: "23:18:59 - 25:26:10", desc: "Pre-dawn calm; galactic night" }
+      ];
+      const currentPhase = PHASES[Math.min(11, Math.max(0, phaseIndex))];
+      const phaseEl = document.getElementById('nlt-phase-indicator');
+      if (phaseEl) {
+        phaseEl.innerText = currentPhase.sym;
+        phaseEl.title = `Phase ${currentPhase.sym} (${currentPhase.name})\nRange: ${currentPhase.range}\n${currentPhase.desc}`;
+      }
+
+      // 2. Update HUD Year Panel
+      document.getElementById('hud-year').innerText = `Y ${nDate.year}`;
+
+      // 3. Update HUD Month Panel (Month xx / 12) with custom downsized text layout
+      const hudMonth = document.getElementById('hud-month');
+      const hudMonthName = document.getElementById('hud-month-name');
+      if (nDate.isIntercalary) {
+        hudMonth.innerText = "FEST";
+        hudMonth.className = "text-xs md:text-sm font-bold text-purple-400 mt-1.5 tracking-wider";
+        hudMonthName.innerText = "Kurunnītu";
+        hudMonthName.className = "text-[10px] md:text-xs text-purple-400 uppercase tracking-wider font-semibold mt-1";
+      } else {
+        hudMonth.innerText = `${(nDate.monthIndex + 1).toString().padStart(2, '0')} / 12`;
+        hudMonth.className = "text-xs md:text-sm font-bold text-slate-400 mt-1.5 tracking-wider";
+        hudMonthName.innerText = MONTHS_LORE[nDate.monthIndex].name;
+        hudMonthName.className = "text-[10px] md:text-xs text-[#49d381] uppercase tracking-wider font-semibold mt-1";
+      }
+
+      // 4. Update HUD Day Panel (Day xx / xx)
+      const hudDay = document.getElementById('hud-day');
+      const hudYday = document.getElementById('hud-yday');
+      if (nDate.isIntercalary) {
+        const festivalDays = isNahlaLeapYear(nDate.year) ? 4 : 3;
+        hudDay.innerText = `${nDate.dayOfMonth.toString().padStart(2, '0')} / ${festivalDays.toString().padStart(2, '0')}`;
+        hudYday.innerText = `F-DAY: ${nDate.dayOfMonth}`;
+      } else {
+        hudDay.innerText = `${nDate.dayOfMonth.toString().padStart(2, '0')} / 46`;
+        hudYday.innerText = `Y-DAY: ${nDate.dayOfYear}`;
+      }
+
+      // Backward compatibility backup injections for old DOM queries
       document.getElementById('current-year-display').innerText = `YEAR ${nDate.year}`;
-      
       const currentDateDisplay = document.getElementById('current-date-display');
       const currentPhaseDisplay = document.getElementById('current-phase-display');
-      
       if (nDate.isIntercalary) {
         currentDateDisplay.innerText = `Festival of Kurunnītu, Day ${nDate.dayOfMonth}`;
-        currentDateDisplay.className = "text-xl md:text-2xl text-purple-400 font-bold tracking-wider uppercase mb-1 font-mono animate-pulse";
         currentPhaseDisplay.innerText = "Intercalary Transition Period";
-        currentPhaseDisplay.className = "text-xs text-purple-300 uppercase tracking-widest mt-2";
       } else {
         currentDateDisplay.innerText = `${MONTHS_LORE[nDate.monthIndex].name} ${nDate.dayOfMonth}`;
-        currentDateDisplay.className = "text-2xl md:text-3xl font-bold text-[#49d381] tracking-wider uppercase mb-1 font-mono";
         currentPhaseDisplay.innerText = `Month ${nDate.monthIndex + 1} — Standard Phase`;
-        currentPhaseDisplay.className = "text-xs text-slate-400 uppercase tracking-widest mt-2";
       }
 
       // Update T-Minus targeted label
       document.getElementById('target-milestone-label').innerHTML = `T-Minus to <span class="text-[#5cb6e4] font-bold">${nDate.nextMilestoneName}</span>`;
 
-      // Calculate and push countdown metrics (using standard Earth duration constants)
+      // Calculate and push countdown metrics (Unified Standard Earth Metrics: Day = 86400s)
       const totalSecs = Math.floor(nDate.msUntilNextMilestone / 1000);
-      const days = Math.floor(totalSecs / 86400); // 86400 standard Earth seconds
-      const hours = Math.floor((totalSecs % 86400) / 3600); // 3600 standard Earth seconds
+      const days = Math.floor(totalSecs / 86400); 
+      const hours = Math.floor((totalSecs % 86400) / 3600); 
       const mins = Math.floor((totalSecs % 3600) / 60);
       const secs = totalSecs % 60;
       const decisecond = Math.floor((nDate.msUntilNextMilestone % 1000) / 100);
