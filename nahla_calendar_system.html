@@ -59,7 +59,7 @@
           Nahla Calendar System
         </h1>
         <p class="text-xs text-slate-500 mt-1 uppercase tracking-wider">
-          Hypi Bra EV-P d5-78 | Orbiting Body: Rebekah (6) | Moon: Nahla (6 a)
+          System: Hypi Bra EV-P d5-78 | Orbiting Body: Rebekah (6) | Moon: Nahla (6 a)
         </p>
       </div>
       <a href="index.html" class="px-3 py-1.5 rounded border border-[#1d2228] text-xs text-slate-400 hover:text-[#5cb6e4] hover:border-[#5cb6e4] transition-all font-mono">
@@ -86,39 +86,43 @@
         <!-- Master Telemetry Split Grid: Readout vs Countdown -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
           
-          <!-- Left: Consolidated Calendar Telemetry Panel (Unified Clock with Phase Symbol, Day, Month, Year readout) -->
+          <!-- Left: Consolidated Calendar Telemetry Panel -->
           <div class="bg-[#0f1115] border border-[#1d2228] rounded p-5 flex flex-col justify-between relative min-h-[220px] font-mono">
-            <!-- TOP SECTION: Running NLT Clock with Adjacent Phase Indicator -->
-            <div class="text-center border-b border-[#1d2228]/40 pb-4">
+            
+            <!-- TOP SECTION: Standardized Date Compartments (DAY | MONTH | YEAR) with geometric flex alignments -->
+            <div class="grid grid-cols-3 gap-3 text-center border-b border-[#1d2228]/40 pb-4 items-stretch">
+              <!-- Left Column: DAY -->
+              <div class="border-r border-[#1d2228]/40 flex flex-col justify-between h-full min-h-[64px]">
+                <div class="text-[11px] md:text-xs text-[#5cb6e4] uppercase tracking-widest font-semibold">DAY</div>
+                <div id="hud-day" class="text-xs md:text-sm font-bold text-slate-200 tracking-wider">-- / --</div>
+                <div id="hud-yday" class="text-[10px] md:text-xs text-slate-500 leading-none">Y-Day: --</div>
+              </div>
+              <!-- Center Column: MONTH -->
+              <div class="border-r border-[#1d2228]/40 flex flex-col justify-between h-full min-h-[64px]">
+                <div class="text-[11px] md:text-xs text-[#5cb6e4] uppercase tracking-widest font-semibold">MONTH</div>
+                <div id="hud-month" class="text-xs md:text-sm font-bold text-slate-400 tracking-wider">-- / --</div>
+                <div id="hud-month-name" class="text-xs md:text-sm text-[#49d381] uppercase tracking-wider font-semibold leading-none">--</div>
+              </div>
+              <!-- Right Column: YEAR -->
+              <div class="flex flex-col justify-between h-full min-h-[64px]">
+                <div class="text-[11px] md:text-xs text-[#5cb6e4] uppercase tracking-widest font-semibold">YEAR</div>
+                <div id="hud-year" class="text-xs md:text-sm font-bold text-slate-200 tracking-wider">--</div>
+                <!-- Invisible space buffer matching height of lower Month Name to perfectly center Year column vertically -->
+                <div class="text-xs md:text-sm opacity-0 select-none pointer-events-none leading-none">-</div>
+              </div>
+            </div>
+
+            <!-- BOTTOM SECTION: Running NLT Clock with Adjacent Phase Indicator -->
+            <div class="text-center pt-4">
               <span class="text-xs text-[#5cb6e4] uppercase tracking-widest font-semibold block mb-1.5">Nahla Local Time (NLT)</span>
               <div class="flex items-center justify-center gap-2 text-2xl md:text-3xl font-bold text-[#5cb6e4] tracking-widest drop-shadow-[0_0_8px_rgba(92,182,228,0.4)]">
                 <span id="nlt-clock-display">--:--:--</span>
                 <span class="text-slate-600 font-light select-none text-xl md:text-2xl">|</span>
                 <span class="text-sm md:text-base font-medium tracking-normal text-[#5cb6e4] select-none">Phase <span id="nlt-phase-indicator" class="font-bold cursor-help" title="Calculating local phase...">--</span></span>
               </div>
-              <div class="text-[10px] text-slate-400 uppercase tracking-wider mt-2">25h 26m 10s Solar rotation</div>
+              <div class="text-[10px] text-slate-400 uppercase tracking-wider mt-2 font-mono">25h 26m 10s Solar rotation</div>
             </div>
             
-            <!-- BOTTOM SECTION: Standardized Date Compartments (Rearranged: DAY | MONTH | YEAR) -->
-            <div class="grid grid-cols-3 gap-3 text-center mt-4 pt-1">
-              <!-- Left Column: DAY -->
-              <div class="border-r border-[#1d2228]/40">
-                <div class="text-[11px] md:text-xs text-[#5cb6e4] uppercase tracking-widest font-semibold">DAY</div>
-                <div id="hud-day" class="text-xs md:text-sm font-bold text-slate-200 mt-1.5 tracking-wider">-- / --</div>
-                <div id="hud-yday" class="text-[10px] md:text-xs text-slate-500 mt-1">Y-Day: --</div>
-              </div>
-              <!-- Center Column: MONTH -->
-              <div class="border-r border-[#1d2228]/40">
-                <div class="text-[11px] md:text-xs text-[#5cb6e4] uppercase tracking-widest font-semibold">MONTH</div>
-                <div id="hud-month" class="text-xs md:text-sm font-bold text-slate-400 mt-1.5 tracking-wider">-- / --</div>
-                <div id="hud-month-name" class="text-[10px] md:text-xs text-[#49d381] uppercase tracking-wider font-semibold mt-1">--</div>
-              </div>
-              <!-- Right Column: YEAR -->
-              <div>
-                <div class="text-[11px] md:text-xs text-[#5cb6e4] uppercase tracking-widest font-semibold">YEAR</div>
-                <div id="hud-year" class="text-xs md:text-sm font-bold text-slate-200 mt-1.5 tracking-wider">--</div>
-              </div>
-            </div>
             <!-- Dynamic Backup containers for backwards compatibility DOM calls -->
             <div class="hidden" id="current-date-display">--</div>
             <div class="hidden" id="current-year-display">--</div>
@@ -169,7 +173,7 @@
       <!-- Calendar Grid Panel -->
       <section class="bg-[#121519] border border-[#1d2228] rounded-lg p-5 shadow-lg">
         <h3 class="text-xs text-[#5cb6e4] mb-4 uppercase tracking-widest font-semibold">
-         555 day Nahlan calendar grid - 12 months at 46 days each
+          The 555-Day Sumerian Calendar Grid
         </h3>
 
         <!-- 12 Months Grid -->
@@ -502,14 +506,14 @@
       const hudMonthName = document.getElementById('hud-month-name');
       if (nDate.isIntercalary) {
         hudMonth.innerText = "FEST";
-        hudMonth.className = "text-xs md:text-sm font-bold text-purple-400 mt-1.5 tracking-wider";
+        hudMonth.className = "text-xs md:text-sm font-bold text-purple-400 tracking-wider";
         hudMonthName.innerText = "Kurunnītu";
-        hudMonthName.className = "text-[10px] md:text-xs text-purple-400 uppercase tracking-wider font-semibold mt-1";
+        hudMonthName.className = "text-xs md:text-sm text-purple-400 uppercase tracking-wider font-semibold leading-none";
       } else {
         hudMonth.innerText = `${(nDate.monthIndex + 1).toString().padStart(2, '0')} / 12`;
-        hudMonth.className = "text-xs md:text-sm font-bold text-slate-400 mt-1.5 tracking-wider";
+        hudMonth.className = "text-xs md:text-sm font-bold text-slate-400 tracking-wider";
         hudMonthName.innerText = MONTHS_LORE[nDate.monthIndex].name;
-        hudMonthName.className = "text-[10px] md:text-xs text-[#49d381] uppercase tracking-wider font-semibold mt-1";
+        hudMonthName.className = "text-xs md:text-sm text-[#49d381] uppercase tracking-wider font-semibold leading-none";
       }
 
       // 4. Update HUD Day Panel (Day xx / xx)
