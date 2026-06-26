@@ -59,7 +59,7 @@
           Nahla Calendar System
         </h1>
         <p class="text-xs text-slate-500 mt-1 uppercase tracking-wider">
-          Hypi Bra EV-P d5-78 | Orbiting Body: Rebekah (6) | Moon: Nahla (6 a)
+          System: Hypi Bra EV-P d5-78 | Orbiting Body: Rebekah (6) | Moon: Nahla (6 a)
         </p>
       </div>
       <a href="index.html" class="px-3 py-1.5 rounded border border-[#1d2228] text-xs text-slate-400 hover:text-[#5cb6e4] hover:border-[#5cb6e4] transition-all font-mono">
@@ -94,14 +94,15 @@
               <!-- Left Column: DAY -->
               <div class="border-r border-[#1d2228]/40 flex flex-col justify-between h-full min-h-[64px]">
                 <div class="text-[11px] md:text-xs text-[#5cb6e4] uppercase tracking-widest font-semibold">DAY</div>
-                <div id="hud-day" class="text-xs md:text-sm font-bold text-slate-200 tracking-wider">-- / --</div>
+                <div id="hud-day" class="text-xs md:text-sm font-bold text-slate-200 tracking-wider">-- <span class="text-slate-500">/ --</span></div>
                 <div id="hud-yday" class="text-[10px] md:text-xs text-slate-500 leading-none">Y-Day: --</div>
               </div>
-              <!-- Center Column: MONTH -->
+              <!-- Center Column: MONTH (Swapped Layout: Header -> Month Name -> Month Number) -->
               <div class="border-r border-[#1d2228]/40 flex flex-col justify-between h-full min-h-[64px]">
                 <div class="text-[11px] md:text-xs text-[#5cb6e4] uppercase tracking-widest font-semibold">MONTH</div>
-                <div id="hud-month" class="text-xs md:text-sm font-bold text-slate-400 tracking-wider">-- / --</div>
                 <div id="hud-month-name" class="text-xs md:text-sm text-[#49d381] uppercase tracking-wider font-semibold leading-none">--</div>
+                <!-- Month index stylized exactly like Y-Day bottom line -->
+                <div id="hud-month" class="text-[10px] md:text-xs text-slate-500 leading-none">-- / --</div>
               </div>
               <!-- Right Column: YEAR -->
               <div class="flex flex-col justify-between h-full min-h-[64px]">
@@ -173,7 +174,7 @@
       <!-- Calendar Grid Panel -->
       <section class="bg-[#121519] border border-[#1d2228] rounded-lg p-5 shadow-lg">
         <h3 class="text-xs text-[#5cb6e4] mb-4 uppercase tracking-widest font-semibold">
-          555 day Nahlan calendar grid - 12 months at 46 days each
+          The 555-Day Sumerian Calendar Grid
         </h3>
 
         <!-- 12 Months Grid -->
@@ -501,17 +502,17 @@
       // 2. Update HUD Year Panel
       document.getElementById('hud-year').innerText = `Y ${nDate.year}`;
 
-      // 3. Update HUD Month Panel (Month xx / 12) with custom downsized text layout
+      // 3. Update HUD Month Panel (Month xx / 12) styled exactly like Y-DAY line
       const hudMonth = document.getElementById('hud-month');
       const hudMonthName = document.getElementById('hud-month-name');
       if (nDate.isIntercalary) {
         hudMonth.innerText = "FEST";
-        hudMonth.className = "text-xs md:text-sm font-bold text-purple-400 tracking-wider";
+        hudMonth.className = "text-[10px] md:text-xs text-purple-400/80 leading-none";
         hudMonthName.innerText = "Kurunnītu";
         hudMonthName.className = "text-xs md:text-sm text-purple-400 uppercase tracking-wider font-semibold leading-none";
       } else {
         hudMonth.innerText = `${(nDate.monthIndex + 1).toString().padStart(2, '0')} / 12`;
-        hudMonth.className = "text-xs md:text-sm font-bold text-slate-400 tracking-wider";
+        hudMonth.className = "text-[10px] md:text-xs text-slate-500 leading-none";
         hudMonthName.innerText = MONTHS_LORE[nDate.monthIndex].name;
         hudMonthName.className = "text-xs md:text-sm text-[#49d381] uppercase tracking-wider font-semibold leading-none";
       }
@@ -521,10 +522,10 @@
       const hudYday = document.getElementById('hud-yday');
       if (nDate.isIntercalary) {
         const festivalDays = isNahlaLeapYear(nDate.year) ? 4 : 3;
-        hudDay.innerText = `${nDate.dayOfMonth.toString().padStart(2, '0')} / ${festivalDays.toString().padStart(2, '0')}`;
+        hudDay.innerHTML = `${nDate.dayOfMonth.toString().padStart(2, '0')} <span class="text-slate-500">/ ${festivalDays.toString().padStart(2, '0')}</span>`;
         hudYday.innerText = `F-DAY: ${nDate.dayOfMonth}`;
       } else {
-        hudDay.innerText = `${nDate.dayOfMonth.toString().padStart(2, '0')} / 46`;
+        hudDay.innerHTML = `${nDate.dayOfMonth.toString().padStart(2, '0')} <span class="text-slate-500">/ 46</span>`;
         hudYday.innerText = `Y-DAY: ${nDate.dayOfYear}`;
       }
 
