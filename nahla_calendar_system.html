@@ -573,7 +573,7 @@
         const progressPct = Math.min(100, (msIntoYearZero / totalDurationMs) * 100);
         
         progressBarFill.style.width = `${progressPct}%`;
-        progressionText.innerText = `Day ${nDate.dayOfYear} of ${nDate.totalDaysInYear} (${progressPct.toFixed(2)}%) | Synchronizing loops with Perihelion Alignment`;
+        progressionText.innerText = `Day ${nDate.dayOfYear} of ${nDate.totalDaysInYear} (${progressPct.toFixed(2)}%) | Synchronised with perihelion alignment`;
       } else {
         const progressPct = (nDate.dayOfYear / nDate.totalDaysInYear) * 100;
         progressBarFill.style.width = `${progressPct}%`;
