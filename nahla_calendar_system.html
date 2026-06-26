@@ -59,7 +59,7 @@
           Nahla Calendar System
         </h1>
         <p class="text-xs text-slate-500 mt-1 uppercase tracking-wider">
-          System: Hypi Bra EV-P d5-78 | Orbiting Body: Rebekah (6) | Moon: Nahla (6 a)
+          Hypi Bra EV-P d5-78 | Orbiting Body: Rebekah (6) | Moon: Nahla (6 a)
         </p>
       </div>
       <a href="index.html" class="px-3 py-1.5 rounded border border-[#1d2228] text-xs text-slate-400 hover:text-[#5cb6e4] hover:border-[#5cb6e4] transition-all font-mono">
@@ -94,14 +94,13 @@
               <!-- Left Column: DAY -->
               <div class="border-r border-[#1d2228]/40 flex flex-col justify-between h-full min-h-[64px]">
                 <div class="text-[11px] md:text-xs text-[#5cb6e4] uppercase tracking-widest font-semibold">DAY</div>
-                <div id="hud-day" class="text-xs md:text-sm font-bold text-slate-200 tracking-wider">-- <span class="text-slate-500">/ --</span></div>
+                <div id="hud-day" class="text-xs md:text-sm font-bold text-slate-200 tracking-wider">-- / --</div>
                 <div id="hud-yday" class="text-[10px] md:text-xs text-slate-500 leading-none">Y-Day: --</div>
               </div>
-              <!-- Center Column: MONTH (Swapped Layout: Header -> Month Name -> Month Number) -->
+              <!-- Center Column: MONTH -->
               <div class="border-r border-[#1d2228]/40 flex flex-col justify-between h-full min-h-[64px]">
                 <div class="text-[11px] md:text-xs text-[#5cb6e4] uppercase tracking-widest font-semibold">MONTH</div>
                 <div id="hud-month-name" class="text-xs md:text-sm text-[#49d381] uppercase tracking-wider font-semibold leading-none">--</div>
-                <!-- Month index stylized exactly like Y-Day bottom line -->
                 <div id="hud-month" class="text-[10px] md:text-xs text-slate-500 leading-none">-- / --</div>
               </div>
               <!-- Right Column: YEAR -->
@@ -174,7 +173,7 @@
       <!-- Calendar Grid Panel -->
       <section class="bg-[#121519] border border-[#1d2228] rounded-lg p-5 shadow-lg">
         <h3 class="text-xs text-[#5cb6e4] mb-4 uppercase tracking-widest font-semibold">
-          The 555-Day Sumerian Calendar Grid
+          555 day Nahlan calendar - 12 Months at 46 days each
         </h3>
 
         <!-- 12 Months Grid -->
@@ -475,7 +474,7 @@
       const nltDisplayStr = `${nltH.toString().padStart(2, '0')}:${nltM.toString().padStart(2, '0')}:${nltS.toString().padStart(2, '0')}`;
       document.getElementById('nlt-clock-display').innerText = nltDisplayStr;
 
-      // Calculate and update current Galactic Band Phase Symbol & Description Tooltip
+      // Calculate and update current Galactic Band Phase Symbol, Label, and Description Tooltip
       const PHASE_SECS = 91570 / 12;
       const phaseIndex = Math.floor(totalSecsInDay / PHASE_SECS);
       const PHASES = [
@@ -495,14 +494,15 @@
       const currentPhase = PHASES[Math.min(11, Math.max(0, phaseIndex))];
       const phaseEl = document.getElementById('nlt-phase-indicator');
       if (phaseEl) {
-        phaseEl.innerText = currentPhase.sym;
+        // Appends the lowercase name in brackets to the right of the greek symbol
+        phaseEl.innerText = `${currentPhase.sym} (${currentPhase.name.toLowerCase()})`;
         phaseEl.title = `Phase ${currentPhase.sym} (${currentPhase.name})\nRange: ${currentPhase.range}\n${currentPhase.desc}`;
       }
 
       // 2. Update HUD Year Panel
       document.getElementById('hud-year').innerText = `Y ${nDate.year}`;
 
-      // 3. Update HUD Month Panel (Month xx / 12) styled exactly like Y-DAY line
+      // 3. Update HUD Month Panel (Month name atop, coordinate on baseline)
       const hudMonth = document.getElementById('hud-month');
       const hudMonthName = document.getElementById('hud-month-name');
       if (nDate.isIntercalary) {
@@ -517,7 +517,7 @@
         hudMonthName.className = "text-xs md:text-sm text-[#49d381] uppercase tracking-wider font-semibold leading-none";
       }
 
-      // 4. Update HUD Day Panel (Day xx / xx)
+      // 4. Update HUD Day Panel (Day xx / xx) with styled dark denominators
       const hudDay = document.getElementById('hud-day');
       const hudYday = document.getElementById('hud-yday');
       if (nDate.isIntercalary) {
