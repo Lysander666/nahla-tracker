@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nahla Festival Tracker - Reference Almanac</title>
+  <!-- Google Fonts for clean monospace and sans-serif HUD elements -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'Consolas', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Custom scrollbar matching Elite Odyssey UI style */
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #08090c;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #1a202c;
+      border-radius: 2px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: #5cb6e4;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-[#08090c] text-[#9ca4b0] p-4 md:p-6 font-sans selection:bg-[#5cb6e4]/30 selection:text-white custom-scrollbar">
+
+  <div class="max-w-4xl mx-auto">
+    
+    <!-- Ship HUD Header matching screenshot style perfectly -->
+    <header class="pb-6 mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div>
+        <h1 class="text-xl md:text-2xl font-bold tracking-tight text-slate-100 font-mono">
+          Nahla Festival Reference
+        </h1>
+        <p class="text-[10px] text-[#5cb6e4] mt-1 uppercase tracking-widest font-mono">
+          HYPI BRA EV-P D5-78 | ORBITING BODY: REBEKAH (6) | MOON: NAHLA (6 A)
+        </p>
+      </div>
+      <div>
+        <a href="nahla_calendar_system.html" class="px-3 py-1.5 rounded border border-[#1a202c] text-[10px] text-slate-400 hover:text-[#5cb6e4] hover:border-[#5cb6e4] transition-all font-mono tracking-wider uppercase">
+          &lt; Return to Calendar System
+        </a>
+      </div>
+    </header>
+
+    <!-- Main Grid: Static Visual Wheel & Quick Explanation -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+      
+      <!-- Left Column: Holographic SVG Orbital Map with Bloom Effects -->
+      <section class="bg-[#0c0e12] border border-[#1a202c] rounded-lg p-5 shadow-lg flex flex-col items-center col-span-1 relative overflow-hidden">
+        <!-- Thin glow-accent indicator line matching screenshot style -->
+        <div class="absolute top-0 left-0 w-full h-[2px] bg-[#5cb6e4]"></div>
+        
+        <div class="w-full text-center mb-3">
+          <span class="text-[10px] text-[#5cb6e4] font-bold uppercase tracking-widest font-mono">
+            Orbital Alignment Schematic
+          </span>
+        </div>
+
+        <!-- High-Fidelity Holographic SVG Schematic Map with Neon Bloom -->
+        <div class="relative w-56 h-56 my-2 bg-[#090b0e] rounded-full border border-[#1d2228]/40 p-1 shadow-[inset_0_0_20px_rgba(92,182,228,0.05)]">
+          <svg viewBox="0 0 200 200" class="w-full h-full transform -rotate-90">
+            <!-- Filter Definitions for Bloom/Glow Effects -->
+            <defs>
+              <!-- Outer soft bloom filter -->
+              <filter id="bloom-heavy" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur stdDeviation="6" result="blur1" />
+                <feGaussianBlur stdDeviation="3" result="blur2" />
+                <feMerge>
+                  <feMergeNode in="blur1" />
+                  <feMergeNode in="blur2" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
+              <!-- Medium crisp bloom filter -->
+              <filter id="bloom-medium" x="-30%" y="-30%" width="160%" height="160%">
+                <feGaussianBlur stdDeviation="2.5" result="blur" />
+                <feMerge>
+                  <feMergeNode in="blur" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
+              <!-- Subtle glow for orbital lines -->
+              <filter id="glow-subtle" x="-20%" y="-20%" width="140%" height="140%">
+                <feGaussianBlur stdDeviation="1.2" result="blur" />
+                <feMerge>
+                  <feMergeNode in="blur" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
+              <!-- Radial Gradient for Rebekah's thermal envelope -->
+              <radialGradient id="rebekah-thermal" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stop-color="#991b1b" stop-opacity="0.8" />
+                <stop offset="50%" stop-color="#7f1d1d" stop-opacity="0.3" />
+                <stop offset="100%" stop-color="#0c0e12" stop-opacity="0" />
+              </radialGradient>
+            </defs>
+
+            <!-- Grid Radar Rings (Telemetry overlay) -->
+            <circle cx="100" cy="100" r="92" fill="none" stroke="#1a202c" stroke-width="0.5" stroke-dasharray="2,8" />
+            <circle cx="100" cy="100" r="80" fill="none" stroke="#1d2228" stroke-width="1.2" filter="url(#glow-subtle)" />
+            <circle cx="100" cy="100" r="55" fill="none" stroke="#1a202c" stroke-width="0.75" stroke-dasharray="3,3" />
+            <circle cx="100" cy="100" r="30" fill="none" stroke="#1a202c" stroke-width="0.5" stroke-dasharray="2,4" />
+            
+            <!-- Axis HUD Guides & Angle Ticks -->
+            <line x1="100" y1="10" x2="100" y2="190" stroke="#1d2228" stroke-width="0.75" />
+            <line x1="10" y1="100" x2="190" y2="100" stroke="#1d2228" stroke-width="0.75" />
+            
+            <!-- Degree Ticks -->
+            <line x1="100" y1="10" x2="100" y2="15" stroke="#5cb6e4" stroke-width="1" />
+            <line x1="100" y1="185" x2="100" y2="190" stroke="#5cb6e4" stroke-width="1" />
+            <line x1="10" y1="100" x2="15" y2="100" stroke="#5cb6e4" stroke-width="1" />
+            <line x1="185" y1="100" x2="190" y2="100" stroke="#5cb6e4" stroke-width="1" />
+
+            <!-- Corner HUD bracket markers -->
+            <path d="M 25 25 L 15 25 L 15 15" fill="none" stroke="#1a202c" stroke-width="1" />
+            <path d="M 175 25 L 185 25 L 185 15" fill="none" stroke="#1a202c" stroke-width="1" />
+            <path d="M 25 175 L 15 175 L 15 185" fill="none" stroke="#1a202c" stroke-width="1" />
+            <path d="M 175 175 L 185 175 L 185 185" fill="none" stroke="#1a202c" stroke-width="1" />
+
+            <!-- Rebekah Thermal Background Glow (Infrared Envelope) -->
+            <circle cx="100" cy="100" r="28" fill="url(#rebekah-thermal)" />
+            
+            <!-- Center Node (Rebekah parent giant core) -->
+            <circle cx="100" cy="100" r="14" fill="#0c0e12" stroke="#ef4444" stroke-width="1.5" filter="url(#bloom-medium)" />
+            <circle cx="100" cy="100" r="9" fill="#b91c1c" />
+            <circle cx="100" cy="100" r="4" fill="#fca5a5" />
+
+            <!-- Directional Travel Indicator (Retro-grade arrows along orbit) -->
+            <path d="M 100 12 L 104 20 L 96 20 Z" fill="#5cb6e4" opacity="0.4" transform="rotate(45 100 100)" />
+            <path d="M 100 12 L 104 20 L 96 20 Z" fill="#5cb6e4" opacity="0.4" transform="rotate(135 100 100)" />
+            <path d="M 100 12 L 104 20 L 96 20 Z" fill="#5cb6e4" opacity="0.4" transform="rotate(225 100 100)" />
+            <path d="M 100 12 L 104 20 L 96 20 Z" fill="#5cb6e4" opacity="0.4" transform="rotate(315 100 100)" />
+            
+            <!-- Festival Quadrant Nodes (Active Bloom) -->
+            <!-- 1. Perihelion: Kurunnītu (Right) -->
+            <circle cx="180" cy="100" r="10" fill="none" stroke="#c084fc" stroke-width="1.5" filter="url(#bloom-heavy)" opacity="0.6" />
+            <circle cx="180" cy="100" r="5" fill="#a855f7" stroke="#ffffff" stroke-width="1" filter="url(#bloom-medium)" />
+            
+            <!-- 2. Descending Node: Maštītu (Bottom) -->
+            <circle cx="100" cy="180" r="10" fill="none" stroke="#fde047" stroke-width="1.5" filter="url(#bloom-heavy)" opacity="0.6" />
+            <circle cx="100" cy="180" r="5" fill="#facc15" stroke="#ffffff" stroke-width="1" filter="url(#bloom-medium)" />
+            
+            <!-- 3. Aphelion: Halpū (Left) -->
+            <circle cx="20" cy="100" r="10" fill="none" stroke="#60a5fa" stroke-width="1.5" filter="url(#bloom-heavy)" opacity="0.6" />
+            <circle cx="20" cy="100" r="5" fill="#3b82f6" stroke="#ffffff" stroke-width="1" filter="url(#bloom-medium)" />
+            
+            <!-- 4. Ascending Node: Rīšu (Top) -->
+            <circle cx="100" cy="20" r="10" fill="none" stroke="#fb923c" stroke-width="1.5" filter="url(#bloom-heavy)" opacity="0.6" />
+            <circle cx="100" cy="20" r="5" fill="#f97316" stroke="#ffffff" stroke-width="1" filter="url(#bloom-medium)" />
+          </svg>
+          
+          <!-- Static Labels -->
+          <div class="absolute top-[8px] left-[39%] text-[9px] font-mono font-bold text-orange-400 tracking-wider filter drop-shadow-[0_0_3px_rgba(249,115,22,0.4)]">RĪŠU</div>
+          <div class="absolute bottom-[6px] left-[33%] text-[9px] font-mono font-bold text-amber-400 tracking-wider filter drop-shadow-[0_0_3px_rgba(250,204,21,0.4)]">MAŠTĪTU</div>
+          <div class="absolute top-[44%] right-[4px] text-[9px] font-mono font-bold text-purple-400 tracking-wider filter drop-shadow-[0_0_3px_rgba(168,85,247,0.4)]">KURUNNĪTU</div>
+          <div class="absolute top-[44%] left-[8px] text-[9px] font-mono font-bold text-blue-400 tracking-wider filter drop-shadow-[0_0_3px_rgba(59,130,246,0.4)]">HALPŪ</div>
+        </div>
+
+        <div class="w-full text-center mt-3 pt-3 border-t border-[#1a202c]/40">
+          <div class="text-[9px] font-mono text-slate-500 uppercase tracking-wider">
+            Four seasonal anchors of the 555-Day Orbit
+          </div>
+        </div>
+      </section>
+
+      <!-- Right Columns: Quick Physics Context and Mental Sanctuary Guide -->
+      <section class="bg-[#0c0e12] border border-[#1a202c] rounded-lg p-5 shadow-lg col-span-2 relative flex flex-col justify-between">
+        <div class="absolute top-0 left-0 w-full h-[2px] bg-[#5cb6e4]"></div>
+        
+        <div>
+          <div class="mb-4 pb-2 border-b border-[#1a202c]/40">
+            <span class="text-[10px] text-[#5cb6e4] font-bold uppercase tracking-widest font-mono">
+              Theoretical Foundation & Purpose
+            </span>
+          </div>
+
+          <h3 class="text-sm font-bold text-slate-200 font-mono mb-2 uppercase tracking-wide">The Psychological Anchor</h3>
+          <p class="text-xs text-slate-400 leading-relaxed mb-4">
+            Living on a vacuum moon inside a deep gravitational well poses major cognitive challenges. Without a biological rhythm, our perception of time naturally degrades. 
+          </p>
+          <p class="text-xs text-slate-400 leading-relaxed mb-4">
+            By establishing the <strong>Four Quadrants of the Wheel</strong>, we divide Nahla's long 555-day orbital loop into manageable segments. Instead of counting down the endless, monotonous days between the searing heat of Perihelion resets, the crew utilizes these four precise orbital nodes to celebrate milestones, rotate duties, and change scientific parameters.
+          </p>
+        </div>
+
+        <div class="border-t border-[#1a202c]/40 pt-3 text-[10px] text-slate-500 leading-relaxed font-mono uppercase">
+          📡 <span class="font-bold text-slate-400">Telemetry Note:</span> Traditional celebrations are strictly scheduled on the exact day of transit. Since they fall precisely every 138 days, they act as reliable seasonal markers for agriculture inside the bio-domes.
+        </div>
+      </section>
+
+    </div>
+
+    <!-- Detailed Quarterly Almanac Cards -->
+    <section class="bg-[#0c0e12] border border-[#1a202c] rounded-lg p-5 shadow-lg mb-6 relative">
+      <div class="absolute top-0 left-0 w-full h-[2px] bg-[#5cb6e4]"></div>
+      
+      <h2 class="text-[10px] text-[#5cb6e4] mb-4 uppercase tracking-widest font-bold font-mono">
+        Almanac: The Four Quarters of the Nahla Wheel
+      </h2>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        
+        <!-- Festival 1: Maštītu -->
+        <div class="bg-[#08090c] border border-amber-500/20 rounded p-4 flex flex-col justify-between">
+          <div>
+            <div class="flex justify-between items-start mb-2">
+              <span class="text-xs text-amber-400 font-mono font-bold">I. DESCENDING NODE</span>
+              <span class="text-[9px] bg-amber-950/40 text-amber-400 border border-amber-500/20 px-2 py-0.5 rounded font-mono">Day 138</span>
+            </div>
+            <h3 class="text-sm font-bold text-slate-200 font-mono">The Festival of Maštītu</h3>
+            <p class="text-[10px] text-slate-500 italic mt-0.5">The Point of Perfect Equilibrium</p>
+            <p class="text-xs text-slate-400 mt-2.5 leading-relaxed">
+              When the star Hope crosses the equator, creating exact day-night symmetry globally. Named after the Mesopotamian ration banquets. A celebration of balance, logistics, and visual alignment where the horizon light splits perfectly.
+            </p>
+          </div>
+          <div class="mt-4 pt-3 border-t border-[#1a202c]/40 text-[10px] font-mono">
+            <span class="text-amber-400 font-bold">Traditional Food:</span> Freshly baked salt biscuits, structured meat-rations, preserved visual greens, and pure water.
+          </div>
+        </div>
+
+        <!-- Festival 2: Halpū -->
+        <div class="bg-[#08090c] border border-blue-500/20 rounded p-4 flex flex-col justify-between">
+          <div>
+            <div class="flex justify-between items-start mb-2">
+              <span class="text-xs text-blue-400 font-mono font-bold">II. APHELION</span>
+              <span class="text-[9px] bg-blue-950/40 text-blue-400 border border-blue-500/20 px-2 py-0.5 rounded font-mono">Day 276</span>
+            </div>
+            <h3 class="text-sm font-bold text-slate-200 font-mono">The Festival of Halpū</h3>
+            <p class="text-[10px] text-slate-500 italic mt-0.5">The Peak of the Crimson Veil</p>
+            <p class="text-xs text-slate-400 mt-2.5 leading-relaxed">
+              When Nahla is furthest from Hope. The sun shrinks to a tiny disk. To survive the deep space freeze, the crew relies on the radiant infrared envelope of parent giant Rebekah. A cozy indoor solstice, looking to the sky's rich glowing belly.
+            </p>
+          </div>
+          <div class="mt-4 pt-3 border-t border-[#1a202c]/40 text-[10px] font-mono">
+            <span class="text-blue-400 font-bold">Traditional Food:</span> Hot dark grain broths, rich stew, buttered sweet pastries, and heavy warming tea.
+          </div>
+        </div>
+
+        <!-- Festival 3: Rīšu -->
+        <div class="bg-[#08090c] border border-orange-500/20 rounded p-4 flex flex-col justify-between">
+          <div>
+            <div class="flex justify-between items-start mb-2">
+              <span class="text-xs text-orange-400 font-mono font-bold">III. ASCENDING NODE</span>
+              <span class="text-[9px] bg-orange-950/40 text-orange-400 border border-orange-500/20 px-2 py-0.5 rounded font-mono">Day 414</span>
+            </div>
+            <h3 class="text-sm font-bold text-slate-200 font-mono">The Festival of Rīšu</h3>
+            <p class="text-[10px] text-slate-500 italic mt-0.5">The Return of the Rising Hope</p>
+            <p class="text-xs text-slate-400 mt-2.5 leading-relaxed">
+              As Nahla crosses the ascending node and begins accelerating back toward solar focus. Shadows begin to contract, and warmth creeps back into the lower valleys. A celebration of hope, rebirth, and the preparation of mapping paths.
+            </p>
+          </div>
+          <div class="mt-4 pt-3 border-t border-[#1a202c]/40 text-[10px] font-mono">
+            <span class="text-orange-400 font-bold">Traditional Food:</span> Bright citrus-flavor concentrates, roasted biscuits, and honey-glazed nuts.
+          </div>
+        </div>
+
+        <!-- Festival 4: Kurunnītu -->
+        <!-- Matches the purple theme highlighted in the screenshot layout -->
+        <div class="bg-[#0c0e12] border border-[#a855f7]/30 rounded p-4 flex flex-col justify-between shadow-[0_0_10px_rgba(168,85,247,0.15)]">
+          <div>
+            <div class="flex justify-between items-start mb-2">
+              <span class="text-xs text-[#a855f7] font-mono font-bold">IV. PERIHELION</span>
+              <span class="text-[9px] bg-purple-950/40 text-purple-400 border border-purple-500/20 px-2 py-0.5 rounded font-mono">Day 553-555</span>
+            </div>
+            <h3 class="text-sm font-bold text-slate-200 font-mono">The Festival of Kurunnītu</h3>
+            <p class="text-[10px] text-slate-500 italic mt-0.5">The Transition of Solar Fire</p>
+            <p class="text-xs text-slate-400 mt-2.5 leading-relaxed">
+              Occurs during the closest orbital run to the primary star Hope. The solar light is searing, shadows are at their shortest, and baseline temperatures hit peak thresholds. Named after the legendary Sumerian sweet red beer.
+            </p>
+          </div>
+          <div class="mt-4 pt-3 border-t border-[#a855f7]/20 text-[10px] font-mono">
+            <span class="text-[#a855f7] font-bold">Traditional Food:</span> Strong fermented red sweet beers, heavy spices, dried fruits, and honey biscuits.
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Simple Day Lookup Table Reference -->
+    <section class="bg-[#0c0e12] border border-[#1a202c] rounded-lg p-5 shadow-lg relative">
+      <div class="absolute top-0 left-0 w-full h-[2px] bg-[#5cb6e4]"></div>
+      
+      <h2 class="text-[10px] text-[#5cb6e4] mb-3 uppercase tracking-widest font-bold font-mono">
+        Quick Look-Up: Calendar Coordination
+      </h2>
+      <p class="text-xs text-slate-400 mb-4 font-mono leading-relaxed">
+        Use this simplified table to quickly match the active day of your calendar to the current seasonal cycle.
+      </p>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left font-mono text-[11px] border-collapse">
+          <thead>
+            <tr class="border-b border-[#1a202c] text-slate-500 uppercase tracking-wider">
+              <th class="py-2 px-3 font-semibold">Calendar Day Range</th>
+              <th class="py-2 px-3 font-semibold">Sumerian Season</th>
+              <th class="py-2 px-3 font-semibold">Climatic Baseline</th>
+              <th class="py-2 px-3 font-semibold">Apex Target Day</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-[#1a202c]/40 text-slate-300">
+            <tr>
+              <td class="py-2.5 px-3">Days 1 - 137</td>
+              <td class="py-2.5 px-3 text-amber-400">Entering Descent (Šumu)</td>
+              <td class="py-2.5 px-3">Cooling downward from Perihelion highs</td>
+              <td class="py-2.5 px-3">Day 138 (Maštītu)</td>
+            </tr>
+            <tr>
+              <td class="py-2.5 px-3">Days 139 - 275</td>
+              <td class="py-2.5 px-3 text-blue-400">Deep Winter Descent (Halpu)</td>
+              <td class="py-2.5 px-3">Intense cold; reliance on Rebekah's infrared</td>
+              <td class="py-2.5 px-3">Day 276 (Halpū)</td>
+            </tr>
+            <tr>
+              <td class="py-2.5 px-3">Days 277 - 413</td>
+              <td class="py-2.5 px-3 text-orange-400">Rising Ascension (Rīšu)</td>
+              <td class="py-2.5 px-3">Warmth returning slowly to valley floors</td>
+              <td class="py-2.5 px-3">Day 414 (Rīšu)</td>
+            </tr>
+            <tr>
+              <td class="py-2.5 px-3">Days 415 - 552</td>
+              <td class="py-2.5 px-3 text-purple-400">Peak Thermal Ascent (Anat)</td>
+              <td class="py-2.5 px-3">Searing zenith run; extreme midday heat</td>
+              <td class="py-2.5 px-3">Days 553 - 555 (Kurunnītu)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </div>
+
+</body>
+</html>
