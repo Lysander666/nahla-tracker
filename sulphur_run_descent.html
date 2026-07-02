@@ -1,0 +1,1352 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Sulphur Run: Pâte Sablée Descent</title>
+    
+    <!-- External Web Fonts for Retro/Sci-Fi Styling -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=VT323&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap">
+    
+    <!-- Tailwind CSS for modern design and structural overlays -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <style>
+        body {
+            font-family: 'VT323', monospace;
+            background-color: #0d0602;
+            overflow: hidden;
+            touch-action: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        /* Responsive game wrapper forcing portrait 9:16 aspect ratio on desktops, full screen on mobile */
+        #game-frame {
+            position: relative;
+            aspect-ratio: 9/16;
+            width: 100%;
+            max-width: 480px;
+            max-height: 100vh;
+            border: 2px solid #d4a24e;
+            box-shadow: 
+                0 0 15px rgba(212, 162, 78, 0.4), 
+                inset 0 0 30px rgba(36, 14, 3, 0.8);
+            background-color: #120703;
+            overflow: hidden;
+        }
+
+        /* Scanline CRT Arcade Filter Overlay */
+        #game-frame::after {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.15) 50%);
+            background-size: 100% 4px;
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        .blink {
+            animation: blinker 0.8s steps(2, start) infinite;
+        }
+        @keyframes blinker {
+            50% { opacity: 0; }
+        }
+
+        /* Smooth continuous gradient animations for hot atmospheric sulfur chasm */
+        @keyframes amberPulse {
+            0% { text-shadow: 0 0 5px #d4a24e, 0 0 10px rgba(212, 162, 78, 0.4); }
+            50% { text-shadow: 0 0 15px #ffb347, 0 0 25px rgba(255, 179, 71, 0.7); }
+            100% { text-shadow: 0 0 5px #d4a24e, 0 0 10px rgba(212, 162, 78, 0.4); }
+        }
+        .neon-amber {
+            animation: amberPulse 2s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center h-full w-full">
+
+    <div id="game-frame" class="flex flex-col justify-between">
+        
+        <!-- Game Canvas covering background -->
+        <canvas id="gameCanvas" class="absolute inset-0 w-full h-full block z-0"></canvas>
+        
+        <!-- AUDIO TAG linking to the same BGM file -->
+        <audio id="bgm" loop preload="auto"></audio>
+
+        <!-- Floating Portrait HUD Layer -->
+        <div id="hud" class="absolute top-4 left-4 right-4 z-20 hidden pointer-events-none flex flex-col gap-1 text-[1.2rem] sm:text-[1.4rem]">
+            <!-- Primary Telemetry Grid -->
+            <div class="flex justify-between items-center bg-black/70 border-l-4 border-[#d4a24e] px-3 py-1.5 shadow-md">
+                <div class="text-[#d4a24e]">
+                    DPTH: <span id="hud-depth" class="text-white font-bold">0</span>m
+                </div>
+                <div class="text-white">
+                    DATA: <span id="hud-data" class="text-[#61dafb]">0</span>
+                </div>
+                <div class="text-[#ff61c7]">
+                    PHASE: <span id="hud-phase" class="font-bold">α</span>
+                </div>
+            </div>
+            
+            <!-- Secondary Telemetry (Loop & Health) -->
+            <div class="flex justify-between items-center text-[1.1rem] bg-black/60 px-3 py-1">
+                <div class="text-gray-400">
+                    LOOP: <span id="hud-loop" class="text-[#d4a24e]">1</span>
+                </div>
+                <!-- Mini Hull Integrity Bar -->
+                <div class="flex items-center gap-2">
+                    <span class="text-[#ff4444] text-xs">SHIELD</span>
+                    <div class="w-16 bg-gray-800 h-2 border border-[#ff4444]/50 rounded overflow-hidden">
+                        <div id="shield-bar" class="bg-[#ff4444] h-full w-full transition-all duration-150"></div>
+                    </div>
+                </div>
+                <div class="text-gray-400">
+                    SPD: <span id="hud-speed" class="text-white">0</span> km/h
+                </div>
+            </div>
+        </div>
+
+        <!-- Start Game Screen Overlay -->
+        <div id="start-screen" class="absolute inset-0 z-30 flex flex-col justify-center items-center bg-black/90 p-6 text-center select-none">
+            <div class="transform -skew-x-3 border-2 border-[#d4a24e] bg-[#240e03]/80 p-5 shadow-[0_0_20px_rgba(212,162,78,0.4)]">
+                <h1 class="text-4xl sm:text-5xl font-extrabold text-white tracking-widest uppercase text-shadow neon-amber leading-none mb-1">SULPHUR RUN</h1>
+                <h2 class="text-xl sm:text-2xl text-[#d4a24e] font-bold tracking-wider leading-none mb-3">PÂTE SABLÉE DESCENT</h2>
+                <p class="text-[1.1rem] sm:text-lg text-gray-300 font-sans tracking-wide leading-relaxed">
+                    Navigate the vertical, crumbly silicate walls of the ancient Pâte Sablée basin. Blast obstructions, dodge magma vents, and stay ahead of the rising toxic sulfur core!
+                </p>
+            </div>
+
+            <span id="start-prompt" class="blink text-2xl text-white mt-12 cursor-pointer neon-amber border border-white/25 px-4 py-2 bg-white/5 active:bg-white/20 transition-all rounded">
+                [TAP TO INITIATE DESCENT]
+            </span>
+
+            <div class="mt-10 border-t border-white/10 pt-4 w-full text-center text-sm sm:text-base text-gray-400 tracking-wider">
+                <p class="mb-1"><span class="text-[#d4a24e]">STEER:</span> Tap Left / Right side of screen</p>
+                <p class="mb-1"><span class="text-[#ff61c7]">WEAPONS:</span> Plasma beams fire automatically downward</p>
+                <p class="text-xs text-gray-500 mt-2 font-sans italic">Connects dynamically to the original synth soundtrack</p>
+            </div>
+        </div>
+
+        <!-- Pause Screen Overlay -->
+        <div id="pause-screen" class="absolute inset-0 z-30 hidden flex flex-col justify-center items-center bg-black/85 text-center">
+            <h1 class="text-5xl text-white font-bold tracking-widest neon-amber transform -skew-x-3 mb-4">DESCENT PAUSED</h1>
+            <p class="blink text-2xl text-gray-300">[TAP CENTER TO RESUME]</p>
+            <button id="pause-quit-btn" class="mt-8 px-5 py-2 border border-[#ff4444] text-[#ff4444] text-lg hover:bg-[#ff4444]/10 rounded transform -skew-x-3 transition-all pointer-events-auto">
+                ABORT SIMULATION
+            </button>
+        </div>
+
+        <!-- Game Over Screen Overlay -->
+        <div id="game-over-screen" class="absolute inset-0 z-30 hidden flex flex-col justify-center items-center bg-black/95 p-6 text-center">
+            <div class="text-[#ff4444] text-xl font-bold tracking-widest uppercase mb-1">CRITICAL FAILURE // CORE MELTDOWN</div>
+            <h1 class="text-4xl sm:text-5xl text-white font-extrabold transform -skew-x-3 text-shadow leading-none mb-4" style="text-shadow: 0 0 10px #ff4444;">MODULE TERMINATED</h1>
+            
+            <div class="my-5 flex flex-col gap-2 border-y border-white/10 py-4 w-full max-w-xs text-xl sm:text-2xl text-gray-300">
+                <p class="flex justify-between"><span>DESCENT DEPTH:</span> <span id="final-depth" class="text-white font-bold">0</span>m</p>
+                <p class="flex justify-between"><span>DATA ACQUIRED:</span> <span id="final-data" class="text-[#61dafb] font-bold">0</span></p>
+                <p class="flex justify-between"><span>TERMINAL PHASE:</span> <span id="final-phase" class="text-[#ff61c7] font-bold">α</span></p>
+            </div>
+
+            <span id="reboot-prompt" class="blink text-2xl text-white mt-8 cursor-pointer neon-amber border border-white/20 px-4 py-2 bg-[#240e03] rounded">
+                [TAP TO REBOOT COMPASS]
+            </span>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Target logical dimensions for calculation aspect-ratio scaling
+        const LOGICAL_WIDTH = 360;
+        const LOGICAL_HEIGHT = 640;
+
+        // BGM Soundtrack file mapping
+        const MUSIC_FILE = 'nahla_theme.mp3';
+        const bgm = document.getElementById('bgm');
+        if (bgm) {
+            bgm.src = MUSIC_FILE;
+            bgm.volume = 0.45;
+        }
+
+        // Adaptive scaling multiplier based on actual client frame size
+        let scaleFactor = 1;
+
+        function resizeCanvas() {
+            const container = document.getElementById('game-frame');
+            const rect = container.getBoundingClientRect();
+            const dpr = window.devicePixelRatio || 1;
+            
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            ctx.scale(dpr, dpr);
+            
+            // Calculate uniform scale coordinate factor
+            scaleFactor = rect.width / LOGICAL_WIDTH;
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        window.addEventListener('load', resizeCanvas);
+        resizeCanvas();
+
+        // --- WEB AUDIO API PROCEDURAL SYNTH ENGINE ---
+        // Generates atmospheric sci-fi backing tracks if the remote mp3 resource is unavailable.
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        let actx = null;
+        let activeAudioNodes = 0;
+
+        function initAudioContext() {
+            if (!actx) {
+                actx = new AudioContext();
+            }
+            if (actx.state === 'suspended') {
+                actx.resume();
+            }
+        }
+
+        function playSound(type) {
+            initAudioContext();
+            if (activeAudioNodes > 15) return; // Prevent performance bottlenecks on weak devices
+
+            activeAudioNodes++;
+            const osc = actx.createOscillator();
+            const gainNode = actx.createGain();
+            const filterNode = actx.createBiquadFilter();
+
+            osc.connect(filterNode);
+            filterNode.connect(gainNode);
+            gainNode.connect(actx.destination);
+
+            osc.onended = () => {
+                osc.disconnect();
+                filterNode.disconnect();
+                gainNode.disconnect();
+                activeAudioNodes--;
+            };
+
+            const now = actx.currentTime;
+            let duration = 0.15;
+
+            switch (type) {
+                case 'shoot':
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(500, now);
+                    osc.frequency.exponentialRampToValueAtTime(80, now + 0.1);
+                    filterNode.type = 'lowpass';
+                    filterNode.frequency.setValueAtTime(1000, now);
+                    gainNode.gain.setValueAtTime(0.12, now);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+                    duration = 0.1;
+                    break;
+                case 'explode':
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(120, now);
+                    osc.frequency.linearRampToValueAtTime(10, now + 0.35);
+                    filterNode.type = 'lowpass';
+                    filterNode.frequency.setValueAtTime(300, now);
+                    gainNode.gain.setValueAtTime(0.35, now);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
+                    duration = 0.35;
+                    break;
+                case 'hit':
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(220, now);
+                    osc.frequency.linearRampToValueAtTime(30, now + 0.25);
+                    filterNode.type = 'bandpass';
+                    filterNode.frequency.setValueAtTime(400, now);
+                    gainNode.gain.setValueAtTime(0.25, now);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+                    duration = 0.25;
+                    break;
+                case 'collect':
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(600, now);
+                    osc.frequency.linearRampToValueAtTime(1200, now + 0.12);
+                    filterNode.type = 'highpass';
+                    filterNode.frequency.setValueAtTime(800, now);
+                    gainNode.gain.setValueAtTime(0.15, now);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+                    duration = 0.15;
+                    break;
+                case 'shield-break':
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(300, now);
+                    osc.frequency.exponentialRampToValueAtTime(50, now + 0.4);
+                    filterNode.type = 'notch';
+                    filterNode.frequency.setValueAtTime(150, now);
+                    gainNode.gain.setValueAtTime(0.3, now);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+                    duration = 0.4;
+                    break;
+            }
+
+            osc.start();
+            osc.stop(now + duration);
+        }
+
+        // --- GAME PLAY MECHANICS & THEMES ---
+        const THEMES = [
+            { name: 'SULPHUR', main: '#d4a24e', glow: 'rgba(212, 162, 78, 0.4)', text: '#d4a24e', background: '#120703' },
+            { name: 'CYAN',    main: '#61dafb', glow: 'rgba(97, 218, 251, 0.4)', text: '#61dafb', background: '#020d12' },
+            { name: 'MAGENTA', main: '#ff61c7', glow: 'rgba(255, 97, 199, 0.4)', text: '#ff61c7', background: '#0e0212' },
+            { name: 'RED',     main: '#ff4444', glow: 'rgba(255, 68, 68, 0.4)',  text: '#ff4444', background: '#120202' }
+        ];
+
+        const GREEK_PHASES = ['α','β','γ','δ','ε','ζ','η','θ','ι','κ','λ','μ'];
+        const POINTS_PER_PHASE = 120;
+
+        // Vertical Chasm structural boundary configurations
+        const CHASM_L = 40;
+        const CHASM_R = LOGICAL_WIDTH - CHASM_L;
+
+        let gameState = 'START';
+        let frames = 0;
+        let depth = 0;
+        let dataScore = 0;
+        let speed = 7.0; // Base descent velocity scaling
+        let visualDepth = 0;
+
+        let currentThemeIdx = 0;
+        let currentPhaseIdx = 0;
+        let currentLoopIdx = 0;
+
+        let touchLeft = false;
+        let touchRight = false;
+
+        const rover = {
+            x: LOGICAL_WIDTH / 2 - 16,
+            y: 110, // Fixed high on vertical screen axis
+            width: 32,
+            height: 20,
+            vx: 0,
+            angle: 0,
+            shield: 100, // Maximum survival integrity points
+            lastShot: 0,
+            shotCooldown: 10,
+
+            draw: function() {
+                ctx.save();
+                ctx.translate(this.x + this.width/2, this.y + this.height/2);
+
+                // Pivot engine chassis depending on lateral movement velocity
+                this.angle = this.vx * 0.04;
+                ctx.rotate(this.angle);
+
+                const theme = THEMES[currentThemeIdx];
+
+                // Wingtips and stabilizers (Outer wings shadow)
+                ctx.fillStyle = '#121214'; 
+                ctx.beginPath();
+                ctx.moveTo(-16, -6);
+                ctx.lineTo(-22, -1);
+                ctx.lineTo(-12, 5);
+                ctx.closePath();
+                ctx.fill();
+
+                ctx.beginPath();
+                ctx.moveTo(16, -6);
+                ctx.lineTo(22, -1);
+                ctx.lineTo(12, 5);
+                ctx.closePath();
+                ctx.fill();
+
+                // Twin retro-thruster braking exhausts at top
+                ctx.fillStyle = theme.main;
+                ctx.shadowColor = theme.main;
+                ctx.shadowBlur = 10;
+                ctx.fillRect(-8, -11, 4, 3);
+                ctx.fillRect(4, -11, 4, 3);
+                ctx.shadowBlur = 0;
+
+                // Sleek aerodynamic fuselage body (pointed downwards)
+                ctx.fillStyle = '#27272a';
+                ctx.beginPath();
+                ctx.moveTo(-10, -8); // Top-left
+                ctx.lineTo(10, -8);  // Top-right
+                ctx.lineTo(7, 3);    // Mid-right
+                ctx.lineTo(0, 11);   // Pointy nose
+                ctx.lineTo(-7, 3);   // Mid-left
+                ctx.closePath();
+                ctx.fill();
+
+                // Wing panel highlights
+                ctx.fillStyle = '#3f3f46';
+                ctx.beginPath();
+                ctx.moveTo(-7, -8);
+                ctx.lineTo(-10, -8);
+                ctx.lineTo(-7, 3);
+                ctx.closePath();
+                ctx.fill();
+
+                ctx.beginPath();
+                ctx.moveTo(7, -8);
+                ctx.lineTo(10, -8);
+                ctx.lineTo(7, 3);
+                ctx.closePath();
+                ctx.fill();
+
+                // Glowing cockpit visor canopy
+                ctx.fillStyle = theme.main;
+                ctx.shadowColor = theme.main;
+                ctx.shadowBlur = 8;
+                ctx.beginPath();
+                ctx.moveTo(-3, -4);
+                ctx.lineTo(3, -4);
+                ctx.lineTo(1.5, 1);
+                ctx.lineTo(0, 4);
+                ctx.lineTo(-1.5, 1);
+                ctx.closePath();
+                ctx.fill();
+                ctx.shadowBlur = 0;
+
+                // Dual wing laser cannon barrels
+                ctx.fillStyle = '#18181b';
+                ctx.fillRect(-13, -1, 2, 8);
+                ctx.fillRect(11, -1, 2, 8);
+
+                ctx.restore();
+            },
+
+            update: function() {
+                // Apply steering thruster force
+                if (touchLeft) this.vx -= 0.85;
+                if (touchRight) this.vx += 0.85;
+
+                // Apply chasm fluid inertia friction
+                this.vx *= 0.83;
+                this.x += this.vx;
+
+                // Safety boundary constraint checks against crumbly silicate canyon walls
+                const buffer = 4;
+                if (this.x < CHASM_L + buffer) {
+                    this.x = CHASM_L + buffer;
+                    this.vx = 0;
+                }
+                if (this.x > CHASM_R - this.width - buffer) {
+                    this.x = CHASM_R - this.width - buffer;
+                    this.vx = 0;
+                }
+
+                // Automatic downward defense firing loop
+                if (frames - this.lastShot >= this.shotCooldown) {
+                    this.lastShot = frames;
+                    this.shoot();
+                }
+            },
+
+            shoot: function() {
+                projectiles.push({
+                    x: this.x + 6,
+                    y: this.y + this.height,
+                    vy: 11,
+                    size: 3,
+                    height: 12
+                });
+                projectiles.push({
+                    x: this.x + this.width - 9,
+                    y: this.y + this.height,
+                    vy: 11,
+                    size: 3,
+                    height: 12
+                });
+                playSound('shoot');
+            }
+        };
+
+        // Entities Storage Layers
+        let obstacles = [];
+        let particles = [];
+        let projectiles = [];
+        let collectibles = [];
+        let starfield = [];
+        let backgroundSabléeDust = [];
+
+        function initEnvironments() {
+            obstacles = [];
+            particles = [];
+            projectiles = [];
+            collectibles = [];
+            starfield = [];
+            backgroundSabléeDust = [];
+
+            // Spawn dynamic stars flowing upwards to simulate high-speed vertical dive
+            for (let i = 0; i < 60; i++) {
+                starfield.push({
+                    x: Math.random() * LOGICAL_WIDTH,
+                    y: Math.random() * LOGICAL_HEIGHT,
+                    speed: 0.8 + Math.random() * 2.2,
+                    size: 0.5 + Math.random() * 1.5,
+                    alpha: 0.2 + Math.random() * 0.8
+                });
+            }
+
+            // Flaky crumbs floating down/up around the volcanic sulfur crater
+            for (let i = 0; i < 25; i++) {
+                backgroundSabléeDust.push({
+                    x: CHASM_L + Math.random() * (CHASM_R - CHASM_L),
+                    y: Math.random() * LOGICAL_HEIGHT,
+                    speed: 1.5 + Math.random() * 2.5,
+                    size: 2 + Math.random() * 4,
+                    angle: Math.random() * Math.PI,
+                    rotSpeed: (Math.random() - 0.5) * 0.05
+                });
+            }
+        }
+
+        // Core sulfur vapor threat from the chasm bottom
+        let vaporHeight = LOGICAL_HEIGHT + 20;
+        let maxVaporAdvance = LOGICAL_HEIGHT - 120; // Critical zone
+
+        // Dynamic generation algorithm for crumbling obstacles and data nodes
+        function generateVerticalSpawns() {
+            // Spawn Breakable Sablée Rock Ledges spanning horizontal space
+            if (frames % 90 === 0) {
+                const layout = Math.random();
+                if (layout < 0.35) {
+                    // Left wall-clinging breakable silicate block
+                    obstacles.push(createObstacle(CHASM_L, LOGICAL_HEIGHT, 110, 20, 'SABLEE', 3));
+                } else if (layout < 0.7) {
+                    // Right wall-clinging breakable silicate block
+                    obstacles.push(createObstacle(CHASM_R - 110, LOGICAL_HEIGHT, 110, 20, 'SABLEE', 3));
+                } else {
+                    // Two smaller segmented ledges on both sides
+                    obstacles.push(createObstacle(CHASM_L, LOGICAL_HEIGHT, 70, 20, 'SABLEE', 2));
+                    obstacles.push(createObstacle(CHASM_R - 70, LOGICAL_HEIGHT, 70, 20, 'SABLEE', 2));
+                }
+            }
+
+            // Spawn hazardous static spikes poking inwards from the hard basalt walls
+            if (frames % 140 === 0 && Math.random() > 0.3) {
+                const sideLeft = Math.random() > 0.5;
+                const spikeWidth = 25 + Math.random() * 15;
+                const spikeHeight = 35 + Math.random() * 15;
+                obstacles.push({
+                    x: sideLeft ? CHASM_L : CHASM_R - spikeWidth,
+                    y: LOGICAL_HEIGHT,
+                    width: spikeWidth,
+                    height: spikeHeight,
+                    type: 'SPIKE',
+                    side: sideLeft ? 'LEFT' : 'RIGHT'
+                });
+            }
+
+            // Spawn floating glowing resource cores/nodes
+            if (frames % 80 === 0) {
+                const nodeRand = Math.random();
+                let val = 40;
+                let col = '#61dafb'; // Default blue
+
+                if (nodeRand > 0.88) {
+                    val = 100;
+                    col = '#d4a24e'; // Golden high value
+                } else if (nodeRand > 0.65) {
+                    val = 70;
+                    col = '#ff61c7'; // Pink mid-value
+                }
+
+                collectibles.push({
+                    x: CHASM_L + 20 + Math.random() * (CHASM_R - CHASM_L - 40),
+                    y: LOGICAL_HEIGHT + 10,
+                    size: 8,
+                    value: val,
+                    color: col,
+                    pulse: Math.random() * Math.PI
+                });
+            }
+        }
+
+        function createObstacle(x, y, w, h, type, hp) {
+            return {
+                x: x, y: y, width: w, height: h, type: type, hp: hp, maxHp: hp
+            };
+        }
+
+        function spawnParticles(x, y, count, color, customSize) {
+            for (let i = 0; i < count; i++) {
+                particles.push({
+                    x: x,
+                    y: y,
+                    vx: (Math.random() - 0.5) * 6,
+                    vy: (Math.random() - 0.5) * 6 - 2,
+                    size: customSize || (1 + Math.random() * 3),
+                    color: color,
+                    life: 20 + Math.random() * 20
+                });
+            }
+        }
+
+        // Mobile Split-Screen Tap Inputs mapped directly to absolute position on touch screen
+        const handleTouchStart = (e) => {
+            initAudioContext();
+            // Start logic removed from global catch to prevent accidental triggers
+            if (gameState === 'GAMEOVER') {
+                resetGame();
+                return;
+            }
+            if (gameState === 'PLAYING') {
+                const rect = canvas.getBoundingClientRect();
+                const touchX = e.touches[0].clientX - rect.left;
+                
+                // Pause button touch bounds
+                if (touchX > rect.width * 0.4 && touchX < rect.width * 0.6 && e.touches[0].clientY - rect.top < rect.height * 0.1) {
+                    togglePause();
+                    return;
+                }
+
+                // Steer left or right depending on side of screen touched
+                if (touchX < rect.width / 2) {
+                    touchLeft = true;
+                    touchRight = false;
+                } else {
+                    touchRight = true;
+                    touchLeft = false;
+                }
+            }
+        };
+
+        // Explicit direct listener for the start prompt to ensure reliable firing
+        document.getElementById('start-prompt').addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            initAudioContext();
+            startGame();
+        }, {passive: false});
+
+        document.getElementById('start-prompt').addEventListener('click', (e) => {
+            e.preventDefault();
+            initAudioContext();
+            startGame();
+        });
+
+        const handleTouchMove = (e) => {
+            if (gameState === 'PLAYING') {
+                const rect = canvas.getBoundingClientRect();
+                const touchX = e.touches[0].clientX - rect.left;
+                if (touchX < rect.width / 2) {
+                    touchLeft = true;
+                    touchRight = false;
+                } else {
+                    touchRight = true;
+                    touchLeft = false;
+                }
+            }
+        };
+
+        const handleTouchEnd = () => {
+            touchLeft = false;
+            touchRight = false;
+        };
+
+        window.addEventListener('touchstart', handleTouchStart, { passive: false });
+        window.addEventListener('touchmove', handleTouchMove, { passive: false });
+        window.addEventListener('touchend', handleTouchEnd);
+
+        // Desktop keyboard controls mapping as seamless accessibility fallback
+        window.addEventListener('keydown', (e) => {
+            if (gameState === 'PLAYING') {
+                if (e.code === 'ArrowLeft' || e.code === 'KeyA') touchLeft = true;
+                if (e.code === 'ArrowRight' || e.code === 'KeyD') touchRight = true;
+                if (e.code === 'KeyP') togglePause();
+            } else if (e.code === 'Space' || e.code === 'Enter') {
+                if (gameState === 'START') startGame();
+                else if (gameState === 'GAMEOVER') resetGame();
+            }
+        });
+
+        window.addEventListener('keyup', (e) => {
+            if (e.code === 'ArrowLeft' || e.code === 'KeyA') touchLeft = false;
+            if (e.code === 'ArrowRight' || e.code === 'KeyD') touchRight = false;
+        });
+
+        function startGame() {
+            gameState = 'PLAYING';
+            document.getElementById('start-screen').style.opacity = '0';
+            setTimeout(() => {
+                document.getElementById('start-screen').style.display = 'none';
+            }, 200);
+            document.getElementById('game-over-screen').style.display = 'none';
+            document.getElementById('hud').style.display = 'flex';
+
+            frames = 0;
+            depth = 0;
+            dataScore = 0;
+            speed = 7.0;
+            rover.shield = 100;
+            rover.x = LOGICAL_WIDTH / 2 - 16;
+            rover.vx = 0;
+
+            currentThemeIdx = 0;
+            currentPhaseIdx = 0;
+            currentLoopIdx = 0;
+            vaporHeight = LOGICAL_HEIGHT + 100;
+
+            initEnvironments();
+            updateHUDTheme();
+
+            if (bgm) {
+                bgm.currentTime = 0;
+                bgm.play().catch(() => {
+                    console.log('Background Audio deferred until browser gesture interaction.');
+                });
+            }
+        }
+
+        function togglePause() {
+            if (gameState === 'PLAYING') {
+                gameState = 'PAUSED';
+                document.getElementById('pause-screen').style.display = 'flex';
+                if (bgm) bgm.pause();
+            } else if (gameState === 'PAUSED') {
+                gameState = 'PLAYING';
+                document.getElementById('pause-screen').style.display = 'none';
+                if (bgm) bgm.play().catch(() => {});
+            }
+        }
+
+        document.getElementById('pause-screen').addEventListener('touchstart', (e) => {
+            e.stopPropagation();
+            if (e.target.id !== 'pause-quit-btn') {
+                togglePause();
+            }
+        });
+
+        document.getElementById('pause-quit-btn').addEventListener('touchstart', (e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            quitGame();
+        });
+
+        function quitGame() {
+            gameState = 'START';
+            document.getElementById('pause-screen').style.display = 'none';
+            document.getElementById('start-screen').style.display = 'flex';
+            document.getElementById('start-screen').style.opacity = '1';
+            document.getElementById('hud').style.display = 'none';
+            if (bgm) bgm.pause();
+        }
+
+        function resetGame() {
+            startGame();
+        }
+
+        function triggerTermination() {
+            gameState = 'GAMEOVER';
+            playSound('explode');
+            
+            document.getElementById('game-over-screen').style.display = 'flex';
+            document.getElementById('final-depth').innerText = Math.floor(depth);
+            document.getElementById('final-data').innerText = dataScore;
+            document.getElementById('final-phase').innerText = GREEK_PHASES[currentPhaseIdx];
+            document.getElementById('hud').style.display = 'none';
+
+            spawnParticles(rover.x + rover.width/2, rover.y + rover.height/2, 35, '#ff4444', 4);
+        }
+
+        document.getElementById('reboot-prompt').addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            resetGame();
+        });
+
+        function updateHUDTheme() {
+            const theme = THEMES[currentThemeIdx];
+            const hud = document.getElementById('hud');
+            
+            hud.style.borderColor = theme.main;
+            document.getElementById('shield-bar').style.backgroundColor = theme.main;
+            document.getElementById('game-frame').style.borderColor = theme.main;
+            document.getElementById('game-frame').style.boxShadow = `0 0 15px ${theme.main}, inset 0 0 30px rgba(36, 14, 3, 0.8)`;
+        }
+
+        function update() {
+            if (gameState !== 'PLAYING') return;
+
+            frames++;
+            depth += 0.08 * (speed / 5);
+
+            // Incrementally scale down environmental descent velocity
+            if (frames % 220 === 0) speed += 0.1;
+
+            // Phase and Loop transitions calculated via acquisition of data scores
+            const rawPhases = Math.floor(dataScore / POINTS_PER_PHASE);
+            const targetPhase = rawPhases % 12;
+            const targetLoop = Math.floor(rawPhases / 12) + 1;
+
+            if (targetPhase !== currentPhaseIdx) {
+                currentPhaseIdx = targetPhase;
+                playSound('collect');
+            }
+
+            if (targetLoop !== currentLoopIdx + 1) {
+                currentLoopIdx = targetLoop - 1;
+                currentThemeIdx = currentLoopIdx % THEMES.length;
+                updateHUDTheme();
+                speed += 1.2; // Drastic velocity change on phase loop increments
+            }
+
+            // Execute Rover update logic
+            rover.update();
+
+            // Run procedurally generated content spawn scheduler
+            generateVerticalSpawns();
+
+            // Parallax Environment Space Layers scroll upwards (simulating descent down)
+            starfield.forEach(star => {
+                star.y -= star.speed * (speed * 0.15);
+                if (star.y < 0) {
+                    star.y = LOGICAL_HEIGHT;
+                    star.x = Math.random() * LOGICAL_WIDTH;
+                }
+            });
+
+            backgroundSabléeDust.forEach(crumb => {
+                crumb.y -= crumb.speed * (speed * 0.12);
+                crumb.angle += crumb.rotSpeed;
+                if (crumb.y < -20) {
+                    crumb.y = LOGICAL_HEIGHT + 20;
+                    crumb.x = CHASM_L + Math.random() * (CHASM_R - CHASM_L);
+                }
+            });
+
+            // Handle glowing laser defensive projectile logic
+            for (let i = projectiles.length - 1; i >= 0; i--) {
+                let p = projectiles[i];
+                p.y += p.vy; // Fired downwards
+                
+                if (p.y > LOGICAL_HEIGHT + 20) {
+                    projectiles.splice(i, 1);
+                }
+            }
+
+            for (let i = obstacles.length - 1; i >= 0; i--) {
+                let obs = obstacles[i];
+                obs.y -= speed * 0.55; // Moving up
+
+                let obsRemoved = false;
+
+                // Hit checks for projectiles vs breakable Sablée ledges
+                if (obs.type === 'SABLEE') {
+                    for (let k = projectiles.length - 1; k >= 0; k--) {
+                        let proj = projectiles[k];
+                        if (proj.x > obs.x && proj.x < obs.x + obs.width &&
+                            proj.y > obs.y && proj.y < obs.y + obs.height) {
+                            
+                            obs.hp--;
+                            projectiles.splice(k, 1);
+                            playSound('hit');
+
+                            // Break flaky crumbly pastry particles
+                            spawnParticles(proj.x, obs.y + obs.height/2, 6, '#ffca7a', 3);
+
+                            if (obs.hp <= 0) {
+                                playSound('explode');
+                                dataScore += 15;
+                                spawnParticles(obs.x + obs.width/2, obs.y + obs.height/2, 20, '#d4a24e', 4);
+                                obstacles.splice(i, 1);
+                                obsRemoved = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                if (obsRemoved) continue;
+
+                // Collisions against Rover
+                const roverBox = {
+                    left: rover.x + 2,
+                    right: rover.x + rover.width - 2,
+                    top: rover.y + 2,
+                    bottom: rover.y + rover.height - 2
+                };
+
+                const obsBox = {
+                    left: obs.x,
+                    right: obs.x + obs.width,
+                    top: obs.y,
+                    bottom: obs.y + obs.height
+                };
+
+                // Check standard box overlap
+                if (roverBox.right > obsBox.left && roverBox.left < obsBox.right &&
+                    roverBox.bottom > obsBox.top && roverBox.top < obsBox.bottom) {
+                    
+                    // Trigger hull failure damage
+                    if (obs.type === 'SABLEE') {
+                        rover.shield -= 20;
+                        playSound('shield-break');
+                        spawnParticles(rover.x + rover.width/2, rover.y + rover.height, 12, '#ffaa00', 3);
+                    } else if (obs.type === 'SPIKE') {
+                        rover.shield -= 40;
+                        playSound('shield-break');
+                        spawnParticles(rover.x + rover.width/2, rover.y + rover.height, 18, '#ff4444', 4);
+                    }
+
+                    // Pull back or bounce physics on crashing
+                    rover.vx = (rover.x + rover.width/2 < obs.x + obs.width/2) ? -6 : 6;
+                    obstacles.splice(i, 1); // Despawn threat post-impact
+
+                    // Force the volatile sulfur core vapor level upwards on major player deceleration
+                    vaporHeight -= 35;
+
+                    if (rover.shield <= 0) {
+                        triggerTermination();
+                        return;
+                    }
+                    continue;
+                }
+
+                if (obs.y < -100) {
+                    obstacles.splice(i, 1);
+                }
+            }
+
+            for (let i = collectibles.length - 1; i >= 0; i--) {
+                let col = collectibles[i];
+                col.y -= speed * 0.55; // Moving upwards past descending rover
+                col.pulse += 0.08;
+
+                const dx = (rover.x + rover.width/2) - col.x;
+                const dy = (rover.y + rover.height/2) - col.y;
+                const dist = Math.sqrt(dx*dx + dy*dy);
+
+                if (dist < 28) {
+                    playSound('collect');
+                    dataScore += col.value;
+                    spawnParticles(col.x, col.y, 8, col.color, 3);
+                    collectibles.splice(i, 1);
+                    
+                    // Recover small shield integrity points on data capture
+                    rover.shield = Math.min(100, rover.shield + 4);
+                    continue;
+                }
+
+                if (col.y < -50) {
+                    collectibles.splice(i, 1);
+                }
+            }
+
+            // Particle timeline decaying updates
+            for (let i = particles.length - 1; i >= 0; i--) {
+                let p = particles[i];
+                p.x += p.vx;
+                p.y += p.vy;
+                p.life--;
+                if (p.life <= 0) {
+                    particles.splice(i, 1);
+                }
+            }
+
+            // Core sulfur rising toxic cloud calculation
+            const normalVaporY = LOGICAL_HEIGHT - 30 - (Math.sin(frames * 0.04) * 8);
+            
+            // Vapor slowly drifts back unless player makes collision errors
+            vaporHeight += (normalVaporY - vaporHeight) * 0.035;
+
+            // Constrain vapor boundaries
+            if (vaporHeight < maxVaporAdvance) {
+                vaporHeight = maxVaporAdvance;
+            }
+
+            // Instantly terminate module if engulfed in core toxic mist
+            if (vaporHeight <= rover.y + rover.height + 5) {
+                rover.shield = 0;
+                triggerTermination();
+                return;
+            }
+
+            // Update visible HUD text values
+            document.getElementById('hud-depth').innerText = Math.floor(depth);
+            document.getElementById('hud-data').innerText = dataScore;
+            document.getElementById('hud-phase').innerText = GREEK_PHASES[currentPhaseIdx];
+            document.getElementById('hud-loop').innerText = currentLoopIdx + 1;
+            document.getElementById('hud-speed').innerText = (speed * 11).toFixed(0);
+            document.getElementById('shield-bar').style.width = rover.shield + '%';
+        }
+
+        function draw() {
+            // Apply scale sizing depending on screen real estate aspect adjustments
+            ctx.save();
+            ctx.scale(scaleFactor, scaleFactor);
+
+            const theme = THEMES[currentThemeIdx];
+
+            // Render deep atmospheric golden-copper sulfur chasm gradient
+            const skyGrad = ctx.createLinearGradient(0, 0, 0, LOGICAL_HEIGHT);
+            skyGrad.addColorStop(0, '#1c0a02');
+            skyGrad.addColorStop(1, '#080200');
+            ctx.fillStyle = skyGrad;
+            ctx.fillRect(0, 0, LOGICAL_WIDTH, LOGICAL_HEIGHT);
+
+            // Render deep celestial background starfield
+            starfield.forEach(star => {
+                ctx.fillStyle = `rgba(212, 162, 78, ${star.alpha * 0.8})`;
+                ctx.fillRect(star.x, star.y, star.size, star.size);
+            });
+
+            // Render flaky crumbs floating down/up around chasm walls
+            backgroundSabléeDust.forEach(crumb => {
+                ctx.save();
+                ctx.translate(crumb.x, crumb.y);
+                ctx.rotate(crumb.angle);
+                ctx.fillStyle = 'rgba(212, 162, 78, 0.25)';
+                ctx.fillRect(-crumb.size/2, -crumb.size/2, crumb.size, crumb.size);
+                ctx.restore();
+            });
+
+            // --- RENDER REBEKAH (PLANET) IN DEEP BACKGROUND GAP ---
+            // Styled with subtle deep crimson planet core and cyan rings
+            ctx.save();
+            ctx.translate(LOGICAL_WIDTH / 2, 220);
+            
+            // Outer Ring Background half (Subtle Cyan)
+            ctx.save();
+            ctx.rotate(-0.15);
+            ctx.scale(1, 0.25);
+            ctx.strokeStyle = 'rgba(6, 182, 212, 0.12)';
+            ctx.lineWidth = 12;
+            ctx.beginPath();
+            ctx.arc(0, 0, 75, Math.PI, 0); // Behind top arc
+            ctx.stroke();
+            ctx.restore();
+
+            // Planet Body Core with deep crimson & obsidian eclipsing gradients
+            const planetGlow = ctx.createRadialGradient(-10, -10, 5, 0, 0, 42);
+            planetGlow.addColorStop(0, '#99000d'); // Crimson highlight
+            planetGlow.addColorStop(0.5, '#4a0107'); // Deep red
+            planetGlow.addColorStop(1, '#120002'); // Obsidian shadowed rim
+            ctx.fillStyle = planetGlow;
+            ctx.shadowColor = '#6e0207'; // Subdued red atmosphere
+            ctx.shadowBlur = 25;
+            ctx.beginPath();
+            ctx.arc(0, 0, 42, 0, Math.PI*2);
+            ctx.fill();
+            ctx.shadowBlur = 0;
+
+            // Planet Foreground Ring half (Subtle Cyan)
+            ctx.save();
+            ctx.rotate(-0.15);
+            ctx.scale(1, 0.25);
+            ctx.strokeStyle = 'rgba(6, 182, 212, 0.2)';
+            ctx.lineWidth = 12;
+            ctx.beginPath();
+            ctx.arc(0, 0, 75, 0, Math.PI); // Front bottom arc
+            ctx.stroke();
+            ctx.restore();
+
+            ctx.restore();
+
+            // --- PROCEDURAL JAGGED ROCKY WALLS ---
+            // Left Solid rocky canyon border
+            ctx.fillStyle = '#0a0301';
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            for (let y = 0; y <= LOGICAL_HEIGHT + 20; y += 15) {
+                let wallScroll = (frames * (speed * 0.55)) % 15;
+                let evalY = y - wallScroll;
+                let globalY = evalY + (depth * 10);
+                let noiseX = CHASM_L + Math.sin(globalY * 0.05) * 8 + Math.sin(globalY * 0.16) * 4;
+                ctx.lineTo(noiseX, evalY);
+            }
+            ctx.lineTo(0, LOGICAL_HEIGHT);
+            ctx.closePath();
+            ctx.fill();
+
+            // Right Solid rocky canyon border
+            ctx.fillStyle = '#0a0301';
+            ctx.beginPath();
+            ctx.moveTo(LOGICAL_WIDTH, 0);
+            for (let y = 0; y <= LOGICAL_HEIGHT + 20; y += 15) {
+                let wallScroll = (frames * (speed * 0.55)) % 15;
+                let evalY = y - wallScroll;
+                let globalY = evalY + (depth * 10);
+                let noiseX = CHASM_R - Math.sin(globalY * 0.05 + 1.5) * 8 - Math.sin(globalY * 0.16) * 4;
+                ctx.lineTo(noiseX, evalY);
+            }
+            ctx.lineTo(LOGICAL_WIDTH, LOGICAL_HEIGHT);
+            ctx.closePath();
+            ctx.fill();
+
+            // Left wall rock details & shading overlays
+            ctx.fillStyle = '#170601';
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            for (let y = 0; y <= LOGICAL_HEIGHT + 20; y += 15) {
+                let wallScroll = (frames * (speed * 0.55)) % 15;
+                let evalY = y - wallScroll;
+                let globalY = evalY + (depth * 10);
+                let noiseX = (CHASM_L - 3) + Math.sin(globalY * 0.05) * 8 + Math.sin(globalY * 0.16) * 4;
+                ctx.lineTo(noiseX, evalY);
+            }
+            ctx.lineTo(0, LOGICAL_HEIGHT);
+            ctx.closePath();
+            ctx.fill();
+
+            // Right wall rock details & shading overlays
+            ctx.fillStyle = '#170601';
+            ctx.beginPath();
+            ctx.moveTo(LOGICAL_WIDTH, 0);
+            for (let y = 0; y <= LOGICAL_HEIGHT + 20; y += 15) {
+                let wallScroll = (frames * (speed * 0.55)) % 15;
+                let evalY = y - wallScroll;
+                let globalY = evalY + (depth * 10);
+                let noiseX = (CHASM_R + 3) - Math.sin(globalY * 0.05 + 1.5) * 8 - Math.sin(globalY * 0.16) * 4;
+                ctx.lineTo(noiseX, evalY);
+            }
+            ctx.lineTo(LOGICAL_WIDTH, LOGICAL_HEIGHT);
+            ctx.closePath();
+            ctx.fill();
+
+            // Render scrolling rocky horizontal strata bands inside walls
+            ctx.strokeStyle = '#291104';
+            ctx.lineWidth = 1.5;
+            for (let i = 0; i < LOGICAL_HEIGHT; i += 40) {
+                const scrollOffset = (frames * (speed * 0.1)) % 40;
+                let evalY = i + scrollOffset;
+                let globalY = evalY + (depth * 10);
+                
+                let noiseLeft = CHASM_L + Math.sin(globalY * 0.05) * 8 + Math.sin(globalY * 0.16) * 4;
+                let noiseRight = CHASM_R - Math.sin(globalY * 0.05 + 1.5) * 8 - Math.sin(globalY * 0.16) * 4;
+
+                ctx.beginPath();
+                ctx.moveTo(0, evalY);
+                ctx.lineTo(noiseLeft, evalY - 5);
+                ctx.moveTo(LOGICAL_WIDTH, evalY);
+                ctx.lineTo(noiseRight, evalY - 5);
+                ctx.stroke();
+            }
+
+            // Left & Right Glowing neon-energy boundaries outlining the rocky jagged margins
+            ctx.strokeStyle = theme.main;
+            ctx.lineWidth = 1.5;
+            ctx.shadowColor = theme.main;
+            ctx.shadowBlur = 8;
+            
+            ctx.beginPath();
+            for (let y = 0; y <= LOGICAL_HEIGHT + 20; y += 15) {
+                let wallScroll = (frames * (speed * 0.55)) % 15;
+                let evalY = y - wallScroll;
+                let globalY = evalY + (depth * 10);
+                let noiseX = CHASM_L + Math.sin(globalY * 0.05) * 8 + Math.sin(globalY * 0.16) * 4;
+                if (y === 0) ctx.moveTo(noiseX, evalY);
+                else ctx.lineTo(noiseX, evalY);
+            }
+            ctx.stroke();
+
+            ctx.beginPath();
+            for (let y = 0; y <= LOGICAL_HEIGHT + 20; y += 15) {
+                let wallScroll = (frames * (speed * 0.55)) % 15;
+                let evalY = y - wallScroll;
+                let globalY = evalY + (depth * 10);
+                let noiseX = CHASM_R - Math.sin(globalY * 0.05 + 1.5) * 8 - Math.sin(globalY * 0.16) * 4;
+                if (y === 0) ctx.moveTo(noiseX, evalY);
+                else ctx.lineTo(noiseX, evalY);
+            }
+            ctx.stroke();
+            
+            ctx.shadowBlur = 0;
+
+            // Render projectiles
+            ctx.fillStyle = '#fff';
+            ctx.shadowColor = theme.main;
+            ctx.shadowBlur = 8;
+            projectiles.forEach(p => {
+                ctx.fillRect(p.x, p.y, p.size, p.height);
+            });
+            ctx.shadowBlur = 0;
+
+            // Render collectible data nodes
+            collectibles.forEach(col => {
+                ctx.save();
+                ctx.translate(col.x, col.y);
+                const scale = 1 + Math.sin(col.pulse) * 0.15;
+                ctx.scale(scale, scale);
+
+                ctx.fillStyle = '#fff';
+                ctx.fillRect(-2, -2, 4, 4);
+
+                ctx.strokeStyle = col.color;
+                ctx.lineWidth = 1.5;
+                ctx.shadowColor = col.color;
+                ctx.shadowBlur = 10;
+                ctx.beginPath();
+                ctx.moveTo(0, -col.size);
+                ctx.lineTo(col.size, 0);
+                ctx.lineTo(0, col.size);
+                ctx.lineTo(-col.size, 0);
+                ctx.closePath();
+                ctx.stroke();
+                ctx.restore();
+            });
+            ctx.shadowBlur = 0;
+
+            obstacles.forEach(obs => {
+                if (obs.type === 'SABLEE') {
+                    // Crusty jagged silicate shelf layers
+                    ctx.save();
+                    ctx.fillStyle = '#1c0f04';
+                    
+                    // Generate a jagged polygon for the rock ledge rather than a straight box
+                    ctx.beginPath();
+                    ctx.moveTo(obs.x, obs.y);
+                    
+                    let steps = 6;
+                    // Jagged Top Edge
+                    for (let j = 0; j <= steps; j++) {
+                        let px = obs.x + (obs.width / steps) * j;
+                        let offset = Math.sin(px * 0.15 + obs.y * 0.05) * 4;
+                        ctx.lineTo(px, obs.y + offset);
+                    }
+                    
+                    // Jagged Right Wall Connection
+                    ctx.lineTo(obs.x + obs.width, obs.y + obs.height);
+                    
+                    // Jagged Bottom Edge
+                    for (let j = steps; j >= 0; j--) {
+                        let px = obs.x + (obs.width / steps) * j;
+                        let offset = Math.sin(px * 0.2 + obs.y * 0.03) * 3 + 4;
+                        ctx.lineTo(px, obs.y + obs.height + offset);
+                    }
+                    ctx.closePath();
+                    ctx.fill();
+
+                    // Jagged health feedback indicator (drawn on the uneven top surface)
+                    const healthPct = obs.hp / obs.maxHp;
+                    ctx.strokeStyle = healthPct > 0.6 ? '#d4a24e' : '#a35f1c';
+                    ctx.lineWidth = 2.5;
+                    ctx.beginPath();
+                    for (let j = 0; j <= steps; j++) {
+                        let px = obs.x + (obs.width / steps) * j;
+                        let offset = Math.sin(px * 0.15 + obs.y * 0.05) * 4;
+                        if (j === 0) ctx.moveTo(px, obs.y + offset);
+                        else ctx.lineTo(px, obs.y + offset);
+                    }
+                    ctx.stroke();
+
+                    // Draw organic layered geological crags and cracks inside the stone
+                    ctx.strokeStyle = '#291505';
+                    ctx.lineWidth = 1.5;
+                    ctx.beginPath();
+                    // Interstitial sedimentary horizontal layer line
+                    for (let j = 1; j < steps; j++) {
+                        let px = obs.x + (obs.width / steps) * j;
+                        let offset = Math.sin(px * 0.12 + obs.y * 0.04) * 3 + obs.height / 2;
+                        if (j === 1) ctx.moveTo(px, obs.y + offset);
+                        else ctx.lineTo(px, obs.y + offset);
+                    }
+                    ctx.stroke();
+
+                    // Structural failure stress lines (cracks visible if damaged)
+                    if (obs.hp < obs.maxHp) {
+                        ctx.beginPath();
+                        ctx.moveTo(obs.x + obs.width * 0.25, obs.y + 2);
+                        ctx.lineTo(obs.x + obs.width * 0.3, obs.y + obs.height - 2);
+                        ctx.moveTo(obs.x + obs.width * 0.75, obs.y + 2);
+                        ctx.lineTo(obs.x + obs.width * 0.7, obs.y + obs.height - 2);
+                        ctx.stroke();
+                    }
+                    ctx.restore();
+                } else if (obs.type === 'SPIKE') {
+                    // Indestructible volcanic basalt rock outcrops
+                    ctx.save();
+                    ctx.fillStyle = '#0a0301';
+                    
+                    ctx.beginPath();
+                    if (obs.side === 'LEFT') {
+                        // Multi-pointed jagged rock jutting from the left wall
+                        ctx.moveTo(CHASM_L, obs.y);
+                        ctx.lineTo(CHASM_L + obs.width * 0.4, obs.y + obs.height * 0.12);
+                        ctx.lineTo(CHASM_L + obs.width * 0.75, obs.y + obs.height * 0.28);
+                        ctx.lineTo(CHASM_L + obs.width, obs.y + obs.height * 0.5); // Peak
+                        ctx.lineTo(CHASM_L + obs.width * 0.7, obs.y + obs.height * 0.72);
+                        ctx.lineTo(CHASM_L + obs.width * 0.35, obs.y + obs.height * 0.88);
+                        ctx.lineTo(CHASM_L, obs.y + obs.height);
+                    } else {
+                        // Multi-pointed jagged rock jutting from the right wall
+                        ctx.moveTo(CHASM_R, obs.y);
+                        ctx.lineTo(CHASM_R - obs.width * 0.4, obs.y + obs.height * 0.12);
+                        ctx.lineTo(CHASM_R - obs.width * 0.75, obs.y + obs.height * 0.28);
+                        ctx.lineTo(CHASM_R - obs.width, obs.y + obs.height * 0.5); // Peak
+                        ctx.lineTo(CHASM_R - obs.width * 0.7, obs.y + obs.height * 0.72);
+                        ctx.lineTo(CHASM_R - obs.width * 0.35, obs.y + obs.height * 0.88);
+                        ctx.lineTo(CHASM_R, obs.y + obs.height);
+                    }
+                    ctx.closePath();
+                    ctx.fill();
+
+                    // Hot volcanic glowing edge highlighting
+                    ctx.strokeStyle = '#ff4444';
+                    ctx.lineWidth = 1.5;
+                    ctx.shadowColor = '#ff4444';
+                    ctx.shadowBlur = 6;
+                    ctx.stroke();
+                    
+                    // Jagged core shadows for texture
+                    ctx.strokeStyle = '#120201';
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    if (obs.side === 'LEFT') {
+                        ctx.moveTo(CHASM_L, obs.y + obs.height * 0.5);
+                        ctx.lineTo(CHASM_L + obs.width * 0.65, obs.y + obs.height * 0.5);
+                    } else {
+                        ctx.moveTo(CHASM_R, obs.y + obs.height * 0.5);
+                        ctx.lineTo(CHASM_R - obs.width * 0.65, obs.y + obs.height * 0.5);
+                    }
+                    ctx.stroke();
+                    ctx.restore();
+                }
+            });
+            ctx.shadowBlur = 0;
+
+            // Render Rover Module
+            rover.draw();
+
+            // Render active particle effects
+            particles.forEach(p => {
+                ctx.fillStyle = p.color || '#aaa';
+                ctx.fillRect(p.x, p.y, p.size, p.size);
+            });
+
+            // --- RENDER SULFUR VAPOR THREAT AT BOTTOM ---
+            const vaporGrad = ctx.createLinearGradient(0, vaporHeight, 0, LOGICAL_HEIGHT);
+            vaporGrad.addColorStop(0, 'rgba(212, 162, 78, 0)');
+            vaporGrad.addColorStop(0.2, 'rgba(212, 162, 78, 0.45)');
+            vaporGrad.addColorStop(0.5, 'rgba(36, 14, 3, 0.85)');
+            vaporGrad.addColorStop(1, '#1c0a02');
+            ctx.fillStyle = vaporGrad;
+            ctx.fillRect(CHASM_L, vaporHeight, CHASM_R - CHASM_L, LOGICAL_HEIGHT - vaporHeight);
+
+            // Sulfur hazard bubbling lines
+            ctx.strokeStyle = '#d4a24e';
+            ctx.lineWidth = 2;
+            ctx.shadowColor = '#d4a24e';
+            ctx.shadowBlur = 12;
+            ctx.beginPath();
+            ctx.moveTo(CHASM_L, vaporHeight);
+            for (let x = CHASM_L; x <= CHASM_R; x += 15) {
+                const wave = Math.sin((frames * 0.05) + (x * 0.1)) * 4;
+                ctx.lineTo(x, vaporHeight + wave);
+            }
+            ctx.stroke();
+            ctx.shadowBlur = 0;
+
+            ctx.restore();
+        }
+
+        // Standard 60 FPS Engine Game Loops
+        function loop() {
+            update();
+            draw();
+            requestAnimationFrame(loop);
+        }
+
+        window.onload = () => {
+            loop();
+        };
+
+    </script>
+</body>
+</html>
