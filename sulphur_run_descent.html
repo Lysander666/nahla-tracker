@@ -67,39 +67,40 @@
         }
     </style>
 </head>
-<body class="flex items-center justify-center h-full w-full">
+<body class="flex items-center justify-center h-full w-full p-0 sm:p-4">
 
-    <div id="game-frame" class="flex flex-col justify-between">
+    <div id="game-frame" class="flex flex-col justify-between w-full h-full max-h-[100dvh]">
         
         <!-- Game Canvas covering background -->
         <canvas id="gameCanvas" class="absolute inset-0 w-full h-full block z-0"></canvas>
         
-        <!-- AUDIO TAG linking to the same BGM file -->
+        <!-- AUDIO TAG linking to BGM file -->
         <audio id="bgm" loop preload="auto"></audio>
 
         <!-- Floating Portrait HUD Layer -->
         <div id="hud" class="absolute top-4 left-4 right-4 z-20 hidden pointer-events-none flex flex-col gap-1 text-[1.2rem] sm:text-[1.4rem]">
             <!-- Primary Telemetry Grid -->
-            <div class="flex justify-between items-center bg-black/70 border-l-4 border-[#d4a24e] px-3 py-1.5 shadow-md">
+            <div class="flex justify-between items-center bg-black/80 border-l-4 border-[#d4a24e] px-3 py-1.5 shadow-md pointer-events-auto">
                 <div class="text-[#d4a24e]">
                     DPTH: <span id="hud-depth" class="text-white font-bold">0</span>m
                 </div>
                 <div class="text-white">
                     DATA: <span id="hud-data" class="text-[#61dafb]">0</span>
                 </div>
-                <div class="text-[#ff61c7]">
-                    PHASE: <span id="hud-phase" class="font-bold">α</span>
-                </div>
+                <!-- Interactive Pause Button on HUD -->
+                <button id="hud-pause-btn" class="bg-[#240e03] border border-[#d4a24e]/50 px-2.5 py-0.5 rounded text-xs text-[#d4a24e] hover:bg-[#d4a24e]/20 active:bg-[#d4a24e]/40 transition-all font-sans">
+                    PAUSE
+                </button>
             </div>
             
             <!-- Secondary Telemetry (Loop & Health) -->
-            <div class="flex justify-between items-center text-[1.1rem] bg-black/60 px-3 py-1">
+            <div class="flex justify-between items-center text-[1.1rem] bg-black/70 px-3 py-1">
                 <div class="text-gray-400">
-                    LOOP: <span id="hud-loop" class="text-[#d4a24e]">1</span>
+                    LOOP: <span id="hud-loop" class="text-[#d4a24e]">1</span> (<span id="hud-phase" class="text-[#61dafb] font-bold">α</span>)
                 </div>
                 <!-- Mini Hull Integrity Bar -->
                 <div class="flex items-center gap-2">
-                    <span class="text-[#ff4444] text-xs">SHIELD</span>
+                    <span class="text-[#ff4444] text-xs font-sans">SHIELD</span>
                     <div class="w-16 bg-gray-800 h-2 border border-[#ff4444]/50 rounded overflow-hidden">
                         <div id="shield-bar" class="bg-[#ff4444] h-full w-full transition-all duration-150"></div>
                     </div>
@@ -125,16 +126,16 @@
             </span>
 
             <div class="mt-10 border-t border-white/10 pt-4 w-full text-center text-sm sm:text-base text-gray-400 tracking-wider">
-                <p class="mb-1"><span class="text-[#d4a24e]">STEER:</span> Tap Left / Right side of screen</p>
+                <p class="mb-1"><span class="text-[#d4a24e]">STEER:</span> Tap/Hold Left or Right side of screen</p>
                 <p class="mb-1"><span class="text-[#ff61c7]">WEAPONS:</span> Plasma beams fire automatically downward</p>
-                <p class="text-xs text-gray-500 mt-2 font-sans italic">Connects dynamically to the original synth soundtrack</p>
+                <p class="text-xs text-gray-500 mt-2 font-sans italic">Synthesized audios lock dynamically on first tap</p>
             </div>
         </div>
 
         <!-- Pause Screen Overlay -->
         <div id="pause-screen" class="absolute inset-0 z-30 hidden flex flex-col justify-center items-center bg-black/85 text-center">
             <h1 class="text-5xl text-white font-bold tracking-widest neon-amber transform -skew-x-3 mb-4">DESCENT PAUSED</h1>
-            <p class="blink text-2xl text-gray-300">[TAP CENTER TO RESUME]</p>
+            <button id="pause-resume-btn" class="blink text-2xl text-gray-300 border border-white/20 px-4 py-2 bg-white/5 rounded active:bg-white/20 transition-all">[TAP TO RESUME]</button>
             <button id="pause-quit-btn" class="mt-8 px-5 py-2 border border-[#ff4444] text-[#ff4444] text-lg hover:bg-[#ff4444]/10 rounded transform -skew-x-3 transition-all pointer-events-auto">
                 ABORT SIMULATION
             </button>
@@ -145,10 +146,10 @@
             <div class="text-[#ff4444] text-xl font-bold tracking-widest uppercase mb-1">CRITICAL FAILURE // CORE MELTDOWN</div>
             <h1 class="text-4xl sm:text-5xl text-white font-extrabold transform -skew-x-3 text-shadow leading-none mb-4" style="text-shadow: 0 0 10px #ff4444;">MODULE TERMINATED</h1>
             
-            <div class="my-5 flex flex-col gap-2 border-y border-white/10 py-4 w-full max-w-xs text-xl sm:text-2xl text-gray-300">
-                <p class="flex justify-between"><span>DESCENT DEPTH:</span> <span id="final-depth" class="text-white font-bold">0</span>m</p>
-                <p class="flex justify-between"><span>DATA ACQUIRED:</span> <span id="final-data" class="text-[#61dafb] font-bold">0</span></p>
-                <p class="flex justify-between"><span>TERMINAL PHASE:</span> <span id="final-phase" class="text-[#ff61c7] font-bold">α</span></p>
+            <div class="my-5 flex flex-col gap-2 border-y border-white/10 py-4 w-full max-w-xs text-xl sm:text-2xl text-gray-300 font-sans">
+                <p class="flex justify-between"><span>DESCENT DEPTH:</span> <span id="final-depth" class="text-white font-bold font-mono">0</span>m</p>
+                <p class="flex justify-between"><span>DATA ACQUIRED:</span> <span id="final-data" class="text-[#61dafb] font-bold font-mono">0</span></p>
+                <p class="flex justify-between"><span>TERMINAL PHASE:</span> <span id="final-phase" class="text-[#ff61c7] font-bold font-mono">α</span></p>
             </div>
 
             <span id="reboot-prompt" class="blink text-2xl text-white mt-8 cursor-pointer neon-amber border border-white/20 px-4 py-2 bg-[#240e03] rounded">
@@ -178,6 +179,7 @@
 
         function resizeCanvas() {
             const container = document.getElementById('game-frame');
+            if (!container) return;
             const rect = container.getBoundingClientRect();
             const dpr = window.devicePixelRatio || 1;
             
@@ -190,105 +192,137 @@
         }
 
         window.addEventListener('resize', resizeCanvas);
+        window.addEventListener('orientationchange', () => {
+            setTimeout(resizeCanvas, 200);
+        });
         window.addEventListener('load', resizeCanvas);
         resizeCanvas();
 
-        // --- WEB AUDIO API PROCEDURAL SYNTH ENGINE ---
-        // Generates atmospheric sci-fi backing tracks if the remote mp3 resource is unavailable.
+        // --- WEB AUDIO API PROCEDURAL SYNTH ENGINE & SOUND SYSTEM ---
         const AudioContext = window.AudioContext || window.webkitAudioContext;
         let actx = null;
         let activeAudioNodes = 0;
+        let lastShootSoundTime = 0; // Throttle sound playback to protect browser threads
 
+        // Forcefully unlock both HTML5 audio and AudioContext simultaneously on mobile gesture
         function initAudioContext() {
-            if (!actx) {
-                actx = new AudioContext();
-            }
-            if (actx.state === 'suspended') {
-                actx.resume();
+            try {
+                if (!actx) {
+                    actx = new AudioContext();
+                }
+                if (actx.state === 'suspended') {
+                    actx.resume();
+                }
+                // Pre-unmute HTML5 BGM
+                if (bgm && bgm.paused) {
+                    bgm.play().then(() => {
+                        if (gameState === 'START') {
+                            bgm.pause(); // keep paused until game start
+                        }
+                    }).catch(() => {});
+                }
+            } catch (e) {
+                console.warn("AudioContext initialization blocked by browser security.", e);
             }
         }
 
         function playSound(type) {
-            initAudioContext();
-            if (activeAudioNodes > 15) return; // Prevent performance bottlenecks on weak devices
+            try {
+                initAudioContext();
+                if (!actx) return;
 
-            activeAudioNodes++;
-            const osc = actx.createOscillator();
-            const gainNode = actx.createGain();
-            const filterNode = actx.createBiquadFilter();
+                const now = actx.currentTime;
 
-            osc.connect(filterNode);
-            filterNode.connect(gainNode);
-            gainNode.connect(actx.destination);
+                // THROTTLE CRITICAL LAUNCH SOUNDS (automatic shooting triggers 6 sounds/sec, which hangs mobile browser engines)
+                if (type === 'shoot') {
+                    if (now - lastShootSoundTime < 0.16) return; // Cap shooting audio triggers at max ~6 per second
+                    lastShootSoundTime = now;
+                }
 
-            osc.onended = () => {
-                osc.disconnect();
-                filterNode.disconnect();
-                gainNode.disconnect();
-                activeAudioNodes--;
-            };
+                if (activeAudioNodes > 8) return; // Prevent Web Audio saturation
 
-            const now = actx.currentTime;
-            let duration = 0.15;
+                activeAudioNodes++;
+                const osc = actx.createOscillator();
+                const gainNode = actx.createGain();
+                const filterNode = actx.createBiquadFilter();
 
-            switch (type) {
-                case 'shoot':
-                    osc.type = 'triangle';
-                    osc.frequency.setValueAtTime(500, now);
-                    osc.frequency.exponentialRampToValueAtTime(80, now + 0.1);
-                    filterNode.type = 'lowpass';
-                    filterNode.frequency.setValueAtTime(1000, now);
-                    gainNode.gain.setValueAtTime(0.12, now);
-                    gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
-                    duration = 0.1;
-                    break;
-                case 'explode':
-                    osc.type = 'sawtooth';
-                    osc.frequency.setValueAtTime(120, now);
-                    osc.frequency.linearRampToValueAtTime(10, now + 0.35);
-                    filterNode.type = 'lowpass';
-                    filterNode.frequency.setValueAtTime(300, now);
-                    gainNode.gain.setValueAtTime(0.35, now);
-                    gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
-                    duration = 0.35;
-                    break;
-                case 'hit':
-                    osc.type = 'sawtooth';
-                    osc.frequency.setValueAtTime(220, now);
-                    osc.frequency.linearRampToValueAtTime(30, now + 0.25);
-                    filterNode.type = 'bandpass';
-                    filterNode.frequency.setValueAtTime(400, now);
-                    gainNode.gain.setValueAtTime(0.25, now);
-                    gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
-                    duration = 0.25;
-                    break;
-                case 'collect':
-                    osc.type = 'sine';
-                    osc.frequency.setValueAtTime(600, now);
-                    osc.frequency.linearRampToValueAtTime(1200, now + 0.12);
-                    filterNode.type = 'highpass';
-                    filterNode.frequency.setValueAtTime(800, now);
-                    gainNode.gain.setValueAtTime(0.15, now);
-                    gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
-                    duration = 0.15;
-                    break;
-                case 'shield-break':
-                    osc.type = 'sawtooth';
-                    osc.frequency.setValueAtTime(300, now);
-                    osc.frequency.exponentialRampToValueAtTime(50, now + 0.4);
-                    filterNode.type = 'notch';
-                    filterNode.frequency.setValueAtTime(150, now);
-                    gainNode.gain.setValueAtTime(0.3, now);
-                    gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
-                    duration = 0.4;
-                    break;
+                osc.connect(filterNode);
+                filterNode.connect(gainNode);
+                gainNode.connect(actx.destination);
+
+                osc.onended = () => {
+                    try {
+                        osc.disconnect();
+                        filterNode.disconnect();
+                        gainNode.disconnect();
+                    } catch (e) {}
+                    activeAudioNodes = Math.max(0, activeAudioNodes - 1);
+                };
+
+                let duration = 0.15;
+
+                switch (type) {
+                    case 'shoot':
+                        osc.type = 'triangle';
+                        osc.frequency.setValueAtTime(450, now);
+                        osc.frequency.exponentialRampToValueAtTime(80, now + 0.08);
+                        filterNode.type = 'lowpass';
+                        filterNode.frequency.setValueAtTime(900, now);
+                        gainNode.gain.setValueAtTime(0.08, now);
+                        gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+                        duration = 0.08;
+                        break;
+                    case 'explode':
+                        osc.type = 'sawtooth';
+                        osc.frequency.setValueAtTime(100, now);
+                        osc.frequency.linearRampToValueAtTime(10, now + 0.3);
+                        filterNode.type = 'lowpass';
+                        filterNode.frequency.setValueAtTime(250, now);
+                        gainNode.gain.setValueAtTime(0.3, now);
+                        gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+                        duration = 0.3;
+                        break;
+                    case 'hit':
+                        osc.type = 'sawtooth';
+                        osc.frequency.setValueAtTime(180, now);
+                        osc.frequency.linearRampToValueAtTime(30, now + 0.2);
+                        filterNode.type = 'bandpass';
+                        filterNode.frequency.setValueAtTime(350, now);
+                        gainNode.gain.setValueAtTime(0.18, now);
+                        gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+                        duration = 0.2;
+                        break;
+                    case 'collect':
+                        osc.type = 'sine';
+                        osc.frequency.setValueAtTime(550, now);
+                        osc.frequency.linearRampToValueAtTime(1100, now + 0.12);
+                        filterNode.type = 'highpass';
+                        filterNode.frequency.setValueAtTime(700, now);
+                        gainNode.gain.setValueAtTime(0.12, now);
+                        gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+                        duration = 0.12;
+                        break;
+                    case 'shield-break':
+                        osc.type = 'sawtooth';
+                        osc.frequency.setValueAtTime(280, now);
+                        osc.frequency.exponentialRampToValueAtTime(40, now + 0.35);
+                        filterNode.type = 'notch';
+                        filterNode.frequency.setValueAtTime(130, now);
+                        gainNode.gain.setValueAtTime(0.25, now);
+                        gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+                        duration = 0.35;
+                        break;
+                }
+
+                osc.start();
+                osc.stop(now + duration);
+            } catch (err) {
+                // Safeguard gameplay loop if web audio triggers a background exception
+                console.warn("WebAudio API was blocked by security sandbox.", err);
             }
-
-            osc.start();
-            osc.stop(now + duration);
         }
 
-        // --- GAME PLAY MECHANICS & THEMES ---
+        // --- STREAMING_CHUNK: Setup Game Themes & Coordinates ---
         const THEMES = [
             { name: 'SULPHUR', main: '#d4a24e', glow: 'rgba(212, 162, 78, 0.4)', text: '#d4a24e', background: '#120703' },
             { name: 'CYAN',    main: '#61dafb', glow: 'rgba(97, 218, 251, 0.4)', text: '#61dafb', background: '#020d12' },
@@ -457,7 +491,6 @@
             }
         };
 
-        // Entities Storage Layers
         let obstacles = [];
         let particles = [];
         let projectiles = [];
@@ -579,60 +612,35 @@
             }
         }
 
-        // Mobile Split-Screen Tap Inputs mapped directly to absolute position on touch screen
+        // Dynamic touch detection spanning both clicks and holds accurately
+        function handleMobileSteering(clientX) {
+            const rect = canvas.getBoundingClientRect();
+            const touchPercent = (clientX - rect.left) / rect.width;
+            
+            if (touchPercent < 0.5) {
+                touchLeft = true;
+                touchRight = false;
+            } else {
+                touchRight = true;
+                touchLeft = false;
+            }
+        }
+
         const handleTouchStart = (e) => {
             initAudioContext();
-            // Start logic removed from global catch to prevent accidental triggers
             if (gameState === 'GAMEOVER') {
-                resetGame();
-                return;
+                return; // Let explicit prompt handle it securely
             }
             if (gameState === 'PLAYING') {
-                const rect = canvas.getBoundingClientRect();
-                const touchX = e.touches[0].clientX - rect.left;
-                
-                // Pause button touch bounds
-                if (touchX > rect.width * 0.4 && touchX < rect.width * 0.6 && e.touches[0].clientY - rect.top < rect.height * 0.1) {
-                    togglePause();
-                    return;
-                }
-
-                // Steer left or right depending on side of screen touched
-                if (touchX < rect.width / 2) {
-                    touchLeft = true;
-                    touchRight = false;
-                } else {
-                    touchRight = true;
-                    touchLeft = false;
-                }
+                const touch = e.touches[0];
+                handleMobileSteering(touch.clientX);
             }
         };
 
-        // Explicit direct listener for the start prompt to ensure reliable firing
-        document.getElementById('start-prompt').addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            initAudioContext();
-            startGame();
-        }, {passive: false});
-
-        document.getElementById('start-prompt').addEventListener('click', (e) => {
-            e.preventDefault();
-            initAudioContext();
-            startGame();
-        });
-
         const handleTouchMove = (e) => {
             if (gameState === 'PLAYING') {
-                const rect = canvas.getBoundingClientRect();
-                const touchX = e.touches[0].clientX - rect.left;
-                if (touchX < rect.width / 2) {
-                    touchLeft = true;
-                    touchRight = false;
-                } else {
-                    touchRight = true;
-                    touchLeft = false;
-                }
+                const touch = e.touches[0];
+                handleMobileSteering(touch.clientX);
             }
         };
 
@@ -641,9 +649,60 @@
             touchRight = false;
         };
 
-        window.addEventListener('touchstart', handleTouchStart, { passive: false });
-        window.addEventListener('touchmove', handleTouchMove, { passive: false });
-        window.addEventListener('touchend', handleTouchEnd);
+        window.addEventListener('touchstart', handleTouchStart, { passive: true });
+        window.addEventListener('touchmove', handleTouchMove, { passive: true });
+        window.addEventListener('touchend', handleTouchEnd, { passive: true });
+
+        // Direct, high-priority listeners to securely unlock audio and launch BGM on prompt clicks
+        const initGameGesture = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            initAudioContext();
+            startGame();
+        };
+
+        document.getElementById('start-prompt').addEventListener('touchstart', initGameGesture);
+        document.getElementById('start-prompt').addEventListener('click', initGameGesture);
+
+        document.getElementById('reboot-prompt').addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            resetGame();
+        });
+        document.getElementById('reboot-prompt').addEventListener('click', (e) => {
+            e.preventDefault();
+            resetGame();
+        });
+
+        // Pause/Resume Overlay Events
+        document.getElementById('hud-pause-btn').addEventListener('click', (e) => {
+            e.stopPropagation();
+            togglePause();
+        });
+        document.getElementById('hud-pause-btn').addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            togglePause();
+        });
+
+        document.getElementById('pause-resume-btn').addEventListener('click', (e) => {
+            e.stopPropagation();
+            togglePause();
+        });
+        document.getElementById('pause-resume-btn').addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            togglePause();
+        });
+
+        document.getElementById('pause-quit-btn').addEventListener('click', (e) => {
+            e.stopPropagation();
+            quitGame();
+        });
+        document.getElementById('pause-quit-btn').addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            quitGame();
+        });
 
         // Desktop keyboard controls mapping as seamless accessibility fallback
         window.addEventListener('keydown', (e) => {
@@ -689,8 +748,8 @@
 
             if (bgm) {
                 bgm.currentTime = 0;
-                bgm.play().catch(() => {
-                    console.log('Background Audio deferred until browser gesture interaction.');
+                bgm.play().catch((err) => {
+                    console.log('Background Audio deferred until browser gesture interaction.', err);
                 });
             }
         }
@@ -706,19 +765,6 @@
                 if (bgm) bgm.play().catch(() => {});
             }
         }
-
-        document.getElementById('pause-screen').addEventListener('touchstart', (e) => {
-            e.stopPropagation();
-            if (e.target.id !== 'pause-quit-btn') {
-                togglePause();
-            }
-        });
-
-        document.getElementById('pause-quit-btn').addEventListener('touchstart', (e) => {
-            e.stopPropagation();
-            e.preventDefault();
-            quitGame();
-        });
 
         function quitGame() {
             gameState = 'START';
@@ -745,11 +791,6 @@
 
             spawnParticles(rover.x + rover.width/2, rover.y + rover.height/2, 35, '#ff4444', 4);
         }
-
-        document.getElementById('reboot-prompt').addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            resetGame();
-        });
 
         function updateHUDTheme() {
             const theme = THEMES[currentThemeIdx];
