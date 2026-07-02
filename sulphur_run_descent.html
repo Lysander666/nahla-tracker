@@ -93,7 +93,7 @@
                 </button>
             </div>
             
-            <!-- Secondary Telemetry (Loop & Health) -->
+            <!-- Secondary Telemetry (Loop, Health & Speed) -->
             <div class="flex justify-between items-center text-[1.1rem] bg-black/70 px-3 py-1">
                 <div class="text-gray-400">
                     LOOP: <span id="hud-loop" class="text-[#d4a24e]">1</span> (<span id="hud-phase" class="text-[#61dafb] font-bold">α</span>)
@@ -198,7 +198,6 @@
         window.addEventListener('load', resizeCanvas);
         resizeCanvas();
 
-        // --- WEB AUDIO API PROCEDURAL SYNTH ENGINE & SOUND SYSTEM ---
         const AudioContext = window.AudioContext || window.webkitAudioContext;
         let actx = null;
         let activeAudioNodes = 0;
@@ -233,9 +232,9 @@
 
                 const now = actx.currentTime;
 
-                // THROTTLE CRITICAL LAUNCH SOUNDS (automatic shooting triggers 6 sounds/sec, which hangs mobile browser engines)
+                // Throttle critical launch sounds to protect browser threads
                 if (type === 'shoot') {
-                    if (now - lastShootSoundTime < 0.16) return; // Cap shooting audio triggers at max ~6 per second
+                    if (now - lastShootSoundTime < 0.16) return; // Cap shooting audio triggers
                     lastShootSoundTime = now;
                 }
 
@@ -317,12 +316,10 @@
                 osc.start();
                 osc.stop(now + duration);
             } catch (err) {
-                // Safeguard gameplay loop if web audio triggers a background exception
                 console.warn("WebAudio API was blocked by security sandbox.", err);
             }
         }
 
-        // --- STREAMING_CHUNK: Setup Game Themes & Coordinates ---
         const THEMES = [
             { name: 'SULPHUR', main: '#d4a24e', glow: 'rgba(212, 162, 78, 0.4)', text: '#d4a24e', background: '#120703' },
             { name: 'CYAN',    main: '#61dafb', glow: 'rgba(97, 218, 251, 0.4)', text: '#61dafb', background: '#020d12' },
@@ -445,33 +442,6 @@
                 ctx.restore();
             },
 
-            update: function() {
-                // Apply steering thruster force
-                if (touchLeft) this.vx -= 0.85;
-                if (touchRight) this.vx += 0.85;
-
-                // Apply chasm fluid inertia friction
-                this.vx *= 0.83;
-                this.x += this.vx;
-
-                // Safety boundary constraint checks against crumbly silicate canyon walls
-                const buffer = 4;
-                if (this.x < CHASM_L + buffer) {
-                    this.x = CHASM_L + buffer;
-                    this.vx = 0;
-                }
-                if (this.x > CHASM_R - this.width - buffer) {
-                    this.x = CHASM_R - this.width - buffer;
-                    this.vx = 0;
-                }
-
-                // Automatic downward defense firing loop
-                if (frames - this.lastShot >= this.shotCooldown) {
-                    this.lastShot = frames;
-                    this.shoot();
-                }
-            },
-
             shoot: function() {
                 projectiles.push({
                     x: this.x + 6,
@@ -517,7 +487,7 @@
                 });
             }
 
-            // Flaky crumbs floating down/up around the volcanic sulfur crater
+            // Flaky crumbs floating around the volcanic sulfur crater
             for (let i = 0; i < 25; i++) {
                 backgroundSabléeDust.push({
                     x: CHASM_L + Math.random() * (CHASM_R - CHASM_L),
@@ -612,54 +582,60 @@
             }
         }
 
-        // Dynamic touch detection spanning both clicks and holds accurately
-        function handleMobileSteering(clientX) {
-            const rect = canvas.getBoundingClientRect();
-            const touchPercent = (clientX - rect.left) / rect.width;
+        // Unified Multi-touch scanner to prevent cancel conflict on dual thumbs
+        function updateTouches(e) {
+            touchLeft = false;
+            touchRight = false;
             
-            if (touchPercent < 0.5) {
-                touchLeft = true;
-                touchRight = false;
-            } else {
-                touchRight = true;
-                touchLeft = false;
+            const rect = canvas.getBoundingClientRect();
+            // Scan all active touch points remaining on the screen surface
+            for (let i = 0; i < e.touches.length; i++) {
+                const touch = e.touches[i];
+                const touchPercent = (touch.clientX - rect.left) / rect.width;
+                if (touchPercent < 0.5) {
+                    touchLeft = true;
+                } else {
+                    touchRight = true;
+                }
             }
         }
 
         const handleTouchStart = (e) => {
             initAudioContext();
             if (gameState === 'GAMEOVER') {
-                return; // Let explicit prompt handle it securely
+                return; 
             }
             if (gameState === 'PLAYING') {
-                const touch = e.touches[0];
-                handleMobileSteering(touch.clientX);
+                updateTouches(e);
             }
         };
 
         const handleTouchMove = (e) => {
             if (gameState === 'PLAYING') {
-                const touch = e.touches[0];
-                handleMobileSteering(touch.clientX);
+                updateTouches(e);
             }
         };
 
-        const handleTouchEnd = () => {
-            touchLeft = false;
-            touchRight = false;
+        const handleTouchEnd = (e) => {
+            if (gameState === 'PLAYING') {
+                updateTouches(e);
+            } else {
+                touchLeft = false;
+                touchRight = false;
+            }
         };
 
-        window.addEventListener('touchstart', handleTouchStart, { passive: true });
-        window.addEventListener('touchmove', handleTouchMove, { passive: true });
-        window.addEventListener('touchend', handleTouchEnd, { passive: true });
-
-        // Direct, high-priority listeners to securely unlock audio and launch BGM on prompt clicks
         const initGameGesture = (e) => {
-            e.preventDefault();
-            e.stopPropagation();
+            if (e) e.preventDefault();
             initAudioContext();
-            startGame();
+            if (gameState === 'START') {
+                startGame();
+            }
         };
+
+        window.addEventListener('touchstart', handleTouchStart, { passive: false });
+        window.addEventListener('touchmove', handleTouchMove, { passive: false });
+        window.addEventListener('touchend', handleTouchEnd, { passive: false });
 
         document.getElementById('start-prompt').addEventListener('touchstart', initGameGesture);
         document.getElementById('start-prompt').addEventListener('click', initGameGesture);
@@ -737,6 +713,7 @@
             rover.shield = 100;
             rover.x = LOGICAL_WIDTH / 2 - 16;
             rover.vx = 0;
+            rover.lastShot = 0; // Fixes restart weapon lock issue
 
             currentThemeIdx = 0;
             currentPhaseIdx = 0;
@@ -828,8 +805,31 @@
                 speed += 1.2; // Drastic velocity change on phase loop increments
             }
 
-            // Execute Rover update logic
-            rover.update();
+            // Execute Rover update logic with crisp Target-Velocity controls
+            let targetVx = 0;
+            if (touchLeft) targetVx = -8.5;
+            if (touchRight) targetVx = 8.5;
+
+            // Snap interpolation removes the sloshing drift
+            rover.vx += (targetVx - rover.vx) * 0.35;
+            rover.x += rover.vx;
+
+            // Safety boundary constraint checks against canyon walls
+            const buffer = 4;
+            if (rover.x < CHASM_L + buffer) {
+                rover.x = CHASM_L + buffer;
+                rover.vx = 0;
+            }
+            if (rover.x > CHASM_R - rover.width - buffer) {
+                rover.x = CHASM_R - rover.width - buffer;
+                rover.vx = 0;
+            }
+
+            // Automatic downward defense firing loop
+            if (frames - rover.lastShot >= rover.shotCooldown) {
+                rover.lastShot = frames;
+                rover.shoot();
+            }
 
             // Run procedurally generated content spawn scheduler
             generateVerticalSpawns();
@@ -926,11 +926,11 @@
                         spawnParticles(rover.x + rover.width/2, rover.y + rover.height, 18, '#ff4444', 4);
                     }
 
-                    // Pull back or bounce physics on crashing
+                    // Pull back physics on crashing
                     rover.vx = (rover.x + rover.width/2 < obs.x + obs.width/2) ? -6 : 6;
                     obstacles.splice(i, 1); // Despawn threat post-impact
 
-                    // Force the volatile sulfur core vapor level upwards on major player deceleration
+                    // Force the volatile sulfur core vapor level upwards on player crash deceleration
                     vaporHeight -= 35;
 
                     if (rover.shield <= 0) {
@@ -1039,7 +1039,7 @@
             });
 
             // --- RENDER REBEKAH (PLANET) IN DEEP BACKGROUND GAP ---
-            // Styled with subtle deep crimson planet core and cyan rings
+            // Styled with deep crimson planet core and cyan rings
             ctx.save();
             ctx.translate(LOGICAL_WIDTH / 2, 220);
             
@@ -1377,7 +1377,6 @@
             ctx.restore();
         }
 
-        // Standard 60 FPS Engine Game Loops
         function loop() {
             update();
             draw();
