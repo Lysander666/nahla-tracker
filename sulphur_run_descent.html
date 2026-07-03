@@ -921,11 +921,26 @@
             const theme = THEMES[currentThemeIdx];
 
             // High Precision Movement Interpolation Architecture
+            let isPushingLeft = false;
+            let isPushingRight = false;
+
             if (touchMode === 'DRAGGING') {
                 const minX = CHASM_L + 4;
                 const maxX = CHASM_R - rover.width - 4;
-                if (rover.targetX < minX) rover.targetX = minX;
-                if (rover.targetX > maxX) rover.targetX = maxX;
+                
+                // Track if the player is actively swiping past boundaries
+                if (rover.targetX < minX) {
+                    rover.targetX = minX;
+                    if (rover.x <= minX + 1) {
+                        isPushingLeft = true;
+                    }
+                }
+                if (rover.targetX > maxX) {
+                    rover.targetX = maxX;
+                    if (rover.x >= maxX - 1) {
+                        isPushingRight = true;
+                    }
+                }
 
                 let diff = rover.targetX - rover.x;
                 rover.vx = diff * 0.32; 
@@ -946,9 +961,12 @@
             const buffer = 4;
             let scrapDamage = 0;
 
-            if (rover.x <= CHASM_L + buffer) {
-                rover.x = CHASM_L + buffer;
-                if (rover.vx < -0.5) {
+            // Check if ship is touching or actively swiped/pushed past boundaries
+            if (rover.x <= CHASM_L + buffer + 0.1 || isPushingLeft) {
+                if (rover.x <= CHASM_L + buffer + 0.1) {
+                    rover.x = CHASM_L + buffer;
+                }
+                if (rover.vx < -0.5 && !isPushingLeft) {
                     // Impact wall damage relative to velocity
                     scrapDamage = Math.min(12, Math.abs(rover.vx) * 1.5);
                     shakeIntensity = Math.max(shakeIntensity, 3);
@@ -963,9 +981,11 @@
                 }
                 // Dampen velocity away from the wall instead of resetting hard to 0
                 rover.vx = Math.max(0, rover.vx * -0.2);
-            } else if (rover.x >= CHASM_R - rover.width - buffer) {
-                rover.x = CHASM_R - rover.width - buffer;
-                if (rover.vx > 0.5) {
+            } else if (rover.x >= CHASM_R - rover.width - buffer - 0.1 || isPushingRight) {
+                if (rover.x >= CHASM_R - rover.width - buffer - 0.1) {
+                    rover.x = CHASM_R - rover.width - buffer;
+                }
+                if (rover.vx > 0.5 && !isPushingRight) {
                     // Impact wall damage relative to velocity
                     scrapDamage = Math.min(12, Math.abs(rover.vx) * 1.5);
                     shakeIntensity = Math.max(shakeIntensity, 3);
