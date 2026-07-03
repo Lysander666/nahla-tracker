@@ -124,7 +124,7 @@
                 <h1 class="text-4xl sm:text-5xl font-extrabold text-white tracking-widest uppercase text-shadow neon-amber leading-none mb-1">SULPHUR RUN</h1>
                 <h2 class="text-xl sm:text-2xl text-[#d4a24e] font-bold tracking-wider leading-none mb-3">PÂTE SABLÉE DESCENT</h2>
                 <p class="text-[1.1rem] sm:text-lg text-gray-300 font-sans tracking-wide leading-relaxed">
-                    Navigate the vertical, crumbly silicate walls of the ancient Pâte Sablée basin. Blast obstructions, dodge magma vents, and stay ahead of the rising toxic sulfur core!
+                    Navigate the vertical, crumbly silicate walls of the ancient Pâte Sablée basin. Blast obstructions, dodge erupting magma vents, and stay ahead of the rising toxic sulfur core!
                 </p>
             </div>
 
@@ -132,11 +132,11 @@
                 [TAP TO INITIATE DESCENT]
             </span>
 
-            <div class="mt-10 border-t border-white/10 pt-4 w-full text-center text-sm sm:text-base text-gray-400 tracking-wider font-sans">
-                <p class="mb-1"><span class="text-[#d4a24e] font-bold">DRAG:</span> Slide thumb anywhere to guide ship precisely</p>
-                <p class="mb-1"><span class="text-[#d4a24e] font-bold">STEER:</span> Or tap/hold left or right side of screen</p>
-                <p class="mb-1"><span class="text-[#ff61c7] font-bold">WEAPONS:</span> Plasma beams fire automatically downward</p>
-                <p class="text-xs text-gray-500 mt-2 italic">Synthesized audios lock dynamically on first tap</p>
+            <div class="mt-10 border-t border-white/10 pt-4 w-full text-center text-sm sm:text-base text-gray-400 tracking-wider font-sans font-medium">
+                <p class="mb-1"><span class="text-[#d4a24e]">DRAG:</span> Slide thumb anywhere to guide ship precisely</p>
+                <p class="mb-1"><span class="text-[#d4a24e]">STEER:</span> Or tap/hold left or right side of screen</p>
+                <p class="mb-1"><span class="text-[#ff5500]">HAZARDS:</span> Volcanic side vents erupt shootable magma fireballs!</p>
+                <p class="text-xs text-gray-500 mt-2 italic font-normal">Synthesized audios lock dynamically on first tap</p>
             </div>
         </div>
 
@@ -439,14 +439,16 @@
                     y: this.y + this.height,
                     vy: 11,
                     size: 3,
-                    height: 12
+                    height: 12,
+                    isMagma: false
                 });
                 projectiles.push({
                     x: this.x + this.width - 9,
                     y: this.y + this.height,
                     vy: 11,
                     size: 3,
-                    height: 12
+                    height: 12,
+                    isMagma: false
                 });
                 playSound('shoot');
             }
@@ -505,17 +507,20 @@
                 }
             }
 
+            // Procedurally spawn Active Basalt Magma Vents
             if (frames % 140 === 0 && Math.random() > 0.3) {
                 const sideLeft = Math.random() > 0.5;
-                const spikeWidth = 25 + Math.random() * 15;
-                const spikeHeight = 35 + Math.random() * 15;
+                const ventWidth = 25 + Math.random() * 15;
+                const ventHeight = 35 + Math.random() * 15;
                 obstacles.push({
-                    x: sideLeft ? CHASM_L : CHASM_R - spikeWidth,
+                    x: sideLeft ? CHASM_L : CHASM_R - ventWidth,
                     y: LOGICAL_HEIGHT,
-                    width: spikeWidth,
-                    height: spikeHeight,
-                    type: 'SPIKE',
-                    side: sideLeft ? 'LEFT' : 'RIGHT'
+                    width: ventWidth,
+                    height: ventHeight,
+                    type: 'VENT', // Upgraded from Spike
+                    side: sideLeft ? 'LEFT' : 'RIGHT',
+                    ventState: 'IDLE', // States: IDLE, WARNING, ERUPTING
+                    stateTimer: 60 + Math.random() * 60 // Wait ticks before flashing
                 });
             }
 
@@ -809,7 +814,6 @@
 
             // High Precision Movement Interpolation Architecture
             if (touchMode === 'DRAGGING') {
-                // Hard boundary checks on logical layout before running easing calculations
                 const minX = CHASM_L + 4;
                 const maxX = CHASM_R - rover.width - 4;
                 if (rover.targetX < minX) rover.targetX = minX;
@@ -822,14 +826,13 @@
                 // Fallback: Digital Tap/Hold side check or Desktop Keys
                 let targetVx = 0;
                 if (touchSide === 'LEFT' || touchLeft) {
-                    targetVx = -6.5; // Tuned down for elegant, controlled motion (prev 8.5)
+                    targetVx = -6.5; 
                 } else if (touchSide === 'RIGHT' || touchRight) {
-                    targetVx = 6.5;  // Tuned down for elegant, controlled motion (prev 8.5)
+                    targetVx = 6.5;  
                 }
 
-                // Progressive acceleration interpolation
                 rover.vx += (targetVx - rover.vx) * 0.22;
-                rover.targetX = rover.x; // Lock drag target to matching fallback location
+                rover.targetX = rover.x; 
             }
 
             rover.x += rover.vx;
@@ -868,24 +871,131 @@
                 }
             });
 
+            // Update Projectile Coordinates (Player Lasers & Magma Orbs)
             for (let i = projectiles.length - 1; i >= 0; i--) {
                 let p = projectiles[i];
-                p.y += p.vy; 
                 
-                if (p.y > LOGICAL_HEIGHT + 20) {
-                    projectiles.splice(i, 1);
+                if (p.isMagma) {
+                    // Magma Orbs fired by vents fly horizontally and drift down with chasm descent
+                    p.x += p.vx;
+                    p.y += p.vy - (speed * 0.15); // Sync slightly with scroll speed
+                    
+                    // Check collision with player
+                    const dx = (rover.x + rover.width/2) - p.x;
+                    const dy = (rover.y + rover.height/2) - p.y;
+                    const dist = Math.sqrt(dx*dx + dy*dy);
+                    
+                    if (dist < 18) {
+                        rover.shield -= 15; 
+                        playSound('shield-break');
+                        spawnParticles(p.x, p.y, 8, '#ff3300', 3);
+                        projectiles.splice(i, 1);
+                        continue;
+                    }
+
+                    // Despawn if out of play zone
+                    if (p.y > LOGICAL_HEIGHT + 20 || p.y < -20 || p.x < CHASM_L - 10 || p.x > CHASM_R + 10) {
+                        projectiles.splice(i, 1);
+                    }
+                } else {
+                    // Standard player lasers fire downward
+                    p.y += p.vy; 
+                    if (p.y > LOGICAL_HEIGHT + 20) {
+                        projectiles.splice(i, 1);
+                    }
                 }
             }
 
+            // Laser Defense Check: Can player shoot down magma orbs?
+            for (let i = projectiles.length - 1; i >= 0; i--) {
+                let p1 = projectiles[i];
+                if (p1.isMagma) continue; // Skip if it's already a hazard orb
+
+                for (let j = projectiles.length - 1; j >= 0; j--) {
+                    let p2 = projectiles[j];
+                    if (!p2.isMagma) continue; // Skip if it's not a hazard orb
+
+                    const dx = p1.x - p2.x;
+                    const dy = p1.y - p2.y;
+                    const dist = Math.sqrt(dx*dx + dy*dy);
+                    
+                    if (dist < 14) {
+                        // Mutual vaporization!
+                        spawnParticles(p2.x, p2.y, 8, '#ff5500', 2);
+                        playSound('hit');
+                        
+                        if (j > i) {
+                            projectiles.splice(j, 1);
+                            projectiles.splice(i, 1);
+                        } else {
+                            projectiles.splice(i, 1);
+                            projectiles.splice(j, 1);
+                        }
+                        break;
+                    }
+                }
+            }
+
+            // Obstacles & Magma Vents Update Cycle
             for (let i = obstacles.length - 1; i >= 0; i--) {
                 let obs = obstacles[i];
                 obs.y -= speed * 0.55; 
+
+                // Run Magma Vent state transition machine
+                if (obs.type === 'VENT') {
+                    obs.stateTimer--;
+                    if (obs.stateTimer <= 0) {
+                        if (obs.ventState === 'IDLE') {
+                            obs.ventState = 'WARNING';
+                            obs.stateTimer = 45; // Time warning flashes
+                        } else if (obs.ventState === 'WARNING') {
+                            obs.ventState = 'ERUPTING';
+                            obs.stateTimer = 80; // active eruption duration
+                        } else if (obs.ventState === 'ERUPTING') {
+                            obs.ventState = 'IDLE';
+                            obs.stateTimer = 110 + Math.random() * 60; // cooling period
+                        }
+                    }
+
+                    // Eruption active: spray particles and spawn physical magma orbs
+                    if (obs.ventState === 'ERUPTING') {
+                        if (frames % 6 === 0) {
+                            const sprayVx = obs.side === 'LEFT' ? (1.5 + Math.random() * 2) : (-1.5 - Math.random() * 2);
+                            particles.push({
+                                x: obs.side === 'LEFT' ? obs.x + obs.width : obs.x,
+                                y: obs.y + obs.height / 2,
+                                vx: sprayVx,
+                                vy: (Math.random() - 0.5) * 1.5 - (speed * 0.1),
+                                size: 2 + Math.random() * 2.5,
+                                color: Math.random() > 0.4 ? '#ff5500' : '#ffaa00',
+                                life: 20 + Math.random() * 15
+                            });
+                        }
+
+                        // Launch shootable magma projectiles
+                        if (obs.stateTimer % 25 === 0) {
+                            const orbVx = obs.side === 'LEFT' ? 3.5 : -3.5;
+                            projectiles.push({
+                                x: obs.side === 'LEFT' ? obs.x + obs.width : obs.x,
+                                y: obs.y + obs.height / 2,
+                                vx: orbVx,
+                                vy: 0.8,
+                                size: 6,
+                                height: 6,
+                                isMagma: true
+                            });
+                            playSound('hit');
+                        }
+                    }
+                }
 
                 let obsRemoved = false;
 
                 if (obs.type === 'SABLEE') {
                     for (let k = projectiles.length - 1; k >= 0; k--) {
                         let proj = projectiles[k];
+                        if (proj.isMagma) continue; // Hazard orbs do not destroy ledges
+
                         if (proj.x > obs.x && proj.x < obs.x + obs.width &&
                             proj.y > obs.y && proj.y < obs.y + obs.height) {
                             
@@ -923,6 +1033,7 @@
                     bottom: obs.y + obs.height
                 };
 
+                // Collision checking between Rover module and structural blocks
                 if (roverBox.right > obsBox.left && roverBox.left < obsBox.right &&
                     roverBox.bottom > obsBox.top && roverBox.top < obsBox.bottom) {
                     
@@ -930,8 +1041,8 @@
                         rover.shield -= 20;
                         playSound('shield-break');
                         spawnParticles(rover.x + rover.width/2, rover.y + rover.height, 12, '#ffaa00', 3);
-                    } else if (obs.type === 'SPIKE') {
-                        rover.shield -= 40;
+                    } else if (obs.type === 'VENT') {
+                        rover.shield -= 40; // Crashing into dense volcanic basalt is fatal
                         playSound('shield-break');
                         spawnParticles(rover.x + rover.width/2, rover.y + rover.height, 18, '#ff4444', 4);
                     }
@@ -1173,13 +1284,29 @@
             
             ctx.shadowBlur = 0;
 
-            ctx.fillStyle = '#fff';
-            ctx.shadowColor = theme.main;
-            ctx.shadowBlur = 8;
+            // Render projectiles (Both standard lasers and hazard magma orbs)
             projectiles.forEach(p => {
-                ctx.fillRect(p.x, p.y, p.size, p.height);
+                if (p.isMagma) {
+                    ctx.save();
+                    ctx.fillStyle = '#ffffff';
+                    ctx.shadowColor = '#ff3300';
+                    ctx.shadowBlur = 12;
+                    ctx.strokeStyle = '#ff5500';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+                    ctx.restore();
+                } else {
+                    ctx.save();
+                    ctx.fillStyle = '#fff';
+                    ctx.shadowColor = theme.main;
+                    ctx.shadowBlur = 8;
+                    ctx.fillRect(p.x, p.y, p.size, p.height);
+                    ctx.restore();
+                }
             });
-            ctx.shadowBlur = 0;
 
             collectibles.forEach(col => {
                 ctx.save();
@@ -1262,46 +1389,82 @@
                         ctx.stroke();
                     }
                     ctx.restore();
-                } else if (obs.type === 'SPIKE') {
+                } else if (obs.type === 'VENT') {
+                    // Volcanic basalt magma vents jutting from canyon walls
                     ctx.save();
-                    ctx.fillStyle = '#0a0301';
+                    ctx.fillStyle = '#0d0402'; 
                     
                     ctx.beginPath();
                     if (obs.side === 'LEFT') {
                         ctx.moveTo(CHASM_L, obs.y);
                         ctx.lineTo(CHASM_L + obs.width * 0.4, obs.y + obs.height * 0.12);
-                        ctx.lineTo(CHASM_L + obs.width * 0.75, obs.y + obs.height * 0.28);
-                        ctx.lineTo(CHASM_L + obs.width, obs.y + obs.height * 0.5); 
-                        ctx.lineTo(CHASM_L + obs.width * 0.7, obs.y + obs.height * 0.72);
-                        ctx.lineTo(CHASM_L + obs.width * 0.35, obs.y + obs.height * 0.88);
+                        ctx.lineTo(CHASM_L + obs.width * 0.8, obs.y + obs.height * 0.28);
+                        ctx.lineTo(CHASM_L + obs.width, obs.y + obs.height * 0.5); // Tip Nozzle
+                        ctx.lineTo(CHASM_L + obs.width * 0.8, obs.y + obs.height * 0.72);
+                        ctx.lineTo(CHASM_L + obs.width * 0.4, obs.y + obs.height * 0.88);
                         ctx.lineTo(CHASM_L, obs.y + obs.height);
                     } else {
                         ctx.moveTo(CHASM_R, obs.y);
                         ctx.lineTo(CHASM_R - obs.width * 0.4, obs.y + obs.height * 0.12);
-                        ctx.lineTo(CHASM_R - obs.width * 0.75, obs.y + obs.height * 0.28);
-                        ctx.lineTo(CHASM_R - obs.width, obs.y + obs.height * 0.5); 
-                        ctx.lineTo(CHASM_R - obs.width * 0.7, obs.y + obs.height * 0.72);
-                        ctx.lineTo(CHASM_R - obs.width * 0.35, obs.y + obs.height * 0.88);
+                        ctx.lineTo(CHASM_R - obs.width * 0.8, obs.y + obs.height * 0.28);
+                        ctx.lineTo(CHASM_R - obs.width, obs.y + obs.height * 0.5); // Tip Nozzle
+                        ctx.lineTo(CHASM_R - obs.width * 0.8, obs.y + obs.height * 0.72);
+                        ctx.lineTo(CHASM_R - obs.width * 0.4, obs.y + obs.height * 0.88);
                         ctx.lineTo(CHASM_R, obs.y + obs.height);
                     }
                     ctx.closePath();
                     ctx.fill();
 
-                    ctx.strokeStyle = '#ff4444';
-                    ctx.lineWidth = 1.5;
-                    ctx.shadowColor = '#ff4444';
-                    ctx.shadowBlur = 6;
+                    // Render glowing energy veins corresponding to vent cycle phase
+                    let glowColor = '#ff3c00';
+                    let coreColor = '#420d00';
+                    if (obs.ventState === 'WARNING') {
+                        // Quick bright flashes prior to blowing
+                        const flashOn = Math.floor(frames / 5) % 2 === 0;
+                        glowColor = flashOn ? '#ffae00' : '#ff3c00';
+                        coreColor = flashOn ? '#ffffff' : '#e65c00';
+                    } else if (obs.ventState === 'ERUPTING') {
+                        glowColor = '#ffbb00';
+                        coreColor = '#ffffff';
+
+                        // Draw white-hot eruption ignition circle at nozzle opening
+                        ctx.save();
+                        ctx.shadowColor = '#ff5500';
+                        ctx.shadowBlur = 12;
+                        ctx.fillStyle = '#ffffff';
+                        ctx.beginPath();
+                        const nozzleX = obs.side === 'LEFT' ? CHASM_L + obs.width : CHASM_R - obs.width;
+                        ctx.arc(nozzleX, obs.y + obs.height / 2, 5, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.restore();
+                    } else {
+                        // IDLE - slowly pulsating dim ember orange
+                        const pulse = 0.5 + Math.sin(frames * 0.05) * 0.3;
+                        glowColor = `rgba(255, 60, 0, ${pulse})`;
+                        coreColor = `rgba(130, 20, 0, ${pulse})`;
+                    }
+
+                    // Stroke basalt boundaries
+                    ctx.strokeStyle = glowColor;
+                    ctx.lineWidth = 1.8;
                     ctx.stroke();
-                    
-                    ctx.strokeStyle = '#120201';
+
+                    // Fill central hot lava conduits
+                    ctx.fillStyle = coreColor;
+                    ctx.beginPath();
+                    const veinX = obs.side === 'LEFT' ? CHASM_L + obs.width - 6 : CHASM_R - obs.width;
+                    ctx.fillRect(veinx = veinX, obs.y + obs.height / 2 - 3, 6, 6);
+
+                    // Jagged cracks for basalt rock texture
+                    ctx.strokeStyle = '#2d0c00';
                     ctx.lineWidth = 1;
                     ctx.beginPath();
                     if (obs.side === 'LEFT') {
                         ctx.moveTo(CHASM_L, obs.y + obs.height * 0.5);
-                        ctx.lineTo(CHASM_L + obs.width * 0.65, obs.y + obs.height * 0.5);
+                        ctx.lineTo(CHASM_L + obs.width * 0.6, obs.y + obs.height * 0.5);
                     } else {
                         ctx.moveTo(CHASM_R, obs.y + obs.height * 0.5);
-                        ctx.lineTo(CHASM_R - obs.width * 0.65, obs.y + obs.height * 0.5);
+                        ctx.lineTo(CHASM_R - obs.width * 0.6, obs.y + obs.height * 0.5);
                     }
                     ctx.stroke();
                     ctx.restore();
@@ -1338,9 +1501,27 @@
             ctx.shadowBlur = 0;
         }
 
-        function loop() {
-            update();
-            draw();
+        // Decoupled strict Fixed Update Timestep accumulator cycle
+        let lastTime = performance.now();
+        let accumulator = 0;
+        const deltaTime = 1000 / 60; // 60 updates per physical simulated second
+
+        function loop(currentTime) {
+            if (!currentTime) currentTime = performance.now();
+            let frameTime = currentTime - lastTime;
+            
+            // Protect loop from deep spiral calculations on heavy background thread lag
+            if (frameTime > 250) frameTime = 250; 
+            lastTime = currentTime;
+
+            accumulator += frameTime;
+
+            while (accumulator >= deltaTime) {
+                update(); // Strictly runs at exactly 60Hz
+                accumulator -= deltaTime;
+            }
+
+            draw(); // Redraws dynamically as fast as browser screen refreshes
             requestAnimationFrame(loop);
         }
 
