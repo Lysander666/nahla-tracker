@@ -5,11 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Sulphur Run: Pâte Sablée Descent</title>
     
-    <!-- External Web Fonts for Retro/Sci-Fi Styling -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=VT323&display=swap">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap">
     
-    <!-- Tailwind CSS for modern design and structural overlays -->
     <script src="https://cdn.tailwindcss.com"></script>
     
     <style>
@@ -35,6 +33,13 @@
                 inset 0 0 30px rgba(36, 14, 3, 0.8);
             background-color: #120703;
             overflow: hidden;
+        }
+
+        /* Fix canvas to scale smoothly with CSS while keeping logical resolution intact */
+        #gameCanvas {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
         }
 
         /* Scanline CRT Arcade Filter Overlay */
@@ -71,15 +76,11 @@
 
     <div id="game-frame" class="flex flex-col justify-between w-full h-full max-h-[100dvh]">
         
-        <!-- Game Canvas covering background -->
         <canvas id="gameCanvas" class="absolute inset-0 w-full h-full block z-0"></canvas>
         
-        <!-- AUDIO TAG linking to BGM file -->
         <audio id="bgm" loop preload="auto"></audio>
 
-        <!-- Floating Portrait HUD Layer -->
         <div id="hud" class="absolute top-4 left-4 right-4 z-20 hidden pointer-events-none flex flex-col gap-1 text-[1.2rem] sm:text-[1.4rem]">
-            <!-- Primary Telemetry Grid -->
             <div class="flex justify-between items-center bg-black/80 border-l-4 border-[#d4a24e] px-3 py-1.5 shadow-md pointer-events-auto">
                 <div class="text-[#d4a24e]">
                     DPTH: <span id="hud-depth" class="text-white font-bold">0</span>m
@@ -87,18 +88,15 @@
                 <div class="text-white">
                     DATA: <span id="hud-data" class="text-[#61dafb]">0</span>
                 </div>
-                <!-- Interactive Pause Button on HUD -->
                 <button id="hud-pause-btn" class="bg-[#240e03] border border-[#d4a24e]/50 px-2.5 py-0.5 rounded text-xs text-[#d4a24e] hover:bg-[#d4a24e]/20 active:bg-[#d4a24e]/40 transition-all font-sans">
                     PAUSE
                 </button>
             </div>
             
-            <!-- Secondary Telemetry (Loop, Health & Speed) -->
             <div class="flex justify-between items-center text-[1.1rem] bg-black/70 px-3 py-1">
                 <div class="text-gray-400">
                     LOOP: <span id="hud-loop" class="text-[#d4a24e]">1</span> (<span id="hud-phase" class="text-[#61dafb] font-bold">α</span>)
                 </div>
-                <!-- Mini Hull Integrity Bar -->
                 <div class="flex items-center gap-2">
                     <span class="text-[#ff4444] text-xs font-sans">SHIELD</span>
                     <div class="w-16 bg-gray-800 h-2 border border-[#ff4444]/50 rounded overflow-hidden">
@@ -111,9 +109,8 @@
             </div>
         </div>
 
-        <!-- Start Game Screen Overlay -->
         <div id="start-screen" class="absolute inset-0 z-30 flex flex-col justify-center items-center bg-black/90 p-6 text-center select-none">
-            <div class="transform -skew-x-3 border-2 border-[#d4a24e] bg-[#240e03]/80 p-5 shadow-[0_0_20px_rgba(212,162,78,0.4)]">
+            <div class="transform -skew-x-3 border-2 border-[#d4a24e] bg-[#240e03]/80 p-5 shadow-[0_0_20px_rgba(212, 162, 78, 0.4)]">
                 <h1 class="text-4xl sm:text-5xl font-extrabold text-white tracking-widest uppercase text-shadow neon-amber leading-none mb-1">SULPHUR RUN</h1>
                 <h2 class="text-xl sm:text-2xl text-[#d4a24e] font-bold tracking-wider leading-none mb-3">PÂTE SABLÉE DESCENT</h2>
                 <p class="text-[1.1rem] sm:text-lg text-gray-300 font-sans tracking-wide leading-relaxed">
@@ -132,7 +129,6 @@
             </div>
         </div>
 
-        <!-- Pause Screen Overlay -->
         <div id="pause-screen" class="absolute inset-0 z-30 hidden flex flex-col justify-center items-center bg-black/85 text-center">
             <h1 class="text-5xl text-white font-bold tracking-widest neon-amber transform -skew-x-3 mb-4">DESCENT PAUSED</h1>
             <button id="pause-resume-btn" class="blink text-2xl text-gray-300 border border-white/20 px-4 py-2 bg-white/5 rounded active:bg-white/20 transition-all">[TAP TO RESUME]</button>
@@ -141,7 +137,6 @@
             </button>
         </div>
 
-        <!-- Game Over Screen Overlay -->
         <div id="game-over-screen" class="absolute inset-0 z-30 hidden flex flex-col justify-center items-center bg-black/95 p-6 text-center">
             <div class="text-[#ff4444] text-xl font-bold tracking-widest uppercase mb-1">CRITICAL FAILURE // CORE MELTDOWN</div>
             <h1 class="text-4xl sm:text-5xl text-white font-extrabold transform -skew-x-3 text-shadow leading-none mb-4" style="text-shadow: 0 0 10px #ff4444;">MODULE TERMINATED</h1>
@@ -162,7 +157,7 @@
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
-        // Target logical dimensions for calculation aspect-ratio scaling
+        // Fixed logical dimensions to keep game mechanics and coordinates stable
         const LOGICAL_WIDTH = 360;
         const LOGICAL_HEIGHT = 640;
 
@@ -174,21 +169,10 @@
             bgm.volume = 0.45;
         }
 
-        // Adaptive scaling multiplier based on actual client frame size
-        let scaleFactor = 1;
-
+        // Lock internal resolution; CSS will responsive-scale it dynamically
         function resizeCanvas() {
-            const container = document.getElementById('game-frame');
-            if (!container) return;
-            const rect = container.getBoundingClientRect();
-            const dpr = window.devicePixelRatio || 1;
-            
-            canvas.width = rect.width * dpr;
-            canvas.height = rect.height * dpr;
-            ctx.scale(dpr, dpr);
-            
-            // Calculate uniform scale coordinate factor
-            scaleFactor = rect.width / LOGICAL_WIDTH;
+            canvas.width = LOGICAL_WIDTH;
+            canvas.height = LOGICAL_HEIGHT;
         }
 
         window.addEventListener('resize', resizeCanvas);
@@ -200,10 +184,10 @@
 
         const AudioContext = window.AudioContext || window.webkitAudioContext;
         let actx = null;
-        let activeAudioNodes = 0;
-        let lastShootSoundTime = 0; // Throttle sound playback to protect browser threads
+        let lastShootSoundTime = 0; 
+        let lastExplodeSoundTime = 0;
 
-        // Forcefully unlock both HTML5 audio and AudioContext simultaneously on mobile gesture
+        // Unlock audio contexts reliably across mobile gestures
         function initAudioContext() {
             try {
                 if (!actx) {
@@ -212,13 +196,8 @@
                 if (actx.state === 'suspended') {
                     actx.resume();
                 }
-                // Pre-unmute HTML5 BGM
-                if (bgm && bgm.paused) {
-                    bgm.play().then(() => {
-                        if (gameState === 'START') {
-                            bgm.pause(); // keep paused until game start
-                        }
-                    }).catch(() => {});
+                if (bgm && bgm.paused && gameState !== 'START' && gameState !== 'PAUSED' && gameState !== 'GAMEOVER') {
+                    bgm.play().catch(() => {});
                 }
             } catch (e) {
                 console.warn("AudioContext initialization blocked by browser security.", e);
@@ -228,19 +207,20 @@
         function playSound(type) {
             try {
                 initAudioContext();
-                if (!actx) return;
+                if (!actx || actx.state === 'suspended') return;
 
                 const now = actx.currentTime;
 
-                // Throttle critical launch sounds to protect browser threads
+                // Time-throttle sound playbacks to protect browser threads without lock leaks
                 if (type === 'shoot') {
-                    if (now - lastShootSoundTime < 0.16) return; // Cap shooting audio triggers
+                    if (now - lastShootSoundTime < 0.12) return; 
                     lastShootSoundTime = now;
                 }
+                if (type === 'explode' || type === 'shield-break') {
+                    if (now - lastExplodeSoundTime < 0.10) return;
+                    lastExplodeSoundTime = now;
+                }
 
-                if (activeAudioNodes > 8) return; // Prevent Web Audio saturation
-
-                activeAudioNodes++;
                 const osc = actx.createOscillator();
                 const gainNode = actx.createGain();
                 const filterNode = actx.createBiquadFilter();
@@ -255,7 +235,6 @@
                         filterNode.disconnect();
                         gainNode.disconnect();
                     } catch (e) {}
-                    activeAudioNodes = Math.max(0, activeAudioNodes - 1);
                 };
 
                 let duration = 0.15;
@@ -313,10 +292,10 @@
                         break;
                 }
 
-                osc.start();
+                osc.start(now);
                 osc.stop(now + duration);
             } catch (err) {
-                console.warn("WebAudio API was blocked by security sandbox.", err);
+                console.warn("WebAudio API encountered sandbox block.", err);
             }
         }
 
@@ -330,7 +309,6 @@
         const GREEK_PHASES = ['α','β','γ','δ','ε','ζ','η','θ','ι','κ','λ','μ'];
         const POINTS_PER_PHASE = 120;
 
-        // Vertical Chasm structural boundary configurations
         const CHASM_L = 40;
         const CHASM_R = LOGICAL_WIDTH - CHASM_L;
 
@@ -338,7 +316,7 @@
         let frames = 0;
         let depth = 0;
         let dataScore = 0;
-        let speed = 7.0; // Base descent velocity scaling
+        let speed = 7.0; 
         let visualDepth = 0;
 
         let currentThemeIdx = 0;
@@ -350,12 +328,12 @@
 
         const rover = {
             x: LOGICAL_WIDTH / 2 - 16,
-            y: 110, // Fixed high on vertical screen axis
+            y: 110, 
             width: 32,
             height: 20,
             vx: 0,
             angle: 0,
-            shield: 100, // Maximum survival integrity points
+            shield: 100, 
             lastShot: 0,
             shotCooldown: 10,
 
@@ -363,13 +341,11 @@
                 ctx.save();
                 ctx.translate(this.x + this.width/2, this.y + this.height/2);
 
-                // Pivot engine chassis depending on lateral movement velocity
                 this.angle = this.vx * 0.04;
                 ctx.rotate(this.angle);
 
                 const theme = THEMES[currentThemeIdx];
 
-                // Wingtips and stabilizers (Outer wings shadow)
                 ctx.fillStyle = '#121214'; 
                 ctx.beginPath();
                 ctx.moveTo(-16, -6);
@@ -385,7 +361,6 @@
                 ctx.closePath();
                 ctx.fill();
 
-                // Twin retro-thruster braking exhausts at top
                 ctx.fillStyle = theme.main;
                 ctx.shadowColor = theme.main;
                 ctx.shadowBlur = 10;
@@ -393,18 +368,16 @@
                 ctx.fillRect(4, -11, 4, 3);
                 ctx.shadowBlur = 0;
 
-                // Sleek aerodynamic fuselage body (pointed downwards)
                 ctx.fillStyle = '#27272a';
                 ctx.beginPath();
-                ctx.moveTo(-10, -8); // Top-left
-                ctx.lineTo(10, -8);  // Top-right
-                ctx.lineTo(7, 3);    // Mid-right
-                ctx.lineTo(0, 11);   // Pointy nose
-                ctx.lineTo(-7, 3);   // Mid-left
+                ctx.moveTo(-10, -8); 
+                ctx.lineTo(10, -8);  
+                ctx.lineTo(7, 3);    
+                ctx.lineTo(0, 11);   
+                ctx.lineTo(-7, 3);   
                 ctx.closePath();
                 ctx.fill();
 
-                // Wing panel highlights
                 ctx.fillStyle = '#3f3f46';
                 ctx.beginPath();
                 ctx.moveTo(-7, -8);
@@ -420,7 +393,6 @@
                 ctx.closePath();
                 ctx.fill();
 
-                // Glowing cockpit visor canopy
                 ctx.fillStyle = theme.main;
                 ctx.shadowColor = theme.main;
                 ctx.shadowBlur = 8;
@@ -434,7 +406,6 @@
                 ctx.fill();
                 ctx.shadowBlur = 0;
 
-                // Dual wing laser cannon barrels
                 ctx.fillStyle = '#18181b';
                 ctx.fillRect(-13, -1, 2, 8);
                 ctx.fillRect(11, -1, 2, 8);
@@ -476,7 +447,6 @@
             starfield = [];
             backgroundSabléeDust = [];
 
-            // Spawn dynamic stars flowing upwards to simulate high-speed vertical dive
             for (let i = 0; i < 60; i++) {
                 starfield.push({
                     x: Math.random() * LOGICAL_WIDTH,
@@ -487,7 +457,6 @@
                 });
             }
 
-            // Flaky crumbs floating around the volcanic sulfur crater
             for (let i = 0; i < 25; i++) {
                 backgroundSabléeDust.push({
                     x: CHASM_L + Math.random() * (CHASM_R - CHASM_L),
@@ -500,29 +469,22 @@
             }
         }
 
-        // Core sulfur vapor threat from the chasm bottom
         let vaporHeight = LOGICAL_HEIGHT + 20;
-        let maxVaporAdvance = LOGICAL_HEIGHT - 120; // Critical zone
+        let maxVaporAdvance = LOGICAL_HEIGHT - 120; 
 
-        // Dynamic generation algorithm for crumbling obstacles and data nodes
         function generateVerticalSpawns() {
-            // Spawn Breakable Sablée Rock Ledges spanning horizontal space
             if (frames % 90 === 0) {
                 const layout = Math.random();
                 if (layout < 0.35) {
-                    // Left wall-clinging breakable silicate block
                     obstacles.push(createObstacle(CHASM_L, LOGICAL_HEIGHT, 110, 20, 'SABLEE', 3));
                 } else if (layout < 0.7) {
-                    // Right wall-clinging breakable silicate block
                     obstacles.push(createObstacle(CHASM_R - 110, LOGICAL_HEIGHT, 110, 20, 'SABLEE', 3));
                 } else {
-                    // Two smaller segmented ledges on both sides
                     obstacles.push(createObstacle(CHASM_L, LOGICAL_HEIGHT, 70, 20, 'SABLEE', 2));
                     obstacles.push(createObstacle(CHASM_R - 70, LOGICAL_HEIGHT, 70, 20, 'SABLEE', 2));
                 }
             }
 
-            // Spawn hazardous static spikes poking inwards from the hard basalt walls
             if (frames % 140 === 0 && Math.random() > 0.3) {
                 const sideLeft = Math.random() > 0.5;
                 const spikeWidth = 25 + Math.random() * 15;
@@ -537,18 +499,17 @@
                 });
             }
 
-            // Spawn floating glowing resource cores/nodes
             if (frames % 80 === 0) {
                 const nodeRand = Math.random();
                 let val = 40;
-                let col = '#61dafb'; // Default blue
+                let col = '#61dafb'; 
 
                 if (nodeRand > 0.88) {
                     val = 100;
-                    col = '#d4a24e'; // Golden high value
+                    col = '#d4a24e'; 
                 } else if (nodeRand > 0.65) {
                     val = 70;
-                    col = '#ff61c7'; // Pink mid-value
+                    col = '#ff61c7'; 
                 }
 
                 collectibles.push({
@@ -582,13 +543,11 @@
             }
         }
 
-        // Unified Multi-touch scanner to prevent cancel conflict on dual thumbs
         function updateTouches(e) {
             touchLeft = false;
             touchRight = false;
             
             const rect = canvas.getBoundingClientRect();
-            // Scan all active touch points remaining on the screen surface
             for (let i = 0; i < e.touches.length; i++) {
                 const touch = e.touches[i];
                 const touchPercent = (touch.clientX - rect.left) / rect.width;
@@ -602,18 +561,12 @@
 
         const handleTouchStart = (e) => {
             initAudioContext();
-            if (gameState === 'GAMEOVER') {
-                return; 
-            }
-            if (gameState === 'PLAYING') {
-                updateTouches(e);
-            }
+            if (gameState === 'GAMEOVER') return; 
+            if (gameState === 'PLAYING') updateTouches(e);
         };
 
         const handleTouchMove = (e) => {
-            if (gameState === 'PLAYING') {
-                updateTouches(e);
-            }
+            if (gameState === 'PLAYING') updateTouches(e);
         };
 
         const handleTouchEnd = (e) => {
@@ -628,9 +581,7 @@
         const initGameGesture = (e) => {
             if (e) e.preventDefault();
             initAudioContext();
-            if (gameState === 'START') {
-                startGame();
-            }
+            if (gameState === 'START') startGame();
         };
 
         window.addEventListener('touchstart', handleTouchStart, { passive: false });
@@ -642,14 +593,15 @@
 
         document.getElementById('reboot-prompt').addEventListener('touchstart', (e) => {
             e.preventDefault();
+            initAudioContext();
             resetGame();
         });
         document.getElementById('reboot-prompt').addEventListener('click', (e) => {
             e.preventDefault();
+            initAudioContext();
             resetGame();
         });
 
-        // Pause/Resume Overlay Events
         document.getElementById('hud-pause-btn').addEventListener('click', (e) => {
             e.stopPropagation();
             togglePause();
@@ -680,13 +632,13 @@
             quitGame();
         });
 
-        // Desktop keyboard controls mapping as seamless accessibility fallback
         window.addEventListener('keydown', (e) => {
             if (gameState === 'PLAYING') {
                 if (e.code === 'ArrowLeft' || e.code === 'KeyA') touchLeft = true;
                 if (e.code === 'ArrowRight' || e.code === 'KeyD') touchRight = true;
                 if (e.code === 'KeyP') togglePause();
             } else if (e.code === 'Space' || e.code === 'Enter') {
+                initAudioContext();
                 if (gameState === 'START') startGame();
                 else if (gameState === 'GAMEOVER') resetGame();
             }
@@ -713,7 +665,7 @@
             rover.shield = 100;
             rover.x = LOGICAL_WIDTH / 2 - 16;
             rover.vx = 0;
-            rover.lastShot = 0; // Fixes restart weapon lock issue
+            rover.lastShot = 0; 
 
             currentThemeIdx = 0;
             currentPhaseIdx = 0;
@@ -722,6 +674,11 @@
 
             initEnvironments();
             updateHUDTheme();
+
+            // Explicitly force AudioContext alive on engine initiation
+            if (actx && actx.state === 'suspended') {
+                actx.resume();
+            }
 
             if (bgm) {
                 bgm.currentTime = 0;
@@ -758,6 +715,7 @@
 
         function triggerTermination() {
             gameState = 'GAMEOVER';
+            if (bgm) bgm.pause();
             playSound('explode');
             
             document.getElementById('game-over-screen').style.display = 'flex';
@@ -785,10 +743,8 @@
             frames++;
             depth += 0.08 * (speed / 5);
 
-            // Incrementally scale down environmental descent velocity
             if (frames % 220 === 0) speed += 0.1;
 
-            // Phase and Loop transitions calculated via acquisition of data scores
             const rawPhases = Math.floor(dataScore / POINTS_PER_PHASE);
             const targetPhase = rawPhases % 12;
             const targetLoop = Math.floor(rawPhases / 12) + 1;
@@ -802,19 +758,16 @@
                 currentLoopIdx = targetLoop - 1;
                 currentThemeIdx = currentLoopIdx % THEMES.length;
                 updateHUDTheme();
-                speed += 1.2; // Drastic velocity change on phase loop increments
+                speed += 1.2; 
             }
 
-            // Execute Rover update logic with crisp Target-Velocity controls
             let targetVx = 0;
             if (touchLeft) targetVx = -8.5;
             if (touchRight) targetVx = 8.5;
 
-            // Snap interpolation removes the sloshing drift
             rover.vx += (targetVx - rover.vx) * 0.35;
             rover.x += rover.vx;
 
-            // Safety boundary constraint checks against canyon walls
             const buffer = 4;
             if (rover.x < CHASM_L + buffer) {
                 rover.x = CHASM_L + buffer;
@@ -825,16 +778,13 @@
                 rover.vx = 0;
             }
 
-            // Automatic downward defense firing loop
             if (frames - rover.lastShot >= rover.shotCooldown) {
                 rover.lastShot = frames;
                 rover.shoot();
             }
 
-            // Run procedurally generated content spawn scheduler
             generateVerticalSpawns();
 
-            // Parallax Environment Space Layers scroll upwards (simulating descent down)
             starfield.forEach(star => {
                 star.y -= star.speed * (speed * 0.15);
                 if (star.y < 0) {
@@ -852,10 +802,9 @@
                 }
             });
 
-            // Handle glowing laser defensive projectile logic
             for (let i = projectiles.length - 1; i >= 0; i--) {
                 let p = projectiles[i];
-                p.y += p.vy; // Fired downwards
+                p.y += p.vy; 
                 
                 if (p.y > LOGICAL_HEIGHT + 20) {
                     projectiles.splice(i, 1);
@@ -864,11 +813,10 @@
 
             for (let i = obstacles.length - 1; i >= 0; i--) {
                 let obs = obstacles[i];
-                obs.y -= speed * 0.55; // Moving up
+                obs.y -= speed * 0.55; 
 
                 let obsRemoved = false;
 
-                // Hit checks for projectiles vs breakable Sablée ledges
                 if (obs.type === 'SABLEE') {
                     for (let k = projectiles.length - 1; k >= 0; k--) {
                         let proj = projectiles[k];
@@ -879,7 +827,6 @@
                             projectiles.splice(k, 1);
                             playSound('hit');
 
-                            // Break flaky crumbly pastry particles
                             spawnParticles(proj.x, obs.y + obs.height/2, 6, '#ffca7a', 3);
 
                             if (obs.hp <= 0) {
@@ -896,7 +843,6 @@
 
                 if (obsRemoved) continue;
 
-                // Collisions against Rover
                 const roverBox = {
                     left: rover.x + 2,
                     right: rover.x + rover.width - 2,
@@ -911,11 +857,9 @@
                     bottom: obs.y + obs.height
                 };
 
-                // Check standard box overlap
                 if (roverBox.right > obsBox.left && roverBox.left < obsBox.right &&
                     roverBox.bottom > obsBox.top && roverBox.top < obsBox.bottom) {
                     
-                    // Trigger hull failure damage
                     if (obs.type === 'SABLEE') {
                         rover.shield -= 20;
                         playSound('shield-break');
@@ -926,11 +870,9 @@
                         spawnParticles(rover.x + rover.width/2, rover.y + rover.height, 18, '#ff4444', 4);
                     }
 
-                    // Pull back physics on crashing
                     rover.vx = (rover.x + rover.width/2 < obs.x + obs.width/2) ? -6 : 6;
-                    obstacles.splice(i, 1); // Despawn threat post-impact
+                    obstacles.splice(i, 1); 
 
-                    // Force the volatile sulfur core vapor level upwards on player crash deceleration
                     vaporHeight -= 35;
 
                     if (rover.shield <= 0) {
@@ -947,7 +889,7 @@
 
             for (let i = collectibles.length - 1; i >= 0; i--) {
                 let col = collectibles[i];
-                col.y -= speed * 0.55; // Moving upwards past descending rover
+                col.y -= speed * 0.55; 
                 col.pulse += 0.08;
 
                 const dx = (rover.x + rover.width/2) - col.x;
@@ -960,7 +902,6 @@
                     spawnParticles(col.x, col.y, 8, col.color, 3);
                     collectibles.splice(i, 1);
                     
-                    // Recover small shield integrity points on data capture
                     rover.shield = Math.min(100, rover.shield + 4);
                     continue;
                 }
@@ -970,7 +911,6 @@
                 }
             }
 
-            // Particle timeline decaying updates
             for (let i = particles.length - 1; i >= 0; i--) {
                 let p = particles[i];
                 p.x += p.vx;
@@ -981,25 +921,19 @@
                 }
             }
 
-            // Core sulfur rising toxic cloud calculation
             const normalVaporY = LOGICAL_HEIGHT - 30 - (Math.sin(frames * 0.04) * 8);
-            
-            // Vapor slowly drifts back unless player makes collision errors
             vaporHeight += (normalVaporY - vaporHeight) * 0.035;
 
-            // Constrain vapor boundaries
             if (vaporHeight < maxVaporAdvance) {
                 vaporHeight = maxVaporAdvance;
             }
 
-            // Instantly terminate module if engulfed in core toxic mist
             if (vaporHeight <= rover.y + rover.height + 5) {
                 rover.shield = 0;
                 triggerTermination();
                 return;
             }
 
-            // Update visible HUD text values
             document.getElementById('hud-depth').innerText = Math.floor(depth);
             document.getElementById('hud-data').innerText = dataScore;
             document.getElementById('hud-phase').innerText = GREEK_PHASES[currentPhaseIdx];
@@ -1009,26 +943,22 @@
         }
 
         function draw() {
-            // Apply scale sizing depending on screen real estate aspect adjustments
-            ctx.save();
-            ctx.scale(scaleFactor, scaleFactor);
+            // Clean frame refresh
+            ctx.clearRect(0, 0, LOGICAL_WIDTH, LOGICAL_HEIGHT);
 
             const theme = THEMES[currentThemeIdx];
 
-            // Render deep atmospheric golden-copper sulfur chasm gradient
             const skyGrad = ctx.createLinearGradient(0, 0, 0, LOGICAL_HEIGHT);
             skyGrad.addColorStop(0, '#1c0a02');
             skyGrad.addColorStop(1, '#080200');
             ctx.fillStyle = skyGrad;
             ctx.fillRect(0, 0, LOGICAL_WIDTH, LOGICAL_HEIGHT);
 
-            // Render deep celestial background starfield
             starfield.forEach(star => {
                 ctx.fillStyle = `rgba(212, 162, 78, ${star.alpha * 0.8})`;
                 ctx.fillRect(star.x, star.y, star.size, star.size);
             });
 
-            // Render flaky crumbs floating down/up around chasm walls
             backgroundSabléeDust.forEach(crumb => {
                 ctx.save();
                 ctx.translate(crumb.x, crumb.y);
@@ -1038,50 +968,43 @@
                 ctx.restore();
             });
 
-            // --- RENDER REBEKAH (PLANET) IN DEEP BACKGROUND GAP ---
-            // Styled with deep crimson planet core and cyan rings
             ctx.save();
             ctx.translate(LOGICAL_WIDTH / 2, 220);
             
-            // Outer Ring Background half (Subtle Cyan)
             ctx.save();
             ctx.rotate(-0.15);
             ctx.scale(1, 0.25);
             ctx.strokeStyle = 'rgba(6, 182, 212, 0.12)';
             ctx.lineWidth = 12;
             ctx.beginPath();
-            ctx.arc(0, 0, 75, Math.PI, 0); // Behind top arc
+            ctx.arc(0, 0, 75, Math.PI, 0); 
             ctx.stroke();
             ctx.restore();
 
-            // Planet Body Core with deep crimson & obsidian eclipsing gradients
             const planetGlow = ctx.createRadialGradient(-10, -10, 5, 0, 0, 42);
-            planetGlow.addColorStop(0, '#99000d'); // Crimson highlight
-            planetGlow.addColorStop(0.5, '#4a0107'); // Deep red
-            planetGlow.addColorStop(1, '#120002'); // Obsidian shadowed rim
+            planetGlow.addColorStop(0, '#99000d'); 
+            planetGlow.addColorStop(0.5, '#4a0107'); 
+            planetGlow.addColorStop(1, '#120002'); 
             ctx.fillStyle = planetGlow;
-            ctx.shadowColor = '#6e0207'; // Subdued red atmosphere
+            ctx.shadowColor = '#6e0207'; 
             ctx.shadowBlur = 25;
             ctx.beginPath();
             ctx.arc(0, 0, 42, 0, Math.PI*2);
             ctx.fill();
             ctx.shadowBlur = 0;
 
-            // Planet Foreground Ring half (Subtle Cyan)
             ctx.save();
             ctx.rotate(-0.15);
             ctx.scale(1, 0.25);
             ctx.strokeStyle = 'rgba(6, 182, 212, 0.2)';
             ctx.lineWidth = 12;
             ctx.beginPath();
-            ctx.arc(0, 0, 75, 0, Math.PI); // Front bottom arc
+            ctx.arc(0, 0, 75, 0, Math.PI); 
             ctx.stroke();
             ctx.restore();
 
             ctx.restore();
 
-            // --- PROCEDURAL JAGGED ROCKY WALLS ---
-            // Left Solid rocky canyon border
             ctx.fillStyle = '#0a0301';
             ctx.beginPath();
             ctx.moveTo(0, 0);
@@ -1096,7 +1019,6 @@
             ctx.closePath();
             ctx.fill();
 
-            // Right Solid rocky canyon border
             ctx.fillStyle = '#0a0301';
             ctx.beginPath();
             ctx.moveTo(LOGICAL_WIDTH, 0);
@@ -1111,7 +1033,6 @@
             ctx.closePath();
             ctx.fill();
 
-            // Left wall rock details & shading overlays
             ctx.fillStyle = '#170601';
             ctx.beginPath();
             ctx.moveTo(0, 0);
@@ -1126,7 +1047,6 @@
             ctx.closePath();
             ctx.fill();
 
-            // Right wall rock details & shading overlays
             ctx.fillStyle = '#170601';
             ctx.beginPath();
             ctx.moveTo(LOGICAL_WIDTH, 0);
@@ -1141,7 +1061,6 @@
             ctx.closePath();
             ctx.fill();
 
-            // Render scrolling rocky horizontal strata bands inside walls
             ctx.strokeStyle = '#291104';
             ctx.lineWidth = 1.5;
             for (let i = 0; i < LOGICAL_HEIGHT; i += 40) {
@@ -1160,7 +1079,6 @@
                 ctx.stroke();
             }
 
-            // Left & Right Glowing neon-energy boundaries outlining the rocky jagged margins
             ctx.strokeStyle = theme.main;
             ctx.lineWidth = 1.5;
             ctx.shadowColor = theme.main;
@@ -1190,7 +1108,6 @@
             
             ctx.shadowBlur = 0;
 
-            // Render projectiles
             ctx.fillStyle = '#fff';
             ctx.shadowColor = theme.main;
             ctx.shadowBlur = 8;
@@ -1199,7 +1116,6 @@
             });
             ctx.shadowBlur = 0;
 
-            // Render collectible data nodes
             collectibles.forEach(col => {
                 ctx.save();
                 ctx.translate(col.x, col.y);
@@ -1226,26 +1142,21 @@
 
             obstacles.forEach(obs => {
                 if (obs.type === 'SABLEE') {
-                    // Crusty jagged silicate shelf layers
                     ctx.save();
                     ctx.fillStyle = '#1c0f04';
                     
-                    // Generate a jagged polygon for the rock ledge rather than a straight box
                     ctx.beginPath();
                     ctx.moveTo(obs.x, obs.y);
                     
                     let steps = 6;
-                    // Jagged Top Edge
                     for (let j = 0; j <= steps; j++) {
                         let px = obs.x + (obs.width / steps) * j;
                         let offset = Math.sin(px * 0.15 + obs.y * 0.05) * 4;
                         ctx.lineTo(px, obs.y + offset);
                     }
                     
-                    // Jagged Right Wall Connection
                     ctx.lineTo(obs.x + obs.width, obs.y + obs.height);
                     
-                    // Jagged Bottom Edge
                     for (let j = steps; j >= 0; j--) {
                         let px = obs.x + (obs.width / steps) * j;
                         let offset = Math.sin(px * 0.2 + obs.y * 0.03) * 3 + 4;
@@ -1254,7 +1165,6 @@
                     ctx.closePath();
                     ctx.fill();
 
-                    // Jagged health feedback indicator (drawn on the uneven top surface)
                     const healthPct = obs.hp / obs.maxHp;
                     ctx.strokeStyle = healthPct > 0.6 ? '#d4a24e' : '#a35f1c';
                     ctx.lineWidth = 2.5;
@@ -1267,11 +1177,9 @@
                     }
                     ctx.stroke();
 
-                    // Draw organic layered geological crags and cracks inside the stone
                     ctx.strokeStyle = '#291505';
                     ctx.lineWidth = 1.5;
                     ctx.beginPath();
-                    // Interstitial sedimentary horizontal layer line
                     for (let j = 1; j < steps; j++) {
                         let px = obs.x + (obs.width / steps) * j;
                         let offset = Math.sin(px * 0.12 + obs.y * 0.04) * 3 + obs.height / 2;
@@ -1280,7 +1188,6 @@
                     }
                     ctx.stroke();
 
-                    // Structural failure stress lines (cracks visible if damaged)
                     if (obs.hp < obs.maxHp) {
                         ctx.beginPath();
                         ctx.moveTo(obs.x + obs.width * 0.25, obs.y + 2);
@@ -1291,26 +1198,23 @@
                     }
                     ctx.restore();
                 } else if (obs.type === 'SPIKE') {
-                    // Indestructible volcanic basalt rock outcrops
                     ctx.save();
                     ctx.fillStyle = '#0a0301';
                     
                     ctx.beginPath();
                     if (obs.side === 'LEFT') {
-                        // Multi-pointed jagged rock jutting from the left wall
                         ctx.moveTo(CHASM_L, obs.y);
                         ctx.lineTo(CHASM_L + obs.width * 0.4, obs.y + obs.height * 0.12);
                         ctx.lineTo(CHASM_L + obs.width * 0.75, obs.y + obs.height * 0.28);
-                        ctx.lineTo(CHASM_L + obs.width, obs.y + obs.height * 0.5); // Peak
+                        ctx.lineTo(CHASM_L + obs.width, obs.y + obs.height * 0.5); 
                         ctx.lineTo(CHASM_L + obs.width * 0.7, obs.y + obs.height * 0.72);
                         ctx.lineTo(CHASM_L + obs.width * 0.35, obs.y + obs.height * 0.88);
                         ctx.lineTo(CHASM_L, obs.y + obs.height);
                     } else {
-                        // Multi-pointed jagged rock jutting from the right wall
                         ctx.moveTo(CHASM_R, obs.y);
                         ctx.lineTo(CHASM_R - obs.width * 0.4, obs.y + obs.height * 0.12);
                         ctx.lineTo(CHASM_R - obs.width * 0.75, obs.y + obs.height * 0.28);
-                        ctx.lineTo(CHASM_R - obs.width, obs.y + obs.height * 0.5); // Peak
+                        ctx.lineTo(CHASM_R - obs.width, obs.y + obs.height * 0.5); 
                         ctx.lineTo(CHASM_R - obs.width * 0.7, obs.y + obs.height * 0.72);
                         ctx.lineTo(CHASM_R - obs.width * 0.35, obs.y + obs.height * 0.88);
                         ctx.lineTo(CHASM_R, obs.y + obs.height);
@@ -1318,14 +1222,12 @@
                     ctx.closePath();
                     ctx.fill();
 
-                    // Hot volcanic glowing edge highlighting
                     ctx.strokeStyle = '#ff4444';
                     ctx.lineWidth = 1.5;
                     ctx.shadowColor = '#ff4444';
                     ctx.shadowBlur = 6;
                     ctx.stroke();
                     
-                    // Jagged core shadows for texture
                     ctx.strokeStyle = '#120201';
                     ctx.lineWidth = 1;
                     ctx.beginPath();
@@ -1342,16 +1244,13 @@
             });
             ctx.shadowBlur = 0;
 
-            // Render Rover Module
             rover.draw();
 
-            // Render active particle effects
             particles.forEach(p => {
                 ctx.fillStyle = p.color || '#aaa';
                 ctx.fillRect(p.x, p.y, p.size, p.size);
             });
 
-            // --- RENDER SULFUR VAPOR THREAT AT BOTTOM ---
             const vaporGrad = ctx.createLinearGradient(0, vaporHeight, 0, LOGICAL_HEIGHT);
             vaporGrad.addColorStop(0, 'rgba(212, 162, 78, 0)');
             vaporGrad.addColorStop(0.2, 'rgba(212, 162, 78, 0.45)');
@@ -1360,7 +1259,6 @@
             ctx.fillStyle = vaporGrad;
             ctx.fillRect(CHASM_L, vaporHeight, CHASM_R - CHASM_L, LOGICAL_HEIGHT - vaporHeight);
 
-            // Sulfur hazard bubbling lines
             ctx.strokeStyle = '#d4a24e';
             ctx.lineWidth = 2;
             ctx.shadowColor = '#d4a24e';
@@ -1373,8 +1271,6 @@
             }
             ctx.stroke();
             ctx.shadowBlur = 0;
-
-            ctx.restore();
         }
 
         function loop() {
