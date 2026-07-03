@@ -1159,7 +1159,7 @@
                     obs.y += obs.vy; 
                 } else if (obs.type === 'PROBE') {
                     // Floating hunter probe rises from the bottom of the screen much slower
-                    obs.y -= (speed * 0.55 + 0.35);
+                    obs.y -= (speed * 0.55 + 0.15);
                     
                     // Tracks player lateral movement
                     obs.x += ((rover.x + rover.width/2 - obs.width/2) - obs.x) * 0.015;
