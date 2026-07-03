@@ -3,6 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <!-- Desktop Redirect Handler -->
+    <script>
+        (function() {
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) 
+                || (navigator.maxTouchPoints > 0) 
+                || (window.matchMedia("(max-width: 1024px)").matches);
+                
+            if (!isMobile) {
+                window.location.href = "sulphur_run.html";
+            }
+        })();
+    </script>
+    
     <title>Sulphur Run: Pâte Sablée Descent V0.57</title>
     
     <!-- External Web Fonts for Retro/Sci-Fi Styling -->
