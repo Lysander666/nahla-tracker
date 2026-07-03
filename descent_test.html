@@ -3,11 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    
     <!-- Desktop Redirect Handler -->
     <script>
         (function() {
-            // Detect mobile devices using User Agent, touch capabilities, and screen size
             const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) 
                 || (navigator.maxTouchPoints > 0) 
                 || (window.matchMedia("(max-width: 1024px)").matches);
@@ -17,12 +15,12 @@
             }
         })();
     </script>
-
-    <title>Sulphur Run: Pâte Sablée Descent V0.59</title>
+    
+    <title>Sulphur Run: Pâte Sablée Descent V0.65</title>
     
     <!-- External Web Fonts for Retro/Sci-Fi Styling -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=VT323&display=swap">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap">
     
     <!-- Tailwind CSS for modern design and structural overlays -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -99,10 +97,10 @@
         <!-- AUDIO TAG linking to BGM file (Fallback to Synth Loop if not loaded) -->
         <audio id="bgm" loop preload="auto"></audio>
 
-        <!-- Floating Portrait HUD Layer -->
+        <!-- Floating Portrait HUD Layer (Top) -->
         <div id="hud" class="absolute top-4 left-4 right-4 z-20 hidden pointer-events-none flex flex-col gap-1 text-[1.2rem] sm:text-[1.4rem]">
             <!-- Primary Telemetry Grid -->
-            <div class="flex justify-between items-center bg-black/80 border-l-4 border-[#d4a24e] px-3 py-1.5 shadow-md pointer-events-auto">
+            <div class="flex justify-between items-center bg-black/85 border-l-4 border-[#d4a24e] px-3 py-1.5 shadow-md pointer-events-auto">
                 <div class="text-[#d4a24e]">
                     DPTH: <span id="hud-depth" class="text-white font-bold">0</span>m
                 </div>
@@ -116,7 +114,7 @@
             </div>
             
             <!-- Secondary Telemetry (Loop, Health & Speed) -->
-            <div class="flex justify-between items-center text-[1.1rem] bg-black/70 px-3 py-1">
+            <div class="flex justify-between items-center text-[1.1rem] bg-black/75 px-3 py-1">
                 <div class="text-gray-400">
                     LOOP: <span id="hud-loop" class="text-[#d4a24e]">1</span> (<span id="hud-phase" class="text-[#61dafb] font-bold">α</span>)
                 </div>
@@ -133,25 +131,55 @@
             </div>
         </div>
 
+        <!-- Floating Portrait HUD Layer (Bottom - Relocated for optimal space & touch) -->
+        <div id="bottom-hud" class="absolute bottom-4 left-4 right-4 z-20 hidden pointer-events-none flex flex-col gap-1 text-[1.2rem] sm:text-[1.4rem]">
+            <!-- Observatory Neon Nodes Tracker Bar -->
+            <div class="flex justify-between items-center text-[0.95rem] bg-black/85 border-r-4 border-[#d4a24e] px-3 py-1.5 transition-colors duration-300 rounded shadow-md pointer-events-none">
+                <div class="text-gray-400 font-sans tracking-wide text-[10px] sm:text-xs">OBSERVATORY PROGRESS:</div>
+                <div id="hud-nodes-container" class="flex gap-1 items-center px-1">
+                    <!-- 16 neon indicators dynamically loaded -->
+                </div>
+                <div id="hud-nodes-count" class="text-[#61dafb] font-bold font-mono text-xs">0/16</div>
+            </div>
+        </div>
+
+        <!-- Achievement/Node Toast Notification Overlay (Celebratory achievement alerts with continue button) -->
+        <div id="node-toast" class="absolute left-4 right-4 top-1/4 z-40 hidden flex flex-col items-center justify-center bg-black/80 backdrop-blur-sm border-2 border-double border-white py-5 px-6 rounded-lg shadow-[0_0_25px_rgba(255,255,255,0.3)] transform -translate-y-4 opacity-0 transition-all duration-500 pointer-events-auto text-center">
+            <div id="toast-badge" class="px-3 py-0.5 bg-white/10 text-[10px] sm:text-xs font-sans font-black tracking-widest text-[#d4a24e] border border-[#d4a24e]/40 rounded mb-1.5 uppercase">FREQUENCY UNLOCKED</div>
+            <h3 id="toast-title" class="text-3xl sm:text-4xl font-extrabold tracking-widest text-white uppercase leading-none my-1 font-mono">AMBER NODE</h3>
+            <p id="toast-desc" class="text-xs sm:text-sm text-gray-300 font-sans mt-1 leading-snug">Observatory Construction: <span class="text-white font-bold font-mono">1/16</span> Nodes Secure</p>
+            <button id="toast-continue-btn" class="blink text-lg sm:text-xl text-white mt-5 cursor-pointer border px-4 py-1.5 bg-white/5 hover:bg-white/10 active:bg-white/25 rounded font-mono transition-all uppercase tracking-wider">
+                [CONTINUE DESCENT]
+            </button>
+        </div>
+
         <!-- Start Game Screen Overlay -->
-        <div id="start-screen" class="absolute inset-0 z-30 flex flex-col justify-center items-center bg-black/90 p-6 text-center select-none">
-            <div class="transform -skew-x-3 border-2 border-[#d4a24e] bg-[#240e03]/80 p-5 shadow-[0_0_20px_rgba(212,162,78,0.4)]">
+        <div id="start-screen" class="absolute inset-0 z-30 flex flex-col justify-center items-center bg-black/95 p-6 text-center select-none overflow-y-auto">
+            <div class="transform -skew-x-3 border-2 border-[#d4a24e] bg-[#240e03]/80 p-5 shadow-[0_0_20px_rgba(212,162,78,0.4)] w-full max-w-sm">
                 <h1 class="text-4xl sm:text-5xl font-extrabold text-white tracking-widest uppercase text-shadow neon-amber leading-none mb-1">SULPHUR RUN</h1>
-                <h2 class="text-xl sm:text-2xl text-[#d4a24e] font-bold tracking-wider leading-none mb-3">PÂTE SABLÉE DESCENT v0.59</h2>
-                <p class="text-[1.1rem] sm:text-lg text-gray-300 font-sans tracking-wide leading-relaxed">
-                    Navigate the vertical, crumbly silicate walls of the ancient Pâte Sablée basin. Blast obstructions, neutralize magma vents, and collect data nodes!
+                <h2 class="text-xl sm:text-2xl text-[#d4a24e] font-bold tracking-wider leading-none mb-3">PÂTE SABLÉE DESCENT v0.65</h2>
+                <p class="text-[1.05rem] sm:text-base text-gray-300 font-sans tracking-wide leading-relaxed">
+                    Navigate the dangerous vertical rock walls of the Pâte Sablée basin. Blast obstructions, neutralize magma vents, and collect data nodes.
                 </p>
+                <div class="mt-3 border-t border-[#d4a24e]/30 pt-3 text-left">
+                    <p class="text-xs sm:text-sm text-[#61dafb] font-bold font-sans uppercase tracking-wider mb-1">PRIMARY DIRECTIVE:</p>
+                    <p class="text-xs sm:text-sm text-gray-300 font-sans leading-snug">
+                        Survive and complete 16 full color theme loops to gather <span class="text-white font-bold">16 Neon Frequency Nodes</span> (4x Amber, 4x Cyan, 4x Pink, 4x Red) and construct the <span class="text-[#d4a24e] font-bold">Natalja's Pass Observatory</span> on the surface!
+                    </p>
+                </div>
             </div>
 
-            <span id="start-prompt" class="blink text-2xl text-white mt-12 cursor-pointer neon-amber border border-white/25 px-4 py-2 bg-white/5 active:bg-white/20 transition-all rounded">
+            <span id="start-prompt" class="blink text-2xl text-white mt-8 cursor-pointer neon-amber border border-white/25 px-4 py-2 bg-white/5 active:bg-white/20 transition-all rounded">
                 [TAP TO INITIATE DESCENT]
             </span>
 
-            <div class="mt-10 border-t border-white/10 pt-4 w-full text-center text-sm sm:text-base text-gray-400 tracking-wider font-sans font-medium">
+            <div class="mt-8 border-t border-white/10 pt-4 w-full text-center text-xs sm:text-sm text-gray-400 tracking-wider font-sans font-medium max-w-sm">
                 <p class="mb-1"><span class="text-[#d4a24e]">DRAG:</span> Slide thumb anywhere to guide ship precisely</p>
-                <p class="mb-1"><span class="text-[#d4a24e]">STEER:</span> Or tap/hold left or right side of screen</p>
+                <p class="mb-1"><span class="text-[#d4a24e]">SPEED:</span> Increases procedurally!</p>
                 <p class="mb-1"><span class="text-[#ff5500]">HAZARDS:</span> Scraping walls deals minor damage. Blast active side vents in 2 hits!</p>
                 <p class="text-xs text-gray-500 mt-2 italic font-normal">Synthesized chiptune soundtrack triggers dynamically</p>
+                <br>
+                <p class="mb-1"><a href="index.html" class="text-[#00ffff] no-underline hover:underline font-bold">RETURN TO NAHLA TRACKER</a></p>
             </div>
         </div>
 
@@ -164,19 +192,44 @@
             </button>
         </div>
 
+        <!-- Victory / Mission Accomplished Overlay -->
+        <div id="victory-screen" class="absolute inset-0 z-30 hidden flex flex-col justify-center items-center bg-black/95 p-6 text-center select-none">
+            <div class="transform -skew-x-3 border-2 border-[#61dafb] bg-[#020d12]/80 p-5 shadow-[0_0_20px_rgba(97,218,251,0.5)] w-full max-w-sm">
+                <div class="text-[#61dafb] text-lg font-bold tracking-widest uppercase mb-1">MISSION ACCOMPLISHED</div>
+                <h1 class="text-4xl sm:text-5xl text-white font-extrabold transform -skew-x-3 text-shadow leading-none mb-3" style="text-shadow: 0 0 10px #61dafb;">OBSERVATORY ONLINE</h1>
+                <p class="text-[1.05rem] sm:text-base text-gray-300 font-sans tracking-wide leading-relaxed">
+                    All 16 neon frequency nodes secured! The construction of the <strong class="text-[#d4a24e]">Natalja's Pass Observatory</strong> on the surface of Pâte Sablée crater is complete.
+                </p>
+            </div>
+            
+            <div class="my-5 flex flex-col gap-2 border-y border-white/10 py-4 w-full max-w-xs text-xl sm:text-2xl text-gray-300 font-sans">
+                <p class="flex justify-between"><span>DESCENT DEPTH:</span> <span id="victory-depth" class="text-white font-bold font-mono">0</span>m</p>
+                <p class="flex justify-between"><span>DATA ACQUIRED:</span> <span id="victory-data" class="text-[#61dafb] font-bold font-mono">0</span></p>
+                <p class="flex justify-between"><span>CONSTRUCTED:</span> <span class="text-[#ff61c7] font-bold font-mono">16/16 NODES</span></p>
+            </div>
+
+            <span id="victory-continue-btn" class="blink text-2xl text-white mt-6 cursor-pointer neon-amber border border-white/20 bg-[#240e03] px-5 py-2.5 rounded font-mono active:bg-white/20 transition-all shadow-[0_0_10px_rgba(212,162,78,0.3)]">
+                [CONTINUE DESCENT]
+            </span>
+            
+            <div class="mt-8">
+                <p class="mb-1 font-sans text-sm"><a href="index.html" class="text-[#00ffff] no-underline hover:underline font-bold">RETURN TO NAHLA TRACKER</a></p>
+            </div>
+        </div>
+
         <!-- Game Over Screen Overlay -->
         <div id="game-over-screen" class="absolute inset-0 z-30 hidden flex flex-col justify-center items-center bg-black/95 p-6 text-center">
-            <div class="text-[#ff4444] text-xl font-bold tracking-widest uppercase mb-1">CRITICAL FAILURE // CORE MELTDOWN</div>
+            <div class="text-[#ff4444] text-xl font-bold tracking-widest uppercase mb-1">CRITICAL FAILURE // SHIP IN REPAIR</div>
             <h1 class="text-4xl sm:text-5xl text-white font-extrabold transform -skew-x-3 text-shadow leading-none mb-4" style="text-shadow: 0 0 10px #ff4444;">MODULE TERMINATED</h1>
             
             <div class="my-5 flex flex-col gap-2 border-y border-white/10 py-4 w-full max-w-xs text-xl sm:text-2xl text-gray-300 font-sans">
                 <p class="flex justify-between"><span>DESCENT DEPTH:</span> <span id="final-depth" class="text-white font-bold font-mono">0</span>m</p>
                 <p class="flex justify-between"><span>DATA ACQUIRED:</span> <span id="final-data" class="text-[#61dafb] font-bold font-mono">0</span></p>
-                <p class="flex justify-between"><span>TERMINAL PHASE:</span> <span id="final-phase" class="text-[#ff61c7] font-bold font-mono">α</span></p>
+                <p class="flex justify-between"><span>NODES SECURED:</span> <span id="final-nodes" class="text-[#d4a24e] font-bold font-mono">0/16</span></p>
             </div>
 
             <span id="reboot-prompt" class="blink text-2xl text-white mt-8 cursor-pointer neon-amber border border-white/20 bg-[#240e03] rounded font-mono">
-                [TAP TO REBOOT COMPASS]
+                [TAP TO RESURFACE]
             </span>
         </div>
     </div>
@@ -404,10 +457,46 @@
             }
         }
 
+        // Triumphant 4-note ascending synthesizer chord for Node Unlocks
+        function playTriumphantSound() {
+            try {
+                initAudioContext();
+                if (!actx || actx.state === 'suspended') return;
+                const now = actx.currentTime;
+                
+                // Pure triumphant retro chiptune arpeggio (C, E, G, C)
+                const notes = [523.25, 659.25, 783.99, 1046.50];
+                notes.forEach((freq, idx) => {
+                    const osc = actx.createOscillator();
+                    const gainNode = actx.createGain();
+                    const filter = actx.createBiquadFilter();
+                    
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(freq, now + (idx * 0.08));
+                    
+                    filter.type = 'lowpass';
+                    filter.frequency.setValueAtTime(1200, now + (idx * 0.08));
+                    
+                    gainNode.gain.setValueAtTime(0, now);
+                    gainNode.gain.linearRampToValueAtTime(0.15, now + (idx * 0.08) + 0.01);
+                    gainNode.gain.exponentialRampToValueAtTime(0.001, now + (idx * 0.08) + 0.28);
+                    
+                    osc.connect(filter);
+                    filter.connect(gainNode);
+                    gainNode.connect(actx.destination);
+                    
+                    osc.start(now + (idx * 0.08));
+                    osc.stop(now + (idx * 0.08) + 0.3);
+                });
+            } catch (e) {
+                console.warn("Failed to play triumphant node synth sound", e);
+            }
+        }
+
         const THEMES = [
             { name: 'SULPHUR', main: '#d4a24e', glow: 'rgba(212, 162, 78, 0.4)', text: '#d4a24e', background: '#120703', rimFill: '#241305' },
             { name: 'CYAN',    main: '#61dafb', glow: 'rgba(97, 218, 251, 0.4)', text: '#61dafb', background: '#020d12', rimFill: '#06202b' },
-            { name: 'MAGENTA', main: '#ff61c7', glow: 'rgba(255, 97, 199, 0.4)', text: '#ff61c7', background: '#0e0212', rimFill: '#26081e' },
+            { name: 'PINK',    main: '#ff61c7', glow: 'rgba(255, 97, 199, 0.4)', text: '#ff61c7', background: '#0e0212', rimFill: '#26081e' },
             { name: 'RED',     main: '#ff4444', glow: 'rgba(255, 68, 68, 0.4)',  text: '#ff4444', background: '#120202', rimFill: '#260808' }
         ];
 
@@ -428,6 +517,11 @@
         let currentThemeIdx = 0;
         let currentPhaseIdx = 0;
         let currentLoopIdx = 0;
+
+        // Neon Node Construction progression state
+        let completedNodes = []; // Flat tracking array: 'amber', 'cyan', 'pink', 'red'
+        let victoryTriggered = false;
+        let isToastFreezing = false; // Freeze gameplay update loop during node reveal toast
 
         // Unified multi-input steering state variables
         let touchLeft = false;
@@ -535,7 +629,6 @@
                     size: 3,
                     height: 12,
                     isMagma: false,
-                    isProbeRound: false,
                     destroyed: false,
                     isUpward: false
                 });
@@ -546,7 +639,6 @@
                     size: 3,
                     height: 12,
                     isMagma: false,
-                    isProbeRound: false,
                     destroyed: false,
                     isUpward: false
                 });
@@ -559,7 +651,6 @@
                     size: 2,
                     height: 8,
                     isMagma: false,
-                    isProbeRound: false,
                     destroyed: false,
                     isUpward: true
                 });
@@ -619,6 +710,7 @@
             }
 
             // Procedurally spawn Active Basalt Magma Vents OFF-SCREEN below bottom
+            // Reaction buffer scales up with speed to ensure consistent 25-frame warning window
             if (frames % 140 === 0 && Math.random() > 0.3) {
                 const sideLeft = Math.random() > 0.5;
                 const ventWidth = 25 + Math.random() * 15;
@@ -652,23 +744,6 @@
                     maxHp: 2,
                     vy: 3 + Math.random() * 3.5, // Velocity falling downward relative to viewport
                     hitFlash: 0
-                });
-            }
-
-            // Hunter Probes only appear starting on Loop 5 (Once completing SULPHUR -> CYAN -> MAGENTA -> RED full loop cycle)
-            if (currentLoopIdx >= 4 && frames % 90 === 0 && Math.random() > 0.15) {
-                const probeSize = 24;
-                obstacles.push({
-                    x: CHASM_L + 20 + Math.random() * (CHASM_R - CHASM_L - 40 - probeSize),
-                    y: LOGICAL_HEIGHT + 20, // Rises from the bottom
-                    width: probeSize,
-                    height: probeSize,
-                    type: 'PROBE', // Elite security probe
-                    hp: 2,
-                    maxHp: 2,
-                    hitFlash: 0,
-                    lastShot: 0,
-                    shootCooldown: 80 + Math.random() * 50
                 });
             }
 
@@ -716,9 +791,122 @@
             }
         }
 
+        // Handle physical rendering of the 16 Observatory frequency tracker dots in the HUD bar
+        function updateNodeDisplay() {
+            const container = document.getElementById('hud-nodes-container');
+            if (!container) return;
+            container.innerHTML = '';
+            
+            const nodeColorMap = {
+                'amber': '#d4a24e',
+                'cyan': '#61dafb',
+                'pink': '#ff61c7',
+                'red': '#ff4444'
+            };
+            
+            const expectedTypes = ['amber', 'cyan', 'pink', 'red'];
+            
+            for (let i = 0; i < 16; i++) {
+                const type = expectedTypes[i % 4];
+                const isCompleted = i < completedNodes.length;
+                const dot = document.createElement('div');
+                dot.className = 'w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full border transition-all duration-300';
+                
+                if (isCompleted) {
+                    dot.style.backgroundColor = nodeColorMap[type];
+                    dot.style.borderColor = nodeColorMap[type];
+                    dot.style.boxShadow = `0 0 5px ${nodeColorMap[type]}`;
+                } else {
+                    dot.style.backgroundColor = 'transparent';
+                    dot.style.borderColor = 'rgba(156, 163, 175, 0.25)';
+                }
+                container.appendChild(dot);
+            }
+            
+            document.getElementById('hud-nodes-count').innerText = `${completedNodes.length}/16`;
+        }
+
+        // Display glorious retro custom warning overlays on collecting a new node
+        function showNodeNotification(typeStr, colorHex, count) {
+            isToastFreezing = true; // Freeze physics loops during achievement celebration
+
+            const toast = document.getElementById('node-toast');
+            const title = document.getElementById('toast-title');
+            const desc = document.getElementById('toast-desc');
+            const badge = document.getElementById('toast-badge');
+            const toastBtn = document.getElementById('toast-continue-btn');
+
+            title.innerText = typeStr;
+            title.style.color = colorHex;
+            title.style.textShadow = `0 0 10px ${colorHex}, 0 0 20px ${colorHex}55`;
+            
+            badge.style.color = colorHex;
+            badge.style.borderColor = `${colorHex}55`;
+            
+            toast.style.borderColor = colorHex;
+            toast.style.boxShadow = `0 0 25px ${colorHex}44, inset 0 0 15px ${colorHex}22`;
+            
+            toastBtn.style.borderColor = colorHex;
+            toastBtn.style.textShadow = `0 0 6px ${colorHex}`;
+            toastBtn.style.boxShadow = `0 0 10px ${colorHex}44, inset 0 0 5px ${colorHex}22`;
+
+            desc.innerHTML = `Natalja's Pass Observatory: <strong style="color: ${colorHex}">${count}/16</strong> Nodes Secure`;
+
+            // Display and animate overlay entry
+            toast.classList.remove('hidden');
+            toast.offsetHeight; // Force layout redraw trigger
+            toast.style.transform = 'translateY(0)';
+            toast.style.opacity = '1';
+
+            // High-intensity celebratory visual effects
+            spawnParticles(LOGICAL_WIDTH / 2, LOGICAL_HEIGHT / 2 + 100, 45, colorHex, 4);
+            shakeIntensity = 12; // Spectacular celebratory camera shake impact
+            playTriumphantSound(); // High-impact retro chords
+        }
+
+        // Dismiss the achievement toast and restore physical descent action
+        function dismissToast() {
+            const toast = document.getElementById('node-toast');
+            toast.style.transform = 'translateY(-20px)';
+            toast.style.opacity = '0';
+            setTimeout(() => {
+                toast.classList.add('hidden');
+                isToastFreezing = false; // Restore gameplay action
+            }, 500);
+        }
+
+        function awardNode(themeIdx) {
+            const types = ['amber', 'cyan', 'pink', 'red'];
+            const awardedType = types[themeIdx];
+            
+            if (completedNodes.length < 16) {
+                completedNodes.push(awardedType);
+                updateNodeDisplay();
+                
+                // Count current instances of this specific color to define Roman Suffix (I, II, III, IV)
+                const nodeColors = ['#d4a24e', '#61dafb', '#ff61c7', '#ff4444'];
+                const countOfType = completedNodes.filter(t => t === awardedType).length;
+                const ROMAN_NUMERALS = ["I", "II", "III", "IV"];
+                const romanSuffix = ROMAN_NUMERALS[countOfType - 1] || "I";
+                
+                const nodeDisplayName = `${awardedType.toUpperCase()} ${romanSuffix}`;
+                
+                // Show physical overlay toast to make collection feel incredibly satisfying
+                showNodeNotification(nodeDisplayName, nodeColors[themeIdx], completedNodes.length);
+                
+                // Trigger Observatory constructed victory overlay sequence
+                if (completedNodes.length === 16 && !victoryTriggered) {
+                    // Slightly delay to allow the 16th toast notice to be dismissed first
+                    setTimeout(() => {
+                        triggerVictory();
+                    }, 1000);
+                }
+            }
+        }
+
         const handleTouchStart = (e) => {
             initAudioContext();
-            if (gameState === 'GAMEOVER') return; 
+            if (gameState === 'GAMEOVER' || gameState === 'VICTORY') return; 
             if (gameState !== 'PLAYING') return;
 
             const touch = e.touches[0];
@@ -783,6 +971,26 @@
             resetGame();
         });
 
+        document.getElementById('toast-continue-btn').addEventListener('click', (e) => {
+            e.stopPropagation();
+            dismissToast();
+        });
+        document.getElementById('toast-continue-btn').addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dismissToast();
+        });
+
+        document.getElementById('victory-continue-btn').addEventListener('click', (e) => {
+            e.stopPropagation();
+            dismissVictory();
+        });
+        document.getElementById('victory-continue-btn').addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dismissVictory();
+        });
+
         document.getElementById('hud-pause-btn').addEventListener('click', (e) => {
             e.stopPropagation();
             togglePause();
@@ -814,6 +1022,12 @@
         });
 
         window.addEventListener('keydown', (e) => {
+            if (isToastFreezing) {
+                if (e.code === 'Space' || e.code === 'Enter') {
+                    dismissToast();
+                    return;
+                }
+            }
             if (gameState === 'PLAYING') {
                 if (e.code === 'ArrowLeft' || e.code === 'KeyA') touchLeft = true;
                 if (e.code === 'ArrowRight' || e.code === 'KeyD') touchRight = true;
@@ -822,6 +1036,7 @@
                 initAudioContext();
                 if (gameState === 'START') startGame();
                 else if (gameState === 'GAMEOVER') resetGame();
+                else if (gameState === 'VICTORY') dismissVictory();
             }
         });
 
@@ -837,7 +1052,11 @@
                 document.getElementById('start-screen').style.display = 'none';
             }, 200);
             document.getElementById('game-over-screen').style.display = 'none';
+            document.getElementById('victory-screen').style.display = 'none';
+            
+            // Show HUD blocks safely
             document.getElementById('hud').style.display = 'flex';
+            document.getElementById('bottom-hud').style.display = 'flex';
 
             frames = 0;
             depth = 0;
@@ -853,12 +1072,17 @@
             touchMode = 'NONE';
             touchSide = 'NONE';
 
+            completedNodes = [];
+            victoryTriggered = false;
+            isToastFreezing = false;
+
             currentThemeIdx = 0;
             currentPhaseIdx = 0;
             currentLoopIdx = 0;
 
             initEnvironments();
             updateHUDTheme();
+            updateNodeDisplay();
 
             if (actx && actx.state === 'suspended') {
                 actx.resume();
@@ -896,13 +1120,50 @@
             document.getElementById('pause-screen').style.display = 'none';
             document.getElementById('start-screen').style.display = 'flex';
             document.getElementById('start-screen').style.opacity = '1';
+            
+            // Hide HUD panels
             document.getElementById('hud').style.display = 'none';
+            document.getElementById('bottom-hud').style.display = 'none';
+            
             if (bgm) bgm.pause();
             stopProceduralBGM();
         }
 
         function resetGame() {
             startGame();
+        }
+
+        function triggerVictory() {
+            victoryTriggered = true;
+            gameState = 'VICTORY';
+            if (bgm) bgm.pause();
+            stopProceduralBGM();
+            
+            document.getElementById('victory-screen').style.display = 'flex';
+            document.getElementById('victory-depth').innerText = Math.floor(depth);
+            document.getElementById('victory-data').innerText = dataScore;
+            
+            // Hide play HUD elements to maintain absolute immersion
+            document.getElementById('hud').style.display = 'none';
+            document.getElementById('bottom-hud').style.display = 'none';
+        }
+
+        function dismissVictory() {
+            // Dismiss victory overlay and safely resume descent endlessly
+            gameState = 'PLAYING';
+            document.getElementById('victory-screen').style.display = 'none';
+            
+            // Re-show operational HUD blocks
+            document.getElementById('hud').style.display = 'flex';
+            document.getElementById('bottom-hud').style.display = 'flex';
+            
+            if (bgm) {
+                bgm.play().catch(() => {
+                    startProceduralBGM();
+                });
+            } else {
+                startProceduralBGM();
+            }
         }
 
         function triggerTermination() {
@@ -912,8 +1173,11 @@
             document.getElementById('game-over-screen').style.display = 'flex';
             document.getElementById('final-depth').innerText = Math.floor(depth);
             document.getElementById('final-data').innerText = dataScore;
-            document.getElementById('final-phase').innerText = GREEK_PHASES[currentPhaseIdx];
+            document.getElementById('final-nodes').innerText = `${completedNodes.length}/16`;
+            
+            // Hide active telemetry feeds
             document.getElementById('hud').style.display = 'none';
+            document.getElementById('bottom-hud').style.display = 'none';
 
             spawnParticles(rover.x + rover.width/2, rover.y + rover.height/2, 35, '#ff4444', 4);
         }
@@ -926,10 +1190,17 @@
             document.getElementById('shield-bar').style.backgroundColor = theme.main;
             document.getElementById('game-frame').style.borderColor = theme.main;
             document.getElementById('game-frame').style.boxShadow = `0 0 15px ${theme.main}, inset 0 0 30px rgba(36, 14, 3, 0.8)`;
+            
+            // Re-match the bottom neon node tracker bar border to current active frequency
+            const nodeBar = document.getElementById('hud-nodes-container').parentElement;
+            if (nodeBar) {
+                nodeBar.style.borderColor = theme.main;
+            }
         }
 
         function update() {
             if (gameState !== 'PLAYING') return;
+            if (isToastFreezing) return; // Freeze physics calculations during node collection toasts
 
             frames++;
             depth += 0.08 * (speed / 5);
@@ -946,6 +1217,9 @@
             }
 
             if (targetLoop !== currentLoopIdx + 1) {
+                // Award a node matching the loop frequency theme that was just completed
+                awardNode(currentThemeIdx);
+                
                 currentLoopIdx = targetLoop - 1;
                 currentThemeIdx = currentLoopIdx % THEMES.length;
                 updateHUDTheme();
@@ -955,24 +1229,24 @@
             const theme = THEMES[currentThemeIdx];
 
             // High Precision Movement Interpolation Architecture
-            let isDraggingTooFarLeft = false;
-            let isDraggingTooFarRight = false;
+            let isPushingLeft = false;
+            let isPushingRight = false;
 
             if (touchMode === 'DRAGGING') {
                 const minX = CHASM_L + 4;
                 const maxX = CHASM_R - rover.width - 4;
                 
-                // Track if the player is actively pulling/swiping past wall boundaries
+                // Track if the player is actively swiping past boundaries
                 if (rover.targetX < minX) {
                     rover.targetX = minX;
                     if (rover.x <= minX + 1) {
-                        isDraggingTooFarLeft = true;
+                        isPushingLeft = true;
                     }
                 }
                 if (rover.targetX > maxX) {
                     rover.targetX = maxX;
                     if (rover.x >= maxX - 1) {
-                        isDraggingTooFarRight = true;
+                        isPushingRight = true;
                     }
                 }
 
@@ -995,12 +1269,12 @@
             const buffer = 4;
             let scrapDamage = 0;
 
-            // Trigger collisions or wall scraping visual/audio response
-            if (rover.x <= CHASM_L + buffer || isDraggingTooFarLeft) {
-                if (rover.x <= CHASM_L + buffer) {
+            // Check if ship is touching or actively swiped/pushed past boundaries
+            if (rover.x <= CHASM_L + buffer + 0.1 || isPushingLeft) {
+                if (rover.x <= CHASM_L + buffer + 0.1) {
                     rover.x = CHASM_L + buffer;
                 }
-                if (rover.vx < -0.5 && !isDraggingTooFarLeft) {
+                if (rover.vx < -0.5 && !isPushingLeft) {
                     // Impact wall damage relative to velocity
                     scrapDamage = Math.min(12, Math.abs(rover.vx) * 1.5);
                     shakeIntensity = Math.max(shakeIntensity, 3);
@@ -1015,11 +1289,11 @@
                 }
                 // Dampen velocity away from the wall instead of resetting hard to 0
                 rover.vx = Math.max(0, rover.vx * -0.2);
-            } else if (rover.x >= CHASM_R - rover.width - buffer || isDraggingTooFarRight) {
-                if (rover.x >= CHASM_R - rover.width - buffer) {
+            } else if (rover.x >= CHASM_R - rover.width - buffer - 0.1 || isPushingRight) {
+                if (rover.x >= CHASM_R - rover.width - buffer - 0.1) {
                     rover.x = CHASM_R - rover.width - buffer;
                 }
-                if (rover.vx > 0.5 && !isDraggingTooFarRight) {
+                if (rover.vx > 0.5 && !isPushingRight) {
                     // Impact wall damage relative to velocity
                     scrapDamage = Math.min(12, Math.abs(rover.vx) * 1.5);
                     shakeIntensity = Math.max(shakeIntensity, 3);
@@ -1069,7 +1343,7 @@
                 }
             });
 
-            // Update Projectile Coordinates (Player Lasers, Magma Orbs & security Probe Rounds)
+            // Update Projectile Coordinates (Player Lasers & Magma Orbs)
             for (let i = projectiles.length - 1; i >= 0; i--) {
                 let p = projectiles[i];
                 
@@ -1094,25 +1368,6 @@
                     if (p.y > LOGICAL_HEIGHT + 20 || p.y < -20 || p.x < CHASM_L - 10 || p.x > CHASM_R + 10) {
                         projectiles.splice(i, 1);
                     }
-                } else if (p.isProbeRound) {
-                    p.y += p.vy; // Fired upward towards the ship (vy < 0)
-                    
-                    // Collision check with player ship
-                    const dx = (rover.x + rover.width/2) - p.x;
-                    const dy = (rover.y + rover.height/2) - p.y;
-                    const dist = Math.sqrt(dx*dx + dy*dy);
-                    
-                    if (dist < 16) {
-                        rover.shield -= 8; // Minimal damage from security rounds
-                        playSound('hit');
-                        spawnParticles(p.x, p.y, 6, '#ff3333', 2);
-                        projectiles.splice(i, 1);
-                        continue;
-                    }
-
-                    if (p.y < -20 || p.y > LOGICAL_HEIGHT + 20) {
-                        projectiles.splice(i, 1);
-                    }
                 } else {
                     // Standard player laser beams
                     p.y += p.vy; // Fired downward (vy > 0) or upward (vy < 0)
@@ -1122,21 +1377,21 @@
                 }
             }
 
-            // Laser Defense Check: Can player shoot down magma orbs or security probe rounds?
+            // Laser Defense Check: Can player shoot down magma orbs?
             for (let i = 0; i < projectiles.length; i++) {
                 let p1 = projectiles[i];
-                if (!p1 || p1.isMagma || p1.isProbeRound || p1.destroyed) continue;
+                if (!p1 || p1.isMagma || p1.destroyed) continue;
 
                 for (let j = 0; j < projectiles.length; j++) {
                     let p2 = projectiles[j];
-                    if (!p2 || (!p2.isMagma && !p2.isProbeRound) || p2.destroyed) continue;
+                    if (!p2 || !p2.isMagma || p2.destroyed) continue;
 
                     const dx = p1.x - p2.x;
                     const dy = p1.y - p2.y;
                     const dist = Math.sqrt(dx*dx + dy*dy);
                     
                     if (dist < 14) {
-                        spawnParticles(p2.x, p2.y, 8, p2.isProbeRound ? '#ff3333' : '#ff5500', 2);
+                        spawnParticles(p2.x, p2.y, 8, '#ff5500', 2);
                         playSound('hit');
                         
                         p1.destroyed = true;
@@ -1151,41 +1406,12 @@
             for (let i = obstacles.length - 1; i >= 0; i--) {
                 let obs = obstacles[i];
                 
-                // Static entities scroll upward as player plunges
-                if (obs.type !== 'BOULDER' && obs.type !== 'PROBE') {
+                // standard movement: static entities scroll upward as player plunges
+                if (obs.type !== 'BOULDER') {
                     obs.y -= speed * 0.55; 
-                } else if (obs.type === 'BOULDER') {
+                } else {
                     // Falling basalt boulder hazard moves downward relative to scroll frame rate
                     obs.y += obs.vy; 
-                } else if (obs.type === 'PROBE') {
-                    // Floating hunter probe rises from the bottom of the screen much slower
-                    obs.y -= (speed * 0.55 + 0.15);
-                    
-                    // Tracks player lateral movement
-                    obs.x += ((rover.x + rover.width/2 - obs.width/2) - obs.x) * 0.015;
-                    
-                    // Keep the probe strictly inside canyon limits
-                    const minX = CHASM_L + 6;
-                    const maxX = CHASM_R - obs.width - 6;
-                    if (obs.x < minX) obs.x = minX;
-                    if (obs.x > maxX) obs.x = maxX;
-
-                    // Periodic shooting up towards player
-                    if (frames - obs.lastShot >= obs.shootCooldown && obs.y < LOGICAL_HEIGHT && obs.y > rover.y + rover.height) {
-                        obs.lastShot = frames;
-                        projectiles.push({
-                            x: obs.x + obs.width / 2,
-                            y: obs.y,
-                            vx: 0,
-                            vy: -5,
-                            size: 4,
-                            height: 4,
-                            isMagma: false,
-                            isProbeRound: true,
-                            destroyed: false
-                        });
-                        playSound('hit');
-                    }
                 }
 
                 // Run Magma Vent continuous eruption engine
@@ -1215,7 +1441,6 @@
                             size: 6,
                             height: 6,
                             isMagma: true,
-                            isProbeRound: false,
                             destroyed: false
                         });
                         playSound('hit');
@@ -1224,16 +1449,16 @@
 
                 let obsRemoved = false;
 
-                // Lasers vs Obstacles/Hazards check (Sablee rock ledges, falling boulders, MAGMA VENTS, and PROBES!)
+                // Lasers vs Obstacles/Hazards check (Sablee rock ledges, falling boulders, and MAGMA VENTS!)
                 for (let k = projectiles.length - 1; k >= 0; k--) {
                     let proj = projectiles[k];
-                    if (proj.isMagma || proj.isProbeRound) continue; 
+                    if (proj.isMagma) continue; 
 
-                    // Check bounds for breakable hazards
+                    // Check bounds for breakable sablée rock ledges, basalt boulders, and MAGMA VENTS
                     if (proj.x > obs.x && proj.x < obs.x + obs.width &&
                         proj.y > obs.y && proj.y < obs.y + obs.height) {
                         
-                        if (obs.type === 'SABLEE' || obs.type === 'BOULDER' || obs.type === 'VENT' || obs.type === 'PROBE') {
+                        if (obs.type === 'SABLEE' || obs.type === 'BOULDER' || obs.type === 'VENT') {
                             obs.hp--;
                             obs.hitFlash = 5; // Flash white on hit
                             projectiles.splice(k, 1);
@@ -1242,7 +1467,6 @@
                             let particleColor = '#ffca7a';
                             if (obs.type === 'BOULDER') particleColor = '#5a5c61';
                             else if (obs.type === 'VENT') particleColor = '#ff5500';
-                            else if (obs.type === 'PROBE') particleColor = '#ff3333';
 
                             spawnParticles(proj.x, obs.y + obs.height/2, 6, particleColor, 3);
 
@@ -1254,9 +1478,6 @@
                                 } else if (obs.type === 'VENT') {
                                     dataScore += 35; // Neutralizing highly active volcanic magma vent!
                                     spawnParticles(obs.x + obs.width/2, obs.y + obs.height/2, 25, '#ff3c00', 4);
-                                } else if (obs.type === 'PROBE') {
-                                    dataScore += 50; // Elite hunter probe neutralize bonus
-                                    spawnParticles(obs.x + obs.width/2, obs.y + obs.height/2, 16, '#ff2222', 3.5);
                                 } else {
                                     dataScore += 15;
                                     spawnParticles(obs.x + obs.width/2, obs.y + obs.height/2, 20, '#d4a24e', 4);
@@ -1304,11 +1525,6 @@
                         playSound('shield-break');
                         shakeIntensity = Math.max(shakeIntensity, 12); // Extreme camera shake!
                         spawnParticles(rover.x + rover.width/2, rover.y + rover.height/2, 22, '#5a5c61', 4);
-                    } else if (obs.type === 'PROBE') {
-                        rover.shield -= 25; // Elite security probe collision
-                        playSound('shield-break');
-                        shakeIntensity = Math.max(shakeIntensity, 8);
-                        spawnParticles(rover.x + rover.width/2, rover.y + rover.height/2, 15, '#ff3333', 3);
                     }
 
                     // Physics kickback
@@ -1445,7 +1661,6 @@
             ctx.save();
             // Subtle parallax vertical scrolling relative to depth
             const rimScrollY = (depth * 0.4) % 12;
-            // Lowered the background crater rim base to 480px (down 50px from 430px)
             const rimBaseY = 480 + rimScrollY; 
             
             // Draw filled colored rim silhouette (inherits thematic coloring)
@@ -1554,15 +1769,6 @@
                     ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
                     ctx.fill();
                     ctx.stroke();
-                    ctx.restore();
-                } else if (p.isProbeRound) {
-                    ctx.save();
-                    ctx.fillStyle = '#ff2222';
-                    ctx.shadowColor = '#ff2222';
-                    ctx.shadowBlur = 10;
-                    ctx.beginPath();
-                    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-                    ctx.fill();
                     ctx.restore();
                 } else {
                     ctx.save();
@@ -1754,55 +1960,6 @@
                     ctx.lineTo(cx - r*0.1, cy + r*0.4);
                     ctx.stroke();
 
-                    ctx.restore();
-                } else if (obs.type === 'PROBE') {
-                    // Elite Cyber-Probe chassis
-                    ctx.save();
-                    ctx.translate(obs.x + obs.width/2, obs.y + obs.height/2);
-                    
-                    // Outer dark mechanical chassis ring
-                    ctx.fillStyle = (obs.hitFlash && obs.hitFlash > 0) ? '#ffffff' : '#08080a';
-                    ctx.strokeStyle = '#22252a';
-                    ctx.lineWidth = 2.2;
-                    ctx.beginPath();
-                    ctx.arc(0, 0, obs.width/2, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.stroke();
-                    
-                    // Inner electronic reactor core
-                    ctx.fillStyle = '#121316';
-                    ctx.beginPath();
-                    ctx.arc(0, 0, obs.width/3, 0, Math.PI * 2);
-                    ctx.fill();
-                    
-                    // Alternating green / red blinking security lights
-                    const isLeftActive = Math.floor(frames / 12) % 2 === 0;
-                    
-                    // Left Node (Alternate blinking Green/Dark Green)
-                    ctx.fillStyle = isLeftActive ? '#00ff66' : '#003310';
-                    ctx.shadowColor = '#00ff66';
-                    ctx.shadowBlur = isLeftActive ? 8 : 0;
-                    ctx.beginPath();
-                    ctx.arc(-5, -3, 2.5, 0, Math.PI * 2);
-                    ctx.fill();
-                    
-                    // Right Node (Alternate blinking Red/Dark Red)
-                    ctx.fillStyle = !isLeftActive ? '#ff0055' : '#330010';
-                    ctx.shadowColor = '#ff0055';
-                    ctx.shadowBlur = !isLeftActive ? 8 : 0;
-                    ctx.beginPath();
-                    ctx.arc(5, -3, 2.5, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.shadowBlur = 0;
-                    
-                    // Central scanning glowing orange lens
-                    ctx.fillStyle = '#ff5500';
-                    ctx.shadowColor = '#ff5500';
-                    ctx.shadowBlur = 6;
-                    ctx.beginPath();
-                    ctx.arc(0, 4, 3, 0, Math.PI * 2);
-                    ctx.fill();
-                    
                     ctx.restore();
                 }
             });
