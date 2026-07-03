@@ -331,6 +331,7 @@
         let dataScore = 0;
         let speed = 7.0; 
         let visualDepth = 0;
+        let shakeIntensity = 0;
 
         let currentThemeIdx = 0;
         let currentPhaseIdx = 0;
@@ -434,6 +435,7 @@
             },
 
             shoot: function() {
+                // Front primary weapons (dual downward plasma beams)
                 projectiles.push({
                     x: this.x + 6,
                     y: this.y + this.height,
@@ -441,7 +443,8 @@
                     size: 3,
                     height: 12,
                     isMagma: false,
-                    destroyed: false
+                    destroyed: false,
+                    isUpward: false
                 });
                 projectiles.push({
                     x: this.x + this.width - 9,
@@ -450,8 +453,22 @@
                     size: 3,
                     height: 12,
                     isMagma: false,
-                    destroyed: false
+                    destroyed: false,
+                    isUpward: false
                 });
+
+                // Rear sweep weapon (single upward defensive pulse targeting crumble avalanches)
+                projectiles.push({
+                    x: this.x + this.width / 2 - 1,
+                    y: this.y - 2,
+                    vy: -9,
+                    size: 2,
+                    height: 8,
+                    isMagma: false,
+                    destroyed: false,
+                    isUpward: true
+                });
+
                 playSound('shoot');
             }
         };
@@ -509,20 +526,35 @@
                 }
             }
 
-            // Procedurally spawn Active Basalt Magma Vents
+            // Procedurally spawn Active Basalt Magma Vents OFF-SCREEN below bottom (LOGICAL_HEIGHT + 120)
             if (frames % 140 === 0 && Math.random() > 0.3) {
                 const sideLeft = Math.random() > 0.5;
                 const ventWidth = 25 + Math.random() * 15;
                 const ventHeight = 35 + Math.random() * 15;
                 obstacles.push({
                     x: sideLeft ? CHASM_L : CHASM_R - ventWidth,
-                    y: LOGICAL_HEIGHT,
+                    y: LOGICAL_HEIGHT + 120, // Spawned off-screen below for proactive warning cycle
                     width: ventWidth,
                     height: ventHeight,
-                    type: 'VENT', // Upgraded from Spike
+                    type: 'VENT', 
                     side: sideLeft ? 'LEFT' : 'RIGHT',
                     ventState: 'IDLE', // States: IDLE, WARNING, ERUPTING
-                    stateTimer: 60 + Math.random() * 60 // Wait ticks before flashing
+                    stateTimer: 40 + Math.random() * 50 // Shortened proactively so warning occurs offscreen
+                });
+            }
+
+            // Procedurally spawn Crumble Avalanche basalt boulders from top (falling down behind player)
+            if (frames % 160 === 0 && Math.random() > 0.4) {
+                const boulderSize = 16 + Math.random() * 10;
+                obstacles.push({
+                    x: CHASM_L + 20 + Math.random() * (CHASM_R - CHASM_L - 40 - boulderSize),
+                    y: -50, // Falling from top of chasm
+                    width: boulderSize,
+                    height: boulderSize,
+                    type: 'BOULDER',
+                    hp: 2,
+                    maxHp: 2,
+                    vy: 3 + Math.random() * 3.5 // Velocity falling downward relative to viewport
                 });
             }
 
@@ -570,7 +602,6 @@
             }
         }
 
-        // Precision Drag and Hold Touch Interface Controllers
         const handleTouchStart = (e) => {
             initAudioContext();
             if (gameState === 'GAMEOVER') return; 
@@ -716,6 +747,7 @@
             rover.targetX = rover.x;
             rover.vx = 0;
             rover.lastShot = 0; 
+            shakeIntensity = 0;
 
             touchMode = 'NONE';
             touchSide = 'NONE';
@@ -728,7 +760,6 @@
             initEnvironments();
             updateHUDTheme();
 
-            // Explicitly force AudioContext alive on engine initiation
             if (actx && actx.state === 'suspended') {
                 actx.resume();
             }
@@ -821,11 +852,9 @@
                 if (rover.targetX < minX) rover.targetX = minX;
                 if (rover.targetX > maxX) rover.targetX = maxX;
 
-                // Responsive spring-damped convergence
                 let diff = rover.targetX - rover.x;
                 rover.vx = diff * 0.32; 
             } else {
-                // Fallback: Digital Tap/Hold side check or Desktop Keys
                 let targetVx = 0;
                 if (touchSide === 'LEFT' || touchLeft) {
                     targetVx = -6.5; 
@@ -878,11 +907,10 @@
                 let p = projectiles[i];
                 
                 if (p.isMagma) {
-                    // Magma Orbs fired by vents fly horizontally and drift down with chasm descent
                     p.x += p.vx;
-                    p.y += p.vy - (speed * 0.15); // Sync slightly with scroll speed
+                    p.y += p.vy - (speed * 0.15); // Drift down slightly with the scrolling descent
                     
-                    // Check collision with player
+                    // Collision check with player ship
                     const dx = (rover.x + rover.width/2) - p.x;
                     const dy = (rover.y + rover.height/2) - p.y;
                     const dist = Math.sqrt(dx*dx + dy*dy);
@@ -890,26 +918,25 @@
                     if (dist < 18) {
                         rover.shield -= 15; 
                         playSound('shield-break');
+                        shakeIntensity = Math.max(shakeIntensity, 4); // Apply soft screen rumble
                         spawnParticles(p.x, p.y, 8, '#ff3300', 3);
                         projectiles.splice(i, 1);
                         continue;
                     }
 
-                    // Despawn if out of play zone
                     if (p.y > LOGICAL_HEIGHT + 20 || p.y < -20 || p.x < CHASM_L - 10 || p.x > CHASM_R + 10) {
                         projectiles.splice(i, 1);
                     }
                 } else {
-                    // Standard player lasers fire downward
-                    p.y += p.vy; 
-                    if (p.y > LOGICAL_HEIGHT + 20) {
+                    // Standard player laser beams
+                    p.y += p.vy; // Fired downward (vy > 0) or upward (vy < 0)
+                    if (p.y > LOGICAL_HEIGHT + 20 || p.y < -20) {
                         projectiles.splice(i, 1);
                     }
                 }
             }
 
             // Laser Defense Check: Can player shoot down magma orbs?
-            // Use deferred destruction to prevent out-of-bounds index errors when splicing in active loops
             for (let i = 0; i < projectiles.length; i++) {
                 let p1 = projectiles[i];
                 if (!p1 || p1.isMagma || p1.destroyed) continue;
@@ -923,32 +950,37 @@
                     const dist = Math.sqrt(dx*dx + dy*dy);
                     
                     if (dist < 14) {
-                        // Mutual vaporization!
                         spawnParticles(p2.x, p2.y, 8, '#ff5500', 2);
                         playSound('hit');
                         
                         p1.destroyed = true;
                         p2.destroyed = true;
-                        break; // Stop checking this laser projectile since it has been vaporized
+                        break; 
                     }
                 }
             }
 
-            // Filter out destroyed projectiles
             projectiles = projectiles.filter(p => !p.destroyed);
 
-            // Obstacles & Magma Vents Update Cycle
+            // Obstacles, Magma Vents, and Avalanche Boulders Update Cycle
             for (let i = obstacles.length - 1; i >= 0; i--) {
                 let obs = obstacles[i];
-                obs.y -= speed * 0.55; 
+                
+                // standard movement: static entities scroll upward as player plunges
+                if (obs.type !== 'BOULDER') {
+                    obs.y -= speed * 0.55; 
+                } else {
+                    // Falling basalt boulder hazard moves downward relative to scroll frame rate
+                    obs.y += obs.vy; 
+                }
 
-                // Run Magma Vent state transition machine
+                // Run Magma Vent state transition machine (active off-screen & on-screen)
                 if (obs.type === 'VENT') {
                     obs.stateTimer--;
                     if (obs.stateTimer <= 0) {
                         if (obs.ventState === 'IDLE') {
                             obs.ventState = 'WARNING';
-                            obs.stateTimer = 45; // Time warning flashes
+                            obs.stateTimer = 45; // Flash pre-warning
                         } else if (obs.ventState === 'WARNING') {
                             obs.ventState = 'ERUPTING';
                             obs.stateTimer = 80; // active eruption duration
@@ -958,7 +990,7 @@
                         }
                     }
 
-                    // Eruption active: spray particles and spawn physical magma orbs
+                    // Eruption active: spray lava ashes and spawn physical magma fireballs
                     if (obs.ventState === 'ERUPTING') {
                         if (frames % 6 === 0) {
                             const sprayVx = obs.side === 'LEFT' ? (1.5 + Math.random() * 2) : (-1.5 - Math.random() * 2);
@@ -973,7 +1005,6 @@
                             });
                         }
 
-                        // Launch shootable magma projectiles
                         if (obs.stateTimer % 25 === 0) {
                             const orbVx = obs.side === 'LEFT' ? 3.5 : -3.5;
                             projectiles.push({
@@ -993,24 +1024,31 @@
 
                 let obsRemoved = false;
 
-                if (obs.type === 'SABLEE') {
-                    for (let k = projectiles.length - 1; k >= 0; k--) {
-                        let proj = projectiles[k];
-                        if (proj.isMagma) continue; // Hazard orbs do not destroy ledges
+                // Lasers vs Obstacles/Hazards check
+                for (let k = projectiles.length - 1; k >= 0; k--) {
+                    let proj = projectiles[k];
+                    if (proj.isMagma) continue; 
 
-                        if (proj.x > obs.x && proj.x < obs.x + obs.width &&
-                            proj.y > obs.y && proj.y < obs.y + obs.height) {
-                            
+                    // Check bounds for breakable sablée rock ledges & basalt boulders
+                    if (proj.x > obs.x && proj.x < obs.x + obs.width &&
+                        proj.y > obs.y && proj.y < obs.y + obs.height) {
+                        
+                        if (obs.type === 'SABLEE' || obs.type === 'BOULDER') {
                             obs.hp--;
                             projectiles.splice(k, 1);
                             playSound('hit');
 
-                            spawnParticles(proj.x, obs.y + obs.height/2, 6, '#ffca7a', 3);
+                            spawnParticles(proj.x, obs.y + obs.height/2, 6, obs.type === 'BOULDER' ? '#5a5c61' : '#ffca7a', 3);
 
                             if (obs.hp <= 0) {
                                 playSound('explode');
-                                dataScore += 15;
-                                spawnParticles(obs.x + obs.width/2, obs.y + obs.height/2, 20, '#d4a24e', 4);
+                                if (obs.type === 'BOULDER') {
+                                    dataScore += 25; // High reward for clearing debris avalanches
+                                    spawnParticles(obs.x + obs.width/2, obs.y + obs.height/2, 18, '#3c3d40', 4);
+                                } else {
+                                    dataScore += 15;
+                                    spawnParticles(obs.x + obs.width/2, obs.y + obs.height/2, 20, '#d4a24e', 4);
+                                }
                                 obstacles.splice(i, 1);
                                 obsRemoved = true;
                                 break;
@@ -1021,6 +1059,7 @@
 
                 if (obsRemoved) continue;
 
+                // Collision checking between Rover module and structural blocks/hazards
                 const roverBox = {
                     left: rover.x + 2,
                     right: rover.x + rover.width - 2,
@@ -1035,20 +1074,27 @@
                     bottom: obs.y + obs.height
                 };
 
-                // Collision checking between Rover module and structural blocks
                 if (roverBox.right > obsBox.left && roverBox.left < obsBox.right &&
                     roverBox.bottom > obsBox.top && roverBox.top < obsBox.bottom) {
                     
                     if (obs.type === 'SABLEE') {
                         rover.shield -= 20;
                         playSound('shield-break');
+                        shakeIntensity = Math.max(shakeIntensity, 5); // soft camera shake on sand impact
                         spawnParticles(rover.x + rover.width/2, rover.y + rover.height, 12, '#ffaa00', 3);
                     } else if (obs.type === 'VENT') {
-                        rover.shield -= 40; // Crashing into dense volcanic basalt is fatal
+                        rover.shield -= 40; // Dense volcanic basalt is dangerous
                         playSound('shield-break');
+                        shakeIntensity = Math.max(shakeIntensity, 10); // Heavy shake on head-on collision
                         spawnParticles(rover.x + rover.width/2, rover.y + rover.height, 18, '#ff4444', 4);
+                    } else if (obs.type === 'BOULDER') {
+                        rover.shield -= 30; // Heavy falling debris avalanche impacts
+                        playSound('shield-break');
+                        shakeIntensity = Math.max(shakeIntensity, 12); // Extreme camera shake!
+                        spawnParticles(rover.x + rover.width/2, rover.y + rover.height/2, 22, '#5a5c61', 4);
                     }
 
+                    // Physics kickback
                     rover.vx = (rover.x + rover.width/2 < obs.x + obs.width/2) ? -6 : 6;
                     obstacles.splice(i, 1); 
 
@@ -1061,7 +1107,8 @@
                     continue;
                 }
 
-                if (obs.y < -100) {
+                // Despawn limits
+                if (obs.y < -120 || obs.y > LOGICAL_HEIGHT + 180) {
                     obstacles.splice(i, 1);
                 }
             }
@@ -1125,6 +1172,16 @@
             ctx.clearRect(0, 0, LOGICAL_WIDTH, LOGICAL_HEIGHT);
 
             const theme = THEMES[currentThemeIdx];
+
+            ctx.save();
+            // Implement dynamic screen shake translation offsets
+            if (shakeIntensity > 0) {
+                const shakeX = (Math.random() - 0.5) * shakeIntensity;
+                const shakeY = (Math.random() - 0.5) * shakeIntensity;
+                ctx.translate(shakeX, shakeY);
+                shakeIntensity *= 0.88; // Decays over frames
+                if (shakeIntensity < 0.2) shakeIntensity = 0;
+            }
 
             const skyGrad = ctx.createLinearGradient(0, 0, 0, LOGICAL_HEIGHT);
             skyGrad.addColorStop(0, '#1c0a02');
@@ -1286,7 +1343,7 @@
             
             ctx.shadowBlur = 0;
 
-            // Render projectiles (Both standard lasers and hazard magma orbs)
+            // Render projectiles (Both standard downward/upward lasers and hazard magma orbs)
             projectiles.forEach(p => {
                 if (p.isMagma) {
                     ctx.save();
@@ -1421,7 +1478,6 @@
                     let glowColor = '#ff3c00';
                     let coreColor = '#420d00';
                     if (obs.ventState === 'WARNING') {
-                        // Quick bright flashes prior to blowing
                         const flashOn = Math.floor(frames / 5) % 2 === 0;
                         glowColor = flashOn ? '#ffae00' : '#ff3c00';
                         coreColor = flashOn ? '#ffffff' : '#e65c00';
@@ -1429,7 +1485,6 @@
                         glowColor = '#ffbb00';
                         coreColor = '#ffffff';
 
-                        // Draw white-hot eruption ignition circle at nozzle opening
                         ctx.save();
                         ctx.shadowColor = '#ff5500';
                         ctx.shadowBlur = 12;
@@ -1440,24 +1495,20 @@
                         ctx.fill();
                         ctx.restore();
                     } else {
-                        // IDLE - slowly pulsating dim ember orange
                         const pulse = 0.5 + Math.sin(frames * 0.05) * 0.3;
                         glowColor = `rgba(255, 60, 0, ${pulse})`;
                         coreColor = `rgba(130, 20, 0, ${pulse})`;
                     }
 
-                    // Stroke basalt boundaries
                     ctx.strokeStyle = glowColor;
                     ctx.lineWidth = 1.8;
                     ctx.stroke();
 
-                    // Fill central hot lava conduits
                     ctx.fillStyle = coreColor;
                     ctx.beginPath();
                     const veinX = obs.side === 'LEFT' ? CHASM_L + obs.width - 6 : CHASM_R - obs.width;
                     ctx.fillRect(veinX, obs.y + obs.height / 2 - 3, 6, 6);
 
-                    // Jagged cracks for basalt rock texture
                     ctx.strokeStyle = '#2d0c00';
                     ctx.lineWidth = 1;
                     ctx.beginPath();
@@ -1470,9 +1521,72 @@
                     }
                     ctx.stroke();
                     ctx.restore();
+                } else if (obs.type === 'BOULDER') {
+                    // Draw crumbly basalt boulder debris
+                    ctx.save();
+                    ctx.fillStyle = '#424347';
+                    ctx.strokeStyle = '#d4a24e';
+                    ctx.lineWidth = 1.5;
+                    ctx.beginPath();
+                    
+                    // Procedural jagged circular polygon
+                    const segments = 6;
+                    const r = obs.width / 2;
+                    const cx = obs.x + r;
+                    const cy = obs.y + r;
+                    for (let s = 0; s < segments; s++) {
+                        const angle = (s / segments) * Math.PI * 2 + (obs.y * 0.02);
+                        const radiusNoise = r * (0.8 + Math.sin(s * 1.5) * 0.15);
+                        const px = cx + Math.cos(angle) * radiusNoise;
+                        const py = cy + Math.sin(angle) * radiusNoise;
+                        if (s === 0) ctx.moveTo(px, py);
+                        else ctx.lineTo(px, py);
+                    }
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.stroke();
+                    
+                    // Draw crack lines inside the crumbly boulder
+                    ctx.strokeStyle = '#1d1e21';
+                    ctx.beginPath();
+                    ctx.moveTo(cx - r*0.3, cy - r*0.3);
+                    ctx.lineTo(cx + r*0.2, cy + r*0.2);
+                    ctx.moveTo(cx + r*0.4, cy - r*0.2);
+                    ctx.lineTo(cx - r*0.1, cy + r*0.4);
+                    ctx.stroke();
+
+                    ctx.restore();
                 }
             });
-            ctx.shadowBlur = 0;
+
+            // Proactive off-screen warnings UI indicators (Bottom edge overlay)
+            obstacles.forEach(obs => {
+                if (obs.type === 'VENT' && obs.y > LOGICAL_HEIGHT) {
+                    if (obs.ventState === 'WARNING') {
+                        const flash = Math.floor(frames / 6) % 2 === 0;
+                        if (flash) {
+                            ctx.save();
+                            ctx.fillStyle = '#ff5500';
+                            ctx.strokeStyle = '#ff5500';
+                            ctx.font = '900 13px Inter, sans-serif';
+                            ctx.textAlign = 'center';
+                            
+                            // Draw warning mark and location brackets
+                            const centerProjX = obs.x + obs.width / 2;
+                            ctx.fillText('!', centerProjX, LOGICAL_HEIGHT - 16);
+                            
+                            ctx.lineWidth = 1.5;
+                            ctx.beginPath();
+                            ctx.moveTo(obs.x, LOGICAL_HEIGHT - 4);
+                            ctx.lineTo(obs.x, LOGICAL_HEIGHT - 12);
+                            ctx.lineTo(obs.x + obs.width, LOGICAL_HEIGHT - 12);
+                            ctx.lineTo(obs.x + obs.width, LOGICAL_HEIGHT - 4);
+                            ctx.stroke();
+                            ctx.restore();
+                        }
+                    }
+                }
+            });
 
             rover.draw();
 
@@ -1501,6 +1615,8 @@
             }
             ctx.stroke();
             ctx.shadowBlur = 0;
+
+            ctx.restore(); // Restores camera screen shake coordinate space
         }
 
         // Decoupled strict Fixed Update Timestep accumulator cycle
