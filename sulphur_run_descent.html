@@ -5,9 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Sulphur Run: Pâte Sablée Descent</title>
     
+    <!-- External Web Fonts for Retro/Sci-Fi Styling -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=VT323&display=swap">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap">
     
+    <!-- Tailwind CSS for modern design and structural overlays -->
     <script src="https://cdn.tailwindcss.com"></script>
     
     <style>
@@ -76,11 +78,15 @@
 
     <div id="game-frame" class="flex flex-col justify-between w-full h-full max-h-[100dvh]">
         
+        <!-- Game Canvas covering background -->
         <canvas id="gameCanvas" class="absolute inset-0 w-full h-full block z-0"></canvas>
         
+        <!-- AUDIO TAG linking to BGM file -->
         <audio id="bgm" loop preload="auto"></audio>
 
+        <!-- Floating Portrait HUD Layer -->
         <div id="hud" class="absolute top-4 left-4 right-4 z-20 hidden pointer-events-none flex flex-col gap-1 text-[1.2rem] sm:text-[1.4rem]">
+            <!-- Primary Telemetry Grid -->
             <div class="flex justify-between items-center bg-black/80 border-l-4 border-[#d4a24e] px-3 py-1.5 shadow-md pointer-events-auto">
                 <div class="text-[#d4a24e]">
                     DPTH: <span id="hud-depth" class="text-white font-bold">0</span>m
@@ -88,15 +94,18 @@
                 <div class="text-white">
                     DATA: <span id="hud-data" class="text-[#61dafb]">0</span>
                 </div>
+                <!-- Interactive Pause Button on HUD -->
                 <button id="hud-pause-btn" class="bg-[#240e03] border border-[#d4a24e]/50 px-2.5 py-0.5 rounded text-xs text-[#d4a24e] hover:bg-[#d4a24e]/20 active:bg-[#d4a24e]/40 transition-all font-sans">
                     PAUSE
                 </button>
             </div>
             
+            <!-- Secondary Telemetry (Loop, Health & Speed) -->
             <div class="flex justify-between items-center text-[1.1rem] bg-black/70 px-3 py-1">
                 <div class="text-gray-400">
                     LOOP: <span id="hud-loop" class="text-[#d4a24e]">1</span> (<span id="hud-phase" class="text-[#61dafb] font-bold">α</span>)
                 </div>
+                <!-- Mini Hull Integrity Bar -->
                 <div class="flex items-center gap-2">
                     <span class="text-[#ff4444] text-xs font-sans">SHIELD</span>
                     <div class="w-16 bg-gray-800 h-2 border border-[#ff4444]/50 rounded overflow-hidden">
@@ -109,8 +118,9 @@
             </div>
         </div>
 
+        <!-- Start Game Screen Overlay -->
         <div id="start-screen" class="absolute inset-0 z-30 flex flex-col justify-center items-center bg-black/90 p-6 text-center select-none">
-            <div class="transform -skew-x-3 border-2 border-[#d4a24e] bg-[#240e03]/80 p-5 shadow-[0_0_20px_rgba(212, 162, 78, 0.4)]">
+            <div class="transform -skew-x-3 border-2 border-[#d4a24e] bg-[#240e03]/80 p-5 shadow-[0_0_20px_rgba(212,162,78,0.4)]">
                 <h1 class="text-4xl sm:text-5xl font-extrabold text-white tracking-widest uppercase text-shadow neon-amber leading-none mb-1">SULPHUR RUN</h1>
                 <h2 class="text-xl sm:text-2xl text-[#d4a24e] font-bold tracking-wider leading-none mb-3">PÂTE SABLÉE DESCENT</h2>
                 <p class="text-[1.1rem] sm:text-lg text-gray-300 font-sans tracking-wide leading-relaxed">
@@ -122,13 +132,15 @@
                 [TAP TO INITIATE DESCENT]
             </span>
 
-            <div class="mt-10 border-t border-white/10 pt-4 w-full text-center text-sm sm:text-base text-gray-400 tracking-wider">
-                <p class="mb-1"><span class="text-[#d4a24e]">STEER:</span> Tap/Hold Left or Right side of screen</p>
-                <p class="mb-1"><span class="text-[#ff61c7]">WEAPONS:</span> Plasma beams fire automatically downward</p>
-                <p class="text-xs text-gray-500 mt-2 font-sans italic">Synthesized audios lock dynamically on first tap</p>
+            <div class="mt-10 border-t border-white/10 pt-4 w-full text-center text-sm sm:text-base text-gray-400 tracking-wider font-sans">
+                <p class="mb-1"><span class="text-[#d4a24e] font-bold">DRAG:</span> Slide thumb anywhere to guide ship precisely</p>
+                <p class="mb-1"><span class="text-[#d4a24e] font-bold">STEER:</span> Or tap/hold left or right side of screen</p>
+                <p class="mb-1"><span class="text-[#ff61c7] font-bold">WEAPONS:</span> Plasma beams fire automatically downward</p>
+                <p class="text-xs text-gray-500 mt-2 italic">Synthesized audios lock dynamically on first tap</p>
             </div>
         </div>
 
+        <!-- Pause Screen Overlay -->
         <div id="pause-screen" class="absolute inset-0 z-30 hidden flex flex-col justify-center items-center bg-black/85 text-center">
             <h1 class="text-5xl text-white font-bold tracking-widest neon-amber transform -skew-x-3 mb-4">DESCENT PAUSED</h1>
             <button id="pause-resume-btn" class="blink text-2xl text-gray-300 border border-white/20 px-4 py-2 bg-white/5 rounded active:bg-white/20 transition-all">[TAP TO RESUME]</button>
@@ -137,6 +149,7 @@
             </button>
         </div>
 
+        <!-- Game Over Screen Overlay -->
         <div id="game-over-screen" class="absolute inset-0 z-30 hidden flex flex-col justify-center items-center bg-black/95 p-6 text-center">
             <div class="text-[#ff4444] text-xl font-bold tracking-widest uppercase mb-1">CRITICAL FAILURE // CORE MELTDOWN</div>
             <h1 class="text-4xl sm:text-5xl text-white font-extrabold transform -skew-x-3 text-shadow leading-none mb-4" style="text-shadow: 0 0 10px #ff4444;">MODULE TERMINATED</h1>
@@ -147,7 +160,7 @@
                 <p class="flex justify-between"><span>TERMINAL PHASE:</span> <span id="final-phase" class="text-[#ff61c7] font-bold font-mono">α</span></p>
             </div>
 
-            <span id="reboot-prompt" class="blink text-2xl text-white mt-8 cursor-pointer neon-amber border border-white/20 px-4 py-2 bg-[#240e03] rounded">
+            <span id="reboot-prompt" class="blink text-2xl text-white mt-8 cursor-pointer neon-amber border border-white/20 px-4 py-2 bg-[#240e03] rounded font-mono">
                 [TAP TO REBOOT COMPASS]
             </span>
         </div>
@@ -157,7 +170,7 @@
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
-        // Fixed logical dimensions to keep game mechanics and coordinates stable
+        // Fixed logical dimensions to keep game mechanics and coordinates perfectly stable
         const LOGICAL_WIDTH = 360;
         const LOGICAL_HEIGHT = 640;
 
@@ -323,8 +336,14 @@
         let currentPhaseIdx = 0;
         let currentLoopIdx = 0;
 
+        // Unified multi-input steering state variables
         let touchLeft = false;
         let touchRight = false;
+        
+        let touchStartClientX = 0;
+        let touchStartRoverX = 0;
+        let touchMode = 'NONE'; // Modes: 'NONE', 'TAP_HOLD', 'DRAGGING'
+        let touchSide = 'NONE'; // Sides: 'NONE', 'LEFT', 'RIGHT'
 
         const rover = {
             x: LOGICAL_WIDTH / 2 - 16,
@@ -336,6 +355,7 @@
             shield: 100, 
             lastShot: 0,
             shotCooldown: 10,
+            targetX: LOGICAL_WIDTH / 2 - 16, // High precision coordinate target
 
             draw: function() {
                 ctx.save();
@@ -543,38 +563,60 @@
             }
         }
 
-        function updateTouches(e) {
-            touchLeft = false;
-            touchRight = false;
-            
-            const rect = canvas.getBoundingClientRect();
-            for (let i = 0; i < e.touches.length; i++) {
-                const touch = e.touches[i];
-                const touchPercent = (touch.clientX - rect.left) / rect.width;
-                if (touchPercent < 0.5) {
-                    touchLeft = true;
-                } else {
-                    touchRight = true;
-                }
-            }
-        }
-
+        // Precision Drag and Hold Touch Interface Controllers
         const handleTouchStart = (e) => {
             initAudioContext();
             if (gameState === 'GAMEOVER') return; 
-            if (gameState === 'PLAYING') updateTouches(e);
+            if (gameState !== 'PLAYING') return;
+
+            const rect = canvas.getBoundingClientRect();
+            const touch = e.touches[0];
+            
+            // Record initial touch coordinates for high-precision sliding reference
+            touchStartClientX = touch.clientX;
+            touchStartRoverX = rover.x;
+            
+            // fallback tap checking side of screen
+            const touchPercent = (touch.clientX - rect.left) / rect.width;
+            touchSide = touchPercent < 0.5 ? 'LEFT' : 'RIGHT';
+            touchMode = 'TAP_HOLD';
         };
 
         const handleTouchMove = (e) => {
-            if (gameState === 'PLAYING') updateTouches(e);
+            if (gameState !== 'PLAYING') return;
+            const touch = e.touches[0];
+            const deltaX = touch.clientX - touchStartClientX;
+
+            // Trigger dragging mode if thumb moves beyond an 8px threshold
+            if (touchMode !== 'DRAGGING' && Math.abs(deltaX) > 8) {
+                touchMode = 'DRAGGING';
+            }
+
+            if (touchMode === 'DRAGGING') {
+                const rect = canvas.getBoundingClientRect();
+                const scaleX = LOGICAL_WIDTH / rect.width;
+                // Perfect 1:1 movement relative to original starting touchpoint
+                rover.targetX = touchStartRoverX + deltaX * scaleX;
+            } else {
+                // If they are static or barely moving, track basic tap half
+                const rect = canvas.getBoundingClientRect();
+                const touchPercent = (touch.clientX - rect.left) / rect.width;
+                touchSide = touchPercent < 0.5 ? 'LEFT' : 'RIGHT';
+            }
         };
 
         const handleTouchEnd = (e) => {
-            if (gameState === 'PLAYING') {
-                updateTouches(e);
+            if (e.touches.length === 0) {
+                touchMode = 'NONE';
+                touchSide = 'NONE';
             } else {
-                touchLeft = false;
-                touchRight = false;
+                // Re-calculate drag origins for remaining touches
+                const touch = e.touches[0];
+                touchStartClientX = touch.clientX;
+                touchStartRoverX = rover.x;
+                const rect = canvas.getBoundingClientRect();
+                const touchPercent = (touch.clientX - rect.left) / rect.width;
+                touchSide = touchPercent < 0.5 ? 'LEFT' : 'RIGHT';
             }
         };
 
@@ -664,8 +706,12 @@
             speed = 7.0;
             rover.shield = 100;
             rover.x = LOGICAL_WIDTH / 2 - 16;
+            rover.targetX = rover.x;
             rover.vx = 0;
             rover.lastShot = 0; 
+
+            touchMode = 'NONE';
+            touchSide = 'NONE';
 
             currentThemeIdx = 0;
             currentPhaseIdx = 0;
@@ -761,11 +807,31 @@
                 speed += 1.2; 
             }
 
-            let targetVx = 0;
-            if (touchLeft) targetVx = -8.5;
-            if (touchRight) targetVx = 8.5;
+            // High Precision Movement Interpolation Architecture
+            if (touchMode === 'DRAGGING') {
+                // Hard boundary checks on logical layout before running easing calculations
+                const minX = CHASM_L + 4;
+                const maxX = CHASM_R - rover.width - 4;
+                if (rover.targetX < minX) rover.targetX = minX;
+                if (rover.targetX > maxX) rover.targetX = maxX;
 
-            rover.vx += (targetVx - rover.vx) * 0.35;
+                // Responsive spring-damped convergence
+                let diff = rover.targetX - rover.x;
+                rover.vx = diff * 0.32; 
+            } else {
+                // Fallback: Digital Tap/Hold side check or Desktop Keys
+                let targetVx = 0;
+                if (touchSide === 'LEFT' || touchLeft) {
+                    targetVx = -6.5; // Tuned down for elegant, controlled motion (prev 8.5)
+                } else if (touchSide === 'RIGHT' || touchRight) {
+                    targetVx = 6.5;  // Tuned down for elegant, controlled motion (prev 8.5)
+                }
+
+                // Progressive acceleration interpolation
+                rover.vx += (targetVx - rover.vx) * 0.22;
+                rover.targetX = rover.x; // Lock drag target to matching fallback location
+            }
+
             rover.x += rover.vx;
 
             const buffer = 4;
@@ -943,7 +1009,6 @@
         }
 
         function draw() {
-            // Clean frame refresh
             ctx.clearRect(0, 0, LOGICAL_WIDTH, LOGICAL_HEIGHT);
 
             const theme = THEMES[currentThemeIdx];
