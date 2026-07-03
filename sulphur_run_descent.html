@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Sulphur Run: Pâte Sablée Descent V0.2</title>
+    <title>Sulphur Run: Pâte Sablée Descent V0.3</title>
     
     <!-- External Web Fonts for Retro/Sci-Fi Styling -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=VT323&display=swap">
@@ -122,7 +122,7 @@
         <div id="start-screen" class="absolute inset-0 z-30 flex flex-col justify-center items-center bg-black/90 p-6 text-center select-none">
             <div class="transform -skew-x-3 border-2 border-[#d4a24e] bg-[#240e03]/80 p-5 shadow-[0_0_20px_rgba(212,162,78,0.4)]">
                 <h1 class="text-4xl sm:text-5xl font-extrabold text-white tracking-widest uppercase text-shadow neon-amber leading-none mb-1">SULPHUR RUN</h1>
-                <h2 class="text-xl sm:text-2xl text-[#d4a24e] font-bold tracking-wider leading-none mb-3">PÂTE SABLÉE DESCENT v0.2</h2>
+                <h2 class="text-xl sm:text-2xl text-[#d4a24e] font-bold tracking-wider leading-none mb-3">PÂTE SABLÉE DESCENT v0.3</h2>
                 <p class="text-[1.1rem] sm:text-lg text-gray-300 font-sans tracking-wide leading-relaxed">
                     Navigate the vertical, crumbly silicate walls of the ancient Pâte Sablée basin. Blast obstructions, neutralize magma vents, and collect data nodes!
                 </p>
@@ -1347,7 +1347,7 @@
             ctx.save();
             // Subtle parallax vertical scrolling relative to depth
             const rimScrollY = (depth * 0.4) % 12;
-            const rimBaseY = 530 + rimScrollY; 
+            const rimBaseY = 430 + rimScrollY; 
             
             // Draw filled colored rim silhouette (inherits thematic coloring)
             ctx.fillStyle = theme.rimFill; 
@@ -1384,7 +1384,8 @@
             ctx.stroke();
             ctx.restore();
 
-            ctx.fillStyle = '#0a0301';
+            // Clean, pure-black outer canyon margins to cleanly isolate the active play field
+            ctx.fillStyle = '#000000';
             ctx.beginPath();
             ctx.moveTo(0, 0);
             for (let y = 0; y <= LOGICAL_HEIGHT + 20; y += 15) {
@@ -1398,7 +1399,7 @@
             ctx.closePath();
             ctx.fill();
 
-            ctx.fillStyle = '#0a0301';
+            ctx.fillStyle = '#000000';
             ctx.beginPath();
             ctx.moveTo(LOGICAL_WIDTH, 0);
             for (let y = 0; y <= LOGICAL_HEIGHT + 20; y += 15) {
@@ -1411,51 +1412,6 @@
             ctx.lineTo(LOGICAL_WIDTH, LOGICAL_HEIGHT);
             ctx.closePath();
             ctx.fill();
-
-            ctx.fillStyle = '#170601';
-            ctx.beginPath();
-            ctx.moveTo(0, 0);
-            for (let y = 0; y <= LOGICAL_HEIGHT + 20; y += 15) {
-                let wallScroll = (frames * (speed * 0.55)) % 15;
-                let evalY = y - wallScroll;
-                let globalY = evalY + (depth * 10);
-                let noiseX = (CHASM_L - 3) + Math.sin(globalY * 0.05) * 8 + Math.sin(globalY * 0.16) * 4;
-                ctx.lineTo(noiseX, evalY);
-            }
-            ctx.lineTo(0, LOGICAL_HEIGHT);
-            ctx.closePath();
-            ctx.fill();
-
-            ctx.fillStyle = '#170601';
-            ctx.beginPath();
-            ctx.moveTo(LOGICAL_WIDTH, 0);
-            for (let y = 0; y <= LOGICAL_HEIGHT + 20; y += 15) {
-                let wallScroll = (frames * (speed * 0.55)) % 15;
-                let evalY = y - wallScroll;
-                let globalY = evalY + (depth * 10);
-                let noiseX = (CHASM_R + 3) - Math.sin(globalY * 0.05 + 1.5) * 8 - Math.sin(globalY * 0.16) * 4;
-                ctx.lineTo(LOGICAL_WIDTH, LOGICAL_HEIGHT);
-                ctx.closePath();
-                ctx.fill();
-            }
-
-            ctx.strokeStyle = '#291104';
-            ctx.lineWidth = 1.5;
-            for (let i = 0; i < LOGICAL_HEIGHT; i += 40) {
-                const scrollOffset = (frames * (speed * 0.1)) % 40;
-                let evalY = i + scrollOffset;
-                let globalY = evalY + (depth * 10);
-                
-                let noiseLeft = CHASM_L + Math.sin(globalY * 0.05) * 8 + Math.sin(globalY * 0.16) * 4;
-                let noiseRight = CHASM_R - Math.sin(globalY * 0.05 + 1.5) * 8 - Math.sin(globalY * 0.16) * 4;
-
-                ctx.beginPath();
-                ctx.moveTo(0, evalY);
-                ctx.lineTo(noiseLeft, evalY - 5);
-                ctx.moveTo(LOGICAL_WIDTH, evalY);
-                ctx.lineTo(noiseRight, evalY - 5);
-                ctx.stroke();
-            }
 
             ctx.strokeStyle = theme.main;
             ctx.lineWidth = 1.5;
