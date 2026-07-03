@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Sulphur Run: Pâte Sablée Descent V0.1</title>
+    <title>Sulphur Run: Pâte Sablée Descent V0.2</title>
     
     <!-- External Web Fonts for Retro/Sci-Fi Styling -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=VT323&display=swap">
@@ -81,7 +81,7 @@
         <!-- Game Canvas covering background -->
         <canvas id="gameCanvas" class="absolute inset-0 w-full h-full block z-0"></canvas>
         
-        <!-- AUDIO TAG linking to BGM file -->
+        <!-- AUDIO TAG linking to BGM file (Fallback to Synth Loop if not loaded) -->
         <audio id="bgm" loop preload="auto"></audio>
 
         <!-- Floating Portrait HUD Layer -->
@@ -122,9 +122,9 @@
         <div id="start-screen" class="absolute inset-0 z-30 flex flex-col justify-center items-center bg-black/90 p-6 text-center select-none">
             <div class="transform -skew-x-3 border-2 border-[#d4a24e] bg-[#240e03]/80 p-5 shadow-[0_0_20px_rgba(212,162,78,0.4)]">
                 <h1 class="text-4xl sm:text-5xl font-extrabold text-white tracking-widest uppercase text-shadow neon-amber leading-none mb-1">SULPHUR RUN</h1>
-                <h2 class="text-xl sm:text-2xl text-[#d4a24e] font-bold tracking-wider leading-none mb-3">PÂTE SABLÉE DESCENT v0.1</h2>
+                <h2 class="text-xl sm:text-2xl text-[#d4a24e] font-bold tracking-wider leading-none mb-3">PÂTE SABLÉE DESCENT v0.2</h2>
                 <p class="text-[1.1rem] sm:text-lg text-gray-300 font-sans tracking-wide leading-relaxed">
-                    Navigate the vertical, crumbly silicate walls of the ancient Pâte Sablée basin. Blast obstructions, dodge erupting magma vents, and collect data nodes!
+                    Navigate the vertical, crumbly silicate walls of the ancient Pâte Sablée basin. Blast obstructions, neutralize magma vents, and collect data nodes!
                 </p>
             </div>
 
@@ -135,8 +135,8 @@
             <div class="mt-10 border-t border-white/10 pt-4 w-full text-center text-sm sm:text-base text-gray-400 tracking-wider font-sans font-medium">
                 <p class="mb-1"><span class="text-[#d4a24e]">DRAG:</span> Slide thumb anywhere to guide ship precisely</p>
                 <p class="mb-1"><span class="text-[#d4a24e]">STEER:</span> Or tap/hold left or right side of screen</p>
-                <p class="mb-1"><span class="text-[#ff5500]">HAZARDS:</span> Volcanic side vents erupt shootable magma fireballs!</p>
-                <p class="text-xs text-gray-500 mt-2 italic font-normal">Synthesized audios lock dynamically on first tap</p>
+                <p class="mb-1"><span class="text-[#ff5500]">HAZARDS:</span> Volcanic side vents erupt instantly but can be blasted in 2 hits!</p>
+                <p class="text-xs text-gray-500 mt-2 italic font-normal">Synthesized chiptune soundtrack triggers dynamically</p>
             </div>
         </div>
 
@@ -199,8 +199,80 @@
         let actx = null;
         let lastShootSoundTime = 0; 
         let lastExplodeSoundTime = 0;
+        let bgmInterval = null;
+        let bgmStep = 0;
 
-        // Unlock audio contexts reliably across mobile gestures
+        const BGM_NOTES = [48, 48, 51, 48, 55, 48, 58, 51, 53, 53, 56, 53, 60, 53, 63, 56];
+        const BGM_MELODY = [0, 0, 72, 0, 75, 74, 0, 79, 0, 82, 80, 79, 75, 0, 74, 72];
+
+        function playBGMStep() {
+            if (!actx || actx.state === 'suspended' || gameState !== 'PLAYING') return;
+            const now = actx.currentTime;
+
+            // Synthesis 1: Retro Bass Synth Channel
+            const bassOsc = actx.createOscillator();
+            const bassGain = actx.createGain();
+            const bassFilter = actx.createBiquadFilter();
+
+            bassOsc.type = 'sawtooth';
+            const bassNote = BGM_NOTES[bgmStep % BGM_NOTES.length];
+            const bassFreq = Math.pow(2, (bassNote - 69) / 12) * 440;
+            bassOsc.frequency.setValueAtTime(bassFreq, now);
+
+            bassFilter.type = 'lowpass';
+            bassFilter.frequency.setValueAtTime(280, now);
+
+            bassGain.gain.setValueAtTime(0.06, now);
+            bassGain.gain.exponentialRampToValueAtTime(0.001, now + 0.16);
+
+            bassOsc.connect(bassFilter);
+            bassFilter.connect(bassGain);
+            bassGain.connect(actx.destination);
+
+            bassOsc.start(now);
+            bassOsc.stop(now + 0.18);
+
+            // Synthesis 2: Chiptune Lead melody channel
+            const melNote = BGM_MELODY[bgmStep % BGM_MELODY.length];
+            if (melNote > 0) {
+                const melOsc = actx.createOscillator();
+                const melGain = actx.createGain();
+                const melFilter = actx.createBiquadFilter();
+
+                melOsc.type = 'triangle';
+                const melFreq = Math.pow(2, (melNote - 69) / 12) * 440;
+                melOsc.frequency.setValueAtTime(melFreq, now);
+
+                melFilter.type = 'bandpass';
+                melFilter.frequency.setValueAtTime(1200, now);
+
+                melGain.gain.setValueAtTime(0.02, now);
+                melGain.gain.exponentialRampToValueAtTime(0.001, now + 0.28);
+
+                melOsc.connect(melFilter);
+                melFilter.connect(melGain);
+                melGain.connect(actx.destination);
+
+                melOsc.start(now);
+                melOsc.stop(now + 0.3);
+            }
+
+            bgmStep++;
+        }
+
+        function startProceduralBGM() {
+            stopProceduralBGM();
+            // 150 BPM matches a step interval of 100ms for high-energy descent action
+            bgmInterval = setInterval(playBGMStep, 100);
+        }
+
+        function stopProceduralBGM() {
+            if (bgmInterval) {
+                clearInterval(bgmInterval);
+                bgmInterval = null;
+            }
+        }
+
         function initAudioContext() {
             try {
                 if (!actx) {
@@ -209,8 +281,13 @@
                 if (actx.state === 'suspended') {
                     actx.resume();
                 }
-                if (bgm && bgm.paused && gameState !== 'START' && gameState !== 'PAUSED' && gameState !== 'GAMEOVER') {
-                    bgm.play().catch(() => {});
+                // Try playing BGM file first, otherwise initiate the procedural synth engine
+                if (bgm && bgm.paused && gameState === 'PLAYING') {
+                    bgm.play().then(() => {
+                        stopProceduralBGM(); // file worked, kill synth
+                    }).catch(() => {
+                        startProceduralBGM(); // fallback to synth engine
+                    });
                 }
             } catch (e) {
                 console.warn("AudioContext initialization blocked by browser security.", e);
@@ -526,20 +603,25 @@
                 }
             }
 
-            // Procedurally spawn Active Basalt Magma Vents OFF-SCREEN below bottom (LOGICAL_HEIGHT + 120)
+            // Procedurally spawn Active Basalt Magma Vents OFF-SCREEN below bottom
+            // Reaction buffer scales up with speed to ensure consistent 25-frame warning window
             if (frames % 140 === 0 && Math.random() > 0.3) {
                 const sideLeft = Math.random() > 0.5;
                 const ventWidth = 25 + Math.random() * 15;
                 const ventHeight = 35 + Math.random() * 15;
+                const spawnOffset = speed * 13.5; 
+
                 obstacles.push({
                     x: sideLeft ? CHASM_L : CHASM_R - ventWidth,
-                    y: LOGICAL_HEIGHT + 120, // Spawned off-screen below for proactive warning cycle
+                    y: LOGICAL_HEIGHT + spawnOffset, 
                     width: ventWidth,
                     height: ventHeight,
                     type: 'VENT', 
                     side: sideLeft ? 'LEFT' : 'RIGHT',
-                    ventState: 'IDLE', // States: IDLE, WARNING, ERUPTING
-                    stateTimer: 40 + Math.random() * 50 // Shortened proactively so warning occurs offscreen
+                    ventState: 'ERUPTING', // Instantly erupt on entry!
+                    hp: 2,                 // Destroyable in 2 precise laser hits!
+                    maxHp: 2,
+                    hitFlash: 0
                 });
             }
 
@@ -554,7 +636,8 @@
                     type: 'BOULDER',
                     hp: 2,
                     maxHp: 2,
-                    vy: 3 + Math.random() * 3.5 // Velocity falling downward relative to viewport
+                    vy: 3 + Math.random() * 3.5, // Velocity falling downward relative to viewport
+                    hitFlash: 0
                 });
             }
 
@@ -584,7 +667,7 @@
 
         function createObstacle(x, y, w, h, type, hp) {
             return {
-                x: x, y: y, width: w, height: h, type: type, hp: hp, maxHp: hp
+                x: x, y: y, width: w, height: h, type: type, hp: hp, maxHp: hp, hitFlash: 0
             };
         }
 
@@ -764,11 +847,17 @@
                 actx.resume();
             }
 
+            // Fire up both fallback audio routines
             if (bgm) {
                 bgm.currentTime = 0;
-                bgm.play().catch((err) => {
-                    console.log('Background Audio deferred until browser gesture interaction.', err);
+                bgm.play().then(() => {
+                    stopProceduralBGM(); // kill synthesized track if user file loaded successfully
+                }).catch((err) => {
+                    console.log('Background Audio file deferred. Launching procedural sequencer loop.', err);
+                    startProceduralBGM();
                 });
+            } else {
+                startProceduralBGM();
             }
         }
 
@@ -777,10 +866,12 @@
                 gameState = 'PAUSED';
                 document.getElementById('pause-screen').style.display = 'flex';
                 if (bgm) bgm.pause();
+                stopProceduralBGM();
             } else if (gameState === 'PAUSED') {
                 gameState = 'PLAYING';
                 document.getElementById('pause-screen').style.display = 'none';
                 if (bgm) bgm.play().catch(() => {});
+                startProceduralBGM();
             }
         }
 
@@ -791,6 +882,7 @@
             document.getElementById('start-screen').style.opacity = '1';
             document.getElementById('hud').style.display = 'none';
             if (bgm) bgm.pause();
+            stopProceduralBGM();
         }
 
         function resetGame() {
@@ -800,6 +892,7 @@
         function triggerTermination() {
             gameState = 'GAMEOVER';
             if (bgm) bgm.pause();
+            stopProceduralBGM();
             playSound('explode');
             
             document.getElementById('game-over-screen').style.display = 'flex';
@@ -974,77 +1067,70 @@
                     obs.y += obs.vy; 
                 }
 
-                // Run Magma Vent state transition machine (active off-screen & on-screen)
+                // Run Magma Vent continuous eruption engine
                 if (obs.type === 'VENT') {
-                    obs.stateTimer--;
-                    if (obs.stateTimer <= 0) {
-                        if (obs.ventState === 'IDLE') {
-                            obs.ventState = 'WARNING';
-                            obs.stateTimer = 45; // Flash pre-warning
-                        } else if (obs.ventState === 'WARNING') {
-                            obs.ventState = 'ERUPTING';
-                            obs.stateTimer = 80; // active eruption duration
-                        } else if (obs.ventState === 'ERUPTING') {
-                            obs.ventState = 'IDLE';
-                            obs.stateTimer = 110 + Math.random() * 60; // cooling period
-                        }
+                    // Spray active thermal particles if near/on screen
+                    if (frames % 6 === 0 && obs.y < LOGICAL_HEIGHT + 20 && obs.y > -50) {
+                        const sprayVx = obs.side === 'LEFT' ? (1.5 + Math.random() * 2) : (-1.5 - Math.random() * 2);
+                        particles.push({
+                            x: obs.side === 'LEFT' ? obs.x + obs.width : obs.x,
+                            y: obs.y + obs.height / 2,
+                            vx: sprayVx,
+                            vy: (Math.random() - 0.5) * 1.5 - (speed * 0.1),
+                            size: 2 + Math.random() * 2.5,
+                            color: Math.random() > 0.4 ? '#ff5500' : '#ffaa00',
+                            life: 20 + Math.random() * 15
+                        });
                     }
 
-                    // Eruption active: spray lava ashes and spawn physical magma fireballs
-                    if (obs.ventState === 'ERUPTING') {
-                        if (frames % 6 === 0) {
-                            const sprayVx = obs.side === 'LEFT' ? (1.5 + Math.random() * 2) : (-1.5 - Math.random() * 2);
-                            particles.push({
-                                x: obs.side === 'LEFT' ? obs.x + obs.width : obs.x,
-                                y: obs.y + obs.height / 2,
-                                vx: sprayVx,
-                                vy: (Math.random() - 0.5) * 1.5 - (speed * 0.1),
-                                size: 2 + Math.random() * 2.5,
-                                color: Math.random() > 0.4 ? '#ff5500' : '#ffaa00',
-                                life: 20 + Math.random() * 15
-                            });
-                        }
-
-                        if (obs.stateTimer % 25 === 0) {
-                            const orbVx = obs.side === 'LEFT' ? 3.5 : -3.5;
-                            projectiles.push({
-                                x: obs.side === 'LEFT' ? obs.x + obs.width : obs.x,
-                                y: obs.y + obs.height / 2,
-                                vx: orbVx,
-                                vy: 0.8,
-                                size: 6,
-                                height: 6,
-                                isMagma: true,
-                                destroyed: false
-                            });
-                            playSound('hit');
-                        }
+                    // Release lethal magma projectiles actively
+                    if (frames % 25 === 0 && obs.y < LOGICAL_HEIGHT && obs.y > -20) {
+                        const orbVx = obs.side === 'LEFT' ? 3.5 : -3.5;
+                        projectiles.push({
+                            x: obs.side === 'LEFT' ? obs.x + obs.width : obs.x,
+                            y: obs.y + obs.height / 2,
+                            vx: orbVx,
+                            vy: 0.8,
+                            size: 6,
+                            height: 6,
+                            isMagma: true,
+                            destroyed: false
+                        });
+                        playSound('hit');
                     }
                 }
 
                 let obsRemoved = false;
 
-                // Lasers vs Obstacles/Hazards check
+                // Lasers vs Obstacles/Hazards check (Sablee rock ledges, falling boulders, and MAGMA VENTS!)
                 for (let k = projectiles.length - 1; k >= 0; k--) {
                     let proj = projectiles[k];
                     if (proj.isMagma) continue; 
 
-                    // Check bounds for breakable sablée rock ledges & basalt boulders
+                    // Check bounds for breakable sablée rock ledges, basalt boulders, and MAGMA VENTS
                     if (proj.x > obs.x && proj.x < obs.x + obs.width &&
                         proj.y > obs.y && proj.y < obs.y + obs.height) {
                         
-                        if (obs.type === 'SABLEE' || obs.type === 'BOULDER') {
+                        if (obs.type === 'SABLEE' || obs.type === 'BOULDER' || obs.type === 'VENT') {
                             obs.hp--;
+                            obs.hitFlash = 5; // Flash white on hit
                             projectiles.splice(k, 1);
                             playSound('hit');
 
-                            spawnParticles(proj.x, obs.y + obs.height/2, 6, obs.type === 'BOULDER' ? '#5a5c61' : '#ffca7a', 3);
+                            let particleColor = '#ffca7a';
+                            if (obs.type === 'BOULDER') particleColor = '#5a5c61';
+                            else if (obs.type === 'VENT') particleColor = '#ff5500';
+
+                            spawnParticles(proj.x, obs.y + obs.height/2, 6, particleColor, 3);
 
                             if (obs.hp <= 0) {
                                 playSound('explode');
                                 if (obs.type === 'BOULDER') {
                                     dataScore += 25; // High reward for clearing debris avalanches
                                     spawnParticles(obs.x + obs.width/2, obs.y + obs.height/2, 18, '#3c3d40', 4);
+                                } else if (obs.type === 'VENT') {
+                                    dataScore += 35; // Neutralizing highly active volcanic magma vent!
+                                    spawnParticles(obs.x + obs.width/2, obs.y + obs.height/2, 25, '#ff3c00', 4);
                                 } else {
                                     dataScore += 15;
                                     spawnParticles(obs.x + obs.width/2, obs.y + obs.height/2, 20, '#d4a24e', 4);
@@ -1107,8 +1193,8 @@
                     continue;
                 }
 
-                // Despawn limits
-                if (obs.y < -120 || obs.y > LOGICAL_HEIGHT + 180) {
+                // Despawn limits (expanded to prevent dynamic high-speed vent spawns from being clipped)
+                if (obs.y < -120 || obs.y > LOGICAL_HEIGHT + 380) {
                     obstacles.splice(i, 1);
                 }
             }
@@ -1392,9 +1478,13 @@
             ctx.shadowBlur = 0;
 
             obstacles.forEach(obs => {
+                if (obs.hitFlash && obs.hitFlash > 0) {
+                    obs.hitFlash--;
+                }
+
                 if (obs.type === 'SABLEE') {
                     ctx.save();
-                    ctx.fillStyle = '#1c0f04';
+                    ctx.fillStyle = (obs.hitFlash && obs.hitFlash > 0) ? '#ffffff' : '#1c0f04';
                     
                     ctx.beginPath();
                     ctx.moveTo(obs.x, obs.y);
@@ -1417,7 +1507,7 @@
                     ctx.fill();
 
                     const healthPct = obs.hp / obs.maxHp;
-                    ctx.strokeStyle = healthPct > 0.6 ? '#d4a24e' : '#a35f1c';
+                    ctx.strokeStyle = (obs.hitFlash && obs.hitFlash > 0) ? '#ffffff' : (healthPct > 0.6 ? '#d4a24e' : '#a35f1c');
                     ctx.lineWidth = 2.5;
                     ctx.beginPath();
                     for (let j = 0; j <= steps; j++) {
@@ -1451,7 +1541,7 @@
                 } else if (obs.type === 'VENT') {
                     // Volcanic basalt magma vents jutting from canyon walls
                     ctx.save();
-                    ctx.fillStyle = '#0d0402'; 
+                    ctx.fillStyle = (obs.hitFlash && obs.hitFlash > 0) ? '#ffffff' : '#0d0402'; 
                     
                     ctx.beginPath();
                     if (obs.side === 'LEFT') {
@@ -1474,31 +1564,19 @@
                     ctx.closePath();
                     ctx.fill();
 
-                    // Render glowing energy veins corresponding to vent cycle phase
-                    let glowColor = '#ff3c00';
-                    let coreColor = '#420d00';
-                    if (obs.ventState === 'WARNING') {
-                        const flashOn = Math.floor(frames / 5) % 2 === 0;
-                        glowColor = flashOn ? '#ffae00' : '#ff3c00';
-                        coreColor = flashOn ? '#ffffff' : '#e65c00';
-                    } else if (obs.ventState === 'ERUPTING') {
-                        glowColor = '#ffbb00';
-                        coreColor = '#ffffff';
+                    // Instantly active glowing lava cores
+                    let glowColor = '#ffbb00';
+                    let coreColor = '#ffffff';
 
-                        ctx.save();
-                        ctx.shadowColor = '#ff5500';
-                        ctx.shadowBlur = 12;
-                        ctx.fillStyle = '#ffffff';
-                        ctx.beginPath();
-                        const nozzleX = obs.side === 'LEFT' ? CHASM_L + obs.width : CHASM_R - obs.width;
-                        ctx.arc(nozzleX, obs.y + obs.height / 2, 5, 0, Math.PI * 2);
-                        ctx.fill();
-                        ctx.restore();
-                    } else {
-                        const pulse = 0.5 + Math.sin(frames * 0.05) * 0.3;
-                        glowColor = `rgba(255, 60, 0, ${pulse})`;
-                        coreColor = `rgba(130, 20, 0, ${pulse})`;
-                    }
+                    ctx.save();
+                    ctx.shadowColor = '#ff5500';
+                    ctx.shadowBlur = 12;
+                    ctx.fillStyle = (obs.hitFlash && obs.hitFlash > 0) ? '#ffffff' : '#ffffff';
+                    ctx.beginPath();
+                    const nozzleX = obs.side === 'LEFT' ? CHASM_L + obs.width : CHASM_R - obs.width;
+                    ctx.arc(nozzleX, obs.y + obs.height / 2, 5, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.restore();
 
                     ctx.strokeStyle = glowColor;
                     ctx.lineWidth = 1.8;
@@ -1524,7 +1602,7 @@
                 } else if (obs.type === 'BOULDER') {
                     // Draw crumbly basalt boulder debris
                     ctx.save();
-                    ctx.fillStyle = '#424347';
+                    ctx.fillStyle = (obs.hitFlash && obs.hitFlash > 0) ? '#ffffff' : '#424347';
                     ctx.strokeStyle = '#d4a24e';
                     ctx.lineWidth = 1.5;
                     ctx.beginPath();
@@ -1562,28 +1640,26 @@
             // Proactive off-screen warnings UI indicators (Bottom edge overlay)
             obstacles.forEach(obs => {
                 if (obs.type === 'VENT' && obs.y > LOGICAL_HEIGHT) {
-                    if (obs.ventState === 'WARNING') {
-                        const flash = Math.floor(frames / 6) % 2 === 0;
-                        if (flash) {
-                            ctx.save();
-                            ctx.fillStyle = '#ff5500';
-                            ctx.strokeStyle = '#ff5500';
-                            ctx.font = '900 13px Inter, sans-serif';
-                            ctx.textAlign = 'center';
-                            
-                            // Draw warning mark and location brackets
-                            const centerProjX = obs.x + obs.width / 2;
-                            ctx.fillText('!', centerProjX, LOGICAL_HEIGHT - 16);
-                            
-                            ctx.lineWidth = 1.5;
-                            ctx.beginPath();
-                            ctx.moveTo(obs.x, LOGICAL_HEIGHT - 4);
-                            ctx.lineTo(obs.x, LOGICAL_HEIGHT - 12);
-                            ctx.lineTo(obs.x + obs.width, LOGICAL_HEIGHT - 12);
-                            ctx.lineTo(obs.x + obs.width, LOGICAL_HEIGHT - 4);
-                            ctx.stroke();
-                            ctx.restore();
-                        }
+                    const flash = Math.floor(frames / 6) % 2 === 0;
+                    if (flash) {
+                        ctx.save();
+                        ctx.fillStyle = '#ff3c00';
+                        ctx.strokeStyle = '#ff3c00';
+                        ctx.font = '900 14px Inter, sans-serif';
+                        ctx.textAlign = 'center';
+                        
+                        // Draw warning mark and location brackets
+                        const centerProjX = obs.x + obs.width / 2;
+                        ctx.fillText('!', centerProjX, LOGICAL_HEIGHT - 16);
+                        
+                        ctx.lineWidth = 1.5;
+                        ctx.beginPath();
+                        ctx.moveTo(obs.x, LOGICAL_HEIGHT - 4);
+                        ctx.lineTo(obs.x, LOGICAL_HEIGHT - 12);
+                        ctx.lineTo(obs.x + obs.width, LOGICAL_HEIGHT - 12);
+                        ctx.lineTo(obs.x + obs.width, LOGICAL_HEIGHT - 4);
+                        ctx.stroke();
+                        ctx.restore();
                     }
                 }
             });
