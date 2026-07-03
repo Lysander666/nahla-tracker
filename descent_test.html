@@ -656,7 +656,7 @@
             }
 
             // Hunter Probes only appear starting on Loop 5 (Once completing SULPHUR -> CYAN -> MAGENTA -> RED full loop cycle)
-            if (currentLoopIdx >= 4 && frames % 180 === 0 && Math.random() > 0.4) {
+            if (currentLoopIdx >= 4 && frames % 90 === 0 && Math.random() > 0.15) {
                 const probeSize = 24;
                 obstacles.push({
                     x: CHASM_L + 20 + Math.random() * (CHASM_R - CHASM_L - 40 - probeSize),
@@ -1158,8 +1158,8 @@
                     // Falling basalt boulder hazard moves downward relative to scroll frame rate
                     obs.y += obs.vy; 
                 } else if (obs.type === 'PROBE') {
-                    // Floating hunter probe rises from the bottom of the screen
-                    obs.y -= (speed * 0.55 + 1.2);
+                    // Floating hunter probe rises from the bottom of the screen much slower
+                    obs.y -= (speed * 0.55 + 0.35);
                     
                     // Tracks player lateral movement
                     obs.x += ((rover.x + rover.width/2 - obs.width/2) - obs.x) * 0.015;
