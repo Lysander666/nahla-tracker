@@ -16,11 +16,11 @@
         })();
     </script>
     
-    <title>Sulphur Run: Pâte Sablée Descent V0.58</title>
+    <title>Sulphur Run: Pâte Sablée Descent V0.7</title>
     
     <!-- External Web Fonts for Retro/Sci-Fi Styling -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=VT323&display=swap">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap">
     
     <!-- Tailwind CSS for modern design and structural overlays -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -94,13 +94,13 @@
         <!-- Game Canvas covering background -->
         <canvas id="gameCanvas" class="absolute inset-0 w-full h-full block z-0"></canvas>
         
-        <!-- AUDIO TAG linking to BGM file (Fallback to Synth Loop if not loaded) -->
+        <!-- AUDIO TAG linking to BGM file -->
         <audio id="bgm" loop preload="auto"></audio>
 
-        <!-- Floating Portrait HUD Layer -->
+        <!-- Floating Portrait HUD Layer (Top) -->
         <div id="hud" class="absolute top-4 left-4 right-4 z-20 hidden pointer-events-none flex flex-col gap-1 text-[1.2rem] sm:text-[1.4rem]">
             <!-- Primary Telemetry Grid -->
-            <div class="flex justify-between items-center bg-black/80 border-l-4 border-[#d4a24e] px-3 py-1.5 shadow-md pointer-events-auto">
+            <div class="flex justify-between items-center bg-black/85 border-l-4 border-[#d4a24e] px-3 py-1.5 shadow-md pointer-events-auto">
                 <div class="text-[#d4a24e]">
                     DPTH: <span id="hud-depth" class="text-white font-bold">0</span>m
                 </div>
@@ -114,7 +114,7 @@
             </div>
             
             <!-- Secondary Telemetry (Loop, Health & Speed) -->
-            <div class="flex justify-between items-center text-[1.1rem] bg-black/70 px-3 py-1">
+            <div class="flex justify-between items-center text-[1.1rem] bg-black/75 px-3 py-1">
                 <div class="text-gray-400">
                     LOOP: <span id="hud-loop" class="text-[#d4a24e]">1</span> (<span id="hud-phase" class="text-[#61dafb] font-bold">α</span>)
                 </div>
@@ -131,27 +131,56 @@
             </div>
         </div>
 
-        <!-- Start Game Screen Overlay -->
-        <div id="start-screen" class="absolute inset-0 z-30 flex flex-col justify-center items-center bg-black/90 p-6 text-center select-none">
-            <div class="transform -skew-x-3 border-2 border-[#d4a24e] bg-[#240e03]/80 p-5 shadow-[0_0_20px_rgba(212,162,78,0.4)]">
-                <h1 class="text-4xl sm:text-5xl font-extrabold text-white tracking-widest uppercase text-shadow neon-amber leading-none mb-1">SULPHUR RUN</h1>
-                <h2 class="text-xl sm:text-2xl text-[#d4a24e] font-bold tracking-wider leading-none mb-3">PÂTE SABLÉE DESCENT v0.58</h2>
-                <p class="text-[1.1rem] sm:text-lg text-gray-300 font-sans tracking-wide leading-relaxed">
-                    Navigate the vertical, sulphur rock walls of the ancient Pâte Sablée basin. Blast obstructions, neutralise magma vents and collect data nodes!
-                </p>
+        <!-- Floating Portrait HUD Layer (Bottom - Observatory Progress Tracker) -->
+        <div id="bottom-hud" class="absolute bottom-4 left-4 right-4 z-20 hidden pointer-events-none flex flex-col gap-1 text-[1.2rem] sm:text-[1.4rem]">
+            <!-- Observatory Neon Nodes Tracker Bar -->
+            <div class="flex justify-between items-center bg-black/85 border-r-4 border-[#d4a24e] px-3 py-1.5 transition-colors duration-300 rounded shadow-md pointer-events-none">
+                <div class="text-gray-200 font-sans font-bold tracking-wide text-[10px] sm:text-xs">OBSERVATORY PROGRESS:</div>
+                <div id="hud-nodes-container" class="flex gap-1 items-center px-1">
+                    <!-- 16 neon indicators dynamically loaded -->
+                </div>
+                <div id="hud-nodes-count" class="text-[#61dafb] font-bold font-mono text-xs">0/16</div>
             </div>
+        </div>
 
-            <span id="start-prompt" class="blink text-2xl text-white mt-12 cursor-pointer neon-amber border border-white/25 px-4 py-2 bg-white/5 active:bg-white/20 transition-all rounded">
+        <!-- Achievement/Node Toast Notification Overlay -->
+        <div id="node-toast" class="absolute left-4 right-4 top-1/4 z-40 hidden flex flex-col items-center justify-center bg-black/85 backdrop-blur-sm border-2 border-double border-white py-5 px-6 rounded-lg shadow-[0_0_25px_rgba(255,255,255,0.3)] transform -translate-y-4 opacity-0 transition-all duration-500 pointer-events-auto text-center">
+            <div id="toast-badge" class="px-3 py-0.5 bg-white/10 text-[10px] sm:text-xs font-sans font-black tracking-widest text-[#d4a24e] border border-[#d4a24e]/40 rounded mb-1.5 uppercase">FREQUENCY UNLOCKED</div>
+            <h3 id="toast-title" class="text-3xl sm:text-4xl font-extrabold tracking-widest text-white uppercase leading-none my-1 font-mono">AMBER NODE</h3>
+            <p id="toast-desc" class="text-xs sm:text-sm text-gray-300 font-sans mt-1 leading-snug">Observatory Construction: <span class="text-white font-bold font-mono">1/16</span> Nodes Secure</p>
+            <button id="toast-continue-btn" class="blink text-lg sm:text-xl text-white mt-5 cursor-pointer border px-4 py-1.5 bg-white/5 hover:bg-white/10 active:bg-white/25 rounded font-mono transition-all uppercase tracking-wider">
+                [CONTINUE DESCENT]
+            </button>
+        </div>
+
+        <!-- Start Game Screen Overlay -->
+        <div id="start-screen" class="absolute inset-0 z-30 flex flex-col justify-center items-center bg-black/95 p-6 text-center select-none overflow-y-auto">
+            <div class="transform -skew-x-3 border-2 border-[#d4a24e] bg-[#240e03]/80 p-5 shadow-[0_0_20px_rgba(212,162,78,0.4)] w-full max-w-sm">
+                <h1 class="text-4xl sm:text-5xl font-extrabold text-white tracking-widest uppercase text-shadow neon-amber leading-none mb-1">SULPHUR RUN</h1>
+                <h2 class="text-xl sm:text-2xl text-[#d4a24e] font-bold tracking-wider leading-none mb-3">PÂTE SABLÉE DESCENT v0.7</h2>
+                <p class="text-[1.05rem] sm:text-base text-gray-300 font-sans tracking-wide leading-relaxed">
+                    Navigate the dangerous sulphurous rock walls of the Pâte Sablée basin. Blast obstructions, neutralise magma vents, and collect data nodes.
+                </p>
+                <div class="mt-3 border-t border-[#d4a24e]/30 pt-3 text-left">
+                    <p class="text-xs sm:text-sm text-[#61dafb] font-bold font-sans uppercase tracking-wider mb-1">PRIMARY DIRECTIVE:</p>
+                    <p class="text-xs sm:text-sm text-gray-300 font-sans leading-snug">
+                        Survive and complete 16 full color loops to gather <span class="text-white font-bold">16 Neon Frequency Nodes</span> (4x Amber, 4x Cyan, 4x Magenta, 4x Crimson) and construct the <span class="text-[#d4a24e] font-bold">Natalja's Pass Observatory</span> on the surface!
+                    </p>
+                </div>
+            </div>
+            
+            <span id="start-prompt" class="blink text-2xl text-white mt-10 cursor-pointer neon-amber border border-white/25 px-5 py-2 bg-white/5 active:bg-white/20 transition-all rounded">
                 [TAP TO INITIATE DESCENT]
             </span>
 
-            <div class="mt-10 border-t border-white/10 pt-4 w-full text-center text-sm sm:text-base text-gray-400 tracking-wider font-sans font-medium">
+            <div class="mt-8 border-t border-white/10 pt-4 w-full text-center text-xs sm:text-sm text-gray-400 tracking-wider font-sans font-medium max-w-sm">
                 <p class="mb-1"><span class="text-[#d4a24e]">DRAG:</span> Slide thumb anywhere to guide ship precisely</p>
                 <p class="mb-1"><span class="text-[#d4a24e]">SPEED:</span> Increases procedurally!</p>
-                <p class="mb-1"><span class="text-[#ff5500]">HAZARDS:</span> Scraping walls deals minor damage. Blast active side vents in 2 hits!</p>
-                <p class="text-xs text-gray-500 mt-2 italic font-normal">Synthesised chiptune soundtrack triggers dynamically</p>
+                <p class="mb-1"><span class="text-[#ff5500]">HAZARDS:</span> Scraping walls deals damage. Avoid or shoot magma spouts!</p>
+                <p class="mb-1"><span class="text-[#ff5500]">COLLECT:</span> Data nodes - these also give small health boosts</p>
+                <p class="text-xs text-gray-500 mt-2 italic font-normal">Synthesized chiptune soundtrack triggers dynamically</p>
                 <br>
-                <p class="mb-1"><a href="index.html" class="text-[#00ffff] no-underline hover:underline">RETURN TO NAHLA TRACKER</a></p>
+                <p class="mb-1"><a href="index.html" class="text-[#00ffff] no-underline hover:underline font-bold">RETURN TO NAHLA TRACKER</a></p>
             </div>
         </div>
 
@@ -164,6 +193,27 @@
             </button>
         </div>
 
+        <!-- Victory Screen Overlay -->
+        <div id="victory-screen" class="absolute inset-0 z-30 hidden flex flex-col justify-center items-center bg-black/95 p-6 text-center select-none overflow-y-auto">
+            <div class="transform -skew-x-3 border-2 border-[#d4a24e] bg-[#240e03]/80 p-5 shadow-[0_0_20px_rgba(212,162,78,0.4)] w-full max-w-sm">
+                <h1 class="text-4xl sm:text-5xl font-extrabold text-white tracking-widest uppercase text-shadow neon-amber leading-none mb-1">CONGRATULATIONS</h1>
+                <h2 class="text-xl sm:text-2xl text-[#d4a24e] font-bold tracking-wider leading-none mb-3">OBSERVATORY CONSTRUCTED!</h2>
+                <p class="text-[1.05rem] sm:text-base text-gray-300 font-sans tracking-wide leading-relaxed">
+                    You have successfully gathered all 16 Neon Frequency Nodes and established the Natalja's Pass Observatory on the surface of Pâte Sablée!
+                </p>
+            </div>
+            
+            <div class="my-5 flex flex-col gap-2 border-y border-white/10 py-4 w-full max-w-xs text-xl sm:text-2xl text-gray-300 font-sans">
+                <p class="flex justify-between"><span>DESCENT DEPTH:</span> <span id="victory-depth" class="text-white font-bold font-mono">0</span>m</p>
+                <p class="flex justify-between"><span>DATA ACQUIRED:</span> <span id="victory-data" class="text-[#61dafb] font-bold font-mono">0</span></p>
+                <p class="flex justify-between"><span>OBSERVATORY:</span> <span class="text-[#ff61c7] font-bold font-mono">16/16 NODES</span></p>
+            </div>
+
+            <span id="victory-continue-btn" class="blink text-2xl text-white mt-6 cursor-pointer neon-amber border border-white/20 bg-[#240e03] px-5 py-2.5 rounded font-mono active:bg-white/20 transition-all shadow-[0_0_10px_rgba(212,162,78,0.3)]">
+                [CONTINUE ENDLESS DESCENT]
+            </span>
+        </div>
+
         <!-- Game Over Screen Overlay -->
         <div id="game-over-screen" class="absolute inset-0 z-30 hidden flex flex-col justify-center items-center bg-black/95 p-6 text-center">
             <div class="text-[#ff4444] text-xl font-bold tracking-widest uppercase mb-1">CRITICAL FAILURE // SHIP IN REPAIR</div>
@@ -172,10 +222,11 @@
             <div class="my-5 flex flex-col gap-2 border-y border-white/10 py-4 w-full max-w-xs text-xl sm:text-2xl text-gray-300 font-sans">
                 <p class="flex justify-between"><span>DESCENT DEPTH:</span> <span id="final-depth" class="text-white font-bold font-mono">0</span>m</p>
                 <p class="flex justify-between"><span>DATA ACQUIRED:</span> <span id="final-data" class="text-[#61dafb] font-bold font-mono">0</span></p>
-                <p class="flex justify-between"><span>TERMINAL PHASE:</span> <span id="final-phase" class="text-[#ff61c7] font-bold font-mono">α</span></p>
+                <p class="flex justify-between"><span>NODES SECURED:</span> <span id="final-nodes" class="text-[#d4a24e] font-bold font-mono">0/16</span></p>
+                <p class="flex justify-between"><span>LAST NODE:</span> <span id="final-last-node" class="font-bold font-mono">NONE</span></p>
             </div>
 
-            <span id="reboot-prompt" class="blink text-2xl text-white mt-8 cursor-pointer neon-amber border border-white/20 bg-[#240e03] rounded font-mono">
+            <span id="reboot-prompt" class="blink text-2xl text-white mt-8 cursor-pointer neon-amber border border-white/20 bg-[#240e03] rounded font-mono p-3">
                 [TAP TO RESURFACE]
             </span>
         </div>
@@ -404,11 +455,48 @@
             }
         }
 
+        // Triumphant 4-note ascending synthesizer chord for Node Unlocks
+        function playTriumphantSound() {
+            try {
+                initAudioContext();
+                if (!actx || actx.state === 'suspended') return;
+                const now = actx.currentTime;
+                
+                // Pure triumphant retro chiptune arpeggio (C, E, G, C)
+                const notes = [523.25, 659.25, 783.99, 1046.50];
+                notes.forEach((freq, idx) => {
+                    const osc = actx.createOscillator();
+                    const gainNode = actx.createGain();
+                    const filter = actx.createBiquadFilter();
+                    
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(freq, now + (idx * 0.08));
+                    
+                    filter.type = 'lowpass';
+                    filter.frequency.setValueAtTime(1200, now + (idx * 0.08));
+                    
+                    gainNode.gain.setValueAtTime(0, now);
+                    gainNode.gain.linearRampToValueAtTime(0.15, now + (idx * 0.08) + 0.01);
+                    gainNode.gain.exponentialRampToValueAtTime(0.001, now + (idx * 0.08) + 0.28);
+                    
+                    osc.connect(filter);
+                    filter.connect(gainNode);
+                    gainNode.connect(actx.destination);
+                    
+                    osc.start(now + (idx * 0.08));
+                    osc.stop(now + (idx * 0.08) + 0.3);
+                });
+            } catch (e) {
+                console.warn("Failed to play triumphant node synth sound", e);
+            }
+        }
+
+        // Color frequency themes
         const THEMES = [
-            { name: 'SULPHUR', main: '#d4a24e', glow: 'rgba(212, 162, 78, 0.4)', text: '#d4a24e', background: '#120703', rimFill: '#241305' },
+            { name: 'AMBER',   main: '#d4a24e', glow: 'rgba(212, 162, 78, 0.4)', text: '#d4a24e', background: '#120703', rimFill: '#241305' },
             { name: 'CYAN',    main: '#61dafb', glow: 'rgba(97, 218, 251, 0.4)', text: '#61dafb', background: '#020d12', rimFill: '#06202b' },
             { name: 'MAGENTA', main: '#ff61c7', glow: 'rgba(255, 97, 199, 0.4)', text: '#ff61c7', background: '#0e0212', rimFill: '#26081e' },
-            { name: 'RED',     main: '#ff4444', glow: 'rgba(255, 68, 68, 0.4)',  text: '#ff4444', background: '#120202', rimFill: '#260808' }
+            { name: 'CRIMSON', main: '#ff4444', glow: 'rgba(255, 68, 68, 0.4)',  text: '#ff4444', background: '#120202', rimFill: '#260808' }
         ];
 
         const GREEK_PHASES = ['α','β','γ','δ','ε','ζ','η','θ','ι','κ','λ','μ'];
@@ -422,12 +510,18 @@
         let depth = 0;
         let dataScore = 0;
         let speed = 7.0; 
-        let visualDepth = 0;
         let shakeIntensity = 0;
 
         let currentThemeIdx = 0;
         let currentPhaseIdx = 0;
         let currentLoopIdx = 0;
+
+        // Neon Node Construction progression state
+        let completedNodes = []; // Flat tracking array: 'amber', 'cyan', 'magenta', 'crimson'
+        let victoryTriggered = false;
+        let isToastFreezing = false; // Freeze gameplay update loop during node reveal toast
+        let lastEarnedNodeName = "NONE";
+        let lastEarnedNodeColor = "#94a3b8";
 
         // Unified multi-input steering state variables
         let touchLeft = false;
@@ -616,7 +710,6 @@
             }
 
             // Procedurally spawn Active Basalt Magma Vents OFF-SCREEN below bottom
-            // Reaction buffer scales up with speed to ensure consistent 25-frame warning window
             if (frames % 140 === 0 && Math.random() > 0.3) {
                 const sideLeft = Math.random() > 0.5;
                 const ventWidth = 25 + Math.random() * 15;
@@ -697,9 +790,141 @@
             }
         }
 
+        // Handle physical rendering of the 16 Observatory frequency tracker dots in the HUD bar
+        function updateNodeDisplay() {
+            const container = document.getElementById('hud-nodes-container');
+            if (!container) return;
+            container.innerHTML = '';
+            
+            const nodeColorMap = {
+                'amber': '#d4a24e',
+                'cyan': '#61dafb',
+                'magenta': '#ff61c7',
+                'crimson': '#ff4444'
+            };
+            
+            const expectedTypes = ['amber', 'cyan', 'magenta', 'crimson'];
+            
+            for (let i = 0; i < 16; i++) {
+                const type = expectedTypes[i % 4];
+                const isCompleted = i < completedNodes.length;
+                const dot = document.createElement('div');
+                dot.className = 'w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full border transition-all duration-300';
+                
+                if (isCompleted) {
+                    dot.style.backgroundColor = nodeColorMap[type];
+                    dot.style.borderColor = nodeColorMap[type];
+                    dot.style.boxShadow = `0 0 5px ${nodeColorMap[type]}`;
+                } else {
+                    dot.style.backgroundColor = 'transparent';
+                    dot.style.borderColor = 'rgba(156, 163, 175, 0.25)';
+                }
+                container.appendChild(dot);
+            }
+            
+            const nodesCountEl = document.getElementById('hud-nodes-count');
+            if (nodesCountEl) {
+                nodesCountEl.innerText = `${completedNodes.length}/16`;
+            }
+        }
+
+        // Display glorious retro custom warning overlays on collecting a new node
+        function showNodeNotification(typeStr, colorHex, count) {
+            isToastFreezing = true; // Freeze physics loops during achievement celebration
+
+            const toast = document.getElementById('node-toast');
+            if (!toast) return;
+
+            const title = document.getElementById('toast-title');
+            const desc = document.getElementById('toast-desc');
+            const badge = document.getElementById('toast-badge');
+            const toastBtn = document.getElementById('toast-continue-btn');
+
+            if (title) {
+                title.innerText = typeStr;
+                title.style.color = colorHex;
+                title.style.textShadow = `0 0 10px ${colorHex}, 0 0 20px ${colorHex}55`;
+            }
+            
+            if (badge) {
+                badge.style.color = colorHex;
+                badge.style.borderColor = `${colorHex}55`;
+            }
+            
+            toast.style.borderColor = colorHex;
+            toast.style.boxShadow = `0 0 25px ${colorHex}44, inset 0 0 15px ${colorHex}22`;
+            
+            if (toastBtn) {
+                toastBtn.style.borderColor = colorHex;
+                toastBtn.style.textShadow = `0 0 6px ${colorHex}`;
+                toastBtn.style.boxShadow = `0 0 10px ${colorHex}44, inset 0 0 5px ${colorHex}22`;
+            }
+
+            if (desc) {
+                desc.innerHTML = `Natalja's Pass Observatory: <strong style="color: ${colorHex}">${count}/16</strong> Nodes Secure`;
+            }
+
+            // Display and animate overlay entry
+            toast.classList.remove('hidden');
+            toast.offsetHeight; // Force layout redraw trigger
+            toast.style.transform = 'translateY(0)';
+            toast.style.opacity = '1';
+
+            // High-intensity celebratory visual effects
+            spawnParticles(LOGICAL_WIDTH / 2, LOGICAL_HEIGHT / 2 + 100, 45, colorHex, 4);
+            shakeIntensity = 12; // Spectacular celebratory camera shake impact
+            playTriumphantSound(); // High-impact retro chords
+        }
+
+        // Dismiss the achievement toast and restore physical descent action
+        function dismissToast() {
+            const toast = document.getElementById('node-toast');
+            if (!toast) return;
+
+            toast.style.transform = 'translateY(-20px)';
+            toast.style.opacity = '0';
+            setTimeout(() => {
+                toast.classList.add('hidden');
+                isToastFreezing = false; // Restore gameplay action
+            }, 500);
+        }
+
+        function awardNode(themeIdx) {
+            const types = ['amber', 'cyan', 'magenta', 'crimson'];
+            const awardedType = types[themeIdx];
+            
+            if (completedNodes.length < 16) {
+                completedNodes.push(awardedType);
+                updateNodeDisplay();
+                
+                // Count current instances of this specific color to define Roman Suffix (I, II, III, IV)
+                const nodeColors = ['#d4a24e', '#61dafb', '#ff61c7', '#ff4444'];
+                const countOfType = completedNodes.filter(t => t === awardedType).length;
+                const ROMAN_NUMERALS = ["I", "II", "III", "IV"];
+                const romanSuffix = ROMAN_NUMERALS[countOfType - 1] || "I";
+                
+                // Exact proper color title (Amber, Cyan, Magenta, Crimson)
+                const capitalizedThemeName = THEMES[themeIdx].name.charAt(0).toUpperCase() + THEMES[themeIdx].name.slice(1).toLowerCase();
+                const nodeDisplayName = `${capitalizedThemeName} ${romanSuffix}`;
+                
+                lastEarnedNodeName = nodeDisplayName;
+                lastEarnedNodeColor = nodeColors[themeIdx];
+                
+                // Show physical overlay toast
+                showNodeNotification(nodeDisplayName, nodeColors[themeIdx], completedNodes.length);
+                
+                // Trigger Observatory constructed victory overlay sequence
+                if (completedNodes.length === 16 && !victoryTriggered) {
+                    setTimeout(() => {
+                        triggerVictory();
+                    }, 1000);
+                }
+            }
+        }
+
         const handleTouchStart = (e) => {
             initAudioContext();
-            if (gameState === 'GAMEOVER') return; 
+            if (gameState === 'GAMEOVER' || gameState === 'VICTORY') return; 
             if (gameState !== 'PLAYING') return;
 
             const touch = e.touches[0];
@@ -750,51 +975,88 @@
         window.addEventListener('touchmove', handleTouchMove, { passive: false });
         window.addEventListener('touchend', handleTouchEnd, { passive: false });
 
-        document.getElementById('start-prompt').addEventListener('touchstart', initGameGesture);
-        document.getElementById('start-prompt').addEventListener('click', initGameGesture);
+        // Safe, bulletproof DOM listener wrapper
+        const bindEvent = (id, event, callback) => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.addEventListener(event, callback);
+            } else {
+                console.warn(`Element with id "${id}" not found for binding "${event}".`);
+            }
+        };
 
-        document.getElementById('reboot-prompt').addEventListener('touchstart', (e) => {
+        // Attach listeners securely with fallback check validations
+        bindEvent('start-prompt', 'touchstart', initGameGesture);
+        bindEvent('start-prompt', 'click', initGameGesture);
+
+        bindEvent('reboot-prompt', 'touchstart', (e) => {
             e.preventDefault();
             initAudioContext();
             resetGame();
         });
-        document.getElementById('reboot-prompt').addEventListener('click', (e) => {
+        bindEvent('reboot-prompt', 'click', (e) => {
             e.preventDefault();
             initAudioContext();
             resetGame();
         });
 
-        document.getElementById('hud-pause-btn').addEventListener('click', (e) => {
+        bindEvent('toast-continue-btn', 'click', (e) => {
+            e.stopPropagation();
+            dismissToast();
+        });
+        bindEvent('toast-continue-btn', 'touchstart', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dismissToast();
+        });
+
+        bindEvent('victory-continue-btn', 'click', (e) => {
+            e.stopPropagation();
+            dismissVictory();
+        });
+        bindEvent('victory-continue-btn', 'touchstart', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dismissVictory();
+        });
+
+        bindEvent('hud-pause-btn', 'click', (e) => {
             e.stopPropagation();
             togglePause();
         });
-        document.getElementById('hud-pause-btn').addEventListener('touchstart', (e) => {
+        bindEvent('hud-pause-btn', 'touchstart', (e) => {
             e.preventDefault();
             e.stopPropagation();
             togglePause();
         });
 
-        document.getElementById('pause-resume-btn').addEventListener('click', (e) => {
+        bindEvent('pause-resume-btn', 'click', (e) => {
             e.stopPropagation();
             togglePause();
         });
-        document.getElementById('pause-resume-btn').addEventListener('touchstart', (e) => {
+        bindEvent('pause-resume-btn', 'touchstart', (e) => {
             e.preventDefault();
             e.stopPropagation();
             togglePause();
         });
 
-        document.getElementById('pause-quit-btn').addEventListener('click', (e) => {
+        bindEvent('pause-quit-btn', 'click', (e) => {
             e.stopPropagation();
             quitGame();
         });
-        document.getElementById('pause-quit-btn').addEventListener('touchstart', (e) => {
+        bindEvent('pause-quit-btn', 'touchstart', (e) => {
             e.preventDefault();
             e.stopPropagation();
             quitGame();
         });
 
         window.addEventListener('keydown', (e) => {
+            if (isToastFreezing) {
+                if (e.code === 'Space' || e.code === 'Enter') {
+                    dismissToast();
+                    return;
+                }
+            }
             if (gameState === 'PLAYING') {
                 if (e.code === 'ArrowLeft' || e.code === 'KeyA') touchLeft = true;
                 if (e.code === 'ArrowRight' || e.code === 'KeyD') touchRight = true;
@@ -803,6 +1065,7 @@
                 initAudioContext();
                 if (gameState === 'START') startGame();
                 else if (gameState === 'GAMEOVER') resetGame();
+                else if (gameState === 'VICTORY') dismissVictory();
             }
         });
 
@@ -813,12 +1076,27 @@
 
         function startGame() {
             gameState = 'PLAYING';
-            document.getElementById('start-screen').style.opacity = '0';
-            setTimeout(() => {
-                document.getElementById('start-screen').style.display = 'none';
-            }, 200);
-            document.getElementById('game-over-screen').style.display = 'none';
-            document.getElementById('hud').style.display = 'flex';
+            
+            const startScreen = document.getElementById('start-screen');
+            if (startScreen) {
+                startScreen.style.opacity = '0';
+                setTimeout(() => {
+                    startScreen.style.display = 'none';
+                }, 200);
+            }
+            
+            const gameOverScreen = document.getElementById('game-over-screen');
+            if (gameOverScreen) gameOverScreen.style.display = 'none';
+            
+            const victoryScreen = document.getElementById('victory-screen');
+            if (victoryScreen) victoryScreen.style.display = 'none';
+            
+            // Show HUD panels safely
+            const hudEl = document.getElementById('hud');
+            if (hudEl) hudEl.style.display = 'flex';
+            
+            const bottomHudEl = document.getElementById('bottom-hud');
+            if (bottomHudEl) bottomHudEl.style.display = 'flex';
 
             frames = 0;
             depth = 0;
@@ -834,12 +1112,19 @@
             touchMode = 'NONE';
             touchSide = 'NONE';
 
+            completedNodes = [];
+            victoryTriggered = false;
+            isToastFreezing = false;
+            lastEarnedNodeName = "NONE";
+            lastEarnedNodeColor = "#94a3b8";
+
             currentThemeIdx = 0;
             currentPhaseIdx = 0;
             currentLoopIdx = 0;
 
             initEnvironments();
             updateHUDTheme();
+            updateNodeDisplay();
 
             if (actx && actx.state === 'suspended') {
                 actx.resume();
@@ -859,14 +1144,15 @@
         }
 
         function togglePause() {
+            const pauseScreen = document.getElementById('pause-screen');
             if (gameState === 'PLAYING') {
                 gameState = 'PAUSED';
-                document.getElementById('pause-screen').style.display = 'flex';
+                if (pauseScreen) pauseScreen.style.display = 'flex';
                 if (bgm) bgm.pause();
                 stopProceduralBGM();
             } else if (gameState === 'PAUSED') {
                 gameState = 'PLAYING';
-                document.getElementById('pause-screen').style.display = 'none';
+                if (pauseScreen) pauseScreen.style.display = 'none';
                 if (bgm) bgm.play().catch(() => {});
                 startProceduralBGM();
             }
@@ -874,10 +1160,23 @@
 
         function quitGame() {
             gameState = 'START';
-            document.getElementById('pause-screen').style.display = 'none';
-            document.getElementById('start-screen').style.display = 'flex';
-            document.getElementById('start-screen').style.opacity = '1';
-            document.getElementById('hud').style.display = 'none';
+            
+            const pauseScreen = document.getElementById('pause-screen');
+            if (pauseScreen) pauseScreen.style.display = 'none';
+            
+            const startScreen = document.getElementById('start-screen');
+            if (startScreen) {
+                startScreen.style.display = 'flex';
+                startScreen.style.opacity = '1';
+            }
+            
+            // Hide HUD panels
+            const hudEl = document.getElementById('hud');
+            if (hudEl) hudEl.style.display = 'none';
+            
+            const bottomHudEl = document.getElementById('bottom-hud');
+            if (bottomHudEl) bottomHudEl.style.display = 'none';
+            
             if (bgm) bgm.pause();
             stopProceduralBGM();
         }
@@ -886,15 +1185,80 @@
             startGame();
         }
 
+        function triggerVictory() {
+            victoryTriggered = true;
+            gameState = 'VICTORY';
+            if (bgm) bgm.pause();
+            stopProceduralBGM();
+            
+            const victoryScreen = document.getElementById('victory-screen');
+            if (victoryScreen) victoryScreen.style.display = 'flex';
+            
+            const victoryDepthEl = document.getElementById('victory-depth');
+            if (victoryDepthEl) victoryDepthEl.innerText = Math.floor(depth);
+            
+            const victoryDataEl = document.getElementById('victory-data');
+            if (victoryDataEl) victoryDataEl.innerText = dataScore;
+            
+            // Hide play HUD elements to maintain absolute immersion
+            const hudEl = document.getElementById('hud');
+            if (hudEl) hudEl.style.display = 'none';
+            
+            const bottomHudEl = document.getElementById('bottom-hud');
+            if (bottomHudEl) bottomHudEl.style.display = 'none';
+        }
+
+        function dismissVictory() {
+            // Dismiss victory overlay and safely resume descent endlessly
+            gameState = 'PLAYING';
+            const victoryScreen = document.getElementById('victory-screen');
+            if (victoryScreen) victoryScreen.style.display = 'none';
+            
+            // Re-show operational HUD blocks
+            const hudEl = document.getElementById('hud');
+            if (hudEl) hudEl.style.display = 'flex';
+            
+            const bottomHudEl = document.getElementById('bottom-hud');
+            if (bottomHudEl) bottomHudEl.style.display = 'flex';
+            
+            if (bgm) {
+                bgm.play().catch(() => {
+                    startProceduralBGM();
+                });
+            } else {
+                startProceduralBGM();
+            }
+        }
+
         function triggerTermination() {
             gameState = 'GAMEOVER';
             playSound('explode');
             
-            document.getElementById('game-over-screen').style.display = 'flex';
-            document.getElementById('final-depth').innerText = Math.floor(depth);
-            document.getElementById('final-data').innerText = dataScore;
-            document.getElementById('final-phase').innerText = GREEK_PHASES[currentPhaseIdx];
-            document.getElementById('hud').style.display = 'none';
+            const gameOverScreen = document.getElementById('game-over-screen');
+            if (gameOverScreen) gameOverScreen.style.display = 'flex';
+            
+            const finalDepthEl = document.getElementById('final-depth');
+            if (finalDepthEl) finalDepthEl.innerText = Math.floor(depth);
+            
+            const finalDataEl = document.getElementById('final-data');
+            if (finalDataEl) finalDataEl.innerText = dataScore;
+            
+            const finalNodesEl = document.getElementById('final-nodes');
+            if (finalNodesEl) finalNodesEl.innerText = `${completedNodes.length}/16`;
+            
+            const lastNodeEl = document.getElementById('final-last-node');
+            if (lastNodeEl) {
+                lastNodeEl.innerText = lastEarnedNodeName;
+                lastNodeEl.style.color = lastEarnedNodeColor;
+                lastNodeEl.style.textShadow = lastEarnedNodeName !== "NONE" ? `0 0 8px ${lastEarnedNodeColor}` : "none";
+            }
+            
+            // Hide active telemetry feeds
+            const hudEl = document.getElementById('hud');
+            if (hudEl) hudEl.style.display = 'none';
+            
+            const bottomHudEl = document.getElementById('bottom-hud');
+            if (bottomHudEl) bottomHudEl.style.display = 'none';
 
             spawnParticles(rover.x + rover.width/2, rover.y + rover.height/2, 35, '#ff4444', 4);
         }
@@ -902,15 +1266,27 @@
         function updateHUDTheme() {
             const theme = THEMES[currentThemeIdx];
             const hud = document.getElementById('hud');
+            if (hud) hud.style.borderColor = theme.main;
             
-            hud.style.borderColor = theme.main;
-            document.getElementById('shield-bar').style.backgroundColor = theme.main;
-            document.getElementById('game-frame').style.borderColor = theme.main;
-            document.getElementById('game-frame').style.boxShadow = `0 0 15px ${theme.main}, inset 0 0 30px rgba(36, 14, 3, 0.8)`;
+            const shieldBar = document.getElementById('shield-bar');
+            if (shieldBar) shieldBar.style.backgroundColor = theme.main;
+            
+            const gameFrame = document.getElementById('game-frame');
+            if (gameFrame) {
+                gameFrame.style.borderColor = theme.main;
+                gameFrame.style.boxShadow = `0 0 15px ${theme.main}, inset 0 0 30px rgba(36, 14, 3, 0.8)`;
+            }
+            
+            // Re-match the bottom neon node tracker bar border to current active frequency
+            const nodesContainer = document.getElementById('hud-nodes-container');
+            if (nodesContainer && nodesContainer.parentElement) {
+                nodesContainer.parentElement.style.borderColor = theme.main;
+            }
         }
 
         function update() {
             if (gameState !== 'PLAYING') return;
+            if (isToastFreezing) return; // Freeze physics calculations during node collection toasts
 
             frames++;
             depth += 0.08 * (speed / 5);
@@ -927,6 +1303,9 @@
             }
 
             if (targetLoop !== currentLoopIdx + 1) {
+                // Award a node matching the loop frequency theme that was just completed
+                awardNode(currentThemeIdx);
+                
                 currentLoopIdx = targetLoop - 1;
                 currentThemeIdx = currentLoopIdx % THEMES.length;
                 updateHUDTheme();
@@ -1156,7 +1535,7 @@
 
                 let obsRemoved = false;
 
-                // Lasers vs Obstacles/Hazards check (Sablee rock ledges, falling boulders, and MAGMA VENTS!)
+                // Lasers vs Obstacles/Hazards check
                 for (let k = projectiles.length - 1; k >= 0; k--) {
                     let proj = projectiles[k];
                     if (proj.isMagma) continue; 
@@ -1245,7 +1624,7 @@
                     continue;
                 }
 
-                // Despawn limits (expanded to prevent dynamic high-speed vent spawns from being clipped)
+                // Despawn limits
                 if (obs.y < -120 || obs.y > LOGICAL_HEIGHT + 380) {
                     obstacles.splice(i, 1);
                 }
@@ -1285,12 +1664,23 @@
                 }
             }
 
-            document.getElementById('hud-depth').innerText = Math.floor(depth);
-            document.getElementById('hud-data').innerText = dataScore;
-            document.getElementById('hud-phase').innerText = GREEK_PHASES[currentPhaseIdx];
-            document.getElementById('hud-loop').innerText = currentLoopIdx + 1;
-            document.getElementById('hud-speed').innerText = (speed * 11).toFixed(0);
-            document.getElementById('shield-bar').style.width = rover.shield + '%';
+            const hudDepthEl = document.getElementById('hud-depth');
+            if (hudDepthEl) hudDepthEl.innerText = Math.floor(depth);
+            
+            const hudDataEl = document.getElementById('hud-data');
+            if (hudDataEl) hudDataEl.innerText = dataScore;
+            
+            const hudPhaseEl = document.getElementById('hud-phase');
+            if (hudPhaseEl) hudPhaseEl.innerText = GREEK_PHASES[currentPhaseIdx];
+            
+            const hudLoopEl = document.getElementById('hud-loop');
+            if (hudLoopEl) hudLoopEl.innerText = currentLoopIdx + 1;
+            
+            const hudSpeedEl = document.getElementById('hud-speed');
+            if (hudSpeedEl) hudSpeedEl.innerText = (speed * 11).toFixed(0);
+            
+            const shieldBar = document.getElementById('shield-bar');
+            if (shieldBar) shieldBar.style.width = rover.shield + '%';
         }
 
         function draw() {
@@ -1368,7 +1758,6 @@
             ctx.save();
             // Subtle parallax vertical scrolling relative to depth
             const rimScrollY = (depth * 0.4) % 12;
-            // Lowered the background crater rim base to 480px (down 50px from 430px)
             const rimBaseY = 480 + rimScrollY; 
             
             // Draw filled colored rim silhouette (inherits thematic coloring)
