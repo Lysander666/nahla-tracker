@@ -135,7 +135,7 @@
             <div class="mt-10 border-t border-white/10 pt-4 w-full text-center text-sm sm:text-base text-gray-400 tracking-wider font-sans font-medium">
                 <p class="mb-1"><span class="text-[#d4a24e]">DRAG:</span> Slide thumb anywhere to guide ship precisely</p>
                 <p class="mb-1"><span class="text-[#d4a24e]">STEER:</span> Or tap/hold left or right side of screen</p>
-                <p class="mb-1"><span class="text-[#ff5500]">HAZARDS:</span> Volcanic side vents erupt instantly but can be blasted in 2 hits!</p>
+                <p class="mb-1"><span class="text-[#ff5500]">HAZARDS:</span> Scraping walls deals minor damage. Blast active side vents in 2 hits!</p>
                 <p class="text-xs text-gray-500 mt-2 italic font-normal">Synthesized chiptune soundtrack triggers dynamically</p>
             </div>
         </div>
@@ -390,10 +390,10 @@
         }
 
         const THEMES = [
-            { name: 'SULPHUR', main: '#d4a24e', glow: 'rgba(212, 162, 78, 0.4)', text: '#d4a24e', background: '#120703' },
-            { name: 'CYAN',    main: '#61dafb', glow: 'rgba(97, 218, 251, 0.4)', text: '#61dafb', background: '#020d12' },
-            { name: 'MAGENTA', main: '#ff61c7', glow: 'rgba(255, 97, 199, 0.4)', text: '#ff61c7', background: '#0e0212' },
-            { name: 'RED',     main: '#ff4444', glow: 'rgba(255, 68, 68, 0.4)',  text: '#ff4444', background: '#120202' }
+            { name: 'SULPHUR', main: '#d4a24e', glow: 'rgba(212, 162, 78, 0.4)', text: '#d4a24e', background: '#120703', rimFill: '#241305' },
+            { name: 'CYAN',    main: '#61dafb', glow: 'rgba(97, 218, 251, 0.4)', text: '#61dafb', background: '#020d12', rimFill: '#06202b' },
+            { name: 'MAGENTA', main: '#ff61c7', glow: 'rgba(255, 97, 199, 0.4)', text: '#ff61c7', background: '#0e0212', rimFill: '#26081e' },
+            { name: 'RED',     main: '#ff4444', glow: 'rgba(255, 68, 68, 0.4)',  text: '#ff4444', background: '#120202', rimFill: '#260808' }
         ];
 
         const GREEK_PHASES = ['α','β','γ','δ','ε','ζ','η','θ','ι','κ','λ','μ'];
@@ -586,9 +586,6 @@
                 });
             }
         }
-
-        let vaporHeight = LOGICAL_HEIGHT + 20;
-        let maxVaporAdvance = LOGICAL_HEIGHT - 120; 
 
         function generateVerticalSpawns() {
             if (frames % 90 === 0) {
@@ -838,7 +835,6 @@
             currentThemeIdx = 0;
             currentPhaseIdx = 0;
             currentLoopIdx = 0;
-            vaporHeight = LOGICAL_HEIGHT + 100;
 
             initEnvironments();
             updateHUDTheme();
@@ -852,9 +848,8 @@
                 bgm.currentTime = 0;
                 bgm.play().then(() => {
                     stopProceduralBGM(); // kill synthesized track if user file loaded successfully
-                }).catch((err) => {
-                    console.log('Background Audio file deferred. Launching procedural sequencer loop.', err);
-                    startProceduralBGM();
+                }).catch(() => {
+                    startProceduralBGM(); // fallback to synth engine
                 });
             } else {
                 startProceduralBGM();
@@ -938,6 +933,8 @@
                 speed += 1.2; 
             }
 
+            const theme = THEMES[currentThemeIdx];
+
             // High Precision Movement Interpolation Architecture
             if (touchMode === 'DRAGGING') {
                 const minX = CHASM_L + 4;
@@ -962,13 +959,49 @@
             rover.x += rover.vx;
 
             const buffer = 4;
-            if (rover.x < CHASM_L + buffer) {
+            let scrapDamage = 0;
+
+            if (rover.x <= CHASM_L + buffer) {
                 rover.x = CHASM_L + buffer;
+                if (rover.vx < -1.5) {
+                    // Impact wall damage relative to velocity
+                    scrapDamage = Math.min(12, Math.abs(rover.vx) * 1.5);
+                    shakeIntensity = Math.max(shakeIntensity, 3);
+                    playSound('hit');
+                    spawnParticles(CHASM_L, rover.y + rover.height/2, 6, theme.main, 2);
+                } else if (Math.abs(rover.vx) > 0.1) {
+                    // Minor wall scraping sparks
+                    if (frames % 4 === 0) {
+                        spawnParticles(CHASM_L, rover.y + rover.height/2, 2, theme.main, 1.5);
+                    }
+                    scrapDamage = 0.1; // Minimal scrape damage
+                }
+                rover.vx = 0;
+            } else if (rover.x >= CHASM_R - rover.width - buffer) {
+                rover.x = CHASM_R - rover.width - buffer;
+                if (rover.vx > 1.5) {
+                    // Impact wall damage relative to velocity
+                    scrapDamage = Math.min(12, Math.abs(rover.vx) * 1.5);
+                    shakeIntensity = Math.max(shakeIntensity, 3);
+                    playSound('hit');
+                    spawnParticles(CHASM_R, rover.y + rover.height/2, 6, theme.main, 2);
+                } else if (Math.abs(rover.vx) > 0.1) {
+                    // Minor wall scraping sparks
+                    if (frames % 4 === 0) {
+                        spawnParticles(CHASM_R, rover.y + rover.height/2, 2, theme.main, 1.5);
+                    }
+                    scrapDamage = 0.1; // Minimal scrape damage
+                }
                 rover.vx = 0;
             }
-            if (rover.x > CHASM_R - rover.width - buffer) {
-                rover.x = CHASM_R - rover.width - buffer;
-                rover.vx = 0;
+
+            if (scrapDamage > 0) {
+                rover.shield -= scrapDamage;
+                if (rover.shield <= 0) {
+                    rover.shield = 0;
+                    triggerTermination();
+                    return;
+                }
             }
 
             if (frames - rover.lastShot >= rover.shotCooldown) {
@@ -1184,8 +1217,6 @@
                     rover.vx = (rover.x + rover.width/2 < obs.x + obs.width/2) ? -6 : 6;
                     obstacles.splice(i, 1); 
 
-                    vaporHeight -= 35;
-
                     if (rover.shield <= 0) {
                         triggerTermination();
                         return;
@@ -1231,19 +1262,6 @@
                 if (p.life <= 0) {
                     particles.splice(i, 1);
                 }
-            }
-
-            const normalVaporY = LOGICAL_HEIGHT - 30 - (Math.sin(frames * 0.04) * 8);
-            vaporHeight += (normalVaporY - vaporHeight) * 0.035;
-
-            if (vaporHeight < maxVaporAdvance) {
-                vaporHeight = maxVaporAdvance;
-            }
-
-            if (vaporHeight <= rover.y + rover.height + 5) {
-                rover.shield = 0;
-                triggerTermination();
-                return;
             }
 
             document.getElementById('hud-depth').innerText = Math.floor(depth);
@@ -1326,6 +1344,46 @@
 
             ctx.restore();
 
+            ctx.save();
+            // Subtle parallax vertical scrolling relative to depth
+            const rimScrollY = (depth * 0.4) % 12;
+            const rimBaseY = 530 + rimScrollY; 
+            
+            // Draw filled colored rim silhouette (inherits thematic coloring)
+            ctx.fillStyle = theme.rimFill; 
+            ctx.beginPath();
+            ctx.moveTo(0, LOGICAL_HEIGHT);
+            ctx.lineTo(0, rimBaseY);
+            
+            for (let x = 0; x <= LOGICAL_WIDTH; x += 8) {
+                // Dip in center to look like a giant crater basin rim
+                const dx = (x - LOGICAL_WIDTH / 2) / (LOGICAL_WIDTH / 2);
+                const dip = dx * dx * 32; 
+                // Jagged rocky peaks
+                const rockNoise = Math.sin(x * 0.12) * 5 + Math.cos(x * 0.28) * 2;
+                ctx.lineTo(x, rimBaseY - dip + rockNoise);
+            }
+            ctx.lineTo(LOGICAL_WIDTH, LOGICAL_HEIGHT);
+            ctx.closePath();
+            ctx.fill();
+
+            // Draw glowing atmospheric rim edge (matching loops theme color)
+            ctx.strokeStyle = theme.main;
+            ctx.globalAlpha = 0.35;
+            ctx.lineWidth = 2.5;
+            ctx.shadowColor = theme.main;
+            ctx.shadowBlur = 6;
+            ctx.beginPath();
+            for (let x = 0; x <= LOGICAL_WIDTH; x += 8) {
+                const dx = (x - LOGICAL_WIDTH / 2) / (LOGICAL_WIDTH / 2);
+                const dip = dx * dx * 32;
+                const rockNoise = Math.sin(x * 0.12) * 5 + Math.cos(x * 0.28) * 2;
+                if (x === 0) ctx.moveTo(x, rimBaseY - dip + rockNoise);
+                else ctx.lineTo(x, rimBaseY - dip + rockNoise);
+            }
+            ctx.stroke();
+            ctx.restore();
+
             ctx.fillStyle = '#0a0301';
             ctx.beginPath();
             ctx.moveTo(0, 0);
@@ -1376,11 +1434,10 @@
                 let evalY = y - wallScroll;
                 let globalY = evalY + (depth * 10);
                 let noiseX = (CHASM_R + 3) - Math.sin(globalY * 0.05 + 1.5) * 8 - Math.sin(globalY * 0.16) * 4;
-                ctx.lineTo(noiseX, evalY);
+                ctx.lineTo(LOGICAL_WIDTH, LOGICAL_HEIGHT);
+                ctx.closePath();
+                ctx.fill();
             }
-            ctx.lineTo(LOGICAL_WIDTH, LOGICAL_HEIGHT);
-            ctx.closePath();
-            ctx.fill();
 
             ctx.strokeStyle = '#291104';
             ctx.lineWidth = 1.5;
@@ -1670,27 +1727,6 @@
                 ctx.fillStyle = p.color || '#aaa';
                 ctx.fillRect(p.x, p.y, p.size, p.size);
             });
-
-            const vaporGrad = ctx.createLinearGradient(0, vaporHeight, 0, LOGICAL_HEIGHT);
-            vaporGrad.addColorStop(0, 'rgba(212, 162, 78, 0)');
-            vaporGrad.addColorStop(0.2, 'rgba(212, 162, 78, 0.45)');
-            vaporGrad.addColorStop(0.5, 'rgba(36, 14, 3, 0.85)');
-            vaporGrad.addColorStop(1, '#1c0a02');
-            ctx.fillStyle = vaporGrad;
-            ctx.fillRect(CHASM_L, vaporHeight, CHASM_R - CHASM_L, LOGICAL_HEIGHT - vaporHeight);
-
-            ctx.strokeStyle = '#d4a24e';
-            ctx.lineWidth = 2;
-            ctx.shadowColor = '#d4a24e';
-            ctx.shadowBlur = 12;
-            ctx.beginPath();
-            ctx.moveTo(CHASM_L, vaporHeight);
-            for (let x = CHASM_L; x <= CHASM_R; x += 15) {
-                const wave = Math.sin((frames * 0.05) + (x * 0.1)) * 4;
-                ctx.lineTo(x, vaporHeight + wave);
-            }
-            ctx.stroke();
-            ctx.shadowBlur = 0;
 
             ctx.restore(); // Restores camera screen shake coordinate space
         }
