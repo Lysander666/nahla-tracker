@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Sulphur Run: Pâte Sablée Descent V0.3</title>
+    <title>Sulphur Run: Pâte Sablée Descent V0.4</title>
     
     <!-- External Web Fonts for Retro/Sci-Fi Styling -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=VT323&display=swap">
@@ -122,7 +122,7 @@
         <div id="start-screen" class="absolute inset-0 z-30 flex flex-col justify-center items-center bg-black/90 p-6 text-center select-none">
             <div class="transform -skew-x-3 border-2 border-[#d4a24e] bg-[#240e03]/80 p-5 shadow-[0_0_20px_rgba(212,162,78,0.4)]">
                 <h1 class="text-4xl sm:text-5xl font-extrabold text-white tracking-widest uppercase text-shadow neon-amber leading-none mb-1">SULPHUR RUN</h1>
-                <h2 class="text-xl sm:text-2xl text-[#d4a24e] font-bold tracking-wider leading-none mb-3">PÂTE SABLÉE DESCENT v0.3</h2>
+                <h2 class="text-xl sm:text-2xl text-[#d4a24e] font-bold tracking-wider leading-none mb-3">PÂTE SABLÉE DESCENT v0.4</h2>
                 <p class="text-[1.1rem] sm:text-lg text-gray-300 font-sans tracking-wide leading-relaxed">
                     Navigate the vertical, crumbly silicate walls of the ancient Pâte Sablée basin. Blast obstructions, neutralize magma vents, and collect data nodes!
                 </p>
@@ -687,17 +687,16 @@
             if (gameState === 'GAMEOVER') return; 
             if (gameState !== 'PLAYING') return;
 
-            const rect = canvas.getBoundingClientRect();
             const touch = e.touches[0];
             
             // Record initial touch coordinates for high-precision sliding reference
             touchStartClientX = touch.clientX;
             touchStartRoverX = rover.x;
             
-            // fallback tap checking side of screen
-            const touchPercent = (touch.clientX - rect.left) / rect.width;
-            touchSide = touchPercent < 0.5 ? 'LEFT' : 'RIGHT';
-            touchMode = 'TAP_HOLD';
+            // Re-center targetX instantly on the ship's current position to guarantee absolutely NO sharp veering
+            rover.targetX = rover.x;
+            touchMode = 'DRAGGING';
+            touchSide = 'NONE';
         };
 
         const handleTouchMove = (e) => {
@@ -705,36 +704,24 @@
             const touch = e.touches[0];
             const deltaX = touch.clientX - touchStartClientX;
 
-            // Trigger dragging mode if thumb moves beyond an 8px threshold
-            if (touchMode !== 'DRAGGING' && Math.abs(deltaX) > 8) {
-                touchMode = 'DRAGGING';
-            }
-
-            if (touchMode === 'DRAGGING') {
-                const rect = canvas.getBoundingClientRect();
-                const scaleX = LOGICAL_WIDTH / rect.width;
-                // Perfect 1:1 movement relative to original starting touchpoint
-                rover.targetX = touchStartRoverX + deltaX * scaleX;
-            } else {
-                // If they are static or barely moving, track basic tap half
-                const rect = canvas.getBoundingClientRect();
-                const touchPercent = (touch.clientX - rect.left) / rect.width;
-                touchSide = touchPercent < 0.5 ? 'LEFT' : 'RIGHT';
-            }
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = LOGICAL_WIDTH / rect.width;
+            
+            // Perfect 1:1 movement relative to original starting touchpoint
+            rover.targetX = touchStartRoverX + deltaX * scaleX;
         };
 
         const handleTouchEnd = (e) => {
             if (e.touches.length === 0) {
                 touchMode = 'NONE';
                 touchSide = 'NONE';
+                rover.vx = 0; // Seamlessly decay speed to zero on finger lift
             } else {
                 // Re-calculate drag origins for remaining touches
                 const touch = e.touches[0];
                 touchStartClientX = touch.clientX;
                 touchStartRoverX = rover.x;
-                const rect = canvas.getBoundingClientRect();
-                const touchPercent = (touch.clientX - rect.left) / rect.width;
-                touchSide = touchPercent < 0.5 ? 'LEFT' : 'RIGHT';
+                rover.targetX = rover.x;
             }
         };
 
@@ -789,7 +776,7 @@
         document.getElementById('pause-quit-btn').addEventListener('touchstart', (e) => {
             e.preventDefault();
             e.stopPropagation();
-            quitGame();
+            togglePause();
         });
 
         window.addEventListener('keydown', (e) => {
@@ -946,9 +933,9 @@
                 rover.vx = diff * 0.32; 
             } else {
                 let targetVx = 0;
-                if (touchSide === 'LEFT' || touchLeft) {
+                if (touchLeft) {
                     targetVx = -6.5; 
-                } else if (touchSide === 'RIGHT' || touchRight) {
+                } else if (touchRight) {
                     targetVx = 6.5;  
                 }
 
@@ -1088,7 +1075,6 @@
 
             projectiles = projectiles.filter(p => !p.destroyed);
 
-            // Obstacles, Magma Vents, and Avalanche Boulders Update Cycle
             for (let i = obstacles.length - 1; i >= 0; i--) {
                 let obs = obstacles[i];
                 
@@ -1347,7 +1333,8 @@
             ctx.save();
             // Subtle parallax vertical scrolling relative to depth
             const rimScrollY = (depth * 0.4) % 12;
-            const rimBaseY = 430 + rimScrollY; 
+            // Lowered the background crater rim base to 480px (down 50px from 430px)
+            const rimBaseY = 480 + rimScrollY; 
             
             // Draw filled colored rim silhouette (inherits thematic coloring)
             ctx.fillStyle = theme.rimFill; 
