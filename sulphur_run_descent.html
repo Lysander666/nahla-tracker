@@ -440,7 +440,8 @@
                     vy: 11,
                     size: 3,
                     height: 12,
-                    isMagma: false
+                    isMagma: false,
+                    destroyed: false
                 });
                 projectiles.push({
                     x: this.x + this.width - 9,
@@ -448,7 +449,8 @@
                     vy: 11,
                     size: 3,
                     height: 12,
-                    isMagma: false
+                    isMagma: false,
+                    destroyed: false
                 });
                 playSound('shoot');
             }
@@ -907,13 +909,14 @@
             }
 
             // Laser Defense Check: Can player shoot down magma orbs?
-            for (let i = projectiles.length - 1; i >= 0; i--) {
+            // Use deferred destruction to prevent out-of-bounds index errors when splicing in active loops
+            for (let i = 0; i < projectiles.length; i++) {
                 let p1 = projectiles[i];
-                if (p1.isMagma) continue; // Skip if it's already a hazard orb
+                if (!p1 || p1.isMagma || p1.destroyed) continue;
 
-                for (let j = projectiles.length - 1; j >= 0; j--) {
+                for (let j = 0; j < projectiles.length; j++) {
                     let p2 = projectiles[j];
-                    if (!p2.isMagma) continue; // Skip if it's not a hazard orb
+                    if (!p2 || !p2.isMagma || p2.destroyed) continue;
 
                     const dx = p1.x - p2.x;
                     const dy = p1.y - p2.y;
@@ -924,17 +927,15 @@
                         spawnParticles(p2.x, p2.y, 8, '#ff5500', 2);
                         playSound('hit');
                         
-                        if (j > i) {
-                            projectiles.splice(j, 1);
-                            projectiles.splice(i, 1);
-                        } else {
-                            projectiles.splice(i, 1);
-                            projectiles.splice(j, 1);
-                        }
-                        break;
+                        p1.destroyed = true;
+                        p2.destroyed = true;
+                        break; // Stop checking this laser projectile since it has been vaporized
                     }
                 }
             }
+
+            // Filter out destroyed projectiles
+            projectiles = projectiles.filter(p => !p.destroyed);
 
             // Obstacles & Magma Vents Update Cycle
             for (let i = obstacles.length - 1; i >= 0; i--) {
@@ -982,7 +983,8 @@
                                 vy: 0.8,
                                 size: 6,
                                 height: 6,
-                                isMagma: true
+                                isMagma: true,
+                                destroyed: false
                             });
                             playSound('hit');
                         }
@@ -1453,7 +1455,7 @@
                     ctx.fillStyle = coreColor;
                     ctx.beginPath();
                     const veinX = obs.side === 'LEFT' ? CHASM_L + obs.width - 6 : CHASM_R - obs.width;
-                    ctx.fillRect(veinx = veinX, obs.y + obs.height / 2 - 3, 6, 6);
+                    ctx.fillRect(veinX, obs.y + obs.height / 2 - 3, 6, 6);
 
                     // Jagged cracks for basalt rock texture
                     ctx.strokeStyle = '#2d0c00';
