@@ -160,7 +160,7 @@
                 <p class="flex justify-between"><span>TERMINAL PHASE:</span> <span id="final-phase" class="text-[#ff61c7] font-bold font-mono">α</span></p>
             </div>
 
-            <span id="reboot-prompt" class="blink text-2xl text-white mt-8 cursor-pointer neon-amber border border-white/20 px-4 py-2 bg-[#240e03] rounded font-mono">
+            <span id="reboot-prompt" class="blink text-2xl text-white mt-8 cursor-pointer neon-amber border border-white/20 bg-[#240e03] rounded font-mono">
                 [TAP TO REBOOT COMPASS]
             </span>
         </div>
@@ -776,7 +776,7 @@
         document.getElementById('pause-quit-btn').addEventListener('touchstart', (e) => {
             e.preventDefault();
             e.stopPropagation();
-            togglePause();
+            quitGame();
         });
 
         window.addEventListener('keydown', (e) => {
