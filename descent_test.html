@@ -1,0 +1,1877 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    
+    <!-- Desktop Redirect Handler -->
+    <script>
+        (function() {
+            // Detect mobile devices using User Agent, touch capabilities, and screen size
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) 
+                || (navigator.maxTouchPoints > 0) 
+                || (window.matchMedia("(max-width: 1024px)").matches);
+                
+            if (!isMobile) {
+                window.location.href = "sulphur_run.html";
+            }
+        })();
+    </script>
+
+    <title>Sulphur Run: Pâte Sablée Descent V0.53</title>
+    
+    <!-- External Web Fonts for Retro/Sci-Fi Styling -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=VT323&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap">
+    
+    <!-- Tailwind CSS for modern design and structural overlays -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <style>
+        body {
+            font-family: 'VT323', monospace;
+            background-color: #0d0602;
+            overflow: hidden;
+            touch-action: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        /* Responsive game wrapper forcing portrait 9:16 aspect ratio on desktops, full screen on mobile */
+        #game-frame {
+            position: relative;
+            aspect-ratio: 9/16;
+            width: 100%;
+            max-width: 480px;
+            max-height: 100vh;
+            border: 2px solid #d4a24e;
+            box-shadow: 
+                0 0 15px rgba(212, 162, 78, 0.4), 
+                inset 0 0 30px rgba(36, 14, 3, 0.8);
+            background-color: #120703;
+            overflow: hidden;
+        }
+
+        /* Fix canvas to scale smoothly with CSS while keeping logical resolution intact */
+        #gameCanvas {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        /* Scanline CRT Arcade Filter Overlay */
+        #game-frame::after {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.15) 50%);
+            background-size: 100% 4px;
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        .blink {
+            animation: blinker 0.8s steps(2, start) infinite;
+        }
+        @keyframes blinker {
+            50% { opacity: 0; }
+        }
+
+        /* Smooth continuous gradient animations for hot atmospheric sulfur chasm */
+        @keyframes amberPulse {
+            0% { text-shadow: 0 0 5px #d4a24e, 0 0 10px rgba(212, 162, 78, 0.4); }
+            50% { text-shadow: 0 0 15px #ffb347, 0 0 25px rgba(255, 179, 71, 0.7); }
+            100% { text-shadow: 0 0 5px #d4a24e, 0 0 10px rgba(212, 162, 78, 0.4); }
+        }
+        .neon-amber {
+            animation: amberPulse 2s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center h-full w-full p-0 sm:p-4">
+
+    <div id="game-frame" class="flex flex-col justify-between w-full h-full max-h-[100dvh]">
+        
+        <!-- Game Canvas covering background -->
+        <canvas id="gameCanvas" class="absolute inset-0 w-full h-full block z-0"></canvas>
+        
+        <!-- AUDIO TAG linking to BGM file (Fallback to Synth Loop if not loaded) -->
+        <audio id="bgm" loop preload="auto"></audio>
+
+        <!-- Floating Portrait HUD Layer -->
+        <div id="hud" class="absolute top-4 left-4 right-4 z-20 hidden pointer-events-none flex flex-col gap-1 text-[1.2rem] sm:text-[1.4rem]">
+            <!-- Primary Telemetry Grid -->
+            <div class="flex justify-between items-center bg-black/80 border-l-4 border-[#d4a24e] px-3 py-1.5 shadow-md pointer-events-auto">
+                <div class="text-[#d4a24e]">
+                    DPTH: <span id="hud-depth" class="text-white font-bold">0</span>m
+                </div>
+                <div class="text-white">
+                    DATA: <span id="hud-data" class="text-[#61dafb]">0</span>
+                </div>
+                <!-- Interactive Pause Button on HUD -->
+                <button id="hud-pause-btn" class="bg-[#240e03] border border-[#d4a24e]/50 px-2.5 py-0.5 rounded text-xs text-[#d4a24e] hover:bg-[#d4a24e]/20 active:bg-[#d4a24e]/40 transition-all font-sans">
+                    PAUSE
+                </button>
+            </div>
+            
+            <!-- Secondary Telemetry (Loop, Health & Speed) -->
+            <div class="flex justify-between items-center text-[1.1rem] bg-black/70 px-3 py-1">
+                <div class="text-gray-400">
+                    LOOP: <span id="hud-loop" class="text-[#d4a24e]">1</span> (<span id="hud-phase" class="text-[#61dafb] font-bold">α</span>)
+                </div>
+                <!-- Mini Hull Integrity Bar -->
+                <div class="flex items-center gap-2">
+                    <span class="text-[#ff4444] text-xs font-sans">SHIELD</span>
+                    <div class="w-16 bg-gray-800 h-2 border border-[#ff4444]/50 rounded overflow-hidden">
+                        <div id="shield-bar" class="bg-[#ff4444] h-full w-full transition-all duration-150"></div>
+                    </div>
+                </div>
+                <div class="text-gray-400">
+                    SPD: <span id="hud-speed" class="text-white">0</span> km/h
+                </div>
+            </div>
+        </div>
+
+        <!-- Start Game Screen Overlay -->
+        <div id="start-screen" class="absolute inset-0 z-30 flex flex-col justify-center items-center bg-black/90 p-6 text-center select-none">
+            <div class="transform -skew-x-3 border-2 border-[#d4a24e] bg-[#240e03]/80 p-5 shadow-[0_0_20px_rgba(212,162,78,0.4)]">
+                <h1 class="text-4xl sm:text-5xl font-extrabold text-white tracking-widest uppercase text-shadow neon-amber leading-none mb-1">SULPHUR RUN</h1>
+                <h2 class="text-xl sm:text-2xl text-[#d4a24e] font-bold tracking-wider leading-none mb-3">PÂTE SABLÉE DESCENT v0.53</h2>
+                <p class="text-[1.1rem] sm:text-lg text-gray-300 font-sans tracking-wide leading-relaxed">
+                    Navigate the vertical, crumbly silicate walls of the ancient Pâte Sablée basin. Blast obstructions, neutralize magma vents, and collect data nodes!
+                </p>
+            </div>
+
+            <span id="start-prompt" class="blink text-2xl text-white mt-12 cursor-pointer neon-amber border border-white/25 px-4 py-2 bg-white/5 active:bg-white/20 transition-all rounded">
+                [TAP TO INITIATE DESCENT]
+            </span>
+
+            <div class="mt-10 border-t border-white/10 pt-4 w-full text-center text-sm sm:text-base text-gray-400 tracking-wider font-sans font-medium">
+                <p class="mb-1"><span class="text-[#d4a24e]">DRAG:</span> Slide thumb anywhere to guide ship precisely</p>
+                <p class="mb-1"><span class="text-[#d4a24e]">STEER:</span> Or tap/hold left or right side of screen</p>
+                <p class="mb-1"><span class="text-[#ff5500]">HAZARDS:</span> Scraping walls deals minor damage. Blast active side vents in 2 hits!</p>
+                <p class="text-xs text-gray-500 mt-2 italic font-normal">Synthesized chiptune soundtrack triggers dynamically</p>
+            </div>
+        </div>
+
+        <!-- Pause Screen Overlay -->
+        <div id="pause-screen" class="absolute inset-0 z-30 hidden flex flex-col justify-center items-center bg-black/85 text-center">
+            <h1 class="text-5xl text-white font-bold tracking-widest neon-amber transform -skew-x-3 mb-4">DESCENT PAUSED</h1>
+            <button id="pause-resume-btn" class="blink text-2xl text-gray-300 border border-white/20 px-4 py-2 bg-white/5 rounded active:bg-white/20 transition-all">[TAP TO RESUME]</button>
+            <button id="pause-quit-btn" class="mt-8 px-5 py-2 border border-[#ff4444] text-[#ff4444] text-lg hover:bg-[#ff4444]/10 rounded transform -skew-x-3 transition-all pointer-events-auto">
+                ABORT SIMULATION
+            </button>
+        </div>
+
+        <!-- Game Over Screen Overlay -->
+        <div id="game-over-screen" class="absolute inset-0 z-30 hidden flex flex-col justify-center items-center bg-black/95 p-6 text-center">
+            <div class="text-[#ff4444] text-xl font-bold tracking-widest uppercase mb-1">CRITICAL FAILURE // CORE MELTDOWN</div>
+            <h1 class="text-4xl sm:text-5xl text-white font-extrabold transform -skew-x-3 text-shadow leading-none mb-4" style="text-shadow: 0 0 10px #ff4444;">MODULE TERMINATED</h1>
+            
+            <div class="my-5 flex flex-col gap-2 border-y border-white/10 py-4 w-full max-w-xs text-xl sm:text-2xl text-gray-300 font-sans">
+                <p class="flex justify-between"><span>DESCENT DEPTH:</span> <span id="final-depth" class="text-white font-bold font-mono">0</span>m</p>
+                <p class="flex justify-between"><span>DATA ACQUIRED:</span> <span id="final-data" class="text-[#61dafb] font-bold font-mono">0</span></p>
+                <p class="flex justify-between"><span>TERMINAL PHASE:</span> <span id="final-phase" class="text-[#ff61c7] font-bold font-mono">α</span></p>
+            </div>
+
+            <span id="reboot-prompt" class="blink text-2xl text-white mt-8 cursor-pointer neon-amber border border-white/20 bg-[#240e03] rounded font-mono">
+                [TAP TO REBOOT COMPASS]
+            </span>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Fixed logical dimensions to keep game mechanics and coordinates perfectly stable
+        const LOGICAL_WIDTH = 360;
+        const LOGICAL_HEIGHT = 640;
+
+        // BGM Soundtrack file mapping
+        const MUSIC_FILE = 'nahla_theme.mp3';
+        const bgm = document.getElementById('bgm');
+        if (bgm) {
+            bgm.src = MUSIC_FILE;
+            bgm.volume = 0.45;
+        }
+
+        // Lock internal resolution; CSS will responsive-scale it dynamically
+        function resizeCanvas() {
+            canvas.width = LOGICAL_WIDTH;
+            canvas.height = LOGICAL_HEIGHT;
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        window.addEventListener('orientationchange', () => {
+            setTimeout(resizeCanvas, 200);
+        });
+        window.addEventListener('load', resizeCanvas);
+        resizeCanvas();
+
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        let actx = null;
+        let lastShootSoundTime = 0; 
+        let lastExplodeSoundTime = 0;
+        let bgmInterval = null;
+        let bgmStep = 0;
+
+        const BGM_NOTES = [48, 48, 51, 48, 55, 48, 58, 51, 53, 53, 56, 53, 60, 53, 63, 56];
+        const BGM_MELODY = [0, 0, 72, 0, 75, 74, 0, 79, 0, 82, 80, 79, 75, 0, 74, 72];
+
+        function playBGMStep() {
+            if (!actx || actx.state === 'suspended' || (gameState !== 'PLAYING' && gameState !== 'GAMEOVER')) return;
+            const now = actx.currentTime;
+
+            // Synthesis 1: Retro Bass Synth Channel
+            const bassOsc = actx.createOscillator();
+            const bassGain = actx.createGain();
+            const bassFilter = actx.createBiquadFilter();
+
+            bassOsc.type = 'sawtooth';
+            const bassNote = BGM_NOTES[bgmStep % BGM_NOTES.length];
+            const bassFreq = Math.pow(2, (bassNote - 69) / 12) * 440;
+            bassOsc.frequency.setValueAtTime(bassFreq, now);
+
+            bassFilter.type = 'lowpass';
+            bassFilter.frequency.setValueAtTime(280, now);
+
+            bassGain.gain.setValueAtTime(0.06, now);
+            bassGain.gain.exponentialRampToValueAtTime(0.001, now + 0.16);
+
+            bassOsc.connect(bassFilter);
+            bassFilter.connect(bassGain);
+            bassGain.connect(actx.destination);
+
+            bassOsc.start(now);
+            bassOsc.stop(now + 0.18);
+
+            // Synthesis 2: Chiptune Lead melody channel
+            const melNote = BGM_MELODY[bgmStep % BGM_MELODY.length];
+            if (melNote > 0) {
+                const melOsc = actx.createOscillator();
+                const melGain = actx.createGain();
+                const melFilter = actx.createBiquadFilter();
+
+                melOsc.type = 'triangle';
+                const melFreq = Math.pow(2, (melNote - 69) / 12) * 440;
+                melOsc.frequency.setValueAtTime(melFreq, now);
+
+                melFilter.type = 'bandpass';
+                melFilter.frequency.setValueAtTime(1200, now);
+
+                melGain.gain.setValueAtTime(0.02, now);
+                melGain.gain.exponentialRampToValueAtTime(0.001, now + 0.28);
+
+                melOsc.connect(melFilter);
+                melFilter.connect(melGain);
+                melGain.connect(actx.destination);
+
+                melOsc.start(now);
+                melOsc.stop(now + 0.3);
+            }
+
+            bgmStep++;
+        }
+
+        function startProceduralBGM() {
+            stopProceduralBGM();
+            // 150 BPM matches a step interval of 100ms for high-energy descent action
+            bgmInterval = setInterval(playBGMStep, 100);
+        }
+
+        function stopProceduralBGM() {
+            if (bgmInterval) {
+                clearInterval(bgmInterval);
+                bgmInterval = null;
+            }
+        }
+
+        function initAudioContext() {
+            try {
+                if (!actx) {
+                    actx = new AudioContext();
+                }
+                if (actx.state === 'suspended') {
+                    actx.resume();
+                }
+                // Try playing BGM file first, otherwise initiate the procedural synth engine
+                if (bgm && bgm.paused && gameState === 'PLAYING') {
+                    bgm.play().then(() => {
+                        stopProceduralBGM(); // file worked, kill synth
+                    }).catch(() => {
+                        startProceduralBGM(); // fallback to synth engine
+                    });
+                }
+            } catch (e) {
+                console.warn("AudioContext initialization blocked by browser security.", e);
+            }
+        }
+
+        function playSound(type) {
+            try {
+                initAudioContext();
+                if (!actx || actx.state === 'suspended') return;
+
+                const now = actx.currentTime;
+
+                // Time-throttle sound playbacks to protect browser threads without lock leaks
+                if (type === 'shoot') {
+                    if (now - lastShootSoundTime < 0.12) return; 
+                    lastShootSoundTime = now;
+                }
+                if (type === 'explode' || type === 'shield-break') {
+                    if (now - lastExplodeSoundTime < 0.10) return;
+                    lastExplodeSoundTime = now;
+                }
+
+                const osc = actx.createOscillator();
+                const gainNode = actx.createGain();
+                const filterNode = actx.createBiquadFilter();
+
+                osc.connect(filterNode);
+                filterNode.connect(gainNode);
+                gainNode.connect(actx.destination);
+
+                osc.onended = () => {
+                    try {
+                        osc.disconnect();
+                        filterNode.disconnect();
+                        gainNode.disconnect();
+                    } catch (e) {}
+                };
+
+                let duration = 0.15;
+
+                switch (type) {
+                    case 'shoot':
+                        osc.type = 'triangle';
+                        osc.frequency.setValueAtTime(450, now);
+                        osc.frequency.exponentialRampToValueAtTime(80, now + 0.08);
+                        filterNode.type = 'lowpass';
+                        filterNode.frequency.setValueAtTime(900, now);
+                        gainNode.gain.setValueAtTime(0.08, now);
+                        gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+                        duration = 0.08;
+                        break;
+                    case 'explode':
+                        osc.type = 'sawtooth';
+                        osc.frequency.setValueAtTime(100, now);
+                        osc.frequency.linearRampToValueAtTime(10, now + 0.3);
+                        filterNode.type = 'lowpass';
+                        filterNode.frequency.setValueAtTime(250, now);
+                        gainNode.gain.setValueAtTime(0.3, now);
+                        gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+                        duration = 0.3;
+                        break;
+                    case 'hit':
+                        osc.type = 'sawtooth';
+                        osc.frequency.setValueAtTime(180, now);
+                        osc.frequency.linearRampToValueAtTime(30, now + 0.2);
+                        filterNode.type = 'bandpass';
+                        filterNode.frequency.setValueAtTime(350, now);
+                        gainNode.gain.setValueAtTime(0.18, now);
+                        gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+                        duration = 0.2;
+                        break;
+                    case 'collect':
+                        osc.type = 'sine';
+                        osc.frequency.setValueAtTime(550, now);
+                        osc.frequency.linearRampToValueAtTime(1100, now + 0.12);
+                        filterNode.type = 'highpass';
+                        filterNode.frequency.setValueAtTime(700, now);
+                        gainNode.gain.setValueAtTime(0.12, now);
+                        gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+                        duration = 0.12;
+                        break;
+                    case 'shield-break':
+                        osc.type = 'sawtooth';
+                        osc.frequency.setValueAtTime(280, now);
+                        osc.frequency.exponentialRampToValueAtTime(40, now + 0.35);
+                        filterNode.type = 'notch';
+                        filterNode.frequency.setValueAtTime(130, now);
+                        gainNode.gain.setValueAtTime(0.25, now);
+                        gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+                        duration = 0.35;
+                        break;
+                }
+
+                osc.start(now);
+                osc.stop(now + duration);
+            } catch (err) {
+                console.warn("WebAudio API encountered sandbox block.", err);
+            }
+        }
+
+        const THEMES = [
+            { name: 'SULPHUR', main: '#d4a24e', glow: 'rgba(212, 162, 78, 0.4)', text: '#d4a24e', background: '#120703', rimFill: '#241305' },
+            { name: 'CYAN',    main: '#61dafb', glow: 'rgba(97, 218, 251, 0.4)', text: '#61dafb', background: '#020d12', rimFill: '#06202b' },
+            { name: 'MAGENTA', main: '#ff61c7', glow: 'rgba(255, 97, 199, 0.4)', text: '#ff61c7', background: '#0e0212', rimFill: '#26081e' },
+            { name: 'RED',     main: '#ff4444', glow: 'rgba(255, 68, 68, 0.4)',  text: '#ff4444', background: '#120202', rimFill: '#260808' }
+        ];
+
+        const GREEK_PHASES = ['α','β','γ','δ','ε','ζ','η','θ','ι','κ','λ','μ'];
+        const POINTS_PER_PHASE = 120;
+
+        const CHASM_L = 40;
+        const CHASM_R = LOGICAL_WIDTH - CHASM_L;
+
+        let gameState = 'START';
+        let frames = 0;
+        let depth = 0;
+        let dataScore = 0;
+        let speed = 7.0; 
+        let visualDepth = 0;
+        let shakeIntensity = 0;
+
+        let currentThemeIdx = 0;
+        let currentPhaseIdx = 0;
+        let currentLoopIdx = 0;
+
+        // Unified multi-input steering state variables
+        let touchLeft = false;
+        let touchRight = false;
+        
+        let touchStartClientX = 0;
+        let touchStartRoverX = 0;
+        let touchMode = 'NONE'; // Modes: 'NONE', 'TAP_HOLD', 'DRAGGING'
+        let touchSide = 'NONE'; // Sides: 'NONE', 'LEFT', 'RIGHT'
+
+        const rover = {
+            x: LOGICAL_WIDTH / 2 - 16,
+            y: 110, 
+            width: 32,
+            height: 20,
+            vx: 0,
+            angle: 0,
+            shield: 100, 
+            lastShot: 0,
+            shotCooldown: 10,
+            targetX: LOGICAL_WIDTH / 2 - 16, // High precision coordinate target
+
+            draw: function() {
+                ctx.save();
+                ctx.translate(this.x + this.width/2, this.y + this.height/2);
+
+                this.angle = this.vx * 0.04;
+                ctx.rotate(this.angle);
+
+                const theme = THEMES[currentThemeIdx];
+
+                ctx.fillStyle = '#121214'; 
+                ctx.beginPath();
+                ctx.moveTo(-16, -6);
+                ctx.lineTo(-22, -1);
+                ctx.lineTo(-12, 5);
+                ctx.closePath();
+                ctx.fill();
+
+                ctx.beginPath();
+                ctx.moveTo(16, -6);
+                ctx.lineTo(22, -1);
+                ctx.lineTo(12, 5);
+                ctx.closePath();
+                ctx.fill();
+
+                ctx.fillStyle = theme.main;
+                ctx.shadowColor = theme.main;
+                ctx.shadowBlur = 10;
+                ctx.fillRect(-8, -11, 4, 3);
+                ctx.fillRect(4, -11, 4, 3);
+                ctx.shadowBlur = 0;
+
+                ctx.fillStyle = '#27272a';
+                ctx.beginPath();
+                ctx.moveTo(-10, -8); 
+                ctx.lineTo(10, -8);  
+                ctx.lineTo(7, 3);    
+                ctx.lineTo(0, 11);   
+                ctx.lineTo(-7, 3);   
+                ctx.closePath();
+                ctx.fill();
+
+                ctx.fillStyle = '#3f3f46';
+                ctx.beginPath();
+                ctx.moveTo(-7, -8);
+                ctx.lineTo(-10, -8);
+                ctx.lineTo(-7, 3);
+                ctx.closePath();
+                ctx.fill();
+
+                ctx.beginPath();
+                ctx.moveTo(7, -8);
+                ctx.lineTo(10, -8);
+                ctx.lineTo(7, 3);
+                ctx.closePath();
+                ctx.fill();
+
+                ctx.fillStyle = theme.main;
+                ctx.shadowColor = theme.main;
+                ctx.shadowBlur = 8;
+                ctx.beginPath();
+                ctx.moveTo(-3, -4);
+                ctx.lineTo(3, -4);
+                ctx.lineTo(1.5, 1);
+                ctx.lineTo(0, 4);
+                ctx.lineTo(-1.5, 1);
+                ctx.closePath();
+                ctx.fill();
+                ctx.shadowBlur = 0;
+
+                ctx.fillStyle = '#18181b';
+                ctx.fillRect(-13, -1, 2, 8);
+                ctx.fillRect(11, -1, 2, 8);
+
+                ctx.restore();
+            },
+
+            shoot: function() {
+                // Front primary weapons (dual downward plasma beams)
+                projectiles.push({
+                    x: this.x + 6,
+                    y: this.y + this.height,
+                    vy: 11,
+                    size: 3,
+                    height: 12,
+                    isMagma: false,
+                    isProbeRound: false,
+                    destroyed: false,
+                    isUpward: false
+                });
+                projectiles.push({
+                    x: this.x + this.width - 9,
+                    y: this.y + this.height,
+                    vy: 11,
+                    size: 3,
+                    height: 12,
+                    isMagma: false,
+                    isProbeRound: false,
+                    destroyed: false,
+                    isUpward: false
+                });
+
+                // Rear sweep weapon (single upward defensive pulse targeting crumble avalanches)
+                projectiles.push({
+                    x: this.x + this.width / 2 - 1,
+                    y: this.y - 2,
+                    vy: -9,
+                    size: 2,
+                    height: 8,
+                    isMagma: false,
+                    isProbeRound: false,
+                    destroyed: false,
+                    isUpward: true
+                });
+
+                playSound('shoot');
+            }
+        };
+
+        let obstacles = [];
+        let particles = [];
+        let projectiles = [];
+        let collectibles = [];
+        let starfield = [];
+        let backgroundSabléeDust = [];
+
+        function initEnvironments() {
+            obstacles = [];
+            particles = [];
+            projectiles = [];
+            collectibles = [];
+            starfield = [];
+            backgroundSabléeDust = [];
+
+            for (let i = 0; i < 60; i++) {
+                starfield.push({
+                    x: Math.random() * LOGICAL_WIDTH,
+                    y: Math.random() * LOGICAL_HEIGHT,
+                    speed: 0.8 + Math.random() * 2.2,
+                    size: 0.5 + Math.random() * 1.5,
+                    alpha: 0.2 + Math.random() * 0.8
+                });
+            }
+
+            for (let i = 0; i < 25; i++) {
+                backgroundSabléeDust.push({
+                    x: CHASM_L + Math.random() * (CHASM_R - CHASM_L),
+                    y: Math.random() * LOGICAL_HEIGHT,
+                    speed: 1.5 + Math.random() * 2.5,
+                    size: 2 + Math.random() * 4,
+                    angle: Math.random() * Math.PI,
+                    rotSpeed: (Math.random() - 0.5) * 0.05
+                });
+            }
+        }
+
+        function generateVerticalSpawns() {
+            if (frames % 90 === 0) {
+                const layout = Math.random();
+                if (layout < 0.35) {
+                    obstacles.push(createObstacle(CHASM_L, LOGICAL_HEIGHT, 110, 20, 'SABLEE', 3));
+                } else if (layout < 0.7) {
+                    obstacles.push(createObstacle(CHASM_R - 110, LOGICAL_HEIGHT, 110, 20, 'SABLEE', 3));
+                } else {
+                    obstacles.push(createObstacle(CHASM_L, LOGICAL_HEIGHT, 70, 20, 'SABLEE', 2));
+                    obstacles.push(createObstacle(CHASM_R - 70, LOGICAL_HEIGHT, 70, 20, 'SABLEE', 2));
+                }
+            }
+
+            // Procedurally spawn Active Basalt Magma Vents OFF-SCREEN below bottom
+            if (frames % 140 === 0 && Math.random() > 0.3) {
+                const sideLeft = Math.random() > 0.5;
+                const ventWidth = 25 + Math.random() * 15;
+                const ventHeight = 35 + Math.random() * 15;
+                const spawnOffset = speed * 13.5; 
+
+                obstacles.push({
+                    x: sideLeft ? CHASM_L : CHASM_R - ventWidth,
+                    y: LOGICAL_HEIGHT + spawnOffset, 
+                    width: ventWidth,
+                    height: ventHeight,
+                    type: 'VENT', 
+                    side: sideLeft ? 'LEFT' : 'RIGHT',
+                    ventState: 'ERUPTING', // Instantly erupt on entry!
+                    hp: 2,                 // Destroyable in 2 precise laser hits!
+                    maxHp: 2,
+                    hitFlash: 0
+                });
+            }
+
+            // Procedurally spawn Crumble Avalanche basalt boulders from top (falling down behind player)
+            if (frames % 160 === 0 && Math.random() > 0.4) {
+                const boulderSize = 16 + Math.random() * 10;
+                obstacles.push({
+                    x: CHASM_L + 20 + Math.random() * (CHASM_R - CHASM_L - 40 - boulderSize),
+                    y: -50, // Falling from top of chasm
+                    width: boulderSize,
+                    height: boulderSize,
+                    type: 'BOULDER',
+                    hp: 2,
+                    maxHp: 2,
+                    vy: 3 + Math.random() * 3.5, // Velocity falling downward relative to viewport
+                    hitFlash: 0
+                });
+            }
+
+            // Hunter Probes only appear starting on Loop 5 (Once completing SULPHUR -> CYAN -> MAGENTA -> RED full loop cycle)
+            if (currentLoopIdx >= 4 && frames % 180 === 0 && Math.random() > 0.4) {
+                const probeSize = 24;
+                obstacles.push({
+                    x: CHASM_L + 20 + Math.random() * (CHASM_R - CHASM_L - 40 - probeSize),
+                    y: LOGICAL_HEIGHT + 20, // Rises from the bottom
+                    width: probeSize,
+                    height: probeSize,
+                    type: 'PROBE', // Elite security probe
+                    hp: 2,
+                    maxHp: 2,
+                    hitFlash: 0,
+                    lastShot: 0,
+                    shootCooldown: 80 + Math.random() * 50
+                });
+            }
+
+            if (frames % 80 === 0) {
+                const nodeRand = Math.random();
+                let val = 40;
+                let col = '#61dafb'; 
+
+                if (nodeRand > 0.88) {
+                    val = 100;
+                    col = '#d4a24e'; 
+                } else if (nodeRand > 0.65) {
+                    val = 70;
+                    col = '#ff61c7'; 
+                }
+
+                collectibles.push({
+                    x: CHASM_L + 20 + Math.random() * (CHASM_R - CHASM_L - 40),
+                    y: LOGICAL_HEIGHT + 10,
+                    size: 8,
+                    value: val,
+                    color: col,
+                    pulse: Math.random() * Math.PI
+                });
+            }
+        }
+
+        function createObstacle(x, y, w, h, type, hp) {
+            return {
+                x: x, y: y, width: w, height: h, type: type, hp: hp, maxHp: hp, hitFlash: 0
+            };
+        }
+
+        function spawnParticles(x, y, count, color, customSize) {
+            for (let i = 0; i < count; i++) {
+                particles.push({
+                    x: x,
+                    y: y,
+                    vx: (Math.random() - 0.5) * 6,
+                    vy: (Math.random() - 0.5) * 6 - 2,
+                    size: customSize || (1 + Math.random() * 3),
+                    color: color,
+                    life: 20 + Math.random() * 20
+                });
+            }
+        }
+
+        const handleTouchStart = (e) => {
+            initAudioContext();
+            if (gameState === 'GAMEOVER') return; 
+            if (gameState !== 'PLAYING') return;
+
+            const touch = e.touches[0];
+            
+            // Record initial touch coordinates for high-precision sliding reference
+            touchStartClientX = touch.clientX;
+            touchStartRoverX = rover.x;
+            
+            // Re-center targetX instantly on the ship's current position to guarantee absolutely NO sharp veering
+            rover.targetX = rover.x;
+            touchMode = 'DRAGGING';
+            touchSide = 'NONE';
+        };
+
+        const handleTouchMove = (e) => {
+            if (gameState !== 'PLAYING') return;
+            const touch = e.touches[0];
+            const deltaX = touch.clientX - touchStartClientX;
+
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = LOGICAL_WIDTH / rect.width;
+            
+            // Perfect 1:1 movement relative to original starting touchpoint
+            rover.targetX = touchStartRoverX + deltaX * scaleX;
+        };
+
+        const handleTouchEnd = (e) => {
+            if (e.touches.length === 0) {
+                touchMode = 'NONE';
+                touchSide = 'NONE';
+                rover.vx = 0; // Seamlessly decay speed to zero on finger lift
+            } else {
+                // Re-calculate drag origins for remaining touches
+                const touch = e.touches[0];
+                touchStartClientX = touch.clientX;
+                touchStartRoverX = rover.x;
+                rover.targetX = rover.x;
+            }
+        };
+
+        const initGameGesture = (e) => {
+            if (e) e.preventDefault();
+            initAudioContext();
+            if (gameState === 'START') startGame();
+        };
+
+        window.addEventListener('touchstart', handleTouchStart, { passive: false });
+        window.addEventListener('touchmove', handleTouchMove, { passive: false });
+        window.addEventListener('touchend', handleTouchEnd, { passive: false });
+
+        document.getElementById('start-prompt').addEventListener('touchstart', initGameGesture);
+        document.getElementById('start-prompt').addEventListener('click', initGameGesture);
+
+        document.getElementById('reboot-prompt').addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            initAudioContext();
+            resetGame();
+        });
+        document.getElementById('reboot-prompt').addEventListener('click', (e) => {
+            e.preventDefault();
+            initAudioContext();
+            resetGame();
+        });
+
+        document.getElementById('hud-pause-btn').addEventListener('click', (e) => {
+            e.stopPropagation();
+            togglePause();
+        });
+        document.getElementById('hud-pause-btn').addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            togglePause();
+        });
+
+        document.getElementById('pause-resume-btn').addEventListener('click', (e) => {
+            e.stopPropagation();
+            togglePause();
+        });
+        document.getElementById('pause-resume-btn').addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            togglePause();
+        });
+
+        document.getElementById('pause-quit-btn').addEventListener('click', (e) => {
+            e.stopPropagation();
+            quitGame();
+        });
+        document.getElementById('pause-quit-btn').addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            quitGame();
+        });
+
+        window.addEventListener('keydown', (e) => {
+            if (gameState === 'PLAYING') {
+                if (e.code === 'ArrowLeft' || e.code === 'KeyA') touchLeft = true;
+                if (e.code === 'ArrowRight' || e.code === 'KeyD') touchRight = true;
+                if (e.code === 'KeyP') togglePause();
+            } else if (e.code === 'Space' || e.code === 'Enter') {
+                initAudioContext();
+                if (gameState === 'START') startGame();
+                else if (gameState === 'GAMEOVER') resetGame();
+            }
+        });
+
+        window.addEventListener('keyup', (e) => {
+            if (e.code === 'ArrowLeft' || e.code === 'KeyA') touchLeft = false;
+            if (e.code === 'ArrowRight' || e.code === 'KeyD') touchRight = false;
+        });
+
+        function startGame() {
+            gameState = 'PLAYING';
+            document.getElementById('start-screen').style.opacity = '0';
+            setTimeout(() => {
+                document.getElementById('start-screen').style.display = 'none';
+            }, 200);
+            document.getElementById('game-over-screen').style.display = 'none';
+            document.getElementById('hud').style.display = 'flex';
+
+            frames = 0;
+            depth = 0;
+            dataScore = 0;
+            speed = 7.0;
+            rover.shield = 100;
+            rover.x = LOGICAL_WIDTH / 2 - 16;
+            rover.targetX = rover.x;
+            rover.vx = 0;
+            rover.lastShot = 0; 
+            shakeIntensity = 0;
+
+            touchMode = 'NONE';
+            touchSide = 'NONE';
+
+            currentThemeIdx = 0;
+            currentPhaseIdx = 0;
+            currentLoopIdx = 0;
+
+            initEnvironments();
+            updateHUDTheme();
+
+            if (actx && actx.state === 'suspended') {
+                actx.resume();
+            }
+
+            // Fire up both fallback audio routines
+            if (bgm) {
+                bgm.currentTime = 0;
+                bgm.play().then(() => {
+                    stopProceduralBGM(); // kill synthesized track if user file loaded successfully
+                }).catch(() => {
+                    startProceduralBGM(); // fallback to synth engine
+                });
+            } else {
+                startProceduralBGM();
+            }
+        }
+
+        function togglePause() {
+            if (gameState === 'PLAYING') {
+                gameState = 'PAUSED';
+                document.getElementById('pause-screen').style.display = 'flex';
+                if (bgm) bgm.pause();
+                stopProceduralBGM();
+            } else if (gameState === 'PAUSED') {
+                gameState = 'PLAYING';
+                document.getElementById('pause-screen').style.display = 'none';
+                if (bgm) bgm.play().catch(() => {});
+                startProceduralBGM();
+            }
+        }
+
+        function quitGame() {
+            gameState = 'START';
+            document.getElementById('pause-screen').style.display = 'none';
+            document.getElementById('start-screen').style.display = 'flex';
+            document.getElementById('start-screen').style.opacity = '1';
+            document.getElementById('hud').style.display = 'none';
+            if (bgm) bgm.pause();
+            stopProceduralBGM();
+        }
+
+        function resetGame() {
+            startGame();
+        }
+
+        function triggerTermination() {
+            gameState = 'GAMEOVER';
+            playSound('explode');
+            
+            document.getElementById('game-over-screen').style.display = 'flex';
+            document.getElementById('final-depth').innerText = Math.floor(depth);
+            document.getElementById('final-data').innerText = dataScore;
+            document.getElementById('final-phase').innerText = GREEK_PHASES[currentPhaseIdx];
+            document.getElementById('hud').style.display = 'none';
+
+            spawnParticles(rover.x + rover.width/2, rover.y + rover.height/2, 35, '#ff4444', 4);
+        }
+
+        function updateHUDTheme() {
+            const theme = THEMES[currentThemeIdx];
+            const hud = document.getElementById('hud');
+            
+            hud.style.borderColor = theme.main;
+            document.getElementById('shield-bar').style.backgroundColor = theme.main;
+            document.getElementById('game-frame').style.borderColor = theme.main;
+            document.getElementById('game-frame').style.boxShadow = `0 0 15px ${theme.main}, inset 0 0 30px rgba(36, 14, 3, 0.8)`;
+        }
+
+        function update() {
+            if (gameState !== 'PLAYING') return;
+
+            frames++;
+            depth += 0.08 * (speed / 5);
+
+            if (frames % 220 === 0) speed += 0.1;
+
+            const rawPhases = Math.floor(dataScore / POINTS_PER_PHASE);
+            const targetPhase = rawPhases % 12;
+            const targetLoop = Math.floor(rawPhases / 12) + 1;
+
+            if (targetPhase !== currentPhaseIdx) {
+                currentPhaseIdx = targetPhase;
+                playSound('collect');
+            }
+
+            if (targetLoop !== currentLoopIdx + 1) {
+                currentLoopIdx = targetLoop - 1;
+                currentThemeIdx = currentLoopIdx % THEMES.length;
+                updateHUDTheme();
+                speed += 1.2; 
+            }
+
+            const theme = THEMES[currentThemeIdx];
+
+            // High Precision Movement Interpolation Architecture
+            let isDraggingTooFarLeft = false;
+            let isDraggingTooFarRight = false;
+
+            if (touchMode === 'DRAGGING') {
+                const minX = CHASM_L + 4;
+                const maxX = CHASM_R - rover.width - 4;
+                
+                // Track if the player is actively pulling/swiping past wall boundaries
+                if (rover.targetX < minX) {
+                    rover.targetX = minX;
+                    if (rover.x <= minX + 1) {
+                        isDraggingTooFarLeft = true;
+                    }
+                }
+                if (rover.targetX > maxX) {
+                    rover.targetX = maxX;
+                    if (rover.x >= maxX - 1) {
+                        isDraggingTooFarRight = true;
+                    }
+                }
+
+                let diff = rover.targetX - rover.x;
+                rover.vx = diff * 0.32; 
+            } else {
+                let targetVx = 0;
+                if (touchLeft) {
+                    targetVx = -6.5; 
+                } else if (touchRight) {
+                    targetVx = 6.5;  
+                }
+
+                rover.vx += (targetVx - rover.vx) * 0.22;
+                rover.targetX = rover.x; 
+            }
+
+            rover.x += rover.vx;
+
+            const buffer = 4;
+            let scrapDamage = 0;
+
+            // Trigger collisions or wall scraping visual/audio response
+            if (rover.x <= CHASM_L + buffer || isDraggingTooFarLeft) {
+                if (rover.x <= CHASM_L + buffer) {
+                    rover.x = CHASM_L + buffer;
+                }
+                if (rover.vx < -0.5 && !isDraggingTooFarLeft) {
+                    // Impact wall damage relative to velocity
+                    scrapDamage = Math.min(12, Math.abs(rover.vx) * 1.5);
+                    shakeIntensity = Math.max(shakeIntensity, 3);
+                    playSound('hit');
+                    spawnParticles(CHASM_L, rover.y + rover.height/2, 6, theme.main, 2);
+                } else {
+                    // Minor wall scraping sparks
+                    if (frames % 4 === 0) {
+                        spawnParticles(CHASM_L, rover.y + rover.height/2, 2, theme.main, 1.5);
+                    }
+                    scrapDamage = 0.2; // Reliable minimal scrape damage
+                }
+                // Dampen velocity away from the wall instead of resetting hard to 0
+                rover.vx = Math.max(0, rover.vx * -0.2);
+            } else if (rover.x >= CHASM_R - rover.width - buffer || isDraggingTooFarRight) {
+                if (rover.x >= CHASM_R - rover.width - buffer) {
+                    rover.x = CHASM_R - rover.width - buffer;
+                }
+                if (rover.vx > 0.5 && !isDraggingTooFarRight) {
+                    // Impact wall damage relative to velocity
+                    scrapDamage = Math.min(12, Math.abs(rover.vx) * 1.5);
+                    shakeIntensity = Math.max(shakeIntensity, 3);
+                    playSound('hit');
+                    spawnParticles(CHASM_R, rover.y + rover.height/2, 6, theme.main, 2);
+                } else {
+                    // Minor wall scraping sparks
+                    if (frames % 4 === 0) {
+                        spawnParticles(CHASM_R, rover.y + rover.height/2, 2, theme.main, 1.5);
+                    }
+                    scrapDamage = 0.2; // Reliable minimal scrape damage
+                }
+                // Dampen velocity away from the wall instead of resetting hard to 0
+                rover.vx = Math.min(0, rover.vx * -0.2);
+            }
+
+            if (scrapDamage > 0) {
+                rover.shield -= scrapDamage;
+                if (rover.shield <= 0) {
+                    rover.shield = 0;
+                    triggerTermination();
+                    return;
+                }
+            }
+
+            if (frames - rover.lastShot >= rover.shotCooldown) {
+                rover.lastShot = frames;
+                rover.shoot();
+            }
+
+            generateVerticalSpawns();
+
+            starfield.forEach(star => {
+                star.y -= star.speed * (speed * 0.15);
+                if (star.y < 0) {
+                    star.y = LOGICAL_HEIGHT;
+                    star.x = Math.random() * LOGICAL_WIDTH;
+                }
+            });
+
+            backgroundSabléeDust.forEach(crumb => {
+                crumb.y -= crumb.speed * (speed * 0.12);
+                crumb.angle += crumb.rotSpeed;
+                if (crumb.y < -20) {
+                    crumb.y = LOGICAL_HEIGHT + 20;
+                    crumb.x = CHASM_L + Math.random() * (CHASM_R - CHASM_L);
+                }
+            });
+
+            // Update Projectile Coordinates (Player Lasers, Magma Orbs & security Probe Rounds)
+            for (let i = projectiles.length - 1; i >= 0; i--) {
+                let p = projectiles[i];
+                
+                if (p.isMagma) {
+                    p.x += p.vx;
+                    p.y += p.vy - (speed * 0.15); // Drift down slightly with the scrolling descent
+                    
+                    // Collision check with player ship
+                    const dx = (rover.x + rover.width/2) - p.x;
+                    const dy = (rover.y + rover.height/2) - p.y;
+                    const dist = Math.sqrt(dx*dx + dy*dy);
+                    
+                    if (dist < 18) {
+                        rover.shield -= 15; 
+                        playSound('shield-break');
+                        shakeIntensity = Math.max(shakeIntensity, 4); // Apply soft screen rumble
+                        spawnParticles(p.x, p.y, 8, '#ff3300', 3);
+                        projectiles.splice(i, 1);
+                        continue;
+                    }
+
+                    if (p.y > LOGICAL_HEIGHT + 20 || p.y < -20 || p.x < CHASM_L - 10 || p.x > CHASM_R + 10) {
+                        projectiles.splice(i, 1);
+                    }
+                } else if (p.isProbeRound) {
+                    p.y += p.vy; // Fired upward towards the ship (vy < 0)
+                    
+                    // Collision check with player ship
+                    const dx = (rover.x + rover.width/2) - p.x;
+                    const dy = (rover.y + rover.height/2) - p.y;
+                    const dist = Math.sqrt(dx*dx + dy*dy);
+                    
+                    if (dist < 16) {
+                        rover.shield -= 8; // Minimal damage from security rounds
+                        playSound('hit');
+                        spawnParticles(p.x, p.y, 6, '#ff3333', 2);
+                        projectiles.splice(i, 1);
+                        continue;
+                    }
+
+                    if (p.y < -20 || p.y > LOGICAL_HEIGHT + 20) {
+                        projectiles.splice(i, 1);
+                    }
+                } else {
+                    // Standard player laser beams
+                    p.y += p.vy; // Fired downward (vy > 0) or upward (vy < 0)
+                    if (p.y > LOGICAL_HEIGHT + 20 || p.y < -20) {
+                        projectiles.splice(i, 1);
+                    }
+                }
+            }
+
+            // Laser Defense Check: Can player shoot down magma orbs or security probe rounds?
+            for (let i = 0; i < projectiles.length; i++) {
+                let p1 = projectiles[i];
+                if (!p1 || p1.isMagma || p1.isProbeRound || p1.destroyed) continue;
+
+                for (let j = 0; j < projectiles.length; j++) {
+                    let p2 = projectiles[j];
+                    if (!p2 || (!p2.isMagma && !p2.isProbeRound) || p2.destroyed) continue;
+
+                    const dx = p1.x - p2.x;
+                    const dy = p1.y - p2.y;
+                    const dist = Math.sqrt(dx*dx + dy*dy);
+                    
+                    if (dist < 14) {
+                        spawnParticles(p2.x, p2.y, 8, p2.isProbeRound ? '#ff3333' : '#ff5500', 2);
+                        playSound('hit');
+                        
+                        p1.destroyed = true;
+                        p2.destroyed = true;
+                        break; 
+                    }
+                }
+            }
+
+            projectiles = projectiles.filter(p => !p.destroyed);
+
+            for (let i = obstacles.length - 1; i >= 0; i--) {
+                let obs = obstacles[i];
+                
+                // Static entities scroll upward as player plunges
+                if (obs.type !== 'BOULDER' && obs.type !== 'PROBE') {
+                    obs.y -= speed * 0.55; 
+                } else if (obs.type === 'BOULDER') {
+                    // Falling basalt boulder hazard moves downward relative to scroll frame rate
+                    obs.y += obs.vy; 
+                } else if (obs.type === 'PROBE') {
+                    // Floating hunter probe rises from the bottom of the screen
+                    obs.y -= (speed * 0.55 + 1.2);
+                    
+                    // Tracks player lateral movement
+                    obs.x += ((rover.x + rover.width/2 - obs.width/2) - obs.x) * 0.015;
+                    
+                    // Keep the probe strictly inside canyon limits
+                    const minX = CHASM_L + 6;
+                    const maxX = CHASM_R - obs.width - 6;
+                    if (obs.x < minX) obs.x = minX;
+                    if (obs.x > maxX) obs.x = maxX;
+
+                    // Periodic shooting up towards player
+                    if (frames - obs.lastShot >= obs.shootCooldown && obs.y < LOGICAL_HEIGHT && obs.y > rover.y + rover.height) {
+                        obs.lastShot = frames;
+                        projectiles.push({
+                            x: obs.x + obs.width / 2,
+                            y: obs.y,
+                            vx: 0,
+                            vy: -5,
+                            size: 4,
+                            height: 4,
+                            isMagma: false,
+                            isProbeRound: true,
+                            destroyed: false
+                        });
+                        playSound('hit');
+                    }
+                }
+
+                // Run Magma Vent continuous eruption engine
+                if (obs.type === 'VENT') {
+                    // Spray active thermal particles if near/on screen
+                    if (frames % 6 === 0 && obs.y < LOGICAL_HEIGHT + 20 && obs.y > -50) {
+                        const sprayVx = obs.side === 'LEFT' ? (1.5 + Math.random() * 2) : (-1.5 - Math.random() * 2);
+                        particles.push({
+                            x: obs.side === 'LEFT' ? obs.x + obs.width : obs.x,
+                            y: obs.y + obs.height / 2,
+                            vx: sprayVx,
+                            vy: (Math.random() - 0.5) * 1.5 - (speed * 0.1),
+                            size: 2 + Math.random() * 2.5,
+                            color: Math.random() > 0.4 ? '#ff5500' : '#ffaa00',
+                            life: 20 + Math.random() * 15
+                        });
+                    }
+
+                    // Release lethal magma projectiles actively
+                    if (frames % 25 === 0 && obs.y < LOGICAL_HEIGHT && obs.y > -20) {
+                        const orbVx = obs.side === 'LEFT' ? 3.5 : -3.5;
+                        projectiles.push({
+                            x: obs.side === 'LEFT' ? obs.x + obs.width : obs.x,
+                            y: obs.y + obs.height / 2,
+                            vx: orbVx,
+                            vy: 0.8,
+                            size: 6,
+                            height: 6,
+                            isMagma: true,
+                            isProbeRound: false,
+                            destroyed: false
+                        });
+                        playSound('hit');
+                    }
+                }
+
+                let obsRemoved = false;
+
+                // Lasers vs Obstacles/Hazards check (Sablee rock ledges, falling boulders, MAGMA VENTS, and PROBES!)
+                for (let k = projectiles.length - 1; k >= 0; k--) {
+                    let proj = projectiles[k];
+                    if (proj.isMagma || proj.isProbeRound) continue; 
+
+                    // Check bounds for breakable hazards
+                    if (proj.x > obs.x && proj.x < obs.x + obs.width &&
+                        proj.y > obs.y && proj.y < obs.y + obs.height) {
+                        
+                        if (obs.type === 'SABLEE' || obs.type === 'BOULDER' || obs.type === 'VENT' || obs.type === 'PROBE') {
+                            obs.hp--;
+                            obs.hitFlash = 5; // Flash white on hit
+                            projectiles.splice(k, 1);
+                            playSound('hit');
+
+                            let particleColor = '#ffca7a';
+                            if (obs.type === 'BOULDER') particleColor = '#5a5c61';
+                            else if (obs.type === 'VENT') particleColor = '#ff5500';
+                            else if (obs.type === 'PROBE') particleColor = '#ff3333';
+
+                            spawnParticles(proj.x, obs.y + obs.height/2, 6, particleColor, 3);
+
+                            if (obs.hp <= 0) {
+                                playSound('explode');
+                                if (obs.type === 'BOULDER') {
+                                    dataScore += 25; // High reward for clearing debris avalanches
+                                    spawnParticles(obs.x + obs.width/2, obs.y + obs.height/2, 18, '#3c3d40', 4);
+                                } else if (obs.type === 'VENT') {
+                                    dataScore += 35; // Neutralizing highly active volcanic magma vent!
+                                    spawnParticles(obs.x + obs.width/2, obs.y + obs.height/2, 25, '#ff3c00', 4);
+                                } else if (obs.type === 'PROBE') {
+                                    dataScore += 50; // Elite hunter probe neutralize bonus
+                                    spawnParticles(obs.x + obs.width/2, obs.y + obs.height/2, 16, '#ff2222', 3.5);
+                                } else {
+                                    dataScore += 15;
+                                    spawnParticles(obs.x + obs.width/2, obs.y + obs.height/2, 20, '#d4a24e', 4);
+                                }
+                                obstacles.splice(i, 1);
+                                obsRemoved = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                if (obsRemoved) continue;
+
+                // Collision checking between Rover module and structural blocks/hazards
+                const roverBox = {
+                    left: rover.x + 2,
+                    right: rover.x + rover.width - 2,
+                    top: rover.y + 2,
+                    bottom: rover.y + rover.height - 2
+                };
+
+                const obsBox = {
+                    left: obs.x,
+                    right: obs.x + obs.width,
+                    top: obs.y,
+                    bottom: obs.y + obs.height
+                };
+
+                if (roverBox.right > obsBox.left && roverBox.left < obsBox.right &&
+                    roverBox.bottom > obsBox.top && roverBox.top < obsBox.bottom) {
+                    
+                    if (obs.type === 'SABLEE') {
+                        rover.shield -= 20;
+                        playSound('shield-break');
+                        shakeIntensity = Math.max(shakeIntensity, 5); // soft camera shake on sand impact
+                        spawnParticles(rover.x + rover.width/2, rover.y + rover.height, 12, '#ffaa00', 3);
+                    } else if (obs.type === 'VENT') {
+                        rover.shield -= 40; // Dense volcanic basalt is dangerous
+                        playSound('shield-break');
+                        shakeIntensity = Math.max(shakeIntensity, 10); // Heavy shake on head-on collision
+                        spawnParticles(rover.x + rover.width/2, rover.y + rover.height, 18, '#ff4444', 4);
+                    } else if (obs.type === 'BOULDER') {
+                        rover.shield -= 20; // Heavy falling debris avalanche impacts
+                        playSound('shield-break');
+                        shakeIntensity = Math.max(shakeIntensity, 12); // Extreme camera shake!
+                        spawnParticles(rover.x + rover.width/2, rover.y + rover.height/2, 22, '#5a5c61', 4);
+                    } else if (obs.type === 'PROBE') {
+                        rover.shield -= 25; // Elite security probe collision
+                        playSound('shield-break');
+                        shakeIntensity = Math.max(shakeIntensity, 8);
+                        spawnParticles(rover.x + rover.width/2, rover.y + rover.height/2, 15, '#ff3333', 3);
+                    }
+
+                    // Physics kickback
+                    rover.vx = (rover.x + rover.width/2 < obs.x + obs.width/2) ? -6 : 6;
+                    obstacles.splice(i, 1); 
+
+                    if (rover.shield <= 0) {
+                        triggerTermination();
+                        return;
+                    }
+                    continue;
+                }
+
+                // Despawn limits (expanded to prevent dynamic high-speed vent spawns from being clipped)
+                if (obs.y < -120 || obs.y > LOGICAL_HEIGHT + 380) {
+                    obstacles.splice(i, 1);
+                }
+            }
+
+            for (let i = collectibles.length - 1; i >= 0; i--) {
+                let col = collectibles[i];
+                col.y -= speed * 0.55; 
+                col.pulse += 0.08;
+
+                const dx = (rover.x + rover.width/2) - col.x;
+                const dy = (rover.y + rover.height/2) - col.y;
+                const dist = Math.sqrt(dx*dx + dy*dy);
+
+                if (dist < 28) {
+                    playSound('collect');
+                    dataScore += col.value;
+                    spawnParticles(col.x, col.y, 8, col.color, 3);
+                    collectibles.splice(i, 1);
+                    
+                    rover.shield = Math.min(100, rover.shield + 4);
+                    continue;
+                }
+
+                if (col.y < -50) {
+                    collectibles.splice(i, 1);
+                }
+            }
+
+            for (let i = particles.length - 1; i >= 0; i--) {
+                let p = particles[i];
+                p.x += p.vx;
+                p.y += p.vy;
+                p.life--;
+                if (p.life <= 0) {
+                    particles.splice(i, 1);
+                }
+            }
+
+            document.getElementById('hud-depth').innerText = Math.floor(depth);
+            document.getElementById('hud-data').innerText = dataScore;
+            document.getElementById('hud-phase').innerText = GREEK_PHASES[currentPhaseIdx];
+            document.getElementById('hud-loop').innerText = currentLoopIdx + 1;
+            document.getElementById('hud-speed').innerText = (speed * 11).toFixed(0);
+            document.getElementById('shield-bar').style.width = rover.shield + '%';
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, LOGICAL_WIDTH, LOGICAL_HEIGHT);
+
+            const theme = THEMES[currentThemeIdx];
+
+            ctx.save();
+            // Implement dynamic screen shake translation offsets
+            if (shakeIntensity > 0) {
+                const shakeX = (Math.random() - 0.5) * shakeIntensity;
+                const shakeY = (Math.random() - 0.5) * shakeIntensity;
+                ctx.translate(shakeX, shakeY);
+                shakeIntensity *= 0.88; // Decays over frames
+                if (shakeIntensity < 0.2) shakeIntensity = 0;
+            }
+
+            const skyGrad = ctx.createLinearGradient(0, 0, 0, LOGICAL_HEIGHT);
+            skyGrad.addColorStop(0, '#1c0a02');
+            skyGrad.addColorStop(1, '#080200');
+            ctx.fillStyle = skyGrad;
+            ctx.fillRect(0, 0, LOGICAL_WIDTH, LOGICAL_HEIGHT);
+
+            starfield.forEach(star => {
+                ctx.fillStyle = `rgba(212, 162, 78, ${star.alpha * 0.8})`;
+                ctx.fillRect(star.x, star.y, star.size, star.size);
+            });
+
+            backgroundSabléeDust.forEach(crumb => {
+                ctx.save();
+                ctx.translate(crumb.x, crumb.y);
+                ctx.rotate(crumb.angle);
+                ctx.fillStyle = 'rgba(212, 162, 78, 0.25)';
+                ctx.fillRect(-crumb.size/2, -crumb.size/2, crumb.size, crumb.size);
+                ctx.restore();
+            });
+
+            ctx.save();
+            ctx.translate(LOGICAL_WIDTH / 2, 220);
+            
+            ctx.save();
+            ctx.rotate(-0.15);
+            ctx.scale(1, 0.25);
+            ctx.strokeStyle = 'rgba(6, 182, 212, 0.12)';
+            ctx.lineWidth = 12;
+            ctx.beginPath();
+            ctx.arc(0, 0, 75, Math.PI, 0); 
+            ctx.stroke();
+            ctx.restore();
+
+            const planetGlow = ctx.createRadialGradient(-10, -10, 5, 0, 0, 42);
+            planetGlow.addColorStop(0, '#99000d'); 
+            planetGlow.addColorStop(0.5, '#4a0107'); 
+            planetGlow.addColorStop(1, '#120002'); 
+            ctx.fillStyle = planetGlow;
+            ctx.shadowColor = '#6e0207'; 
+            ctx.shadowBlur = 25;
+            ctx.beginPath();
+            ctx.arc(0, 0, 42, 0, Math.PI*2);
+            ctx.fill();
+            ctx.shadowBlur = 0;
+
+            ctx.save();
+            ctx.rotate(-0.15);
+            ctx.scale(1, 0.25);
+            ctx.strokeStyle = 'rgba(6, 182, 212, 0.2)';
+            ctx.lineWidth = 12;
+            ctx.beginPath();
+            ctx.arc(0, 0, 75, 0, Math.PI); 
+            ctx.stroke();
+            ctx.restore();
+
+            ctx.restore();
+
+            ctx.save();
+            // Subtle parallax vertical scrolling relative to depth
+            const rimScrollY = (depth * 0.4) % 12;
+            // Lowered the background crater rim base to 480px (down 50px from 430px)
+            const rimBaseY = 480 + rimScrollY; 
+            
+            // Draw filled colored rim silhouette (inherits thematic coloring)
+            ctx.fillStyle = theme.rimFill; 
+            ctx.beginPath();
+            ctx.moveTo(0, LOGICAL_HEIGHT);
+            ctx.lineTo(0, rimBaseY);
+            
+            for (let x = 0; x <= LOGICAL_WIDTH; x += 8) {
+                // Dip in center to look like a giant crater basin rim
+                const dx = (x - LOGICAL_WIDTH / 2) / (LOGICAL_WIDTH / 2);
+                const dip = dx * dx * 32; 
+                // Jagged rocky peaks
+                const rockNoise = Math.sin(x * 0.12) * 5 + Math.cos(x * 0.28) * 2;
+                ctx.lineTo(x, rimBaseY - dip + rockNoise);
+            }
+            ctx.lineTo(LOGICAL_WIDTH, LOGICAL_HEIGHT);
+            ctx.closePath();
+            ctx.fill();
+
+            // Draw glowing atmospheric rim edge (matching loops theme color)
+            ctx.strokeStyle = theme.main;
+            ctx.globalAlpha = 0.35;
+            ctx.lineWidth = 2.5;
+            ctx.shadowColor = theme.main;
+            ctx.shadowBlur = 6;
+            ctx.beginPath();
+            for (let x = 0; x <= LOGICAL_WIDTH; x += 8) {
+                const dx = (x - LOGICAL_WIDTH / 2) / (LOGICAL_WIDTH / 2);
+                const dip = dx * dx * 32;
+                const rockNoise = Math.sin(x * 0.12) * 5 + Math.cos(x * 0.28) * 2;
+                if (x === 0) ctx.moveTo(x, rimBaseY - dip + rockNoise);
+                else ctx.lineTo(x, rimBaseY - dip + rockNoise);
+            }
+            ctx.stroke();
+            ctx.restore();
+
+            // Clean, pure-black outer canyon margins to cleanly isolate the active play field
+            ctx.fillStyle = '#000000';
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            for (let y = 0; y <= LOGICAL_HEIGHT + 20; y += 15) {
+                let wallScroll = (frames * (speed * 0.55)) % 15;
+                let evalY = y - wallScroll;
+                let globalY = evalY + (depth * 10);
+                let noiseX = CHASM_L + Math.sin(globalY * 0.05) * 8 + Math.sin(globalY * 0.16) * 4;
+                ctx.lineTo(noiseX, evalY);
+            }
+            ctx.lineTo(0, LOGICAL_HEIGHT);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.fillStyle = '#000000';
+            ctx.beginPath();
+            ctx.moveTo(LOGICAL_WIDTH, 0);
+            for (let y = 0; y <= LOGICAL_HEIGHT + 20; y += 15) {
+                let wallScroll = (frames * (speed * 0.55)) % 15;
+                let evalY = y - wallScroll;
+                let globalY = evalY + (depth * 10);
+                let noiseX = CHASM_R - Math.sin(globalY * 0.05 + 1.5) * 8 - Math.sin(globalY * 0.16) * 4;
+                ctx.lineTo(noiseX, evalY);
+            }
+            ctx.lineTo(LOGICAL_WIDTH, LOGICAL_HEIGHT);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.strokeStyle = theme.main;
+            ctx.lineWidth = 1.5;
+            ctx.shadowColor = theme.main;
+            ctx.shadowBlur = 8;
+            
+            ctx.beginPath();
+            for (let y = 0; y <= LOGICAL_HEIGHT + 20; y += 15) {
+                let wallScroll = (frames * (speed * 0.55)) % 15;
+                let evalY = y - wallScroll;
+                let globalY = evalY + (depth * 10);
+                let noiseX = CHASM_L + Math.sin(globalY * 0.05) * 8 + Math.sin(globalY * 0.16) * 4;
+                if (y === 0) ctx.moveTo(noiseX, evalY);
+                else ctx.lineTo(noiseX, evalY);
+            }
+            ctx.stroke();
+
+            ctx.beginPath();
+            for (let y = 0; y <= LOGICAL_HEIGHT + 20; y += 15) {
+                let wallScroll = (frames * (speed * 0.55)) % 15;
+                let evalY = y - wallScroll;
+                let globalY = evalY + (depth * 10);
+                let noiseX = CHASM_R - Math.sin(globalY * 0.05 + 1.5) * 8 - Math.sin(globalY * 0.16) * 4;
+                if (y === 0) ctx.moveTo(noiseX, evalY);
+                else ctx.lineTo(noiseX, evalY);
+            }
+            ctx.stroke();
+            
+            ctx.shadowBlur = 0;
+
+            // Render projectiles (Both standard downward/upward lasers and hazard magma orbs)
+            projectiles.forEach(p => {
+                if (p.isMagma) {
+                    ctx.save();
+                    ctx.fillStyle = '#ffffff';
+                    ctx.shadowColor = '#ff3300';
+                    ctx.shadowBlur = 12;
+                    ctx.strokeStyle = '#ff5500';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+                    ctx.restore();
+                } else if (p.isProbeRound) {
+                    ctx.save();
+                    ctx.fillStyle = '#ff2222';
+                    ctx.shadowColor = '#ff2222';
+                    ctx.shadowBlur = 10;
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.restore();
+                } else {
+                    ctx.save();
+                    ctx.fillStyle = '#fff';
+                    ctx.shadowColor = theme.main;
+                    ctx.shadowBlur = 8;
+                    ctx.fillRect(p.x, p.y, p.size, p.height);
+                    ctx.restore();
+                }
+            });
+
+            collectibles.forEach(col => {
+                ctx.save();
+                ctx.translate(col.x, col.y);
+                const scale = 1 + Math.sin(col.pulse) * 0.15;
+                ctx.scale(scale, scale);
+
+                ctx.fillStyle = '#fff';
+                ctx.fillRect(-2, -2, 4, 4);
+
+                ctx.strokeStyle = col.color;
+                ctx.lineWidth = 1.5;
+                ctx.shadowColor = col.color;
+                ctx.shadowBlur = 10;
+                ctx.beginPath();
+                ctx.moveTo(0, -col.size);
+                ctx.lineTo(col.size, 0);
+                ctx.lineTo(0, col.size);
+                ctx.lineTo(-col.size, 0);
+                ctx.closePath();
+                ctx.stroke();
+                ctx.restore();
+            });
+            ctx.shadowBlur = 0;
+
+            obstacles.forEach(obs => {
+                if (obs.hitFlash && obs.hitFlash > 0) {
+                    obs.hitFlash--;
+                }
+
+                if (obs.type === 'SABLEE') {
+                    ctx.save();
+                    ctx.fillStyle = (obs.hitFlash && obs.hitFlash > 0) ? '#ffffff' : '#1c0f04';
+                    
+                    ctx.beginPath();
+                    ctx.moveTo(obs.x, obs.y);
+                    
+                    let steps = 6;
+                    for (let j = 0; j <= steps; j++) {
+                        let px = obs.x + (obs.width / steps) * j;
+                        let offset = Math.sin(px * 0.15 + obs.y * 0.05) * 4;
+                        ctx.lineTo(px, obs.y + offset);
+                    }
+                    
+                    ctx.lineTo(obs.x + obs.width, obs.y + obs.height);
+                    
+                    for (let j = steps; j >= 0; j--) {
+                        let px = obs.x + (obs.width / steps) * j;
+                        let offset = Math.sin(px * 0.2 + obs.y * 0.03) * 3 + 4;
+                        ctx.lineTo(px, obs.y + obs.height + offset);
+                    }
+                    ctx.closePath();
+                    ctx.fill();
+
+                    const healthPct = obs.hp / obs.maxHp;
+                    ctx.strokeStyle = (obs.hitFlash && obs.hitFlash > 0) ? '#ffffff' : (healthPct > 0.6 ? '#d4a24e' : '#a35f1c');
+                    ctx.lineWidth = 2.5;
+                    ctx.beginPath();
+                    for (let j = 0; j <= steps; j++) {
+                        let px = obs.x + (obs.width / steps) * j;
+                        let offset = Math.sin(px * 0.15 + obs.y * 0.05) * 4;
+                        if (j === 0) ctx.moveTo(px, obs.y + offset);
+                        else ctx.lineTo(px, obs.y + offset);
+                    }
+                    ctx.stroke();
+
+                    ctx.strokeStyle = '#291505';
+                    ctx.lineWidth = 1.5;
+                    ctx.beginPath();
+                    for (let j = 1; j < steps; j++) {
+                        let px = obs.x + (obs.width / steps) * j;
+                        let offset = Math.sin(px * 0.12 + obs.y * 0.04) * 3 + obs.height / 2;
+                        if (j === 1) ctx.moveTo(px, obs.y + offset);
+                        else ctx.lineTo(px, obs.y + offset);
+                    }
+                    ctx.stroke();
+
+                    if (obs.hp < obs.maxHp) {
+                        ctx.beginPath();
+                        ctx.moveTo(obs.x + obs.width * 0.25, obs.y + 2);
+                        ctx.lineTo(obs.x + obs.width * 0.3, obs.y + obs.height - 2);
+                        ctx.moveTo(obs.x + obs.width * 0.75, obs.y + 2);
+                        ctx.lineTo(obs.x + obs.width * 0.7, obs.y + obs.height - 2);
+                        ctx.stroke();
+                    }
+                    ctx.restore();
+                } else if (obs.type === 'VENT') {
+                    // Volcanic basalt magma vents jutting from canyon walls
+                    ctx.save();
+                    ctx.fillStyle = (obs.hitFlash && obs.hitFlash > 0) ? '#ffffff' : '#0d0402'; 
+                    
+                    ctx.beginPath();
+                    if (obs.side === 'LEFT') {
+                        ctx.moveTo(CHASM_L, obs.y);
+                        ctx.lineTo(CHASM_L + obs.width * 0.4, obs.y + obs.height * 0.12);
+                        ctx.lineTo(CHASM_L + obs.width * 0.8, obs.y + obs.height * 0.28);
+                        ctx.lineTo(CHASM_L + obs.width, obs.y + obs.height * 0.5); // Tip Nozzle
+                        ctx.lineTo(CHASM_L + obs.width * 0.8, obs.y + obs.height * 0.72);
+                        ctx.lineTo(CHASM_L + obs.width * 0.4, obs.y + obs.height * 0.88);
+                        ctx.lineTo(CHASM_L, obs.y + obs.height);
+                    } else {
+                        ctx.moveTo(CHASM_R, obs.y);
+                        ctx.lineTo(CHASM_R - obs.width * 0.4, obs.y + obs.height * 0.12);
+                        ctx.lineTo(CHASM_R - obs.width * 0.8, obs.y + obs.height * 0.28);
+                        ctx.lineTo(CHASM_R - obs.width, obs.y + obs.height * 0.5); // Tip Nozzle
+                        ctx.lineTo(CHASM_R - obs.width * 0.8, obs.y + obs.height * 0.72);
+                        ctx.lineTo(CHASM_R - obs.width * 0.4, obs.y + obs.height * 0.88);
+                        ctx.lineTo(CHASM_R, obs.y + obs.height);
+                    }
+                    ctx.closePath();
+                    ctx.fill();
+
+                    // Instantly active glowing lava cores
+                    let glowColor = '#ffbb00';
+                    let coreColor = '#ffffff';
+
+                    ctx.save();
+                    ctx.shadowColor = '#ff5500';
+                    ctx.shadowBlur = 12;
+                    ctx.fillStyle = (obs.hitFlash && obs.hitFlash > 0) ? '#ffffff' : '#ffffff';
+                    ctx.beginPath();
+                    const nozzleX = obs.side === 'LEFT' ? CHASM_L + obs.width : CHASM_R - obs.width;
+                    ctx.arc(nozzleX, obs.y + obs.height / 2, 5, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.restore();
+
+                    ctx.strokeStyle = glowColor;
+                    ctx.lineWidth = 1.8;
+                    ctx.stroke();
+
+                    ctx.fillStyle = coreColor;
+                    ctx.beginPath();
+                    const veinX = obs.side === 'LEFT' ? CHASM_L + obs.width - 6 : CHASM_R - obs.width;
+                    ctx.fillRect(veinX, obs.y + obs.height / 2 - 3, 6, 6);
+
+                    ctx.strokeStyle = '#2d0c00';
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    if (obs.side === 'LEFT') {
+                        ctx.moveTo(CHASM_L, obs.y + obs.height * 0.5);
+                        ctx.lineTo(CHASM_L + obs.width * 0.6, obs.y + obs.height * 0.5);
+                    } else {
+                        ctx.moveTo(CHASM_R, obs.y + obs.height * 0.5);
+                        ctx.lineTo(CHASM_R - obs.width * 0.6, obs.y + obs.height * 0.5);
+                    }
+                    ctx.stroke();
+                    ctx.restore();
+                } else if (obs.type === 'BOULDER') {
+                    // Draw crumbly basalt boulder debris
+                    ctx.save();
+                    ctx.fillStyle = (obs.hitFlash && obs.hitFlash > 0) ? '#ffffff' : '#424347';
+                    ctx.strokeStyle = '#d4a24e';
+                    ctx.lineWidth = 1.5;
+                    ctx.beginPath();
+                    
+                    // Procedural jagged circular polygon
+                    const segments = 6;
+                    const r = obs.width / 2;
+                    const cx = obs.x + r;
+                    const cy = obs.y + r;
+                    for (let s = 0; s < segments; s++) {
+                        const angle = (s / segments) * Math.PI * 2 + (obs.y * 0.02);
+                        const radiusNoise = r * (0.8 + Math.sin(s * 1.5) * 0.15);
+                        const px = cx + Math.cos(angle) * radiusNoise;
+                        const py = cy + Math.sin(angle) * radiusNoise;
+                        if (s === 0) ctx.moveTo(px, py);
+                        else ctx.lineTo(px, py);
+                    }
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.stroke();
+                    
+                    // Draw crack lines inside the crumbly boulder
+                    ctx.strokeStyle = '#1d1e21';
+                    ctx.beginPath();
+                    ctx.moveTo(cx - r*0.3, cy - r*0.3);
+                    ctx.lineTo(cx + r*0.2, cy + r*0.2);
+                    ctx.moveTo(cx + r*0.4, cy - r*0.2);
+                    ctx.lineTo(cx - r*0.1, cy + r*0.4);
+                    ctx.stroke();
+
+                    ctx.restore();
+                } else if (obs.type === 'PROBE') {
+                    // Elite Cyber-Probe chassis
+                    ctx.save();
+                    ctx.translate(obs.x + obs.width/2, obs.y + obs.height/2);
+                    
+                    // Outer dark mechanical chassis ring
+                    ctx.fillStyle = (obs.hitFlash && obs.hitFlash > 0) ? '#ffffff' : '#08080a';
+                    ctx.strokeStyle = '#22252a';
+                    ctx.lineWidth = 2.2;
+                    ctx.beginPath();
+                    ctx.arc(0, 0, obs.width/2, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+                    
+                    // Inner electronic reactor core
+                    ctx.fillStyle = '#121316';
+                    ctx.beginPath();
+                    ctx.arc(0, 0, obs.width/3, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    // Alternating green / red blinking security lights
+                    const isLeftActive = Math.floor(frames / 12) % 2 === 0;
+                    
+                    // Left Node (Alternate blinking Green/Dark Green)
+                    ctx.fillStyle = isLeftActive ? '#00ff66' : '#003310';
+                    ctx.shadowColor = '#00ff66';
+                    ctx.shadowBlur = isLeftActive ? 8 : 0;
+                    ctx.beginPath();
+                    ctx.arc(-5, -3, 2.5, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    // Right Node (Alternate blinking Red/Dark Red)
+                    ctx.fillStyle = !isLeftActive ? '#ff0055' : '#330010';
+                    ctx.shadowColor = '#ff0055';
+                    ctx.shadowBlur = !isLeftActive ? 8 : 0;
+                    ctx.beginPath();
+                    ctx.arc(5, -3, 2.5, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.shadowBlur = 0;
+                    
+                    // Central scanning glowing orange lens
+                    ctx.fillStyle = '#ff5500';
+                    ctx.shadowColor = '#ff5500';
+                    ctx.shadowBlur = 6;
+                    ctx.beginPath();
+                    ctx.arc(0, 4, 3, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    ctx.restore();
+                }
+            });
+
+            // Proactive off-screen warnings UI indicators (Bottom edge overlay)
+            obstacles.forEach(obs => {
+                if (obs.type === 'VENT' && obs.y > LOGICAL_HEIGHT) {
+                    const flash = Math.floor(frames / 6) % 2 === 0;
+                    if (flash) {
+                        ctx.save();
+                        ctx.fillStyle = '#ff3c00';
+                        ctx.strokeStyle = '#ff3c00';
+                        ctx.font = '900 14px Inter, sans-serif';
+                        ctx.textAlign = 'center';
+                        
+                        // Draw warning mark and location brackets
+                        const centerProjX = obs.x + obs.width / 2;
+                        ctx.fillText('!', centerProjX, LOGICAL_HEIGHT - 16);
+                        
+                        ctx.lineWidth = 1.5;
+                        ctx.beginPath();
+                        ctx.moveTo(obs.x, LOGICAL_HEIGHT - 4);
+                        ctx.lineTo(obs.x, LOGICAL_HEIGHT - 12);
+                        ctx.lineTo(obs.x + obs.width, LOGICAL_HEIGHT - 12);
+                        ctx.lineTo(obs.x + obs.width, LOGICAL_HEIGHT - 4);
+                        ctx.stroke();
+                        ctx.restore();
+                    }
+                }
+            });
+
+            rover.draw();
+
+            particles.forEach(p => {
+                ctx.fillStyle = p.color || '#aaa';
+                ctx.fillRect(p.x, p.y, p.size, p.size);
+            });
+
+            ctx.restore(); // Restores camera screen shake coordinate space
+        }
+
+        // Decoupled strict Fixed Update Timestep accumulator cycle
+        let lastTime = performance.now();
+        let accumulator = 0;
+        const deltaTime = 1000 / 60; // 60 updates per physical simulated second
+
+        function loop(currentTime) {
+            if (!currentTime) currentTime = performance.now();
+            let frameTime = currentTime - lastTime;
+            
+            // Protect loop from deep spiral calculations on heavy background thread lag
+            if (frameTime > 250) frameTime = 250; 
+            lastTime = currentTime;
+
+            accumulator += frameTime;
+
+            while (accumulator >= deltaTime) {
+                update(); // Strictly runs at exactly 60Hz
+                accumulator -= deltaTime;
+            }
+
+            draw(); // Redraws dynamically as fast as browser screen refreshes
+            requestAnimationFrame(loop);
+        }
+
+        window.onload = () => {
+            loop();
+        };
+
+    </script>
+</body>
+</html>
