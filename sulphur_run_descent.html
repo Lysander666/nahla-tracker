@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Sulphur Run: Pâte Sablée Descent</title>
+    <title>Sulphur Run: Pâte Sablée Descent v0.1</title>
     
     <!-- External Web Fonts for Retro/Sci-Fi Styling -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=VT323&display=swap">
@@ -124,7 +124,7 @@
                 <h1 class="text-4xl sm:text-5xl font-extrabold text-white tracking-widest uppercase text-shadow neon-amber leading-none mb-1">SULPHUR RUN</h1>
                 <h2 class="text-xl sm:text-2xl text-[#d4a24e] font-bold tracking-wider leading-none mb-3">PÂTE SABLÉE DESCENT</h2>
                 <p class="text-[1.1rem] sm:text-lg text-gray-300 font-sans tracking-wide leading-relaxed">
-                    Navigate the vertical, crumbly silicate walls of the ancient Pâte Sablée basin. Blast obstructions, dodge erupting magma vents, and stay ahead of the rising toxic sulfur core!
+                    Navigate the vertical, crumbly silicate walls of the ancient Pâte Sablée basin. Blast obstructions, dodge erupting magma vents, and collect data nodes!
                 </p>
             </div>
 
@@ -1088,7 +1088,7 @@
                         shakeIntensity = Math.max(shakeIntensity, 10); // Heavy shake on head-on collision
                         spawnParticles(rover.x + rover.width/2, rover.y + rover.height, 18, '#ff4444', 4);
                     } else if (obs.type === 'BOULDER') {
-                        rover.shield -= 30; // Heavy falling debris avalanche impacts
+                        rover.shield -= 10; // Heavy falling debris avalanche impacts
                         playSound('shield-break');
                         shakeIntensity = Math.max(shakeIntensity, 12); // Extreme camera shake!
                         spawnParticles(rover.x + rover.width/2, rover.y + rover.height/2, 22, '#5a5c61', 4);
