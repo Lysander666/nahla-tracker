@@ -3,20 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- Favicons matching master tracker index layout -->
   <link class="canvas-ignore" rel="icon" type="image/png" sizes="16x16" href="faviconmain16.png">
   <link class="canvas-ignore" rel="icon" type="image/png" sizes="32x32" href="favicon32@2x.png">
   <link class="canvas-ignore" rel="icon" type="image/png" sizes="128x128" href="faviconmain128.png">
   <link class="canvas-ignore" rel="manifest" href="manifest.json">
   <link class="canvas-ignore" rel="icon" type="image/png" sizes="512x512" href="favicon-512.png?v=2">
   <link class="canvas-ignore" rel="apple-touch-icon" sizes="180x180" href="favicon-512.png?v=2">
-  <title>Nahla Calendar System</title>
-  <!-- Google Fonts for the exact clean Monospace typography seen in the screenshot -->
+  <title>Nahla Calendar System & Orbital Canvas</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
-  <!-- Tailwind CSS CDN for instant styling -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -31,7 +28,6 @@
     }
   </script>
   <style>
-    /* Custom scrollbar matching Elite Odyssey UI style */
     .custom-scrollbar::-webkit-scrollbar {
       width: 4px;
     }
@@ -52,14 +48,13 @@
   <!-- Main Container -->
   <div class="max-w-4xl mx-auto">
     
-    <!-- Ship HUD Header matching Screenshot aesthetic -->
+   <!-- Ship HUD Header -->
    <header class="border-b border-[#1d2228] pb-4 mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
       <div>
         <div class="flex items-center gap-2.5 mt-2">
           <h1 class="text-xl md:text-2xl font-bold tracking-tight text-slate-100 font-mono">
-            Nahla Calendar System
+            Nahla Orbital & Calendar System
           </h1>
-            <!-- <img src="favicon8.png" alt="Nahla Tracker Logo" class="w-6 h-6 md:w-7 md:h-7 object-contain flex-shrink-0" onerror="this.style.display='none'">-->
         </div> 
         <p class="text-xs text-slate-500 mt-1 uppercase tracking-wider">
            Hypi Bra EV-P d5-78 | Orbiting Body: Rebekah (6) | Moon: Nahla (6 a)
@@ -70,10 +65,34 @@
       </a>
     </header>
 
-
-    <!-- Main Panel Content -->
     <div class="flex flex-col gap-6">
       
+      <!-- Interactive Orbital Canvas Panel -->
+      <section class="bg-[#121519] border border-[#1d2228] rounded-lg p-5 shadow-lg relative overflow-hidden">
+        <div class="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#5cb6e4] to-transparent"></div>
+        
+        <div class="flex justify-between items-center mb-3">
+          <span class="text-xs text-[#5cb6e4] font-bold uppercase tracking-widest font-sans">
+            Real-Time Orbital Telemetry & Map
+          </span>
+          <div class="flex items-center gap-2">
+            <button id="reset-time-btn" class="px-2.5 py-1 text-[10px] font-mono rounded border border-[#1d2228] hover:border-[#5cb6e4] hover:text-[#5cb6e4] transition-all uppercase bg-[#0f1115]">
+              Sync To Real-Time
+            </button>
+            <span class="text-[10px] text-amber-400 font-bold bg-amber-500/10 px-2 py-0.5 rounded uppercase tracking-wider font-mono">
+              Interactive Canvas
+            </span>
+          </div>
+        </div>
+
+        <div class="relative w-full aspect-[16/9] md:aspect-[21/9] bg-[#090b0d] rounded border border-[#1d2228] overflow-hidden">
+          <canvas id="orbitalCanvas" class="w-full h-full block cursor-crosshair"></canvas>
+          <div class="absolute bottom-2 left-2 bg-[#0d0f12]/90 border border-[#1d2228] px-2 py-1 rounded text-[10px] font-mono text-slate-400 pointer-events-none">
+            Click orbit track to fast-forward time to that coordinate.
+          </div>
+        </div>
+      </section>
+
       <!-- Epoch Clock Panel -->
       <section class="bg-[#121519] border border-[#1d2228] rounded-lg p-5 shadow-lg relative overflow-hidden">
         <div class="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#5cb6e4] to-transparent"></div>
@@ -87,36 +106,35 @@
           </span>
         </div>
 
-        <!-- Master Telemetry Split Grid: Readout vs Countdown -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
           
           <!-- Left: Consolidated Calendar Telemetry Panel -->
-          <div class="bg-[#0f1115] border border-[#1d2228] rounded p-5 flex flex-col justify-between relative min-h-[220px] font-mono">
+          <div class="bg-[#0f1115] border border-[#1d2228] rounded p-5 flex flex-col justify-between relative min-h-[240px] font-mono">
             
-            <!-- TOP SECTION: Standardized Date Compartments (DAY | MONTH | YEAR) with geometric flex alignments -->
             <div class="grid grid-cols-3 gap-3 text-center border-b border-[#1d2228]/40 pb-4 items-stretch">
-              <!-- Left Column: DAY -->
-              <div class="border-r border-[#1d2228]/40 flex flex-col justify-between h-full min-h-[64px]">
-                <div class="text-[11px] md:text-xs text-[#5cb6e4] uppercase tracking-widest font-semibold">DAY</div>
-                <div id="hud-day" class="text-xs md:text-sm font-bold text-slate-200 tracking-wider">-- / --</div>
-                <div id="hud-yday" class="text-[10px] md:text-xs text-slate-500 leading-none">Y-Day: --</div>
+              <!-- Left Column: DAY & WEEK -->
+              <div class="border-r border-[#1d2228]/40 flex flex-col justify-between h-full min-h-[75px]">
+                <div class="text-[11px] md:text-xs text-[#5cb6e4] uppercase tracking-widest font-semibold">WEEKDAY</div>
+                <div id="hud-day" class="text-xs font-bold text-slate-200 tracking-wider">-- / --</div>
+                <div id="hud-week-number" class="text-[10px] text-[#49d381] uppercase font-semibold leading-none mt-0.5">--</div>
+                <div id="hud-yday" class="text-[10px] text-slate-500 leading-none mt-1">Y-Day: --</div>
               </div>
-              <!-- Center Column: MONTH -->
-              <div class="border-r border-[#1d2228]/40 flex flex-col justify-between h-full min-h-[64px]">
+              <!-- Center Column: MONTH & QUARTER -->
+              <div class="border-r border-[#1d2228]/40 flex flex-col justify-between h-full min-h-[75px]">
                 <div class="text-[11px] md:text-xs text-[#5cb6e4] uppercase tracking-widest font-semibold">MONTH</div>
                 <div id="hud-month-name" class="text-xs md:text-sm text-[#49d381] uppercase tracking-wider font-semibold leading-none">--</div>
-                <div id="hud-month" class="text-[10px] md:text-xs text-slate-500 leading-none">-- / --</div>
+                <div id="hud-month" class="text-[10px] text-slate-500 leading-none mt-0.5">-- / --</div>
+                <div id="hud-quarter-name" class="text-[9px] text-amber-400 font-bold uppercase tracking-widest mt-1">--</div>
               </div>
               <!-- Right Column: YEAR -->
-              <div class="flex flex-col justify-between h-full min-h-[64px]">
+              <div class="flex flex-col justify-between h-full min-h-[75px]">
                 <div class="text-[11px] md:text-xs text-[#5cb6e4] uppercase tracking-widest font-semibold">YEAR</div>
                 <div id="hud-year" class="text-xs md:text-sm font-bold text-slate-200 tracking-wider">--</div>
-                <!-- Invisible space buffer matching height of lower Month Name to perfectly center Year column vertically -->
                 <div class="text-xs md:text-sm opacity-0 select-none pointer-events-none leading-none">-</div>
               </div>
             </div>
 
-            <!-- BOTTOM SECTION: Running NLT Clock with Adjacent Phase Indicator -->
+            <!-- BOTTOM SECTION: Running NLT Clock -->
             <div class="text-center pt-4">
               <span class="text-xs text-[#5cb6e4] uppercase tracking-widest font-semibold block mb-1.5">Nahla Local Time (NLT)</span>
               <div class="flex items-center justify-center gap-2 text-2xl md:text-3xl font-bold text-[#5cb6e4] tracking-widest drop-shadow-[0_0_8px_rgba(92,182,228,0.4)]">
@@ -127,7 +145,6 @@
               <div class="text-[10px] text-slate-400 uppercase tracking-wider mt-2 font-mono">25h 26m 10s Solar rotation</div>
             </div>
             
-            <!-- Dynamic Backup containers for backwards compatibility DOM calls -->
             <div class="hidden" id="current-date-display">--</div>
             <div class="hidden" id="current-year-display">--</div>
             <div class="hidden" id="current-phase-display">--</div>
@@ -177,7 +194,7 @@
       <!-- Calendar Grid Panel -->
       <section class="bg-[#121519] border border-[#1d2228] rounded-lg p-5 shadow-lg">
         <h3 class="text-xs text-[#5cb6e4] mb-4 uppercase tracking-widest font-semibold">
-          555 day Nahlan calendar - 12 Months at 46 days each
+          555 day Nahlan calendar - 4 Quarters | 12 Months at 46 days each
         </h3>
 
         <!-- 12 Months Grid -->
@@ -204,9 +221,8 @@
           </span>
         </div>
         
-        <!-- Visual 28-Year Grid Indicator -->
         <div id="leap-timeline-grid" class="grid grid-cols-7 sm:grid-cols-14 md:grid-cols-28 gap-1.5 font-mono text-[10px] text-center mb-3">
-          <!-- Populated dynamically via JS: 28 small blocks -->
+          <!-- Populated dynamically via JS -->
         </div>
         
         <p id="leap-announcement-text" class="text-xs text-slate-400 font-medium font-sans">
@@ -219,29 +235,31 @@
   </div>
 
   <script>
-    // Constants sourced directly from the CMDR's Elite Dangerous Journal Scans
-    // Calibration updated to: July 3, 2026, 03:10:11.000 UTC (Cycle #19 Midnight alignment from Drift Table)
     const EPOCH_UTC = Date.UTC(2026, 6, 3, 3, 10, 11); 
-    const ROTATION_ANCHOR_UTC = Date.UTC(2025, 6, 20, 19, 8, 49); // Scan timestamp
+    const ROTATION_ANCHOR_UTC = Date.UTC(2025, 6, 20, 19, 8, 49);
+
+    const QUARTERS = ["Bellatrix", "Bunika", "Elena", "Troum"];
+    const WEEKDAYS = ["Abelina", "Jana", "Mira", "Maria", "Theresa", "Ferril", "Herbst", "Asmorod", "Sarasvati", "Gauri", "Chamunda"];
 
     const MONTHS_LORE = [
-      { name: "Anat", desc: "Goddess of fierce beginnings, war, and rebirth.", alignment: "Start of Year / Peak Sunlight" },
-      { name: "Bau", desc: "Primeval goddess of the healing dawn and the life-giving breath.", alignment: "Late Morning Orbit" },
-      { name: "Uzzayan", desc: "Himyarite goddess of power, might, and healing.", alignment: "Approaching Outer Orbit" },
-      { name: "Gula", desc: "Goddess of medicine, healing, and grand transformations.", alignment: "High Horizon Phase" },
-      { name: "Shams", desc: "The brilliant pre-Islamic sun goddess, lady of the heavens, bringing light and warmth.", alignment: "Stellar Apex Alignment" },
-      { name: "Ki", desc: "The earth goddess. Honouring Nahla's dense, metal and sulphur-rich planetary mantle.", alignment: "Peak Magnetic Alignment" },
-      { name: "Mot", desc: "God of dust, sterility, and the burning heat of Hope. Day 277 commences the Festival of Mot - a 1-day dark beer event celebrating the furthest point from Hope and the return.", alignment: "Aphelion" },
-      { name: "Nanaya", desc: "Goddess of cosmic love, beauty, and the locked bond of giant and moon.", alignment: "Tidal Symmetrical Node" },
-      { name: "Tanuf", desc: "Pre-Islamic South Arabian goddess of high mountain peaks, offering shelter and safe passage through the shadows of the descending orbit.", alignment: "Descending Node" },
-      { name: "Nisaba", desc: "Goddess of writing, cosmic records, and mapping the stars.", alignment: "Apsidal Alignment" },
-      { name: "Sara", desc: "Guardian of deep subterranean vaults and metallic magma flows.", alignment: "Volcanic Surge Era" },
-      { name: "Uttu", desc: "Goddess of weaving, spinning the magnificent webs of Rebekah's rings.", alignment: "Ring Crossing Horizon" }
+      { name: "Hope", desc: "Sun of fierce beginnings, blue-white light and rebirth.", alignment: "Start of Year / Peak Sunlight" },
+      { name: "Simone", desc: "Primeval schorching planet of the healing dawn and the life-giving breath.", alignment: "Late Morning Orbit" },
+      { name: "Marika", desc: "Mystical dark ringed world of secrets and promise.", alignment: "Approaching Outer Orbit" },
+      { name: "Ružena", desc: "Marika's sister world, it is also shrouded in mystique, darkness and hidden wonder.", alignment: "High Horizon Phase" },
+      { name: "Rayne", desc: "Dazzling pink/red goddess of the middle system.", alignment: "Stellar Apex Alignment" },
+      { name: "Báthory", desc: "The earth/night goddess. Honouring Nahla's dense, metal and sulphur-rich planetary mantle.", alignment: "Peak Magnetic Alignment" },
+      { name: "Aeoga", desc: "God of dust, sterility, and the burning heat of Hope. Day 277 commences the Festival of Mot - a 1-day dark beer event celebrating the furthest point from Hope and the return.", alignment: "Aphelion" },
+      { name: "Skaði", desc: "Goddess of cosmic love, beauty, and the locked bond of giant and moon.", alignment: "Tidal Symmetrical Node" },
+      { name: "Draupadi", desc: "Goddess of high mountain peaks, offering shelter and safe passage through the shadows of the descending orbit.", alignment: "Descending Node" },
+      { name: "Sita", desc: "Goddess of writing, cosmic records, and mapping the stars.", alignment: "Apsidal Alignment" },
+      { name: "Ariana", desc: "Sweet siren-voiced cosmic world of subterranean vaults and icy vapours.", alignment: "Volcanic Surge Era" },
+      { name: "Anneke", desc: "Goddess of cosmic aural beauty, spinning the magnificent webs of Rebekah's rings.", alignment: "Ring Crossing Horizon" }
     ];
 
-    let selectedMonthIndex = 0; // State tracker for current active grid view (0-11, or -1 for Kurunnītu)
+    let selectedMonthIndex = 0; 
+    let accumulatedTimeOffset = 0; // ms added by fast forwarding
+    let lastClockUpdate = Date.now();
 
-    // Leap Year checks (Years 5, 11, 16, 22, 28)
     function isNahlaLeapYear(year) {
       if (year <= 0) return false;
       const yearInCycle = ((year - 1) % 28) + 1;
@@ -252,14 +270,11 @@
       return isNahlaLeapYear(year) ? 556 : 555;
     }
 
-    // Main calendar logic engine supporting Year 0 backward coordinates perfectly
-    // 1 Nahla local day = 25h 26m 10s = 91,570 seconds
     function getNahlaCalendarDate(utcMillis) {
       const DAY_MS = 91570 * 1000;
       let year, dayOfYear, msInCurrentDay, totalDaysInYear;
       
       if (utcMillis >= EPOCH_UTC) {
-        // Year 1+ Standard Progression
         let remainingMs = utcMillis - EPOCH_UTC;
         year = 1;
         while (true) {
@@ -274,7 +289,6 @@
         msInCurrentDay = remainingMs % DAY_MS;
         totalDaysInYear = getDaysInNahlaYear(year);
       } else {
-        // Year 0 Backward Offset Matrix
         let remainingMs = EPOCH_UTC - utcMillis;
         year = 0;
         while (true) {
@@ -285,7 +299,7 @@
           remainingMs -= yearMs;
           year--;
         }
-        totalDaysInYear = getNahlaCalendarDateBackwards(year); // Fallback standard checker
+        totalDaysInYear = isNahlaLeapYear(year) ? 556 : 555;
         let msFromStartOfYear = (totalDaysInYear * DAY_MS) - remainingMs;
         dayOfYear = Math.floor(msFromStartOfYear / DAY_MS) + 1;
         msInCurrentDay = msFromStartOfYear % DAY_MS;
@@ -297,19 +311,42 @@
       let isIntercalary = false;
       let msUntilNextMilestone = 0;
       let nextMilestoneName = "";
+      let weekdayName = "";
+      let weekNumberText = "";
+      let quarterName = "";
 
       if (dayOfYear <= 552) {
         monthIndex = Math.floor((dayOfYear - 1) / 46);
         dayOfMonth = ((dayOfYear - 1) % 46) + 1;
+        quarterName = QUARTERS[Math.floor(monthIndex / 3)];
+        
         const daysRemainingInMonth = 46 - dayOfMonth;
         msUntilNextMilestone = (daysRemainingInMonth * DAY_MS) + msLeftInCurrentDay;
-        nextMilestoneName = monthIndex === 11 ? "Festival of Kurunnītu" : `${MONTHS_LORE[monthIndex + 1].name} 1`;
+        nextMilestoneName = monthIndex === 11 ? "Festival of Rebekah" : `${MONTHS_LORE[monthIndex + 1].name} 1`;
+
+        if (dayOfMonth <= 44) {
+          const zeroIndexedDay = dayOfMonth - 1;
+          const weekdayIdx = zeroIndexedDay % 11;
+          const weekNum = Math.floor(zeroIndexedDay / 11) + 1;
+          weekdayName = WEEKDAYS[weekdayIdx];
+          weekNumberText = `Week ${weekNum}`;
+        } else if (dayOfMonth === 45) {
+          weekdayName = "Festival of Rati";
+          weekNumberText = "Interregna";
+        } else if (dayOfMonth === 46) {
+          weekdayName = "Festival of Kali";
+          weekNumberText = "Interregna";
+        }
       } else {
         isIntercalary = true;
         dayOfMonth = dayOfYear - 552;
+        quarterName = "Year-End";
+        weekdayName = "Festival Day " + dayOfMonth;
+        weekNumberText = "Festival Loop";
+        
         const daysRemainingInFestival = totalDaysInYear - dayOfYear;
         msUntilNextMilestone = (daysRemainingInFestival * DAY_MS) + msLeftInCurrentDay;
-        nextMilestoneName = `Year ${year + 1}, Anat 1 (Perihelion)`;
+        nextMilestoneName = `Year ${year + 1}, Hope 1 (Perihelion)`;
       }
 
       return {
@@ -322,22 +359,256 @@
         msInCurrentDay,
         totalDaysInYear,
         msUntilNextMilestone,
-        nextMilestoneName
+        nextMilestoneName,
+        weekdayName,
+        weekNumberText,
+        quarterName
       };
     }
 
-    function getNahlaCalendarDateBackwards(year) {
-      return isNahlaLeapYear(year) ? 556 : 555;
+    const canvas = document.getElementById('orbitalCanvas');
+    const ctx = canvas.getContext('2d');
+    let hoveredAngle = null;
+    let hoveredMonthName = null;
+
+    function resizeCanvas() {
+      const rect = canvas.parentNode.getBoundingClientRect();
+      canvas.width = rect.width * window.devicePixelRatio;
+      canvas.height = rect.height * window.devicePixelRatio;
+      ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    canvas.addEventListener('mousemove', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
+      
+      const dx = x - centerX;
+      const dy = y - centerY;
+      const distance = Math.sqrt(dx*dx + dy*dy);
+      
+      const orbitalRadius = Math.min(rect.width, rect.height) * 0.38;
+      
+      if (Math.abs(distance - orbitalRadius) < 22) {
+        let angle = Math.atan2(dy, dx) + Math.PI/2; 
+        if (angle < 0) angle += 2*Math.PI;
+        
+        hoveredAngle = angle;
+        
+        const progressPct = angle / (2*Math.PI);
+        const dayEstimate = Math.floor(progressPct * 555);
+        if (dayEstimate < 552) { 
+          const mIdx = Math.floor(dayEstimate / 46);
+          hoveredMonthName = `${MONTHS_LORE[mIdx].name} (Day ${1 + (dayEstimate % 46)})`;
+        } else {
+          hoveredMonthName = `Festival of Rebekah`;
+        }
+      } else {
+        hoveredAngle = null;
+        hoveredMonthName = null;
+      }
+    });
+
+    canvas.addEventListener('mouseleave', () => {
+      hoveredAngle = null;
+      hoveredMonthName = null;
+    });
+
+    // Fast Forward Time Orbit Jump Click handler
+    canvas.addEventListener('click', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
+      
+      const dx = x - centerX;
+      const dy = y - centerY;
+      const distance = Math.sqrt(dx*dx + dy*dy);
+      
+      const orbitalRadius = Math.min(rect.width, rect.height) * 0.38;
+      
+      if (Math.abs(distance - orbitalRadius) < 30) {
+        let angle = Math.atan2(dy, dx) + Math.PI/2; 
+        if (angle < 0) angle += 2*Math.PI;
+        
+        const targetPercent = angle / (2*Math.PI);
+        const DAY_MS = 91570 * 1000;
+        
+        const currentSimTime = Date.now() + accumulatedTimeOffset;
+        const nDate = getNahlaCalendarDate(currentSimTime);
+        const currentYearStart = currentSimTime - ((nDate.dayOfYear - 1) * DAY_MS + nDate.msInCurrentDay);
+        
+        const targetOffsetMs = targetPercent * nDate.totalDaysInYear * DAY_MS;
+        const newSimTime = currentYearStart + targetOffsetMs;
+        
+        accumulatedTimeOffset += (newSimTime - currentSimTime);
+      }
+    });
+
+    function drawOrbitSimulator(nDate) {
+      const w = canvas.width / window.devicePixelRatio;
+      const h = canvas.height / window.devicePixelRatio;
+      const cx = w / 2;
+      const cy = h / 2;
+      
+      ctx.clearRect(0, 0, w, h);
+      
+      const orbitRad = Math.min(w, h) * 0.38;
+      
+      const qAngles = [0, Math.PI/2, Math.PI, 1.5*Math.PI, 2*Math.PI];
+      const qColors = ["#ef444405", "#3b82f605", "#10b98105", "#f59e0b05"];
+      
+      for(let i=0; i<4; i++) {
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.arc(cx, cy, orbitRad * 1.25, qAngles[i] - Math.PI/2, qAngles[i+1] - Math.PI/2);
+        ctx.closePath();
+        ctx.fillStyle = qColors[i];
+        ctx.fill();
+      }
+
+      ctx.strokeStyle = "#1d2228";
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([4, 4]);
+      ctx.beginPath();
+      ctx.arc(cx, cy, orbitRad, 0, 2*Math.PI);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      ctx.strokeStyle = "#1d2228";
+      ctx.lineWidth = 1;
+      
+      for(let i=0; i<4; i++) {
+        const theta = (i * Math.PI / 2) - Math.PI / 2;
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(cx + Math.cos(theta) * orbitRad * 1.15, cy + Math.sin(theta) * orbitRad * 1.15);
+        ctx.stroke();
+        
+        const textTheta = theta + Math.PI/4;
+        const labelR = orbitRad * 1.05;
+        ctx.font = '10px "JetBrains Mono", Courier, monospace';
+        ctx.fillStyle = "#5cb6e499";
+        ctx.textAlign = "center";
+        ctx.fillText(QUARTERS[i].toUpperCase(), cx + Math.cos(textTheta)*labelR, cy + Math.sin(textTheta)*labelR + 3);
+      }
+
+      // Drawing Rebekah Rings (Back Side Half - behind the planet body, now in glowing cyan)
+      const rebekahRad = 32;
+      
+      function drawRingHalf(startAngle, endAngle) {
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.rotate(-Math.PI/6);
+        ctx.scale(2.2, 0.45);
+        
+        // Outer fine dusty disk edge (Cyan)
+        ctx.strokeStyle = "rgba(6, 182, 212, 0.15)";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.arc(0, 0, rebekahRad * 1.45, startAngle, endAngle);
+        ctx.stroke();
+
+        // Dense cyan ring band
+        ctx.strokeStyle = "rgba(6, 182, 212, 0.55)";
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.arc(0, 0, rebekahRad * 1.25, startAngle, endAngle);
+        ctx.stroke();
+
+        // Inner ring glowing margin (Cyan)
+        ctx.strokeStyle = "rgba(34, 211, 238, 0.7)";
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.arc(0, 0, rebekahRad * 1.1, startAngle, endAngle);
+        ctx.stroke();
+
+        // Ring interior atmosphere glow overlay (Cyan)
+        ctx.strokeStyle = "rgba(6, 182, 212, 0.08)";
+        ctx.lineWidth = 8;
+        ctx.beginPath();
+        ctx.arc(0, 0, rebekahRad * 1.25, startAngle, endAngle);
+        ctx.stroke();
+
+        ctx.restore();
+      }
+
+      // Draw the Back ring portion (tilted away from viewer, local negative Y)
+      drawRingHalf(Math.PI, 2 * Math.PI);
+
+      // Drawing Rebekah as a Deep Crimson / Red Gas Giant Sphere (overlapping back ring)
+      const grad = ctx.createRadialGradient(cx, cy, 2, cx, cy, rebekahRad);
+      grad.addColorStop(0, '#ff4d4d');    // Bright crimson glow center
+      grad.addColorStop(0.35, '#990011'); // Deep blood-red intermediate 
+      grad.addColorStop(0.75, '#4a0008'); // Dark maroon bands transition
+      grad.addColorStop(1, '#0e0304');    // Black shadow fading into space
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.arc(cx, cy, rebekahRad, 0, 2*Math.PI);
+      ctx.fill();
+
+      // Draw the Front ring portion (tilted towards viewer, overlapping the planet body)
+      drawRingHalf(0, Math.PI);
+
+      // Orbital Moon tracker representation
+      const progressRatio = nDate.dayOfYear / nDate.totalDaysInYear;
+      const moonAngle = (progressRatio * 2 * Math.PI) - Math.PI / 2;
+      
+      const mx = cx + Math.cos(moonAngle) * orbitRad;
+      const my = cy + Math.sin(moonAngle) * orbitRad;
+      
+      const glow = ctx.createRadialGradient(mx, my, 1, mx, my, 10);
+      glow.addColorStop(0, '#49d381');
+      glow.addColorStop(1, 'transparent');
+      ctx.fillStyle = glow;
+      ctx.beginPath();
+      ctx.arc(mx, my, 10, 0, 2*Math.PI);
+      ctx.fill();
+
+      ctx.fillStyle = '#49d381';
+      ctx.beginPath();
+      ctx.arc(mx, my, 5, 0, 2*Math.PI);
+      ctx.fill();
+
+      ctx.font = 'bold 9px "JetBrains Mono", Courier, monospace';
+      ctx.fillStyle = '#9ca4b0';
+      ctx.textAlign = 'left';
+      ctx.fillText(`SYSTEM MONITOR: ACTIVE`, 15, 20);
+      
+      ctx.font = '8px "JetBrains Mono", Courier, monospace';
+      ctx.fillStyle = '#5cb6e4';
+      ctx.fillText(`YEAR PROGRESS: ${(progressRatio*100).toFixed(2)}%`, 15, 32);
+      ctx.fillText(`CURRENT NODE: ${nDate.quarterName.toUpperCase()}`, 15, 44);
+
+      if (hoveredAngle !== null) {
+        ctx.strokeStyle = '#49d38188';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.arc(cx, cy, orbitRad, hoveredAngle - Math.PI/2 - 0.05, hoveredAngle - Math.PI/2 + 0.05);
+        ctx.stroke();
+        
+        ctx.fillStyle = '#49d381';
+        ctx.font = 'bold 9px "JetBrains Mono", Courier, monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText(hoveredMonthName, cx, h - 15);
+      }
     }
 
-    // Build the month layout buttons and register click events
     function renderCalendarGrid(currentMonthIndex, isYearZero, isIntercalary) {
       const gridContainer = document.getElementById('months-grid');
-      gridContainer.innerHTML = ''; // reset
+      gridContainer.innerHTML = ''; 
 
       MONTHS_LORE.forEach((month, idx) => {
         const isActive = currentMonthIndex === idx;
         const isSelected = selectedMonthIndex === idx;
+        const qIdx = Math.floor(idx / 3);
 
         const button = document.createElement('button');
         button.className = `p-3 rounded border text-left transition-all ${
@@ -350,25 +621,23 @@
 
         button.innerHTML = `
           <div class="flex justify-between items-start">
-            <span class="text-xs text-slate-400 font-medium font-sans">M ${idx + 1}</span>
+            <span class="text-xs text-slate-500 font-medium font-mono">M ${idx + 1} | ${QUARTERS[qIdx].substring(0,4)}</span>
             ${isActive ? '<span class="text-[10px] uppercase bg-[#49d381]/10 text-[#49d381] px-2 py-0.5 rounded font-bold animate-pulse font-sans">Active</span>' : ''}
           </div>
           <div class="text-base font-bold text-slate-200 mt-1 font-sans">${month.name}</div>
-          <div class="text-xs text-slate-400 mt-0.5 font-sans">46 Days</div>
+          <div class="text-[11px] text-slate-400 mt-0.5 font-sans">44 Days + 2 Mini-Fests</div>
         `;
 
         button.addEventListener('click', () => {
           selectedMonthIndex = idx;
           updateMonthDetails();
-          // Rerender grid to shift selections
-          const activeCal = getNahlaCalendarDate(Date.now());
+          const activeCal = getNahlaCalendarDate(Date.now() + accumulatedTimeOffset);
           renderCalendarGrid(activeCal.monthIndex, activeCal.isYearZero, activeCal.isIntercalary);
         });
 
         gridContainer.appendChild(button);
       });
 
-      // Append Festival of Kurunnītu button at the end
       const isFestivalActive = isIntercalary;
       const isFestivalSelected = selectedMonthIndex === -1;
       const festivalButton = document.createElement('button');
@@ -384,7 +653,7 @@
         <div class="flex justify-between items-center">
           <div>
             <span class="text-xs text-slate-400 font-medium font-sans">Un-Month Cycle</span>
-            <div class="text-base font-bold text-purple-300 mt-0.5 font-sans">Festival of Kurunnītu (Intercalary Days)</div>
+            <div class="text-base font-bold text-purple-300 mt-0.5 font-sans">Festival of Rebekah (Intercalary Days)</div>
           </div>
           <div class="text-right flex flex-col items-end gap-1">
             <span class="text-xs text-slate-400 block font-sans">3 Days (4 in Leap)</span>
@@ -398,14 +667,13 @@
       festivalButton.addEventListener('click', () => {
         selectedMonthIndex = -1;
         updateMonthDetails();
-        const activeCal = getNahlaCalendarDate(Date.now());
+        const activeCal = getNahlaCalendarDate(Date.now() + accumulatedTimeOffset);
         renderCalendarGrid(activeCal.monthIndex, activeCal.isYearZero, activeCal.isIntercalary);
       });
 
       gridContainer.appendChild(festivalButton);
     }
 
-    // Render Lore Details card based on current selected month
     function updateMonthDetails() {
       const detailsContainer = document.getElementById('month-details');
 
@@ -413,30 +681,31 @@
         detailsContainer.innerHTML = `
           <div>
             <h4 class="text-base font-bold text-purple-400 uppercase font-sans">
-              The Festival of Kurunnītu
+              The Festival of Rebekah
             </h4>
             <p class="text-xs text-slate-500 italic mt-0.5 font-sans">
-              Traditional Mesopotamian sweet-beer celebration sitting completely outside standard months.
+              Primary System Festival named after the parent gas giant Rebekah.
             </p>
             <p class="text-sm text-slate-300 mt-2.5 leading-relaxed font-sans">
-              Named after Kurunnītu, goddess of brewing and the divine sweet red beer of offerings and celebration 🍒 This 3-day (4-day in leap years) period represents the transition zone of celestial rest. Standard chronometer measurements pause while Rebekah reaches maximum orbital speeds before resetting back to Anat 1 at Perihelion.
+              This 3-day (4-day in leap years) celebration sits outside standard months and quarters. Standard weekday clocks pause as Rebekah coordinates shift into maximum orbital acceleration, preparing to loop safely back into Month 1 (Hope) Day 1 at Perihelion.
             </p>
             <div class="mt-3 inline-flex items-center gap-1.5 text-xs text-purple-400 font-sans">
               <span class="w-1.5 h-1.5 rounded-full bg-purple-400"></span>
-              Occurs: End of Month 12 (Uttu) / Prior to Perihelion
+              Occurs: End of Quarter IV (Troum) / Closes Month 12 (Anneke)
             </div>
           </div>
         `;
       } else {
         const month = MONTHS_LORE[selectedMonthIndex];
+        const qIdx = Math.floor(selectedMonthIndex / 3);
         detailsContainer.innerHTML = `
           <div>
             <div class="flex justify-between items-start">
               <h4 class="text-base font-bold text-[#5cb6e4] uppercase font-sans">
-                Month ${selectedMonthIndex + 1}: ${month.name}
+                Month ${selectedMonthIndex + 1}: ${month.name} (Quarter: ${QUARTERS[qIdx]})
               </h4>
               <span class="text-xs text-slate-400 bg-[#0f1115] px-2.5 py-1 rounded border border-[#1d2228] font-mono">
-                Standard Length: 46 Days
+                Length: 44 Weekdays + Festival of Rati & Kali
               </span>
             </div>
             <p class="text-xs text-slate-500 italic mt-0.5 font-sans">
@@ -454,14 +723,16 @@
       }
     }
 
-    // Core Clock and Countdown updater loop
     function updateClock() {
       const now = Date.now();
-      
-      // Compute calendar coordinates
-      const nDate = getNahlaCalendarDate(now);
+      const elapsedRealTime = now - lastClockUpdate;
+      lastClockUpdate = now;
 
-      // Handle epoch reference labels
+      const simTime = now + accumulatedTimeOffset;
+      const nDate = getNahlaCalendarDate(simTime);
+
+      drawOrbitSimulator(nDate);
+
       const epochRefSpan = document.getElementById('epoch-ref');
       if (nDate.isYearZero) {
         epochRefSpan.innerText = "Target Epoch: 2026-07-03 03:10:11 UTC";
@@ -469,26 +740,22 @@
         epochRefSpan.innerText = `Year Alignment: Year ${nDate.year}`;
       }
 
-      // --- CONSOLIDATED HUD TELEMETRY WRITING ---
-      // 1. Calculate NLT (Nahla Local Time) from current ms progress in the cycle
       const totalSecsInDay = Math.floor(nDate.msInCurrentDay / 1000);
       const nltH = Math.floor(totalSecsInDay / 3600);
       const nltM = Math.floor((totalSecsInDay % 3600) / 60);
       const nltS = totalSecsInDay % 60;
-      const nltDisplayStr = `${nltH.toString().padStart(2, '0')}:${nltM.toString().padStart(2, '0')}:${nltS.toString().padStart(2, '0')}`;
-      document.getElementById('nlt-clock-display').innerText = nltDisplayStr;
+      document.getElementById('nlt-clock-display').innerText = `${nltH.toString().padStart(2, '0')}:${nltM.toString().padStart(2, '0')}:${nltS.toString().padStart(2, '0')}`;
 
-      // Calculate and update current Galactic Band Phase Symbol, Label, and Description Tooltip
       const PHASE_SECS = 91570 / 12;
       const phaseIndex = Math.floor(totalSecsInDay / PHASE_SECS);
       const PHASES = [
         { sym: "α", name: "Alpha", range: "00:00:00 - 02:07:10", desc: "Astronomical dawn; first light" },
         { sym: "β", name: "Beta", range: "02:07:10 - 04:14:21", desc: "Brightening sunrise arc" },
-        { sym: "γ", name: "Gamma", range: "04:14:21 - 06:21:32", desc: "Morning light, sun climbing (galactic band 90°)" },
+        { sym: "γ", name: "Gamma", range: "04:14:21 - 06:21:32", desc: "Morning light, sun climbing (90°)" },
         { sym: "δ", name: "Delta", range: "06:21:32 - 08:28:43", desc: "Approaching midday" },
         { sym: "ε", name: "Epsilon", range: "08:28:43 - 10:35:54", desc: "Solar zenith; shortest shadows" },
         { sym: "ζ", name: "Zeta", range: "10:35:54 - 12:43:05", desc: "Early afternoon" },
-        { sym: "η", name: "Eta", range: "12:43:05 - 14:50:15", desc: "Mid-afternoon decline (galactic band 270°)" },
+        { sym: "η", name: "Eta", range: "12:43:05 - 14:50:15", desc: "Mid-afternoon decline (270°)" },
         { sym: "θ", name: "Theta", range: "14:50:15 - 16:57:26", desc: "Late afternoon" },
         { sym: "ι", name: "Iota", range: "16:57:26 - 19:04:37", desc: "Early evening/sunset" },
         { sym: "κ", name: "Kappa", range: "19:04:37 - 21:11:48", desc: "Twilight glow" },
@@ -498,58 +765,56 @@
       const currentPhase = PHASES[Math.min(11, Math.max(0, phaseIndex))];
       const phaseEl = document.getElementById('nlt-phase-indicator');
       if (phaseEl) {
-        // Appends the lowercase name in brackets to the right of the greek symbol
         phaseEl.innerText = `${currentPhase.sym} (${currentPhase.name.toLowerCase()})`;
         phaseEl.title = `Phase ${currentPhase.sym} (${currentPhase.name})\nRange: ${currentPhase.range}\n${currentPhase.desc}`;
       }
 
-      // 2. Update HUD Year Panel
       document.getElementById('hud-year').innerText = `Y ${nDate.year}`;
 
-      // 3. Update HUD Month Panel (Month name atop, coordinate on baseline)
       const hudMonth = document.getElementById('hud-month');
       const hudMonthName = document.getElementById('hud-month-name');
+      const hudQuarterName = document.getElementById('hud-quarter-name');
+
       if (nDate.isIntercalary) {
         hudMonth.innerText = "FEST";
-        hudMonth.className = "text-[10px] md:text-xs text-purple-400/80 leading-none";
-        hudMonthName.innerText = "Kurunnītu";
+        hudMonthName.innerText = "Rebekah";
         hudMonthName.className = "text-xs md:text-sm text-purple-400 uppercase tracking-wider font-semibold leading-none";
+        hudQuarterName.innerText = "YEAR-END";
       } else {
         hudMonth.innerText = `${(nDate.monthIndex + 1).toString().padStart(2, '0')} / 12`;
-        hudMonth.className = "text-[10px] md:text-xs text-slate-500 leading-none";
         hudMonthName.innerText = MONTHS_LORE[nDate.monthIndex].name;
         hudMonthName.className = "text-xs md:text-sm text-[#49d381] uppercase tracking-wider font-semibold leading-none";
+        hudQuarterName.innerText = `Q: ${nDate.quarterName}`;
       }
 
-      // 4. Update HUD Day Panel (Day xx / xx) with styled dark denominators
       const hudDay = document.getElementById('hud-day');
+      const hudWeekNum = document.getElementById('hud-week-number');
       const hudYday = document.getElementById('hud-yday');
+
+      hudDay.innerText = nDate.weekdayName;
+      hudWeekNum.innerText = nDate.weekNumberText;
+
       if (nDate.isIntercalary) {
         const festivalDays = isNahlaLeapYear(nDate.year) ? 4 : 3;
-        hudDay.innerHTML = `${nDate.dayOfMonth.toString().padStart(2, '0')} <span class="text-slate-500">/ ${festivalDays.toString().padStart(2, '0')}</span>`;
-        hudYday.innerText = `F-DAY: ${nDate.dayOfMonth}`;
+        hudYday.innerText = `F-DAY: ${nDate.dayOfMonth} / ${festivalDays}`;
       } else {
-        hudDay.innerHTML = `${nDate.dayOfMonth.toString().padStart(2, '0')} <span class="text-slate-500">/ 46</span>`;
-        hudYday.innerText = `Y-DAY: ${nDate.dayOfYear}`;
+        hudYday.innerText = `M-DAY: ${nDate.dayOfMonth} | Y-DAY: ${nDate.dayOfYear}`;
       }
 
-      // Backward compatibility backup injections for old DOM queries
       document.getElementById('current-year-display').innerText = `YEAR ${nDate.year}`;
       const currentDateDisplay = document.getElementById('current-date-display');
       const currentPhaseDisplay = document.getElementById('current-phase-display');
       if (nDate.isIntercalary) {
-        currentDateDisplay.innerText = `Festival of Kurunnītu, Day ${nDate.dayOfMonth}`;
+        currentDateDisplay.innerText = `Festival of Rebekah, Day ${nDate.dayOfMonth}`;
         currentPhaseDisplay.innerText = "Intercalary Transition Period";
       } else {
         currentDateDisplay.innerText = `${MONTHS_LORE[nDate.monthIndex].name} ${nDate.dayOfMonth}`;
-        currentPhaseDisplay.innerText = `Month ${nDate.monthIndex + 1} — Standard Phase`;
+        currentPhaseDisplay.innerText = `Month ${nDate.monthIndex + 1} — ${nDate.weekNumberText}`;
       }
 
-      // Update T-Minus targeted label
       document.getElementById('target-milestone-label').innerHTML = `T-Minus to <span class="text-[#5cb6e4] font-bold">${nDate.nextMilestoneName}</span>`;
 
-      // Calculate and push countdown metrics (Unified Standard Earth Metrics: Day = 86400s)
-      const totalSecs = Math.floor(nDate.msUntilNextMilestone / 1000);
+      const totalSecs = Math.max(0, Math.floor(nDate.msUntilNextMilestone / 1000));
       const days = Math.floor(totalSecs / 86400); 
       const hours = Math.floor((totalSecs % 86400) / 3600); 
       const mins = Math.floor((totalSecs % 3600) / 60);
@@ -562,25 +827,21 @@
       document.getElementById('countdown-secs').innerText = secs.toString().padStart(2, '0');
       document.getElementById('countdown-ds').innerText = decisecond;
 
-      // Update progress bar or progress tracker text
       const progressBarFill = document.getElementById('progress-bar-fill');
       const progressionText = document.getElementById('progression-text');
 
       if (nDate.isYearZero) {
-        // Calculate Year 0 progress towards Epoch (using 91570-second Nahla days)
         const totalDurationMs = 555 * 91570 * 1000;
         const msIntoYearZero = (nDate.dayOfYear - 1) * 91570 * 1000 + nDate.msInCurrentDay;
         const progressPct = Math.min(100, (msIntoYearZero / totalDurationMs) * 100);
-        
         progressBarFill.style.width = `${progressPct}%`;
-        progressionText.innerText = `Day ${nDate.dayOfYear} of ${nDate.totalDaysInYear} (${progressPct.toFixed(2)}%) | Synchronised with perihelion alignment`;
+        progressionText.innerText = `Day ${nDate.dayOfYear} of ${nDate.totalDaysInYear} (${progressPct.toFixed(2)}%) | Quarter: ${nDate.quarterName}`;
       } else {
         const progressPct = (nDate.dayOfYear / nDate.totalDaysInYear) * 100;
         progressBarFill.style.width = `${progressPct}%`;
         progressionText.innerText = `Day ${nDate.dayOfYear} of ${nDate.totalDaysInYear} | ${progressPct.toFixed(2)}% orbital progression complete.`;
       }
 
-      // --- Leap Year Cycle Monitor Integration ---
       const currentYear = nDate.year;
       let yearInCycle = ((currentYear - 1) % 28) + 1;
       if (yearInCycle <= 0) {
@@ -591,7 +852,7 @@
       document.getElementById('leap-cycle-text').innerText = `Cycle Position: Year ${yearInCycle} of 28`;
 
       const timelineContainer = document.getElementById('leap-timeline-grid');
-      timelineContainer.innerHTML = ''; // Reset timeline grid
+      timelineContainer.innerHTML = ''; 
 
       for (let y = 1; y <= 28; y++) {
         const block = document.createElement('div');
@@ -615,7 +876,6 @@
         timelineContainer.appendChild(block);
       }
 
-      // Compute details for the next scheduled leap year
       let yearsUntilLeap = 0;
       let targetLeapYear = currentYear;
       for (let offset = 1; offset <= 28; offset++) {
@@ -628,7 +888,7 @@
 
       const leapAnnouncement = document.getElementById('leap-announcement-text');
       if (isNahlaLeapYear(currentYear)) {
-        leapAnnouncement.innerHTML = `⚠️ <span class="text-purple-400 font-bold">CRITICAL ALIGNMENT:</span> Year ${currentYear} is an active LEAP YEAR. The Festival of Kurunnītu expands to 4 days.`;
+        leapAnnouncement.innerHTML = `⚠️ <span class="text-purple-400 font-bold">CRITICAL ALIGNMENT:</span> Year ${currentYear} is an active LEAP YEAR. The Festival of Rebekah expands to 4 days.`;
       } else {
         let nextLeapCycleYear = ((targetLeapYear - 1) % 28) + 1;
         if (nextLeapCycleYear <= 0) nextLeapCycleYear += 28;
@@ -636,23 +896,23 @@
       }
     }
 
-    // Initialize application on load
+    document.getElementById('reset-time-btn').addEventListener('click', () => {
+      accumulatedTimeOffset = 0;
+    });
+
     window.onload = function() {
-      // Calculate initial setup
       const activeCal = getNahlaCalendarDate(Date.now());
-      
-      // Select the current month dynamically on launch (works beautifully for both Year 0 and Year 1+)
       selectedMonthIndex = activeCal.isIntercalary ? -1 : activeCal.monthIndex;
 
-      // Initial layouts
       renderCalendarGrid(activeCal.monthIndex, activeCal.isYearZero, activeCal.isIntercalary);
       updateMonthDetails();
+      
+      lastClockUpdate = Date.now();
       updateClock();
 
-      // Start the heartbeat loop
       setInterval(() => {
         updateClock();
-      }, 100);
+      }, 50);
     }
   </script>
 </body>
