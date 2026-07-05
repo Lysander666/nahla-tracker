@@ -143,7 +143,7 @@
           <div class="flex-1 flex flex-col justify-between bg-[#0f1115] border border-[#1d2228] rounded-lg p-3 sm:p-4 font-sans">
             <div>
               <div class="flex justify-between items-center mb-2.5">
-                <span class="text-[11px] sm:text-xs text-slate-400 font-bold uppercase tracking-wider font-mono">11-Day Week Progression Tracker</span>
+                <span class="text-xs sm:text-sm text-slate-400 font-bold uppercase tracking-wider font-mono">11-Day Week Progression Tracker</span>
                 <span id="weekday-status-toast" class="text-[10px] sm:text-xs font-mono text-slate-500 uppercase">STANDBY</span>
               </div>
               
@@ -154,7 +154,7 @@
             </div>
 
             <!-- Intercalary/Festival Event Alert Monitor inside tracker -->
-            <div id="weekday-tracker-alert" class="mt-3 pt-2.5 border-t border-[#1d2228]/40 text-[11px] sm:text-xs font-mono flex items-center gap-2 text-slate-500">
+            <div id="weekday-tracker-alert" class="mt-3 pt-2.5 border-t border-[#1d2228]/40 text-xs sm:text-sm font-mono flex items-center gap-2 text-slate-500">
               <span class="inline-block w-2 h-2 rounded-full bg-slate-700"></span>
               <span>All Week systems operating on standard rotational frequency.</span>
             </div>
@@ -574,9 +574,12 @@
         
         const textTheta = theta + Math.PI/4;
         const labelR = orbitRad * 1.05;
-        const sizeMultiplier = w < 480 ? 0.8 : 1.0;
-        ctx.font = `${Math.round(10 * sizeMultiplier)}px "JetBrains Mono", Courier, monospace`;
-        ctx.fillStyle = "#5cb6e499";
+        
+        // Enlarged and brightened Quarter titles (Bellatrix, Bunika, etc.)
+        const sizeMultiplier = w < 480 ? 1.1 : 1.35;
+        ctx.font = `bold ${Math.round(10 * sizeMultiplier)}px "JetBrains Mono", Courier, monospace`;
+        ctx.fillStyle = "#7dd3sky"; // Beautiful, highly saturated sky blue
+        ctx.fillStyle = "#7dd3fc"; 
         ctx.textBaseline = "middle";
         ctx.textAlign = "center";
         ctx.fillText(QUARTERS[i].toUpperCase(), cx + Math.cos(textTheta)*labelR, cy + Math.sin(textTheta)*labelR);
@@ -670,7 +673,7 @@
         ctx.stroke();
         
         ctx.fillStyle = '#49d381';
-        ctx.font = `bold ${Math.round(9 * mobileScale)}px "JetBrains Mono", Courier, monospace`;
+        ctx.font = `bold ${Math.round(10 * mobileScale)}px "JetBrains Mono", Courier, monospace`;
         ctx.textAlign = 'center';
         ctx.fillText(hoveredMonthName, cx, h - 15);
       }
@@ -686,9 +689,9 @@
         sq.className = "bg-[#090b0d] border border-[#1d2228] rounded p-2 text-center flex flex-col justify-between items-center transition-all duration-300 min-h-[58px]";
         
         sq.innerHTML = `
-          <span class="text-[9px] sm:text-[10px] text-slate-500 font-mono leading-none">${index + 1}</span>
-          <span class="text-[11px] sm:text-xs font-bold text-slate-400 font-mono leading-tight tracking-wider mt-1">${WEEKDAY_SHORTS[index]}</span>
-          <span class="text-[8px] sm:text-[9px] text-slate-500 font-sans tracking-wide leading-none select-none mt-1 truncate max-w-full" title="${day}">${day}</span>
+          <span class="text-[11px] sm:text-xs text-slate-500 font-mono leading-none">${index + 1}</span>
+          <span class="text-xs sm:text-sm font-bold text-slate-400 font-mono leading-tight tracking-wider mt-1">${WEEKDAY_SHORTS[index]}</span>
+          <span class="text-[10px] sm:text-[11px] text-slate-500 font-sans tracking-wide leading-none select-none mt-1 truncate max-w-full" title="${day}">${day}</span>
         `;
         container.appendChild(sq);
       });
@@ -701,12 +704,12 @@
 
         if (!isIntercalary && currentWeekdayName === day) {
           sq.className = "bg-[#49d381]/5 border-[#49d381] active-day-pulse rounded p-2 text-center flex flex-col justify-between items-center transition-all duration-300 min-h-[58px] scale-105 z-10 text-[#49d381]";
-          sq.querySelector('span:nth-child(2)').className = "text-[11px] sm:text-xs font-bold text-[#49d381] font-mono leading-tight tracking-wider mt-1";
-          sq.querySelector('span:nth-child(3)').className = "text-[8px] sm:text-[9px] text-[#49d381] font-semibold font-sans tracking-wide leading-none select-none mt-1 truncate max-w-full";
+          sq.querySelector('span:nth-child(2)').className = "text-xs sm:text-sm font-bold text-[#49d381] font-mono leading-tight tracking-wider mt-1";
+          sq.querySelector('span:nth-child(3)').className = "text-[10px] sm:text-[11px] text-[#49d381] font-semibold font-sans tracking-wide leading-none select-none mt-1 truncate max-w-full";
         } else {
           sq.className = "bg-[#090b0d] border border-[#1d2228] rounded p-2 text-center flex flex-col justify-between items-center transition-all duration-300 min-h-[58px] opacity-60";
-          sq.querySelector('span:nth-child(2)').className = "text-[11px] sm:text-xs font-bold text-slate-400 font-mono leading-tight tracking-wider mt-1";
-          sq.querySelector('span:nth-child(3)').className = "text-[8px] sm:text-[9px] text-slate-500 font-sans tracking-wide leading-none select-none mt-1 truncate max-w-full";
+          sq.querySelector('span:nth-child(2)').className = "text-xs sm:text-sm font-bold text-slate-400 font-mono leading-tight tracking-wider mt-1";
+          sq.querySelector('span:nth-child(3)').className = "text-[10px] sm:text-[11px] text-slate-500 font-sans tracking-wide leading-none select-none mt-1 truncate max-w-full";
         }
       });
 
@@ -715,14 +718,14 @@
       
       if (isIntercalary) {
         toast.innerText = "FESTIVAL PAUSE";
-        toast.className = "text-[10px] sm:text-xs font-mono text-purple-400 bg-purple-500/10 px-1.5 py-0.5 rounded uppercase tracking-wider font-bold animate-pulse";
+        toast.className = "text-[11px] sm:text-xs font-mono text-purple-400 bg-purple-500/10 px-1.5 py-0.5 rounded uppercase tracking-wider font-bold animate-pulse";
         alertBanner.innerHTML = `
           <span class="inline-block w-2.5 h-2.5 rounded-full bg-purple-500 animate-ping"></span>
           <span class="text-purple-300 font-semibold">WEEK SEQUENCE SUSPENDED: Observing the Festival of Rebekah (Day ${dayOfMonth}). Standard shift timelines are paused.</span>
         `;
       } else if (dayOfMonth === 45 || dayOfMonth === 46) {
         toast.innerText = "MINI-FEST WEEKEND";
-        toast.className = "text-[10px] sm:text-xs font-mono text-amber-400 bg-amber-500/10 px-1.5 py-0.5 rounded uppercase tracking-wider font-bold animate-pulse";
+        toast.className = "text-[11px] sm:text-xs font-mono text-amber-400 bg-amber-500/10 px-1.5 py-0.5 rounded uppercase tracking-wider font-bold animate-pulse";
         const festName = dayOfMonth === 45 ? "Rati" : "Kali";
         alertBanner.innerHTML = `
           <span class="inline-block w-2.5 h-2.5 rounded-full bg-amber-500 animate-ping"></span>
@@ -730,7 +733,7 @@
         `;
       } else {
         toast.innerText = "ACTIVE WEEKDAY";
-        toast.className = "text-[10px] sm:text-xs font-mono text-[#49d381] bg-[#49d381]/10 px-1.5 py-0.5 rounded uppercase tracking-wider font-semibold";
+        toast.className = "text-[11px] sm:text-xs font-mono text-[#49d381] bg-[#49d381]/10 px-1.5 py-0.5 rounded uppercase tracking-wider font-semibold";
         alertBanner.innerHTML = `
           <span class="inline-block w-2 h-2 rounded-full bg-[#49d381]"></span>
           <span class="text-slate-400">Standard 46-day month: 4 weeks (44 standard days), ending with a 2-day dual festival period. 12 months (+3 intercalary days) per orbital cycle.</span>
