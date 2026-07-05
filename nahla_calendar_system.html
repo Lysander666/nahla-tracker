@@ -641,14 +641,14 @@
       const my = cy + Math.sin(moonAngle) * orbitRad;
       
       const glow = ctx.createRadialGradient(mx, my, 1, mx, my, 10);
-      glow.addColorStop(0, '#49d381');
+      glow.addColorStop(0, '#fbbf24');
       glow.addColorStop(1, 'transparent');
       ctx.fillStyle = glow;
       ctx.beginPath();
       ctx.arc(mx, my, 10, 0, 2*Math.PI);
       ctx.fill();
 
-      ctx.fillStyle = '#49d381';
+      ctx.fillStyle = '#fbbf24';
       ctx.beginPath();
       ctx.arc(mx, my, 5, 0, 2*Math.PI);
       ctx.fill();
