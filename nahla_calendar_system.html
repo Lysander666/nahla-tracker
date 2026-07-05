@@ -65,11 +65,11 @@
    <header class="border-b border-[#1d2228] pb-4 mb-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
       <div>
         <div class="flex items-center gap-2.5 mt-2">
-          <h1 class="text-lg sm:text-xl md:text-2xl font-bold tracking-tight text-slate-100 font-mono">
+          <h1 class="text-base sm:text-lg md:text-2xl font-bold tracking-tight text-slate-100 font-mono">
             Nahla Orbital & Calendar System
           </h1>
         </div> 
-        <p class="text-[9px] sm:text-xs text-slate-500 mt-1 uppercase tracking-wider">
+        <p class="text-[10px] sm:text-xs text-slate-500 mt-1 uppercase tracking-wider">
            Hypi Bra EV-P d5-78 | Orbiting Body: Rebekah (6) | Moon: Nahla (6 a)
         </p>
       </div>
@@ -84,15 +84,15 @@
       <section class="bg-[#121519] border border-[#1d2228] rounded-lg p-3 sm:p-5 shadow-lg relative overflow-hidden">
         <div class="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#5cb6e4] to-transparent"></div>
         
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-3">
-          <span class="text-xs text-[#5cb6e4] font-bold uppercase tracking-widest font-sans">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2.5 mb-3">
+          <span class="text-xs sm:text-sm text-[#5cb6e4] font-bold uppercase tracking-widest font-sans">
             Real-Time Year Quarter
           </span>
-          <div class="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
-            <button id="reset-time-btn" class="px-2 py-1 text-[9px] sm:text-[10px] font-mono rounded border border-[#1d2228] hover:border-[#5cb6e4] hover:text-[#5cb6e4] transition-all uppercase bg-[#0f1115]">
+          <div class="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
+            <button id="reset-time-btn" class="px-3 py-1.5 text-[11px] sm:text-xs font-mono font-bold rounded border border-[#5cb6e4] text-[#5cb6e4] bg-[#5cb6e4]/10 hover:bg-[#5cb6e4]/20 hover:shadow-[0_0_12px_rgba(92,182,228,0.3)] transition-all uppercase tracking-wider bg-[#0f1115]">
               Sync To Real-Time
             </button>
-            <span class="text-[9px] sm:text-[10px] text-amber-400 font-bold bg-amber-500/10 px-2 py-0.5 rounded uppercase tracking-wider font-mono">
+            <span class="text-[10px] sm:text-xs text-amber-400 font-bold bg-amber-500/10 px-2 py-0.5 rounded uppercase tracking-wider font-mono">
               Interactive Canvas
             </span>
           </div>
@@ -100,7 +100,7 @@
 
         <div class="relative w-full aspect-[4/3] sm:aspect-[16/9] md:aspect-[21/9] bg-[#090b0d] rounded border border-[#1d2228] overflow-hidden">
           <canvas id="orbitalCanvas" class="w-full h-full block cursor-crosshair"></canvas>
-          <div class="absolute bottom-2 left-2 right-2 sm:right-auto bg-[#0d0f12]/90 border border-[#1d2228] px-2 py-1 rounded text-[9px] sm:text-[10px] font-mono text-slate-400 pointer-events-none text-center sm:text-left">
+          <div class="absolute bottom-2 left-2 right-2 sm:right-auto bg-[#0d0f12]/90 border border-[#1d2228] px-2 py-1 rounded text-[10px] sm:text-xs font-mono text-slate-400 pointer-events-none text-center sm:text-left">
             Click orbit track to fast-forward time.
           </div>
         </div>
@@ -111,7 +111,7 @@
         <div class="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#49d381] to-transparent"></div>
         
         <div class="mb-4">
-          <span class="text-xs text-[#49d381] font-bold uppercase tracking-widest font-sans">
+          <span class="text-xs sm:text-sm text-[#49d381] font-bold uppercase tracking-widest font-sans">
             Current weekday: 11 day week / 4 weeks per month
           </span>
         </div>
@@ -119,20 +119,20 @@
         <div class="flex flex-col md:flex-row gap-5 items-stretch">
           <!-- One-Day Desk Calendar Widget -->
           <div class="flex-shrink-0 flex items-center justify-center">
-            <div id="single-day-card" class="w-44 h-44 flex flex-col justify-between border border-[#5cb6e4]/30 rounded-lg overflow-hidden bg-[#090b0d] shadow-[0_0_15px_rgba(92,182,228,0.1)] transition-all duration-300">
+            <div id="single-day-card" class="w-44 sm:w-48 h-44 sm:h-48 flex flex-col justify-between border border-[#5cb6e4]/30 rounded-lg overflow-hidden bg-[#090b0d] shadow-[0_0_15px_rgba(92,182,228,0.1)] transition-all duration-300">
               <!-- Month & Year Header band -->
-              <div id="single-day-header" class="bg-[#5cb6e4]/10 border-b border-[#5cb6e4]/20 py-2 text-center text-[10px] sm:text-xs font-bold uppercase tracking-widest font-mono text-[#5cb6e4]">
+              <div id="single-day-header" class="bg-[#5cb6e4]/10 border-b border-[#5cb6e4]/20 py-2.5 text-center text-[11px] sm:text-xs font-bold uppercase tracking-widest font-mono text-[#5cb6e4]">
                 LOADING...
               </div>
               
               <!-- Daily Main Body -->
               <div class="flex-1 flex flex-col items-center justify-center p-2 text-center">
                 <span id="single-day-num" class="text-4xl sm:text-5xl font-extrabold text-slate-100 font-mono tracking-tighter leading-none">--</span>
-                <span id="single-day-name" class="text-[10px] sm:text-xs font-semibold text-[#49d381] mt-2 font-sans uppercase tracking-wider leading-none">--</span>
+                <span id="single-day-name" class="text-[11px] sm:text-xs font-semibold text-[#49d381] mt-2 font-sans uppercase tracking-wider leading-none">--</span>
               </div>
               
               <!-- Footnote Telemetry Details -->
-              <div id="single-day-footer" class="bg-[#121519] border-t border-[#1d2228] py-1.5 px-2 text-center text-[8px] sm:text-[9px] font-mono text-slate-500 flex justify-between items-center">
+              <div id="single-day-footer" class="bg-[#121519] border-t border-[#1d2228] py-2 px-2.5 text-center text-[9px] sm:text-[10px] font-mono text-slate-500 flex justify-between items-center">
                 <span id="single-day-week">WEEK --</span>
                 <span id="single-day-quarter">--</span>
               </div>
@@ -143,18 +143,18 @@
           <div class="flex-1 flex flex-col justify-between bg-[#0f1115] border border-[#1d2228] rounded-lg p-3 sm:p-4 font-sans">
             <div>
               <div class="flex justify-between items-center mb-2.5">
-                <span class="text-[10px] sm:text-xs text-slate-400 font-bold uppercase tracking-wider font-mono">11-Day Week Progression Tracker</span>
-                <span id="weekday-status-toast" class="text-[9px] font-mono text-slate-500 uppercase">STANDBY</span>
+                <span class="text-[11px] sm:text-xs text-slate-400 font-bold uppercase tracking-wider font-mono">11-Day Week Progression Tracker</span>
+                <span id="weekday-status-toast" class="text-[10px] sm:text-xs font-mono text-slate-500 uppercase">STANDBY</span>
               </div>
               
               <!-- 11-Day Squares Grid -->
-              <div id="week-squares-container" class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-11 gap-1.5 sm:gap-2">
+              <div id="week-squares-container" class="grid grid-cols-3 sm:grid-cols-6 md:grid-cols-11 gap-1.5 sm:gap-2">
                 <!-- Built dynamically via Javascript -->
               </div>
             </div>
 
             <!-- Intercalary/Festival Event Alert Monitor inside tracker -->
-            <div id="weekday-tracker-alert" class="mt-3 pt-2.5 border-t border-[#1d2228]/40 text-[10px] sm:text-xs font-mono flex items-center gap-2 text-slate-500">
+            <div id="weekday-tracker-alert" class="mt-3 pt-2.5 border-t border-[#1d2228]/40 text-[11px] sm:text-xs font-mono flex items-center gap-2 text-slate-500">
               <span class="inline-block w-2 h-2 rounded-full bg-slate-700"></span>
               <span>All Week systems operating on standard rotational frequency.</span>
             </div>
@@ -167,10 +167,10 @@
         <div class="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#5cb6e4] to-transparent"></div>
         
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1.5 mb-4 border-b border-[#1d2228]/40 pb-3">
-          <span class="text-xs text-[#5cb6e4] font-bold uppercase tracking-widest font-sans">
+          <span class="text-xs sm:text-sm text-[#5cb6e4] font-bold uppercase tracking-widest font-sans">
             Telemetry & Telecommunications
           </span>
-          <span id="epoch-ref" class="text-[10px] sm:text-xs text-slate-500 font-medium font-mono">
+          <span id="epoch-ref" class="text-[11px] sm:text-xs text-slate-500 font-medium font-mono">
             ---
           </span>
         </div>
@@ -182,36 +182,36 @@
             
             <div class="grid grid-cols-3 gap-1.5 sm:gap-3 text-center border-b border-[#1d2228]/40 pb-4 items-stretch">
               <!-- Left Column: DAY & WEEK -->
-              <div class="border-r border-[#1d2228]/40 flex flex-col justify-between h-full min-h-[75px] px-1">
-                <div class="text-[9px] sm:text-[11px] md:text-xs text-[#5cb6e4] uppercase tracking-wider font-semibold">WEEKDAY</div>
-                <div id="hud-day" class="text-[10px] sm:text-xs font-bold text-slate-200 tracking-wide break-words max-w-full leading-tight">-- / --</div>
-                <div id="hud-week-number" class="text-[8px] sm:text-[10px] text-[#49d381] uppercase font-semibold leading-none mt-1">--</div>
-                <div id="hud-yday" class="text-[8px] sm:text-[10px] text-slate-500 leading-none mt-1 break-all">Y-Day: --</div>
+              <div class="border-r border-[#1d2228]/40 flex flex-col justify-between h-full min-h-[85px] px-1">
+                <div class="text-[10px] sm:text-[11px] md:text-xs text-[#5cb6e4] uppercase tracking-wider font-semibold">WEEKDAY</div>
+                <div id="hud-day" class="text-[11px] sm:text-xs md:text-sm font-bold text-slate-200 tracking-wide break-words max-w-full leading-tight">-- / --</div>
+                <div id="hud-week-number" class="text-[9px] sm:text-[10px] text-[#49d381] uppercase font-semibold leading-none mt-1">--</div>
+                <div id="hud-yday" class="text-[9px] sm:text-[10px] text-slate-500 leading-none mt-1 break-all">Y-Day: --</div>
               </div>
               <!-- Center Column: MONTH & QUARTER -->
-              <div class="border-r border-[#1d2228]/40 flex flex-col justify-between h-full min-h-[75px] px-1">
-                <div class="text-[9px] sm:text-[11px] md:text-xs text-[#5cb6e4] uppercase tracking-wider font-semibold">MONTH</div>
-                <div id="hud-month-name" class="text-[10px] sm:text-xs md:text-sm text-[#49d381] uppercase tracking-wide font-semibold leading-tight break-words">--</div>
-                <div id="hud-month" class="text-[8px] sm:text-[10px] text-slate-500 leading-none mt-1">-- / --</div>
-                <div id="hud-quarter-name" class="text-[7px] sm:text-[9px] text-amber-400 font-bold uppercase tracking-wider mt-1 break-words">--</div>
+              <div class="border-r border-[#1d2228]/40 flex flex-col justify-between h-full min-h-[85px] px-1">
+                <div class="text-[10px] sm:text-[11px] md:text-xs text-[#5cb6e4] uppercase tracking-wider font-semibold">MONTH</div>
+                <div id="hud-month-name" class="text-[11px] sm:text-xs md:text-sm text-[#49d381] uppercase tracking-wide font-semibold leading-tight break-words">--</div>
+                <div id="hud-month" class="text-[9px] sm:text-[10px] text-slate-500 leading-none mt-1">-- / --</div>
+                <div id="hud-quarter-name" class="text-[8px] sm:text-[10px] text-amber-400 font-bold uppercase tracking-wider mt-1 break-words">--</div>
               </div>
               <!-- Right Column: YEAR -->
-              <div class="flex flex-col justify-between h-full min-h-[75px] px-1">
-                <div class="text-[9px] sm:text-[11px] md:text-xs text-[#5cb6e4] uppercase tracking-wider font-semibold">YEAR</div>
-                <div id="hud-year" class="text-[10px] sm:text-xs md:text-sm font-bold text-slate-200 tracking-wider">--</div>
+              <div class="flex flex-col justify-between h-full min-h-[85px] px-1">
+                <div class="text-[10px] sm:text-[11px] md:text-xs text-[#5cb6e4] uppercase tracking-wider font-semibold">YEAR</div>
+                <div id="hud-year" class="text-[11px] sm:text-xs md:text-sm font-bold text-slate-200 tracking-wider">--</div>
                 <div class="text-xs md:text-sm opacity-0 select-none pointer-events-none leading-none">-</div>
               </div>
             </div>
 
             <!-- BOTTOM SECTION: Running NLT Clock -->
             <div class="text-center pt-4">
-              <span class="text-[10px] sm:text-xs text-[#5cb6e4] uppercase tracking-widest font-semibold block mb-1.5">Nahla Local Time (NLT)</span>
-              <div class="flex items-center justify-center gap-1 sm:gap-2 text-xl sm:text-2xl md:text-3xl font-bold text-[#5cb6e4] tracking-wider sm:tracking-widest drop-shadow-[0_0_8px_rgba(92,182,228,0.4)]">
+              <span class="text-[11px] sm:text-xs text-[#5cb6e4] uppercase tracking-widest font-semibold block mb-1.5">Nahla Local Time (NLT)</span>
+              <div class="flex items-center justify-center gap-1 sm:gap-2 text-2xl sm:text-3xl md:text-4xl font-bold text-[#5cb6e4] tracking-wider sm:tracking-widest drop-shadow-[0_0_8px_rgba(92,182,228,0.4)]">
                 <span id="nlt-clock-display">--:--:--</span>
-                <span class="text-slate-600 font-light select-none text-lg sm:text-xl md:text-2xl">|</span>
+                <span class="text-slate-600 font-light select-none text-xl sm:text-2xl md:text-3xl">|</span>
                 <span class="text-xs sm:text-sm md:text-base font-medium tracking-normal text-[#5cb6e4] select-none whitespace-nowrap">Phase <span id="nlt-phase-indicator" class="font-bold cursor-help" title="Calculating local phase...">--</span></span>
               </div>
-              <div class="text-[9px] sm:text-[10px] text-slate-400 uppercase tracking-wider mt-2 font-mono">25h 26m 10s Solar rotation</div>
+              <div class="text-[10px] sm:text-xs text-slate-400 uppercase tracking-wider mt-2 font-mono">25h 26m 10s Solar rotation</div>
             </div>
             
             <div class="hidden" id="current-date-display">--</div>
@@ -221,29 +221,29 @@
 
           <!-- Right: T-Minus Target Tracking -->
           <div class="flex flex-col justify-center">
-            <div id="target-milestone-label" class="text-center text-[10px] sm:text-xs text-slate-400 tracking-wider sm:tracking-widest uppercase mb-3">
+            <div id="target-milestone-label" class="text-center text-[11px] sm:text-xs text-slate-400 tracking-wider sm:tracking-widest uppercase mb-3">
               T-Minus to <span class="text-[#5cb6e4] font-bold">---</span>
             </div>
-            <div class="grid grid-cols-5 gap-1 sm:gap-1.5 text-center font-semibold font-mono">
-              <div class="bg-[#0f1115] border border-[#1d2228] rounded p-1.5 sm:p-2 min-w-0">
-                <div id="countdown-days" class="text-sm sm:text-xl font-bold text-[#5cb6e4] truncate">00</div>
-                <div class="text-[8px] sm:text-[10px] text-slate-400 uppercase tracking-wider sm:tracking-widest mt-0.5 font-sans">Days</div>
+            <div class="grid grid-cols-5 gap-1.5 sm:gap-2 text-center font-semibold font-mono">
+              <div class="bg-[#0f1115] border border-[#1d2228] rounded p-2 min-w-0">
+                <div id="countdown-days" class="text-base sm:text-xl font-bold text-[#5cb6e4] truncate">00</div>
+                <div class="text-[9px] sm:text-[10px] text-slate-400 uppercase tracking-wider sm:tracking-widest mt-0.5 font-sans">Days</div>
               </div>
-              <div class="bg-[#0f1115] border border-[#1d2228] rounded p-1.5 sm:p-2 min-w-0">
-                <div id="countdown-hours" class="text-sm sm:text-xl font-bold text-[#5cb6e4] truncate">00</div>
-                <div class="text-[8px] sm:text-[10px] text-slate-400 uppercase tracking-wider sm:tracking-widest mt-0.5 font-sans">Hours</div>
+              <div class="bg-[#0f1115] border border-[#1d2228] rounded p-2 min-w-0">
+                <div id="countdown-hours" class="text-base sm:text-xl font-bold text-[#5cb6e4] truncate">00</div>
+                <div class="text-[9px] sm:text-[10px] text-slate-400 uppercase tracking-wider sm:tracking-widest mt-0.5 font-sans">Hours</div>
               </div>
-              <div class="bg-[#0f1115] border border-[#1d2228] rounded p-1.5 sm:p-2 min-w-0">
-                <div id="countdown-mins" class="text-sm sm:text-xl font-bold text-[#5cb6e4] truncate">00</div>
-                <div class="text-[8px] sm:text-[10px] text-slate-400 uppercase tracking-wider sm:tracking-widest mt-0.5 font-sans">Mins</div>
+              <div class="bg-[#0f1115] border border-[#1d2228] rounded p-2 min-w-0">
+                <div id="countdown-mins" class="text-base sm:text-xl font-bold text-[#5cb6e4] truncate">00</div>
+                <div class="text-[9px] sm:text-[10px] text-slate-400 uppercase tracking-wider sm:tracking-widest mt-0.5 font-sans">Mins</div>
               </div>
-              <div class="bg-[#0f1115] border border-[#1d2228] rounded p-1.5 sm:p-2 min-w-0">
-                <div id="countdown-secs" class="text-sm sm:text-xl font-bold text-[#5cb6e4] truncate">00</div>
-                <div class="text-[8px] sm:text-[10px] text-slate-400 uppercase tracking-wider sm:tracking-widest mt-0.5 font-sans">Secs</div>
+              <div class="bg-[#0f1115] border border-[#1d2228] rounded p-2 min-w-0">
+                <div id="countdown-secs" class="text-base sm:text-xl font-bold text-[#5cb6e4] truncate">00</div>
+                <div class="text-[9px] sm:text-[10px] text-slate-400 uppercase tracking-wider sm:tracking-widest mt-0.5 font-sans">Secs</div>
               </div>
-              <div class="bg-[#0f1115] border border-[#1d2228] rounded p-1.5 sm:p-2 min-w-0">
-                <div id="countdown-ds" class="text-sm sm:text-xl font-bold text-[#5cb6e4] truncate">0</div>
-                <div class="text-[8px] sm:text-[10px] text-slate-400 uppercase tracking-wider sm:tracking-widest mt-0.5 font-sans">Ds</div>
+              <div class="bg-[#0f1115] border border-[#1d2228] rounded p-2 min-w-0">
+                <div id="countdown-ds" class="text-base sm:text-xl font-bold text-[#5cb6e4] truncate">0</div>
+                <div class="text-[9px] sm:text-[10px] text-slate-400 uppercase tracking-wider sm:tracking-widest mt-0.5 font-sans">Ds</div>
               </div>
             </div>
           </div>
@@ -251,10 +251,10 @@
 
         <!-- Dynamic Status / Progression -->
         <div id="progression-container" class="mt-4 pt-3 border-t border-[#1d2228]/40">
-          <div id="progress-bar-container" class="w-full bg-[#0f1115] border border-[#1d2228] rounded h-2 overflow-hidden">
+          <div id="progress-bar-container" class="w-full bg-[#0f1115] border border-[#1d2228] rounded h-2.5 overflow-hidden">
             <div id="progress-bar-fill" class="bg-[#5cb6e4] shadow-[0_0_8px_rgba(92,182,228,0.7)] h-full transition-all duration-300" style="width: 0%"></div>
           </div>
-          <p id="progression-text" class="text-[10px] sm:text-xs text-slate-400 text-center mt-2 font-medium">
+          <p id="progression-text" class="text-[11px] sm:text-xs text-slate-400 text-center mt-2 font-medium">
             --
           </p>
         </div>
@@ -262,7 +262,7 @@
 
       <!-- Calendar Grid Panel -->
       <section class="bg-[#121519] border border-[#1d2228] rounded-lg p-3 sm:p-5 shadow-lg">
-        <h3 class="text-[10px] sm:text-xs text-[#5cb6e4] mb-4 uppercase tracking-wider sm:tracking-widest font-semibold">
+        <h3 class="text-[11px] sm:text-xs text-[#5cb6e4] mb-4 uppercase tracking-wider sm:tracking-widest font-semibold">
           555 day Nahlan calendar - 4 Quarters | 12 Months at 46 days each
         </h3>
 
@@ -281,16 +281,16 @@
       <section class="bg-[#121519] border border-[#1d2228] rounded-lg p-3 sm:p-5 shadow-lg relative overflow-hidden">
         <div class="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#8b5cf6] to-transparent"></div>
         
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1 mb-3">
-          <span class="text-xs text-[#5cb6e4] font-bold uppercase tracking-widest font-sans">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1.5 mb-3">
+          <span class="text-xs sm:text-sm text-[#5cb6e4] font-bold uppercase tracking-widest font-sans">
             28-Year Leap Cycle Monitor
           </span>
-          <span id="leap-cycle-text" class="text-[10px] sm:text-xs text-slate-500 font-mono">
+          <span id="leap-cycle-text" class="text-[11px] sm:text-xs text-slate-500 font-mono">
             Cycle Position: Year -- of 28
           </span>
         </div>
         
-        <div id="leap-timeline-grid" class="grid grid-cols-7 sm:grid-cols-14 md:grid-cols-28 gap-1 font-mono text-[9px] sm:text-[10px] text-center mb-3">
+        <div id="leap-timeline-grid" class="grid grid-cols-7 sm:grid-cols-14 md:grid-cols-28 gap-1 font-mono text-[10px] sm:text-[11px] text-center mb-3">
           <!-- Populated dynamically via JS -->
         </div>
         
@@ -331,6 +331,7 @@
     let selectedMonthIndex = 0; 
     let accumulatedTimeOffset = 0; // ms added by fast forwarding
     let lastClockUpdate = Date.now();
+    let userManuallySelected = false; // Flag to lock user exploration details in grid
 
     function isNahlaLeapYear(year) {
       if (year <= 0) return false;
@@ -520,6 +521,14 @@
         const newSimTime = currentYearStart + targetOffsetMs;
         
         accumulatedTimeOffset += (newSimTime - currentSimTime);
+
+        // SYNC: Release user manual grid locks on canvas click to let the calendar grid instantly snap & follow orbit
+        userManuallySelected = false;
+        
+        const activeCal = getNahlaCalendarDate(Date.now() + accumulatedTimeOffset);
+        selectedMonthIndex = activeCal.isIntercalary ? -1 : activeCal.monthIndex;
+        renderCalendarGrid(activeCal.monthIndex, activeCal.isYearZero, activeCal.isIntercalary);
+        updateMonthDetails();
       }
     });
 
@@ -674,12 +683,12 @@
       WEEKDAYS.forEach((day, index) => {
         const sq = document.createElement('div');
         sq.id = `wk-sq-${index}`;
-        sq.className = "bg-[#090b0d] border border-[#1d2228] rounded p-1.5 sm:p-2 text-center flex flex-col justify-between items-center transition-all duration-300 min-h-[52px]";
+        sq.className = "bg-[#090b0d] border border-[#1d2228] rounded p-2 text-center flex flex-col justify-between items-center transition-all duration-300 min-h-[58px]";
         
         sq.innerHTML = `
-          <span class="text-[8px] text-slate-600 font-mono leading-none">${index + 1}</span>
-          <span class="text-[10px] sm:text-xs font-bold text-slate-400 font-mono leading-tight tracking-wider mt-0.5">${WEEKDAY_SHORTS[index]}</span>
-          <span class="text-[7px] text-slate-700 font-sans tracking-wide leading-none select-none mt-0.5 truncate max-w-full" title="${day}">${day}</span>
+          <span class="text-[9px] sm:text-[10px] text-slate-500 font-mono leading-none">${index + 1}</span>
+          <span class="text-[11px] sm:text-xs font-bold text-slate-400 font-mono leading-tight tracking-wider mt-1">${WEEKDAY_SHORTS[index]}</span>
+          <span class="text-[8px] sm:text-[9px] text-slate-500 font-sans tracking-wide leading-none select-none mt-1 truncate max-w-full" title="${day}">${day}</span>
         `;
         container.appendChild(sq);
       });
@@ -691,13 +700,13 @@
         if (!sq) return;
 
         if (!isIntercalary && currentWeekdayName === day) {
-          sq.className = "bg-[#49d381]/5 border-[#49d381] active-day-pulse rounded p-1.5 sm:p-2 text-center flex flex-col justify-between items-center transition-all duration-300 min-h-[52px] scale-105 z-10 text-[#49d381]";
-          sq.querySelector('span:nth-child(2)').className = "text-[10px] sm:text-xs font-bold text-[#49d381] font-mono leading-tight tracking-wider mt-0.5";
-          sq.querySelector('span:nth-child(3)').className = "text-[7px] text-[#49d381] font-semibold font-sans tracking-wide leading-none select-none mt-0.5 truncate max-w-full";
+          sq.className = "bg-[#49d381]/5 border-[#49d381] active-day-pulse rounded p-2 text-center flex flex-col justify-between items-center transition-all duration-300 min-h-[58px] scale-105 z-10 text-[#49d381]";
+          sq.querySelector('span:nth-child(2)').className = "text-[11px] sm:text-xs font-bold text-[#49d381] font-mono leading-tight tracking-wider mt-1";
+          sq.querySelector('span:nth-child(3)').className = "text-[8px] sm:text-[9px] text-[#49d381] font-semibold font-sans tracking-wide leading-none select-none mt-1 truncate max-w-full";
         } else {
-          sq.className = "bg-[#090b0d] border border-[#1d2228] rounded p-1.5 sm:p-2 text-center flex flex-col justify-between items-center transition-all duration-300 min-h-[52px] opacity-60";
-          sq.querySelector('span:nth-child(2)').className = "text-[10px] sm:text-xs font-bold text-slate-400 font-mono leading-tight tracking-wider mt-0.5";
-          sq.querySelector('span:nth-child(3)').className = "text-[7px] text-slate-500 font-sans tracking-wide leading-none select-none mt-0.5 truncate max-w-full";
+          sq.className = "bg-[#090b0d] border border-[#1d2228] rounded p-2 text-center flex flex-col justify-between items-center transition-all duration-300 min-h-[58px] opacity-60";
+          sq.querySelector('span:nth-child(2)').className = "text-[11px] sm:text-xs font-bold text-slate-400 font-mono leading-tight tracking-wider mt-1";
+          sq.querySelector('span:nth-child(3)').className = "text-[8px] sm:text-[9px] text-slate-500 font-sans tracking-wide leading-none select-none mt-1 truncate max-w-full";
         }
       });
 
@@ -706,25 +715,25 @@
       
       if (isIntercalary) {
         toast.innerText = "FESTIVAL PAUSE";
-        toast.className = "text-[9px] font-mono text-purple-400 bg-purple-500/10 px-1.5 py-0.5 rounded uppercase tracking-wider font-bold animate-pulse";
+        toast.className = "text-[10px] sm:text-xs font-mono text-purple-400 bg-purple-500/10 px-1.5 py-0.5 rounded uppercase tracking-wider font-bold animate-pulse";
         alertBanner.innerHTML = `
           <span class="inline-block w-2.5 h-2.5 rounded-full bg-purple-500 animate-ping"></span>
-          <span class="text-purple-300 font-semibold">WEEK SEQUENCE SUSPENDED: Observing the Festival of Rebekah (Day ${dayOfMonth}). All standard work schedules are offline.</span>
+          <span class="text-purple-300 font-semibold">WEEK SEQUENCE SUSPENDED: Observing the Festival of Rebekah (Day ${dayOfMonth}). Standard shift timelines are paused.</span>
         `;
       } else if (dayOfMonth === 45 || dayOfMonth === 46) {
         toast.innerText = "MINI-FEST WEEKEND";
-        toast.className = "text-[9px] font-mono text-amber-400 bg-amber-500/10 px-1.5 py-0.5 rounded uppercase tracking-wider font-bold animate-pulse";
+        toast.className = "text-[10px] sm:text-xs font-mono text-amber-400 bg-amber-500/10 px-1.5 py-0.5 rounded uppercase tracking-wider font-bold animate-pulse";
         const festName = dayOfMonth === 45 ? "Rati" : "Kali";
         alertBanner.innerHTML = `
           <span class="inline-block w-2.5 h-2.5 rounded-full bg-amber-500 animate-ping"></span>
-          <span class="text-amber-300 font-semibold">INTERREGNA RECORD: Month-end Festival of ${festName} active. Time progression is decoupled from weekday cycles.</span>
+          <span class="text-amber-300 font-semibold">INTERREGNA RECORD: Month-end Festival of ${festName} active. Chronology split from core workday grids.</span>
         `;
       } else {
         toast.innerText = "ACTIVE WEEKDAY";
-        toast.className = "text-[9px] font-mono text-[#49d381] bg-[#49d381]/10 px-1.5 py-0.5 rounded uppercase tracking-wider font-semibold";
+        toast.className = "text-[10px] sm:text-xs font-mono text-[#49d381] bg-[#49d381]/10 px-1.5 py-0.5 rounded uppercase tracking-wider font-semibold";
         alertBanner.innerHTML = `
           <span class="inline-block w-2 h-2 rounded-full bg-[#49d381]"></span>
-          <span class="text-slate-400">The Nahlan month comprises 46 days: 44 days split into 4 weeks, with a 2 day fest at the end of each month. There are 12 months (+3 days) per year, and 555 days per year.</span>
+          <span class="text-slate-400">Standard 46-day month: 4 weeks (44 standard days), ending with a 2-day dual festival period. 12 months (+3 intercalary days) per orbital cycle.</span>
         `;
       }
     }
@@ -738,35 +747,35 @@
       const quarterLabel = document.getElementById('single-day-quarter');
 
       if (nDate.isIntercalary) {
-        card.className = "w-44 h-44 flex flex-col justify-between border border-purple-500 rounded-lg overflow-hidden bg-[#0a0710] shadow-[0_0_15px_rgba(168,85,247,0.2)] transition-all duration-300";
-        header.className = "bg-purple-950/40 border-b border-purple-500/30 py-2 text-center text-[10px] sm:text-xs font-bold uppercase tracking-widest font-mono text-purple-400";
+        card.className = "w-44 sm:w-48 h-44 sm:h-48 flex flex-col justify-between border border-purple-500 rounded-lg overflow-hidden bg-[#0a0710] shadow-[0_0_15px_rgba(168,85,247,0.2)] transition-all duration-300";
+        header.className = "bg-purple-950/40 border-b border-purple-500/30 py-2.5 text-center text-[11px] sm:text-xs font-bold uppercase tracking-widest font-mono text-purple-400";
         header.innerText = `REBEKAH FEST`;
         dayNum.innerText = `D-${nDate.dayOfMonth}`;
         dayNum.className = "text-3xl font-extrabold text-purple-200 font-mono tracking-tighter leading-none";
         dayName.innerText = "YEAR-END CORRECTION";
-        dayName.className = "text-[9px] sm:text-[10px] font-bold text-purple-400 mt-2 font-sans uppercase tracking-wider leading-none";
+        dayName.className = "text-[10px] sm:text-[11px] font-bold text-purple-400 mt-2 font-sans uppercase tracking-wider leading-none";
         weekLabel.innerText = "PAUSE";
         quarterLabel.innerText = "Y-END";
       } else if (nDate.dayOfMonth === 45 || nDate.dayOfMonth === 46) {
         const mName = MONTHS_LORE[nDate.monthIndex].name.toUpperCase();
-        card.className = "w-44 h-44 flex flex-col justify-between border border-amber-500 rounded-lg overflow-hidden bg-[#0c0906] shadow-[0_0_15px_rgba(245,158,11,0.15)] transition-all duration-300";
-        header.className = "bg-amber-950/30 border-b border-amber-500/20 py-2 text-center text-[10px] sm:text-xs font-bold uppercase tracking-widest font-mono text-amber-500";
+        card.className = "w-44 sm:w-48 h-44 sm:h-48 flex flex-col justify-between border border-amber-500 rounded-lg overflow-hidden bg-[#0c0906] shadow-[0_0_15px_rgba(245,158,11,0.15)] transition-all duration-300";
+        header.className = "bg-amber-950/30 border-b border-amber-500/20 py-2.5 text-center text-[11px] sm:text-xs font-bold uppercase tracking-widest font-mono text-amber-500";
         header.innerText = `${mName} • Y ${nDate.year}`;
         dayNum.innerText = nDate.dayOfMonth;
         dayNum.className = "text-4xl sm:text-5xl font-extrabold text-amber-200 font-mono tracking-tighter leading-none";
         dayName.innerText = nDate.weekdayName.toUpperCase();
-        dayName.className = "text-[10px] sm:text-xs font-bold text-amber-400 mt-2 font-sans uppercase tracking-wider leading-none";
+        dayName.className = "text-[11px] sm:text-xs font-bold text-amber-400 mt-2 font-sans uppercase tracking-wider leading-none";
         weekLabel.innerText = "FESTIVAL";
         quarterLabel.innerText = nDate.quarterName.toUpperCase().substring(0, 6);
       } else {
         const mName = MONTHS_LORE[nDate.monthIndex].name.toUpperCase();
-        card.className = "w-44 h-44 flex flex-col justify-between border border-[#5cb6e4]/30 rounded-lg overflow-hidden bg-[#090b0d] shadow-[0_0_15px_rgba(92,182,228,0.1)] transition-all duration-300";
-        header.className = "bg-[#5cb6e4]/10 border-b border-[#5cb6e4]/20 py-2 text-center text-[10px] sm:text-xs font-bold uppercase tracking-widest font-mono text-[#5cb6e4]";
+        card.className = "w-44 sm:w-48 h-44 sm:h-48 flex flex-col justify-between border border-[#5cb6e4]/30 rounded-lg overflow-hidden bg-[#090b0d] shadow-[0_0_15px_rgba(92,182,228,0.1)] transition-all duration-300";
+        header.className = "bg-[#5cb6e4]/10 border-b border-[#5cb6e4]/20 py-2.5 text-center text-[11px] sm:text-xs font-bold uppercase tracking-widest font-mono text-[#5cb6e4]";
         header.innerText = `${mName} • Y ${nDate.year}`;
         dayNum.innerText = nDate.dayOfMonth;
         dayNum.className = "text-4xl sm:text-5xl font-extrabold text-slate-100 font-mono tracking-tighter leading-none";
         dayName.innerText = nDate.weekdayName;
-        dayName.className = "text-[10px] sm:text-xs font-bold text-[#49d381] mt-2 font-sans uppercase tracking-wider leading-none";
+        dayName.className = "text-[11px] sm:text-xs font-bold text-[#49d381] mt-2 font-sans uppercase tracking-wider leading-none";
         weekLabel.innerText = nDate.weekNumberText.toUpperCase();
         quarterLabel.innerText = nDate.quarterName.toUpperCase().substring(0, 6);
       }
@@ -792,15 +801,16 @@
 
         button.innerHTML = `
           <div class="flex justify-between items-start">
-            <span class="text-[9px] sm:text-xs text-slate-500 font-medium font-mono">M ${idx + 1} | ${QUARTERS[qIdx].substring(0,4)}</span>
-            ${isActive ? '<span class="text-[8px] sm:text-[10px] uppercase bg-[#49d381]/10 text-[#49d381] px-1.5 sm:px-2 py-0.5 rounded font-bold animate-pulse font-sans">Active</span>' : ''}
+            <span class="text-[10px] sm:text-xs text-slate-500 font-medium font-mono">M ${idx + 1} | ${QUARTERS[qIdx].substring(0,4)}</span>
+            ${isActive ? '<span class="text-[9px] sm:text-[10px] uppercase bg-[#49d381]/10 text-[#49d381] px-1.5 sm:px-2 py-0.5 rounded font-bold animate-pulse font-sans">Active</span>' : ''}
           </div>
-          <div class="text-sm sm:text-base font-bold text-slate-200 mt-1 font-sans truncate">${month.name}</div>
-          <div class="text-[9px] sm:text-[11px] text-slate-400 mt-0.5 font-sans leading-tight">44 Days + 2 Fests</div>
+          <div class="text-sm sm:text-base font-bold text-slate-200 mt-1.5 font-sans truncate">${month.name}</div>
+          <div class="text-[10px] sm:text-xs text-slate-400 mt-1 font-sans leading-tight">44 Days + 2 Fests</div>
         `;
 
         button.addEventListener('click', () => {
           selectedMonthIndex = idx;
+          userManuallySelected = true; // Flag on to prevent simulator override
           updateMonthDetails();
           const activeCal = getNahlaCalendarDate(Date.now() + accumulatedTimeOffset);
           renderCalendarGrid(activeCal.monthIndex, activeCal.isYearZero, activeCal.isIntercalary);
@@ -823,12 +833,12 @@
       festivalButton.innerHTML = `
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1">
           <div>
-            <span class="text-[10px] sm:text-xs text-slate-400 font-medium font-sans">Un-Month Cycle</span>
+            <span class="text-[11px] sm:text-xs text-slate-400 font-medium font-sans">Un-Month Cycle</span>
             <div class="text-sm sm:text-base font-bold text-purple-300 mt-0.5 font-sans">Festival of Rebekah (Intercalary)</div>
           </div>
           <div class="text-left sm:text-right flex sm:flex-col items-start sm:items-end gap-1.5 sm:gap-1 mt-1 sm:mt-0">
-            <span class="text-[10px] sm:text-xs text-slate-400 font-sans">3 Days (4 in Leap)</span>
-            <span class="text-[8px] sm:text-[10px] text-purple-400 bg-purple-500/10 px-1.5 py-0.5 rounded font-bold uppercase tracking-wider font-sans">
+            <span class="text-[11px] sm:text-xs text-slate-400 font-sans">3 Days (4 in Leap)</span>
+            <span class="text-[9px] sm:text-[10px] text-purple-400 bg-purple-500/10 px-1.5 py-0.5 rounded font-bold uppercase tracking-wider font-sans">
               Interregna
             </span>
           </div>
@@ -837,6 +847,7 @@
 
       festivalButton.addEventListener('click', () => {
         selectedMonthIndex = -1;
+        userManuallySelected = true; // Lock detail grid view to this month
         updateMonthDetails();
         const activeCal = getNahlaCalendarDate(Date.now() + accumulatedTimeOffset);
         renderCalendarGrid(activeCal.monthIndex, activeCal.isYearZero, activeCal.isIntercalary);
@@ -851,16 +862,16 @@
       if (selectedMonthIndex === -1) {
         detailsContainer.innerHTML = `
           <div>
-            <h4 class="text-sm sm:text-base font-bold text-purple-400 uppercase font-sans">
+            <h4 class="text-base font-bold text-purple-400 uppercase font-sans">
               The Festival of Rebekah
             </h4>
-            <p class="text-[10px] sm:text-xs text-slate-500 italic mt-0.5 font-sans">
+            <p class="text-[11px] sm:text-xs text-slate-500 italic mt-0.5 font-sans">
               Primary System Festival named after the parent gas giant Rebekah.
             </p>
             <p class="text-xs sm:text-sm text-slate-300 mt-2.5 leading-relaxed font-sans">
               This 3-day (4-day in leap years) celebration sits outside standard months and quarters. Standard weekday clocks pause as Rebekah coordinates shift into maximum orbital acceleration, preparing to loop safely back into Month 1 (Hope) Day 1 at Perihelion.
             </p>
-            <div class="mt-3 inline-flex items-center gap-1.5 text-[10px] sm:text-xs text-purple-400 font-sans">
+            <div class="mt-3 inline-flex items-center gap-1.5 text-[11px] sm:text-xs text-purple-400 font-sans">
               <span class="w-1.5 h-1.5 rounded-full bg-purple-400"></span>
               Occurs: End of Quarter IV (Troum) / Closes Month 12 (Anneke)
             </div>
@@ -872,20 +883,20 @@
         detailsContainer.innerHTML = `
           <div>
             <div class="flex flex-col sm:flex-row justify-between items-start gap-1">
-              <h4 class="text-sm sm:text-base font-bold text-[#5cb6e4] uppercase font-sans">
+              <h4 class="text-base font-bold text-[#5cb6e4] uppercase font-sans">
                 Month ${selectedMonthIndex + 1}: ${month.name} (Quarter: ${QUARTERS[qIdx]})
               </h4>
-              <span class="text-[9px] sm:text-xs text-slate-400 bg-[#0f1115] px-2 py-0.5 sm:py-1 rounded border border-[#1d2228] font-mono">
+              <span class="text-[10px] sm:text-xs text-slate-400 bg-[#0f1115] px-2 py-1 rounded border border-[#1d2228] font-mono mt-1 sm:mt-0">
                 Length: 44 Weekdays + Festival of Rati & Kali
               </span>
             </div>
-            <p class="text-[10px] sm:text-xs text-slate-500 italic mt-0.5 font-sans">
+            <p class="text-[11px] sm:text-xs text-slate-500 italic mt-0.5 font-sans">
               Celestial Alignment & Influence
             </p>
             <p class="text-xs sm:text-sm text-slate-300 mt-2.5 leading-relaxed font-sans">
               ${month.desc}
             </p>
-            <div class="mt-3 inline-flex items-center gap-1.5 text-[10px] sm:text-xs text-[#5cb6e4] font-sans">
+            <div class="mt-3 inline-flex items-center gap-1.5 text-[11px] sm:text-xs text-[#5cb6e4] font-sans">
               <span class="w-1.5 h-1.5 rounded-full bg-[#5cb6e4]"></span>
               Observatory Alignment: ${month.alignment}
             </div>
@@ -907,6 +918,14 @@
       // Update new desk calendar square and weekday list
       updateOneDayCard(nDate);
       updateWeekdayTrackHighlight(nDate.weekdayName, nDate.isIntercalary, nDate.dayOfMonth);
+
+      // SYNC: Dynamic Month selection follows active simulator/canvas changes
+      const currentSimMonth = nDate.isIntercalary ? -1 : nDate.monthIndex;
+      if (!userManuallySelected && currentSimMonth !== selectedMonthIndex) {
+        selectedMonthIndex = currentSimMonth;
+        updateMonthDetails();
+        renderCalendarGrid(nDate.monthIndex, nDate.isYearZero, nDate.isIntercalary);
+      }
 
       const epochRefSpan = document.getElementById('epoch-ref');
       if (nDate.isYearZero) {
@@ -953,12 +972,12 @@
       if (nDate.isIntercalary) {
         hudMonth.innerText = "FEST";
         hudMonthName.innerText = "Rebekah";
-        hudMonthName.className = "text-[10px] sm:text-xs md:text-sm text-purple-400 uppercase tracking-wider font-semibold leading-none break-all";
+        hudMonthName.className = "text-[11px] sm:text-xs md:text-sm text-purple-400 uppercase tracking-wider font-semibold leading-none break-all";
         hudQuarterName.innerText = "YEAR-END";
       } else {
         hudMonth.innerText = `${(nDate.monthIndex + 1).toString().padStart(2, '0')} / 12`;
         hudMonthName.innerText = MONTHS_LORE[nDate.monthIndex].name;
-        hudMonthName.className = "text-[10px] sm:text-xs md:text-sm text-[#49d381] uppercase tracking-wider font-semibold leading-none break-all";
+        hudMonthName.className = "text-[11px] sm:text-xs md:text-sm text-[#49d381] uppercase tracking-wider font-semibold leading-none break-all";
         hudQuarterName.innerText = `Q: ${nDate.quarterName}`;
       }
 
@@ -1039,14 +1058,14 @@
         if (isCurrentBlock) {
           const activeLeap = isNahlaLeapYear(currentYear);
           if (activeLeap) {
-            block.className = 'bg-purple-500 text-white font-bold rounded p-0.5 sm:p-1 shadow-[0_0_8px_rgba(168,85,247,0.8)] border border-purple-400';
+            block.className = 'bg-purple-500 text-white font-bold rounded p-1 sm:p-1.5 shadow-[0_0_8px_rgba(168,85,247,0.8)] border border-purple-400';
           } else {
-            block.className = 'bg-[#5cb6e4] text-[#0d0f12] font-bold rounded p-0.5 sm:p-1 shadow-[0_0_8px_rgba(92,182,228,0.8)] border border-[#5cb6e4]';
+            block.className = 'bg-[#5cb6e4] text-[#0d0f12] font-bold rounded p-1 sm:p-1.5 shadow-[0_0_8px_rgba(92,182,228,0.8)] border border-[#5cb6e4]';
           }
         } else if (isLeapBlock) {
-          block.className = 'bg-purple-950/25 border border-purple-500/40 text-purple-400 rounded p-0.5 sm:p-1';
+          block.className = 'bg-purple-950/25 border border-purple-500/40 text-purple-400 rounded p-1 sm:p-1.5';
         } else {
-          block.className = 'bg-[#0f1115] border border-[#1d2228] text-slate-500 rounded p-0.5 sm:p-1';
+          block.className = 'bg-[#0f1115] border border-[#1d2228] text-slate-500 rounded p-1 sm:p-1.5';
         }
         timelineContainer.appendChild(block);
       }
@@ -1073,6 +1092,12 @@
 
     document.getElementById('reset-time-btn').addEventListener('click', () => {
       accumulatedTimeOffset = 0;
+      userManuallySelected = false; // Reset lock to track simulation again
+
+      const activeCal = getNahlaCalendarDate(Date.now());
+      selectedMonthIndex = activeCal.isIntercalary ? -1 : activeCal.monthIndex;
+      renderCalendarGrid(activeCal.monthIndex, activeCal.isYearZero, activeCal.isIntercalary);
+      updateMonthDetails();
     });
 
     window.onload = function() {
