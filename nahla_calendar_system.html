@@ -578,7 +578,6 @@
         // Enlarged and brightened Quarter titles (Bellatrix, Bunika, etc.)
         const sizeMultiplier = w < 480 ? 1.1 : 1.35;
         ctx.font = `bold ${Math.round(10 * sizeMultiplier)}px "JetBrains Mono", Courier, monospace`;
-        ctx.fillStyle = "#7dd3sky"; // Beautiful, highly saturated sky blue
         ctx.fillStyle = "#7dd3fc"; 
         ctx.textBaseline = "middle";
         ctx.textAlign = "center";
@@ -641,14 +640,14 @@
       const my = cy + Math.sin(moonAngle) * orbitRad;
       
       const glow = ctx.createRadialGradient(mx, my, 1, mx, my, 10);
-      glow.addColorStop(0, '#fbbf24');
+      glow.addColorStop(0, '#49d381');
       glow.addColorStop(1, 'transparent');
       ctx.fillStyle = glow;
       ctx.beginPath();
       ctx.arc(mx, my, 10, 0, 2*Math.PI);
       ctx.fill();
 
-      ctx.fillStyle = '#fbbf24';
+      ctx.fillStyle = '#49d381';
       ctx.beginPath();
       ctx.arc(mx, my, 5, 0, 2*Math.PI);
       ctx.fill();
@@ -691,7 +690,7 @@
         sq.innerHTML = `
           <span class="text-[11px] sm:text-xs text-slate-500 font-mono leading-none">${index + 1}</span>
           <span class="text-xs sm:text-sm font-bold text-slate-400 font-mono leading-tight tracking-wider mt-1">${WEEKDAY_SHORTS[index]}</span>
-          <span class="text-[10px] sm:text-[11px] text-slate-500 font-sans tracking-wide leading-none select-none mt-1 truncate max-w-full" title="${day}">${day}</span>
+          <span class="text-[10px] sm:text-[11px] md:text-[7.5px] lg:text-[8.5px] xl:text-[9.5px] text-slate-500 font-sans tracking-wide leading-none select-none mt-1 max-w-full" title="${day}">${day}</span>
         `;
         container.appendChild(sq);
       });
@@ -705,11 +704,11 @@
         if (!isIntercalary && currentWeekdayName === day) {
           sq.className = "bg-[#49d381]/5 border-[#49d381] active-day-pulse rounded p-2 text-center flex flex-col justify-between items-center transition-all duration-300 min-h-[58px] scale-105 z-10 text-[#49d381]";
           sq.querySelector('span:nth-child(2)').className = "text-xs sm:text-sm font-bold text-[#49d381] font-mono leading-tight tracking-wider mt-1";
-          sq.querySelector('span:nth-child(3)').className = "text-[10px] sm:text-[11px] text-[#49d381] font-semibold font-sans tracking-wide leading-none select-none mt-1 truncate max-w-full";
+          sq.querySelector('span:nth-child(3)').className = "text-[10px] sm:text-[11px] md:text-[7.5px] lg:text-[8.5px] xl:text-[9.5px] text-[#49d381] font-semibold font-sans tracking-wide leading-none select-none mt-1 max-w-full";
         } else {
           sq.className = "bg-[#090b0d] border border-[#1d2228] rounded p-2 text-center flex flex-col justify-between items-center transition-all duration-300 min-h-[58px] opacity-60";
           sq.querySelector('span:nth-child(2)').className = "text-xs sm:text-sm font-bold text-slate-400 font-mono leading-tight tracking-wider mt-1";
-          sq.querySelector('span:nth-child(3)').className = "text-[10px] sm:text-[11px] text-slate-500 font-sans tracking-wide leading-none select-none mt-1 truncate max-w-full";
+          sq.querySelector('span:nth-child(3)').className = "text-[10px] sm:text-[11px] md:text-[7.5px] lg:text-[8.5px] xl:text-[9.5px] text-slate-500 font-sans tracking-wide leading-none select-none mt-1 max-w-full";
         }
       });
 
@@ -736,7 +735,7 @@
         toast.className = "text-[11px] sm:text-xs font-mono text-[#49d381] bg-[#49d381]/10 px-1.5 py-0.5 rounded uppercase tracking-wider font-semibold";
         alertBanner.innerHTML = `
           <span class="inline-block w-2 h-2 rounded-full bg-[#49d381]"></span>
-          <span class="text-slate-400">46-day month: 4 weeks (44 standard days), ending with a 2-day dual festival period. 12 months (+3 intercalary days) per cycle.</span>
+          <span class="text-slate-400">Standard 46-day month: 4 weeks (44 standard days), ending with a 2-day dual festival period. 12 months (+3 intercalary days) per orbital cycle.</span>
         `;
       }
     }
