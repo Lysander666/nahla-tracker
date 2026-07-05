@@ -143,12 +143,12 @@
           <div class="flex-1 flex flex-col justify-between bg-[#0f1115] border border-[#1d2228] rounded-lg p-3 sm:p-4 font-sans">
             <div>
               <div class="flex justify-between items-center mb-2.5">
-                <span class="text-xs sm:text-sm text-slate-400 font-bold uppercase tracking-wider font-mono">11-Day Week Progression Tracker</span>
+                <span class="text-xs sm:text-sm text-slate-400 font-bold uppercase tracking-wider font-mono">11-Day Week & Mini-Fest Grid</span>
                 <span id="weekday-status-toast" class="text-[10px] sm:text-xs font-mono text-slate-500 uppercase">STANDBY</span>
               </div>
               
-              <!-- 11-Day Squares Grid -->
-              <div id="week-squares-container" class="grid grid-cols-3 sm:grid-cols-6 md:grid-cols-11 gap-1.5 sm:gap-2">
+              <!-- 12-Slot Squares Grid: perfectly symmetric 3/4/6 layout to prevent desktop squeezing -->
+              <div id="week-squares-container" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-1.5 sm:gap-2">
                 <!-- Built dynamically via Javascript -->
               </div>
             </div>
@@ -639,15 +639,16 @@
       const mx = cx + Math.cos(moonAngle) * orbitRad;
       const my = cy + Math.sin(moonAngle) * orbitRad;
       
+      // Changed moon tracker marker to amber/sulphur hue
       const glow = ctx.createRadialGradient(mx, my, 1, mx, my, 10);
-      glow.addColorStop(0, '#49d381');
+      glow.addColorStop(0, '#fbbf24');
       glow.addColorStop(1, 'transparent');
       ctx.fillStyle = glow;
       ctx.beginPath();
       ctx.arc(mx, my, 10, 0, 2*Math.PI);
       ctx.fill();
 
-      ctx.fillStyle = '#49d381';
+      ctx.fillStyle = '#fbbf24';
       ctx.beginPath();
       ctx.arc(mx, my, 5, 0, 2*Math.PI);
       ctx.fill();
@@ -682,6 +683,7 @@
       const container = document.getElementById('week-squares-container');
       container.innerHTML = '';
       
+      // Standard 11 weekdays
       WEEKDAYS.forEach((day, index) => {
         const sq = document.createElement('div');
         sq.id = `wk-sq-${index}`;
@@ -690,10 +692,21 @@
         sq.innerHTML = `
           <span class="text-[11px] sm:text-xs text-slate-500 font-mono leading-none">${index + 1}</span>
           <span class="text-xs sm:text-sm font-bold text-slate-400 font-mono leading-tight tracking-wider mt-1">${WEEKDAY_SHORTS[index]}</span>
-          <span class="text-[10px] sm:text-[11px] md:text-[7.5px] lg:text-[8.5px] xl:text-[9.5px] text-slate-500 font-sans tracking-wide leading-none select-none mt-1 max-w-full" title="${day}">${day}</span>
+          <span class="text-[10px] sm:text-[11px] text-slate-500 font-sans tracking-wide leading-none select-none mt-1 max-w-full" title="${day}">${day}</span>
         `;
         container.appendChild(sq);
       });
+
+      // 12th Box: Dedicated home for month-end Mini-Festivals (Rati & Kali)
+      const festSq = document.createElement('div');
+      festSq.id = `wk-sq-11`;
+      festSq.className = "bg-[#090b0d] border border-[#1d2228] rounded p-2 text-center flex flex-col justify-between items-center transition-all duration-300 min-h-[58px]";
+      festSq.innerHTML = `
+        <span class="text-[11px] sm:text-xs text-slate-500 font-mono leading-none">45-46</span>
+        <span class="text-xs sm:text-sm font-bold text-slate-400 font-mono leading-tight tracking-wider mt-1">FEST</span>
+        <span class="text-[10px] sm:text-[11px] text-slate-500 font-sans tracking-wide leading-none select-none mt-1 max-w-full" title="Festival of Rati & Kali">Rati / Kali</span>
+      `;
+      container.appendChild(festSq);
     }
 
     function updateWeekdayTrackHighlight(currentWeekdayName, isIntercalary, dayOfMonth) {
@@ -701,30 +714,46 @@
         const sq = document.getElementById(`wk-sq-${index}`);
         if (!sq) return;
 
-        if (!isIntercalary && currentWeekdayName === day) {
+        // Highlight standard weekday boxes if not on festival days 45/46 or year-end intercalary period
+        if (!isIntercalary && dayOfMonth <= 44 && currentWeekdayName === day) {
           sq.className = "bg-[#49d381]/5 border-[#49d381] active-day-pulse rounded p-2 text-center flex flex-col justify-between items-center transition-all duration-300 min-h-[58px] scale-105 z-10 text-[#49d381]";
           sq.querySelector('span:nth-child(2)').className = "text-xs sm:text-sm font-bold text-[#49d381] font-mono leading-tight tracking-wider mt-1";
-          sq.querySelector('span:nth-child(3)').className = "text-[10px] sm:text-[11px] md:text-[7.5px] lg:text-[8.5px] xl:text-[9.5px] text-[#49d381] font-semibold font-sans tracking-wide leading-none select-none mt-1 max-w-full";
+          sq.querySelector('span:nth-child(3)').className = "text-[10px] sm:text-[11px] text-[#49d381] font-semibold font-sans tracking-wide leading-none select-none mt-1 max-w-full";
         } else {
           sq.className = "bg-[#090b0d] border border-[#1d2228] rounded p-2 text-center flex flex-col justify-between items-center transition-all duration-300 min-h-[58px] opacity-60";
           sq.querySelector('span:nth-child(2)').className = "text-xs sm:text-sm font-bold text-slate-400 font-mono leading-tight tracking-wider mt-1";
-          sq.querySelector('span:nth-child(3)').className = "text-[10px] sm:text-[11px] md:text-[7.5px] lg:text-[8.5px] xl:text-[9.5px] text-slate-500 font-sans tracking-wide leading-none select-none mt-1 max-w-full";
+          sq.querySelector('span:nth-child(3)').className = "text-[10px] sm:text-[11px] text-slate-500 font-sans tracking-wide leading-none select-none mt-1 max-w-full";
         }
       });
+
+      // Update 12th Slot (Month-End Festival block) highlight
+      const festSq = document.getElementById('wk-sq-11');
+      if (festSq) {
+        const isMiniFestActive = !isIntercalary && (dayOfMonth === 45 || dayOfMonth === 46);
+        if (isMiniFestActive) {
+          festSq.className = "bg-amber-500/5 border-amber-500 active-day-pulse rounded p-2 text-center flex flex-col justify-between items-center transition-all duration-300 min-h-[58px] scale-105 z-10 text-amber-400";
+          festSq.querySelector('span:nth-child(2)').className = "text-xs sm:text-sm font-bold text-amber-400 font-mono leading-tight tracking-wider mt-1";
+          festSq.querySelector('span:nth-child(3)').className = "text-[10px] sm:text-[11px] text-amber-400 font-semibold font-sans tracking-wide leading-none select-none mt-1 max-w-full";
+        } else {
+          festSq.className = "bg-[#090b0d] border border-[#1d2228] rounded p-2 text-center flex flex-col justify-between items-center transition-all duration-300 min-h-[58px] opacity-60";
+          festSq.querySelector('span:nth-child(2)').className = "text-xs sm:text-sm font-bold text-slate-400 font-mono leading-tight tracking-wider mt-1";
+          festSq.querySelector('span:nth-child(3)').className = "text-[10px] sm:text-[11px] text-slate-500 font-sans tracking-wide leading-none select-none mt-1 max-w-full";
+        }
+      }
 
       const alertBanner = document.getElementById('weekday-tracker-alert');
       const toast = document.getElementById('weekday-status-toast');
       
       if (isIntercalary) {
         toast.innerText = "FESTIVAL PAUSE";
-        toast.className = "text-[11px] sm:text-xs font-mono text-purple-400 bg-purple-500/10 px-1.5 py-0.5 rounded uppercase tracking-wider font-bold animate-pulse";
+        toast.className = "text-[10px] sm:text-xs font-mono text-purple-400 bg-purple-500/10 px-1.5 py-0.5 rounded uppercase tracking-wider font-bold animate-pulse";
         alertBanner.innerHTML = `
           <span class="inline-block w-2.5 h-2.5 rounded-full bg-purple-500 animate-ping"></span>
           <span class="text-purple-300 font-semibold">WEEK SEQUENCE SUSPENDED: Observing the Festival of Rebekah (Day ${dayOfMonth}). Standard shift timelines are paused.</span>
         `;
       } else if (dayOfMonth === 45 || dayOfMonth === 46) {
         toast.innerText = "MINI-FEST WEEKEND";
-        toast.className = "text-[11px] sm:text-xs font-mono text-amber-400 bg-amber-500/10 px-1.5 py-0.5 rounded uppercase tracking-wider font-bold animate-pulse";
+        toast.className = "text-[10px] sm:text-xs font-mono text-amber-400 bg-amber-500/10 px-1.5 py-0.5 rounded uppercase tracking-wider font-bold animate-pulse";
         const festName = dayOfMonth === 45 ? "Rati" : "Kali";
         alertBanner.innerHTML = `
           <span class="inline-block w-2.5 h-2.5 rounded-full bg-amber-500 animate-ping"></span>
@@ -732,7 +761,7 @@
         `;
       } else {
         toast.innerText = "ACTIVE WEEKDAY";
-        toast.className = "text-[11px] sm:text-xs font-mono text-[#49d381] bg-[#49d381]/10 px-1.5 py-0.5 rounded uppercase tracking-wider font-semibold";
+        toast.className = "text-[10px] sm:text-xs font-mono text-[#49d381] bg-[#49d381]/10 px-1.5 py-0.5 rounded uppercase tracking-wider font-semibold";
         alertBanner.innerHTML = `
           <span class="inline-block w-2 h-2 rounded-full bg-[#49d381]"></span>
           <span class="text-slate-400">Standard 46-day month: 4 weeks (44 standard days), ending with a 2-day dual festival period. 12 months (+3 intercalary days) per orbital cycle.</span>
@@ -917,11 +946,11 @@
 
       drawOrbitSimulator(nDate);
 
-      // Update new desk calendar square and weekday list
+      // Update desk calendar card and weekday grid
       updateOneDayCard(nDate);
       updateWeekdayTrackHighlight(nDate.weekdayName, nDate.isIntercalary, nDate.dayOfMonth);
 
-      // SYNC: Dynamic Month selection follows active simulator/canvas changes
+      // SYNC: Dynamic Month selection follows active simulator changes
       const currentSimMonth = nDate.isIntercalary ? -1 : nDate.monthIndex;
       if (!userManuallySelected && currentSimMonth !== selectedMonthIndex) {
         selectedMonthIndex = currentSimMonth;
