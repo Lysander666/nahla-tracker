@@ -9,7 +9,7 @@
   <link class="canvas-ignore" rel="manifest" href="manifest.json">
   <link class="canvas-ignore" rel="icon" type="image/png" sizes="512x512" href="favicon-512.png?v=2">
   <link class="canvas-ignore" rel="apple-touch-icon" sizes="180x180" href="favicon-512.png?v=2">
-  <title>Nahla Orbital & Calendar System</title>
+  <title>Nahla Calendar System & Orbital Canvas</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -40,6 +40,19 @@
     }
     .custom-scrollbar::-webkit-scrollbar-thumb:hover {
       background: #5cb6e4;
+    }
+    @keyframes pulse-glowing {
+      0%, 100% {
+        box-shadow: 0 0 5px rgba(73, 211, 129, 0.2), inset 0 0 5px rgba(73, 211, 129, 0.1);
+        border-color: rgba(73, 211, 129, 0.5);
+      }
+      50% {
+        box-shadow: 0 0 15px rgba(73, 211, 129, 0.5), inset 0 0 8px rgba(73, 211, 129, 0.2);
+        border-color: rgba(73, 211, 129, 1);
+      }
+    }
+    .active-day-pulse {
+      animation: pulse-glowing 2s infinite ease-in-out;
     }
   </style>
 </head>
@@ -73,7 +86,7 @@
         
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-3">
           <span class="text-xs text-[#5cb6e4] font-bold uppercase tracking-widest font-sans">
-            Real-Time Orbital Telemetry & Map
+            Real-Time Year Quarter
           </span>
           <div class="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
             <button id="reset-time-btn" class="px-2 py-1 text-[9px] sm:text-[10px] font-mono rounded border border-[#1d2228] hover:border-[#5cb6e4] hover:text-[#5cb6e4] transition-all uppercase bg-[#0f1115]">
@@ -89,6 +102,62 @@
           <canvas id="orbitalCanvas" class="w-full h-full block cursor-crosshair"></canvas>
           <div class="absolute bottom-2 left-2 right-2 sm:right-auto bg-[#0d0f12]/90 border border-[#1d2228] px-2 py-1 rounded text-[9px] sm:text-[10px] font-mono text-slate-400 pointer-events-none text-center sm:text-left">
             Click orbit track to fast-forward time.
+          </div>
+        </div>
+      </section>
+
+      <!-- NEW: Single Day Calendar & Week List Display Panel -->
+      <section class="bg-[#121519] border border-[#1d2228] rounded-lg p-3 sm:p-5 shadow-lg relative overflow-hidden">
+        <div class="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#49d381] to-transparent"></div>
+        
+        <div class="mb-4">
+          <span class="text-xs text-[#49d381] font-bold uppercase tracking-widest font-sans">
+            Current weekday: 11 day week / 4 weeks per month
+          </span>
+        </div>
+
+        <div class="flex flex-col md:flex-row gap-5 items-stretch">
+          <!-- One-Day Desk Calendar Widget -->
+          <div class="flex-shrink-0 flex items-center justify-center">
+            <div id="single-day-card" class="w-44 h-44 flex flex-col justify-between border border-[#5cb6e4]/30 rounded-lg overflow-hidden bg-[#090b0d] shadow-[0_0_15px_rgba(92,182,228,0.1)] transition-all duration-300">
+              <!-- Month & Year Header band -->
+              <div id="single-day-header" class="bg-[#5cb6e4]/10 border-b border-[#5cb6e4]/20 py-2 text-center text-[10px] sm:text-xs font-bold uppercase tracking-widest font-mono text-[#5cb6e4]">
+                LOADING...
+              </div>
+              
+              <!-- Daily Main Body -->
+              <div class="flex-1 flex flex-col items-center justify-center p-2 text-center">
+                <span id="single-day-num" class="text-4xl sm:text-5xl font-extrabold text-slate-100 font-mono tracking-tighter leading-none">--</span>
+                <span id="single-day-name" class="text-[10px] sm:text-xs font-semibold text-[#49d381] mt-2 font-sans uppercase tracking-wider leading-none">--</span>
+              </div>
+              
+              <!-- Footnote Telemetry Details -->
+              <div id="single-day-footer" class="bg-[#121519] border-t border-[#1d2228] py-1.5 px-2 text-center text-[8px] sm:text-[9px] font-mono text-slate-500 flex justify-between items-center">
+                <span id="single-day-week">WEEK --</span>
+                <span id="single-day-quarter">--</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Weekday list progress track -->
+          <div class="flex-1 flex flex-col justify-between bg-[#0f1115] border border-[#1d2228] rounded-lg p-3 sm:p-4 font-sans">
+            <div>
+              <div class="flex justify-between items-center mb-2.5">
+                <span class="text-[10px] sm:text-xs text-slate-400 font-bold uppercase tracking-wider font-mono">11-Day Week Progression Tracker</span>
+                <span id="weekday-status-toast" class="text-[9px] font-mono text-slate-500 uppercase">STANDBY</span>
+              </div>
+              
+              <!-- 11-Day Squares Grid -->
+              <div id="week-squares-container" class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-11 gap-1.5 sm:gap-2">
+                <!-- Built dynamically via Javascript -->
+              </div>
+            </div>
+
+            <!-- Intercalary/Festival Event Alert Monitor inside tracker -->
+            <div id="weekday-tracker-alert" class="mt-3 pt-2.5 border-t border-[#1d2228]/40 text-[10px] sm:text-xs font-mono flex items-center gap-2 text-slate-500">
+              <span class="inline-block w-2 h-2 rounded-full bg-slate-700"></span>
+              <span>All Week systems operating on standard rotational frequency.</span>
+            </div>
           </div>
         </div>
       </section>
@@ -240,10 +309,13 @@
 
     const QUARTERS = ["Bellatrix", "Bunika", "Elena", "Troum"];
     const WEEKDAYS = ["Abelina", "Jana", "Mira", "Maria", "Theresa", "Ferril", "Herbst", "Asmorod", "Sarasvati", "Gauri", "Chamunda"];
+    
+    // Short labels for small resolution tracking UI
+    const WEEKDAY_SHORTS = ["ABE", "JAN", "MIR", "MAR", "THE", "FER", "HER", "ASM", "SAR", "GAU", "CHA"];
 
     const MONTHS_LORE = [
       { name: "Hope", desc: "Sun of fierce beginnings, blue-white light and rebirth.", alignment: "Start of Year / Peak Sunlight" },
-      { name: "Simone", desc: "Primeval schorching planet of the healing dawn and the life-giving breath.", alignment: "Late Morning Orbit" },
+      { name: "Simone", desc: "Primeval scorching planet of the healing dawn and the life-giving breath.", alignment: "Late Morning Orbit" },
       { name: "Marika", desc: "Mystical dark ringed world of secrets and promise.", alignment: "Approaching Outer Orbit" },
       { name: "Ružena", desc: "Marika's sister world, it is also shrouded in mystique, darkness and hidden wonder.", alignment: "High Horizon Phase" },
       { name: "Rayne", desc: "Dazzling pink/red goddess of the middle system.", alignment: "Stellar Apex Alignment" },
@@ -419,7 +491,6 @@
       hoveredMonthName = null;
     });
 
-    // Fast Forward Time Orbit Jump Click handler
     canvas.addEventListener('click', (e) => {
       const rect = canvas.getBoundingClientRect();
       const x = e.clientX - rect.left;
@@ -494,15 +565,14 @@
         
         const textTheta = theta + Math.PI/4;
         const labelR = orbitRad * 1.05;
-        // Keep typography scaled down on smaller screens
         const sizeMultiplier = w < 480 ? 0.8 : 1.0;
         ctx.font = `${Math.round(10 * sizeMultiplier)}px "JetBrains Mono", Courier, monospace`;
         ctx.fillStyle = "#5cb6e499";
+        ctx.textBaseline = "middle";
         ctx.textAlign = "center";
-        ctx.fillText(QUARTERS[i].toUpperCase(), cx + Math.cos(textTheta)*labelR, cy + Math.sin(textTheta)*labelR + 3);
+        ctx.fillText(QUARTERS[i].toUpperCase(), cx + Math.cos(textTheta)*labelR, cy + Math.sin(textTheta)*labelR);
       }
 
-      // Drawing Rebekah Rings
       const rebekahRad = w < 480 ? 22 : 32;
       
       function drawRingHalf(startAngle, endAngle) {
@@ -511,28 +581,24 @@
         ctx.rotate(-Math.PI/6);
         ctx.scale(2.2, 0.45);
         
-        // Outer fine dusty disk edge (Cyan)
         ctx.strokeStyle = "rgba(6, 182, 212, 0.15)";
         ctx.lineWidth = 1;
         ctx.beginPath();
         ctx.arc(0, 0, rebekahRad * 1.45, startAngle, endAngle);
         ctx.stroke();
 
-        // Dense cyan ring band
         ctx.strokeStyle = "rgba(6, 182, 212, 0.55)";
         ctx.lineWidth = 4;
         ctx.beginPath();
         ctx.arc(0, 0, rebekahRad * 1.25, startAngle, endAngle);
         ctx.stroke();
 
-        // Inner ring glowing margin (Cyan)
         ctx.strokeStyle = "rgba(34, 211, 238, 0.7)";
         ctx.lineWidth = 1.5;
         ctx.beginPath();
         ctx.arc(0, 0, rebekahRad * 1.1, startAngle, endAngle);
         ctx.stroke();
 
-        // Ring interior atmosphere glow overlay (Cyan)
         ctx.strokeStyle = "rgba(6, 182, 212, 0.08)";
         ctx.lineWidth = 8;
         ctx.beginPath();
@@ -542,24 +608,20 @@
         ctx.restore();
       }
 
-      // Draw the Back ring portion
       drawRingHalf(Math.PI, 2 * Math.PI);
 
-      // Drawing Rebekah as a Deep Crimson / Red Gas Giant Sphere (overlapping back ring)
       const grad = ctx.createRadialGradient(cx, cy, 2, cx, cy, rebekahRad);
-      grad.addColorStop(0, '#ff4d4d');    // Bright crimson glow center
-      grad.addColorStop(0.35, '#990011'); // Deep blood-red intermediate 
-      grad.addColorStop(0.75, '#4a0008'); // Dark maroon bands transition
-      grad.addColorStop(1, '#0e0304');    // Black shadow fading into space
+      grad.addColorStop(0, '#ff4d4d');    
+      grad.addColorStop(0.35, '#990011'); 
+      grad.addColorStop(0.75, '#4a0008'); 
+      grad.addColorStop(1, '#0e0304');    
       ctx.fillStyle = grad;
       ctx.beginPath();
       ctx.arc(cx, cy, rebekahRad, 0, 2*Math.PI);
       ctx.fill();
 
-      // Draw the Front ring portion (tilted towards viewer, overlapping the planet body)
       drawRingHalf(0, Math.PI);
 
-      // Orbital Moon tracker representation
       const progressRatio = nDate.dayOfYear / nDate.totalDaysInYear;
       const moonAngle = (progressRatio * 2 * Math.PI) - Math.PI / 2;
       
@@ -579,7 +641,6 @@
       ctx.arc(mx, my, 5, 0, 2*Math.PI);
       ctx.fill();
 
-      // Scaled telemetry HUD labels on canvas
       const mobileScale = w < 480 ? 0.85 : 1.0;
       
       ctx.font = `bold ${Math.round(9 * mobileScale)}px "JetBrains Mono", Courier, monospace`;
@@ -603,6 +664,111 @@
         ctx.font = `bold ${Math.round(9 * mobileScale)}px "JetBrains Mono", Courier, monospace`;
         ctx.textAlign = 'center';
         ctx.fillText(hoveredMonthName, cx, h - 15);
+      }
+    }
+
+    function initWeekdayTrack() {
+      const container = document.getElementById('week-squares-container');
+      container.innerHTML = '';
+      
+      WEEKDAYS.forEach((day, index) => {
+        const sq = document.createElement('div');
+        sq.id = `wk-sq-${index}`;
+        sq.className = "bg-[#090b0d] border border-[#1d2228] rounded p-1.5 sm:p-2 text-center flex flex-col justify-between items-center transition-all duration-300 min-h-[52px]";
+        
+        sq.innerHTML = `
+          <span class="text-[8px] text-slate-600 font-mono leading-none">${index + 1}</span>
+          <span class="text-[10px] sm:text-xs font-bold text-slate-400 font-mono leading-tight tracking-wider mt-0.5">${WEEKDAY_SHORTS[index]}</span>
+          <span class="text-[7px] text-slate-700 font-sans tracking-wide leading-none select-none mt-0.5 truncate max-w-full" title="${day}">${day}</span>
+        `;
+        container.appendChild(sq);
+      });
+    }
+
+    function updateWeekdayTrackHighlight(currentWeekdayName, isIntercalary, dayOfMonth) {
+      WEEKDAYS.forEach((day, index) => {
+        const sq = document.getElementById(`wk-sq-${index}`);
+        if (!sq) return;
+
+        if (!isIntercalary && currentWeekdayName === day) {
+          sq.className = "bg-[#49d381]/5 border-[#49d381] active-day-pulse rounded p-1.5 sm:p-2 text-center flex flex-col justify-between items-center transition-all duration-300 min-h-[52px] scale-105 z-10 text-[#49d381]";
+          sq.querySelector('span:nth-child(2)').className = "text-[10px] sm:text-xs font-bold text-[#49d381] font-mono leading-tight tracking-wider mt-0.5";
+          sq.querySelector('span:nth-child(3)').className = "text-[7px] text-[#49d381] font-semibold font-sans tracking-wide leading-none select-none mt-0.5 truncate max-w-full";
+        } else {
+          sq.className = "bg-[#090b0d] border border-[#1d2228] rounded p-1.5 sm:p-2 text-center flex flex-col justify-between items-center transition-all duration-300 min-h-[52px] opacity-60";
+          sq.querySelector('span:nth-child(2)').className = "text-[10px] sm:text-xs font-bold text-slate-400 font-mono leading-tight tracking-wider mt-0.5";
+          sq.querySelector('span:nth-child(3)').className = "text-[7px] text-slate-500 font-sans tracking-wide leading-none select-none mt-0.5 truncate max-w-full";
+        }
+      });
+
+      const alertBanner = document.getElementById('weekday-tracker-alert');
+      const toast = document.getElementById('weekday-status-toast');
+      
+      if (isIntercalary) {
+        toast.innerText = "FESTIVAL PAUSE";
+        toast.className = "text-[9px] font-mono text-purple-400 bg-purple-500/10 px-1.5 py-0.5 rounded uppercase tracking-wider font-bold animate-pulse";
+        alertBanner.innerHTML = `
+          <span class="inline-block w-2.5 h-2.5 rounded-full bg-purple-500 animate-ping"></span>
+          <span class="text-purple-300 font-semibold">WEEK SEQUENCE SUSPENDED: Observing the Festival of Rebekah (Day ${dayOfMonth}). All standard work schedules are offline.</span>
+        `;
+      } else if (dayOfMonth === 45 || dayOfMonth === 46) {
+        toast.innerText = "MINI-FEST WEEKEND";
+        toast.className = "text-[9px] font-mono text-amber-400 bg-amber-500/10 px-1.5 py-0.5 rounded uppercase tracking-wider font-bold animate-pulse";
+        const festName = dayOfMonth === 45 ? "Rati" : "Kali";
+        alertBanner.innerHTML = `
+          <span class="inline-block w-2.5 h-2.5 rounded-full bg-amber-500 animate-ping"></span>
+          <span class="text-amber-300 font-semibold">INTERREGNA RECORD: Month-end Festival of ${festName} active. Time progression is decoupled from weekday cycles.</span>
+        `;
+      } else {
+        toast.innerText = "ACTIVE WEEKDAY";
+        toast.className = "text-[9px] font-mono text-[#49d381] bg-[#49d381]/10 px-1.5 py-0.5 rounded uppercase tracking-wider font-semibold";
+        alertBanner.innerHTML = `
+          <span class="inline-block w-2 h-2 rounded-full bg-[#49d381]"></span>
+          <span class="text-slate-400">The Nahlan month comprises 46 days: 44 days split into 4 weeks, with a 2 day fest at the end.</span>
+        `;
+      }
+    }
+
+    function updateOneDayCard(nDate) {
+      const card = document.getElementById('single-day-card');
+      const header = document.getElementById('single-day-header');
+      const dayNum = document.getElementById('single-day-num');
+      const dayName = document.getElementById('single-day-name');
+      const weekLabel = document.getElementById('single-day-week');
+      const quarterLabel = document.getElementById('single-day-quarter');
+
+      if (nDate.isIntercalary) {
+        card.className = "w-44 h-44 flex flex-col justify-between border border-purple-500 rounded-lg overflow-hidden bg-[#0a0710] shadow-[0_0_15px_rgba(168,85,247,0.2)] transition-all duration-300";
+        header.className = "bg-purple-950/40 border-b border-purple-500/30 py-2 text-center text-[10px] sm:text-xs font-bold uppercase tracking-widest font-mono text-purple-400";
+        header.innerText = `REBEKAH FEST`;
+        dayNum.innerText = `D-${nDate.dayOfMonth}`;
+        dayNum.className = "text-3xl font-extrabold text-purple-200 font-mono tracking-tighter leading-none";
+        dayName.innerText = "YEAR-END CORRECTION";
+        dayName.className = "text-[9px] sm:text-[10px] font-bold text-purple-400 mt-2 font-sans uppercase tracking-wider leading-none";
+        weekLabel.innerText = "PAUSE";
+        quarterLabel.innerText = "Y-END";
+      } else if (nDate.dayOfMonth === 45 || nDate.dayOfMonth === 46) {
+        const mName = MONTHS_LORE[nDate.monthIndex].name.toUpperCase();
+        card.className = "w-44 h-44 flex flex-col justify-between border border-amber-500 rounded-lg overflow-hidden bg-[#0c0906] shadow-[0_0_15px_rgba(245,158,11,0.15)] transition-all duration-300";
+        header.className = "bg-amber-950/30 border-b border-amber-500/20 py-2 text-center text-[10px] sm:text-xs font-bold uppercase tracking-widest font-mono text-amber-500";
+        header.innerText = `${mName} • Y ${nDate.year}`;
+        dayNum.innerText = nDate.dayOfMonth;
+        dayNum.className = "text-4xl sm:text-5xl font-extrabold text-amber-200 font-mono tracking-tighter leading-none";
+        dayName.innerText = nDate.weekdayName.toUpperCase();
+        dayName.className = "text-[10px] sm:text-xs font-bold text-amber-400 mt-2 font-sans uppercase tracking-wider leading-none";
+        weekLabel.innerText = "FESTIVAL";
+        quarterLabel.innerText = nDate.quarterName.toUpperCase().substring(0, 6);
+      } else {
+        const mName = MONTHS_LORE[nDate.monthIndex].name.toUpperCase();
+        card.className = "w-44 h-44 flex flex-col justify-between border border-[#5cb6e4]/30 rounded-lg overflow-hidden bg-[#090b0d] shadow-[0_0_15px_rgba(92,182,228,0.1)] transition-all duration-300";
+        header.className = "bg-[#5cb6e4]/10 border-b border-[#5cb6e4]/20 py-2 text-center text-[10px] sm:text-xs font-bold uppercase tracking-widest font-mono text-[#5cb6e4]";
+        header.innerText = `${mName} • Y ${nDate.year}`;
+        dayNum.innerText = nDate.dayOfMonth;
+        dayNum.className = "text-4xl sm:text-5xl font-extrabold text-slate-100 font-mono tracking-tighter leading-none";
+        dayName.innerText = nDate.weekdayName;
+        dayName.className = "text-[10px] sm:text-xs font-bold text-[#49d381] mt-2 font-sans uppercase tracking-wider leading-none";
+        weekLabel.innerText = nDate.weekNumberText.toUpperCase();
+        quarterLabel.innerText = nDate.quarterName.toUpperCase().substring(0, 6);
       }
     }
 
@@ -738,6 +904,10 @@
 
       drawOrbitSimulator(nDate);
 
+      // Update new desk calendar square and weekday list
+      updateOneDayCard(nDate);
+      updateWeekdayTrackHighlight(nDate.weekdayName, nDate.isIntercalary, nDate.dayOfMonth);
+
       const epochRefSpan = document.getElementById('epoch-ref');
       if (nDate.isYearZero) {
         epochRefSpan.innerText = "Target Epoch: 2026-07-03 03:10:11 UTC";
@@ -806,7 +976,7 @@
         hudYday.innerText = `M-DAY: ${nDate.dayOfMonth} | Y-DAY: ${nDate.dayOfYear}`;
       }
 
-      document.getElementById('current-year-display').innerText = `YEAR ${nDate.year}`;
+      document.getElementById('current-date-display').innerText = `YEAR ${nDate.year}`;
       const currentDateDisplay = document.getElementById('current-date-display');
       const currentPhaseDisplay = document.getElementById('current-phase-display');
       if (nDate.isIntercalary) {
@@ -906,6 +1076,8 @@
     });
 
     window.onload = function() {
+      initWeekdayTrack();
+
       const activeCal = getNahlaCalendarDate(Date.now());
       selectedMonthIndex = activeCal.isIntercalary ? -1 : activeCal.monthIndex;
 
