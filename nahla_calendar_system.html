@@ -106,7 +106,7 @@
         </div>
       </section>
 
-      <!-- SWAPPED PANEL 1: Epoch Clock & Telemetry Panel (Now first) -->
+      <!-- Telemetry & Telecommunications Panel -->
       <section class="bg-[#121519] border border-[#1d2228] rounded-lg p-3 sm:p-5 shadow-lg relative overflow-hidden">
         <div class="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#5cb6e4] to-transparent"></div>
         
@@ -203,7 +203,7 @@
         </div>
       </section>
 
-      <!-- SWAPPED PANEL 2: Single Day Calendar & Week List Display Panel (Now second) -->
+      <!-- Single Day Calendar & Week List Display Panel -->
       <section class="bg-[#121519] border border-[#1d2228] rounded-lg p-3 sm:p-5 shadow-lg relative overflow-hidden">
         <div class="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#49d381] to-transparent"></div>
         
@@ -443,11 +443,31 @@
     let hoveredAngle = null;
     let hoveredMonthName = null;
 
+    // Track physical layout dimensions to prevent redrawing/flickering on vertical address bar shifts on mobile
+    let lastCanvasWidth = 0;
+    let lastCanvasHeight = 0;
+
     function resizeCanvas() {
       const rect = canvas.parentNode.getBoundingClientRect();
-      canvas.width = rect.width * window.devicePixelRatio;
-      canvas.height = rect.height * window.devicePixelRatio;
-      ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+      const targetWidth = Math.floor(rect.width);
+      const targetHeight = Math.floor(rect.height);
+
+      // Only re-initialize and scale if parent coordinates have actually transformed
+      if (targetWidth !== lastCanvasWidth || targetHeight !== lastCanvasHeight) {
+        lastCanvasWidth = targetWidth;
+        lastCanvasHeight = targetHeight;
+
+        canvas.width = targetWidth * window.devicePixelRatio;
+        canvas.height = targetHeight * window.devicePixelRatio;
+        ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+        
+        // Immediately redraw canvas elements synchronously within the same render cycle
+        if (typeof getNahlaCalendarDate === 'function') {
+          const simTime = Date.now() + accumulatedTimeOffset;
+          const nDate = getNahlaCalendarDate(simTime);
+          drawOrbitSimulator(nDate);
+        }
+      }
     }
     window.addEventListener('resize', resizeCanvas);
     resizeCanvas();
