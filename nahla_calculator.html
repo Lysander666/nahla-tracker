@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nahla Calculator</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'Consolas', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+  
+  <style>
+    /* Premium custom scrollbar styling to match Elite Dangerous UI colors */
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #0d0f12;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #1d2228;
+      border-radius: 3px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: #5cb6e4;
+    }
+    
+    @keyframes pulse-cyan {
+      0%, 100% {
+        box-shadow: 0 0 5px rgba(92, 182, 228, 0.2), inset 0 0 5px rgba(92, 182, 228, 0.1);
+        border-color: rgba(92, 182, 228, 0.4);
+      }
+      50% {
+        box-shadow: 0 0 15px rgba(92, 182, 228, 0.5), inset 0 0 8px rgba(92, 182, 228, 0.2);
+        border-color: rgba(92, 182, 228, 0.9);
+      }
+    }
+    .glowing-panel {
+      animation: pulse-cyan 3s infinite ease-in-out;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-[#0d0f12] text-[#9ca4b0] p-3 md:p-6 font-sans selection:bg-[#5cb6e4]/30 selection:text-white">
+
+  <!-- Main Container -->
+  <div class="max-w-4xl mx-auto">
+    
+    <!-- Ship HUD Header -->
+    <header class="border-b border-[#1d2228] pb-4 mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div>
+        <div class="flex items-center gap-2 mt-2">
+          <span class="inline-block w-2.5 h-2.5 rounded-full bg-[#fbbf24] animate-ping mr-1"></span>
+          <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-slate-100 font-mono">
+            Nahla Calculator
+          </h1>
+        </div> 
+        <p class="text-[10px] sm:text-xs text-slate-500 mt-1 uppercase tracking-wider font-mono">
+           Input an Earth date/time to see the Nahlan equivalent | v1.2 Anniversary Gift
+        </p>
+      </div>
+      <a href="https://nahla.live" target="_blank" class="px-3 py-1.5 rounded border border-[#1d2228] text-xs text-slate-400 hover:text-[#5cb6e4] hover:border-[#5cb6e4] transition-all font-mono whitespace-nowrap">
+        &lt; RETURN TO LIVE HUD TRACKER
+      </a>
+    </header>
+
+    <!-- Content Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      
+      <!-- Left side: Interactive Converter Form -->
+      <section class="lg:col-span-5 bg-[#121519] border border-[#1d2228] rounded-lg p-5 shadow-lg relative overflow-hidden flex flex-col justify-between">
+        <div class="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#5cb6e4] to-transparent"></div>
+        
+        <div>
+          <div class="flex items-center justify-between mb-4 pb-2 border-b border-[#1d2228]/40">
+            <span class="text-xs font-bold text-[#5cb6e4] uppercase tracking-widest font-mono">
+              Chronology Controls
+            </span>
+            <!-- Live Switch -->
+            <label class="inline-flex items-center cursor-pointer">
+              <input type="checkbox" id="live-toggle" class="sr-only peer" checked>
+              <div class="relative w-9 h-5 bg-[#090b0d] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-[#9ca4b0] after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#49d381]/30 peer-checked:after:bg-[#49d381]"></div>
+              <span id="live-status-label" class="ms-2 text-[10px] font-bold font-mono text-[#49d381] uppercase tracking-wider">LIVE</span>
+            </label>
+          </div>
+
+          <!-- Input Fields -->
+          <div class="space-y-4">
+            <div>
+              <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider font-mono mb-1.5">
+                1. Target Earth Date (UTC)
+              </label>
+              <input type="date" id="input-date" class="w-full bg-[#090b0d] border border-[#1d2228] rounded p-2.5 font-mono text-slate-100 text-sm focus:outline-none focus:border-[#5cb6e4] transition-all cursor-pointer">
+            </div>
+
+            <div>
+              <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider font-mono mb-1.5">
+                2. Target Earth Time (UTC)
+              </label>
+              <div class="flex gap-2">
+                <input type="time" id="input-time" step="1" class="flex-1 bg-[#090b0d] border border-[#1d2228] rounded p-2.5 font-mono text-slate-100 text-sm focus:outline-none focus:border-[#5cb6e4] transition-all cursor-pointer">
+                <button id="use-now-btn" class="px-3 bg-[#0d0f12] border border-[#1d2228] text-slate-400 rounded hover:text-white hover:border-slate-500 transition-all font-mono text-xs font-bold uppercase tracking-wider">
+                  Now
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick presets -->
+          <div class="mt-6">
+            <span class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider font-mono mb-2">
+              System Alignment Presets
+            </span>
+            <div class="grid grid-cols-2 gap-2">
+              <button onclick="applyPreset('2025-07-20T19:33:00Z')" class="p-2 text-left bg-[#090b0d] hover:bg-[#121519] border border-[#1d2228] hover:border-[#fbbf24] rounded transition-all group">
+                <span class="block text-[9px] text-[#fbbf24] font-bold font-mono uppercase tracking-wider">Discovery Day</span>
+                <span class="block text-[11px] text-slate-400 font-mono mt-0.5 group-hover:text-white">20 Jul 2025</span>
+              </button>
+              <button onclick="applyPreset('2026-07-20T19:08:49Z')" class="p-2 text-left bg-[#090b0d] hover:bg-[#121519] border border-[#1d2228] hover:border-[#5cb6e4] rounded transition-all group">
+                <span class="block text-[9px] text-[#5cb6e4] font-bold font-mono uppercase tracking-wider">1-Year Anniversary</span>
+                <span class="block text-[11px] text-slate-400 font-mono mt-0.5 group-hover:text-white">20 Jul 2026</span>
+              </button>
+              <button onclick="applyPreset('2026-07-03T03:10:11Z')" class="p-2 text-left bg-[#090b0d] hover:bg-[#121519] border border-[#1d2228] hover:border-[#49d381] rounded transition-all group">
+                <span class="block text-[9px] text-[#49d381] font-bold font-mono uppercase tracking-wider">Epoch Alignment</span>
+                <span class="block text-[11px] text-slate-400 font-mono mt-0.5 group-hover:text-white">03 Jul 2026</span>
+              </button>
+              <button onclick="applyPreset('2312-07-01T12:00:00Z')" class="p-2 text-left bg-[#090b0d] hover:bg-[#121519] border border-[#1d2228] hover:border-purple-400 rounded transition-all group">
+                <span class="block text-[9px] text-purple-400 font-bold font-mono uppercase tracking-wider">Far Future Sync</span>
+                <span class="block text-[11px] text-slate-400 font-mono mt-0.5 group-hover:text-white">01 Jul 2312</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- System specs display -->
+        <div class="mt-6 pt-4 border-t border-[#1d2228]/40 text-[10px] font-mono text-slate-500 leading-relaxed">
+          <p class="font-bold text-[#5cb6e4] mb-1">CHRONOMETRIC CONSTANTS:</p>
+          <p>• Day (Solar): 25h 26m 10s (91,570s)</p>
+          <p>• Earth Year Alignment: 555 Earth Days</p>
+          <p>• Phase Interval: 2h 07m 10.8s (7,630.8s)</p>
+        </div>
+      </section>
+
+      <!-- Right side: Calculation Results / boarding pass interface -->
+      <section class="lg:col-span-7 flex flex-col gap-5">
+        
+        <!-- The Main Boarding Pass/Telemetry Screen -->
+        <div class="bg-[#121519] border border-[#1d2228] rounded-lg p-5 shadow-lg relative overflow-hidden glowing-panel">
+          <div class="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#5cb6e4] to-transparent"></div>
+          
+          <div class="flex items-center justify-between mb-4 border-b border-[#1d2228]/40 pb-3">
+            <span class="text-xs font-bold text-slate-400 uppercase tracking-widest font-mono">
+              Nahlan Equivalent
+            </span>
+            <span id="output-calc-state" class="text-[10px] font-mono bg-[#5cb6e4]/10 text-[#5cb6e4] px-2 py-0.5 rounded font-bold uppercase tracking-wider">
+              REAL-TIME SYNC
+            </span>
+          </div>
+
+          <!-- Digital Passport Output Card -->
+          <div class="bg-[#090b0d] border border-[#1d2228] rounded p-5 relative overflow-hidden">
+            <!-- Grid Watermark Icon in background -->
+            <div class="absolute right-4 bottom-4 opacity-5 pointer-events-none text-slate-100 font-bold text-9xl font-mono select-none">
+              N
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10">
+              
+              <!-- Left Column: Nahla Date / Weekday details -->
+              <div class="space-y-4 font-mono">
+                <div>
+                  <span class="text-[9px] text-slate-500 uppercase tracking-wider block">Nahla Calendar Date</span>
+                  <div id="out-nahla-date" class="text-xl font-bold text-[#49d381] mt-0.5">
+                    -- / --
+                  </div>
+                  <div id="out-nahla-year" class="text-xs text-slate-400 mt-0.5">
+                    Nahla Year --
+                  </div>
+                </div>
+
+                <div>
+                  <span class="text-[9px] text-slate-500 uppercase tracking-wider block">Temporal Period / Quarter</span>
+                  <div id="out-nahla-quarter" class="text-sm font-semibold text-slate-200 mt-0.5">
+                    --
+                  </div>
+                  <div id="out-nahla-week" class="text-xs text-slate-400 mt-0.5">
+                    --
+                  </div>
+                </div>
+
+                <div>
+                  <span class="text-[9px] text-slate-500 uppercase tracking-wider block">Solar Day Progress</span>
+                  <div id="out-nahla-progress" class="text-xs text-[#5cb6e4] mt-0.5">
+                    --% Complete
+                  </div>
+                </div>
+              </div>
+
+              <!-- Right Column: NLT Clock / Active Phase -->
+              <div class="space-y-4 border-t md:border-t-0 md:border-l border-[#1d2228] pt-4 md:pt-0 md:pl-6 font-mono">
+                <div>
+                  <span class="text-[9px] text-slate-500 uppercase tracking-wider block">Nahla Local Time (NLT)</span>
+                  <div id="out-nlt-time" class="text-2xl font-bold text-[#5cb6e4] tracking-widest mt-0.5">
+                    --:--:--
+                  </div>
+                  <span class="text-[9px] text-slate-500 uppercase mt-0.5 block">25h 26m 10s Cycle</span>
+                </div>
+
+                <div>
+                  <span class="text-[9px] text-slate-500 uppercase tracking-wider block">Active Galactic Phase</span>
+                  <div class="flex items-baseline gap-2 mt-0.5">
+                    <span id="out-phase-symbol" class="text-2xl font-bold text-[#fbbf24]">--</span>
+                    <span id="out-phase-name" class="text-sm font-semibold text-slate-200">--</span>
+                  </div>
+                  <p id="out-phase-range" class="text-[10px] text-slate-400 mt-1 italic">
+                    --
+                  </p>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Interactive Action Board -->
+          <div class="mt-4 flex flex-col sm:flex-row gap-3">
+            <button onclick="copyTransitLog()" class="flex-1 py-2.5 bg-[#5cb6e4] hover:bg-[#49a8d9] text-[#0d0f12] font-bold font-mono text-xs uppercase tracking-wider rounded transition-all text-center flex items-center justify-center gap-1.5 shadow-[0_0_12px_rgba(92,182,228,0.2)]">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 01-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 011.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 00-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 01-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 00-3.375-3.375h-1.5a1.125 1.125 0 01-1.125-1.125v-1.5a3.375 3.375 0 00-3.375-3.375H9.75" />
+              </svg>
+              Copy Transit Entry log
+            </button>
+            <div id="copy-toast" class="opacity-0 pointer-events-none transition-all duration-300 text-[10px] text-[#49d381] font-mono font-bold uppercase tracking-wider bg-[#49d381]/10 border border-[#49d381]/20 px-3 py-2 rounded text-center flex items-center justify-center">
+              Copied to clipboard!
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+    </div>
+
+    <!-- Lower Section: Active Phase visual Dial -->
+    <section class="bg-[#121519] border border-[#1d2228] rounded-lg p-5 mt-6 shadow-lg relative overflow-hidden">
+      <div class="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#fbbf24] to-transparent"></div>
+      
+      <span class="block text-xs font-bold text-[#fbbf24] uppercase tracking-widest font-mono mb-4">
+        Dynamic Phase Alignment
+      </span>
+
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+        <!-- SVG Interactive Phase Wheel Dial -->
+        <div class="md:col-span-5 flex justify-center">
+          <div class="relative w-48 h-48">
+            <svg id="phase-dial-svg" viewBox="0 0 200 200" class="w-full h-full transform -rotate-90">
+              <!-- Background ring -->
+              <circle cx="100" cy="100" r="85" fill="none" stroke="#090b0d" stroke-width="12" />
+              <!-- Highlighted Phase Arc -->
+              <circle id="phase-dial-highlight" cx="100" cy="100" r="85" fill="none" stroke="#fbbf24" stroke-width="14" stroke-dasharray="44.5 534" stroke-dashoffset="0" stroke-linecap="round" class="transition-all duration-500" />
+              <!-- Inner accent -->
+              <circle cx="100" cy="100" r="72" fill="none" stroke="#1d2228" stroke-width="1" />
+              <!-- Center Core (Rebekah graphic placeholder) -->
+              <circle cx="100" cy="100" r="45" fill="#090b0d" stroke="#1d2228" stroke-width="2" />
+              <circle cx="100" cy="100" r="30" fill="url(#core-gradient)" />
+              
+              <defs>
+                <radialGradient id="core-gradient">
+                  <stop offset="0%" stop-color="#ff4d4d" />
+                  <stop offset="60%" stop-color="#4a0008" />
+                  <stop offset="100%" stop-color="#090b0d" />
+                </radialGradient>
+              </defs>
+            </svg>
+            <div class="absolute inset-0 flex flex-col items-center justify-center font-mono select-none">
+              <span id="center-phase-symbol" class="text-3xl font-bold text-[#fbbf24]">α</span>
+              <span class="text-[8px] text-slate-500 uppercase tracking-widest mt-0.5">CURRENT PHASE</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Detailed Phase Matrix Info Block -->
+        <div class="md:col-span-7 bg-[#090b0d] border border-[#1d2228] rounded p-4 self-stretch flex flex-col justify-between">
+          <div class="font-mono">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="text-xs font-bold text-[#fbbf24] uppercase tracking-wider">Phase Spectrum Telemetry</span>
+              <span class="inline-block px-1.5 py-0.5 rounded text-[8px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20 uppercase tracking-wide">Live Sensor</span>
+            </div>
+            <p id="dial-phase-desc" class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+              Astronomical dawn; first light and morning transition.
+            </p>
+          </div>
+
+          <div class="mt-4 grid grid-cols-2 gap-4 border-t border-[#1d2228] pt-4 font-mono text-[10px]">
+            <div>
+              <span class="text-slate-500 uppercase block">Orbital Elevation</span>
+              <span id="dial-phase-elevation" class="text-slate-300 font-bold">Dawn Crossing Node</span>
+            </div>
+            <div>
+              <span class="text-slate-500 uppercase block">Atmospheric Temp Delta</span>
+              <span id="dial-phase-temp" class="text-slate-300 font-bold">Ascending Phase Arc</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <script>
+    // System Constants matching provided calendar codebase
+    const EPOCH_UTC = Date.UTC(2026, 6, 3, 3, 10, 11); // July 3, 2026, 03:10:11 UTC
+    const DAY_MS = 91570 * 1000; // 25 hours, 26 minutes, 10 seconds in milliseconds
+    const PHASE_SECS = 91570 / 12; // Length of one galactic phase
+
+    const QUARTERS = ["Bellatrix", "Bunika", "Elena", "Troum"];
+    const WEEKDAYS = ["Abelina", "Jana", "Mira", "Maria", "Theresa", "Ferril", "Herbst", "Asmorod", "Sarasvati", "Gauri", "Chamunda"];
+    
+    const MONTHS_LORE = [
+      { name: "Hope", desc: "Sun of fierce beginnings, blue-white light and rebirth.", alignment: "Start of Year / Peak Sunlight" },
+      { name: "Simone", desc: "Primeval scorching planet of the healing dawn and the life-giving breath.", alignment: "Late Morning Orbit" },
+      { name: "Marika", desc: "Mystical dark ringed world of secrets and promise.", alignment: "Approaching Outer Orbit" },
+      { name: "Ružena", desc: "Marika's sister world, it is also shrouded in mystique, darkness and hidden wonder.", alignment: "High Horizon Phase" },
+      { name: "Rayne", desc: "Dazzling pink/red goddess of the middle system.", alignment: "Stellar Apex Alignment" },
+      { name: "Báthory", desc: "The earth/night goddess. Honouring Nahla's dense, metal and sulphur-rich planetary mantle.", alignment: "Peak Magnetic Alignment" },
+      { name: "Aeoga", desc: "God of dust, sterility, and the burning heat of Hope.", alignment: "Aphelion" },
+      { name: "Skaði", desc: "Goddess of cosmic love, beauty, and the locked bond of giant and moon.", alignment: "Tidal Symmetrical Node" },
+      { name: "Draupadi", desc: "Goddess of high mountain peaks, offering safe passage.", alignment: "Descending Node" },
+      { name: "Sita", desc: "Goddess of writing, cosmic records, and mapping the stars.", alignment: "Apsidal Alignment" },
+      { name: "Ariana", desc: "Sweet siren-voiced cosmic world of subterranean vaults.", alignment: "Volcanic Surge Era" },
+      { name: "Anneke", desc: "Goddess of cosmic aural beauty, spinning Rebekah's rings.", alignment: "Ring Crossing Horizon" }
+    ];
+
+    const PHASES = [
+      { sym: "α", name: "Alpha", range: "00:00:00 - 02:07:10", desc: "Astronomical dawn; first light and morning transition." },
+      { sym: "β", name: "Beta", range: "02:07:10 - 04:14:21", desc: "Brightening sunrise arc; parent body Rebekah casts a red glow across the sulphur plains." },
+      { sym: "γ", name: "Gamma", range: "04:14:21 - 06:21:32", desc: "Morning light; sun climbing at a steep 90-degree inclination." },
+      { sym: "δ", name: "Delta", range: "06:21:32 - 08:28:43", desc: "Mid-day ascent; peak solar intensity approaches." },
+      { sym: "ε", name: "Epsilon", range: "08:28:43 - 10:35:54", desc: "Solar zenith; shortest shadows and highest solar panels output." },
+      { sym: "ζ", name: "Zeta", range: "10:35:54 - 12:43:05", desc: "Post-zenith afternoon warmth; dust storms peak during high winds." },
+      { sym: "η", name: "Eta", range: "12:43:05 - 14:50:15", desc: "Mid-afternoon decline; long shadows creeping from Natalja's Pass." },
+      { sym: "θ", name: "Theta", range: "14:50:15 - 16:57:26", desc: "Late afternoon; thermal venting vents become active." },
+      { sym: "ι", name: "Iota", range: "16:57:26 - 19:04:37", desc: "Twilight descent; sun slipping beneath the horizon of Rebekah." },
+      { sym: "κ", name: "Kappa", range: "19:04:37 - 21:11:48", desc: "Twilight glow; faint pink atmospheres glimmer in the dust lanes." },
+      { sym: "λ", name: "Lambda", range: "21:11:48 - 23:18:59", desc: "Deep night; thermal minimum begins as volcanic magma channels cool." },
+      { sym: "μ", name: "Mu", range: "23:18:59 - 25:26:10", desc: "Pre-dawn calm; galactic core band high and slanting across the stellar background." }
+    ];
+
+    // State Tracking
+    let isLive = true;
+    let computedTransitData = null; // Store for copy command
+
+    // Calendar helper functions matching tracker logic
+    function isNahlaLeapYear(year) {
+      if (year <= 0) return false;
+      const yearInCycle = ((year - 1) % 28) + 1;
+      return [5, 11, 16, 22, 28].includes(yearInCycle);
+    }
+
+    function getDaysInNahlaYear(year) {
+      return isNahlaLeapYear(year) ? 556 : 555;
+    }
+
+    function getNahlaCalendarDate(utcMillis) {
+      let year, dayOfYear, msInCurrentDay, totalDaysInYear;
+      
+      if (utcMillis >= EPOCH_UTC) {
+        let remainingMs = utcMillis - EPOCH_UTC;
+        year = 1;
+        while (true) {
+          const yearMs = getDaysInNahlaYear(year) * DAY_MS;
+          if (remainingMs < yearMs) {
+            break;
+          }
+          remainingMs -= yearMs;
+          year++;
+        }
+        dayOfYear = Math.floor(remainingMs / DAY_MS) + 1;
+        msInCurrentDay = remainingMs % DAY_MS;
+        totalDaysInYear = getDaysInNahlaYear(year);
+      } else {
+        let remainingMs = EPOCH_UTC - utcMillis;
+        year = 0;
+        while (true) {
+          const yearMs = getDaysInNahlaYear(year) * DAY_MS;
+          if (remainingMs <= yearMs) {
+            break;
+          }
+          remainingMs -= yearMs;
+          year--;
+        }
+        totalDaysInYear = isNahlaLeapYear(year) ? 556 : 555;
+        let msFromStartOfYear = (totalDaysInYear * DAY_MS) - remainingMs;
+        dayOfYear = Math.floor(msFromStartOfYear / DAY_MS) + 1;
+        msInCurrentDay = msFromStartOfYear % DAY_MS;
+      }
+
+      let monthIndex = -1;
+      let dayOfMonth = 0;
+      let isIntercalary = false;
+      let weekdayName = "";
+      let weekNumberText = "";
+      let quarterName = "";
+
+      if (dayOfYear <= 552) {
+        monthIndex = Math.floor((dayOfYear - 1) / 46);
+        dayOfMonth = ((dayOfYear - 1) % 46) + 1;
+        quarterName = QUARTERS[Math.floor(monthIndex / 3)];
+        
+        if (dayOfMonth <= 44) {
+          const zeroIndexedDay = dayOfMonth - 1;
+          const weekdayIdx = zeroIndexedDay % 11;
+          const weekNum = Math.floor(zeroIndexedDay / 11) + 1;
+          weekdayName = WEEKDAYS[weekdayIdx];
+          weekNumberText = `Week ${weekNum}`;
+        } else if (dayOfMonth === 45) {
+          weekdayName = "Festival of Rati";
+          weekNumberText = "Interregna";
+        } else if (dayOfMonth === 46) {
+          weekdayName = "Festival of Kali";
+          weekNumberText = "Interregna";
+        }
+      } else {
+        isIntercalary = true;
+        dayOfMonth = dayOfYear - 552;
+        quarterName = "Year-End";
+        weekdayName = "Festival Day " + dayOfMonth;
+        weekNumberText = "Festival Loop";
+      }
+
+      return {
+        isYearZero: year === 0,
+        year,
+        dayOfYear,
+        monthIndex,
+        dayOfMonth,
+        isIntercalary,
+        msInCurrentDay,
+        totalDaysInYear,
+        weekdayName,
+        weekNumberText,
+        quarterName
+      };
+    }
+
+    // Calculations & Conversion Engine
+    function convertTime() {
+      let targetMs;
+
+      if (isLive) {
+        targetMs = Date.now();
+        // Sync inputs
+        const targetDate = new Date(targetMs);
+        document.getElementById('input-date').value = targetDate.toISOString().substring(0, 10);
+        document.getElementById('input-time').value = targetDate.toISOString().substring(11, 19);
+      } else {
+        const inputDateVal = document.getElementById('input-date').value;
+        const inputTimeVal = document.getElementById('input-time').value;
+        if (!inputDateVal || !inputTimeVal) return;
+        
+        targetMs = Date.parse(`${inputDateVal}T${inputTimeVal}Z`);
+        if (isNaN(targetMs)) return;
+      }
+
+      const nDate = getNahlaCalendarDate(targetMs);
+      
+      // Calculate NLT Clock
+      const totalSecsInDay = Math.floor(nDate.msInCurrentDay / 1000);
+      const nltH = Math.floor(totalSecsInDay / 3600);
+      const nltM = Math.floor((totalSecsInDay % 3600) / 60);
+      const nltS = totalSecsInDay % 60;
+      const nltString = `${nltH.toString().padStart(2, '0')}:${nltM.toString().padStart(2, '0')}:${nltS.toString().padStart(2, '0')}`;
+
+      // Calculate active Phase
+      const phaseIndex = Math.min(11, Math.max(0, Math.floor(totalSecsInDay / PHASE_SECS)));
+      const activePhase = PHASES[phaseIndex];
+
+      // Update Outputs
+      if (nDate.isIntercalary) {
+        document.getElementById('out-nahla-date').innerText = `Festival of Rebekah, Day ${nDate.dayOfMonth}`;
+        document.getElementById('out-nahla-quarter').innerText = "Year-End Intercalary";
+        document.getElementById('out-nahla-week').innerText = "Chronology Suspended";
+      } else {
+        const monthName = MONTHS_LORE[nDate.monthIndex].name;
+        document.getElementById('out-nahla-date').innerText = `${monthName} ${nDate.dayOfMonth} (${nDate.weekdayName})`;
+        document.getElementById('out-nahla-quarter').innerText = `Quarter: ${nDate.quarterName}`;
+        document.getElementById('out-nahla-week').innerText = `${nDate.weekNumberText}`;
+      }
+
+      document.getElementById('out-nahla-year').innerText = `Nahla Year ${nDate.year}`;
+      
+      const progressPct = ((nDate.dayOfYear / nDate.totalDaysInYear) * 100).toFixed(2);
+      document.getElementById('out-nahla-progress').innerText = `${progressPct}% Orbital Cycle`;
+
+      document.getElementById('out-nlt-time').innerText = nltString;
+      document.getElementById('out-phase-symbol').innerText = activePhase.sym;
+      document.getElementById('out-phase-name').innerText = activePhase.name;
+      document.getElementById('out-phase-range').innerText = `Phase window: ${activePhase.range}`;
+
+      // Update Phase Dial SVG Arc and center graphics
+      const dialHighlight = document.getElementById('phase-dial-highlight');
+      const segmentArcLength = 534 / 12; // Radius 85 perimeter = ~534
+      const newOffset = -segmentArcLength * phaseIndex;
+      dialHighlight.style.strokeDashoffset = newOffset;
+      document.getElementById('center-phase-symbol').innerText = activePhase.sym;
+      document.getElementById('dial-phase-desc').innerText = activePhase.desc;
+      document.getElementById('dial-phase-elevation').innerText = `Phase #${phaseIndex + 1} (${activePhase.name})`;
+      document.getElementById('dial-phase-temp').innerText = `Node: ${nDate.weekdayName}`;
+
+      // Preserve data package for Clipboard Transit copy
+      computedTransitData = {
+        earthTime: new Date(targetMs).toUTCString(),
+        nahlaDate: nDate.isIntercalary ? `Festival of Rebekah, Day ${nDate.dayOfMonth}` : `${MONTHS_LORE[nDate.monthIndex].name} ${nDate.dayOfMonth}`,
+        nahlaYear: `Year ${nDate.year}`,
+        nlt: nltString,
+        phase: `${activePhase.sym} (${activePhase.name})`,
+        quarter: nDate.quarterName,
+        week: nDate.weekNumberText,
+        progress: `${progressPct}%`
+      };
+    }
+
+    // Action Helpers
+    function applyPreset(isoString) {
+      document.getElementById('live-toggle').checked = false;
+      isLive = false;
+      document.getElementById('live-status-label').innerText = "STATIC";
+      document.getElementById('live-status-label').className = "ms-2 text-[10px] font-bold font-mono text-amber-500 uppercase tracking-wider";
+      document.getElementById('output-calc-state').innerText = "HISTORICAL ENTRY";
+      document.getElementById('output-calc-state').className = "text-[10px] font-mono bg-amber-500/10 text-amber-400 px-2 py-0.5 rounded font-bold uppercase tracking-wider";
+
+      // Force-append Z if not already present to guarantee UTC parsing
+      if (!isoString.endsWith('Z')) {
+        isoString += 'Z';
+      }
+      
+      const dt = new Date(isoString);
+      document.getElementById('input-date').value = dt.toISOString().substring(0, 10);
+      document.getElementById('input-time').value = dt.toISOString().substring(11, 19);
+      convertTime();
+    }
+
+    function copyTransitLog() {
+      if (!computedTransitData) return;
+      const textBlock = `====================================
+NAHLA SYSTEM TRANSIT RECORD
+====================================
+Earth UTC Standard : ${computedTransitData.earthTime}
+Nahla Calendar     : ${computedTransitData.nahlaDate}, ${computedTransitData.nahlaYear}
+Temporal Division  : Quarter: ${computedTransitData.quarter} (${computedTransitData.week})
+Nahla Local Time   : ${computedTransitData.nlt}
+Active Phase       : Phase ${computedTransitData.phase}
+Orbit Progression  : ${computedTransitData.progress}
+====================================`;
+
+      // Copy using safe fallback method
+      const el = document.createElement('textarea');
+      el.value = textBlock;
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand('copy');
+      document.body.removeChild(el);
+
+      const toast = document.getElementById('copy-toast');
+      toast.className = "opacity-100 transition-all duration-300 text-[10px] text-[#49d381] font-mono font-bold uppercase tracking-wider bg-[#49d381]/10 border border-[#49d381]/20 px-3 py-2 rounded text-center flex items-center justify-center";
+      setTimeout(() => {
+        toast.className = "opacity-0 pointer-events-none transition-all duration-300 text-[10px] text-[#49d381] font-mono font-bold uppercase tracking-wider bg-[#49d381]/10 border border-[#49d381]/20 px-3 py-2 rounded text-center flex items-center justify-center";
+      }, 2000);
+    }
+
+    // Event Listeners setup
+    document.getElementById('live-toggle').addEventListener('change', (e) => {
+      isLive = e.target.checked;
+      const label = document.getElementById('live-status-label');
+      const calcState = document.getElementById('output-calc-state');
+      if (isLive) {
+        label.innerText = "LIVE";
+        label.className = "ms-2 text-[10px] font-bold font-mono text-[#49d381] uppercase tracking-wider";
+        calcState.innerText = "REAL-TIME SYNC";
+        calcState.className = "text-[10px] font-mono bg-[#5cb6e4]/10 text-[#5cb6e4] px-2 py-0.5 rounded font-bold uppercase tracking-wider";
+      } else {
+        label.innerText = "STATIC";
+        label.className = "ms-2 text-[10px] font-bold font-mono text-amber-500 uppercase tracking-wider";
+        calcState.innerText = "MANUAL LOG";
+        calcState.className = "text-[10px] font-mono bg-amber-500/10 text-amber-400 px-2 py-0.5 rounded font-bold uppercase tracking-wider";
+      }
+      convertTime();
+    });
+
+    document.getElementById('use-now-btn').addEventListener('click', () => {
+      document.getElementById('live-toggle').checked = true;
+      isLive = true;
+      const label = document.getElementById('live-status-label');
+      const calcState = document.getElementById('output-calc-state');
+      label.innerText = "LIVE";
+      label.className = "ms-2 text-[10px] font-bold font-mono text-[#49d381] uppercase tracking-wider";
+      calcState.innerText = "REAL-TIME SYNC";
+      calcState.className = "text-[10px] font-mono bg-[#5cb6e4]/10 text-[#5cb6e4] px-2 py-0.5 rounded font-bold uppercase tracking-wider";
+      convertTime();
+    });
+
+    document.getElementById('input-date').addEventListener('input', () => {
+      if (isLive) {
+        document.getElementById('live-toggle').checked = false;
+        isLive = false;
+        document.getElementById('live-status-label').innerText = "STATIC";
+        document.getElementById('live-status-label').className = "ms-2 text-[10px] font-bold font-mono text-amber-500 uppercase tracking-wider";
+        document.getElementById('output-calc-state').innerText = "MANUAL LOG";
+        document.getElementById('output-calc-state').className = "text-[10px] font-mono bg-amber-500/10 text-amber-400 px-2 py-0.5 rounded font-bold uppercase tracking-wider";
+      }
+      convertTime();
+    });
+
+    document.getElementById('input-time').addEventListener('input', () => {
+      if (isLive) {
+        document.getElementById('live-toggle').checked = false;
+        isLive = false;
+        document.getElementById('live-status-label').innerText = "STATIC";
+        document.getElementById('live-status-label').className = "ms-2 text-[10px] font-bold font-mono text-amber-500 uppercase tracking-wider";
+        document.getElementById('output-calc-state').innerText = "MANUAL LOG";
+        document.getElementById('output-calc-state').className = "text-[10px] font-mono bg-amber-500/10 text-amber-400 px-2 py-0.5 rounded font-bold uppercase tracking-wider";
+      }
+      convertTime();
+    });
+
+    // Start Loops
+    window.onload = function() {
+      convertTime();
+      setInterval(() => {
+        if (isLive) {
+          convertTime();
+        }
+      }, 500);
+    }
+  </script>
+</body>
+</html>
