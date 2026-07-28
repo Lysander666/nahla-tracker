@@ -1220,6 +1220,18 @@
     height: auto;
     max-width: 800px;
 }       
+
+/* Force 5-panel layout to stay on a single row */
+.panel-container {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  gap: 0.5rem !important; /* Tightens space between panels if needed */
+}
+
+.panel-card {
+  flex: 1 1 0 !important; /* Allows panels to shrink equally */
+  min-width: 0 !important; /* Stops individual panels from forcing a wrap */
+}
        
 
     </style>
