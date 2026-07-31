@@ -1221,23 +1221,7 @@
     max-width: 800px;
 }       
 
-/* Fix 5-panel wrapping on 1080p laptops */
-#system-info-container {
-    flex-wrap: nowrap !important;
-    gap: 10px !important; /* Slightly tightens panel spacing */
-}
 
-.celestial-body, #map-panel, #manifest-panel {
-    min-width: 0 !important; /* Removes the 250px hard floor */
-    flex: 1 1 0 !important;   /* Forces all 5 cards to shrink equally */
-    padding: 0 12px 15px 12px !important; /* Tightens internal padding slightly */
-}
-
-/* Ensure images/widgets inside panels scale down fluidly */
-#map-panel img, #nahla-clock {
-    max-width: 100% !important;
-    height: auto !important;
-}
        
 
     </style>
