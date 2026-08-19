@@ -94,18 +94,26 @@
 }
 
 .header-badge img {
-    width: 150px;         /* Increased size */
-    height: 150px;        /* Matches width for a perfect circle */
-    border-radius: 50%;
-    object-fit: cover;
+    width: 150px;
+    height: 150px;
+    /* 1. Prevents clipping of protruding ship wings/nose */
+    object-fit: contain;
+    border-radius: 0;
+    
+    /* 2. Fixes downsampling moiré / stippled texture */
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: high-quality;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    
     display: block;
-    box-shadow: 0 0 18px rgba(0, 0, 0, 0.85);
+    cursor: pointer;
     transition: transform 0.25s ease, filter 0.25s ease;
 }
 
 .header-badge img:hover {
-    transform: scale(1.04);
-    filter: drop-shadow(0 0 12px rgba(97, 218, 251, 0.5));
+    transform: scale(1.05);
+    filter: drop-shadow(0 0 12px rgba(97, 218, 251, 0.4));
 }
        
 .header-title {
