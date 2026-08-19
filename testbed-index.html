@@ -75,17 +75,8 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 20px;
-    margin-bottom: 8px;
-    text-align: center;
-}
-
-.header {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 36px;            /* Increased space so larger badges don't crowd the title */
-    margin-bottom: 12px;
+    gap: 45px;            /* Extra spacing to accommodate the larger patches */
+    margin-bottom: 15px;
     text-align: center;
 }
 
@@ -103,19 +94,20 @@
 }
 
 .header-badge img {
-    width: 120px;          /* Increased from 85px (adjust to 130px–140px if desired) */
-    height: 120px;         /* Keeps the 1:1 circular aspect ratio */
+    width: 150px;         /* Increased size */
+    height: 150px;        /* Matches width for a perfect circle */
     border-radius: 50%;
     object-fit: cover;
     display: block;
-    box-shadow: 0 0 16px rgba(0, 0, 0, 0.8);
-    transition: transform 0.2s ease, filter 0.2s ease;
+    box-shadow: 0 0 18px rgba(0, 0, 0, 0.85);
+    transition: transform 0.25s ease, filter 0.25s ease;
 }
 
 .header-badge img:hover {
-    transform: scale(1.05);
-    filter: drop-shadow(0 0 8px rgba(97, 218, 251, 0.5));
+    transform: scale(1.04);
+    filter: drop-shadow(0 0 12px rgba(97, 218, 251, 0.5));
 }
+       
 .header-title {
     display: flex;
     flex-direction: column;
@@ -139,13 +131,14 @@
     to { opacity: 0.85; }
 }
 
-@media (max-width: 650px) {
+@media (max-width: 768px) {
     .header {
-        gap: 12px;
+        gap: 16px;
     }
     .header-badge img {
-        width: 65px;
-        height: 65px;
+        width: 75px;
+        height: 75px;
+
     }
     .header-logo img {
         width: 44px;
