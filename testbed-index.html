@@ -75,21 +75,18 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 12px;
-    margin-bottom: 20px;
+    gap: 20px;
+    margin-bottom: 8px;
     text-align: center;
 }
 
-.header-logo {
-    padding-top: 20px;      /* space above the logo */
-    padding-bottom: 20px;   /* space between logo and tracker title */
-    text-align: center;     /* keeps logo centered */
-}
-
-
-.header-logo img {
-    width: 68px;
-    height: 68px;
+.header-badge img {
+    width: 85px;
+    height: 85px;
+    border-radius: 50%;
+    object-fit: cover;
+    display: block;
+    box-shadow: 0 0 12px rgba(0, 0, 0, 0.7);
 }
 
 .header-title {
@@ -101,8 +98,8 @@
 .header-tagline {
     text-align: center;
     font-size: 1.1rem;
-    margin-top: -30px;
-    margin-bottom: 22px;
+    margin-top: 0;
+    margin-bottom: 25px;
     color: #61dafb;
     font-family: Consolas, "Courier New", monospace;
     text-shadow: 0 0 8px rgba(97,218,251,0.4);
@@ -113,6 +110,22 @@
 @keyframes taglineFade {
     from { opacity: 0; }
     to { opacity: 0.85; }
+}
+
+@media (max-width: 600px) {
+    .header {
+        gap: 10px;
+    }
+    .header-badge img {
+        width: 55px;
+        height: 55px;
+    }
+    .title-main {
+        font-size: 1.5rem;
+    }
+    .title-sub {
+        font-size: 0.95rem;
+    }
 }
 
 
@@ -1286,12 +1299,17 @@
 </head>
 <body>
 <div class="header">
-    <div class="header-logo">
-        <img src="favicon8.png" alt="Nahla Tracker Logo">
+    <div class="header-badge">
+        <img src="draft7.jpg" alt="Project Nahla Patch">
     </div>
+
     <div class="header-title">
         <div class="title-main">Nahla Tracker</div>
-        <div class="title-sub">LIVE • version 1.2</div>
+        <div class="title-sub">LIVE • version 1.3</div>
+    </div>
+
+    <div class="header-badge">
+        <img src="stellar.jpg" alt="Operation Stellar Descent Patch">
     </div>
 </div>
 
