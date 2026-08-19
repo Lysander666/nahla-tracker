@@ -806,6 +806,17 @@
        font-weight: 500; /* barely stronger */
       }
 
+#calendar-link-panel a:hover {
+    background-color: #ffbf00 !important;
+    color: #1a1a1a !important; /* Crisp dark text against the bright amber */
+    box-shadow: 0 0 12px rgba(255, 191, 0, 0.6); /* Optional thematic glow */
+    transform: scale(1.03);
+}
+
+#calendar-link-panel a:active {
+    transform: scale(0.98);
+}
+}
        /* ===========================
    WEATHER PANEL
 =========================== */
@@ -1209,6 +1220,8 @@
     height: auto;
     max-width: 800px;
 }       
+
+
        
 
     </style>
@@ -1220,7 +1233,7 @@
     </div>
     <div class="header-title">
         <div class="title-main">Nahla Tracker</div>
-        <div class="title-sub">LIVE • v0.91 (beta)</div>
+        <div class="title-sub">LIVE • version 1.2</div>
     </div>
 </div>
 
@@ -1248,6 +1261,15 @@
             </div>
         </div>
 
+    <div style="text-align: center; margin-bottom: 30px; font-family: Consolas, 'Courier New', monospace;">
+        <a href="https://docs.google.com/document/d/1nkydqRha-yUzk0U7wzoGTMCrpcbAQCJjPkldUvKA_5w/edit?usp=sharing" 
+           target="_blank" 
+           rel="noopener noreferrer" 
+           style="color: #61dafb; font-weight: bold; text-decoration: underline; text-shadow: 0 0 8px rgba(97,218,251,0.3); font-size: 1.1rem;">
+            Year 1 report out now
+        </a>
+    </div>
+   
         <h2>System Information</h2>
 
         <div id="system-info-container">
@@ -1272,7 +1294,7 @@
                     </li>
                    <br>
                     <li><strong>Play <a class="cyan-link" href="sulphur_run.html" target="_blank" style="color:#ffbf00;">Sulphur Run</a> [in dev, desktop only atm!]
-                   and get the <a class="cyan-link" href="https://velorin.bandcamp.com/album/sulphur-run-ost" target="_blank" style="color:#ffbf00;">soundtrack</a>!</strong></li>
+                   and get the <a class="cyan-link" href="https://www.youtube.com/watch?v=V1hrs7G40Z4&list=PLtY8F3nnVGuu_8FNRZblBlNch2QGe3fVZ" target="_blank" style="color:#ffbf00;">synthwave soundtrack</a></strong>!</li>
                 </ul>
             </div>
 
@@ -1413,6 +1435,37 @@
             
         </div>
 
+<!-- Fully Center-Aligned Responsive Horizontal Calendar Panel -->
+<div id="calendar-link-panel" style="margin-top: 30px; border: 1px solid #444; border-radius: 8px; padding: 20px; background-color: #222; box-shadow: 0 0 18px rgba(0, 0, 0, 0.5); text-align: center;">
+    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; text-align: center;">
+        
+        <!-- Center-Aligned: Title & Description -->
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 6px; max-width: 100%; text-align: center;">
+            <div class="drift-pill" style="width: fit-content; margin: 0 auto;">SOLAR YEAR</div>
+            <h2 style="color: #61dafb; margin: 8px 0 0 0; text-align: center; font-family: 'Consolas', 'Courier New', monospace; font-size: 1.25rem; width: 100%;">
+                Nahlan Calendar Alignment
+            </h2>
+            <p style="margin: 6px 0 0 0; color: #ccc; font-size: 0.9rem; line-height: 1.5; text-align: center; width: 100%;">
+                Track Nahla's long-term orbital cycles, monthly seasonal matrices, and the intercalary transition zones relative to Perihelion alignment.
+            </p>
+        </div>
+
+<!-- First Action Button -->
+<div style="width: 100%; text-align: center; margin-bottom: 12px;">
+    <a href="nahla_calendar_system.html" target="_blank" style="display: inline-block; background: none; border: 2px solid #ffbf00; color: #ffbf00; font-family: 'Consolas', monospace; font-size: 0.85rem; font-weight: bold; padding: 6px 14px; border-radius: 6px; cursor: pointer; transition: all 0.2s; text-decoration: none; margin: 0 auto;">
+        OPEN CALENDAR SYSTEM &gt;
+    </a>
+</div>
+
+<!-- Second Action Button (Below) -->
+<div style="width: 100%; text-align: center; margin-bottom: 4px;">
+    <a href="nahla_calculator.html" target="_blank" style="display: inline-block; background: none; border: 2px solid #61dafb; color: #61dafb; font-family: 'Consolas', monospace; font-size: 0.85rem; font-weight: bold; padding: 6px 14px; border-radius: 6px; cursor: pointer; transition: all 0.2s; text-decoration: none; margin: 0 auto;">
+        NAHLA CALCULATOR &gt;
+    </a>
+</div>
+
+    </div>
+</div>
    <!-- ====================== -->
 <!--   NAHLA WEATHER PANEL  -->
 <!-- ====================== -->
@@ -1511,11 +1564,29 @@
             <img id="lightbox-image" src="" alt="Enlarged view">
         </div>
 
+   
+
+
         <div id="notes-box">
             <h2>🌕 Nahla News Network 🌌</h2>
             <div id="notes"><p>This project started as a simple question: <strong>what happens if you choose a moon at random and study it as if it were the most important world in the galaxy?</strong>
 
                Nahla became that moon and this tracker became the answer.</p>  <br>
+               <p><strong>03/07/3312: Sulphur Run minigame now on mobile:</strong> The Sulphur Run minigame is now finally on mobile! This is a portrait version called <a href="sulphur_run_descent.html" style="color: #FFBF00;"><strong>Pâte Sablée Descent</strong></a> - you must be on mobile when clicking this link! Enjoy 🎮</p>   
+               <p><strong>26/06/3312: Version 1.0 - and a new calendar!</strong> Another big day for the Nahla Tracker - we are out of beta and into version 1.0! 🌕 Also, as we approach a full (Earth) year on Nahla, we have now introduced a Nahlan calendar which can be viewed here - <a class="cyan-link" href="https://lysander666.github.io/nahla-tracker/nahla_calendar_system.html" target="_blank" style="color:#ffbf00;"><strong>Nahla Calendar System</strong></a>. This is a massive step forward for the tracker, giving Nahla a mapped full year cycle of 555.2 Earth days with corresponding months.
+               <br>
+               <p><strong>21/06/3312: New anchor!</strong> Big day for the Nahla Tracker - this is the first time since November that it has been re-anchored from observation 🌕 Phase λ on 14th June (night) was the new anchor. The phase clock drifted only ONE phase in seven months, less than a minute a day. 
+               <br>
+               <p><strong>11/01/3312: New year... new Nahla?</strong> Not quite, everything is the same here, just how we like it! For those who do read NNN, we are introducing a new research tool made from our base here for testing. Have a look at <a class="cyan-link" href="https://thesismemoryweb.com/" target="_blank" style="color:#ffbf00;"><strong>Thesis Memory Web</strong></a> for help with qualitative research 🧪
+               <br>
+               <br>
+               This is not production-ready software but it is quite stable. Feel free to have a look and give any feedback through Inara [link at the bottom]!</p> 
+
+                <p><strong>14/12/3311: The original <a class="cyan-link" href="https://www.youtube.com/watch?v=V1hrs7G40Z4&list=PLtY8F3nnVGuu_8FNRZblBlNch2QGe3fVZ" target="_blank" style="color:#ffbf00;">soundtrack</a> for Sulphur Run is now available! >>> Re-uploaded on YT!</strong> 
+                   <br>
+                   <br>
+                   Also, a floating point error created phase display lag of up to TWO HOURS when anchoring! This was because of a ~0.00000001 ms rounding glitch in the code. Crazy how these seemingly infinitesimal offsets can create such massive differences.
+                   Now fixed... but wow. </p>
                <p><strong>01/12/3311: Sulphur Run minigame added:</strong> It's December so why not - if you can't play Elite, then Sulphur Run is [nearly] the next best thing! It's really an alpha currently, 
                   and it's linked from the Nahla panel up top. It's optimised for desktop right now, mobile at some point! Enjoy 🎮</p>
                <p><strong>27/11/3311: Nahla Tracker is in beta!:</strong> Now is a good time to consider NT <strong>feature complete</strong> - the phase clock governs everything such as galactic band cycle, NLT, NCT, drift time
@@ -1537,7 +1608,7 @@
                 <br>
                 Day—night cycles beyond Earth vary according to the orbital and rotational dynamics of their respective worlds, rather than adhering to Earth's 24-hour rhythm.
                 <p></p>
-                <small>Nahla Tracker for Elite Dangerous is a personal project of Lysander666 - <a class="cyan-link" href="https://bsky.app/profile/lysander666.bsky.social" target="_blank">@lysander666.bsky.social</a></small>
+                <small>Nahla Tracker for Elite Dangerous is a personal project of Lysander666 - <a class="cyan-link" href="https://inara.cz/elite/cmdr/440263/" target="_blank">@lysander666 on Inara</a></small>
             </div>
         </div>
  <div id="drift-panel">
@@ -1569,7 +1640,7 @@
                     This means <strong>NLT midnight (00:00)</strong> slides later in GMT each cycle.
                     The chart below shows when NLT 00:00 happens in GMT over upcoming Nahla days.</p>
                     <br>
-                    <p>For a chart showing regular <strong>galactic phase times</strong>, please see <a class="cyan-link" href="phase-table.html" target="_blank">this page</a>.  
+                    <p>For a chart showing regular <strong>galactic phase times</strong>, please see the <a class="cyan-link" href="phase-table.html" target="_blank"><strong>Nahla Phase Cycle Chart</strong></a>.  
                 </p>
             </div>
 
@@ -1622,7 +1693,7 @@ const DAY_LENGTH_SECONDS = 91570;
 const PHASE_COUNT           = 12;
 const PHASE_LENGTH_SECONDS  = DAY_LENGTH_SECONDS / PHASE_COUNT;
 
-var CYCLE_ANCHOR   = new Date("2025-11-22T11:46:55.000Z");
+var CYCLE_ANCHOR   = new Date("2026-06-14T01:19:11.450Z");
 var REBEKAH_ANCHOR = new Date("2025-11-23T14:00:00.000Z");
 
 // Utility function
