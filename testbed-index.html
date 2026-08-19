@@ -80,6 +80,28 @@
     text-align: center;
 }
 
+.header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 24px;
+    margin-bottom: 8px;
+    text-align: center;
+}
+
+.header-center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.header-logo img {
+    width: 60px;
+    height: 60px;
+    margin-bottom: 4px;
+}
+
 .header-badge img {
     width: 85px;
     height: 85px;
@@ -98,7 +120,7 @@
 .header-tagline {
     text-align: center;
     font-size: 1.1rem;
-    margin-top: 0;
+    margin-top: 6px;
     margin-bottom: 25px;
     color: #61dafb;
     font-family: Consolas, "Courier New", monospace;
@@ -112,22 +134,25 @@
     to { opacity: 0.85; }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 650px) {
     .header {
-        gap: 10px;
+        gap: 12px;
     }
     .header-badge img {
-        width: 55px;
-        height: 55px;
+        width: 50px;
+        height: 50px;
+    }
+    .header-logo img {
+        width: 44px;
+        height: 44px;
     }
     .title-main {
-        font-size: 1.5rem;
+        font-size: 1.4rem;
     }
     .title-sub {
-        font-size: 0.95rem;
+        font-size: 0.85rem;
     }
 }
-
 
 
 
@@ -1303,9 +1328,14 @@
         <img src="draft7.jpg" alt="Project Nahla Patch">
     </div>
 
-    <div class="header-title">
-        <div class="title-main">Nahla Tracker</div>
-        <div class="title-sub">LIVE • version 1.3</div>
+    <div class="header-center">
+        <div class="header-logo">
+            <img src="favicon8.png" alt="Nahla Tracker Logo">
+        </div>
+        <div class="header-title">
+            <div class="title-main">Nahla Tracker</div>
+            <div class="title-sub">LIVE • version 1.2</div>
+        </div>
     </div>
 
     <div class="header-badge">
