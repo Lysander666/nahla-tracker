@@ -94,13 +94,12 @@
 }
 
 .header-badge img {
-    width: 150px;
     height: 150px;
-    /* 1. Prevents clipping of protruding ship wings/nose */
+    width: auto;                  /* Lets wide images expand naturally */
+    max-width: 220px;             /* Accommodates the wider wingspan */
     object-fit: contain;
     border-radius: 0;
     
-    /* 2. Fixes downsampling moiré / stippled texture */
     image-rendering: -webkit-optimize-contrast;
     image-rendering: high-quality;
     transform: translateZ(0);
