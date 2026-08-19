@@ -515,54 +515,68 @@
             margin-bottom: 15px;
         }
         
-        .gallery-container {
-            display: flex;
-            gap: 15px;
-            overflow-x: auto;
-            overflow-y: hidden;
-            padding: 10px 0;
-            height: 250px;
-            scroll-behavior: smooth;
-        }
-        
-        .gallery-container::-webkit-scrollbar {
-            height: 10px;
-        }
-        
-        .gallery-container::-webkit-scrollbar-track {
-            background: #1a1a1a;
-            border-radius: 4px;
-        }
-        
-        .gallery-container::-webkit-scrollbar-thumb {
-            background: #444;
-            border-radius: 4px;
-        }
-        
-        .gallery-container::-webkit-scrollbar-thumb:hover {
-            background: #555;
-        }
-        
-        .gallery-item {
-            display: flex;
-            flex-direction: column;
-            flex-shrink: 0;
-            width: 300px;
-            height: 220px;
-            border: 2px solid #444;
-            border-radius: 8px;
-            overflow: visible;
-            cursor: pointer;
-            transition: transform 0.2s, border-color 0.2s;
-            position: relative;
-        }
+/* --- GALLERY GRID --- */
+#gallery-section {
+    margin-top: 30px;
+    border: 1px solid #444;
+    border-radius: 8px;
+    padding: 20px;
+    background-color: #222;
+    box-shadow: 0 0 18px rgba(0, 0, 0, 0.5);
+}
 
-        .gallery-item img {
-            width: 100%;
-            height: calc(100% - 36px);
-            object-fit: cover;
-            background-color: #333;
-        }
+#gallery-section h2 {
+    color: #61dafb;
+    margin-top: 0;
+    margin-bottom: 18px;
+    text-align: center;
+    font-family: "Consolas", "Courier New", monospace;
+}
+
+.gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 14px;
+}
+
+.gallery-thumb {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid #333;
+    cursor: pointer;
+    background-color: #151515;
+    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.gallery-thumb:hover {
+    transform: translateY(-3px);
+    border-color: #61dafb;
+    box-shadow: 0 4px 14px rgba(97, 218, 251, 0.25);
+}
+
+.gallery-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.gallery-thumb-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(transparent, rgba(0,0,0,0.85));
+    padding: 16px 8px 6px 8px;
+    font-size: 0.75rem;
+    color: #eee;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    pointer-events: none;
+}
 
         .gallery-caption {
             height: 36px;
@@ -585,45 +599,89 @@
             box-shadow: 0 0 18px rgba(97, 218, 251, 0.18);
         }
         
-        .lightbox {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.9);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-        }
-        
-        .lightbox.active {
-            display: flex;
-        }
-        
-        .lightbox img {
-            max-width: 90%;
-            max-height: 90%;
-            border-radius: 8px;
-            box-shadow: 0 0 30px rgba(97, 218, 251, 0.3);
-        }
-        
-        .lightbox-close {
-            position: absolute;
-            top: 30px;
-            right: 40px;
-            color: #fff;
-            font-size: 40px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: color 0.2s;
-        }
-        
-        .lightbox-close:hover {
-            color: #61dafb;
-        }
+/* --- FULLSCREEN LIGHTBOX & NAVIGATION --- */
+.lightbox {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.92);
+    z-index: 2000;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.lightbox.active {
+    display: flex;
+}
+
+.lightbox-content {
+    position: relative;
+    max-width: 90vw;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.lightbox-content img {
+    max-width: 100%;
+    max-height: 80vh;
+    border-radius: 6px;
+    border: 1px solid #444;
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
+    object-fit: contain;
+}
+
+.lightbox-caption {
+    margin-top: 10px;
+    color: #61dafb;
+    font-family: Consolas, monospace;
+    font-size: 0.95rem;
+    text-align: center;
+}
+
+.lightbox-nav-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(20, 20, 20, 0.7);
+    border: 1px solid #444;
+    color: #61dafb;
+    font-size: 2rem;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    user-select: none;
+}
+
+.lightbox-nav-btn:hover {
+    background: #61dafb;
+    color: #111;
+    border-color: #61dafb;
+}
+
+.lightbox-prev { left: 25px; }
+.lightbox-next { right: 25px; }
+
+.lightbox-close {
+    position: absolute;
+    top: 20px;
+    right: 30px;
+    color: #888;
+    font-size: 36px;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.lightbox-close:hover {
+    color: #61dafb;
+}
             
         .gallery-tooltip {
             position: absolute;
@@ -1496,73 +1554,24 @@
 </div>
    
 
-        <div id="gallery-section">
-            <div class="gallery-header">
-                <button class="gallery-btn" id="scroll-left">&lt;</button>
-                <h2>Gallery</h2>
-                <button class="gallery-btn" id="scroll-right">&gt;</button>
-            </div>
-            <div class="gallery-container">
-                <div class="gallery-item" onclick="openLightbox('Nahla.jpg')">
-                    <div class="gallery-tooltip">Nahla</div>
-                    <img src="Nahla.jpg" alt="Nahla">
-                    <div class="gallery-caption">Nahla</div>
-                </div>             
+<div id="gallery-section">
+    <h2>Gallery</h2>
+    <div class="gallery-grid" id="gallery-grid">
+        <!-- Rendered dynamically by JS -->
+    </div>
+</div>
 
-                <div class="gallery-item" onclick="openLightbox('Rebekah-from-Nahla.jpg')">
-                    <div class="gallery-tooltip">Rebekah seen from Nahla</div>
-                    <img src="Rebekah-from-Nahla.jpg" alt="Rebekah seen from Nahla">
-                    <div class="gallery-caption">Rebekah seen from Nahla</div>
-                </div>
-                         
-                <div class="gallery-item" onclick="openLightbox('Pate-Sablee-Overhead.jpg')">
-                    <div class="gallery-tooltip">Pâte Sablée crater</div>
-                    <img src="Pate-Sablee-Overhead.jpg" alt="Pâte Sablée crater">
-                    <div class="gallery-caption">Pâte Sablée crater</div>
-                </div>     
-
-                <div class="gallery-item" onclick="openLightbox('galactic-band.jpg')">
-                    <div class="gallery-tooltip">Galactic band</div>
-                    <img src="galactic-band.jpg" alt="Galactic band">
-                    <div class="gallery-caption">Galactic band</div>
-                </div>
-                    
-                <div class="gallery-item" onclick="openLightbox('Natalja.jpg')">
-                    <div class="gallery-tooltip">Natalja's Pass</div>
-                    <img src="Natalja.jpg" alt="Natalja's Pass">
-                    <div class="gallery-caption">Natalja's Pass</div>
-                </div>
-
-                <div class="gallery-item" onclick="openLightbox('night.jpg')">
-                    <div class="gallery-tooltip">True Night</div>
-                    <img src="night.jpg" alt="Night">
-                    <div class="gallery-caption">True Night</div>
-                </div>
-
-                <div class="gallery-item" onclick="openLightbox('galacticnight.jpg')">
-                    <div class="gallery-tooltip">Galactic Night</div>
-                    <img src="galacticnight.jpg" alt="Galactic Night">
-                    <div class="gallery-caption">Galactic Night</div>
-                </div>         
-                    
-                <div class="gallery-item" onclick="openLightbox('hope.jpg')">
-                    <div class="gallery-tooltip">Hope</div>
-                    <img src="hope.jpg" alt="Hope">
-                    <div class="gallery-caption">Hope</div>
-                </div>     
-
-                <div class="gallery-item" onclick="openLightbox('sunset.jpg')">
-                    <div class="gallery-tooltip">Sunset</div>
-                    <img src="sunset.jpg" alt="Hope">
-                    <div class="gallery-caption">Sunset</div>
-                </div>
-            </div>
-        </div>
-
-        <div class="lightbox" id="lightbox" onclick="closeLightbox()">
-            <span class="lightbox-close">&times;</span>
-            <img id="lightbox-image" src="" alt="Enlarged view">
-        </div>
+<div class="lightbox" id="lightbox">
+    <span class="lightbox-close" onclick="closeLightbox()">&times;</span>
+    <button class="lightbox-nav-btn lightbox-prev" onclick="prevLightbox(event)">&lt;</button>
+    
+    <div class="lightbox-content">
+        <img id="lightbox-image" src="" alt="Enlarged view">
+        <div id="lightbox-caption" class="lightbox-caption"></div>
+    </div>
+    
+    <button class="lightbox-nav-btn lightbox-next" onclick="nextLightbox(event)">&gt;</button>
+</div>
 
    
 
@@ -2073,86 +2082,86 @@ function updateTempDot(wrappedSeconds) {
 
 
        
-// Gallery Lightbox Functions
-function openLightbox(imageSrc) {
-    const lightbox = document.getElementById('lightbox');
-    const lightboxImage = document.getElementById('lightbox-image');
-    lightboxImage.src = imageSrc;
-    lightbox.classList.add('active');
+// --- GALLERY DATA ---
+const GALLERY_ITEMS = [
+    { src: 'Nahla.jpg', title: 'Nahla' },
+    { src: 'Rebekah-from-Nahla.jpg', title: 'Rebekah seen from Nahla' },
+    { src: 'Pate-Sablee-Overhead.jpg', title: 'Pâte Sablée crater' },
+    { src: 'galactic-band.jpg', title: 'Galactic band' },
+    { src: 'Natalja.jpg', title: 'Natalja\'s Pass' },
+    { src: 'night.jpg', title: 'True Night' },
+    { src: 'galacticnight.jpg', title: 'Galactic Night' },
+    { src: 'hope.jpg', title: 'Hope' },
+    { src: 'sunset.jpg', title: 'Sunset' },
+    // Add guest shots right here:
+    // { src: 'visitor1.jpg', title: 'Rebekah Rise • photo by CMDR Name' }
+];
+
+let currentLightboxIndex = 0;
+
+function renderGallery() {
+    const grid = document.getElementById('gallery-grid');
+    if (!grid) return;
+    grid.innerHTML = '';
+
+    GALLERY_ITEMS.forEach((item, index) => {
+        const thumb = document.createElement('div');
+        thumb.className = 'gallery-thumb';
+        thumb.onclick = () => openLightbox(index);
+
+        thumb.innerHTML = `
+            <img src="${item.src}" alt="${item.title}" loading="lazy">
+            <div class="gallery-thumb-overlay">${item.title}</div>
+        `;
+        grid.appendChild(thumb);
+    });
+}
+
+function openLightbox(index) {
+    currentLightboxIndex = index;
+    updateLightbox();
+    document.getElementById('lightbox').classList.add('active');
+}
+
+function updateLightbox() {
+    const item = GALLERY_ITEMS[currentLightboxIndex];
+    document.getElementById('lightbox-image').src = item.src;
+    document.getElementById('lightbox-caption').textContent = item.title;
 }
 
 function closeLightbox() {
-    const lightbox = document.getElementById('lightbox');
-    lightbox.classList.remove('active');
+    document.getElementById('lightbox').classList.remove('active');
 }
 
-document.addEventListener('keydown', function(event) {
-    if (event.key === 'Escape') {
-        closeLightbox();
-    }
+function prevLightbox(e) {
+    if (e) e.stopPropagation();
+    currentLightboxIndex = (currentLightboxIndex - 1 + GALLERY_ITEMS.length) % GALLERY_ITEMS.length;
+    updateLightbox();
+}
+
+function nextLightbox(e) {
+    if (e) e.stopPropagation();
+    currentLightboxIndex = (currentLightboxIndex + 1) % GALLERY_ITEMS.length;
+    updateLightbox();
+}
+
+// Background click to close
+document.getElementById('lightbox').addEventListener('click', (e) => {
+    if (e.target.id === 'lightbox') closeLightbox();
 });
 
-// Gallery draggable
-const gallery = document.querySelector('.gallery-container');
+// Arrow key controls
+document.addEventListener('keydown', (e) => {
+    const lb = document.getElementById('lightbox');
+    if (!lb.classList.contains('active')) return;
 
-let isDown = false;
-let startX;
-let scrollLeft;
-
-gallery.addEventListener('mousedown', (e) => {
-    isDown = true;
-    gallery.classList.add('active');
-    startX = e.pageX - gallery.offsetLeft;
-    scrollLeft = gallery.scrollLeft;
+    if (e.key === 'ArrowLeft') prevLightbox();
+    if (e.key === 'ArrowRight') nextLightbox();
+    if (e.key === 'Escape') closeLightbox();
 });
 
-gallery.addEventListener('mouseleave', () => {
-    isDown = false;
-});
-
-gallery.addEventListener('mouseup', () => {
-    isDown = false;
-});
-
-gallery.addEventListener('mousemove', (e) => {
-    if (!isDown) return;
-    e.preventDefault();
-    const x = e.pageX - gallery.offsetLeft;
-    const walk = (x - startX) * 1.3;
-    gallery.scrollLeft = scrollLeft - walk;
-});
-
-const scrollLeftBtn = document.getElementById('scroll-left');
-const scrollRightBtn = document.getElementById('scroll-right');
-
-const scrollAmount = 630;
-
-scrollLeftBtn.addEventListener('click', () => {
-    gallery.scrollBy({
-        left: -scrollAmount,
-        behavior: 'smooth'
-    });
-});
-
-scrollRightBtn.addEventListener('click', () => {
-    gallery.scrollBy({
-        left: scrollAmount,
-        behavior: 'smooth'
-    });
-});
-
-const audio = document.getElementById("nahla-audio");
-const btn = document.getElementById("audio-btn");
-
-btn.addEventListener("click", () => {
-    if (audio.paused) {
-        audio.play().catch(e => console.log("Audio play failed (likely missing file):", e));
-        btn.textContent = "⏸";
-    } else {
-        audio.pause();
-        btn.textContent = "▶";
-    }
-});
+// Initialize grid
+renderGallery();
 
 /* ===================================
   NAHLA CLOCK (SYNCED + ACTIVE)
