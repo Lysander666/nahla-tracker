@@ -1313,6 +1313,38 @@
     max-width: 800px;
 }       
 
+       @media (max-width: 768px) {
+    #gallery-section {
+        padding: 12px;
+        margin-top: 20px;
+    }
+
+    .gallery-grid {
+        /* Forces a neat 2-column layout on all mobile screens */
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+    }
+
+    .gallery-thumb {
+        border-radius: 5px;
+    }
+
+    .gallery-thumb-overlay {
+        font-size: 0.65rem;
+        padding: 12px 6px 4px 6px;
+    }
+
+    /* Keep lightbox navigation buttons easy to tap on phones */
+    .lightbox-nav-btn {
+        width: 42px;
+        height: 42px;
+        font-size: 1.5rem;
+    }
+
+    .lightbox-prev { left: 10px; }
+    .lightbox-next { right: 10px; }
+    .lightbox-close { top: 15px; right: 20px; font-size: 30px; }
+}
 
        
 
@@ -2129,6 +2161,13 @@ const GALLERY_ITEMS = [
     { src: 'sunset.jpg', title: 'Sunset' },
     // Add guest shots right here:
     // { src: 'visitor1.jpg', title: 'Rebekah Rise • photo by CMDR Name' }
+    { src: 'visitor1.jpg', title: 'Rebekah Rise • photo by CMDR JohnMK2' },
+    { src: 'visitor1.jpg', title: 'Rebekah Rise • photo by CMDR JohnMK2' },
+    { src: 'visitor1.jpg', title: 'Rebekah Rise • photo by CMDR JohnMK2' },
+    { src: 'visitor1.jpg', title: 'Rebekah Rise • photo by CMDR JohnMK2' },
+    { src: 'visitor1.jpg', title: 'Rebekah Rise • photo by CMDR JohnMK2' },
+    { src: 'visitor1.jpg', title: 'Rebekah Rise • photo by CMDR JohnMK2' },
+
 ];
 
 let currentLightboxIndex = 0;
