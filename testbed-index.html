@@ -1752,48 +1752,18 @@
     </div> 
     
     <script>
+<script>
 // =======================
 //  NAHLA 12-PHASE TRACKER
 // =======================
 
 const MOON_NAME = "Nahla";
 
-// Calculate elapsed seconds since the solar anchor
-const elapsedSolar = (now.getTime() - HOPE_ANCHOR.getTime()) / 1000;
-
-// Calculate how many phases Hope has drifted along the 12-phase Galactic Band
-// 12 phases per 555.2-day orbit (drift rate = 0.0216 phases/day)
-const solarDrift = (elapsedSolar / ORBIT_PERIOD_SECONDS) * 12;
-
-// Dynamic, continuous phase positions (0 to 12)
-const currentSunrisePhase0 = mod(BASE_SUNRISE_PHASE_INDEX + solarDrift, 12);
-const currentSunsetPhase0  = mod(currentSunrisePhase0 + DAYLIGHT_PHASE_SPAN, 12);
-
-let isHopeUp = false;
-    if (currentSunrisePhase0 < currentSunsetPhase0) {
-        isHopeUp = (currentPhase0 >= currentSunrisePhase0 && currentPhase0 < currentSunsetPhase0);
-    } else {
-        // Wraps across the Phase 12 (mu) -> Phase 1 (alpha) boundary
-        isHopeUp = (currentPhase0 >= currentSunrisePhase0 || currentPhase0 < currentSunsetPhase0);
-    }
-
-    // --- USE isHopeUp TO UPDATE YOUR UI ELEMENTS ---
-    // Example: Update the status badge / text
-    var sunStatusEl = document.getElementById("sun-status");
-    if (sunStatusEl) {
-        sunStatusEl.textContent = isHopeUp ? "DAYLIGHT (HOPE ABOVE HORIZON)" : "NIGHT (HOPE BELOW HORIZON)";
-        sunStatusEl.className = isHopeUp ? "status-day" : "status-night";
-    }
-
-    // Example: If you render sunrise / sunset markers on the phase ring / tracker bar:
-    // Pass currentSunrisePhase0 and currentSunsetPhase0 to your ring drawing function
-}       
-
 const DAY_LENGTH_HOURS   = 25.435;
 const DAY_LENGTH_SECONDS = 91570;
 
-const PHASE_COUNT           = 12;
-const PHASE_LENGTH_SECONDS  = DAY_LENGTH_SECONDS / PHASE_COUNT;
+const PHASE_COUNT          = 12;
+const PHASE_LENGTH_SECONDS = DAY_LENGTH_SECONDS / PHASE_COUNT;
 
 var CYCLE_ANCHOR   = new Date("2026-06-14T01:19:11.450Z");
 var REBEKAH_ANCHOR = new Date("2025-11-23T14:00:00.000Z");
@@ -1807,7 +1777,7 @@ const ORBIT_PERIOD_SECONDS = 555.2 * 86400;
 // Base sunrise phase index (0-indexed) at HOPE_ANCHOR (Phase beta 2.305 = index 1.305)
 // Day length arc at Natalja's Pass is ~9.0 phases (~19h daylight arc)
 const BASE_SUNRISE_PHASE_INDEX = 1.305;
-const DAYLIGHT_PHASE_SPAN       = 9.000;
+const DAYLIGHT_PHASE_SPAN      = 9.000;
 
 // Utility function
 function mod(a, b) {
@@ -1880,9 +1850,6 @@ function setPhaseAnchor(observedTimestampString, observedPhaseNumber) {
     }
 
     const offsetSeconds = (observedPhaseNumber - 1) * PHASE_LENGTH_SECONDS;
-    
-    // FIX ADDED HERE: Subtract 50ms to prevent floating point floor errors
-    // (e.g. 10.9999 becoming 10 instead of 11)
     const correctedAnchorMs = observedTime.getTime() - (offsetSeconds * 1000) - 50;
 
     window.CYCLE_ANCHOR = new Date(correctedAnchorMs);
@@ -1950,45 +1917,43 @@ function get_cycle_state(now) {
     const elapsed_seconds = (now - CYCLE_ANCHOR) / 1000;
     const wrapped         = mod(elapsed_seconds, DAY_LENGTH_SECONDS);
 
-    const phaseIndex0     = Math.floor(wrapped / PHASE_LENGTH_SECONDS);
-    const phaseNumber     = phaseIndex0 + 1;
+    const phaseIndex0      = Math.floor(wrapped / PHASE_LENGTH_SECONDS);
+    const continuousPhase0 = wrapped / PHASE_LENGTH_SECONDS;
+    const phaseNumber      = phaseIndex0 + 1;
     const secondsIntoPhase = wrapped - phaseIndex0 * PHASE_LENGTH_SECONDS;
     const hoursIntoDay     = wrapped / 3600;
 
     return {
         wrappedSeconds: wrapped,
         phaseIndex0,
+        continuousPhase0,
         phaseNumber,
         secondsIntoPhase,
         hoursIntoDay
     };
 }
 
-       // ===============================
+// ===============================
 //  SUN & HOPE ELEVATION HELPERS
 // ===============================
 
-// Sun elevation (deg) from wrapped seconds in a 25h26m10s solar day.
 function getSunElevationDeg(wrappedSeconds) {
     const angle = (wrappedSeconds / DAY_LENGTH_SECONDS) * 2 * Math.PI;
-    return Math.sin(angle) * 90; // -90° (nadir) → +90° (zenith)
-}
-
-// Hope elevation based on phaseIndex0 (12-phase cycle)
-function getHopeElevationDeg(phaseIndex0) {
-    // Divide 12 phases into a sinusoid from -90° to +90°.
-    const angle = (phaseIndex0 / 12) * 2 * Math.PI;
     return Math.sin(angle) * 90;
 }
 
+function getHopeElevationDeg(phaseIndex0) {
+    const angle = (phaseIndex0 / 12) * 2 * Math.PI;
+    return Math.sin(angle) * 90;
+}
 
 function get_sun_state_index(phaseIndex0) {
     return Math.floor(phaseIndex0 / 2);
 }
 
-function get_hope_indicator(phaseIndex0) {
-    if (phaseIndex0 <= 8) {
-        const sunState = Math.min(get_sun_state_index(phaseIndex0), 3); // Cap at 3
+function get_hope_indicator(isHopeUp, phaseIndex0) {
+    if (isHopeUp) {
+        const sunState = Math.min(get_sun_state_index(phaseIndex0), 3);
         const symbols = ["🌅","☀️","🔆","🌄"];
         const arc = ["─","─","─","─","─","─"];
         arc[sunState] = symbols[sunState];
@@ -2011,7 +1976,6 @@ function get_galactic_band_indicator(phaseNumber) {
         return `<strong>Galactic Band:</strong> 🌌 ${phaseLabel} – visible (low angle – ${BAND_PHASE_DESCRIPTIONS[phaseNumber]})`;
     }
 }
-
 
 function get_rebekah_status(now) {
     const elapsed = (now - REBEKAH_ANCHOR) / 1000;
@@ -2046,7 +2010,7 @@ function get_nahla_local_time_string(wrappedSeconds) {
 }
 
 function get_nahla_coordinated_time_string(wrappedSeconds) {
-     const SCALE = 24 / DAY_LENGTH_HOURS;  // Auto-sync to actual Nahla day length
+    const SCALE = 24 / DAY_LENGTH_HOURS;
     const scaled_seconds = wrappedSeconds * SCALE;
 
     const hours   = Math.floor(scaled_seconds / 3600);
@@ -2075,17 +2039,13 @@ function getNahlaTempKelvin(wrappedSeconds) {
     const minK = 143;
     const maxK = 275;
 
-    // Normalised 0 → 1 day model using sin curve
     const angle = (wrappedSeconds / DAY_LENGTH_SECONDS) * 2 * Math.PI;
     const norm = (Math.sin(angle - Math.PI / 2) + 1) / 2; 
-    // Shifted so minimum is at “night”, maximum at “day”
 
     const K = minK + (maxK - minK) * norm;
 
     return `${K.toFixed(0)} K (${(K - 273.15).toFixed(1)} °C)`;
 }
-       
-       
 
 function printCodeForGitHub() {
     const cycle = window.CYCLE_ANCHOR.toISOString();
@@ -2109,39 +2069,51 @@ function updateDisplay() {
     const now = new Date();
     const cycle = get_cycle_state(now);
 
-    const phaseIndex0   = cycle.phaseIndex0;
-    const phaseNumber   = cycle.phaseNumber;
-    const wrapped       = cycle.wrappedSeconds;
-    const hoursIntoDay  = cycle.hoursIntoDay;
+    const phaseIndex0      = cycle.phaseIndex0;
+    const continuousPhase0 = cycle.continuousPhase0;
+    const phaseNumber      = cycle.phaseNumber;
+    const wrapped          = cycle.wrappedSeconds;
+    const hoursIntoDay     = cycle.hoursIntoDay;
 
-    const isDay = phaseIndex0 >= SUNRISE_PHASE_INDEX0 && phaseIndex0 < SUNSET_PHASE_INDEX0;
+    // --- DECOUPLED SOLAR PROGRESSION ---
+    const elapsedSolar = (now.getTime() - HOPE_ANCHOR.getTime()) / 1000;
+    const solarDrift   = (elapsedSolar / ORBIT_PERIOD_SECONDS) * 12;
+
+    const currentSunrisePhase0 = mod(BASE_SUNRISE_PHASE_INDEX + solarDrift, 12);
+    const currentSunsetPhase0  = mod(currentSunrisePhase0 + DAYLIGHT_PHASE_SPAN, 12);
+
+    let isHopeUp = false;
+    if (currentSunrisePhase0 < currentSunsetPhase0) {
+        isHopeUp = (continuousPhase0 >= currentSunrisePhase0 && continuousPhase0 < currentSunsetPhase0);
+    } else {
+        isHopeUp = (continuousPhase0 >= currentSunrisePhase0 || continuousPhase0 < currentSunsetPhase0);
+    }
+
+    // --- TIME UNTIL NEXT SUNRISE / SUNSET ---
+    let timeToEvent = 0;
+    if (isHopeUp) {
+        let phaseDiff = mod(currentSunsetPhase0 - continuousPhase0, 12);
+        timeToEvent = phaseDiff * PHASE_LENGTH_SECONDS;
+    } else {
+        let phaseDiff = mod(currentSunrisePhase0 - continuousPhase0, 12);
+        timeToEvent = phaseDiff * PHASE_LENGTH_SECONDS;
+    }
 
     let statusText;
-    let timeToEvent;
-
-    if (isDay) {
-        const sunset_at = SUNSET_PHASE_INDEX0 * PHASE_LENGTH_SECONDS;
-        timeToEvent     = sunset_at - wrapped;
+    if (isHopeUp) {
         statusText = `☀️  DAY on ${MOON_NAME} | Sunset in: <span class="time-highlight">${format_timedelta(timeToEvent)}</span> | <span class="time-highlight">${hoursIntoDay.toFixed(2)}h</span> into solar day`;
     } else {
-        const sunrise_at = 12 * PHASE_LENGTH_SECONDS;
-        const timeToEvent = sunrise_at - wrapped;
         statusText = `🌙 NIGHT on ${MOON_NAME} | Sunrise in: <span class="time-highlight">${format_timedelta(timeToEvent)}</span> | <span class="time-highlight">${hoursIntoDay.toFixed(2)}h</span> into solar day`;
     }
 
-    const hopeHtml = get_hope_indicator(phaseIndex0);
-
+    const hopeHtml = get_hope_indicator(isHopeUp, phaseIndex0);
     const bandIndicator = get_galactic_band_indicator(phaseNumber);
     const bandHtml = bandIndicator;
-
     const rebekahHtml = get_rebekah_status(now);
 
     const moonclockString  = get_nahla_local_time_string(wrapped);
     const nctString        = get_nahla_coordinated_time_string(wrapped);
-
-   const nextPhaseString = "Next phase in: " + 
-    get_time_to_next_phase(cycle.secondsIntoPhase);
-
+    const nextPhaseString  = "Next phase in: " + get_time_to_next_phase(cycle.secondsIntoPhase);
 
     const statusEl  = document.getElementById("status");
     const hopeEl    = document.getElementById("hope");
@@ -2150,7 +2122,6 @@ function updateDisplay() {
     const moonEl    = document.getElementById("moonclock");
     const nctEl     = document.getElementById("moonclock-coordinated");
     const nextPhaseEl = document.getElementById("next-phase-timer");
-
 
     if (statusEl)  statusEl.innerHTML  = statusText;
     if (hopeEl)    hopeEl.innerHTML    = hopeHtml;
@@ -2161,18 +2132,14 @@ function updateDisplay() {
     if (nextPhaseEl) nextPhaseEl.textContent = nextPhaseString;
 }
 
-
-
 function updateTempDot(wrappedSeconds) {
     const dot = document.getElementById("temp-wave-dot");
     const svg = document.getElementById("temp-wave");
     if (!dot || !svg) return;
 
-    // FIX: Use the internal SVG dimensions (500x60), NOT the screen size
     const waveWidth = 800; 
     const waveHeight = 80; 
 
-    // The rest of the math remains exactly the same...
     const t = wrappedSeconds / DAY_LENGTH_SECONDS;
     const angle = t * 2 * Math.PI;
     const norm = (Math.sin(angle - Math.PI / 2) + 1) / 2;
@@ -2184,8 +2151,6 @@ function updateTempDot(wrappedSeconds) {
     dot.setAttribute("cy", dotY);
 }
 
-
-       
 // --- GALLERY DATA ---
 const GALLERY_ITEMS = [
     { src: 'Nahla.jpg', title: 'Nahla' },
@@ -2197,15 +2162,12 @@ const GALLERY_ITEMS = [
     { src: 'galacticnight.jpg', title: 'Galactic Night' },
     { src: 'hope.jpg', title: 'Hope' },
     { src: 'sunset.jpg', title: 'Sunset' },
-    // Add guest shots right here:
-    // { src: 'visitor1.jpg', title: 'Rebekah Rise • photo by CMDR Name' }
     { src: 'SRV1.jpg', title: 'SRV1 • photo by CMDR JohnMK2' },
     { src: 'SRV2.jpg', title: 'SRV2 • photo by CMDR JohnMK2' },
     { src: 'PateSablee.jpg', title: 'Pate Sablee • photo by CMDR JohnMK2' },
     { src: 'RockyNahla.jpg', title: 'Rocky Nahla • photo by CMDR JohnMK2' },
     { src: 'Rebekah1.jpg', title: 'Rebekah 1 • photo by CMDR JohnMK2' },
-    { src: 'Rebekah2.jpg', title: 'Rebekah 2 • photo by CMDR JohnMK2' },
-
+    { src: 'Rebekah2.jpg', title: 'Rebekah 2 • photo by CMDR JohnMK2' }
 ];
 
 let currentLightboxIndex = 0;
@@ -2279,7 +2241,6 @@ renderGallery();
 =================================== */
 
 (function() {
-
     const HOURS_ON_FACE = 25;
     const RADIUS = 88;
     const NUMBER_RADIUS = 72;
@@ -2398,53 +2359,34 @@ renderGallery();
     buildSectors();
     buildTicks();
     updateClock();
-
 })();
 
 // Initialize: Load anchors first, then start tracker
 loadAnchorsFromStorage().then(() => {
     updateDisplay();
-    updateWeatherPanel(); // Initialize weather panel
+    updateWeatherPanel();
     setInterval(updateDisplay, 50);
-    setInterval(updateWeatherPanel, 1000); // Update weather every second
+    setInterval(updateWeatherPanel, 1000);
 }).catch(err => {
     console.error("Storage load failed, using defaults:", err);
     updateDisplay();
-    updateWeatherPanel(); // Initialize weather panel
+    updateWeatherPanel();
     setInterval(updateDisplay, 50);
-    setInterval(updateWeatherPanel, 1000); // Update weather every second
+    setInterval(updateWeatherPanel, 1000);
 });
 
-   function toRad(deg) { return deg * Math.PI / 180; }
-function getSunElevationDeg(wrappedSeconds) {
-    // Simple solar elevation model:
-    //  -90° = midnight
-    //    0° = sunrise/sunset
-    //   90° = high noon
-    const fraction = wrappedSeconds / DAY_LENGTH_SECONDS;
-    return Math.sin(fraction * 2 * Math.PI) * 90;
-}
+function toRad(deg) { return deg * Math.PI / 180; }
 
-function getHopeElevationDeg(phaseIndex0) {
-    // Placeholder model for Hope's elevation
-    // Maps 0–11 phase index to -90° to +90°
-    return (phaseIndex0 / 12) * 180 - 90;
-}
-
-       
 function getSunElevationDegFromPhase(phaseIndex0) {
-    const p = phaseIndex0 + 1; // convert 0–11 → 1–12
-
-    if (p === 5) return 60;                   // ε — overhead
-    if (p === 4 || p === 6) return 40;        // δ, ζ — high slanted
-    if (p === 3 || p === 7) return 20;        // γ, η — mid-height
-    if (p === 2 || p === 8) return 5;         // β, θ — steep rising/descending (sunlight!)
-    if (p === 1 || p === 9) return 1;         // α, ι — sunrise/sunset
-    if (p === 10 || p === 12) return -10;     // κ dusk / μ dawn
-    return -30;                               // λ deep night
+    const p = phaseIndex0 + 1;
+    if (p === 5) return 60;
+    if (p === 4 || p === 6) return 40;
+    if (p === 3 || p === 7) return 20;
+    if (p === 2 || p === 8) return 5;
+    if (p === 1 || p === 9) return 1;
+    if (p === 10 || p === 12) return -10;
+    return -30;
 }
-
-       
 
 function buildTemperatureWave() {
     const width = 800;
@@ -2457,37 +2399,26 @@ function buildTemperatureWave() {
         const t = x / width; 
         const angle = t * 2 * Math.PI;
 
-        // Normalised sine wave
         const norm = (Math.sin(angle - Math.PI / 2) + 1) / 2;
-        
         const y = height - (norm * (height - 10)) - 5;
         points.push(`${x},${y}`);
     }
 
     const linePointsString = points.join(" ");
 
-    // 1. Draw the main line
     document.getElementById("temp-wave-line").setAttribute("points", linePointsString);
 
-    // 2. Draw the fill area
-    // We take the line, add a point at the Bottom-Right, then Bottom-Left to close the shape
     const fillPointsString = linePointsString + ` ${width},${height} 0,${height}`;
-    
     const fillPoly = document.getElementById("temp-wave-fill");
     if (fillPoly) {
         fillPoly.setAttribute("points", fillPointsString);
     }
 }
 
- 
-    
-
 /* ======================================================
-   NAHLA DRIFT TABLE v2 — GMT rollover, no flicker,
-   restored hour labels, stable highlight.
+   NAHLA DRIFT TABLE v2 — GMT rollover, no flicker
    ====================================================== */
 
-// Format GMT date (e.g. "26 Nov")
 function formatUtcDateShort(d) {
     return d.toLocaleDateString("en-GB", {
         day: "2-digit",
@@ -2496,7 +2427,6 @@ function formatUtcDateShort(d) {
     }).replace(",", "");
 }
 
-// Compute real NLT midnight for a given GMT date
 function computeNltMidnightForDate(dateObj) {
     const diffSeconds = (dateObj - CYCLE_ANCHOR) / 1000;
     const wrapped = mod(diffSeconds, DAY_LENGTH_SECONDS);
@@ -2504,27 +2434,23 @@ function computeNltMidnightForDate(dateObj) {
     return new Date(dateObj.getTime() + secondsUntilMidnight * 1000);
 }
 
-// Compute cycle number
 function computeCycleNumber(dateObj) {
     const nlt0 = computeNltMidnightForDate(dateObj);
     const diff = (nlt0 - CYCLE_ANCHOR) / 1000;
     return Math.floor(diff / DAY_LENGTH_SECONDS) + 1;
 }
 
-// Cache last GMT day to prevent flicker
 let lastBuiltDay = null;
 
 function buildDriftTable(force = false) {
     const now = new Date();
 
-    // Today's GMT midnight
     const todayGmt = new Date(Date.UTC(
         now.getUTCFullYear(),
         now.getUTCMonth(),
         now.getUTCDate()
     ));
 
-    // Only rebuild once per GMT day unless forced
     if (!force && lastBuiltDay === todayGmt.getTime()) return;
     lastBuiltDay = todayGmt.getTime();
 
@@ -2533,29 +2459,21 @@ function buildDriftTable(force = false) {
 
     const rowsToShow = parseInt(document.getElementById("drift-rows-select").value, 10);
 
-    // Loop over GMT days (calendar rows)
-    // Start yesterday (i = -1) for context
     for (let i = -1; i < rowsToShow; i++) {
-
-        // This row's GMT date at 00:00
         const dateAtMidnight = new Date(todayGmt.getTime() + i * 86400000);
 
         const row = document.createElement("div");
         row.className = "drift-row";
 
-        // ----- CELL 1: Cycle # (or placeholder) -----
         const cycleCell = document.createElement("div");
         cycleCell.className = "drift-cell drift-cycle";
 
-        // ----- CELL 2: GMT Date -----
         const dateCell = document.createElement("div");
         dateCell.className = "drift-cell drift-date";
         dateCell.textContent = formatUtcDateShort(dateAtMidnight);
         row.appendChild(cycleCell);
         row.appendChild(dateCell);
 
-        // ----- Determine if an NLT midnight occurs on this GMT date -----
-        // Range for this GMT day in seconds since anchor
         const diffSecStart = (dateAtMidnight - CYCLE_ANCHOR) / 1000;
         const diffSecEnd = (dateAtMidnight.getTime() + 86400000 - CYCLE_ANCHOR.getTime()) / 1000;
 
@@ -2563,7 +2481,6 @@ function buildDriftTable(force = false) {
         let cycleStartTime = null;
 
         if (diffSecEnd > 0) {
-            // First possible cycle index that could fall in this day
             let candidate = Math.ceil(diffSecStart / DAY_LENGTH_SECONDS);
             if (candidate < 0) candidate = 0;
 
@@ -2575,7 +2492,6 @@ function buildDriftTable(force = false) {
             }
         }
 
-        // ----- CELL 3: GMT Time (or placeholder) -----
         const timeCell = document.createElement("div");
         timeCell.className = "drift-cell drift-time";
 
@@ -2583,20 +2499,17 @@ function buildDriftTable(force = false) {
             cycleCell.textContent = `#${cycleIndex + 1}`;
             timeCell.textContent = cycleStartTime.toISOString().split("T")[1].split(".")[0];
         } else {
-            // No NLT midnight this GMT day
             cycleCell.textContent = "#—";
             timeCell.textContent = "No NLT midnight this day";
         }
         row.appendChild(timeCell);
 
-        // ----- CELL 4: Bar Chart -----
         const barCell = document.createElement("div");
         barCell.className = "drift-bar-cell";
 
         const barTrack = document.createElement("div");
         barTrack.className = "drift-bar-track";
 
-        // Hour markers
         for (let h = 0; h < 24; h++) {
             const mk = document.createElement("div");
             mk.className = "drift-bar-hour-marker";
@@ -2604,7 +2517,6 @@ function buildDriftTable(force = false) {
             barTrack.appendChild(mk);
         }
 
-        // If we have an NLT midnight on this day, show the marker
         if (cycleIndex !== null) {
             const secondsInGmtDay =
                 cycleStartTime.getUTCHours() * 3600 +
@@ -2632,25 +2544,17 @@ function buildDriftTable(force = false) {
 
         row.appendChild(barCell);
 
-        // ----- Highlight today's row + TODAY badge -----
         if (dateAtMidnight.getTime() === todayGmt.getTime()) {
             row.classList.add("drift-row-current");
-
-        //   const badge = document.createElement("span");
-        //    badge.className = "today-badge";
-        //    badge.textContent = "TODAY";
-        //    cycleCell.appendChild(badge);
         } 
 
         body.appendChild(row); 
     }
 }
 
-// Update only clocks every second (no table rebuild)
 function updateDriftPanelClocks() {
     const now = new Date();
 
-    // GMT Clock
     document.getElementById("drift-gmt-clock").textContent =
         now.toISOString().split("T")[1].split(".")[0];
 
@@ -2665,7 +2569,7 @@ function updateDriftPanelClocks() {
         `${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
 }
 
-       function updateDriftAnchorInfo() {
+function updateDriftAnchorInfo() {
     const footer = document.getElementById("drift-anchor-info");
     if (!footer) return;
 
@@ -2675,35 +2579,27 @@ function updateDriftPanelClocks() {
 function updateWeatherPanel() {
     try {
         const now = new Date();
-        // Check if cycle calculator exists before running
         if (typeof get_cycle_state !== "function") return;
         
         const cycle = get_cycle_state(now);
 
-        // 1. Update the Text (Safely)
         const tempElement = document.getElementById("weather-temp");
         if (tempElement && typeof getNahlaTempKelvin === "function") {
             tempElement.textContent = getNahlaTempKelvin(cycle.wrappedSeconds);
         }
 
-        // 2. Update the Dot Position (Safely)
-        // We double check if updateTempDot exists to prevent crashes
         if (typeof updateTempDot === "function") {
             updateTempDot(cycle.wrappedSeconds);
         }
-
     } catch (err) {
-        // If weather fails, log it but DO NOT crash the other trackers
         console.error("Weather Panel Error:", err);
     }
 }
 
-
-
-// Timer — stable, no-flicker
+// Timer
 setInterval(() => {
     updateDriftPanelClocks();
-    buildDriftTable(); // no rebuild unless GMT day changed
+    buildDriftTable();
 }, 1000);
 
 // First build
@@ -2712,13 +2608,10 @@ updateDriftPanelClocks();
 updateDriftAnchorInfo();
 buildTemperatureWave();
 
-// ===========================================
-// FORCE DRIFT-TABLE REBUILD WHEN USER CHANGES ROW SELECT
-// ===========================================
 document.getElementById("drift-rows-select").addEventListener("change", () => {
-    buildDriftTable(true); // Force rebuild even if same GMT day
+    buildDriftTable(true);
 });
-       
+           
 
 
 /* (function() {
