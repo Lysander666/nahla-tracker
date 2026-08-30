@@ -1357,7 +1357,7 @@
     </div>
     <div class="header-title">
         <div class="title-main">Nahla Tracker</div>
-        <div class="title-sub">LIVE • version 1.3</div>
+        <div class="title-sub">LIVE • version 1.4</div>
     </div>
 </div>
 
@@ -1758,9 +1758,36 @@
 
 const MOON_NAME = "Nahla";
 
-const SUNRISE_PHASE_INDEX0 = 0;
-const SUNSET_PHASE_INDEX0  = 9;
-const NIGHT_START_INDEX0   = 9;
+// Calculate elapsed seconds since the solar anchor
+const elapsedSolar = (now.getTime() - HOPE_ANCHOR.getTime()) / 1000;
+
+// Calculate how many phases Hope has drifted along the 12-phase Galactic Band
+// 12 phases per 555.2-day orbit (drift rate = 0.0216 phases/day)
+const solarDrift = (elapsedSolar / ORBIT_PERIOD_SECONDS) * 12;
+
+// Dynamic, continuous phase positions (0 to 12)
+const currentSunrisePhase0 = mod(BASE_SUNRISE_PHASE_INDEX + solarDrift, 12);
+const currentSunsetPhase0  = mod(currentSunrisePhase0 + DAYLIGHT_PHASE_SPAN, 12);
+
+let isHopeUp = false;
+    if (currentSunrisePhase0 < currentSunsetPhase0) {
+        isHopeUp = (currentPhase0 >= currentSunrisePhase0 && currentPhase0 < currentSunsetPhase0);
+    } else {
+        // Wraps across the Phase 12 (mu) -> Phase 1 (alpha) boundary
+        isHopeUp = (currentPhase0 >= currentSunrisePhase0 || currentPhase0 < currentSunsetPhase0);
+    }
+
+    // --- USE isHopeUp TO UPDATE YOUR UI ELEMENTS ---
+    // Example: Update the status badge / text
+    var sunStatusEl = document.getElementById("sun-status");
+    if (sunStatusEl) {
+        sunStatusEl.textContent = isHopeUp ? "DAYLIGHT (HOPE ABOVE HORIZON)" : "NIGHT (HOPE BELOW HORIZON)";
+        sunStatusEl.className = isHopeUp ? "status-day" : "status-night";
+    }
+
+    // Example: If you render sunrise / sunset markers on the phase ring / tracker bar:
+    // Pass currentSunrisePhase0 and currentSunsetPhase0 to your ring drawing function
+}       
 
 const DAY_LENGTH_HOURS   = 25.435;
 const DAY_LENGTH_SECONDS = 91570;
@@ -1770,6 +1797,17 @@ const PHASE_LENGTH_SECONDS  = DAY_LENGTH_SECONDS / PHASE_COUNT;
 
 var CYCLE_ANCHOR   = new Date("2026-06-14T01:19:11.450Z");
 var REBEKAH_ANCHOR = new Date("2025-11-23T14:00:00.000Z");
+
+// Master Solar Calibration Epoch (OBS-008: Hope Sunrise over saddle rim)
+const HOPE_ANCHOR = new Date("2026-08-30T12:55:23.000Z");
+
+// Orbital Period of Rebekah/Nahla around Hope (555.2 Earth days in seconds)
+const ORBIT_PERIOD_SECONDS = 555.2 * 86400;
+
+// Base sunrise phase index (0-indexed) at HOPE_ANCHOR (Phase beta 2.305 = index 1.305)
+// Day length arc at Natalja's Pass is ~9.0 phases (~19h daylight arc)
+const BASE_SUNRISE_PHASE_INDEX = 1.305;
+const DAYLIGHT_PHASE_SPAN       = 9.000;
 
 // Utility function
 function mod(a, b) {
