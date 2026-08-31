@@ -411,47 +411,49 @@
         }
 
 
-/* --- 1. BASE GRID CONTAINER --- */
 #system-info-container {
     display: grid;
     grid-template-columns: repeat(5, minmax(0, 1fr));
     gap: 16px;
     width: 100%;
-    max-width: 100%;       /* Ensures it stretches across the entire screen */
-    margin: 0 auto;
     box-sizing: border-box;
 }
 
-/* --- 2. INDIVIDUAL PANEL CARDS --- */
-
-
-/* --- 3. FIX TEXT & LIST OVERFLOW --- */
-.celestial-body, #map-panel, #manifest-panel {
-    flex: 1;
-    min-width: 250px;
-    border: 1px solid #444;
+.celestial-body, 
+#map-panel, 
+#manifest-panel {
+    border: 1px solid #4a4a4a;
     border-radius: 8px;
-    padding: 0 20px 20px 20px;
+    padding: 0 12px 14px 12px;
     background-color: #222;
-    height: 635px; /* <<<<< ALL PANEL HEIGHTS ARE CONTROLLED BY THIS LINE HERE!! <<<<<< */
+    height: 635px;
     overflow-y: auto;
+    box-sizing: border-box;
+    /* Force consistent font & override Linux Chromium monospace inflation */
+    font-family: Consolas, "Liberation Mono", "DejaVu Sans Mono", "Courier New", monospace !important;
+    font-size: 13px !important;
+    line-height: 1.35 !important;
 }
 
-/* Remove excessive indentation in nested lists */
-.celestial-body ul, #map-panel ul {
+.celestial-body ul, 
+#map-panel ul, 
+.manifest-list {
     list-style-type: none;
     padding-left: 0;
-    font-size: 0.9rem;
-    color: #ccc;
-}
-.manifest-list ul {
-    list-style-type: square;
-    padding-left: 12px;        /* Tighter nested list indent */
+    margin: 6px 0;
+    font-size: inherit !important;
+    line-height: inherit !important;
 }
 
+.celestial-body li, 
+#map-panel li, 
+.manifest-list li {
+    margin-bottom: 5px;
+}
 
 
-/* --- 4. TABLET / MOBILE COLLAPSE (< 1199px) --- */
+
+/* ---TABLET / MOBILE COLLAPSE (< 1199px) --- */
 @media (max-width: 1199px) {
     #system-info-container {
         grid-template-columns: 1fr; /* Clean vertical stack on phones/tablets */
