@@ -1765,7 +1765,7 @@ const PHASE_COUNT          = 12;
 const PHASE_LENGTH_SECONDS = DAY_LENGTH_SECONDS / PHASE_COUNT;
 
 var CYCLE_ANCHOR   = new Date("2026-06-14T01:19:11.450Z");
-var REBEKAH_ANCHOR = new Date("2025-11-23T14:00:00.000Z");
+var REBEKAH_ANCHOR = new Date("2026-08-31T14:49:00.000Z");
 
 // Master Solar Calibration Epoch (OBS-008: Hope Sunrise over saddle rim)
 const HOPE_ANCHOR = new Date("2026-08-30T12:55:23.000Z");
@@ -1979,14 +1979,16 @@ function get_galactic_band_indicator(phaseNumber) {
 function get_rebekah_status(now) {
     const elapsed = (now - REBEKAH_ANCHOR) / 1000;
     const wrapped = mod(elapsed, DAY_LENGTH_SECONDS);
-    const half    = DAY_LENGTH_SECONDS / 2;
+    
+    // Observed visible arc: ~8h 18m (29,880 seconds)
+    const REBEKAH_VISIBLE_SECONDS = 29880; 
 
-    if (wrapped < half) {
-        const time_until_set = half - wrapped;
-        return `<strong>Rebekah:</strong> 🪐 VISIBLE | Est. set in: <span class="time-highlight">${format_timedelta(time_until_set)}</span> (ESTIMATE)`;
+    if (wrapped < REBEKAH_VISIBLE_SECONDS) {
+        const time_until_set = REBEKAH_VISIBLE_SECONDS - wrapped;
+        return `<strong>Rebekah:</strong> 🪐 VISIBLE | Est. set in: <span class="time-highlight">${format_timedelta(time_until_set)}</span>`;
     } else {
         const time_until_rise = DAY_LENGTH_SECONDS - wrapped;
-        return `<strong>Rebekah:</strong> ─ below horizon | Est. rise in: <span class="time-highlight">${format_timedelta(time_until_rise)}</span> (ESTIMATE)`;
+        return `<strong>Rebekah:</strong> ─ below horizon | Est. rise in: <span class="time-highlight">${format_timedelta(time_until_rise)}</span>`;
     }
 }
 
@@ -2189,9 +2191,14 @@ function renderGallery() {
     });
 }
 
-function openLightbox(index) {
-    currentLightboxIndex = index;
-    updateLightbox();
+function openLightbox(target) {
+    if (typeof target === 'number') {
+        currentLightboxIndex = target;
+        updateLightbox();
+    } else if (typeof target === 'string') {
+        document.getElementById('lightbox-image').src = target;
+        document.getElementById('lightbox-caption').textContent = 'Galactic Position';
+    }
     document.getElementById('lightbox').classList.add('active');
 }
 
@@ -2633,7 +2640,19 @@ document.getElementById("drift-rows-select").addEventListener("change", () => {
     }
 })(); */
        
-
+const audioBtn = document.getElementById('audio-btn');
+const audioEl = document.getElementById('nahla-audio');
+if (audioBtn && audioEl) {
+    audioBtn.addEventListener('click', () => {
+        if (audioEl.paused) {
+            audioEl.play();
+            audioBtn.textContent = '❚❚';
+        } else {
+            audioEl.pause();
+            audioBtn.textContent = '▶';
+        }
+    });
+}
 
     </script>
 </body>
