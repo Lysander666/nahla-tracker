@@ -431,13 +431,15 @@
 #manifest-panel {
     border: 1px solid #4a4a4a;
     border-radius: 8px;
-    padding: 0 16px 16px 16px;  /* Clean, balanced inner padding */
+    padding: 0 16px 16px 16px;
     background-color: #222;
     height: 635px;
     overflow-y: auto;
     box-sizing: border-box;
-font-size: 0.76rem;         /* <-- Change from 0.82rem to 0.76rem (or 12px) */
-    line-height: 1.35;          /* Optional: slightly tighter line height */
+    font-family: Consolas, "Courier New", monospace; /* Fixes Chromium scaling */
+    font-size: 11.5px !important;                     /* Direct pixel size */
+    line-height: 1.35;
+    -webkit-text-size-adjust: 100%;
 }
 
 /* Remove excessive indentation in nested lists */
