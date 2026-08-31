@@ -1346,6 +1346,100 @@
     .lightbox-close { top: 15px; right: 20px; font-size: 30px; }
 }
 
+       /* --- SITE FOOTER --- */
+.site-footer {
+    margin-top: 50px;
+    padding: 30px 20px 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    border-top: 1px solid #333;
+}
+
+.footer-badges {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 30px;
+}
+
+.footer-badges img {
+    width: 170px;
+    height: 170px;
+    object-fit: contain;
+    border-radius: 50%;
+    display: block;
+    cursor: pointer;
+
+    /* Forces modern browser bicubic image resampling */
+    image-rendering: auto;
+
+    /* Fixes subpixel edge fuzz on circular borders */
+    overflow: hidden;
+    clip-path: circle(50% at 50% 50%);
+
+    /* Hardware accelerates the scaling so lines stay sharp */
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+
+    transition: transform 0.3s ease, filter 0.3s ease;
+}
+
+.footer-badges img:hover {
+    transform: scale(1.05) translateZ(0);
+}
+
+/* Individual neon drop-shadow glows */
+.footer-badge-stellar {
+    filter: drop-shadow(0 0 12px rgba(186, 85, 211, 0.45));
+}
+.footer-badge-stellar:hover {
+    transform: scale(1.05);
+    filter: drop-shadow(0 0 22px rgba(186, 85, 211, 0.8));
+}
+
+.footer-badge-nahla {
+    filter: drop-shadow(0 0 12px rgba(255, 165, 0, 0.45));
+}
+.footer-badge-nahla:hover {
+    transform: scale(1.05);
+    filter: drop-shadow(0 0 22px rgba(255, 165, 0, 0.8));
+}
+
+.footer-text {
+    margin-top: 18px;
+    font-size: 0.85rem;
+    color: #777;
+    font-family: Consolas, "Courier New", monospace;
+    letter-spacing: 0.05em;
+}
+
+.footer-text a {
+    color: #61dafb;
+    text-decoration: none;
+}
+
+.footer-text a:hover {
+    text-decoration: underline;
+}
+
+/* Mobile scaling */
+@media (max-width: 600px) {
+    .site-footer {
+        margin-top: 35px;
+        padding: 20px 10px 30px;
+    }
+    .footer-badges {
+        gap: 16px;
+    }
+    .footer-badges img {
+        width: 120px;
+        height: 120px;
+    }
+}
        
 
     </style>
