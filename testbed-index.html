@@ -411,43 +411,57 @@
         }
 
 
-/* --- 1. BASE FLEX CONTAINER --- */
+/* --- 1. BASE GRID CONTAINER --- */
 #system-info-container {
-    display: flex;
-    gap: 20px;
-    align-items: flex-start;
-    flex-wrap: nowrap; /* Forces all 5 to stay on one row */
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 12px;
     width: 100%;
     box-sizing: border-box;
-}       
-        
-/* --- SYSTEM INFO PANELS (RESTORE ORIGINAL BORDERS & SHADOWS) --- */
-.celestial-body, #map-panel, #manifest-panel {
-    flex: 1;
-    min-width: 250px;
-    border: 1px solid #4a4a4a; /* Slightly brighter so it stays visible when scaled */
+}
+
+/* --- 2. INDIVIDUAL PANEL CARDS --- */
+.celestial-body, 
+#map-panel, 
+#manifest-panel {
+    border: 1px solid #4a4a4a;
     border-radius: 8px;
-    padding: 0 20px 20px 20px;
+    padding: 0 14px 16px 14px;
     background-color: #222;
     height: 635px;
     overflow-y: auto;
-    box-shadow: 0 0 14px rgba(0, 0, 0, 0.4);
+    box-sizing: border-box;
+    font-size: 0.88rem; /* Keeps text legible without micro-squishing */
 }
 
-/* --- LAPTOP SCALING MEDIA QUERY --- */
-@media (min-width: 1200px) and (max-width: 1450px) {
-    /* Chromium / Vivaldi uses native zoom */
-    #system-info-container {
-        zoom: 0.8;
-    }
+/* --- 3. FIX TEXT & LIST OVERFLOW --- */
+.celestial-body ul, 
+#map-panel ul, 
+.manifest-list {
+    list-style-type: none;
+    padding-left: 0;
+    margin: 10px 0;
+    word-break: break-word; /* Prevents long names from blowing out the panel width */
+}
 
-    /* Firefox ONLY target to prevent Vivaldi double-scaling */
-    @supports not (zoom: 1) {
-        #system-info-container {
-            transform: scale(0.8);
-            transform-origin: top center;
-            margin-bottom: -120px;
-        }
+/* --- 4. LAPTOP SCREEN BALANCE (1200px - 1450px) --- */
+@media (min-width: 1200px) and (max-width: 1450px) {
+    #system-info-container {
+        gap: 8px; /* Tighter gap to guarantee full horizontal fit without overflow */
+    }
+    .celestial-body, 
+    #map-panel, 
+    #manifest-panel {
+        padding: 0 10px 14px 10px;
+        font-size: 0.82rem;
+    }
+}
+
+/* --- 5. TABLET / MOBILE COLLAPSE (< 1199px) --- */
+@media (max-width: 1199px) {
+    #system-info-container {
+        grid-template-columns: 1fr; /* Clean vertical stack on phones/tablets */
+        gap: 16px;
     }
 }
         
