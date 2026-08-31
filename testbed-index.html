@@ -919,6 +919,14 @@
     color: #9ee7ff;
 }
 
+       /* Targets Chromium browsers (Vivaldi, Chrome, Edge) exclusively */
+@supports (-webkit-text-size-adjust: auto) {
+    .clock-label {
+        font-size: 0.73rem !important; /* Slightly smaller than default 0.8rem */
+        line-height: 1.35;
+    }
+}
+
         .active-phase {
             stroke: #9ee7ff !important;
             stroke-width: 2 !important;
