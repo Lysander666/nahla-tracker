@@ -409,6 +409,17 @@
         .gallery-btn:active {
             transform: scale(0.95);
         }
+
+
+/* --- 1. BASE FLEX CONTAINER --- */
+#system-info-container {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+    flex-wrap: nowrap; /* Forces all 5 to stay on one row */
+    width: 100%;
+    box-sizing: border-box;
+}       
         
 /* --- SYSTEM INFO PANELS (RESTORE ORIGINAL BORDERS & SHADOWS) --- */
 .celestial-body, #map-panel, #manifest-panel {
