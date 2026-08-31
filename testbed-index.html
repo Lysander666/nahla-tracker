@@ -479,7 +479,7 @@
         .celestial-body ul, #map-panel ul {
             list-style-type: none;
             padding-left: 0;
-            font-size: 0.9rem;
+            font-size: inherit; /* Inherits whatever font-size the parent card has */
             color: #ccc;
         }
         .celestial-body li, #map-panel li {
@@ -525,7 +525,7 @@
         .manifest-list {
             list-style-type: none;
             padding-left: 0;
-            font-size: 0.85rem;
+            font-size: 0.82rem; /* Now cleanly applies to ALL text inside the cards */
         }
         .manifest-list li {
             margin-bottom: 5px;
