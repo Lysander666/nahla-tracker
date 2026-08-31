@@ -1271,9 +1271,12 @@
 
 
 /* Only for screens around your laptop size */
-@media (min-width: 1200px) and (max-width: 1400px) {
+@media (min-width: 1200px) and (max-width: 1450px) {
     #system-info-container {
-        zoom: 0.8;
+        zoom: 0.8;                     /* Chromium / Vivaldi */
+        transform: scale(0.8);          /* Firefox fallback */
+        transform-origin: top center;
+        margin-bottom: -120px;          /* Pulls up following panels to eliminate scale gap */
     }
 }
 
