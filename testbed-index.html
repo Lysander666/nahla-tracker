@@ -456,18 +456,26 @@
 /* ---TABLET / MOBILE COLLAPSE (< 1199px) --- */
 @media (max-width: 1199px) {
     #system-info-container {
-        grid-template-columns: 1fr; /* Stacks cards cleanly on tablets/phones */
+        grid-template-columns: 1fr;
         gap: 16px;
     }
 
-    /* Bump card font size & auto-adjust height for mobile screens */
+    /* Clean modern sans-serif for mobile cards */
     .celestial-body, 
     #map-panel, 
     #manifest-panel {
-        font-size: 15px !important;   /* Clean, readable size on phone displays */
-        line-height: 1.45 !important;
-        height: auto !important;      /* Removes fixed 635px cutoff so content breathes */
-        max-height: 500px;            /* Keeps internal scroll if preferred */
+        font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+        font-size: 0.95rem !important;
+        line-height: 1.5 !important;
+        letter-spacing: 0.01em;
+        height: auto !important;
+    }
+
+    /* Keep data labels crisp and legible */
+    .celestial-body li strong, 
+    #map-panel li strong,
+    .manifest-list strong {
+        color: #e6f7ff;
     }
 }
         
