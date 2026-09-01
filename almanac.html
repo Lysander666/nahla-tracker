@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nahla Ephemeris • Rise & Set Schedule</title>
+    
+    <!-- External Monospace and Sans Fonts -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Consolas&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap">
+
+    <style>
+        :root {
+            --bg-main: #141414;
+            --bg-card: #1e1e1e;
+            --bg-card-alt: #181818;
+            --border-color: #383838;
+            --border-hover: #555555;
+            --cyan-main: #61dafb;
+            --cyan-glow: rgba(97, 218, 251, 0.35);
+            --amber-main: #ffbf00;
+            --amber-glow: rgba(255, 191, 0, 0.3);
+            --pink-rebekah: #ff61c7;
+            --pink-glow: rgba(255, 97, 199, 0.35);
+            --text-main: #e0e0e0;
+            --text-dim: #888888;
+            --green-accent: #61fbb0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Custom Scrollbar for all scrollable containers & window */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-main);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #333333;
+            border-radius: 4px;
+            border: 1px solid #222222;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #4a4a4a;
+            border-color: rgba(97, 218, 251, 0.4);
+        }
+
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: #333333 #141414;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            font-family: "JetBrains Mono", Consolas, monospace;
+            font-size: 0.92rem;
+            line-height: 1.55;
+            padding: 24px 16px 60px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+        }
+
+        .ephem-header {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+
+        .ephem-pill {
+            display: inline-block;
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.14em;
+            color: var(--cyan-main);
+            padding: 4px 12px;
+            border-radius: 999px;
+            border: 1px solid var(--cyan-glow);
+            background: rgba(20, 40, 50, 0.85);
+            margin-bottom: 12px;
+        }
+
+        .ephem-title {
+            font-size: 2.1rem;
+            font-weight: 700;
+            color: #ffffff;
+            letter-spacing: 0.03em;
+        }
+
+        .ephem-subtitle {
+            font-size: 0.95rem;
+            color: var(--cyan-main);
+            margin-top: 4px;
+            text-shadow: 0 0 10px var(--cyan-glow);
+        }
+
+        .nav-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 12px;
+            font-size: 0.85rem;
+            color: var(--text-dim);
+            text-decoration: none;
+            transition: color 0.2s, transform 0.2s;
+        }
+
+        .nav-back:hover {
+            color: var(--cyan-main);
+            transform: translateX(-2px);
+        }
+
+        .live-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .live-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 16px 18px;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
+            position: relative;
+            overflow: hidden;
+            transition: border-color 0.2s;
+        }
+
+        .live-card:hover {
+            border-color: var(--border-hover);
+        }
+
+        .live-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+        }
+
+        .live-card.hope::before { background-color: var(--amber-main); box-shadow: 0 0 8px var(--amber-glow); }
+        .live-card.rebekah::before { background-color: var(--pink-rebekah); box-shadow: 0 0 8px var(--pink-glow); }
+        .live-card.telemetry::before { background-color: var(--cyan-main); box-shadow: 0 0 8px var(--cyan-glow); }
+        .live-card.phase::before { background-color: var(--green-accent); }
+
+        .live-label {
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: var(--text-dim);
+            margin-bottom: 6px;
+        }
+
+        .live-val-main {
+            font-size: 1.35rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+            letter-spacing: 0.02em;
+        }
+
+        .live-val-sub {
+            font-size: 0.82rem;
+            color: #b8b8b8;
+        }
+
+        .toolbar {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 14px 18px;
+            margin-bottom: 24px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 14px;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+        }
+
+        .toolbar-group {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .toolbar label {
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        select, button, input {
+            background-color: var(--bg-card-alt);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 7px 14px;
+            font-family: inherit;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        select:focus, input:focus {
+            outline: none;
+            border-color: var(--cyan-main);
+            box-shadow: 0 0 8px var(--cyan-glow);
+        }
+
+        button.btn-primary {
+            border-color: var(--cyan-main);
+            color: var(--cyan-main);
+            font-weight: 600;
+        }
+
+        button.btn-primary:hover {
+            background-color: var(--cyan-main);
+            color: #111111;
+            box-shadow: 0 0 12px var(--cyan-glow);
+        }
+
+        button.btn-secondary:hover {
+            background-color: #262626;
+            border-color: #666;
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            color: var(--cyan-main);
+            margin: 28px 0 12px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .table-wrap {
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow-x: auto;
+            background-color: var(--bg-card);
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
+            margin-bottom: 30px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.88rem;
+            white-space: nowrap;
+        }
+
+        th {
+            background-color: #121212;
+            color: #999999;
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        td {
+            padding: 10px 16px;
+            border-bottom: 1px solid #252525;
+            color: #cccccc;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background-color: #242424;
+        }
+
+        .tr-current td {
+            background-color: #182c38 !important;
+            border-left: 3px solid var(--cyan-main);
+        }
+
+        .tag-event {
+            display: inline-block;
+            font-size: 0.72rem;
+            font-weight: 700;
+            padding: 2px 7px;
+            border-radius: 4px;
+            letter-spacing: 0.05em;
+        }
+
+        .tag-sunrise { 
+            background: rgba(255, 170, 0, 0.12); 
+            color: #ffaa00; 
+            border: 1px solid rgba(255, 170, 0, 0.4); 
+            box-shadow: none;
+            text-shadow: none;
+        }
+        .tag-sunset  { 
+            background: rgba(255, 26, 184, 0.12); 
+            color: #ff38c5; 
+            border: 1px solid rgba(255, 26, 184, 0.4); 
+            box-shadow: none;
+            text-shadow: none;
+        }
+        .tag-rise    { background: rgba(255, 97, 199, 0.15); color: #ff8be0; border: 1px solid rgba(255, 97, 199, 0.4); }
+        .tag-set     { background: rgba(136, 136, 136, 0.2); color: #aaaaaa; border: 1px solid rgba(136, 136, 136, 0.4); }
+
+        .time-cell {
+            font-family: "JetBrains Mono", Consolas, monospace;
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            font-size: 0.78rem;
+            color: #777777;
+            border-top: 1px solid #262626;
+            padding-top: 24px;
+        }
+
+        footer a {
+            color: var(--cyan-main);
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <div class="ephem-header">
+        <div class="ephem-pill">SURFACE EPHEMERIS • NATALJA'S PASS (39.2, 104.3)</div>
+        <h1 class="ephem-title">Nahla Solar & Planetary Almanac</h1>
+        <div class="ephem-subtitle">Automated Rise, Set & Celestial Visibility Horizons</div>
+        <a href="index.html" class="nav-back">&larr; Return to Main Nahla Tracker</a>
+    </div>
+
+    <!-- CONTROL BAR -->
+    <div class="toolbar">
+        <div class="toolbar-group">
+            <label for="horizon-range">Forecast Horizon:</label>
+            <select id="horizon-range">
+                <option value="7">7 Nahla Cycles (~7.4 Earth Days)</option>
+                <option value="14" selected>14 Nahla Cycles (~14.8 Earth Days)</option>
+                <option value="30">30 Nahla Cycles (~31.8 Earth Days)</option>
+                <option value="60">60 Nahla Cycles (~63.6 Earth Days)</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- HOPE TABLE -->
+    <h2 class="section-title">☀️ Hope (Primary Star) Schedule</h2>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Cycle</th>
+                    <th>Date (UTC)</th>
+                    <th>Sunrise (UTC)</th>
+                    <th>Sunset (UTC)</th>
+                    <th>Daylight Span</th>
+                    <th>Solar Drift Offset</th>
+                    <th>Sunrise Band Phase</th>
+                </tr>
+            </thead>
+            <tbody id="hope-table-body">
+                <!-- Dynamically Rendered -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- REBEKAH TABLE -->
+    <div style="display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin: 28px 0 12px 0;">
+        <h2 class="section-title" style="margin: 0;">🪐 Rebekah (Parent Body) Schedule</h2>
+        <span style="font-size: 0.78rem; color: #888;">Bearing: <strong style="color: var(--pink-rebekah);">266° WSW</strong> • Visible Arc: <strong style="color: #ffffff;">8h 18m (Fixed 1:1 Lock)</strong></span>
+    </div>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Cycle</th>
+                    <th>Date (UTC)</th>
+                    <th>Rise @ 266° (UTC)</th>
+                    <th>Peak Transit (UTC)</th>
+                    <th>Set (UTC)</th>
+                </tr>
+            </thead>
+            <tbody id="rebekah-table-body">
+                <!-- Dynamically Rendered -->
+            </tbody>
+        </table>
+    </div>
+
+    <footer>
+        Nahla Ephemeris Engine • Calculated for Ground Post Miley at Natalja's Pass • <a href="https://inara.cz/elite/cmdr/440263/" target="_blank">CMDR Lysander666</a>
+    </footer>
+
+</div>
+
+<script>
+/* =========================================================================
+   === QUICK SYNC & CALIBRATION ANCHORS ====================================
+   Paste newly observed ISO timestamps below to recalibrate all predictions.
+   ========================================================================= */
+
+// 1. HOPE SUNRISE ANCHOR (UTC ISO) — OBS-008 Sunrise at Natalja's Pass
+const HOPE_ANCHOR = new Date("2026-08-30T12:55:23.000Z");
+
+// 2. REBEKAH RISE ANCHOR (UTC ISO) — Rise / Transit at Natalja's Pass
+const REBEKAH_ANCHOR = new Date("2026-08-31T14:49:00.000Z");
+
+// 3. SIDEREAL GALACTIC PHASE ANCHOR (UTC ISO) — Phase λ observation epoch
+const CYCLE_ANCHOR = new Date("2026-06-14T01:19:11.450Z");
+
+/* =========================================================================
+   ORBITAL CONSTANTS & EPHEMERIS ENGINE
+   ========================================================================= */
+
+const DAY_LENGTH_SECONDS = 91570; // 25h 26m 10s (Sidereal rotation)
+const ORBIT_PERIOD_SECONDS = 555.2 * 86400; // 555.2 Earth Days in seconds
+const PHASE_COUNT = 12;
+const PHASE_LENGTH_SECONDS = DAY_LENGTH_SECONDS / PHASE_COUNT;
+
+const BASE_SUNRISE_PHASE_INDEX = 1.305;
+const DAYLIGHT_PHASE_SPAN      = 9.000;
+const REBEKAH_VISIBLE_SECONDS  = 29880; // 8h 18m 00s
+
+const GREEK_PHASES = ["α","β","γ","δ","ε","ζ","η","θ","ι","κ","λ","μ"];
+const BAND_PHASE_DESCS = {
+    1: "sun rising (left)",
+    2: "steep rising",
+    3: "mid-height vertical",
+    4: "high, slanting across",
+    5: "overhead horizontal (peak)",
+    6: "high, descending",
+    7: "mid-height vertical (rev)",
+    8: "steeply descending",
+    9: "low, angled sunset",
+    10:"low, flat dusk",
+    11:"deep night",
+    12:"galactic dawn, dim rise"
+};
+
+function mod(a, b) {
+    return ((a % b) + b) % b;
+}
+
+function format_timedelta(total_seconds) {
+    total_seconds = Math.max(0, total_seconds);
+    const hours   = Math.floor(total_seconds / 3600);
+    const minutes = Math.floor((total_seconds % 3600) / 60);
+    const seconds = Math.floor(total_seconds % 60);
+    return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+}
+
+function formatUtcDateShort(d) {
+    return d.toLocaleDateString("en-GB", {
+        weekday: "short",
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+        timeZone: "UTC"
+    });
+}
+
+function formatUtcTime(d) {
+    return d.toISOString().split("T")[1].split(".")[0] + " UTC";
+}
+
+function renderAllSchedules() {
+    const horizon = parseInt(document.getElementById("horizon-range").value, 10);
+    const now = new Date();
+
+    // Apparent Solar Day = Sidereal Day + Orbital Advance
+    const solarDriftPerCycleSeconds = (DAY_LENGTH_SECONDS / ORBIT_PERIOD_SECONDS) * DAY_LENGTH_SECONDS;
+    const APPARENT_SOLAR_DAY_SECONDS = DAY_LENGTH_SECONDS + solarDriftPerCycleSeconds;
+
+    // Relative cycle calculations
+    const diffHopeSeconds = (now.getTime() - HOPE_ANCHOR.getTime()) / 1000;
+    const currentHopeCycleIndex = Math.floor(diffHopeSeconds / APPARENT_SOLAR_DAY_SECONDS);
+
+    // 1. Render Hope Table
+    const hopeBody = document.getElementById("hope-table-body");
+    hopeBody.innerHTML = "";
+
+    for (let i = 0; i < horizon; i++) {
+        const cycleIdx = currentHopeCycleIndex + i;
+        const sunriseTime = new Date(HOPE_ANCHOR.getTime() + (cycleIdx * APPARENT_SOLAR_DAY_SECONDS * 1000));
+        const sunsetTime = new Date(sunriseTime.getTime() + (DAYLIGHT_PHASE_SPAN * PHASE_LENGTH_SECONDS * 1000));
+
+        const elapsedSolar = (sunriseTime.getTime() - HOPE_ANCHOR.getTime()) / 1000;
+        const totalDriftHours = (elapsedSolar / ORBIT_PERIOD_SECONDS) * 25.435;
+        const currentSunrisePhase0 = mod(BASE_SUNRISE_PHASE_INDEX + (elapsedSolar / ORBIT_PERIOD_SECONDS) * 12, 12);
+        const phaseNumber = Math.floor(currentSunrisePhase0) + 1;
+        const phaseLetter = GREEK_PHASES[phaseNumber - 1];
+
+        const row = document.createElement("tr");
+        if (i === 0) row.className = "tr-current";
+
+        row.innerHTML = `
+            <td>#${cycleIdx + 1}</td>
+            <td>${formatUtcDateShort(sunriseTime)}</td>
+            <td class="time-cell"><span class="tag-event tag-sunrise">SUNRISE</span> ${formatUtcTime(sunriseTime)}</td>
+            <td class="time-cell"><span class="tag-event tag-sunset">SUNSET</span> ${formatUtcTime(sunsetTime)}</td>
+            <td>~19h 05m 43s</td>
+            <td style="color: var(--cyan-main);">+${totalDriftHours.toFixed(2)}h annual drift</td>
+            <td><span style="color: var(--green-accent);">Phase ${phaseLetter} (${phaseNumber})</span></td>
+        `;
+        hopeBody.appendChild(row);
+    }
+
+    // 2. Render Rebekah Table
+    const rebekahBody = document.getElementById("rebekah-table-body");
+    rebekahBody.innerHTML = "";
+
+    const diffRebekahSeconds = (now.getTime() - REBEKAH_ANCHOR.getTime()) / 1000;
+    const currentRebekahCycleIndex = Math.floor(diffRebekahSeconds / DAY_LENGTH_SECONDS);
+
+    for (let i = 0; i < horizon; i++) {
+        const cycleIdx = currentRebekahCycleIndex + i;
+        const riseTime = new Date(REBEKAH_ANCHOR.getTime() + (cycleIdx * DAY_LENGTH_SECONDS * 1000));
+        const transitTime = new Date(riseTime.getTime() + (REBEKAH_VISIBLE_SECONDS / 2 * 1000));
+        const setTime  = new Date(riseTime.getTime() + (REBEKAH_VISIBLE_SECONDS * 1000));
+
+        const row = document.createElement("tr");
+        if (i === 0) row.className = "tr-current";
+
+        row.innerHTML = `
+            <td>#${cycleIdx + 1}</td>
+            <td>${formatUtcDateShort(riseTime)}</td>
+            <td class="time-cell"><span class="tag-event tag-rise">RISE</span> ${formatUtcTime(riseTime)}</td>
+            <td class="time-cell" style="color: var(--cyan-main);">${formatUtcTime(transitTime)}</td>
+            <td class="time-cell"><span class="tag-event tag-set">SET</span> ${formatUtcTime(setTime)}</td>
+        `;
+        rebekahBody.appendChild(row);
+    }
+}
+
+// Event Listeners
+document.getElementById("horizon-range").addEventListener("change", renderAllSchedules);
+
+// Init on page load
+renderAllSchedules();
+
+</script>
+</body>
+</html>
