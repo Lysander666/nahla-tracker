@@ -296,6 +296,21 @@
             border-left: 3px solid var(--cyan-main);
         }
 
+        .tag-status {
+            display: inline-block;
+            font-size: 0.68rem;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin-left: 6px;
+        }
+        .tag-active-day   { background: rgba(255, 170, 0, 0.2); color: #ffaa00; border: 1px solid rgba(255, 170, 0, 0.4); }
+        .tag-active-night { background: rgba(97, 218, 251, 0.15); color: var(--cyan-main); border: 1px solid var(--cyan-glow); }
+        .tag-active-rise  { background: rgba(255, 97, 199, 0.2); color: var(--pink-rebekah); border: 1px solid var(--pink-glow); }
+        .tag-today        { background: rgba(97, 218, 251, 0.2); color: #ffffff; border: 1px solid var(--cyan-main); }
+
         .tag-event {
             display: inline-block;
             font-size: 0.72rem;
@@ -353,8 +368,9 @@
 <div class="container">
 
     <div class="ephem-header">
+        <div class="ephem-pill">SURFACE EPHEMERIS • NATALJA'S PASS (39.2, 104.3)</div>
         <h1 class="ephem-title">Nahla Solar & Planetary Almanac</h1>
-        <div class="ephem-subtitle">Rise, Set & Celestial Visibilities</div>
+        <div class="ephem-subtitle">Automated Rise, Set & Celestial Visibility Horizons</div>
         <a href="index.html" class="nav-back">&larr; Return to Main Nahla Tracker</a>
     </div>
 
@@ -415,7 +431,7 @@
     </div>
 
     <footer>
-      Calculated for ground post <italic>Miley</italic> at Natalja's Pass • <a href="https://inara.cz/elite/cmdr/440263/" target="_blank">CMDR Lysander666</a>
+        Nahla Ephemeris Engine • Calculated for Ground Post Miley at Natalja's Pass • <a href="https://inara.cz/elite/cmdr/440263/" target="_blank">CMDR Lysander666</a>
     </footer>
 
 </div>
@@ -435,6 +451,9 @@ const REBEKAH_ANCHOR = new Date("2026-08-31T14:49:00.000Z");
 // 3. SIDEREAL GALACTIC PHASE ANCHOR (UTC ISO) — Phase λ observation epoch
 const CYCLE_ANCHOR = new Date("2026-06-14T01:19:11.450Z");
 
+// 4. PERIHELION ORBITAL EPOCH (UTC ISO) — Month 1 Hope Day 1 (Closest to Primary)
+const PERIHELION_EPOCH = new Date("2026-07-03T03:10:11.000Z");
+
 /* =========================================================================
    ORBITAL CONSTANTS & EPHEMERIS ENGINE
    ========================================================================= */
@@ -445,7 +464,8 @@ const PHASE_COUNT = 12;
 const PHASE_LENGTH_SECONDS = DAY_LENGTH_SECONDS / PHASE_COUNT;
 
 const BASE_SUNRISE_PHASE_INDEX = 1.305;
-const DAYLIGHT_PHASE_SPAN      = 9.000;
+const MEAN_DAYLIGHT_SECONDS    = 9.000 * PHASE_LENGTH_SECONDS; // ~19h 04m 38s base
+const DAYLIGHT_VARIATION_SECS  = 23 * 60; // ±23m seasonal expansion/contraction between Perihelion and Aphelion
 const REBEKAH_VISIBLE_SECONDS  = 29880; // 8h 18m 00s
 
 const GREEK_PHASES = ["α","β","γ","δ","ε","ζ","η","θ","ι","κ","λ","μ"];
@@ -498,9 +518,15 @@ function renderAllSchedules() {
     const solarDriftPerCycleSeconds = (DAY_LENGTH_SECONDS / ORBIT_PERIOD_SECONDS) * DAY_LENGTH_SECONDS;
     const APPARENT_SOLAR_DAY_SECONDS = DAY_LENGTH_SECONDS + solarDriftPerCycleSeconds;
 
-    // Relative cycle calculations
+    // Relative cycle calculations aligned to start from today / current UTC date
     const diffHopeSeconds = (now.getTime() - HOPE_ANCHOR.getTime()) / 1000;
-    const currentHopeCycleIndex = Math.floor(diffHopeSeconds / APPARENT_SOLAR_DAY_SECONDS);
+    let currentHopeCycleIndex = Math.floor(diffHopeSeconds / APPARENT_SOLAR_DAY_SECONDS);
+    let checkHopeRise = new Date(HOPE_ANCHOR.getTime() + (currentHopeCycleIndex * APPARENT_SOLAR_DAY_SECONDS * 1000));
+    
+    // If previous sunrise was on a prior UTC calendar day and sunset has passed, advance to today's upcoming cycle
+    if (now > checkHopeRise && now.getUTCDate() !== checkHopeRise.getUTCDate()) {
+        currentHopeCycleIndex++;
+    }
 
     // 1. Render Hope Table
     const hopeBody = document.getElementById("hope-table-body");
@@ -509,7 +535,14 @@ function renderAllSchedules() {
     for (let i = 0; i < horizon; i++) {
         const cycleIdx = currentHopeCycleIndex + i;
         const sunriseTime = new Date(HOPE_ANCHOR.getTime() + (cycleIdx * APPARENT_SOLAR_DAY_SECONDS * 1000));
-        const sunsetTime = new Date(sunriseTime.getTime() + (DAYLIGHT_PHASE_SPAN * PHASE_LENGTH_SECONDS * 1000));
+        
+        // Calculate orbital anomaly relative to Perihelion (3 July 2026)
+        const orbitalAngle = ((sunriseTime.getTime() - PERIHELION_EPOCH.getTime()) / 1000 / ORBIT_PERIOD_SECONDS) * 2 * Math.PI;
+        // Dynamic daylight duration: stretches at Perihelion (cos = 1), compresses at Aphelion (cos = -1)
+        const daylightSpanSecs = MEAN_DAYLIGHT_SECONDS + (DAYLIGHT_VARIATION_SECS * Math.cos(orbitalAngle));
+        
+        const sunsetTime = new Date(sunriseTime.getTime() + (daylightSpanSecs * 1000));
+        const nextSunrise = new Date(sunriseTime.getTime() + (APPARENT_SOLAR_DAY_SECONDS * 1000));
 
         const elapsedSolar = (sunriseTime.getTime() - HOPE_ANCHOR.getTime()) / 1000;
         const totalDriftHours = (elapsedSolar / ORBIT_PERIOD_SECONDS) * 25.435;
@@ -517,15 +550,32 @@ function renderAllSchedules() {
         const phaseNumber = Math.floor(currentSunrisePhase0) + 1;
         const phaseLetter = GREEK_PHASES[phaseNumber - 1];
 
+        const isToday = (sunriseTime.getUTCFullYear() === now.getUTCFullYear() &&
+                         sunriseTime.getUTCMonth() === now.getUTCMonth() &&
+                         sunriseTime.getUTCDate() === now.getUTCDate());
+        const isCurrentCycle = (now >= sunriseTime && now < nextSunrise);
+        const isDayNow = (now >= sunriseTime && now < sunsetTime);
+
         const row = document.createElement("tr");
-        if (i === 0) row.className = "tr-current";
+        if (isToday || isCurrentCycle) row.className = "tr-current";
+
+        let statusBadge = "";
+        if (isToday && now < sunriseTime) {
+            statusBadge = `<span class="tag-status tag-today">☀️ Today (Upcoming)</span>`;
+        } else if (isCurrentCycle) {
+            statusBadge = isDayNow 
+                ? `<span class="tag-status tag-active-day">☀️ Active (Day)</span>`
+                : `<span class="tag-status tag-active-night">🌙 Active (Night)</span>`;
+        } else if (isToday) {
+            statusBadge = `<span class="tag-status tag-today">Today</span>`;
+        }
 
         row.innerHTML = `
-            <td>#${cycleIdx + 1}</td>
+            <td>#${cycleIdx + 1} ${statusBadge}</td>
             <td>${formatUtcDateShort(sunriseTime)}</td>
             <td class="time-cell"><span class="tag-event tag-sunrise">SUNRISE</span> ${formatUtcTime(sunriseTime)}</td>
             <td class="time-cell"><span class="tag-event tag-sunset">SUNSET</span> ${formatUtcTime(sunsetTime)}</td>
-            <td>~19h 05m 43s</td>
+            <td style="color: #ffffff; font-weight: 500;">~${format_timedelta(daylightSpanSecs)}</td>
             <td style="color: var(--cyan-main);">+${totalDriftHours.toFixed(2)}h annual drift</td>
             <td><span style="color: var(--green-accent);">Phase ${phaseLetter} (${phaseNumber})</span></td>
         `;
@@ -537,19 +587,43 @@ function renderAllSchedules() {
     rebekahBody.innerHTML = "";
 
     const diffRebekahSeconds = (now.getTime() - REBEKAH_ANCHOR.getTime()) / 1000;
-    const currentRebekahCycleIndex = Math.floor(diffRebekahSeconds / DAY_LENGTH_SECONDS);
+    let currentRebekahCycleIndex = Math.floor(diffRebekahSeconds / DAY_LENGTH_SECONDS);
+    let checkRebekahRise = new Date(REBEKAH_ANCHOR.getTime() + (currentRebekahCycleIndex * DAY_LENGTH_SECONDS * 1000));
+    
+    // If previous rise was on a prior UTC calendar day and visibility has ended, advance to today's upcoming cycle
+    if (now > checkRebekahRise && now.getUTCDate() !== checkRebekahRise.getUTCDate()) {
+        currentRebekahCycleIndex++;
+    }
 
     for (let i = 0; i < horizon; i++) {
         const cycleIdx = currentRebekahCycleIndex + i;
         const riseTime = new Date(REBEKAH_ANCHOR.getTime() + (cycleIdx * DAY_LENGTH_SECONDS * 1000));
         const transitTime = new Date(riseTime.getTime() + (REBEKAH_VISIBLE_SECONDS / 2 * 1000));
         const setTime  = new Date(riseTime.getTime() + (REBEKAH_VISIBLE_SECONDS * 1000));
+        const nextRise = new Date(riseTime.getTime() + (DAY_LENGTH_SECONDS * 1000));
+
+        const isToday = (riseTime.getUTCFullYear() === now.getUTCFullYear() &&
+                         riseTime.getUTCMonth() === now.getUTCMonth() &&
+                         riseTime.getUTCDate() === now.getUTCDate());
+        const isCurrentCycle = (now >= riseTime && now < nextRise);
+        const isVisibleNow = (now >= riseTime && now < setTime);
 
         const row = document.createElement("tr");
-        if (i === 0) row.className = "tr-current";
+        if (isToday || isCurrentCycle) row.className = "tr-current";
+
+        let statusBadge = "";
+        if (isToday && now < riseTime) {
+            statusBadge = `<span class="tag-status tag-today">🪐 Today (Upcoming)</span>`;
+        } else if (isCurrentCycle) {
+            statusBadge = isVisibleNow 
+                ? `<span class="tag-status tag-active-rise">🪐 Visible</span>`
+                : `<span class="tag-status tag-active-night">Below Horizon</span>`;
+        } else if (isToday) {
+            statusBadge = `<span class="tag-status tag-today">Today</span>`;
+        }
 
         row.innerHTML = `
-            <td>#${cycleIdx + 1}</td>
+            <td>#${cycleIdx + 1} ${statusBadge}</td>
             <td>${formatUtcDateShort(riseTime)}</td>
             <td class="time-cell"><span class="tag-event tag-rise">RISE</span> ${formatUtcTime(riseTime)}</td>
             <td class="time-cell" style="color: var(--cyan-main);">${formatUtcTime(transitTime)}</td>
