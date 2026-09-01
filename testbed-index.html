@@ -509,20 +509,10 @@
             color: #bbb;
         }
         
-.celestial-body::-webkit-scrollbar,
-#map-panel::-webkit-scrollbar,
-#hope-info::-webkit-scrollbar,
-.gallery-container::-webkit-scrollbar {
-    display: none;
-    width: 0 !important;
-}
-
-.celestial-body,
-#map-panel,
-#hope-info,
-.gallery-container {
-    scrollbar-width: none;
-}
+        .celestial-body::-webkit-scrollbar,
+        #map-panel::-webkit-scrollbar
+            width: 10px;
+        }
         
         .celestial-body::-webkit-scrollbar-track,
         #map-panel::-webkit-scrollbar-track
@@ -834,23 +824,20 @@
             color: #66e2ff;
         }
 
-#nahla-clock-container {
-    width: 100%;
-    margin-top: 14px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-}
+        #nahla-clock-container {
+            width: 100%;
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
 
-#nahla-clock {
-    width: 100%;
-    height: auto;
-    max-width: 240px; /* Scaled down slightly from 260px so it fits cleanly in 1536px card width */
-    margin: 0 auto;
-    display: block;
-    filter: drop-shadow(0 0 15px rgba(97, 218, 251, 0.4));
-}
+        #nahla-clock {
+            width: 100%;
+            height: auto;
+            max-width: 260px;
+            filter: drop-shadow(0 0 15px rgba(97, 218, 251, 0.4));
+        }
 
         .clock-face {
             fill: #1a1a1a;
@@ -1617,45 +1604,44 @@
 
             </div>
 
-<div class="celestial-body" id="hope-info">
-    <h3>Hope (Primary Star)</h3>
-    <ul>
-        <li><strong>Type:</strong> A5 Vb Blue-White Star</li>
-        <li><strong>Mass:</strong> 1.6758 Solar</li>
-        <li><strong>Radius:</strong> 1.427 Solar</li>
-        <li><strong>Temp:</strong> 8,631 K / 8,358 C</li>
-        <li><strong>Absolute magnitude:</strong> 2.3165 </li>
-        <li><strong>Age:</strong> 800 million years</li>
-        <li><strong>Rotation:</strong> 1.0 Earth days</li>
-    </ul>
+            <div class="celestial-body" id="hope-info">
+                <h3>Hope (Primary Star)</h3>
+                <ul>
+                    <li><strong>Type:</strong> A5 Vb Blue-White Star</li>
+                    <li><strong>Mass:</strong> 1.6758 Solar</li>
+                    <li><strong>Radius:</strong> 1.427 Solar</li>
+                    <li><strong>Temp:</strong> 8,631 K / 8,358 C</li>
+                    <li><strong>Absolute magnitude:</strong> 2.3165 </li>
+                    <li><strong>Age:</strong> 800 million years</li>
+                    <li><strong>Rotation:</strong> 1.0 Earth days</li>
 
-    <!-- MOVED OUTSIDE THE UL -->
-    <div id="nahla-clock-container">
-        <svg id="nahla-clock" viewBox="0 0 200 200">
-            <circle cx="100" cy="100" r="90" class="clock-face" />
-            <circle cx="100" cy="100" r="88" class="clock-ring" />
+                    <div id="nahla-clock-container">
+                        <svg id="nahla-clock" viewBox="0 0 200 200">
+                            <circle cx="100" cy="100" r="90" class="clock-face" />
+                            <circle cx="100" cy="100" r="88" class="clock-ring" />
 
-            <!-- Quadrant axis lines -->
-            <line class="clock-axis" x1="100" y1="12" x2="100" y2="188" />
-            <line class="clock-axis" x1="12" y1="100" x2="188" y2="100" />
+                            <!-- Quadrant axis lines -->
+                            <line class="clock-axis" x1="100" y1="12" x2="100" y2="188" />
+                            <line class="clock-axis" x1="12" y1="100" x2="188" y2="100" />
 
-            <g id="nahla-sectors"></g>
-            <g id="nahla-ticks"></g>
-            <g id="nahla-numbers"></g>
+                            <g id="nahla-sectors"></g>
+                            <g id="nahla-ticks"></g>
+                            <g id="nahla-numbers"></g>
 
-            <line id="nahla-hand-glow" class="hand-glow"
-                  x1="100" y1="100" x2="100" y2="56" />
+                            <line id="nahla-hand-glow" class="hand-glow"
+                                  x1="100" y1="100" x2="100" y2="56" />
 
-            <line id="nahla-hand-hour" class="hand-hour"
-                  x1="100" y1="100" x2="100" y2="56" />
+                            <line id="nahla-hand-hour" class="hand-hour"
+                                  x1="100" y1="100" x2="100" y2="56" />
 
-            <circle cx="100" cy="100" r="3" class="center-" />
-        </svg>
+                            <circle cx="100" cy="100" r="3" class="center-" />
+                        </svg>
 
-        <div class="clock-label">Nahla Phase Clock • 25h Day</div>
-        <div class="clock-label">Galactic Band = &#945;-&#956; • <span class="live-highlight">Live</span></div>
-    </div>
-</div>
+                        <div class="clock-label">Nahla Phase Clock • 25h Day</div>
+                        <div class="clock-label">Galactic Band = &#945;-&#956; • <span class="live-highlight">Live</span></div>
+                    </div>
+                </ul>
+            </div>
 
             <div id="map-panel">
                 <h3>Hypi Bra EV-P d5-78</h3>
