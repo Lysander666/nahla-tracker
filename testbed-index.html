@@ -429,11 +429,10 @@
     height: 635px;
     overflow-y: auto;
     box-sizing: border-box;
-    /* Clean Inter sans-serif stack matching mobile view */
-    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
-    font-size: 0.85rem !important;
-    line-height: 1.45 !important;
-    letter-spacing: 0.01em;
+    /* Force consistent font & override Linux Chromium monospace inflation */
+    font-family: Consolas, "Liberation Mono", "DejaVu Sans Mono", "Courier New", monospace !important;
+    font-size: 13px !important;
+    line-height: 1.35 !important;
 }
 
 .celestial-body ul, 
@@ -446,11 +445,12 @@
     line-height: inherit !important;
 }
 
-.celestial-body li strong, 
-#map-panel li strong,
-.manifest-list strong {
-    color: #e6f7ff;
+.celestial-body li, 
+#map-panel li, 
+.manifest-list li {
+    margin-bottom: 5px;
 }
+
 
 
 /* ---TABLET / MOBILE COLLAPSE (< 1199px) --- */
