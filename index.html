@@ -1514,7 +1514,7 @@
     </div>
     <div class="header-title">
         <div class="title-main">Nahla Tracker</div>
-        <div class="title-sub">LIVE • version 1.41</div>
+        <div class="title-sub">LIVE • version 1.4</div>
     </div>
 </div>
 
@@ -1940,10 +1940,6 @@ var REBEKAH_ANCHOR = new Date("2026-08-31T14:49:00.000Z");
 // Master Solar Calibration Epoch (OBS-008: Hope Sunrise over saddle rim)
 const HOPE_ANCHOR = new Date("2026-08-30T12:55:23.000Z");
 
-// Perihelion Epoch (3 July 2026 - Maximum Daylight Alignment)
-const PERIHELION_EPOCH = new Date(Date.UTC(2026, 6, 3, 3, 10, 11));
-const MEAN_DAYLIGHT_SECONDS = (19 * 3600) + (5 * 60) + 43; // 19h 05m 43s base
-
 // Orbital Period of Rebekah/Nahla around Hope (555.2 Earth days in seconds)
 const ORBIT_PERIOD_SECONDS = 555.2 * 86400;
 
@@ -2250,32 +2246,28 @@ function updateDisplay() {
     const wrapped          = cycle.wrappedSeconds;
     const hoursIntoDay     = cycle.hoursIntoDay;
 
-   // --- DYNAMIC SOLAR DRIFT & SEASONAL DAYLIGHT ---
-    const APPARENT_SOLAR_DAY_SECS = DAY_LENGTH_SECONDS + ((DAY_LENGTH_SECONDS / ORBIT_PERIOD_SECONDS) * DAY_LENGTH_SECONDS);
-    const elapsedFromSolarAnchorSecs = (now.getTime() - HOPE_ANCHOR.getTime()) / 1000;
-    const currentSolarCycleFloat = elapsedFromSolarAnchorSecs / APPARENT_SOLAR_DAY_SECS;
-    const currentSolarCycleIdx = Math.floor(currentSolarCycleFloat);
+    // --- DECOUPLED SOLAR PROGRESSION ---
+    const elapsedSolar = (now.getTime() - HOPE_ANCHOR.getTime()) / 1000;
+    const solarDrift   = (elapsedSolar / ORBIT_PERIOD_SECONDS) * 12;
 
-    const currentSunriseMs = HOPE_ANCHOR.getTime() + (currentSolarCycleIdx * APPARENT_SOLAR_DAY_SECS * 1000);
-    const nextSunriseMs = currentSunriseMs + (APPARENT_SOLAR_DAY_SECS * 1000);
+    const currentSunrisePhase0 = mod(BASE_SUNRISE_PHASE_INDEX + solarDrift, 12);
+    const currentSunsetPhase0  = mod(currentSunrisePhase0 + DAYLIGHT_PHASE_SPAN, 12);
 
-    // Seasonal harmonic variation (23 min swing between Perihelion and Aphelion)
-    const orbitalAngle = ((currentSunriseMs - PERIHELION_EPOCH.getTime()) / 1000 / ORBIT_PERIOD_SECONDS) * 2 * Math.PI;
-    const daylightSpanSecs = MEAN_DAYLIGHT_SECONDS + (23 * 60 * Math.cos(orbitalAngle));
-    const currentSunsetMs = currentSunriseMs + (daylightSpanSecs * 1000);
+    let isHopeUp = false;
+    if (currentSunrisePhase0 < currentSunsetPhase0) {
+        isHopeUp = (continuousPhase0 >= currentSunrisePhase0 && continuousPhase0 < currentSunsetPhase0);
+    } else {
+        isHopeUp = (continuousPhase0 >= currentSunrisePhase0 || continuousPhase0 < currentSunsetPhase0);
+    }
 
-    const nowMs = now.getTime();
-    const isHopeUp = (nowMs >= currentSunriseMs && nowMs < currentSunsetMs);
-
+    // --- TIME UNTIL NEXT SUNRISE / SUNSET ---
     let timeToEvent = 0;
     if (isHopeUp) {
-        timeToEvent = (currentSunsetMs - nowMs) / 1000;
-    } else if (nowMs < currentSunriseMs) {
-        timeToEvent = (currentSunriseMs - nowMs) / 1000;
+        let phaseDiff = mod(currentSunsetPhase0 - continuousPhase0, 12);
+        timeToEvent = phaseDiff * PHASE_LENGTH_SECONDS;
     } else {
-        timeToEvent = (nextSunriseMs - nowMs) / 1000;
-    }
-   
+        let phaseDiff = mod(currentSunrisePhase0 - continuousPhase0, 12);
+        timeToEvent = phaseDiff * PHASE_LENGTH_SECONDS;
     }
 
     let statusText;
