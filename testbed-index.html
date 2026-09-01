@@ -509,10 +509,20 @@
             color: #bbb;
         }
         
-        .celestial-body::-webkit-scrollbar,
-        #map-panel::-webkit-scrollbar
-            width: 10px;
-        }
+.celestial-body::-webkit-scrollbar,
+#map-panel::-webkit-scrollbar,
+#hope-info::-webkit-scrollbar,
+.gallery-container::-webkit-scrollbar {
+    display: none;
+    width: 0 !important;
+}
+
+.celestial-body,
+#map-panel,
+#hope-info,
+.gallery-container {
+    scrollbar-width: none;
+}
         
         .celestial-body::-webkit-scrollbar-track,
         #map-panel::-webkit-scrollbar-track
@@ -826,21 +836,21 @@
 
 #nahla-clock-container {
     width: 100%;
-    margin-top: 20px;
-    margin-left: auto;
-    margin-right: auto;
+    margin-top: 14px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
 }
 
-        #nahla-clock {
-            width: 100%;
-            height: auto;
-            max-width: 260px;
-            filter: drop-shadow(0 0 15px rgba(97, 218, 251, 0.4));
-        }
+#nahla-clock {
+    width: 100%;
+    height: auto;
+    max-width: 240px; /* Scaled down slightly from 260px so it fits cleanly in 1536px card width */
+    margin: 0 auto;
+    display: block;
+    filter: drop-shadow(0 0 15px rgba(97, 218, 251, 0.4));
+}
 
         .clock-face {
             fill: #1a1a1a;
