@@ -1,4 +1,4 @@
-   <!-- 
+<!-- 
 === QUICK SYNC (MINIMAL) ==========================================
 
 1) SYNC GALACTIC BAND PHASE (1–12)
@@ -217,8 +217,14 @@
 /* Rebekah static sky compass */
 
 .rebekah-compass {
-    margin-top: 45px;   /* adjust this number as you like */
-    margin-bottom: 4px; /* keeps spacing above the label clean */
+    /* Pinned to a fixed offset from the panel top so this always lines up
+       with #nahla-clock-container regardless of how the list text above
+       wraps in a given browser/resolution. Adjust `top` to move it. */
+    position: absolute;
+    top: 300px;
+    left: 0;
+    right: 0;
+    margin-bottom: 4px;
     display: flex;
     justify-content: center;
 }
@@ -306,7 +312,12 @@
 }
 
 .rebekah-label-outside {
-    margin-top: 30px;   /* increase or decrease to taste */
+    /* Pinned below the now-absolutely-positioned .rebekah-compass:
+       compass top (300px) + compass height (140px) + 30px gap = 470px. */
+    position: absolute;
+    top: 470px;
+    left: 0;
+    right: 0;
     text-align: center;
     font-size: 0.75rem;
     color: #9ee7ff;
@@ -429,6 +440,7 @@
     height: 635px;
     overflow-y: auto;
     box-sizing: border-box;
+    position: relative;
     /* Force consistent font & override Linux Chromium monospace inflation */
     font-family: Consolas, "Liberation Mono", "DejaVu Sans Mono", "Courier New", monospace !important;
     font-size: 13px !important;
@@ -476,6 +488,29 @@
     #map-panel li strong,
     .manifest-list strong {
         color: #e6f7ff;
+    }
+
+    /* The desktop fixed-offset positioning for the compass/clock (see
+       .rebekah-compass / #nahla-clock-container / .rebekah-label-outside)
+       assumes the fixed 635px panel height above. On mobile the panel
+       height becomes auto, so revert these back to normal document flow
+       or the panel would collapse under them. */
+    .rebekah-compass,
+    #nahla-clock-container,
+    .rebekah-label-outside {
+        position: static;
+    }
+
+    .rebekah-compass {
+        margin-top: 45px;
+    }
+
+    #nahla-clock-container {
+        margin-top: 20px;
+    }
+
+    .rebekah-label-outside {
+        margin-top: 30px;
     }
 }
         
@@ -825,8 +860,13 @@
         }
 
         #nahla-clock-container {
+            /* Pinned to the same fixed offset as .rebekah-compass (see that
+               rule for why) so the two graphics always align, in any browser. */
+            position: absolute;
+            top: 300px;
+            left: 0;
+            right: 0;
             width: 100%;
-            margin-top: 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -1614,33 +1654,33 @@
                     <li><strong>Absolute magnitude:</strong> 2.3165 </li>
                     <li><strong>Age:</strong> 800 million years</li>
                     <li><strong>Rotation:</strong> 1.0 Earth days</li>
-
-                    <div id="nahla-clock-container">
-                        <svg id="nahla-clock" viewBox="0 0 200 200">
-                            <circle cx="100" cy="100" r="90" class="clock-face" />
-                            <circle cx="100" cy="100" r="88" class="clock-ring" />
-
-                            <!-- Quadrant axis lines -->
-                            <line class="clock-axis" x1="100" y1="12" x2="100" y2="188" />
-                            <line class="clock-axis" x1="12" y1="100" x2="188" y2="100" />
-
-                            <g id="nahla-sectors"></g>
-                            <g id="nahla-ticks"></g>
-                            <g id="nahla-numbers"></g>
-
-                            <line id="nahla-hand-glow" class="hand-glow"
-                                  x1="100" y1="100" x2="100" y2="56" />
-
-                            <line id="nahla-hand-hour" class="hand-hour"
-                                  x1="100" y1="100" x2="100" y2="56" />
-
-                            <circle cx="100" cy="100" r="3" class="center-" />
-                        </svg>
-
-                        <div class="clock-label">Nahla Phase Clock • 25h Day</div>
-                        <div class="clock-label">Galactic Band = &#945;-&#956; • <span class="live-highlight">Live</span></div>
-                    </div>
                 </ul>
+
+                <div id="nahla-clock-container">
+                    <svg id="nahla-clock" viewBox="0 0 200 200">
+                        <circle cx="100" cy="100" r="90" class="clock-face" />
+                        <circle cx="100" cy="100" r="88" class="clock-ring" />
+
+                        <!-- Quadrant axis lines -->
+                        <line class="clock-axis" x1="100" y1="12" x2="100" y2="188" />
+                        <line class="clock-axis" x1="12" y1="100" x2="188" y2="100" />
+
+                        <g id="nahla-sectors"></g>
+                        <g id="nahla-ticks"></g>
+                        <g id="nahla-numbers"></g>
+
+                        <line id="nahla-hand-glow" class="hand-glow"
+                              x1="100" y1="100" x2="100" y2="56" />
+
+                        <line id="nahla-hand-hour" class="hand-hour"
+                              x1="100" y1="100" x2="100" y2="56" />
+
+                        <circle cx="100" cy="100" r="3" class="center-" />
+                    </svg>
+
+                    <div class="clock-label">Nahla Phase Clock • 25h Day</div>
+                    <div class="clock-label">Galactic Band = &#945;-&#956; • <span class="live-highlight">Live</span></div>
+                </div>
             </div>
 
             <div id="map-panel">
