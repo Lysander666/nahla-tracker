@@ -1514,7 +1514,7 @@
     </div>
     <div class="header-title">
         <div class="title-main">Nahla Tracker</div>
-        <div class="title-sub">LIVE • version 1.42</div>
+        <div class="title-sub">LIVE • version 1.43</div>
     </div>
 </div>
 
@@ -1657,7 +1657,7 @@
                     <li><strong>Dist. to Colonia:</strong> 22,698.70 ly</li>
                 </ul>
                 <h4>Galactic Position</h4>
-                <img src="galaxy_map.png" alt="Galactic Position" onclick="openLightbox('galaxy_map.png')" style="cursor: pointer;">
+                <img src="galaxy_map.png" alt="Galactic Position" onclick="openLightbox(this.src, this.alt)" style="cursor: pointer;">
             </div>
 
             <div id="manifest-panel">
@@ -1911,8 +1911,8 @@
 
    <footer class="site-footer">
     <div class="footer-badges">
-        <img src="stellardescent.png" alt="Operation Stellar Descent" class="footer-badge-stellar" onclick="openLightbox(this.src)">
-        <img src="nahla_voyage-sm.png" alt="Project Nahla Est. 3311" class="footer-badge-nahla" onclick="openLightbox(this.src)">
+        <img src="stellardescent4.png" alt="Operation Stellar Descent" class="footer-badge-stellar" onclick="openLightbox(this.src, this.alt)">
+        <img src="nahla_voyage-sm.png" alt="Project Nahla Est. 3311" class="footer-badge-nahla" onclick="openLightbox(this.src, this.alt)">
     </div>
     <div class="footer-text">
         Project Nahla • Est. 3311 • <a href="https://inara.cz/elite/cmdr/440263/" target="_blank" rel="noopener noreferrer">CMDR Lysander666</a>
@@ -2373,7 +2373,7 @@ function openLightbox(target) {
         updateLightbox();
     } else if (typeof target === 'string') {
         document.getElementById('lightbox-image').src = target;
-        document.getElementById('lightbox-caption').textContent = 'Galactic Position';
+        document.getElementById('lightbox-caption').textContent = caption;
     }
     document.getElementById('lightbox').classList.add('active');
 }
