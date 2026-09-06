@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Consolas&family=Inter:wght@400;600&family=JetBrains+Mono:wght@400;500;600;700&display=swap">
     <link rel="icon" type="image/png" sizes="16x16" href="faviconmain16.png">
     <link rel="icon" type="image/png" sizes="32x32" href="favicon32@2x.png">
@@ -624,9 +625,9 @@
             transform: translateY(0);
         }
 
-        @media (max-width: 800px) {
+@media (max-width: 800px) {
             body {
-                padding: 18px 12px;
+                padding: 16px 12px;
             }
 
             .top-bar {
@@ -651,10 +652,6 @@
                 padding: 10px 14px;
             }
 
-            .form-row {
-                grid-template-columns: 1fr;
-            }
-
             .header h1 {
                 font-size: 1.45rem;
             }
@@ -662,6 +659,118 @@
             .expedition-badge {
                 width: 90px;
                 height: 90px;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            /* --- CONVERT TABLE TO READABLE MOBILE CARDS --- */
+            .table-card {
+                background: transparent;
+                border: none;
+                box-shadow: none;
+                overflow-x: visible;
+            }
+
+            table {
+                min-width: 100%;
+                display: block;
+            }
+
+            thead {
+                display: none; /* Hide wide table column headers */
+            }
+
+            tbody {
+                display: flex;
+                flex-direction: column;
+                gap: 16px;
+                width: 100%;
+            }
+
+            tbody tr {
+                display: block;
+                background-color: #222;
+                border: 1px solid #3d3d3d;
+                border-radius: 8px;
+                padding: 16px;
+                box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+                box-sizing: border-box;
+            }
+
+            td {
+                display: block;
+                padding: 8px 0;
+                border-bottom: 1px solid #2a2a2a;
+            }
+
+            td:last-child {
+                border-bottom: none;
+                padding-bottom: 0;
+            }
+
+            /* Clear section labels on mobile */
+            td:nth-child(1)::before {
+                content: "COMMANDER";
+                display: block;
+                font-size: 0.68rem;
+                color: #61dafb;
+                letter-spacing: 0.08em;
+                margin-bottom: 4px;
+            }
+
+            td:nth-child(2)::before {
+                content: "ROLE / ASSIGNMENT";
+                display: block;
+                font-size: 0.68rem;
+                color: #61dafb;
+                letter-spacing: 0.08em;
+                margin-bottom: 4px;
+            }
+
+            td:nth-child(3)::before {
+                content: "MAIN CRAFT";
+                display: block;
+                font-size: 0.68rem;
+                color: #61dafb;
+                letter-spacing: 0.08em;
+                margin-bottom: 4px;
+            }
+
+            td:nth-child(4)::before {
+                content: "FIELD NOTES & DATA";
+                display: block;
+                font-size: 0.68rem;
+                color: #61dafb;
+                letter-spacing: 0.08em;
+                margin-bottom: 4px;
+            }
+
+            /* Mobile Admin Controls */
+            body.is-admin td.admin-col {
+                display: block;
+                margin-top: 10px;
+                padding-top: 10px;
+                border-top: 1px solid #333;
+                text-align: left;
+            }
+
+            .admin-actions-cell {
+                width: 100%;
+                justify-content: flex-start;
+                gap: 8px;
+            }
+
+            .btn-table-order {
+                width: 34px;
+                height: 34px;
+                font-size: 0.9rem;
+            }
+
+            .btn-table-edit {
+                padding: 6px 14px;
+                font-size: 0.85rem;
             }
         }
     </style>
