@@ -1,23 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nahla Tracker — Contributor Manifest</title>
-    
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Consolas&family=Inter:wght@400;600&family=JetBrains+Mono:wght@400;600&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Consolas&family=Inter:wght@400;600&family=JetBrains+Mono:wght@400;500;600;700&display=swap">
     <link rel="icon" type="image/png" sizes="16x16" href="faviconmain16.png">
     <link rel="icon" type="image/png" sizes="32x32" href="favicon32@2x.png">
     
     <style>
         body {
             background-color: #1a1a1a;
-            color: #e0e0e0;
-            font-family: Consolas, "JetBrains Mono", "Courier New", monospace;
-            font-size: 1rem;
-            line-height: 1.6;
+            color: #e5e7eb;
+            /* Prioritize JetBrains Mono for superior x-height, clear character glyphs, and open letter-spacing */
+            font-family: "JetBrains Mono", Consolas, "Courier New", monospace;
+            font-size: 0.95rem;
+            letter-spacing: 0.015em;
+            line-height: 1.65;
             padding: 30px 20px;
             margin: 0;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
 
         .container {
@@ -276,19 +276,6 @@
             filter: drop-shadow(0 0 24px rgba(255, 191, 0, 0.85));
         }
 
-        .header-pill {
-            display: inline-block;
-            font-size: 0.7rem;
-            text-transform: uppercase;
-            letter-spacing: 0.12em;
-            color: #9ee7ff;
-            padding: 3px 9px;
-            border-radius: 999px;
-            border: 1px solid rgba(97, 218, 251, 0.4);
-            background: rgba(20, 40, 50, 0.9);
-            margin-bottom: 10px;
-        }
-
         .header h1 {
             color: #61dafb;
             font-size: 1.9rem;
@@ -297,7 +284,7 @@
         }
 
         .header-tagline {
-            color: #888;
+            color: #9ca3af;
             font-size: 0.95rem;
         }
 
@@ -313,10 +300,10 @@
         .search-input {
             background-color: #222;
             border: 1px solid #444;
-            color: #eee;
+            color: #f3f4f6;
             font-family: inherit;
             font-size: 0.88rem;
-            padding: 8px 12px;
+            padding: 9px 12px;
             border-radius: 6px;
             width: 100%;
             max-width: 320px;
@@ -330,8 +317,8 @@
         }
 
         .manifest-count {
-            font-size: 0.82rem;
-            color: #888;
+            font-size: 0.85rem;
+            color: #9ca3af;
         }
 
         .table-card {
@@ -340,13 +327,15 @@
             border-radius: 8px;
             box-shadow: 0 0 18px rgba(0, 0, 0, 0.5);
             overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
         }
 
         table {
             width: 100%;
+            min-width: 700px; /* Guarantees legible spacing and prevents cramped text wrapping on phones */
             border-collapse: collapse;
             text-align: left;
-            font-size: 0.9rem;
+            font-size: 0.92rem;
         }
 
         thead {
@@ -357,8 +346,8 @@
         th {
             padding: 14px 16px;
             color: #61dafb;
-            font-size: 0.78rem;
-            letter-spacing: 0.1em;
+            font-size: 0.8rem;
+            letter-spacing: 0.08em;
             text-transform: uppercase;
             font-weight: 600;
         }
@@ -397,47 +386,50 @@
 
         .inara-badge {
             display: inline-block;
-            font-size: 0.65rem;
-            color: #aaa;
-            border: 1px solid #444;
-            padding: 1px 5px;
+            font-size: 0.7rem;
+            color: #c0c6cc;
+            border: 1px solid #4a4a4a;
+            padding: 2px 6px;
             border-radius: 3px;
-            margin-top: 4px;
-            background: #191919;
+            margin-top: 6px;
+            background: #181818;
             text-transform: uppercase;
+            letter-spacing: 0.04em;
         }
 
         .role-badge {
             display: inline-block;
-            font-size: 0.75rem;
+            font-size: 0.78rem;
             padding: 3px 8px;
             border-radius: 4px;
-            background: rgba(97, 218, 251, 0.08);
-            border: 1px solid rgba(97, 218, 251, 0.35);
+            background: rgba(97, 218, 251, 0.1);
+            border: 1px solid rgba(97, 218, 251, 0.4);
             color: #9ee7ff;
-            margin-bottom: 4px;
+            margin-bottom: 5px;
+            font-weight: 600;
         }
 
         .role-desc {
-            font-size: 0.82rem;
-            color: #bbb;
+            font-size: 0.84rem;
+            color: #d1d5db;
         }
 
         .ship-title {
             color: #ffbf00;
-            font-weight: bold;
-            font-size: 0.9rem;
+            font-weight: 600;
+            font-size: 0.92rem;
         }
 
         .ship-type {
-            color: #777;
-            font-size: 0.78rem;
+            color: #9ca3af;
+            font-size: 0.8rem;
+            margin-top: 2px;
         }
 
         .field-notes {
-            color: #aaa;
-            font-size: 0.85rem;
-            line-height: 1.45;
+            color: #d1d5db;
+            font-size: 0.88rem;
+            line-height: 1.55;
         }
 
         .contribute-box {
@@ -617,20 +609,42 @@
 
         @media (max-width: 800px) {
             body {
-                padding: 16px 12px;
+                padding: 18px 12px;
+            }
+
+            .top-bar {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 12px;
+            }
+
+            .back-nav a {
+                justify-content: center;
+                padding: 10px 14px;
+            }
+
+            .action-btns {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .btn-action {
+                flex: 1 1 auto;
+                justify-content: center;
+                padding: 10px 14px;
             }
 
             .form-row {
                 grid-template-columns: 1fr;
             }
 
-            th, td {
-                padding: 10px 10px;
-                font-size: 0.8rem;
+            .header h1 {
+                font-size: 1.45rem;
             }
 
-            .header h1 {
-                font-size: 1.4rem;
+            .expedition-badge {
+                width: 90px;
+                height: 90px;
             }
         }
     </style>
@@ -669,7 +683,6 @@
                  title="Project Nahla Expedition Insignia"
                  onerror="this.onerror=null; this.src='favicon8.png';">
         </div>
-        <div class="header-pill" id="header-pill">Personnel &amp; Field Manifest</div>
         <h1>Project Nahla — Expedition Contributors</h1>
         <div class="header-tagline">Telemetry, field observations, mapping, logistics, and surface photography</div>
     </div>
@@ -779,54 +792,44 @@ let draggedIndex = -1;
 
 const CONTRIBUTORS = [
     {
-        name: "Lysander666",
-        inaraUrl: "https://inara.cz/elite/cmdr/440263/",
-        badge: "Inara #440263",
-        role: "Lead Researcher",
-        assignment: "Surface Operations & Timekeeping",
-        shipName: "Miley",
-        shipType: "Mandalay (Deep Space Explorer)",
-        notes: "Primary outpost stationed at Natalja's Pass (39.2, 104.3). Maintained longitudinal observation logs and anchor calculations since July 2025."
+        "name": "Lysander666",
+        "inaraUrl": "https://inara.cz/elite/cmdr/440263/",
+        "badge": "Inara #440263",
+        "role": "Lead Researcher",
+        "assignment": "Surface Operations & Timekeeping",
+        "shipName": "Miley",
+        "shipType": "Mandalay (Deep Space Explorer)",
+        "notes": "Primary outpost stationed at Natalja's Pass (39.2, 104.3). Maintained longitudinal observation logs and anchor calculations since July 2025."
     },
     {
-        name: "Zach Drachenherz",
-        inaraUrl: "https://inara.cz/",
-        badge: "Fleet Logistics",
-        role: "Logistics Coordinator",
-        assignment: "Transit Voyage Host",
-        shipName: "—",
-        shipType: "Fleet Carrier Flagship",
-        notes: "Organized and mobilized the Project Nahla Open Transit Voyage carrier convoy to bring visiting commanders to Hope / Nahla."
+        "name": "Zach Drachenherz",
+        "inaraUrl": "https://inara.cz/",
+        "badge": "Fleet Logistics",
+        "role": "Logistics Coordinator",
+        "assignment": "Transit Voyage Host",
+        "shipName": "A. R. C. Cor Draconis",
+        "shipType": "Fleet Carrier Flagship",
+        "notes": "Organized and mobilized the Project Nahla Open Transit Voyage carrier convoy to bring visiting commanders to Hope / Nahla."
     },
     {
-        name: "Zell Ak'inyi",
-        inaraUrl: "https://distantworlds3.space/projects/rawrunner/",
-        badge: "Distant Worlds 3",
-        role: "Ground Surveyor",
-        assignment: "Rawrunning Pioneer",
-        shipName: "—",
-        shipType: "Scarab SRV",
-        notes: "Conducted multi-month continuous planetary terrain surveys and sustained ground traversals across rugged sulphur ridges."
+        "name": "Scoopy Doopy",
+        "inaraUrl": "https://inara.cz/",
+        "badge": "",
+        "role": "Pioneer",
+        "assignment": "Honourary lead",
+        "shipName": "[no name]",
+        "shipType": "Asp Explorer",
+        "notes": "Discovered Hope system during a circumnavigate of the galaxy in 2016."
     },
     {
-        name: "JohnMK2",
-        inaraUrl: "https://inara.cz/",
-        badge: "Field Recon",
-        role: "Reconnaissance",
-        assignment: "Photographic Survey",
-        shipName: "—",
-        shipType: "SRV Survey Division",
-        notes: "Captured the initial surface reconnaissance sequence including Pâte Sablée crater, rocky outcrops, and Rebekah ring alignments."
-    },
-    {
-        name: "LCU No Fool Like One",
-        inaraUrl: "https://bsky.app/profile/fool.canonn.tech",
-        badge: "Canonn Science",
-        role: "Astrometrics",
-        assignment: "Rotational Telemetry Analysis",
-        shipName: "—",
-        shipType: "Canonn Research Fleet",
-        notes: "Supplied the exact sidereal rotational period calculation (25h 26m 10s) underpinning the entire 12-phase galactic clock."
+        "name": "JohnMK2",
+        "inaraUrl": "https://inara.cz/",
+        "badge": "Field Recon",
+        "role": "Reconnaissance",
+        "assignment": "Photographic Survey",
+        "shipName": "Envoy of Nahla",
+        "shipType": "Caspian Explorer",
+        "notes": "Captured the initial surface reconnaissance sequence including Pâte Sablée crater, rocky outcrops, and Rebekah ring alignments."
     }
 ];
 
