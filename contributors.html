@@ -1,0 +1,1193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nahla Tracker — Contributor Manifest</title>
+    
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Consolas&family=Inter:wght@400;600&family=JetBrains+Mono:wght@400;600&display=swap">
+    <link rel="icon" type="image/png" sizes="16x16" href="faviconmain16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon32@2x.png">
+    
+    <style>
+        body {
+            background-color: #1a1a1a;
+            color: #e0e0e0;
+            font-family: Consolas, "JetBrains Mono", "Courier New", monospace;
+            font-size: 1rem;
+            line-height: 1.6;
+            padding: 30px 20px;
+            margin: 0;
+        }
+
+        .container {
+            max-width: 1120px;
+            margin: 0 auto;
+        }
+
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .back-nav a {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: #61dafb;
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border: 1px solid #333;
+            padding: 6px 14px;
+            border-radius: 6px;
+            background-color: #222;
+            transition: all 0.2s ease;
+        }
+
+        .back-nav a:hover {
+            border-color: #61dafb;
+            background-color: #2a2a2a;
+            box-shadow: 0 0 10px rgba(97, 218, 251, 0.2);
+            transform: translateY(-1px);
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 10px;
+        }
+
+        /* Hidden by default from the general public */
+        .admin-only {
+            display: none !important;
+        }
+
+        body.is-admin .admin-only {
+            display: inline-flex !important;
+        }
+
+        .admin-indicator {
+            display: none;
+            background: rgba(255, 191, 0, 0.15);
+            border: 1px solid #ffbf00;
+            color: #ffbf00;
+            font-size: 0.72rem;
+            padding: 4px 10px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            align-items: center;
+            gap: 6px;
+        }
+
+        body.is-admin .admin-indicator {
+            display: inline-flex;
+        }
+
+        /* Dedicated table admin actions column */
+        th.admin-col, td.admin-col {
+            display: none;
+        }
+
+        body.is-admin th.admin-col,
+        body.is-admin td.admin-col {
+            display: table-cell;
+            text-align: center;
+            vertical-align: middle;
+            white-space: nowrap;
+        }
+
+        .admin-actions-cell {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            justify-content: center;
+        }
+
+        .btn-table-order {
+            background-color: #242424;
+            color: #61dafb;
+            border: 1px solid #444;
+            border-radius: 4px;
+            width: 26px;
+            height: 26px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.72rem;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            padding: 0;
+            line-height: 1;
+        }
+
+        .btn-table-order:hover:not(:disabled) {
+            background-color: #333;
+            border-color: #61dafb;
+            color: #8ffaff;
+            box-shadow: 0 0 6px rgba(97, 218, 251, 0.3);
+        }
+
+        .btn-table-order:disabled {
+            opacity: 0.25;
+            cursor: not-allowed;
+            border-color: #2a2a2a;
+        }
+
+        /* Drag-and-drop styles in admin mode */
+        body.is-admin tbody tr {
+            cursor: grab;
+        }
+
+        body.is-admin tbody tr:active {
+            cursor: grabbing;
+        }
+
+        body.is-admin tbody tr.dragging {
+            opacity: 0.4;
+            background-color: #1a2a35 !important;
+        }
+
+        body.is-admin tbody tr.drag-over-top {
+            border-top: 2px solid #61dafb !important;
+        }
+
+        body.is-admin tbody tr.drag-over-bottom {
+            border-bottom: 2px solid #61dafb !important;
+        }
+
+        .btn-table-edit {
+            background-color: #242424;
+            color: #ffbf00;
+            border: 1px solid #ffbf00;
+            border-radius: 4px;
+            padding: 4px 10px;
+            font-size: 0.75rem;
+            font-family: inherit;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .btn-table-edit:hover {
+            background-color: #ffbf00;
+            color: #111;
+            box-shadow: 0 0 8px rgba(255, 191, 0, 0.4);
+        }
+
+        .btn-modal-delete {
+            background-color: #2a1515;
+            color: #ff5555;
+            border: 1px solid #ff5555;
+            display: none;
+        }
+
+        .btn-modal-delete:hover {
+            background-color: #ff5555;
+            color: #111;
+            box-shadow: 0 0 10px rgba(255, 85, 85, 0.4);
+        }
+
+        .btn-action {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-family: inherit;
+            font-size: 0.85rem;
+            font-weight: 600;
+            padding: 6px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+        }
+
+        .btn-submit-public {
+            background-color: #222;
+            color: #61dafb;
+            border: 1px solid #333;
+        }
+
+        .btn-submit-public:hover {
+            border-color: #61dafb;
+            background-color: #2a2a2a;
+            box-shadow: 0 0 10px rgba(97, 218, 251, 0.2);
+            color: #8ffaff;
+        }
+
+        .btn-add {
+            background-color: #222;
+            color: #ffbf00;
+            border: 1px solid #ffbf00;
+        }
+
+        .btn-add:hover {
+            background-color: #ffbf00;
+            color: #111;
+            box-shadow: 0 0 12px rgba(255, 191, 0, 0.4);
+            transform: translateY(-1px);
+        }
+
+        .btn-export {
+            background-color: #222;
+            color: #61dafb;
+            border: 1px solid #444;
+        }
+
+        .btn-export:hover {
+            border-color: #61dafb;
+            background-color: #2a2a2a;
+            color: #8ffaff;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .header-badge-wrap {
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .expedition-badge {
+            width: 105px;
+            height: 105px;
+            object-fit: contain;
+            border-radius: 50%;
+            clip-path: circle(50% at 50% 50%);
+            filter: drop-shadow(0 0 14px rgba(255, 175, 0, 0.45));
+            transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1), filter 0.3s ease;
+            cursor: pointer;
+            image-rendering: auto;
+            transform: translateZ(0);
+        }
+
+        .expedition-badge:hover {
+            transform: scale(1.06) translateZ(0);
+            filter: drop-shadow(0 0 24px rgba(255, 191, 0, 0.85));
+        }
+
+        .header-pill {
+            display: inline-block;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: #9ee7ff;
+            padding: 3px 9px;
+            border-radius: 999px;
+            border: 1px solid rgba(97, 218, 251, 0.4);
+            background: rgba(20, 40, 50, 0.9);
+            margin-bottom: 10px;
+        }
+
+        .header h1 {
+            color: #61dafb;
+            font-size: 1.9rem;
+            margin: 0 0 8px 0;
+            text-shadow: 0 0 12px rgba(97, 218, 251, 0.35);
+        }
+
+        .header-tagline {
+            color: #888;
+            font-size: 0.95rem;
+        }
+
+        .search-bar-wrap {
+            margin-bottom: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .search-input {
+            background-color: #222;
+            border: 1px solid #444;
+            color: #eee;
+            font-family: inherit;
+            font-size: 0.88rem;
+            padding: 8px 12px;
+            border-radius: 6px;
+            width: 100%;
+            max-width: 320px;
+            outline: none;
+            transition: border-color 0.2s ease;
+        }
+
+        .search-input:focus {
+            border-color: #61dafb;
+            box-shadow: 0 0 8px rgba(97, 218, 251, 0.2);
+        }
+
+        .manifest-count {
+            font-size: 0.82rem;
+            color: #888;
+        }
+
+        .table-card {
+            background-color: #222;
+            border: 1px solid #444;
+            border-radius: 8px;
+            box-shadow: 0 0 18px rgba(0, 0, 0, 0.5);
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.9rem;
+        }
+
+        thead {
+            background-color: #161616;
+            border-bottom: 1px solid #3d3d3d;
+        }
+
+        th {
+            padding: 14px 16px;
+            color: #61dafb;
+            font-size: 0.78rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        td {
+            padding: 14px 16px;
+            border-bottom: 1px solid #2a2a2a;
+            vertical-align: top;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background-color: #262626;
+        }
+
+        .cmdr-name {
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: #fff;
+            display: inline-block;
+        }
+
+        .cmdr-link {
+            color: #61dafb;
+            text-decoration: none;
+            transition: color 0.15s ease;
+        }
+
+        .cmdr-link:hover {
+            color: #8ffaff;
+            text-decoration: underline;
+        }
+
+        .inara-badge {
+            display: inline-block;
+            font-size: 0.65rem;
+            color: #aaa;
+            border: 1px solid #444;
+            padding: 1px 5px;
+            border-radius: 3px;
+            margin-top: 4px;
+            background: #191919;
+            text-transform: uppercase;
+        }
+
+        .role-badge {
+            display: inline-block;
+            font-size: 0.75rem;
+            padding: 3px 8px;
+            border-radius: 4px;
+            background: rgba(97, 218, 251, 0.08);
+            border: 1px solid rgba(97, 218, 251, 0.35);
+            color: #9ee7ff;
+            margin-bottom: 4px;
+        }
+
+        .role-desc {
+            font-size: 0.82rem;
+            color: #bbb;
+        }
+
+        .ship-title {
+            color: #ffbf00;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .ship-type {
+            color: #777;
+            font-size: 0.78rem;
+        }
+
+        .field-notes {
+            color: #aaa;
+            font-size: 0.85rem;
+            line-height: 1.45;
+        }
+
+        .contribute-box {
+            margin-top: 25px;
+            background-color: #1e1e1e;
+            border: 1px dashed #444;
+            border-radius: 8px;
+            padding: 18px;
+            text-align: center;
+            font-size: 0.88rem;
+            color: #aaa;
+        }
+
+        .contribute-box a {
+            color: #ffbf00;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .contribute-box a:hover {
+            text-decoration: underline;
+        }
+
+        .footer {
+            margin-top: 35px;
+            text-align: center;
+            font-size: 0.8rem;
+            color: #666;
+            border-top: 1px solid #333;
+            padding-top: 20px;
+        }
+
+        /* --- MODAL DIALOG STYLES --- */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-card {
+            background-color: #202020;
+            border: 1px solid #444;
+            border-radius: 10px;
+            width: 100%;
+            max-width: 620px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+            padding: 24px;
+            box-sizing: border-box;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            border-bottom: 1px solid #333;
+            padding-bottom: 10px;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            color: #ffbf00;
+            font-size: 1.3rem;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: #888;
+            font-size: 1.6rem;
+            cursor: pointer;
+            padding: 0;
+            line-height: 1;
+        }
+
+        .modal-close:hover {
+            color: #fff;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            margin-bottom: 12px;
+        }
+
+        .form-group label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #61dafb;
+        }
+
+        .form-group input, 
+        .form-group textarea, 
+        .form-group select {
+            background-color: #161616;
+            border: 1px solid #3d3d3d;
+            border-radius: 5px;
+            color: #eee;
+            font-family: inherit;
+            font-size: 0.88rem;
+            padding: 8px 10px;
+            outline: none;
+            box-sizing: border-box;
+        }
+
+        .form-group input:focus, 
+        .form-group textarea:focus {
+            border-color: #61dafb;
+        }
+
+        .output-box {
+            background-color: #121212;
+            border: 1px solid #333;
+            border-radius: 6px;
+            padding: 10px;
+            margin-top: 14px;
+            font-size: 0.75rem;
+            color: #8ffaff;
+            white-space: pre-wrap;
+            max-height: 140px;
+            overflow-y: auto;
+            user-select: all;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 18px;
+            flex-wrap: wrap;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: #202020;
+            color: #61dafb;
+            border: 1px solid #61dafb;
+            padding: 10px 18px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.25s ease;
+            pointer-events: none;
+            z-index: 2000;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        @media (max-width: 800px) {
+            body {
+                padding: 16px 12px;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            th, td {
+                padding: 10px 10px;
+                font-size: 0.8rem;
+            }
+
+            .header h1 {
+                font-size: 1.4rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="top-bar">
+        <div class="back-nav">
+            <a href="index.html">&larr; Return to Main Tracker</a>
+        </div>
+        <div class="action-btns">
+            <!-- Public submission button -->
+            <a href="https://inara.cz/elite/cmdr/440263/" target="_blank" rel="noopener noreferrer" class="btn-action btn-submit-public" id="public-submit-link">
+                <span>✉</span> Submit Log via Inara
+            </a>
+
+            <!-- Admin indicator & tools: hidden from public view -->
+            <div class="admin-indicator" title="Press Ctrl+Shift+A to toggle">
+                <span>●</span> Admin Mode
+            </div>
+            <button class="btn-action btn-add admin-only" id="open-add-modal-btn">
+                <span>+</span> Add Commander
+            </button>
+            <button class="btn-action btn-export admin-only" id="copy-data-btn">
+                <span>&lt;/&gt;</span> Copy Code Array
+            </button>
+        </div>
+    </div>
+
+    <div class="header">
+        <div class="header-badge-wrap">
+            <img src="nahla_voyage-sm.png" 
+                 alt="Project Nahla Expedition Insignia" 
+                 class="expedition-badge" 
+                 title="Project Nahla Expedition Insignia"
+                 onerror="this.onerror=null; this.src='favicon8.png';">
+        </div>
+        <div class="header-pill" id="header-pill">Personnel &amp; Field Manifest</div>
+        <h1>Project Nahla — Expedition Contributors</h1>
+        <div class="header-tagline">Telemetry, field observations, mapping, logistics, and surface photography</div>
+    </div>
+
+    <div class="search-bar-wrap">
+        <input type="text" id="search-input" class="search-input" placeholder="Search commander, ship, or role...">
+        <div class="manifest-count" id="manifest-count">Displaying entries</div>
+    </div>
+
+    <div class="table-card">
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 21%;">Commander</th>
+                    <th style="width: 22%;">Role / Assignment</th>
+                    <th style="width: 19%;">Survey Craft</th>
+                    <th style="width: 24%;">Field Notes &amp; Data Provided</th>
+                    <th class="admin-col" style="width: 14%;">Admin Controls</th>
+                </tr>
+            </thead>
+            <tbody id="contributors-tbody">
+                <!-- Dynamically rendered by JavaScript -->
+            </tbody>
+        </table>
+    </div>
+
+    <div class="contribute-box">
+        Submitting field logs, telemetry readings, or surface photography from Natalja's Pass? Contact <a href="https://inara.cz/elite/cmdr/440263/" target="_blank" rel="noopener noreferrer">CMDR Lysander666 on Inara</a> to have your vessel and findings added to the manifest.
+    </div>
+
+    <div class="footer">
+        Project Nahla • Hypi Bra EV-P d5-78 • Remote Moon Telemetry Manifest
+    </div>
+</div>
+
+<div class="modal-overlay" id="add-modal">
+    <div class="modal-card">
+        <div class="modal-header">
+            <h2 id="modal-title">Add Commander to Manifest</h2>
+            <button class="modal-close" id="close-modal-btn">&times;</button>
+        </div>
+        
+        <form id="add-cmdr-form">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="input-name">CMDR Name *</label>
+                    <input type="text" id="input-name" required placeholder="e.g. Lysander666">
+                </div>
+                <div class="form-group">
+                    <label for="input-badge">Badge / Inara #</label>
+                    <input type="text" id="input-badge" placeholder="e.g. Inara #440263">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="input-url">Profile / Log Link</label>
+                <input type="url" id="input-url" placeholder="https://inara.cz/elite/cmdr/... or Bluesky/DW3">
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="input-role">Primary Role / Title *</label>
+                    <input type="text" id="input-role" required placeholder="e.g. Field Surveyor">
+                </div>
+                <div class="form-group">
+                    <label for="input-assignment">Assignment / Specialty</label>
+                    <input type="text" id="input-assignment" placeholder="e.g. Rawrunning Pioneer">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="input-ship-title">Survey Craft Name</label>
+                    <input type="text" id="input-ship-title" placeholder="e.g. Miley (or leave blank for —)">
+                </div>
+                <div class="form-group">
+                    <label for="input-ship-type">Vessel Model / Hull Type</label>
+                    <input type="text" id="input-ship-type" placeholder="e.g. Mandalay, Scarab SRV, Carrier">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="input-notes">Field Notes &amp; Data Contribution</label>
+                <textarea id="input-notes" rows="3" placeholder="Summary of data provided, coordinates surveyed, or photographs taken..."></textarea>
+            </div>
+
+            <div class="output-box" id="code-preview">// Generated object preview will appear here as you type...</div>
+
+            <div class="modal-actions">
+                <button type="button" class="btn-action btn-modal-delete" id="delete-cmdr-btn">Delete Entry</button>
+                <button type="button" class="btn-action btn-export" id="copy-snippet-btn">Copy Code Object</button>
+                <button type="submit" class="btn-action btn-add" id="submit-form-btn">Add to Active Table</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="toast" id="toast-msg">Copied to clipboard!</div>
+
+<script>
+// =========================================================================
+//  PROJECT NAHLA CONTRIBUTORS DATA LIST
+//  To add commanders manually, simply append a new object to this array!
+// =========================================================================
+let editingIndex = -1; // -1 means adding a new commander, >= 0 means editing
+let draggedIndex = -1;
+
+const CONTRIBUTORS = [
+    {
+        name: "Lysander666",
+        inaraUrl: "https://inara.cz/elite/cmdr/440263/",
+        badge: "Inara #440263",
+        role: "Lead Researcher",
+        assignment: "Surface Operations & Timekeeping",
+        shipName: "Miley",
+        shipType: "Mandalay (Deep Space Explorer)",
+        notes: "Primary outpost stationed at Natalja's Pass (39.2, 104.3). Maintained longitudinal observation logs and anchor calculations since July 2025."
+    },
+    {
+        name: "Zach Drachenherz",
+        inaraUrl: "https://inara.cz/",
+        badge: "Fleet Logistics",
+        role: "Logistics Coordinator",
+        assignment: "Transit Voyage Host",
+        shipName: "—",
+        shipType: "Fleet Carrier Flagship",
+        notes: "Organized and mobilized the Project Nahla Open Transit Voyage carrier convoy to bring visiting commanders to Hope / Nahla."
+    },
+    {
+        name: "Zell Ak'inyi",
+        inaraUrl: "https://distantworlds3.space/projects/rawrunner/",
+        badge: "Distant Worlds 3",
+        role: "Ground Surveyor",
+        assignment: "Rawrunning Pioneer",
+        shipName: "—",
+        shipType: "Scarab SRV",
+        notes: "Conducted multi-month continuous planetary terrain surveys and sustained ground traversals across rugged sulphur ridges."
+    },
+    {
+        name: "JohnMK2",
+        inaraUrl: "https://inara.cz/",
+        badge: "Field Recon",
+        role: "Reconnaissance",
+        assignment: "Photographic Survey",
+        shipName: "—",
+        shipType: "SRV Survey Division",
+        notes: "Captured the initial surface reconnaissance sequence including Pâte Sablée crater, rocky outcrops, and Rebekah ring alignments."
+    },
+    {
+        name: "LCU No Fool Like One",
+        inaraUrl: "https://bsky.app/profile/fool.canonn.tech",
+        badge: "Canonn Science",
+        role: "Astrometrics",
+        assignment: "Rotational Telemetry Analysis",
+        shipName: "—",
+        shipType: "Canonn Research Fleet",
+        notes: "Supplied the exact sidereal rotational period calculation (25h 26m 10s) underpinning the entire 12-phase galactic clock."
+    }
+];
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+}
+
+function renderTable(filterQuery = '') {
+    const tbody = document.getElementById('contributors-tbody');
+    const countEl = document.getElementById('manifest-count');
+    const query = filterQuery.trim().toLowerCase();
+    
+    tbody.innerHTML = '';
+
+    // Store original array index alongside each item so filtering edits the right commander
+    const filtered = CONTRIBUTORS
+        .map((item, originalIndex) => ({ ...item, originalIndex }))
+        .filter(item => {
+            if (!query) return true;
+            return (
+                item.name.toLowerCase().includes(query) ||
+                (item.role && item.role.toLowerCase().includes(query)) ||
+                (item.assignment && item.assignment.toLowerCase().includes(query)) ||
+                (item.shipName && item.shipName.toLowerCase().includes(query)) ||
+                (item.shipType && item.shipType.toLowerCase().includes(query)) ||
+                (item.notes && item.notes.toLowerCase().includes(query))
+            );
+        });
+
+    if (filtered.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="5" style="text-align: center; color: #777; padding: 24px;">
+                    No commanders found matching "${escapeHtml(filterQuery)}"
+                </td>
+            </tr>
+        `;
+        countEl.textContent = `Showing 0 of ${CONTRIBUTORS.length} commanders`;
+        return;
+    }
+
+    filtered.forEach(cmdr => {
+        const tr = document.createElement('tr');
+        tr.dataset.index = cmdr.originalIndex;
+        
+        // Enable drag-and-drop for Admin Mode
+        if (document.body.classList.contains('is-admin')) {
+            tr.draggable = true;
+            setupDragAndDropRow(tr, cmdr.originalIndex);
+        }
+        
+        const url = cmdr.inaraUrl ? escapeHtml(cmdr.inaraUrl) : '#';
+        const linkHtml = cmdr.inaraUrl 
+            ? `<a class="cmdr-link" href="${url}" target="_blank" rel="noopener noreferrer">${escapeHtml(cmdr.name)}</a>`
+            : `<span class="cmdr-link">${escapeHtml(cmdr.name)}</span>`;
+
+        const badgeHtml = cmdr.badge 
+            ? `<br><span class="inara-badge">${escapeHtml(cmdr.badge)}</span>` 
+            : '';
+
+        const shipTitle = cmdr.shipName && cmdr.shipName.trim() !== '' ? cmdr.shipName : '—';
+        const shipType = cmdr.shipType ? cmdr.shipType : '';
+
+        const isFirst = cmdr.originalIndex === 0;
+        const isLast = cmdr.originalIndex === CONTRIBUTORS.length - 1;
+
+        tr.innerHTML = `
+            <td>
+                <span class="cmdr-name">${linkHtml}</span>
+                ${badgeHtml}
+            </td>
+            <td>
+                <span class="role-badge">${escapeHtml(cmdr.role || 'Contributor')}</span>
+                ${cmdr.assignment ? `<div class="role-desc">${escapeHtml(cmdr.assignment)}</div>` : ''}
+            </td>
+            <td>
+                <div class="ship-title">${escapeHtml(shipTitle)}</div>
+                ${shipType ? `<div class="ship-type">${escapeHtml(shipType)}</div>` : ''}
+            </td>
+            <td class="field-notes">
+                ${escapeHtml(cmdr.notes || '')}
+            </td>
+            <td class="admin-col">
+                <div class="admin-actions-cell">
+                    <button type="button" class="btn-table-order" onclick="moveCmdr(${cmdr.originalIndex}, -1)" title="Move up" ${isFirst ? 'disabled' : ''}>▲</button>
+                    <button type="button" class="btn-table-order" onclick="moveCmdr(${cmdr.originalIndex}, 1)" title="Move down" ${isLast ? 'disabled' : ''}>▼</button>
+                    <button type="button" class="btn-table-edit" onclick="openEditModal(${cmdr.originalIndex})" title="Edit entry">✎ Edit</button>
+                </div>
+            </td>
+        `;
+
+        tbody.appendChild(tr);
+    });
+
+    countEl.textContent = `Showing ${filtered.length} of ${CONTRIBUTORS.length} commanders`;
+}
+
+// Reordering function via up/down buttons
+window.moveCmdr = function(index, direction) {
+    const targetIndex = index + direction;
+    if (targetIndex < 0 || targetIndex >= CONTRIBUTORS.length) return;
+    
+    // Swap items in the master array
+    const item = CONTRIBUTORS.splice(index, 1)[0];
+    CONTRIBUTORS.splice(targetIndex, 0, item);
+
+    renderTable(document.getElementById('search-input').value);
+    showToast(`Moved CMDR ${item.name} ${direction < 0 ? 'up' : 'down'}`);
+};
+
+// Drag and drop setup for table rows
+function setupDragAndDropRow(row, index) {
+    row.addEventListener('dragstart', (e) => {
+        draggedIndex = index;
+        row.classList.add('dragging');
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', index);
+    });
+
+    row.addEventListener('dragend', () => {
+        row.classList.remove('dragging');
+        document.querySelectorAll('tr').forEach(r => {
+            r.classList.remove('drag-over-top', 'drag-over-bottom');
+        });
+        draggedIndex = -1;
+    });
+
+    row.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        
+        const rect = row.getBoundingClientRect();
+        const midY = rect.top + rect.height / 2;
+        if (e.clientY < midY) {
+            row.classList.add('drag-over-top');
+            row.classList.remove('drag-over-bottom');
+        } else {
+            row.classList.add('drag-over-bottom');
+            row.classList.remove('drag-over-top');
+        }
+    });
+
+    row.addEventListener('dragleave', () => {
+        row.classList.remove('drag-over-top', 'drag-over-bottom');
+    });
+
+    row.addEventListener('drop', (e) => {
+        e.preventDefault();
+        row.classList.remove('drag-over-top', 'drag-over-bottom');
+
+        if (draggedIndex === -1 || draggedIndex === index) return;
+
+        const rect = row.getBoundingClientRect();
+        const midY = rect.top + rect.height / 2;
+        let insertIndex = index;
+
+        // If dropped on the bottom half of the target row, place after it
+        if (e.clientY >= midY) {
+            insertIndex = (draggedIndex < index) ? index : index + 1;
+        } else {
+            insertIndex = (draggedIndex < index) ? index - 1 : index;
+        }
+
+        const movedItem = CONTRIBUTORS.splice(draggedIndex, 1)[0];
+        CONTRIBUTORS.splice(insertIndex, 0, movedItem);
+
+        renderTable(document.getElementById('search-input').value);
+        showToast(`Reordered CMDR ${movedItem.name}`);
+    });
+}
+
+function showToast(message) {
+    const toast = document.getElementById('toast-msg');
+    toast.textContent = message;
+    toast.classList.add('show');
+    setTimeout(() => {
+        toast.classList.remove('show');
+    }, 2400);
+}
+
+function copyToClipboard(text, successMsg) {
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    textarea.style.position = 'fixed';
+    textarea.style.opacity = '0';
+    document.body.appendChild(textarea);
+    textarea.select();
+    try {
+        document.execCommand('copy');
+        showToast(successMsg || 'Copied to clipboard!');
+    } catch (err) {
+        showToast('Unable to copy automatically');
+    }
+    document.body.removeChild(textarea);
+}
+
+// Modal handling
+const modal = document.getElementById('add-modal');
+const modalTitle = document.getElementById('modal-title');
+const openModalBtn = document.getElementById('open-add-modal-btn');
+const closeModalBtn = document.getElementById('close-modal-btn');
+const cmdrForm = document.getElementById('add-cmdr-form');
+const previewBox = document.getElementById('code-preview');
+const submitFormBtn = document.getElementById('submit-form-btn');
+const deleteCmdrBtn = document.getElementById('delete-cmdr-btn');
+
+function buildCurrentObject() {
+    return {
+        name: document.getElementById('input-name').value.trim() || 'CMDR Name',
+        inaraUrl: document.getElementById('input-url').value.trim() || 'https://inara.cz/',
+        badge: document.getElementById('input-badge').value.trim() || '',
+        role: document.getElementById('input-role').value.trim() || 'Surveyor',
+        assignment: document.getElementById('input-assignment').value.trim() || '',
+        shipName: document.getElementById('input-ship-title').value.trim() || '—',
+        shipType: document.getElementById('input-ship-type').value.trim() || '',
+        notes: document.getElementById('input-notes').value.trim() || ''
+    };
+}
+
+function updatePreview() {
+    const obj = buildCurrentObject();
+    previewBox.textContent = JSON.stringify(obj, null, 4);
+}
+
+cmdrForm.addEventListener('input', updatePreview);
+
+// Open in Add Mode
+openModalBtn.addEventListener('click', () => {
+    editingIndex = -1;
+    cmdrForm.reset();
+    modalTitle.textContent = "Add Commander to Manifest";
+    submitFormBtn.textContent = "Add to Active Table";
+    deleteCmdrBtn.style.display = "none";
+    modal.classList.add('active');
+    updatePreview();
+});
+
+// Open in Edit Mode (exposed globally for row buttons)
+window.openEditModal = function(index) {
+    if (index < 0 || index >= CONTRIBUTORS.length) return;
+    editingIndex = index;
+    const cmdr = CONTRIBUTORS[index];
+
+    document.getElementById('input-name').value = cmdr.name || '';
+    document.getElementById('input-url').value = cmdr.inaraUrl || '';
+    document.getElementById('input-badge').value = cmdr.badge || '';
+    document.getElementById('input-role').value = cmdr.role || '';
+    document.getElementById('input-assignment').value = cmdr.assignment || '';
+    document.getElementById('input-ship-title').value = cmdr.shipName === '—' ? '' : (cmdr.shipName || '');
+    document.getElementById('input-ship-type').value = cmdr.shipType || '';
+    document.getElementById('input-notes').value = cmdr.notes || '';
+
+    modalTitle.textContent = `Edit CMDR ${cmdr.name}`;
+    submitFormBtn.textContent = "Save Changes";
+    deleteCmdrBtn.style.display = "inline-flex";
+
+    modal.classList.add('active');
+    updatePreview();
+};
+
+// Delete entry handler
+deleteCmdrBtn.addEventListener('click', () => {
+    if (editingIndex >= 0 && editingIndex < CONTRIBUTORS.length) {
+        const removed = CONTRIBUTORS.splice(editingIndex, 1)[0];
+        renderTable(document.getElementById('search-input').value);
+        modal.classList.remove('active');
+        showToast(`Removed CMDR ${removed.name}`);
+    }
+});
+
+closeModalBtn.addEventListener('click', () => {
+    modal.classList.remove('active');
+});
+
+modal.addEventListener('click', (e) => {
+    if (e.target === modal) modal.classList.remove('active');
+});
+
+// Add or Update CMDR in live array
+cmdrForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const entryData = buildCurrentObject();
+    
+    if (editingIndex >= 0 && editingIndex < CONTRIBUTORS.length) {
+        // Updating existing entry
+        CONTRIBUTORS[editingIndex] = entryData;
+        showToast(`Updated CMDR ${entryData.name}`);
+    } else {
+        // Adding brand new entry to beginning of array
+        CONTRIBUTORS.unshift(entryData);
+        showToast(`Added CMDR ${entryData.name} to active list!`);
+    }
+    
+    renderTable(document.getElementById('search-input').value);
+    modal.classList.remove('active');
+    cmdrForm.reset();
+});
+
+// Copy single snippet button
+document.getElementById('copy-snippet-btn').addEventListener('click', () => {
+    const obj = buildCurrentObject();
+    const formatted = '    ' + JSON.stringify(obj, null, 4).replace(/\n/g, '\n    ') + ',';
+    copyToClipboard(formatted, 'Commander code object copied!');
+});
+
+// Copy complete array button
+document.getElementById('copy-data-btn').addEventListener('click', () => {
+    const fullCode = 'const CONTRIBUTORS = ' + JSON.stringify(CONTRIBUTORS, null, 4) + ';';
+    copyToClipboard(fullCode, 'Full CONTRIBUTORS array copied!');
+});
+
+// Search filter
+document.getElementById('search-input').addEventListener('input', (e) => {
+    renderTable(e.target.value);
+});
+
+// =========================================================================
+//  ADMIN ACCESS CONTROL
+//  Keeps admin tools invisible to public visitors.
+//  Activate by:
+//    1. Visiting contributors.html?admin
+//    2. Pressing keyboard shortcut: Ctrl + Shift + A (or Cmd + Shift + A)
+// =========================================================================
+function toggleAdminMode(enable) {
+    const isNowAdmin = (enable !== undefined) 
+        ? enable 
+        : !document.body.classList.contains('is-admin');
+
+    if (isNowAdmin) {
+        document.body.classList.add('is-admin');
+        showToast('Admin Mode enabled');
+    } else {
+        document.body.classList.remove('is-admin');
+        showToast('Admin Mode disabled');
+    }
+
+    // Re-render table to enable/disable drag-and-drop & admin controls
+    renderTable(document.getElementById('search-input').value);
+}
+
+// 1. Check URL query string on load (?admin)
+if (new URLSearchParams(window.location.search).has('admin')) {
+    toggleAdminMode(true);
+}
+
+// 2. Keyboard shortcut: Ctrl + Shift + A (or Cmd + Shift + A on macOS)
+window.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'A' || e.key === 'a')) {
+        e.preventDefault();
+        toggleAdminMode();
+    }
+});
+
+// Initial Render
+renderTable();
+</script>
+
+</body>
+</html>
