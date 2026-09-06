@@ -635,45 +635,53 @@
                 letter-spacing: normal !important;
             }
 
-/* Side-by-Side Mobile Navigation */
+ /* Turn container into a vertical flex column to rearrange items on mobile */
+            .container {
+                display: flex;
+                flex-direction: column;
+            }
+
+            /* Single, full-width back button at the very top */
             .top-bar {
-                flex-direction: row !important;
-                align-items: center;
-                justify-content: space-between;
-                gap: 10px;
+                margin-bottom: 16px;
                 width: 100%;
             }
 
             .back-nav {
-                flex: 1;
-                display: flex;
+                width: 100%;
             }
 
             .back-nav a {
-                width: 100%;
-                min-width: 0;
-                text-align: center;
-                justify-content: center;
-                padding: 8px 10px;
-                font-size: 0.8rem;
-                white-space: nowrap;
-            }
-
-            .action-btns {
-                flex: 1;
                 display: flex;
-                flex-direction: row;
-                gap: 8px;
+                width: 100%;
+                box-sizing: border-box;
+                text-align: center;
+                justify-content: center;
+                padding: 10px 14px;
+                font-size: 0.9rem;
             }
 
-            .btn-action {
+            /* Move Inara submission button down below the table and notes box */
+            .action-btns {
+                display: contents; /* Allows child items to follow container ordering */
+            }
+
+            #public-submit-link {
+                order: 10;
+                display: flex;
                 width: 100%;
-                min-width: 0;
+                box-sizing: border-box;
                 justify-content: center;
                 text-align: center;
-                padding: 8px 10px;
-                font-size: 0.8rem;
-                white-space: nowrap;
+                padding: 12px 14px;
+                font-size: 0.95rem;
+                margin-top: 16px;
+                margin-bottom: 20px;
+            }
+
+            /* Ensure footer stays last */
+            .footer {
+                order: 11;
             }
 
             .header h1 {
