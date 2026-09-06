@@ -635,45 +635,45 @@
                 letter-spacing: normal !important;
             }
 
-            /* Stack and center top navigation buttons */
+/* Side-by-Side Mobile Navigation */
             .top-bar {
-                flex-direction: column;
+                flex-direction: row !important;
                 align-items: center;
-                justify-content: center;
-                gap: 12px;
+                justify-content: space-between;
+                gap: 10px;
                 width: 100%;
             }
 
             .back-nav {
-                width: 100%;
+                flex: 1;
                 display: flex;
-                justify-content: center;
             }
 
             .back-nav a {
-                width: auto;
-                min-width: 220px;
+                width: 100%;
+                min-width: 0;
                 text-align: center;
                 justify-content: center;
-                padding: 9px 18px;
-                font-size: 0.9rem;
+                padding: 8px 10px;
+                font-size: 0.8rem;
+                white-space: nowrap;
             }
 
             .action-btns {
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
-                width: 100%;
-                gap: 10px;
+                flex: 1;
+                display: flex;
+                flex-direction: row;
+                gap: 8px;
             }
 
             .btn-action {
-                width: auto;
-                min-width: 220px;
+                width: 100%;
+                min-width: 0;
                 justify-content: center;
                 text-align: center;
-                padding: 9px 18px;
-                font-size: 0.9rem;
+                padding: 8px 10px;
+                font-size: 0.8rem;
+                white-space: nowrap;
             }
 
             .header h1 {
