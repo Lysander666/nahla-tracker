@@ -637,26 +637,34 @@
 
 /* Side-by-Side Mobile Navigation */
             .top-bar {
-                flex-direction: row !important;
-                align-items: center;
-                justify-content: space-between;
-                gap: 10px;
+                display: flex;
+                justify-content: center;
+                margin-bottom: 20px;
                 width: 100%;
             }
 
             .back-nav {
-                flex: 1;
-                display: flex;
+                width: 100%;
             }
 
             .back-nav a {
+                display: flex;
                 width: 100%;
-                min-width: 0;
+                box-sizing: border-box;
                 text-align: center;
                 justify-content: center;
-                padding: 8px 10px;
-                font-size: 0.8rem;
-                white-space: nowrap;
+                padding: 10px 14px;
+                font-size: 0.9rem;
+            }
+
+            #public-submit-link {
+                display: inline-flex;
+                width: 100%;
+                box-sizing: border-box;
+                justify-content: center;
+                text-align: center;
+                padding: 12px 14px;
+                font-size: 0.92rem;
             }
 
             .action-btns {
@@ -861,10 +869,7 @@
             <a href="index.html">&larr; Return to Main Tracker</a>
         </div>
         <div class="action-btns">
-            <!-- Public submission button -->
-            <a href="https://inara.cz/elite/cmdr/440263/" target="_blank" rel="noopener noreferrer" class="btn-action btn-submit-public" id="public-submit-link">
-                <span>✉</span> Submit Log via Inara
-            </a>
+        
 
             <!-- Admin indicator & tools: hidden from public view -->
             <div class="admin-indicator" title="Press Ctrl+Shift+A to toggle">
@@ -915,9 +920,17 @@
         </table>
     </div>
 
-    <div class="contribute-box">
+<div class="contribute-box">
         Submitting field logs, telemetry readings, or surface photography? Contact <a href="https://inara.cz/elite/cmdr/440263/" target="_blank" rel="noopener noreferrer">CMDR Lysander666 on Inara</a> to have your vessel and findings added to the manifest.
+        
+        <div style="margin-top: 14px;">
+            <a href="https://inara.cz/elite/cmdr/440263/" target="_blank" rel="noopener noreferrer" class="btn-action btn-submit-public" id="public-submit-link">
+                <span>✉</span> Submit Log via Inara
+            </a>
+        </div>
     </div>
+
+    
 
     <div class="footer">
         Project Nahla • Hypi Bra EV-P d5-78 6 a
