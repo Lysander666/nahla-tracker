@@ -38,10 +38,12 @@
             -moz-osx-font-smoothing: grayscale;
         }
 
-        .container {
-            max-width: 1120px;
-            margin: 0 auto;
-        }
+ .container {
+    width: 100%;
+    max-width: 1120px;
+    margin: 0 auto;
+    box-sizing: border-box;
+}
 
         .top-bar {
             display: flex;
@@ -625,6 +627,12 @@
             transform: translateY(0);
         }
 
+        /* Desktop default: hide mobile-only button */
+.mobile-submit-wrap {
+    display: none;
+    margin-top: 14px;
+}
+
 @media (max-width: 800px) {
             body {
                 padding: 16px 12px;
@@ -635,12 +643,28 @@
                 letter-spacing: normal !important;
             }
 
-/* Side-by-Side Mobile Navigation */
-            .top-bar {
-                display: flex;
-                justify-content: center;
-                margin-bottom: 20px;
+
+        .top-submit-btn {
+                display: none !important;
+            }
+
+            /* Show the bottom button on mobile */
+            .mobile-submit-wrap {
+                display: block;
+            }
+
+            .mobile-submit-wrap .btn-submit-public {
+                display: inline-flex;
                 width: 100%;
+                box-sizing: border-box;
+                justify-content: center;
+                padding: 10px 14px;
+            }
+
+            /* Center the single back button at the top */
+            .top-bar {
+                justify-content: center;
+                margin-bottom: 16px;
             }
 
             .back-nav {
@@ -651,20 +675,9 @@
                 display: flex;
                 width: 100%;
                 box-sizing: border-box;
-                text-align: center;
                 justify-content: center;
+                text-align: center;
                 padding: 10px 14px;
-                font-size: 0.9rem;
-            }
-
-            #public-submit-link {
-                display: inline-flex;
-                width: 100%;
-                box-sizing: border-box;
-                justify-content: center;
-                text-align: center;
-                padding: 12px 14px;
-                font-size: 0.92rem;
             }
 
             .action-btns {
@@ -863,15 +876,17 @@
 </head>
 <body>
 
-<div class="container">
-    <div class="top-bar">
+<div class="top-bar">
         <div class="back-nav">
             <a href="index.html">&larr; Return to Main Tracker</a>
         </div>
         <div class="action-btns">
-        
+            <!-- Visible on desktop, hidden on mobile -->
+            <a href="https://inara.cz/elite/cmdr/440263/" target="_blank" rel="noopener noreferrer" class="btn-action btn-submit-public top-submit-btn" id="public-submit-link">
+                <span>✉</span> Submit Log via Inara
+            </a>
 
-            <!-- Admin indicator & tools: hidden from public view -->
+            <!-- Admin tools: hidden from public -->
             <div class="admin-indicator" title="Press Ctrl+Shift+A to toggle">
                 <span>●</span> Admin Mode
             </div>
@@ -921,10 +936,10 @@
     </div>
 
 <div class="contribute-box">
-        Submitting field logs, telemetry readings, or surface photography? Contact <strong>CMDR Lysander666</strong> to have your vessel and findings added to the manifest.
+        Submitting field logs, telemetry readings, or surface photography? Contact <a href="https://inara.cz/elite/cmdr/440263/" target="_blank" rel="noopener noreferrer">CMDR Lysander666 on Inara</a> to have your vessel and findings added to the manifest.
         
-        <div style="margin-top: 14px;">
-            <a href="https://inara.cz/elite/cmdr/440263/" target="_blank" rel="noopener noreferrer" class="btn-action btn-submit-public" id="public-submit-link">
+        <div class="mobile-submit-wrap">
+            <a href="https://inara.cz/elite/cmdr/440263/" target="_blank" rel="noopener noreferrer" class="btn-action btn-submit-public">
                 <span>✉</span> Submit Log via Inara
             </a>
         </div>
