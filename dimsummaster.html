@@ -1,0 +1,1599 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Dim Sum Master: London Chinatown (倫敦唐人街點心大師)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Noto+Serif+TC:wght@600;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    :root {
+      --bg-gradient-top: #460c0c;
+      --bg-gradient-bottom: #160303;
+      --panel-dark: #190404;
+      --card-bg: #270909;
+      --gold-accent: #f5b938;
+      --gold-glow: #ffd666;
+      --paper-cream: #faf2dc;
+      --bamboo-light: #dfa86a;
+      --bamboo-dark: #6e401b;
+      --border-shadow: #0f0202;
+      --jade-green: #38b000;
+      --lantern-glow: rgba(245, 185, 56, 0.45);
+      --rain-opacity: 0.7;
+    }
+
+    /* Dynamic London Time-of-Day Palette Overrides */
+    body.tod-morning {
+      --bg-gradient-top: #3d1a14;
+      --bg-gradient-bottom: #140707;
+      --lantern-glow: rgba(253, 224, 71, 0.35);
+    }
+    body.tod-afternoon {
+      --bg-gradient-top: #4a0d0d;
+      --bg-gradient-bottom: #170404;
+      --lantern-glow: rgba(245, 185, 56, 0.5);
+    }
+    body.tod-dusk {
+      --bg-gradient-top: #360a1d;
+      --bg-gradient-bottom: #12030d;
+      --lantern-glow: rgba(251, 146, 60, 0.65);
+    }
+    body.tod-night {
+      --bg-gradient-top: #1c0919;
+      --bg-gradient-bottom: #090209;
+      --lantern-glow: rgba(244, 63, 94, 0.55);
+    }
+
+    * {
+      box-sizing: border-box;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+      -webkit-tap-highlight-color: transparent;
+      image-rendering: pixelated;
+    }
+
+    body {
+      background: radial-gradient(circle at 50% 20%, var(--bg-gradient-top) 0%, var(--bg-gradient-bottom) 100%);
+      font-family: 'Press Start 2P', monospace;
+      color: var(--paper-cream);
+      min-height: 100vh;
+      overflow-x: hidden;
+      touch-action: manipulation;
+      transition: background 1.5s ease;
+      position: relative;
+    }
+
+    #rain-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 1;
+      opacity: var(--rain-opacity);
+      transition: opacity 1s ease;
+    }
+
+    .main-app-container {
+      position: relative;
+      z-index: 10;
+    }
+
+    .chinese-font {
+      font-family: 'Noto Serif TC', serif;
+    }
+
+    .pixel-box {
+      border: 4px solid var(--border-shadow);
+      box-shadow: 
+        inset 2px 2px 0px rgba(255,255,255,0.12),
+        inset -2px -2px 0px rgba(0,0,0,0.65),
+        4px 4px 0px rgba(0,0,0,0.8);
+    }
+
+    .pixel-btn {
+      transition: transform 0.05s ease, filter 0.1s ease;
+      cursor: pointer;
+      position: relative;
+      touch-action: manipulation;
+    }
+
+    .pixel-btn:active:not(:disabled) {
+      transform: translate(2px, 2px);
+      box-shadow: 1px 1px 0px rgba(0,0,0,0.8);
+    }
+
+    .pixel-btn:disabled {
+      filter: grayscale(85%) opacity(0.5);
+      cursor: not-allowed;
+    }
+
+    .steamer-wrapper {
+      position: relative;
+      width: 180px;
+      height: 170px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      touch-action: manipulation;
+    }
+
+    .bamboo-body {
+      width: 145px;
+      height: 115px;
+      background: #c98845;
+      border: 6px solid #48230b;
+      border-radius: 20px 20px 28px 28px;
+      position: relative;
+      box-shadow: 0 10px 0 #240e04, inset 0 -14px 0 #9d5d21, 0 0 25px var(--lantern-glow);
+      transition: transform 0.06s ease, box-shadow 1s ease;
+    }
+
+    .bamboo-stripes {
+      position: absolute;
+      top: 18px;
+      left: 8px;
+      right: 8px;
+      height: 10px;
+      background: #7a3c13;
+      border-radius: 4px;
+      box-shadow: 0 26px 0 #7a3c13;
+    }
+
+    .bamboo-label {
+      position: absolute;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: 'Noto Serif TC', serif;
+      font-size: 22px;
+      font-weight: 900;
+      color: #3b1704;
+      letter-spacing: 4px;
+      pointer-events: none;
+      text-shadow: 1px 1px 0px rgba(255,255,255,0.25);
+    }
+
+    .steamer-handle {
+      position: absolute;
+      top: -14px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 44px;
+      height: 14px;
+      background: #7a3c13;
+      border: 4px solid #48230b;
+      border-radius: 8px 8px 2px 2px;
+    }
+
+    @keyframes floatSteam {
+      0% {
+        opacity: 0.95;
+        transform: translate(0, 0) scale(0.8) rotate(0deg);
+      }
+      50% {
+        opacity: 0.7;
+        transform: translate(-12px, -38px) scale(1.3) rotate(-8deg);
+      }
+      100% {
+        opacity: 0;
+        transform: translate(10px, -80px) scale(1.8) rotate(14deg);
+      }
+    }
+
+    .steam-puff {
+      position: fixed;
+      pointer-events: none;
+      font-size: 18px;
+      color: #fff8e7;
+      text-shadow: 0 0 6px rgba(255,255,255,0.85);
+      animation: floatSteam 0.95s cubic-bezier(0.2, 0.8, 0.4, 1) forwards;
+      z-index: 999;
+    }
+
+    @keyframes popEarn {
+      0% {
+        opacity: 1;
+        transform: translateY(0) scale(0.9);
+      }
+      100% {
+        opacity: 0;
+        transform: translateY(-40px) scale(1.1);
+      }
+    }
+
+    .earn-popup {
+      position: fixed;
+      pointer-events: none;
+      font-size: 10px;
+      font-family: 'Press Start 2P', monospace;
+      color: #ffd666;
+      text-shadow: 2px 2px 0px #000;
+      animation: popEarn 0.8s ease-out forwards;
+      z-index: 999;
+    }
+
+    @keyframes swayLantern {
+      0%, 100% { transform: rotate(-4deg); }
+      50% { transform: rotate(4deg); }
+    }
+
+    .lantern-sway {
+      animation: swayLantern 3.6s ease-in-out infinite;
+      transform-origin: top center;
+      display: inline-block;
+      filter: drop-shadow(0 0 8px var(--lantern-glow));
+    }
+
+    @keyframes softPulseGlow {
+      0%, 100% { opacity: 0.85; filter: drop-shadow(0 0 4px #f5b938); }
+      50% { opacity: 1; filter: drop-shadow(0 0 14px #ffd666); }
+    }
+
+    .cosy-glow {
+      animation: softPulseGlow 3s infinite ease-in-out;
+    }
+
+    @keyframes gentleVapor {
+      0% { transform: translateY(0) scale(0.9); opacity: 0.2; }
+      50% { transform: translateY(-8px) scale(1.1); opacity: 0.6; }
+      100% { transform: translateY(-16px) scale(1.3); opacity: 0; }
+    }
+
+    .cosy-cup-steam {
+      display: inline-block;
+      animation: gentleVapor 2.2s ease-out infinite;
+    }
+
+    /* Retro scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #140303;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #6e2217;
+      border: 1px solid var(--gold-accent);
+    }
+  </style>
+</head>
+
+<body class="p-2 sm:p-5 flex flex-col items-center justify-start min-h-screen">
+  
+  <!-- Canvas for London Rain Ambient Particle Animation -->
+  <canvas id="rain-canvas"></canvas>
+
+  <div class="main-app-container w-full max-w-5xl bg-[#230606]/95 backdrop-blur-sm pixel-box p-3 sm:p-5 mb-4 flex flex-col gap-4">
+    
+    <!-- Top Header: Title, Chinatown Lanterns, Time-of-Day, Controls -->
+    <header class="border-b-4 border-[#f5b938] pb-3 flex flex-col md:flex-row items-center justify-between gap-3 text-center md:text-left">
+      <div class="flex items-center gap-3">
+        <span class="text-3xl filter lantern-sway">🏮</span>
+        <div>
+          <div class="flex items-center gap-2 justify-center md:justify-start">
+            <h1 class="text-xs sm:text-base md:text-lg text-[#f5b938] tracking-wider leading-relaxed">
+              DIM SUM MASTER
+            </h1>
+            <span class="cosy-cup-steam text-xs text-[#a7f3d0]">♨️</span>
+          </div>
+          <div class="text-[9px] sm:text-[10px] text-[#ffd666] font-bold tracking-wide mt-0.5">
+            RESTAURANT: DIM SUM DIANTANG <span class="chinese-font font-bold text-xs text-[#ffe599]">(點心殿堂)</span>
+          </div>
+          <p class="text-[7px] sm:text-[8px] text-[#f7d5a3] mt-1 tracking-tight">
+            GERRARD ST, LONDON CHINATOWN &bull; TARGET: 383,000 DISHES
+          </p>
+        </div>
+        <span class="text-3xl filter lantern-sway" style="animation-delay: -1.8s;">🏮</span>
+      </div>
+
+      <div class="flex flex-col items-center md:items-end gap-1.5">
+        <!-- Live London GMT / BST Atmosphere Badge -->
+        <button id="tod-toggle-btn" class="bg-[#38110b] text-[#fde047] border border-[#f5b938] px-2.5 py-1 text-[7px] sm:text-[8px] pixel-btn flex items-center gap-1.5 shadow" title="Click to cycle London Day/Night ambience">
+          <span id="tod-icon">🌆</span>
+          <span id="tod-text">LONDON GMT: 15:00 &bull; AFTERNOON YUM CHA</span>
+          <span class="text-[6px] text-[#fcd34d] opacity-80">(CLICK TO CYCLE)</span>
+        </button>
+
+        <div class="flex flex-wrap items-center justify-center md:justify-end gap-1.5 text-[7px] sm:text-[8px]">
+          <button id="rain-toggle-btn" class="bg-[#192f38] text-[#7dd3fc] border-2 border-black px-2 py-1.5 pixel-btn hover:bg-[#22414f] flex items-center gap-1">
+            <span>🌧️ RAIN:</span> <span id="rain-status">ON</span>
+          </button>
+          <button id="sound-toggle-btn" class="bg-[#42140d] text-[#f5b938] border-2 border-black px-2 py-1.5 pixel-btn hover:bg-[#5a1b12]">
+            SFX: <span id="sound-status">ON</span>
+          </button>
+          <button id="haptics-toggle-btn" class="bg-[#42140d] text-[#f5b938] border-2 border-black px-2 py-1.5 pixel-btn hover:bg-[#5a1b12]">
+            VIBE: <span id="haptics-status">ON</span>
+          </button>
+          <button id="tea-modal-btn" class="bg-[#243d1a] text-[#a7f3d0] border-2 border-black px-2.5 py-1.5 pixel-btn hover:bg-[#325824]">
+            TEA HOUSE 🍵
+          </button>
+          <button id="badges-toggle-btn" class="bg-[#42140d] text-[#fde68a] border-2 border-black px-2 py-1.5 pixel-btn hover:bg-[#5a1b12]">
+            TROPHIES 🏆
+          </button>
+          <button id="stats-toggle-btn" class="bg-[#42140d] text-[#faf2dc] border-2 border-black px-2 py-1.5 pixel-btn hover:bg-[#5a1b12]">
+            STATS 📜
+          </button>
+          <button id="data-toggle-btn" class="bg-[#42140d] text-[#faf2dc] border-2 border-black px-2 py-1.5 pixel-btn hover:bg-[#5a1b12]">
+            BACKUP 💾
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+
+      <!-- LEFT COLUMN: Steamer, Dual Dumpling Counter, Overheat Guard, Specialty Dish -->
+      <section class="lg:col-span-5 bg-[#170303]/90 pixel-box p-3 sm:p-4 flex flex-col items-center text-center">
+        
+        <!-- Dual Counter: Spendable vs Lifetime Goal -->
+        <div class="w-full bg-[#fceddb] text-[#1b0a06] border-4 border-black p-3 mb-3 pixel-box text-left shadow-inner">
+          <div class="flex justify-between items-center border-b border-[#c49b77] pb-1 mb-2">
+            <span class="text-[7px] text-[#6d3923] tracking-wider font-bold">DIANTANG PANTRY (TO SPEND):</span>
+            <span id="dimsum-counter" class="text-sm sm:text-base font-black text-[#961e1e]">0.00</span>
+          </div>
+          <div>
+            <div class="text-[7px] text-[#854d0e] font-bold">LIFETIME STEAMED (GOAL PROGRESS):</div>
+            <div id="lifetime-counter" class="text-base sm:text-xl md:text-2xl font-black text-[#b91c1c] my-1 tracking-tight">
+              0.00
+            </div>
+          </div>
+          <div class="flex justify-between items-center text-[7px] sm:text-[8px] text-[#555] tracking-tight mt-1 border-t border-[#c49b77] pt-1">
+            <span id="rate-counter">Pace: +0.0000/s</span>
+            <span id="tea-multiplier-tag" class="text-[#059669] font-bold">Tea: 1.0x</span>
+          </div>
+        </div>
+
+        <!-- Bamboo Steamer Button with Cosy Steam -->
+        <div class="relative my-2">
+          <button id="steamer-button" class="pixel-btn outline-none focus:outline-none bg-transparent border-0 cursor-pointer" aria-label="Steam Dim Sum">
+            <div class="steamer-wrapper">
+              <div id="bamboo-body" class="bamboo-body flex items-center justify-center">
+                <div class="steamer-handle"></div>
+                <div class="bamboo-stripes"></div>
+                <div class="bamboo-label">殿堂</div>
+              </div>
+            </div>
+          </button>
+        </div>
+
+        <div class="text-[8px] text-[#f5b938] mt-1 mb-2">
+          CLICK STEAMER (+0.25 DIM SUM)
+        </div>
+
+        <!-- Heat Meter Box -->
+        <div class="w-full bg-[#270808] border-2 border-black p-2.5 text-left mb-3">
+          <div class="flex justify-between items-center text-[7px] mb-1.5">
+            <span id="heat-title" class="text-[#f5b938]">BAMBOO HEAT: 0%</span>
+            <span id="cooldown-badge" class="text-[#ff7878] hidden font-bold animate-pulse">OVERHEATED!</span>
+          </div>
+          <div class="w-full h-3 bg-black border border-[#481810] overflow-hidden">
+            <div id="heat-bar" class="h-full bg-gradient-to-r from-[#e58a22] to-[#d62828] transition-all duration-100" style="width: 0%;"></div>
+          </div>
+          <p class="text-[6px] text-[#d1a880] mt-1.5 leading-relaxed">
+            Paced clicks allow optimal temperature. Rapid spamming overheats the bamboo tiers, triggering an 8s cooldown.
+          </p>
+        </div>
+
+        <!-- Active Specialty Dish Milestone -->
+        <div class="w-full bg-[#230909] border-2 border-[#541f12] p-2.5 flex items-center gap-3">
+          <div id="dish-icon" class="text-3xl">🥟</div>
+          <div class="text-left flex-1">
+            <div class="text-[7px] text-[#f5b938]">CHINATOWN SPECIALTY:</div>
+            <div id="dish-name" class="text-[8px] text-[#faf2dc] font-bold">House Har Gow</div>
+            <div id="dish-desc" class="text-[6px] text-[#d1a880]">Classic translucent crystal shrimp dumpling.</div>
+          </div>
+        </div>
+
+        <!-- Active Event / Tea Bonus Notification Pill -->
+        <div id="active-buff-box" class="w-full mt-2.5 bg-[#142918] border-2 border-[#23582d] p-2 text-left hidden">
+          <div class="flex items-center justify-between text-[7px] text-[#a7f3d0]">
+            <span id="buff-title" class="font-bold">TEA CEREMONY ACTIVE</span>
+            <span id="buff-timer">30s</span>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- RIGHT COLUMN: Kitchen Stations & Chefs -->
+      <section class="lg:col-span-7 flex flex-col gap-3">
+        
+        <div class="flex items-center justify-between border-b-2 border-[#551818] pb-2">
+          <div class="text-[9px] text-[#f5b938] tracking-wider">KITCHEN STATIONS & CHEFS</div>
+          <div class="text-[7px] text-[#e8ba84]">HOURLY YIELD: <span id="hourly-counter" class="text-[#ffd666] font-bold">0.0</span> / hr</div>
+        </div>
+
+        <!-- Upgrades List -->
+        <div id="upgrades-container" class="flex flex-col gap-2.5 max-h-[480px] overflow-y-auto pr-1">
+          <!-- Populated dynamically via JS -->
+        </div>
+
+      </section>
+    </div>
+
+    <!-- Milestone Goal Progress Bar -->
+    <div class="w-full bg-[#120202] border-2 border-black p-3 mt-1">
+      <div class="flex justify-between items-center text-[7px] sm:text-[8px] text-[#f5b938] mb-1.5">
+        <span>ROAD TO 383,000 DIM SUM (2-3 MONTH MASTER GOAL)</span>
+        <span id="goal-percent" class="text-[#ffe082]">0.0000%</span>
+      </div>
+      <div class="w-full h-5 bg-black border-2 border-[#3d1313] overflow-hidden p-0.5">
+        <div id="goal-bar" class="h-full bg-gradient-to-r from-[#d97706] via-[#f59e0b] to-[#fde047] transition-all duration-300" style="width: 0%;"></div>
+      </div>
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center text-[6px] sm:text-[7px] text-[#c79c72] mt-1.5 gap-1">
+        <span id="goal-remaining">Remaining: 383,000.00 dim sum</span>
+        <span id="goal-estimate">Estimated time: ~70-90 days at current pace</span>
+      </div>
+    </div>
+
+    <!-- Gerrard Street Live Atmospheric Ticker -->
+    <div class="w-full bg-[#0d0101] border-2 border-black p-2 text-[7px] text-[#86efac] flex items-center gap-2 overflow-hidden">
+      <span class="text-[#f5b938] font-bold whitespace-nowrap">[GERRARD ST]</span>
+      <span id="ticker-text" class="truncate">Red lanterns sway on Gerrard Street. Crowds gather outside Dim Sum Diantang for morning tea.</span>
+    </div>
+
+  </div>
+
+  <!-- Lucky Fortune Cookie Trigger -->
+  <div id="fortune-container" class="fixed top-1/3 right-6 pointer-events-auto cursor-pointer hidden z-40">
+    <div id="fortune-cookie" class="text-4xl filter drop-shadow hover:scale-125 transition-transform animate-bounce">
+      🥠
+    </div>
+    <div class="text-[7px] text-[#ffd666] bg-black/80 px-2 py-0.5 border border-[#f5b938] text-center mt-1">
+      LUCKY COOKIE!
+    </div>
+  </div>
+
+  <!-- Tea House Modal -->
+  <div id="tea-modal" class="fixed inset-0 bg-black/85 z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-[#1f0b08] border-4 border-[#4ade80] p-4 sm:p-5 max-w-lg w-full pixel-box flex flex-col gap-3 text-left">
+      <div class="flex justify-between items-center border-b-2 border-[#2b5934] pb-2">
+        <h3 class="text-[9px] sm:text-[10px] text-[#4ade80]">🍵 DIANTANG TEA CEREMONY (YUM CHA PAIRING)</h3>
+        <button id="close-tea-btn" class="text-[#4ade80] text-xs font-bold px-2 py-1 bg-[#122817] border border-black">&times;</button>
+      </div>
+      <p class="text-[7px] text-[#c4e3cb] leading-relaxed">
+        Authentic dim sum is inseparable from Chinese tea. Brew seasonal loose-leaf pots using spent dim sum to activate permanent kitchen multipliers!
+      </p>
+      
+      <div id="teas-list" class="flex flex-col gap-2 max-h-[300px] overflow-y-auto pr-1"></div>
+
+      <button id="done-tea-btn" class="bg-[#22c55e] text-[#0f2e16] text-[8px] py-2 font-bold pixel-btn border-2 border-black">
+        RETURN TO DINING ROOM
+      </button>
+    </div>
+  </div>
+
+  <!-- Badges Modal -->
+  <div id="badges-modal" class="fixed inset-0 bg-black/85 z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-[#210808] border-4 border-[#f5b938] p-4 sm:p-5 max-w-lg w-full pixel-box flex flex-col gap-3 text-left">
+      <div class="flex justify-between items-center border-b-2 border-[#541d1d] pb-2">
+        <h3 class="text-[9px] sm:text-[10px] text-[#f5b938]">🏆 CHINATOWN HALL OF FAME</h3>
+        <button id="close-badges-btn" class="text-[#f5b938] text-xs font-bold px-2 py-1 bg-[#401212] border border-black">&times;</button>
+      </div>
+      <p class="text-[7px] text-[#e0b892]">
+        Track your culinary legacy across weeks of running Dim Sum Diantang.
+      </p>
+      <div id="badges-list" class="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-[320px] overflow-y-auto pr-1"></div>
+      <button id="done-badges-btn" class="bg-[#f5b938] text-[#240808] text-[8px] py-2 font-bold pixel-btn border-2 border-black">
+        BACK TO STEAMERS
+      </button>
+    </div>
+  </div>
+
+  <!-- Stats Modal -->
+  <div id="stats-modal" class="fixed inset-0 bg-black/85 z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-[#210808] border-4 border-[#f5b938] p-4 sm:p-5 max-w-md w-full pixel-box flex flex-col gap-3 text-left">
+      <div class="flex justify-between items-center border-b-2 border-[#541d1d] pb-2">
+        <h3 class="text-[9px] sm:text-[10px] text-[#f5b938]">CHINATOWN LEDGER & METRICS</h3>
+        <button id="close-stats-btn" class="text-[#f5b938] text-xs font-bold px-2 py-1 bg-[#401212] border border-black">&times;</button>
+      </div>
+      <div class="text-[7px] text-[#f5eedb] flex flex-col gap-2 my-1 leading-relaxed">
+        <div class="flex justify-between border-b border-[#3b1212] pb-1">
+          <span>Total Dim Sum Steamed:</span>
+          <span id="stat-total" class="text-[#f5b938] font-bold">0</span>
+        </div>
+        <div class="flex justify-between border-b border-[#3b1212] pb-1">
+          <span>Manual Steamer Clicks:</span>
+          <span id="stat-clicks" class="text-[#f5b938]">0</span>
+        </div>
+        <div class="flex justify-between border-b border-[#3b1212] pb-1">
+          <span>Dim Sum From Clicks:</span>
+          <span id="stat-click-yield" class="text-[#f5b938]">0</span>
+        </div>
+        <div class="flex justify-between border-b border-[#3b1212] pb-1">
+          <span>Kitchen Staff Employed:</span>
+          <span id="stat-stations" class="text-[#f5b938]">0</span>
+        </div>
+        <div class="flex justify-between border-b border-[#3b1212] pb-1">
+          <span>Fortune Cookies Cracked:</span>
+          <span id="stat-cookies" class="text-[#f5b938]">0</span>
+        </div>
+        <div class="flex justify-between border-b border-[#3b1212] pb-1">
+          <span>Gerrard St Grand Opening:</span>
+          <span id="stat-start-date" class="text-[#f5b938]">Today</span>
+        </div>
+        <div class="flex justify-between">
+          <span>Active Kitchen Playtime:</span>
+          <span id="stat-time-played" class="text-[#f5b938]">0.0 hrs</span>
+        </div>
+      </div>
+      <button id="ok-stats-btn" class="bg-[#f5b938] text-[#240808] text-[8px] py-2 font-bold pixel-btn border-2 border-black">
+        RETURN TO KITCHEN
+      </button>
+    </div>
+  </div>
+
+  <!-- Backup & Export Modal -->
+  <div id="data-modal" class="fixed inset-0 bg-black/85 z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-[#210808] border-4 border-[#f5b938] p-4 sm:p-5 max-w-lg w-full pixel-box flex flex-col gap-3 text-left">
+      <div class="flex justify-between items-center border-b-2 border-[#541d1d] pb-2">
+        <h3 class="text-[9px] sm:text-[10px] text-[#f5b938]">SAVE CODE & BACKUP LEDGER</h3>
+        <button id="close-data-btn" class="text-[#f5b938] text-xs font-bold px-2 py-1 bg-[#401212] border border-black">&times;</button>
+      </div>
+      <p class="text-[7px] text-[#e0b892] leading-normal">
+        Because progressing to 383,000 Dim Sum spans weeks to months, copy your backup string and store it safely in your notes!
+      </p>
+      <textarea id="save-data-textarea" class="w-full h-24 bg-black border-2 border-[#551818] p-2 text-[7px] text-[#86efac] font-mono select-all" placeholder="Your exported save key will appear here..."></textarea>
+      
+      <div class="flex flex-wrap gap-2 text-[7px]">
+        <button id="export-btn" class="bg-[#42140d] text-[#f5b938] border border-black px-3 py-2 pixel-btn hover:bg-[#5a1b12]">
+          GENERATE KEY
+        </button>
+        <button id="copy-btn" class="bg-[#42140d] text-[#faf2dc] border border-black px-3 py-2 pixel-btn hover:bg-[#5a1b12]">
+          COPY KEY
+        </button>
+        <button id="import-btn" class="bg-[#7f1d1d] text-white border border-black px-3 py-2 pixel-btn hover:bg-[#991b1b]">
+          RESTORE FROM KEY
+        </button>
+        <button id="reset-btn" class="bg-[#2a0808] text-[#ef4444] border border-[#ef4444] px-3 py-2 pixel-btn hover:bg-[#450a0a] ml-auto">
+          RESET SAVE
+        </button>
+      </div>
+      <div id="data-feedback" class="text-[6px] text-[#f5b938] min-h-[14px]"></div>
+    </div>
+  </div>
+
+  <script>
+    /*
+      DIM SUM MASTER: LONDON CHINATOWN ENGINE
+      - Target: 383,000 dim sum over ~75-90 days.
+      - Click: 0.25 Dim Sum (4 clicks = 1 dim sum).
+      - Overheat: Triggered upon rapid mashing to preserve paced idle longevity.
+      - Atmospheric London Weather & Time-of-Day Engine (GMT/BST).
+      - Procedural Web Audio Synthesizer: Continuous London Rain with low-pass pitter-patter.
+    */
+    const TARGET_GOAL = 383000;
+    const SAVE_KEY = 'dim_sum_master_longhaul_save_v3';
+
+    let gameState = {
+      dimSum: 0,
+      totalEarned: 0,
+      totalClicks: 0,
+      fortuneCount: 0,
+      startTime: Date.now(),
+      lastSaveTime: Date.now(),
+      heat: 0,
+      isOverheated: false,
+      cooldownTimer: 0,
+      soundEnabled: true,
+      rainEnabled: true,
+      hapticsEnabled: true,
+      timeOfDayMode: 'auto', // 'auto', 'morning', 'afternoon', 'dusk', 'night'
+      teaMultiplier: 1.0,
+      activeBuff: null,
+      upgrades: {
+        teaBoy:       { count: 0, cost: 12,    rate: 0.0075, name: "Lisle St. Tea Apprentice",    desc: "Refills hot jasmine pots amidst Gerrard St rain.", icon: "🫖" },
+        cartAuntie:   { count: 0, cost: 65,    rate: 0.0320, name: "Gerrard St. Trolley Auntie", desc: "Navigates bustling crowds with steaming bamboo tiers.", icon: "🛒" },
+        wrapperSifu:  { count: 0, cost: 320,   rate: 0.1250, name: "Wardour Master Pincher",     desc: "Pleats crystal translucent har gow on Soho marble.", icon: "🥟" },
+        bambooRack:   { count: 0, cost: 1450,  rate: 0.4400, name: "Shaftesbury Dragon Steamer", desc: "High-power multi-tiered commercial boiler tiers.", icon: "♨️" },
+        headChef:     { count: 0, cost: 6200,  rate: 1.4500, name: "Executive Chef of Chinatown", desc: "Legendary master who brought authentic yum cha to London.", icon: "👨‍🍳" },
+        teaGuild:     { count: 0, cost: 26000, rate: 4.8000, name: "Newport Place Flagship Palace", desc: "Multi-storey dining landmark beneath the iconic Paifang.", icon: "🏯" }
+      },
+      teas: {
+        jasmine:    { bought: false, cost: 150,   mult: 1.08, name: "Fragrant Jasmine Green (茉莉花茶)", desc: "Gentle floral notes soothe hungry queues (+8% all passive yield)." },
+        tieguanyin: { bought: false, cost: 1200,  mult: 1.15, name: "Iron Goddess Oolong (鐵觀音)",     desc: "Roasted complex notes boost staff speed (+15% passive yield)." },
+        puerh:      { bought: false, cost: 6000,  mult: 1.25, name: "Vintage Aged Pu-erh (陳年普洱)",     desc: "Deep earthy vintage tea clears rich dim sum (+25% passive yield)." },
+        daHongPao:  { bought: false, cost: 30000, mult: 1.40, name: "Imperial Wuyi Da Hong Pao (大紅袍)", desc: "Rare cliff tea fit for London aristocracy (+40% passive yield)." }
+      },
+      badges: {
+        firstClick:      { unlocked: false, name: "First Steam",       desc: "Hand-crafted your very first dumpling.", icon: "🥟" },
+        hundredClub:     { unlocked: false, name: "Soho Apprentice",   desc: "Accumulated 100 lifetime dim sum.", icon: "🏮" },
+        thousandClub:    { unlocked: false, name: "Gerrard Regular",   desc: "Reached 1,000 lifetime dim sum.", icon: "🥢" },
+        tenThousand:     { unlocked: false, name: "West End Sensation",desc: "Reached 10,000 lifetime dim sum.", icon: "🏆" },
+        hundredThousand: { unlocked: false, name: "Chinatown Legend",  desc: "Crossed 100,000 lifetime dim sum.", icon: "👑" },
+        teaConnoisseur:  { unlocked: false, name: "Tea Master",        desc: "Brewed all four traditional tea pots.", icon: "🍵" },
+        fortuneCracker:  { unlocked: false, name: "Golden Destiny",    desc: "Found and cracked 5 lucky fortune cookies.", icon: "🥠" }
+      }
+    };
+
+    const DISH_MILESTONES = [
+      { req: 0,      name: "House Har Gow (蝦餃)",        icon: "🥟", desc: "Translucent crystal shrimp dumpling with tight pleats." },
+      { req: 1500,   name: "Golden Siu Mai (燒賣)",       icon: "🟡", desc: "Open-topped pork and prawn topped with orange tobiko." },
+      { req: 10000,  name: "Fluffy Char Siu Bao (叉燒包)",  icon: "🥟", desc: "Sweet honey barbecue pork tucked in snowy steamed bread." },
+      { req: 40000,  name: "Silky Cheong Fun (腸粉)",     icon: "🥢", desc: "Steamed wide rice sheets drenched in sweet seasoned soy." },
+      { req: 120000, name: "Xiao Long Bao Broth Pouches", icon: "🍲", desc: "Fragile skin filled with rich savory molten broth." },
+      { req: 250000, name: "Flaky Egg Tarts (蛋撻)",       icon: "🥧", desc: "Thousand-layer puff pastry cradling silken baked custard." },
+      { req: 383000, name: "Grand Chinatown Banquet (倫敦唐人街大宴)", icon: "👑", desc: "The crowning imperial feast of Gerrard Street." }
+    ];
+
+    const CHINATOWN_NEWS = [
+      "A soft London drizzle falls outside; Gerrard Street red lanterns glow warm on the wet cobblestones.",
+      "The soothing aroma of hot jasmine tea drifts through Dim Sum Diantang's frosted glass windows.",
+      "Trolley aunties navigate between packed bamboo tables amidst the chatter of morning yum cha.",
+      "West End theatre patrons seek shelter from the Soho rain, queuing happily under the Paifang gate.",
+      "Steam rises steadily from thirty stacked bamboo tiers, carrying the aroma of shrimp dumplings.",
+      "Raindrops tap against the restaurant panes as master sifus fold delicate 20-pleat har gow.",
+      "Evening shoppers under black umbrellas pause to admire the golden roast duck window across Gerrard Street."
+    ];
+
+    // Detect London Time (Europe/London handles GMT / BST automatically)
+    function getLondonTimeInfo() {
+      try {
+        const now = new Date();
+        const str = now.toLocaleTimeString('en-GB', { timeZone: 'Europe/London', hour12: false });
+        const parts = str.split(':');
+        const hour = parseInt(parts[0], 10);
+        const min = parts[1];
+        return { hour, min, formatted: `${str.slice(0, 5)} London Time` };
+      } catch (e) {
+        const d = new Date();
+        return { hour: d.getUTCHours(), min: String(d.getUTCMinutes()).padStart(2, '0'), formatted: `${d.getUTCHours()}:${String(d.getUTCMinutes()).padStart(2, '0')} GMT` };
+      }
+    }
+
+    let audioCtx = null;
+    let rainSourceNode = null;
+    let rainGainNode = null;
+    let rainFilterNode = null;
+
+    function initAudioContext() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }
+
+    // Procedural London Rain Generator: Band-filtered noise + randomised gentle raindrop patters
+    function startRainSound() {
+      if (!gameState.rainEnabled) return;
+      try {
+        initAudioContext();
+        if (rainSourceNode) return; // already running
+
+        // Generate 3 seconds of pink/brownish soft noise buffer
+        const bufferSize = audioCtx.sampleRate * 3;
+        const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+        const output = noiseBuffer.getChannelData(0);
+        let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0;
+        for (let i = 0; i < bufferSize; i++) {
+          const white = Math.random() * 2 - 1;
+          b0 = 0.99886 * b0 + white * 0.0555179;
+          b1 = 0.99332 * b1 + white * 0.0750759;
+          b2 = 0.96900 * b2 + white * 0.1538520;
+          b3 = 0.86650 * b3 + white * 0.3104856;
+          b4 = 0.55000 * b4 + white * 0.5329522;
+          output[i] = (b0 + b1 + b2 + b3 + b4) * 0.05;
+        }
+
+        rainSourceNode = audioCtx.createBufferSource();
+        rainSourceNode.buffer = noiseBuffer;
+        rainSourceNode.loop = true;
+
+        // Lowpass filter for cosy muffled window rain
+        rainFilterNode = audioCtx.createBiquadFilter();
+        rainFilterNode.type = 'lowpass';
+        rainFilterNode.frequency.setValueAtTime(850, audioCtx.currentTime);
+
+        rainGainNode = audioCtx.createGain();
+        rainGainNode.gain.setValueAtTime(0.001, audioCtx.currentTime);
+        // Fade in smoothly to avoid pop
+        rainGainNode.gain.exponentialRampToValueAtTime(0.18, audioCtx.currentTime + 1.2);
+
+        rainSourceNode.connect(rainFilterNode);
+        rainFilterNode.connect(rainGainNode);
+        rainGainNode.connect(audioCtx.destination);
+
+        rainSourceNode.start(0);
+
+        // Schedule gentle micro raindrop "pats"
+        scheduleRandomPitterPatter();
+      } catch (e) {
+        console.warn("Rain audio start prevented by browser policy until interaction:", e);
+      }
+    }
+
+    function stopRainSound() {
+      if (rainGainNode && audioCtx) {
+        try {
+          const now = audioCtx.currentTime;
+          rainGainNode.gain.setValueAtTime(rainGainNode.gain.value, now);
+          rainGainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
+          setTimeout(() => {
+            if (rainSourceNode) {
+              rainSourceNode.stop();
+              rainSourceNode.disconnect();
+              rainSourceNode = null;
+            }
+          }, 650);
+        } catch (e) {}
+      }
+    }
+
+    function scheduleRandomPitterPatter() {
+      if (!gameState.rainEnabled || !rainSourceNode) return;
+      const nextDelay = 800 + Math.random() * 2400;
+      setTimeout(() => {
+        if (gameState.rainEnabled && rainSourceNode && audioCtx && audioCtx.state === 'running') {
+          playMicroRaindrop();
+          scheduleRandomPitterPatter();
+        }
+      }, nextDelay);
+    }
+
+    function playMicroRaindrop() {
+      try {
+        const now = audioCtx.currentTime;
+        const osc = audioCtx.createOscillator();
+        const dropGain = audioCtx.createGain();
+        osc.type = 'sine';
+        // Random pitch plunge resembling water drop
+        const startFreq = 1100 + Math.random() * 800;
+        osc.frequency.setValueAtTime(startFreq, now);
+        osc.frequency.exponentialRampToValueAtTime(320, now + 0.04);
+        dropGain.gain.setValueAtTime(0.018, now);
+        dropGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.04);
+        osc.connect(dropGain);
+        dropGain.connect(audioCtx.destination);
+        osc.start(now);
+        osc.stop(now + 0.05);
+      } catch (e) {}
+    }
+
+    function playRetroSound(type) {
+      if (!gameState.soundEnabled) return;
+      try {
+        initAudioContext();
+        const now = audioCtx.currentTime;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        if (type === 'click') {
+          // Hollow bamboo thud
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(340, now);
+          osc.frequency.exponentialRampToValueAtTime(105, now + 0.07);
+          gain.gain.setValueAtTime(0.28, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.07);
+          osc.start(now);
+          osc.stop(now + 0.08);
+        } else if (type === 'buy') {
+          // Cash register double bell
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(587.33, now);
+          osc.frequency.setValueAtTime(880, now + 0.08);
+          gain.gain.setValueAtTime(0.18, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
+          osc.start(now);
+          osc.stop(now + 0.23);
+        } else if (type === 'tea') {
+          // Gentle soothing bell chime
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(523.25, now);
+          osc.frequency.exponentialRampToValueAtTime(1046.50, now + 0.2);
+          gain.gain.setValueAtTime(0.2, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+          osc.start(now);
+          osc.stop(now + 0.36);
+        } else if (type === 'overheat') {
+          // Low buzzing warn
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(150, now);
+          osc.frequency.setValueAtTime(110, now + 0.12);
+          gain.gain.setValueAtTime(0.25, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.26);
+          osc.start(now);
+          osc.stop(now + 0.27);
+        } else if (type === 'fortune') {
+          // Happy 3-tone arpeggio
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(440, now);
+          osc.frequency.setValueAtTime(554.37, now + 0.07);
+          osc.frequency.setValueAtTime(659.25, now + 0.14);
+          gain.gain.setValueAtTime(0.25, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+          osc.start(now);
+          osc.stop(now + 0.31);
+        }
+      } catch (err) {}
+    }
+
+    function triggerHaptic(duration = 12) {
+      if (!gameState.hapticsEnabled) return;
+      try {
+        if ('vibrate' in navigator) navigator.vibrate(duration);
+      } catch (e) {}
+    }
+
+    const rainCanvas = document.getElementById('rain-canvas');
+    const rainCtx = rainCanvas.getContext('2d');
+    let raindrops = [];
+    const NUM_DROPS = 65;
+
+    function resizeRainCanvas() {
+      rainCanvas.width = window.innerWidth;
+      rainCanvas.height = window.innerHeight;
+      initRaindrops();
+    }
+
+    function initRaindrops() {
+      raindrops = [];
+      for (let i = 0; i < NUM_DROPS; i++) {
+        raindrops.push({
+          x: Math.random() * rainCanvas.width,
+          y: Math.random() * rainCanvas.height,
+          length: 12 + Math.random() * 16,
+          speed: 9 + Math.random() * 7,
+          opacity: 0.12 + Math.random() * 0.22,
+          slant: -1.2 + Math.random() * 0.4
+        });
+      }
+    }
+
+    function updateAndDrawRain() {
+      if (!gameState.rainEnabled) {
+        rainCtx.clearRect(0, 0, rainCanvas.width, rainCanvas.height);
+        return;
+      }
+
+      rainCtx.clearRect(0, 0, rainCanvas.width, rainCanvas.height);
+      rainCtx.strokeStyle = 'rgba(215, 235, 255, 0.4)';
+      rainCtx.lineWidth = 1;
+      rainCtx.beginPath();
+
+      for (let i = 0; i < raindrops.length; i++) {
+        const d = raindrops[i];
+        rainCtx.moveTo(d.x, d.y);
+        rainCtx.lineTo(d.x + d.slant * d.length, d.y + d.length);
+
+        d.y += d.speed;
+        d.x += d.slant * (d.speed * 0.3);
+
+        if (d.y > rainCanvas.height) {
+          d.y = -20;
+          d.x = Math.random() * rainCanvas.width;
+        }
+      }
+      rainCtx.stroke();
+    }
+
+    window.addEventListener('resize', resizeRainCanvas);
+    resizeRainCanvas();
+
+    function applyTimeOfDayAtmosphere() {
+      const { hour, formatted } = getLondonTimeInfo();
+      let mode = gameState.timeOfDayMode;
+      
+      let effectivePhase = 'afternoon';
+      if (mode === 'auto') {
+        if (hour >= 6 && hour < 12) effectivePhase = 'morning';
+        else if (hour >= 12 && hour < 18) effectivePhase = 'afternoon';
+        else if (hour >= 18 && hour < 23) effectivePhase = 'dusk';
+        else effectivePhase = 'night';
+      } else {
+        effectivePhase = mode;
+      }
+
+      // Update Body CSS Class
+      document.body.className = document.body.className.replace(/\btod-\w+/g, '').trim();
+      document.body.classList.add(`tod-${effectivePhase}`);
+
+      // Update Top Status Pill
+      const todIcon = document.getElementById('tod-icon');
+      const todText = document.getElementById('tod-text');
+
+      const phaseLabels = {
+        morning:   { icon: '🌅', label: 'MORNING MIST & YUM CHA' },
+        afternoon: { icon: '🏮', label: 'AFTERNOON YUM CHA RUSH' },
+        dusk:      { icon: '🌆', label: 'WEST END THEATRE DUSK' },
+        night:     { icon: '🌙', label: 'MIDNIGHT LANTERN RAIN' }
+      };
+
+      const info = phaseLabels[effectivePhase] || phaseLabels.afternoon;
+      todIcon.textContent = info.icon;
+      todText.textContent = `${mode === 'auto' ? '🇬🇧 ' + formatted.toUpperCase() : 'MANUAL'}: ${info.label}`;
+    }
+
+    // Toggle/Cycle Time of Day on button click
+    document.getElementById('tod-toggle-btn').addEventListener('click', () => {
+      const modes = ['auto', 'morning', 'afternoon', 'dusk', 'night'];
+      const currentIdx = modes.indexOf(gameState.timeOfDayMode);
+      gameState.timeOfDayMode = modes[(currentIdx + 1) % modes.length];
+      playRetroSound('click');
+      triggerHaptic(18);
+      applyTimeOfDayAtmosphere();
+      setTicker(`London atmosphere changed to: ${gameState.timeOfDayMode.toUpperCase()} mode.`);
+    });
+
+    function calcBaseRate() {
+      let base = 0;
+      for (const key in gameState.upgrades) {
+        base += gameState.upgrades[key].count * gameState.upgrades[key].rate;
+      }
+      return base;
+    }
+
+    function calcTotalMultiplier() {
+      let mult = 1.0;
+      for (const t in gameState.teas) {
+        if (gameState.teas[t].bought) mult *= gameState.teas[t].mult;
+      }
+      if (gameState.activeBuff && gameState.activeBuff.timer > 0) {
+        mult *= (gameState.activeBuff.mult || 1);
+      }
+      return mult;
+    }
+
+    function calcPassiveRate() {
+      return calcBaseRate() * calcTotalMultiplier();
+    }
+
+    function getActiveSpecialty() {
+      let current = DISH_MILESTONES[0];
+      for (let i = 0; i < DISH_MILESTONES.length; i++) {
+        if (gameState.totalEarned >= DISH_MILESTONES[i].req) {
+          current = DISH_MILESTONES[i];
+        }
+      }
+      return current;
+    }
+
+    function setTicker(msg) {
+      const el = document.getElementById('ticker-text');
+      if (el) el.textContent = msg;
+    }
+
+    function saveGame() {
+      gameState.lastSaveTime = Date.now();
+      try {
+        localStorage.setItem(SAVE_KEY, JSON.stringify(gameState));
+      } catch (e) {
+        console.warn("Save game error:", e);
+      }
+    }
+
+    function loadGame() {
+      try {
+        let raw = localStorage.getItem(SAVE_KEY);
+        if (!raw) raw = localStorage.getItem('dim_sum_master_longhaul_save_v2');
+        if (!raw) raw = localStorage.getItem('dim_sum_master_longhaul_save');
+
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed && typeof parsed === 'object') {
+            if (parsed.upgrades) {
+              for (const k in gameState.upgrades) {
+                if (parsed.upgrades[k]) {
+                  gameState.upgrades[k].count = parsed.upgrades[k].count || 0;
+                  gameState.upgrades[k].cost = parsed.upgrades[k].cost || gameState.upgrades[k].cost;
+                }
+              }
+            }
+            if (parsed.teas) {
+              for (const t in gameState.teas) {
+                if (parsed.teas[t]) gameState.teas[t].bought = !!parsed.teas[t].bought;
+              }
+            }
+            if (parsed.badges) {
+              for (const b in gameState.badges) {
+                if (parsed.badges[b]) gameState.badges[b].unlocked = !!parsed.badges[b].unlocked;
+              }
+            }
+            gameState.dimSum = parsed.dimSum || 0;
+            gameState.totalEarned = parsed.totalEarned || gameState.dimSum;
+            gameState.totalClicks = parsed.totalClicks || 0;
+            gameState.fortuneCount = parsed.fortuneCount || 0;
+            gameState.startTime = parsed.startTime || Date.now();
+            gameState.soundEnabled = parsed.soundEnabled !== false;
+            gameState.rainEnabled = parsed.rainEnabled !== false;
+            gameState.hapticsEnabled = parsed.hapticsEnabled !== false;
+            gameState.timeOfDayMode = parsed.timeOfDayMode || 'auto';
+
+            // Offline progress calculations
+            const now = Date.now();
+            const lastSaved = parsed.lastSaveTime || now;
+            const diffSeconds = Math.max(0, (now - lastSaved) / 1000);
+
+            if (diffSeconds > 3) {
+              const currentRate = calcPassiveRate();
+              const offlineEarned = diffSeconds * currentRate;
+              gameState.dimSum += offlineEarned;
+              gameState.totalEarned += offlineEarned;
+              const hours = (diffSeconds / 3600).toFixed(1);
+              setTicker(`Dim Sum Diantang doors were closed for ${hours} hrs. Staff pre-steamed +${offlineEarned.toFixed(2)} dim sum!`);
+            }
+          }
+        }
+      } catch (err) {
+        console.error("Failed to parse game data:", err);
+      }
+    }
+
+    const steamerBtn = document.getElementById('steamer-button');
+    const bambooBody = document.getElementById('bamboo-body');
+
+    function handleSteamerTap(e) {
+      if (e) e.preventDefault();
+
+      // Ensure audio context is warmed on user tap
+      initAudioContext();
+      if (gameState.rainEnabled && !rainSourceNode) {
+        startRainSound();
+      }
+
+      if (gameState.isOverheated) {
+        playRetroSound('overheat');
+        triggerHaptic([30, 40, 30]);
+        setTicker("Steamer is smoking! Please wait for bamboo tiers to cool down.");
+        return;
+      }
+
+      const clickYield = 0.25;
+      gameState.dimSum += clickYield;
+      gameState.totalEarned += clickYield;
+      gameState.totalClicks++;
+
+      gameState.heat += 9.5;
+      playRetroSound('click');
+      triggerHaptic(14);
+
+      // Bamboo squash effect
+      bambooBody.style.transform = "scale(0.92) translateY(4px)";
+      setTimeout(() => {
+        bambooBody.style.transform = "scale(1) translateY(0px)";
+      }, 70);
+
+      const clientX = e.clientX || (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
+      const clientY = e.clientY || (e.touches && e.touches[0] ? e.touches[0].clientY : 0);
+
+      createSteamPuff(clientX, clientY);
+      createEarnPopup(clientX, clientY, "+0.25");
+
+      // Overheat evaluation
+      if (gameState.heat >= 100) {
+        gameState.heat = 100;
+        gameState.isOverheated = true;
+        gameState.cooldownTimer = 8.0;
+        playRetroSound('overheat');
+        triggerHaptic([50, 60, 50]);
+        setTicker("OVERHEAT! Steam pressure peak! Bamboo requires 8s cooling.");
+      }
+
+      checkAchievements();
+      renderUI();
+    }
+
+    steamerBtn.addEventListener('pointerdown', handleSteamerTap);
+
+    function createSteamPuff(x, y) {
+      const puff = document.createElement('div');
+      puff.className = 'steam-puff';
+      puff.textContent = '♨️';
+      const rect = steamerBtn.getBoundingClientRect();
+      const posX = (x && x > 0) ? x - 10 : (rect.left + rect.width / 2 - 10);
+      const posY = (y && y > 0) ? y - 25 : (rect.top + 20);
+
+      puff.style.left = `${posX}px`;
+      puff.style.top = `${posY}px`;
+      document.body.appendChild(puff);
+      setTimeout(() => puff.remove(), 950);
+    }
+
+    function createEarnPopup(x, y, text) {
+      const pop = document.createElement('div');
+      pop.className = 'earn-popup';
+      pop.textContent = text;
+      const rect = steamerBtn.getBoundingClientRect();
+      const posX = (x && x > 0) ? x + 12 : (rect.left + rect.width / 2 + 10);
+      const posY = (y && y > 0) ? y - 10 : rect.top;
+
+      pop.style.left = `${posX}px`;
+      pop.style.top = `${posY}px`;
+      document.body.appendChild(pop);
+      setTimeout(() => pop.remove(), 800);
+    }
+
+    const upgradesContainer = document.getElementById('upgrades-container');
+
+    function initUpgradesList() {
+      upgradesContainer.innerHTML = '';
+      for (const key in gameState.upgrades) {
+        const upg = gameState.upgrades[key];
+        const card = document.createElement('div');
+        card.id = `upg-card-${key}`;
+        card.className = "bg-[#250808]/90 border-2 border-[#451616] p-2 sm:p-2.5 flex items-center justify-between gap-3 pixel-box";
+        card.innerHTML = `
+          <div class="flex items-center gap-2 sm:gap-3">
+            <span class="text-xl sm:text-2xl">${upg.icon}</span>
+            <div class="text-left">
+              <div class="text-[7px] sm:text-[8px] text-[#f5b938] font-bold">${upg.name}</div>
+              <div class="text-[6px] text-[#e3b88b] leading-tight my-0.5">${upg.desc}</div>
+              <div class="text-[6px] text-[#86efac]">
+                +${upg.rate.toFixed(4)}/s &bull; <span class="text-[#ffe082]" id="count-${key}">Hired: ${upg.count}</span>
+              </div>
+            </div>
+          </div>
+          <button id="buy-btn-${key}" class="pixel-btn bg-[#f5b938] text-[#240808] text-[7px] font-bold px-2.5 sm:px-3 py-2 border-2 border-black whitespace-nowrap" onclick="purchaseUpgrade('${key}')">
+            HIRE (<span id="cost-${key}">${upg.cost}</span>)
+          </button>
+        `;
+        upgradesContainer.appendChild(card);
+      }
+    }
+
+    window.purchaseUpgrade = function(key) {
+      const upg = gameState.upgrades[key];
+      if (gameState.dimSum >= upg.cost) {
+        gameState.dimSum -= upg.cost;
+        upg.count++;
+        upg.cost = Math.ceil(upg.cost * 1.28);
+        playRetroSound('buy');
+        triggerHaptic(25);
+        setTicker(`Staff hired! ${upg.name} has joined the Dim Sum Diantang team.`);
+        checkAchievements();
+        renderUI();
+      }
+    };
+
+    const teasList = document.getElementById('teas-list');
+
+    function renderTeasList() {
+      teasList.innerHTML = '';
+      for (const t in gameState.teas) {
+        const tea = gameState.teas[t];
+        const card = document.createElement('div');
+        card.className = "bg-[#180806] border-2 border-[#3d1814] p-2 flex items-center justify-between gap-2 pixel-box";
+        
+        let actionBtnHtml = '';
+        if (tea.bought) {
+          actionBtnHtml = `<span class="text-[7px] text-[#4ade80] font-bold px-2 py-1 bg-[#102916] border border-[#22c55e]">BREWED ✔</span>`;
+        } else {
+          const canAfford = gameState.dimSum >= tea.cost;
+          actionBtnHtml = `
+            <button class="pixel-btn ${canAfford ? 'bg-[#22c55e] text-[#0f2e16]' : 'bg-[#3b2a26] text-[#888]'} text-[7px] font-bold px-2.5 py-1.5 border border-black" 
+                    ${!canAfford ? 'disabled' : ''} onclick="purchaseTea('${t}')">
+              BREW (${tea.cost.toLocaleString()})
+            </button>
+          `;
+        }
+
+        card.innerHTML = `
+          <div class="text-left flex-1">
+            <div class="text-[7px] sm:text-[8px] text-[#ffd666] font-bold">${tea.name}</div>
+            <div class="text-[6px] text-[#c4b5a5] leading-tight my-0.5">${tea.desc}</div>
+          </div>
+          ${actionBtnHtml}
+        `;
+        teasList.appendChild(card);
+      }
+    }
+
+    window.purchaseTea = function(t) {
+      const tea = gameState.teas[t];
+      if (!tea.bought && gameState.dimSum >= tea.cost) {
+        gameState.dimSum -= tea.cost;
+        tea.bought = true;
+        playRetroSound('tea');
+        triggerHaptic([20, 30, 40]);
+        setTicker(`Exquisite pairing! ${tea.name} is now served to every guest!`);
+        renderTeasList();
+        checkAchievements();
+        renderUI();
+      }
+    };
+
+    function renderBadgesList() {
+      const listEl = document.getElementById('badges-list');
+      listEl.innerHTML = '';
+      for (const b in gameState.badges) {
+        const badge = gameState.badges[b];
+        const item = document.createElement('div');
+        item.className = `p-2 border-2 pixel-box flex items-center gap-2 ${badge.unlocked ? 'bg-[#261608] border-[#f5b938]' : 'bg-[#150404] border-[#381111] opacity-50'}`;
+        item.innerHTML = `
+          <div class="text-xl">${badge.unlocked ? badge.icon : '🔒'}</div>
+          <div class="text-left">
+            <div class="text-[7px] font-bold ${badge.unlocked ? 'text-[#f5b938]' : 'text-[#888]'}">${badge.name}</div>
+            <div class="text-[6px] ${badge.unlocked ? 'text-[#faf2dc]' : 'text-[#666]'} leading-tight">${badge.desc}</div>
+          </div>
+        `;
+        listEl.appendChild(item);
+      }
+    }
+
+    function checkAchievements() {
+      if (!gameState.badges.firstClick.unlocked && gameState.totalClicks >= 1) unlockBadge('firstClick');
+      if (!gameState.badges.hundredClub.unlocked && gameState.totalEarned >= 100) unlockBadge('hundredClub');
+      if (!gameState.badges.thousandClub.unlocked && gameState.totalEarned >= 1000) unlockBadge('thousandClub');
+      if (!gameState.badges.tenThousand.unlocked && gameState.totalEarned >= 10000) unlockBadge('tenThousand');
+      if (!gameState.badges.hundredThousand.unlocked && gameState.totalEarned >= 100000) unlockBadge('hundredThousand');
+      if (!gameState.badges.fortuneCracker.unlocked && gameState.fortuneCount >= 5) unlockBadge('fortuneCracker');
+      const allTeas = Object.values(gameState.teas).every(t => t.bought);
+      if (!gameState.badges.teaConnoisseur.unlocked && allTeas) unlockBadge('teaConnoisseur');
+    }
+
+    function unlockBadge(key) {
+      gameState.badges[key].unlocked = true;
+      setTicker(`🏆 TROPHY UNLOCKED: ${gameState.badges[key].name}!`);
+      playRetroSound('fortune');
+    }
+
+    const fortuneContainer = document.getElementById('fortune-container');
+
+    function scheduleFortuneCookie() {
+      const delay = (70 + Math.random() * 70) * 1000;
+      setTimeout(() => {
+        fortuneContainer.classList.remove('hidden');
+        setTimeout(() => {
+          if (!fortuneContainer.classList.contains('hidden')) {
+            fortuneContainer.classList.add('hidden');
+            scheduleFortuneCookie();
+          }
+        }, 18000);
+      }, delay);
+    }
+
+    fortuneContainer.addEventListener('pointerdown', (e) => {
+      e.preventDefault();
+      fortuneContainer.classList.add('hidden');
+      gameState.fortuneCount++;
+      playRetroSound('fortune');
+      triggerHaptic([30, 20, 30, 20, 50]);
+
+      const roll = Math.random();
+      if (roll < 0.5) {
+        const rate = Math.max(0.05, calcPassiveRate());
+        const bonus = Math.max(25, Math.round(rate * 600));
+        gameState.dimSum += bonus;
+        gameState.totalEarned += bonus;
+        setTicker(`🥠 FORTUNE REVEALED: "Great wealth flows to the patient sifu!" (+${bonus.toLocaleString()} Dim Sum)`);
+      } else {
+        gameState.activeBuff = { type: 'theatre_rush', timer: 30, mult: 2.0 };
+        setTicker("🥠 FORTUNE REVEALED: West End Theatre Rush! Kitchen speed doubled for 30 seconds!");
+      }
+      checkAchievements();
+      scheduleFortuneCookie();
+      renderUI();
+    });
+
+    let lastTimestamp = performance.now();
+    let tickerInterval = 0;
+    let todCheckInterval = 0;
+
+    function gameLoop(now) {
+      const dt = (now - lastTimestamp) / 1000;
+      lastTimestamp = now;
+
+      // Passive kitchen generation
+      const rate = calcPassiveRate();
+      const earned = rate * dt;
+      gameState.dimSum += earned;
+      gameState.totalEarned += earned;
+
+      // Active temporary buff countdown
+      if (gameState.activeBuff) {
+        gameState.activeBuff.timer -= dt;
+        if (gameState.activeBuff.timer <= 0) {
+          gameState.activeBuff = null;
+          setTicker("The West End theatre crowd departs. Kitchen pace returns to normal.");
+        }
+      }
+
+      // Heat dissipation & Burnout recovery
+      if (gameState.isOverheated) {
+        gameState.cooldownTimer -= dt;
+        if (gameState.cooldownTimer <= 0) {
+          gameState.isOverheated = false;
+          gameState.cooldownTimer = 0;
+          gameState.heat = 0;
+          setTicker("Bamboo steamer temperature normalized. Steamers ready for action.");
+        }
+      } else if (gameState.heat > 0) {
+        gameState.heat = Math.max(0, gameState.heat - (12 * dt));
+      }
+
+      // Draw background rain
+      updateAndDrawRain();
+
+      // Atmospheric ticker update (~18s)
+      tickerInterval += dt;
+      if (tickerInterval > 18) {
+        tickerInterval = 0;
+        const randomSnippet = CHINATOWN_NEWS[Math.floor(Math.random() * CHINATOWN_NEWS.length)];
+        setTicker(randomSnippet);
+      }
+
+      // Periodic check for London GMT/BST time shifts
+      todCheckInterval += dt;
+      if (todCheckInterval > 30) {
+        todCheckInterval = 0;
+        applyTimeOfDayAtmosphere();
+      }
+
+      renderUI();
+      requestAnimationFrame(gameLoop);
+    }
+
+    function renderUI() {
+      document.getElementById('dimsum-counter').textContent = gameState.dimSum.toLocaleString('en-US', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+
+      const lifetimeEl = document.getElementById('lifetime-counter');
+      if (lifetimeEl) {
+        lifetimeEl.textContent = gameState.totalEarned.toLocaleString('en-US', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        });
+      }
+
+      const currentRate = calcPassiveRate();
+      document.getElementById('rate-counter').textContent = `Pace: +${currentRate.toFixed(4)}/s`;
+      document.getElementById('hourly-counter').textContent = (currentRate * 3600).toFixed(1);
+
+      const totalMult = calcTotalMultiplier();
+      const teaTag = document.getElementById('tea-multiplier-tag');
+      teaTag.textContent = `Tea: ${totalMult.toFixed(2)}x`;
+      teaTag.className = totalMult > 1.0 ? "text-[#4ade80] font-bold" : "text-[#888]";
+
+      const buffBox = document.getElementById('active-buff-box');
+      if (gameState.activeBuff) {
+        buffBox.classList.remove('hidden');
+        document.getElementById('buff-title').textContent = "THEATRE RUSH (2X MULTIPLIER)";
+        document.getElementById('buff-timer').textContent = `${Math.ceil(gameState.activeBuff.timer)}s`;
+      } else {
+        buffBox.classList.add('hidden');
+      }
+
+      const heatBar = document.getElementById('heat-bar');
+      const heatTitle = document.getElementById('heat-title');
+      const cooldownBadge = document.getElementById('cooldown-badge');
+      heatBar.style.width = `${gameState.heat}%`;
+
+      if (gameState.isOverheated) {
+        heatTitle.textContent = `OVERHEATED! COOLING: ${Math.ceil(gameState.cooldownTimer)}s`;
+        cooldownBadge.classList.remove('hidden');
+        heatBar.style.background = "#ef4444";
+      } else {
+        heatTitle.textContent = `BAMBOO HEAT: ${Math.floor(gameState.heat)}%`;
+        cooldownBadge.classList.add('hidden');
+        heatBar.style.background = gameState.heat > 75 ? "#f97316" : "linear-gradient(to right, #e58a22, #d62828)";
+      }
+
+      for (const key in gameState.upgrades) {
+        const upg = gameState.upgrades[key];
+        const btn = document.getElementById(`buy-btn-${key}`);
+        const costEl = document.getElementById(`cost-${key}`);
+        const countEl = document.getElementById(`count-${key}`);
+        if (btn && costEl && countEl) {
+          costEl.textContent = upg.cost.toLocaleString('en-US');
+          countEl.textContent = `Hired: ${upg.count}`;
+          btn.disabled = gameState.dimSum < upg.cost;
+        }
+      }
+
+      const progressPercent = Math.min(100, (gameState.totalEarned / TARGET_GOAL) * 100);
+      document.getElementById('goal-bar').style.width = `${progressPercent}%`;
+      document.getElementById('goal-percent').textContent = `${progressPercent.toFixed(4)}%`;
+
+      const remaining = Math.max(0, TARGET_GOAL - gameState.totalEarned);
+      document.getElementById('goal-remaining').textContent = `Remaining: ${remaining.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} dim sum`;
+
+      if (currentRate > 0) {
+        const secRemaining = remaining / currentRate;
+        const daysRemaining = (secRemaining / 86400).toFixed(1);
+        document.getElementById('goal-estimate').textContent = `Estimated time: ~${daysRemaining} days at current idle pace`;
+      } else {
+        document.getElementById('goal-estimate').textContent = `Estimated time: ~70-90 days with staff`;
+      }
+
+      const activeDish = getActiveSpecialty();
+      const dishIconEl = document.getElementById('dish-icon');
+      const dishNameEl = document.getElementById('dish-name');
+      const dishDescEl = document.getElementById('dish-desc');
+      if (dishIconEl) dishIconEl.textContent = activeDish.icon;
+      if (dishNameEl) dishNameEl.textContent = activeDish.name;
+      if (dishDescEl) dishDescEl.textContent = activeDish.desc;
+
+      if (gameState.totalEarned >= TARGET_GOAL) {
+        setTicker("CONGRATULATIONS! 383,000 Dim Sum achieved! Dim Sum Diantang is now the legendary grand palace of London Chinatown!");
+      }
+    }
+
+    // Rain Audio & Visual Toggle
+    const rainToggleBtn = document.getElementById('rain-toggle-btn');
+    const rainStatus = document.getElementById('rain-status');
+    rainToggleBtn.addEventListener('click', () => {
+      gameState.rainEnabled = !gameState.rainEnabled;
+      rainStatus.textContent = gameState.rainEnabled ? "ON" : "OFF";
+      if (gameState.rainEnabled) {
+        startRainSound();
+        setTicker("London rain begins to pitter-patter softly outside.");
+      } else {
+        stopRainSound();
+        setTicker("London rain subsides into a calm Soho mist.");
+      }
+      playRetroSound('click');
+    });
+
+    // Sound FX Toggle
+    const soundToggleBtn = document.getElementById('sound-toggle-btn');
+    const soundStatus = document.getElementById('sound-status');
+    soundToggleBtn.addEventListener('click', () => {
+      gameState.soundEnabled = !gameState.soundEnabled;
+      soundStatus.textContent = gameState.soundEnabled ? "ON" : "OFF";
+      if (gameState.soundEnabled) playRetroSound('click');
+    });
+
+    // Haptics Toggle
+    const hapticsToggleBtn = document.getElementById('haptics-toggle-btn');
+    const hapticsStatus = document.getElementById('haptics-status');
+    hapticsToggleBtn.addEventListener('click', () => {
+      gameState.hapticsEnabled = !gameState.hapticsEnabled;
+      hapticsStatus.textContent = gameState.hapticsEnabled ? "ON" : "OFF";
+      if (gameState.hapticsEnabled) triggerHaptic(20);
+    });
+
+    // Tea modal
+    const teaModal = document.getElementById('tea-modal');
+    document.getElementById('tea-modal-btn').addEventListener('click', () => {
+      renderTeasList();
+      teaModal.classList.remove('hidden');
+    });
+    document.getElementById('close-tea-btn').addEventListener('click', () => teaModal.classList.add('hidden'));
+    document.getElementById('done-tea-btn').addEventListener('click', () => teaModal.classList.add('hidden'));
+
+    // Badges modal
+    const badgesModal = document.getElementById('badges-modal');
+    document.getElementById('badges-toggle-btn').addEventListener('click', () => {
+      renderBadgesList();
+      badgesModal.classList.remove('hidden');
+    });
+    document.getElementById('close-badges-btn').addEventListener('click', () => badgesModal.classList.add('hidden'));
+    document.getElementById('done-badges-btn').addEventListener('click', () => badgesModal.classList.add('hidden'));
+
+    // Stats modal
+    const statsModal = document.getElementById('stats-modal');
+    document.getElementById('stats-toggle-btn').addEventListener('click', () => {
+      document.getElementById('stat-total').textContent = gameState.totalEarned.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      document.getElementById('stat-clicks').textContent = gameState.totalClicks.toLocaleString('en-US');
+      document.getElementById('stat-click-yield').textContent = (gameState.totalClicks * 0.25).toLocaleString('en-US', { minimumFractionDigits: 2 });
+      
+      let totalHired = 0;
+      for (const k in gameState.upgrades) totalHired += gameState.upgrades[k].count;
+      document.getElementById('stat-stations').textContent = totalHired;
+      document.getElementById('stat-cookies').textContent = gameState.fortuneCount;
+      document.getElementById('stat-start-date').textContent = new Date(gameState.startTime).toLocaleDateString();
+      const hoursPlayed = ((Date.now() - gameState.startTime) / 3600000).toFixed(1);
+      document.getElementById('stat-time-played').textContent = `${hoursPlayed} hrs`;
+      
+      statsModal.classList.remove('hidden');
+    });
+    document.getElementById('close-stats-btn').addEventListener('click', () => statsModal.classList.add('hidden'));
+    document.getElementById('ok-stats-btn').addEventListener('click', () => statsModal.classList.add('hidden'));
+
+    // Backup and Save Modal
+    const dataModal = document.getElementById('data-modal');
+    const saveTextarea = document.getElementById('save-data-textarea');
+    const feedback = document.getElementById('data-feedback');
+
+    document.getElementById('data-toggle-btn').addEventListener('click', () => {
+      saveTextarea.value = '';
+      feedback.textContent = '';
+      dataModal.classList.remove('hidden');
+    });
+
+    document.getElementById('close-data-btn').addEventListener('click', () => dataModal.classList.add('hidden'));
+
+    document.getElementById('export-btn').addEventListener('click', () => {
+      saveGame();
+      const str = btoa(unescape(encodeURIComponent(JSON.stringify(gameState))));
+      saveTextarea.value = str;
+      feedback.textContent = "Save string generated! Keep it safe in your notes.";
+    });
+
+    document.getElementById('copy-btn').addEventListener('click', () => {
+      if (!saveTextarea.value) {
+        saveGame();
+        saveTextarea.value = btoa(unescape(encodeURIComponent(JSON.stringify(gameState))));
+      }
+      saveTextarea.select();
+      document.execCommand('copy');
+      feedback.textContent = "Copied save code to clipboard!";
+    });
+
+    document.getElementById('import-btn').addEventListener('click', () => {
+      const code = saveTextarea.value.trim();
+      if (!code) {
+        feedback.textContent = "Please paste a backup string in the box above.";
+        return;
+      }
+      try {
+        const decoded = JSON.parse(decodeURIComponent(escape(atob(code))));
+        if (decoded && typeof decoded === 'object' && decoded.upgrades) {
+          gameState = decoded;
+          saveGame();
+          initUpgradesList();
+          applyTimeOfDayAtmosphere();
+          renderUI();
+          feedback.textContent = "Save restored successfully! Welcome back to Gerrard Street.";
+          setTicker("Restored Dim Sum Diantang ledger from external backup!");
+        } else {
+          feedback.textContent = "Invalid save format.";
+        }
+      } catch (err) {
+        feedback.textContent = "Error parsing save code. Please ensure no trailing spaces.";
+      }
+    });
+
+    document.getElementById('reset-btn').addEventListener('click', () => {
+      const resetMsgBox = document.createElement('div');
+      resetMsgBox.className = "fixed inset-0 bg-black/90 z-[60] flex items-center justify-center p-4";
+      resetMsgBox.innerHTML = `
+        <div class="bg-[#240808] border-4 border-[#ef4444] p-4 max-w-xs w-full pixel-box text-center">
+          <div class="text-[8px] text-[#ef4444] font-bold mb-2">ARE YOU SURE?</div>
+          <p class="text-[6px] text-[#faf2dc] mb-3 leading-relaxed">This will erase your Chinatown restaurant progress permanently!</p>
+          <div class="flex justify-center gap-2 text-[7px]">
+            <button id="confirm-reset" class="bg-[#ef4444] text-white px-3 py-1.5 pixel-btn border border-black">CONFIRM ERASE</button>
+            <button id="cancel-reset" class="bg-[#481810] text-[#f5b938] px-3 py-1.5 pixel-btn border border-black">CANCEL</button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(resetMsgBox);
+
+      document.getElementById('confirm-reset').onclick = () => {
+        localStorage.removeItem(SAVE_KEY);
+        localStorage.removeItem('dim_sum_master_longhaul_save_v2');
+        localStorage.removeItem('dim_sum_master_longhaul_save');
+        location.reload();
+      };
+      document.getElementById('cancel-reset').onclick = () => {
+        resetMsgBox.remove();
+      };
+    });
+
+    window.onload = function() {
+      loadGame();
+      initUpgradesList();
+      checkAchievements();
+      applyTimeOfDayAtmosphere();
+      renderUI();
+      scheduleFortuneCookie();
+      lastTimestamp = performance.now();
+      requestAnimationFrame(gameLoop);
+      setInterval(saveGame, 5000);
+
+      // Start rain sound on very first user interaction anywhere on the screen
+      const startAudioOnTouch = () => {
+        initAudioContext();
+        if (gameState.rainEnabled && !rainSourceNode) {
+          startRainSound();
+        }
+        window.removeEventListener('pointerdown', startAudioOnTouch);
+      };
+      window.addEventListener('pointerdown', startAudioOnTouch);
+    };
+  </script>
+</body>
+</html>
