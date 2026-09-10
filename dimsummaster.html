@@ -1533,12 +1533,28 @@
         const decoded = JSON.parse(decodeURIComponent(escape(atob(code))));
         if (decoded && typeof decoded === 'object' && decoded.upgrades) {
           gameState = decoded;
+
+          // Calculate interim offline progress from when the key was exported
+          const now = Date.now();
+          const lastSaved = decoded.lastSaveTime || now;
+          const diffSeconds = Math.max(0, (now - lastSaved) / 1000);
+
+          if (diffSeconds > 3) {
+            const currentRate = calcPassiveRate();
+            const offlineEarned = diffSeconds * currentRate;
+            gameState.dimSum += offlineEarned;
+            gameState.totalEarned += offlineEarned;
+            const hours = (diffSeconds / 3600).toFixed(1);
+            setTicker(`Restored save! Kitchen was away for ${hours} hrs. Staff pre-steamed +${offlineEarned.toFixed(2)} dim sum!`);
+          } else {
+            setTicker("Restored Dim Sum Diantang ledger from external backup!");
+          }
+
           saveGame();
           initUpgradesList();
           applyTimeOfDayAtmosphere();
           renderUI();
           feedback.textContent = "Save restored successfully! Welcome back to Gerrard Street.";
-          setTicker("Restored Dim Sum Diantang ledger from external backup!");
         } else {
           feedback.textContent = "Invalid save format.";
         }
