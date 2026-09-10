@@ -314,7 +314,7 @@
             VIBE: <span id="haptics-status">ON</span>
           </button>
           <button id="tea-modal-btn" class="bg-[#243d1a] text-[#a7f3d0] border-2 border-black px-2.5 py-1.5 pixel-btn hover:bg-[#325824]">
-            TEA HOUSE 🍵
+            TEA & CELLAR 🍵
           </button>
           <button id="badges-toggle-btn" class="bg-[#42140d] text-[#fde68a] border-2 border-black px-2 py-1.5 pixel-btn hover:bg-[#5a1b12]">
             TROPHIES 🏆
@@ -456,11 +456,11 @@
   <div id="tea-modal" class="fixed inset-0 bg-black/85 z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-[#1f0b08] border-4 border-[#4ade80] p-4 sm:p-5 max-w-lg w-full pixel-box flex flex-col gap-3 text-left">
       <div class="flex justify-between items-center border-b-2 border-[#2b5934] pb-2">
-        <h3 class="text-[9px] sm:text-[10px] text-[#4ade80]">🍵 DIANTANG TEA CEREMONY (YUM CHA PAIRING)</h3>
+        <h3 class="text-[9px] sm:text-[10px] text-[#4ade80]">🍵 DIANTANG TEA & CONDIMENT CELLAR (YUM CHA MULTIPLIERS)</h3>
         <button id="close-tea-btn" class="text-[#4ade80] text-xs font-bold px-2 py-1 bg-[#122817] border border-black">&times;</button>
       </div>
       <p class="text-[7px] text-[#c4e3cb] leading-relaxed">
-        Authentic dim sum is inseparable from Chinese tea. Brew seasonal loose-leaf pots using spent dim sum to activate permanent kitchen multipliers!
+        Authentic dim sum pairs hand-brewed vintage tea with artisan condiments. Brew teas and craft reserve sauces to activate permanent compounding multipliers across your entire kitchen!
       </p>
       
       <div id="teas-list" class="flex flex-col gap-2 max-h-[300px] overflow-y-auto pr-1"></div>
@@ -595,22 +595,30 @@
         wrapperSifu:  { count: 0, cost: 320,   rate: 0.1250, name: "Wardour Master Pincher",     desc: "Pleats crystal translucent har gow on Soho marble.", icon: "🥟" },
         bambooRack:   { count: 0, cost: 1450,  rate: 0.4400, name: "Shaftesbury Dragon Steamer", desc: "High-power multi-tiered commercial boiler tiers.", icon: "♨️" },
         headChef:     { count: 0, cost: 6200,  rate: 1.4500, name: "Executive Chef of Chinatown", desc: "Legendary master who brought authentic yum cha to London.", icon: "👨‍🍳" },
-        teaGuild:     { count: 0, cost: 26000, rate: 4.8000, name: "Newport Place Flagship Palace", desc: "Multi-storey dining landmark beneath the iconic Paifang.", icon: "🏯" }
+        teaGuild:     { count: 0, cost: 26000, rate: 4.8000, name: "Newport Place Flagship Palace", desc: "Multi-storey dining landmark beneath the iconic Paifang.", icon: "🏯" },
+        goldenDragon: { count: 0, cost: 110000, rate: 16.5000, name: "Gerrard Dragon Float Fleet", desc: "Ceremonial festival troupe serving thousands beneath paper lanterns.", icon: "🐉" },
+        dimsumDynasty: { count: 0, cost: 450000, rate: 55.0000, name: "Grand Imperial Paifang Dynasty", desc: "The supreme multi-pavilion culinary empire of London Chinatown.", icon: "👑" }
       },
       teas: {
-        jasmine:    { bought: false, cost: 150,   mult: 1.08, name: "Fragrant Jasmine Green (茉莉花茶)", desc: "Gentle floral notes soothe hungry queues (+8% all passive yield)." },
-        tieguanyin: { bought: false, cost: 1200,  mult: 1.15, name: "Iron Goddess Oolong (鐵觀音)",     desc: "Roasted complex notes boost staff speed (+15% passive yield)." },
-        puerh:      { bought: false, cost: 6000,  mult: 1.25, name: "Vintage Aged Pu-erh (陳年普洱)",     desc: "Deep earthy vintage tea clears rich dim sum (+25% passive yield)." },
-        daHongPao:  { bought: false, cost: 30000, mult: 1.40, name: "Imperial Wuyi Da Hong Pao (大紅袍)", desc: "Rare cliff tea fit for London aristocracy (+40% passive yield)." }
+        jasmine:      { bought: false, cost: 150,    mult: 1.08, name: "Fragrant Jasmine Green (茉莉花茶)", desc: "Gentle floral notes soothe hungry queues (+8% all passive yield)." },
+        chiliCrisp:   { bought: false, cost: 750,    mult: 1.12, name: "House Chiu Chow Chili Oil (潮州辣椒油)", desc: "Slow-simmered crispy garlic and shallot flakes in chili oil (+12% passive yield)." },
+        tieguanyin:   { bought: false, cost: 1200,   mult: 1.15, name: "Iron Goddess Oolong (鐵觀音)",     desc: "Roasted complex notes boost staff speed (+15% passive yield)." },
+        puerh:        { bought: false, cost: 6000,   mult: 1.25, name: "Vintage Aged Pu-erh (陳年普洱)",     desc: "Deep earthy vintage tea clears rich dim sum (+25% passive yield)." },
+        silverNeedle: { bought: false, cost: 15000,  mult: 1.30, name: "White Silver Needle Peony (白毫銀針)", desc: "Velvety sun-dried Fujian white tea steeped in crystal water (+30% passive yield)." },
+        daHongPao:    { bought: false, cost: 30000,  mult: 1.40, name: "Imperial Wuyi Da Hong Pao (大紅袍)", desc: "Rare cliff tea fit for London aristocracy (+40% passive yield)." },
+        xoSauce:      { bought: false, cost: 75000,  mult: 1.50, name: "Master Reserve XO Sauce (御品XO醬)", desc: "Hand-shredded dried scallops, Jinhua ham, and aged shallots (+50% passive yield)." },
+        dancongOolong:{ bought: false, cost: 200000, mult: 1.65, name: "Rare Phoenix Dancong Oolong (鳳凰單欉)", desc: "Ancient tree nectar oolong from Guangdong misty peaks (+65% passive yield)." }
       },
       badges: {
-        firstClick:      { unlocked: false, name: "First Steam",       desc: "Hand-crafted your very first dumpling.", icon: "🥟" },
-        hundredClub:     { unlocked: false, name: "Soho Apprentice",   desc: "Accumulated 100 lifetime dim sum.", icon: "🏮" },
-        thousandClub:    { unlocked: false, name: "Gerrard Regular",   desc: "Reached 1,000 lifetime dim sum.", icon: "🥢" },
-        tenThousand:     { unlocked: false, name: "West End Sensation",desc: "Reached 10,000 lifetime dim sum.", icon: "🏆" },
-        hundredThousand: { unlocked: false, name: "Chinatown Legend",  desc: "Crossed 100,000 lifetime dim sum.", icon: "👑" },
-        teaConnoisseur:  { unlocked: false, name: "Tea Master",        desc: "Brewed all four traditional tea pots.", icon: "🍵" },
-        fortuneCracker:  { unlocked: false, name: "Golden Destiny",    desc: "Found and cracked 5 lucky fortune cookies.", icon: "🥠" }
+        firstClick:       { unlocked: false, name: "First Steam",       desc: "Hand-crafted your very first dumpling.", icon: "🥟" },
+        hundredClub:      { unlocked: false, name: "Soho Apprentice",   desc: "Accumulated 100 lifetime dim sum.", icon: "🏮" },
+        thousandClub:     { unlocked: false, name: "Gerrard Regular",   desc: "Reached 1,000 lifetime dim sum.", icon: "🥢" },
+        tenThousand:      { unlocked: false, name: "West End Sensation",desc: "Reached 10,000 lifetime dim sum.", icon: "🏆" },
+        hundredThousand:  { unlocked: false, name: "Chinatown Legend",  desc: "Crossed 100,000 lifetime dim sum.", icon: "👑" },
+        dragonFleetOwner: { unlocked: false, name: "Dragon Master",     desc: "Commissioned the Gerrard Dragon Float Fleet.", icon: "🐉" },
+        teaConnoisseur:   { unlocked: false, name: "Tea Master",        desc: "Brewed the classic four tea varieties.", icon: "🍵" },
+        cellarMaster:     { unlocked: false, name: "Gourmet Cellar",    desc: "Crafted all artisan condiments and reserve teas.", icon: "🫙" },
+        fortuneCracker:   { unlocked: false, name: "Golden Destiny",    desc: "Found and cracked 5 lucky fortune cookies.", icon: "🥠" }
       }
     };
 
@@ -1042,19 +1050,24 @@
         startRainSound();
       }
 
-      if (gameState.isOverheated) {
+      const isZenActive = gameState.activeBuff && gameState.activeBuff.type === 'bamboo_zen';
+
+      if (gameState.isOverheated && !isZenActive) {
         playRetroSound('overheat');
         triggerHaptic([30, 40, 30]);
         setTicker("Steamer is smoking! Please wait for bamboo tiers to cool down.");
         return;
       }
 
-      const clickYield = 0.25;
+      // Hand click amount (boosted during Zen Fortune)
+      const clickYield = isZenActive ? 1.50 : 0.25;
       gameState.dimSum += clickYield;
       gameState.totalEarned += clickYield;
       gameState.totalClicks++;
 
-      gameState.heat += 9.5;
+      if (!isZenActive) {
+        gameState.heat += 9.5;
+      }
       playRetroSound('click');
       triggerHaptic(14);
 
@@ -1068,10 +1081,10 @@
       const clientY = e.clientY || (e.touches && e.touches[0] ? e.touches[0].clientY : 0);
 
       createSteamPuff(clientX, clientY);
-      createEarnPopup(clientX, clientY, "+0.25");
+      createEarnPopup(clientX, clientY, `+${clickYield.toFixed(2)}`);
 
-      // Overheat evaluation
-      if (gameState.heat >= 100) {
+      // Overheat evaluation (bypassed if Zen Fortune active)
+      if (!isZenActive && gameState.heat >= 100) {
         gameState.heat = 100;
         gameState.isOverheated = true;
         gameState.cooldownTimer = 8.0;
@@ -1221,35 +1234,44 @@
       }
     }
 
+    function unlockBadge(key) {
+      if (gameState.badges[key] && !gameState.badges[key].unlocked) {
+        gameState.badges[key].unlocked = true;
+        playRetroSound('tea');
+        triggerHaptic([25, 40, 25]);
+        setTicker(`🏆 TROPHY UNLOCKED: ${gameState.badges[key].name}! (${gameState.badges[key].desc})`);
+      }
+    }
+
     function checkAchievements() {
       if (!gameState.badges.firstClick.unlocked && gameState.totalClicks >= 1) unlockBadge('firstClick');
       if (!gameState.badges.hundredClub.unlocked && gameState.totalEarned >= 100) unlockBadge('hundredClub');
       if (!gameState.badges.thousandClub.unlocked && gameState.totalEarned >= 1000) unlockBadge('thousandClub');
       if (!gameState.badges.tenThousand.unlocked && gameState.totalEarned >= 10000) unlockBadge('tenThousand');
       if (!gameState.badges.hundredThousand.unlocked && gameState.totalEarned >= 100000) unlockBadge('hundredThousand');
+      if (!gameState.badges.dragonFleetOwner.unlocked && gameState.upgrades.goldenDragon?.count >= 1) unlockBadge('dragonFleetOwner');
       if (!gameState.badges.fortuneCracker.unlocked && gameState.fortuneCount >= 5) unlockBadge('fortuneCracker');
-      const allTeas = Object.values(gameState.teas).every(t => t.bought);
-      if (!gameState.badges.teaConnoisseur.unlocked && allTeas) unlockBadge('teaConnoisseur');
-    }
-
-    function unlockBadge(key) {
-      gameState.badges[key].unlocked = true;
-      setTicker(`🏆 TROPHY UNLOCKED: ${gameState.badges[key].name}!`);
-      playRetroSound('fortune');
+      
+      const classicTeas = ['jasmine', 'tieguanyin', 'puerh', 'daHongPao'];
+      if (!gameState.badges.teaConnoisseur.unlocked && classicTeas.every(k => gameState.teas[k]?.bought)) {
+        unlockBadge('teaConnoisseur');
+      }
+      const allCellar = Object.values(gameState.teas).every(t => t.bought);
+      if (!gameState.badges.cellarMaster.unlocked && allCellar) {
+        unlockBadge('cellarMaster');
+      }
     }
 
     const fortuneContainer = document.getElementById('fortune-container');
+    let fortuneTimer = null;
 
     function scheduleFortuneCookie() {
-      const delay = (70 + Math.random() * 70) * 1000;
-      setTimeout(() => {
+      if (fortuneTimer) clearTimeout(fortuneTimer);
+      // Spawn cookie every 65 to 130 seconds
+      const delay = 65000 + Math.random() * 65000;
+      fortuneTimer = setTimeout(() => {
         fortuneContainer.classList.remove('hidden');
-        setTimeout(() => {
-          if (!fortuneContainer.classList.contains('hidden')) {
-            fortuneContainer.classList.add('hidden');
-            scheduleFortuneCookie();
-          }
-        }, 18000);
+        setTicker("🥠 A Golden Fortune Cookie has drifted into the dining room! Tap it before it leaves!");
       }, delay);
     }
 
@@ -1260,181 +1282,51 @@
       playRetroSound('fortune');
       triggerHaptic([30, 20, 30, 20, 50]);
 
+      // Expanded Pool: 6 distinct fortune outcomes
       const roll = Math.random();
-      if (roll < 0.5) {
-        const rate = Math.max(0.05, calcPassiveRate());
-        const bonus = Math.max(25, Math.round(rate * 600));
+      const currentRate = Math.max(0.05, calcPassiveRate());
+
+      if (roll < 0.25) {
+        // Fortune 1: Great Wealth Flow (Lump sum 12 minutes)
+        const bonus = Math.max(35, Math.round(currentRate * 720));
         gameState.dimSum += bonus;
         gameState.totalEarned += bonus;
-        setTicker(`🥠 FORTUNE REVEALED: "Great wealth flows to the patient sifu!" (+${bonus.toLocaleString()} Dim Sum)`);
+        setTicker(`🥠 FORTUNE REVEALED: "Wealth flows like hot jasmine tea!" (+${bonus.toLocaleString()} Dim Sum burst)`);
+      } else if (roll < 0.45) {
+        // Fortune 2: West End Theatre Rush (2.5x speed frenzy for 35s)
+        gameState.activeBuff = { type: 'theatre_rush', name: "THEATRE RUSH (2.5X SPEED)", timer: 35, mult: 2.5 };
+        setTicker("🥠 FORTUNE REVEALED: West End curtains fall! Hungry patrons rush Diantang! (2.5x speed for 35s)");
+      } else if (roll < 0.65) {
+        // Fortune 3: Master Sifu's Bamboo Zen (Clear heat + no overheat + +1.50/click for 25s)
+        gameState.heat = 0;
+        gameState.isOverheated = false;
+        gameState.cooldownTimer = 0;
+        gameState.activeBuff = { type: 'bamboo_zen', name: "BAMBOO ZEN (+1.50/TAP & NO HEAT)", timer: 25, mult: 1.0 };
+        setTicker("🥠 FORTUNE REVEALED: Master Sifu's Zen focus! Steamer cannot overheat & clicks yield +1.50 for 25s!");
+      } else if (roll < 0.80) {
+        // Fortune 4: Soho Mist Rain Blessing (+75% passive bonus for 40s)
+        gameState.activeBuff = { type: 'rain_blessing', name: "SOHO RAIN BLESSING (+75% YIELD)", timer: 40, mult: 1.75 };
+        setTicker("🥠 FORTUNE REVEALED: London drizzle brings good luck! Steaming yield boosted by +75% for 40s!");
+      } else if (roll < 0.93) {
+        // Fortune 5: Trolley Caravan Stampede (Instant staff-scaled payout)
+        let totalStaff = 0;
+        for (const k in gameState.upgrades) totalStaff += gameState.upgrades[k].count;
+        const auntieBonus = Math.max(50, Math.round(totalStaff * 30 + currentRate * 300));
+        gameState.dimSum += auntieBonus;
+        gameState.totalEarned += auntieBonus;
+        setTicker(`🥠 FORTUNE REVEALED: Trolley Caravan Stampede! Gerrard Street crowds clear the carts! (+${auntieBonus.toLocaleString()} Dim Sum)`);
       } else {
-        gameState.activeBuff = { type: 'theatre_rush', timer: 30, mult: 2.0 };
-        setTicker("🥠 FORTUNE REVEALED: West End Theatre Rush! Kitchen speed doubled for 30 seconds!");
+        // Fortune 6: Rare Imperial Dragon Blessing (1,000 instant + 3.0x frenzy)
+        const dragonGift = 1000;
+        gameState.dimSum += dragonGift;
+        gameState.totalEarned += dragonGift;
+        gameState.activeBuff = { type: 'super_frenzy', name: "IMPERIAL DRAGON (3.0X SUPER FRENZY)", timer: 15, mult: 3.0 };
+        setTicker("🥠 RARE GOLDEN FORTUNE: Imperial Dragon Blessing! +1,000 Dim Sum & 3.0x Super Frenzy for 15s!");
       }
+
       checkAchievements();
       scheduleFortuneCookie();
       renderUI();
-    });
-
-    let lastTimestamp = performance.now();
-    let tickerInterval = 0;
-    let todCheckInterval = 0;
-
-    function gameLoop(now) {
-      const dt = (now - lastTimestamp) / 1000;
-      lastTimestamp = now;
-
-      // Passive kitchen generation
-      const rate = calcPassiveRate();
-      const earned = rate * dt;
-      gameState.dimSum += earned;
-      gameState.totalEarned += earned;
-
-      // Active temporary buff countdown
-      if (gameState.activeBuff) {
-        gameState.activeBuff.timer -= dt;
-        if (gameState.activeBuff.timer <= 0) {
-          gameState.activeBuff = null;
-          setTicker("The West End theatre crowd departs. Kitchen pace returns to normal.");
-        }
-      }
-
-      // Heat dissipation & Burnout recovery
-      if (gameState.isOverheated) {
-        gameState.cooldownTimer -= dt;
-        if (gameState.cooldownTimer <= 0) {
-          gameState.isOverheated = false;
-          gameState.cooldownTimer = 0;
-          gameState.heat = 0;
-          setTicker("Bamboo steamer temperature normalized. Steamers ready for action.");
-        }
-      } else if (gameState.heat > 0) {
-        gameState.heat = Math.max(0, gameState.heat - (12 * dt));
-      }
-
-      // Draw background rain
-      updateAndDrawRain();
-
-      // Atmospheric ticker update (~18s)
-      tickerInterval += dt;
-      if (tickerInterval > 18) {
-        tickerInterval = 0;
-        const randomSnippet = CHINATOWN_NEWS[Math.floor(Math.random() * CHINATOWN_NEWS.length)];
-        setTicker(randomSnippet);
-      }
-
-      // Periodic check for London GMT/BST time shifts
-      todCheckInterval += dt;
-      if (todCheckInterval > 30) {
-        todCheckInterval = 0;
-        applyTimeOfDayAtmosphere();
-      }
-
-      renderUI();
-      requestAnimationFrame(gameLoop);
-    }
-
-    function renderUI() {
-      document.getElementById('dimsum-counter').textContent = gameState.dimSum.toLocaleString('en-US', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-      });
-
-      const lifetimeEl = document.getElementById('lifetime-counter');
-      if (lifetimeEl) {
-        lifetimeEl.textContent = gameState.totalEarned.toLocaleString('en-US', {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2
-        });
-      }
-
-      const currentRate = calcPassiveRate();
-      document.getElementById('rate-counter').textContent = `Pace: +${currentRate.toFixed(4)}/s`;
-      document.getElementById('hourly-counter').textContent = (currentRate * 3600).toFixed(1);
-
-      const totalMult = calcTotalMultiplier();
-      const teaTag = document.getElementById('tea-multiplier-tag');
-      teaTag.textContent = `Tea: ${totalMult.toFixed(2)}x`;
-      teaTag.className = totalMult > 1.0 ? "text-[#4ade80] font-bold" : "text-[#888]";
-
-      const buffBox = document.getElementById('active-buff-box');
-      if (gameState.activeBuff) {
-        buffBox.classList.remove('hidden');
-        document.getElementById('buff-title').textContent = "THEATRE RUSH (2X MULTIPLIER)";
-        document.getElementById('buff-timer').textContent = `${Math.ceil(gameState.activeBuff.timer)}s`;
-      } else {
-        buffBox.classList.add('hidden');
-      }
-
-      const heatBar = document.getElementById('heat-bar');
-      const heatTitle = document.getElementById('heat-title');
-      const cooldownBadge = document.getElementById('cooldown-badge');
-      heatBar.style.width = `${gameState.heat}%`;
-
-      if (gameState.isOverheated) {
-        heatTitle.textContent = `OVERHEATED! COOLING: ${Math.ceil(gameState.cooldownTimer)}s`;
-        cooldownBadge.classList.remove('hidden');
-        heatBar.style.background = "#ef4444";
-      } else {
-        heatTitle.textContent = `BAMBOO HEAT: ${Math.floor(gameState.heat)}%`;
-        cooldownBadge.classList.add('hidden');
-        heatBar.style.background = gameState.heat > 75 ? "#f97316" : "linear-gradient(to right, #e58a22, #d62828)";
-      }
-
-      for (const key in gameState.upgrades) {
-        const upg = gameState.upgrades[key];
-        const btn = document.getElementById(`buy-btn-${key}`);
-        const costEl = document.getElementById(`cost-${key}`);
-        const countEl = document.getElementById(`count-${key}`);
-        if (btn && costEl && countEl) {
-          costEl.textContent = upg.cost.toLocaleString('en-US');
-          countEl.textContent = `Hired: ${upg.count}`;
-          btn.disabled = gameState.dimSum < upg.cost;
-        }
-      }
-
-      const progressPercent = Math.min(100, (gameState.totalEarned / TARGET_GOAL) * 100);
-      document.getElementById('goal-bar').style.width = `${progressPercent}%`;
-      document.getElementById('goal-percent').textContent = `${progressPercent.toFixed(4)}%`;
-
-      const remaining = Math.max(0, TARGET_GOAL - gameState.totalEarned);
-      document.getElementById('goal-remaining').textContent = `Remaining: ${remaining.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} dim sum`;
-
-      if (currentRate > 0) {
-        const secRemaining = remaining / currentRate;
-        const daysRemaining = (secRemaining / 86400).toFixed(1);
-        document.getElementById('goal-estimate').textContent = `Estimated time: ~${daysRemaining} days at current idle pace`;
-      } else {
-        document.getElementById('goal-estimate').textContent = `Estimated time: ~70-90 days with staff`;
-      }
-
-      const activeDish = getActiveSpecialty();
-      const dishIconEl = document.getElementById('dish-icon');
-      const dishNameEl = document.getElementById('dish-name');
-      const dishDescEl = document.getElementById('dish-desc');
-      if (dishIconEl) dishIconEl.textContent = activeDish.icon;
-      if (dishNameEl) dishNameEl.textContent = activeDish.name;
-      if (dishDescEl) dishDescEl.textContent = activeDish.desc;
-
-      if (gameState.totalEarned >= TARGET_GOAL) {
-        setTicker("CONGRATULATIONS! 383,000 Dim Sum achieved! Dim Sum Diantang is now the legendary grand palace of London Chinatown!");
-      }
-    }
-
-    // Rain Audio & Visual Toggle
-    const rainToggleBtn = document.getElementById('rain-toggle-btn');
-    const rainStatus = document.getElementById('rain-status');
-    rainToggleBtn.addEventListener('click', () => {
-      gameState.rainEnabled = !gameState.rainEnabled;
-      rainStatus.textContent = gameState.rainEnabled ? "ON" : "OFF";
-      if (gameState.rainEnabled) {
-        startRainSound();
-        setTicker("London rain begins to pitter-patter softly outside.");
-      } else {
-        stopRainSound();
-        setTicker("London rain subsides into a calm Soho mist.");
-      }
-      playRetroSound('click');
     });
 
     // Sound FX Toggle
@@ -1445,6 +1337,21 @@
       soundStatus.textContent = gameState.soundEnabled ? "ON" : "OFF";
       if (gameState.soundEnabled) playRetroSound('click');
     });
+
+    // Rain Toggle
+    const rainToggleBtn = document.getElementById('rain-toggle-btn');
+    const rainStatus = document.getElementById('rain-status');
+    if (rainToggleBtn && rainStatus) {
+      rainToggleBtn.addEventListener('click', () => {
+        gameState.rainEnabled = !gameState.rainEnabled;
+        rainStatus.textContent = gameState.rainEnabled ? "ON" : "OFF";
+        if (gameState.rainEnabled) {
+          startRainSound();
+        } else {
+          stopRainSound();
+        }
+      });
+    }
 
     // Haptics Toggle
     const hapticsToggleBtn = document.getElementById('haptics-toggle-btn');
@@ -1510,7 +1417,7 @@
       saveGame();
       const str = btoa(unescape(encodeURIComponent(JSON.stringify(gameState))));
       saveTextarea.value = str;
-      feedback.textContent = "Save string generated! Keep it safe in your notes.";
+      feedback.textContent = "Save key generated! Copy and store it in your notes.";
     });
 
     document.getElementById('copy-btn').addEventListener('click', () => {
@@ -1526,7 +1433,7 @@
     document.getElementById('import-btn').addEventListener('click', () => {
       const code = saveTextarea.value.trim();
       if (!code) {
-        feedback.textContent = "Please paste a backup string in the box above.";
+        feedback.textContent = "Please paste a save key into the box above.";
         return;
       }
       try {
@@ -1562,6 +1469,142 @@
         feedback.textContent = "Error parsing save code. Please ensure no trailing spaces.";
       }
     });
+
+    let lastTimestamp = performance.now();
+
+    function gameLoop(now) {
+      const dt = Math.min(1.0, (now - lastTimestamp) / 1000);
+      lastTimestamp = now;
+
+      // Passive Dumpling generation
+      const rate = calcPassiveRate();
+      const earned = rate * dt;
+      gameState.dimSum += earned;
+      gameState.totalEarned += earned;
+
+      // Active temporary buff countdown
+      if (gameState.activeBuff) {
+        gameState.activeBuff.timer -= dt;
+        if (gameState.activeBuff.timer <= 0) {
+          const finishedType = gameState.activeBuff.type;
+          gameState.activeBuff = null;
+          if (finishedType === 'bamboo_zen') {
+            setTicker("Master Sifu's Zen focus concludes. Steamer pressure normalizes.");
+          } else {
+            setTicker("The festive crowd disperses. Kitchen pace returns to normal.");
+          }
+        }
+      }
+
+      // Heat dissipation & Burnout recovery
+      if (gameState.isOverheated) {
+        gameState.cooldownTimer -= dt;
+        if (gameState.cooldownTimer <= 0) {
+          gameState.isOverheated = false;
+          gameState.cooldownTimer = 0;
+          gameState.heat = 0;
+          setTicker("Bamboo steamer temperature normalized. Ready for steaming.");
+        }
+      } else if (gameState.heat > 0) {
+        // Cools by 12% heat per second
+        gameState.heat = Math.max(0, gameState.heat - (12 * dt));
+      }
+
+      updateAndDrawRain();
+      renderUI();
+      requestAnimationFrame(gameLoop);
+    }
+
+    function renderUI() {
+      // Numerical displays
+      document.getElementById('dimsum-counter').textContent = gameState.dimSum.toLocaleString('en-US', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+
+      const lifetimeEl = document.getElementById('lifetime-counter');
+      if (lifetimeEl) {
+        lifetimeEl.textContent = gameState.totalEarned.toLocaleString('en-US', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        });
+      }
+
+      const currentRate = calcPassiveRate();
+      document.getElementById('rate-counter').textContent = `Pace: +${currentRate.toFixed(4)}/s`;
+      document.getElementById('hourly-counter').textContent = (currentRate * 3600).toFixed(1);
+
+      const teaMultEl = document.getElementById('tea-multiplier-tag');
+      if (teaMultEl) {
+        teaMultEl.textContent = `Tea: ${calcTotalMultiplier().toFixed(2)}x`;
+      }
+
+      // Heat Meter
+      const heatBar = document.getElementById('heat-bar');
+      const heatTitle = document.getElementById('heat-title');
+      const cooldownBadge = document.getElementById('cooldown-badge');
+      heatBar.style.width = `${gameState.heat}%`;
+
+      if (gameState.isOverheated) {
+        heatTitle.textContent = `OVERHEATED! COOLING: ${Math.ceil(gameState.cooldownTimer)}s`;
+        cooldownBadge.classList.remove('hidden');
+        heatBar.style.background = "#e61919";
+      } else {
+        heatTitle.textContent = `BAMBOO HEAT: ${Math.floor(gameState.heat)}%`;
+        cooldownBadge.classList.add('hidden');
+        heatBar.style.background = gameState.heat > 75 ? "#ff5e00" : "linear-gradient(to right, #e58a22, #d62828)";
+      }
+
+      // Active Buff Box
+      const buffBox = document.getElementById('active-buff-box');
+      if (gameState.activeBuff && gameState.activeBuff.timer > 0) {
+        buffBox.classList.remove('hidden');
+        document.getElementById('buff-title').textContent = gameState.activeBuff.name || "KITCHEN BUFF ACTIVE";
+        document.getElementById('buff-timer').textContent = `${Math.ceil(gameState.activeBuff.timer)}s`;
+      } else {
+        buffBox.classList.add('hidden');
+      }
+
+      // Upgrade Buttons state
+      for (const key in gameState.upgrades) {
+        const upg = gameState.upgrades[key];
+        const btn = document.getElementById(`buy-btn-${key}`);
+        const costEl = document.getElementById(`cost-${key}`);
+        const countEl = document.getElementById(`count-${key}`);
+        if (btn && costEl && countEl) {
+          costEl.textContent = upg.cost.toLocaleString('en-US');
+          countEl.textContent = `Hired: ${upg.count}`;
+          btn.disabled = gameState.dimSum < upg.cost;
+        }
+      }
+
+      // Goal Calculations based on permanent lifetime production
+      const progressPercent = Math.min(100, (gameState.totalEarned / TARGET_GOAL) * 100);
+      document.getElementById('goal-bar').style.width = `${progressPercent}%`;
+      document.getElementById('goal-percent').textContent = `${progressPercent.toFixed(4)}%`;
+
+      const remaining = Math.max(0, TARGET_GOAL - gameState.totalEarned);
+      document.getElementById('goal-remaining').textContent = `Remaining: ${remaining.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} dim sum`;
+
+      if (currentRate > 0) {
+        const secRemaining = remaining / currentRate;
+        const daysRemaining = (secRemaining / 86400).toFixed(1);
+        document.getElementById('goal-estimate').textContent = `Estimated time: ~${daysRemaining} days at current pace`;
+      } else {
+        document.getElementById('goal-estimate').textContent = `Estimated time: ~70-90 days with kitchen staff`;
+      }
+
+      // Milestone dish
+      const activeDish = getActiveSpecialty();
+      document.getElementById('dish-icon').textContent = activeDish.icon;
+      document.getElementById('dish-name').textContent = activeDish.name;
+      document.getElementById('dish-desc').textContent = activeDish.desc;
+
+      // Completion celebration check
+      if (gameState.totalEarned >= TARGET_GOAL) {
+        document.getElementById('ticker-text').textContent = "CONGRATULATIONS! 383,000 Dim Sum achieved! Dim Sum Diantang is crowned the supreme palace of London Chinatown!";
+      }
+    }
 
     document.getElementById('reset-btn').addEventListener('click', () => {
       const resetMsgBox = document.createElement('div');
