@@ -4,7 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Dim Sum Master 倫敦唐人街點心大師</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🥠</text></svg>">
+  
+  <!-- Offline SVG Favicon: Traditional Character '點' for Dim Sum -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23701212'/><text x='50%' y='55%' dominant-baseline='central' text-anchor='middle' font-family='serif' font-weight='900' font-size='62' fill='%23f5b938'>點</text></svg>">
+  
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Noto+Serif+TC:wght@600;900&display=swap" rel="stylesheet">
@@ -12,40 +15,35 @@
 
   <style>
     :root {
-      --bg-gradient-top: #460c0c;
-      --bg-gradient-bottom: #160303;
-      --panel-dark: #190404;
-      --card-bg: #270909;
+      --bg-gradient-top: #360707;
+      --bg-gradient-bottom: #0d0101;
       --gold-accent: #f5b938;
       --gold-glow: #ffd666;
       --paper-cream: #faf2dc;
-      --bamboo-light: #dfa86a;
-      --bamboo-dark: #6e401b;
-      --border-shadow: #0f0202;
-      --jade-green: #38b000;
+      --border-shadow: #080101;
       --lantern-glow: rgba(245, 185, 56, 0.45);
-      --rain-opacity: 0.7;
+      --rain-opacity: 0.85;
     }
 
-    /* Dynamic London Time-of-Day Palette Overrides */
+    /* Environmental Cycle Palettes aboard A.R.C. Core Draconis */
     body.tod-morning {
-      --bg-gradient-top: #3d1a14;
-      --bg-gradient-bottom: #140707;
+      --bg-gradient-top: #2c120c;
+      --bg-gradient-bottom: #0a0404;
       --lantern-glow: rgba(253, 224, 71, 0.35);
     }
     body.tod-afternoon {
-      --bg-gradient-top: #4a0d0d;
-      --bg-gradient-bottom: #170404;
+      --bg-gradient-top: #380808;
+      --bg-gradient-bottom: #0d0202;
       --lantern-glow: rgba(245, 185, 56, 0.5);
     }
     body.tod-dusk {
-      --bg-gradient-top: #360a1d;
-      --bg-gradient-bottom: #12030d;
+      --bg-gradient-top: #24061a;
+      --bg-gradient-bottom: #09010a;
       --lantern-glow: rgba(251, 146, 60, 0.65);
     }
     body.tod-night {
-      --bg-gradient-top: #1c0919;
-      --bg-gradient-bottom: #090209;
+      --bg-gradient-top: #120412;
+      --bg-gradient-bottom: #040105;
       --lantern-glow: rgba(244, 63, 94, 0.55);
     }
 
@@ -59,7 +57,7 @@
     }
 
     body {
-      background: radial-gradient(circle at 50% 20%, var(--bg-gradient-top) 0%, var(--bg-gradient-bottom) 100%);
+      background: radial-gradient(circle at 50% 25%, var(--bg-gradient-top) 0%, var(--bg-gradient-bottom) 100%);
       font-family: 'Press Start 2P', monospace;
       color: var(--paper-cream);
       min-height: 100vh;
@@ -69,7 +67,8 @@
       position: relative;
     }
 
-    #rain-canvas {
+    /* Observation Viewport Canvas (Stars + Carrier Hull Silhouette + Window Rain) */
+    #viewport-canvas {
       position: fixed;
       top: 0;
       left: 0;
@@ -78,7 +77,6 @@
       pointer-events: none;
       z-index: 1;
       opacity: var(--rain-opacity);
-      transition: opacity 1s ease;
     }
 
     .main-app-container {
@@ -93,9 +91,9 @@
     .pixel-box {
       border: 4px solid var(--border-shadow);
       box-shadow: 
-        inset 2px 2px 0px rgba(255,255,255,0.12),
-        inset -2px -2px 0px rgba(0,0,0,0.65),
-        4px 4px 0px rgba(0,0,0,0.8);
+        inset 2px 2px 0px rgba(255,255,255,0.1),
+        inset -2px -2px 0px rgba(0,0,0,0.7),
+        4px 4px 0px rgba(0,0,0,0.85);
     }
 
     .pixel-btn {
@@ -175,18 +173,9 @@
     }
 
     @keyframes floatSteam {
-      0% {
-        opacity: 0.95;
-        transform: translate(0, 0) scale(0.8) rotate(0deg);
-      }
-      50% {
-        opacity: 0.7;
-        transform: translate(-12px, -38px) scale(1.3) rotate(-8deg);
-      }
-      100% {
-        opacity: 0;
-        transform: translate(10px, -80px) scale(1.8) rotate(14deg);
-      }
+      0% { opacity: 0.95; transform: translate(0, 0) scale(0.8) rotate(0deg); }
+      50% { opacity: 0.7; transform: translate(-12px, -38px) scale(1.3) rotate(-8deg); }
+      100% { opacity: 0; transform: translate(10px, -80px) scale(1.8) rotate(14deg); }
     }
 
     .steam-puff {
@@ -200,14 +189,8 @@
     }
 
     @keyframes popEarn {
-      0% {
-        opacity: 1;
-        transform: translateY(0) scale(0.9);
-      }
-      100% {
-        opacity: 0;
-        transform: translateY(-40px) scale(1.1);
-      }
+      0% { opacity: 1; transform: translateY(0) scale(0.9); }
+      100% { opacity: 0; transform: translateY(-40px) scale(1.1); }
     }
 
     .earn-popup {
@@ -233,15 +216,6 @@
       filter: drop-shadow(0 0 8px var(--lantern-glow));
     }
 
-    @keyframes softPulseGlow {
-      0%, 100% { opacity: 0.85; filter: drop-shadow(0 0 4px #f5b938); }
-      50% { opacity: 1; filter: drop-shadow(0 0 14px #ffd666); }
-    }
-
-    .cosy-glow {
-      animation: softPulseGlow 3s infinite ease-in-out;
-    }
-
     @keyframes gentleVapor {
       0% { transform: translateY(0) scale(0.9); opacity: 0.2; }
       50% { transform: translateY(-8px) scale(1.1); opacity: 0.6; }
@@ -253,16 +227,24 @@
       animation: gentleVapor 2.2s ease-out infinite;
     }
 
-    /* Retro scrollbar */
+    /* Carrier Hull Viewport Stencil */
+    .hull-stencil {
+      font-size: 6px;
+      letter-spacing: 1px;
+      color: #4ade80;
+      opacity: 0.75;
+      text-shadow: 0 0 4px #22c55e;
+    }
+
     ::-webkit-scrollbar {
       width: 8px;
       height: 8px;
     }
     ::-webkit-scrollbar-track {
-      background: #140303;
+      background: #0f0202;
     }
     ::-webkit-scrollbar-thumb {
-      background: #6e2217;
+      background: #541710;
       border: 1px solid var(--gold-accent);
     }
   </style>
@@ -270,15 +252,15 @@
 
 <body class="p-2 sm:p-5 flex flex-col items-center justify-start min-h-screen">
   
-  <!-- Canvas for London Rain Ambient Particle Animation -->
-  <canvas id="rain-canvas"></canvas>
+  <!-- Canvas: Deep space starfield + Carrier hull trusses + Simulated London rain -->
+  <canvas id="viewport-canvas"></canvas>
 
-  <div class="main-app-container w-full max-w-5xl bg-[#230606]/95 backdrop-blur-sm pixel-box p-3 sm:p-5 mb-4 flex flex-col gap-4">
+  <div class="main-app-container w-full max-w-5xl bg-[#1d0505]/95 backdrop-blur-md pixel-box p-3 sm:p-5 mb-4 flex flex-col gap-4">
     
-    <!-- Top Header: Title, Chinatown Lanterns, Time-of-Day, Controls -->
+    <!-- Top Header: Title, Chinatown Lanterns, Carrier Nav & Time Controls -->
     <header class="border-b-4 border-[#f5b938] pb-3 flex flex-col md:flex-row items-center justify-between gap-3 text-center md:text-left">
       <div class="flex items-center gap-3">
-        <span class="text-3xl filter lantern-sway">🏮</span>
+        <span id="secret-lantern" class="text-3xl filter lantern-sway cursor-pointer active:scale-125 transition-transform" title="A warm glowing silk lantern...">🏮</span>
         <div>
           <div class="flex items-center gap-2 justify-center md:justify-start">
             <h1 class="text-xs sm:text-base md:text-lg text-[#f5b938] tracking-wider leading-relaxed">
@@ -286,44 +268,44 @@
             </h1>
             <span class="cosy-cup-steam text-xs text-[#a7f3d0]">♨️</span>
           </div>
-          <div class="text-[9px] sm:text-[10px] text-[#ffd666] font-bold tracking-wide mt-0.5">
-            RESTAURANT: DIM SUM DIANTANG <span class="chinese-font font-bold text-xs text-[#ffe599]">(點心殿堂)</span>
+          <div class="text-[8px] sm:text-[9px] text-[#ffd666] font-bold tracking-wide mt-0.5">
+            A.R.C. CORE DRACONIS &bull; SUB-DECK 04, SOHO BIODOME, LITTLE GERRARD ST<span class="chinese-font font-bold text-xs text-[#ffe599]">(點心殿堂)</span>
           </div>
-          <p class="text-[7px] sm:text-[8px] text-[#f7d5a3] mt-1 tracking-tight">
-            GERRARD ST, LONDON CHINATOWN &bull; TARGET: 383,000 DISHES
+          <p class="hull-stencil mt-1 uppercase">
+            REPLICATED PRECIPITATION / EXTERNAL: HARD VACUUM (0.00 ATM) / GOAL: 383,000 DISHES
           </p>
         </div>
         <span class="text-3xl filter lantern-sway" style="animation-delay: -1.8s;">🏮</span>
       </div>
 
       <div class="flex flex-col items-center md:items-end gap-1.5">
-        <!-- Live London GMT / BST Atmosphere Badge -->
-        <button id="tod-toggle-btn" class="bg-[#38110b] text-[#fde047] border border-[#f5b938] px-2.5 py-1 text-[7px] sm:text-[8px] pixel-btn flex items-center gap-1.5 shadow" title="Click to cycle London Day/Night ambience">
+        <!-- Live London / Fleet Time Atmosphere Badge -->
+        <button id="tod-toggle-btn" class="bg-[#2e0e09] text-[#fde047] border border-[#f5b938] px-2.5 py-1 text-[7px] sm:text-[8px] pixel-btn flex items-center gap-1.5 shadow" title="Click to cycle Carrier Habitat day/night cycles">
           <span id="tod-icon">🌆</span>
-          <span id="tod-text">LONDON GMT: 15:00 &bull; AFTERNOON YUM CHA</span>
-          <span class="text-[6px] text-[#fcd34d] opacity-80">(CLICK TO CYCLE)</span>
+          <span id="tod-text">FLEET CYCLE: 15:00 &bull; AFTERNOON YUM CHA</span>
+          <span class="text-[6px] text-[#fcd34d] opacity-80">(CYCLE)</span>
         </button>
 
         <div class="flex flex-wrap items-center justify-center md:justify-end gap-1.5 text-[7px] sm:text-[8px]">
-          <button id="rain-toggle-btn" class="bg-[#192f38] text-[#7dd3fc] border-2 border-black px-2 py-1.5 pixel-btn hover:bg-[#22414f] flex items-center gap-1">
-            <span>🌧️ RAIN:</span> <span id="rain-status">ON</span>
+          <button id="rain-toggle-btn" class="bg-[#15272e] text-[#7dd3fc] border-2 border-black px-2 py-1.5 pixel-btn hover:bg-[#1f3a45] flex items-center gap-1">
+            <span>🌧️ SCRUBBER:</span> <span id="rain-status">ON</span>
           </button>
-          <button id="sound-toggle-btn" class="bg-[#42140d] text-[#f5b938] border-2 border-black px-2 py-1.5 pixel-btn hover:bg-[#5a1b12]">
+          <button id="sound-toggle-btn" class="bg-[#38100a] text-[#f5b938] border-2 border-black px-2 py-1.5 pixel-btn hover:bg-[#4d160e]">
             SFX: <span id="sound-status">ON</span>
           </button>
-          <button id="haptics-toggle-btn" class="bg-[#42140d] text-[#f5b938] border-2 border-black px-2 py-1.5 pixel-btn hover:bg-[#5a1b12]">
+          <button id="haptics-toggle-btn" class="bg-[#38100a] text-[#f5b938] border-2 border-black px-2 py-1.5 pixel-btn hover:bg-[#4d160e]">
             VIBE: <span id="haptics-status">ON</span>
           </button>
-          <button id="tea-modal-btn" class="bg-[#243d1a] text-[#a7f3d0] border-2 border-black px-2.5 py-1.5 pixel-btn hover:bg-[#325824]">
-            TEA & CELLAR 🍵
+          <button id="tea-modal-btn" class="bg-[#1f3616] text-[#a7f3d0] border-2 border-black px-2.5 py-1.5 pixel-btn hover:bg-[#2b4c1f]">
+            TEA & SAKE CELLAR 🍶
           </button>
-          <button id="badges-toggle-btn" class="bg-[#42140d] text-[#fde68a] border-2 border-black px-2 py-1.5 pixel-btn hover:bg-[#5a1b12]">
+          <button id="badges-toggle-btn" class="bg-[#38100a] text-[#fde68a] border-2 border-black px-2.5 py-1.5 pixel-btn hover:bg-[#4d160e]">
             TROPHIES 🏆
           </button>
-          <button id="stats-toggle-btn" class="bg-[#42140d] text-[#faf2dc] border-2 border-black px-2 py-1.5 pixel-btn hover:bg-[#5a1b12]">
-            STATS 📜
+          <button id="stats-toggle-btn" class="bg-[#38100a] text-[#faf2dc] border-2 border-black px-2 py-1.5 pixel-btn hover:bg-[#4d160e]">
+            LOG 📜
           </button>
-          <button id="data-toggle-btn" class="bg-[#42140d] text-[#faf2dc] border-2 border-black px-2 py-1.5 pixel-btn hover:bg-[#5a1b12]">
+          <button id="data-toggle-btn" class="bg-[#38100a] text-[#faf2dc] border-2 border-black px-2 py-1.5 pixel-btn hover:bg-[#4d160e]">
             BACKUP 💾
           </button>
         </div>
@@ -333,23 +315,23 @@
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
 
       <!-- LEFT COLUMN: Steamer, Dual Dumpling Counter, Overheat Guard, Specialty Dish -->
-      <section class="lg:col-span-5 bg-[#170303]/90 pixel-box p-3 sm:p-4 flex flex-col items-center text-center">
+      <section class="lg:col-span-5 bg-[#120202]/90 pixel-box p-3 sm:p-4 flex flex-col items-center text-center">
         
         <!-- Dual Counter: Spendable vs Lifetime Goal -->
-        <div class="w-full bg-[#fceddb] text-[#1b0a06] border-4 border-black p-3 mb-3 pixel-box text-left shadow-inner">
+        <div class="w-full bg-[#faecd9] text-[#1b0a06] border-4 border-black p-3 mb-3 pixel-box text-left shadow-inner">
           <div class="flex justify-between items-center border-b border-[#c49b77] pb-1 mb-2">
-            <span class="text-[7px] text-[#6d3923] tracking-wider font-bold">DIANTANG PANTRY (TO SPEND):</span>
+            <span class="text-[7px] text-[#6d3923] tracking-wider font-bold">SHIP PANTRY (TO SPEND):</span>
             <span id="dimsum-counter" class="text-sm sm:text-base font-black text-[#961e1e]">0.00</span>
           </div>
           <div>
-            <div class="text-[7px] text-[#854d0e] font-bold">LIFETIME STEAMED (GOAL PROGRESS):</div>
+            <div class="text-[7px] text-[#854d0e] font-bold">LIFETIME STEAMED (VOYAGE PROGRESS):</div>
             <div id="lifetime-counter" class="text-base sm:text-xl md:text-2xl font-black text-[#b91c1c] my-1 tracking-tight">
               0.00
             </div>
           </div>
           <div class="flex justify-between items-center text-[7px] sm:text-[8px] text-[#555] tracking-tight mt-1 border-t border-[#c49b77] pt-1">
             <span id="rate-counter">Pace: +0.0000/s</span>
-            <span id="tea-multiplier-tag" class="text-[#059669] font-bold">Tea: 1.0x</span>
+            <span id="tea-multiplier-tag" class="text-[#059669] font-bold">Tea: 1.00x</span>
           </div>
         </div>
 
@@ -367,11 +349,11 @@
         </div>
 
         <div class="text-[8px] text-[#f5b938] mt-1 mb-2">
-          CLICK STEAMER (+0.25 DIM SUM)
+          CLICK STEAMER (+0.10 DIM SUM)
         </div>
 
         <!-- Heat Meter Box -->
-        <div class="w-full bg-[#270808] border-2 border-black p-2.5 text-left mb-3">
+        <div class="w-full bg-[#200606] border-2 border-black p-2.5 text-left mb-3">
           <div class="flex justify-between items-center text-[7px] mb-1.5">
             <span id="heat-title" class="text-[#f5b938]">BAMBOO HEAT: 0%</span>
             <span id="cooldown-badge" class="text-[#ff7878] hidden font-bold animate-pulse">OVERHEATED!</span>
@@ -379,25 +361,25 @@
           <div class="w-full h-3 bg-black border border-[#481810] overflow-hidden">
             <div id="heat-bar" class="h-full bg-gradient-to-r from-[#e58a22] to-[#d62828] transition-all duration-100" style="width: 0%;"></div>
           </div>
-          <p class="text-[6px] text-[#d1a880] mt-1.5 leading-relaxed">
-            Paced clicks allow optimal temperature. Rapid spamming overheats the bamboo tiers, triggering an 8s cooldown.
+          <p class="text-[6px] text-[#c49b75] mt-1.5 leading-relaxed">
+            Deliberate pacing preserves heat integrity. Rapid mashing overheats the bamboo tiers, triggering an 8s cooldown.
           </p>
         </div>
 
         <!-- Active Specialty Dish Milestone -->
-        <div class="w-full bg-[#230909] border-2 border-[#541f12] p-2.5 flex items-center gap-3">
+        <div class="w-full bg-[#1c0606] border-2 border-[#481810] p-2.5 flex items-center gap-3">
           <div id="dish-icon" class="text-3xl">🥟</div>
           <div class="text-left flex-1">
-            <div class="text-[7px] text-[#f5b938]">CURRENT SPECIALTY:</div>
+            <div class="text-[7px] text-[#f5b938]">CARRIER SPECIALTY DISH:</div>
             <div id="dish-name" class="text-[8px] text-[#faf2dc] font-bold">House Har Gow</div>
-            <div id="dish-desc" class="text-[6px] text-[#d1a880]">Classic translucent crystal shrimp dumpling.</div>
+            <div id="dish-desc" class="text-[6px] text-[#d1a880]">Classic translucent crystal shrimp dumpling folded on Sub-Deck 4.</div>
           </div>
         </div>
 
         <!-- Active Event / Tea Bonus Notification Pill -->
-        <div id="active-buff-box" class="w-full mt-2.5 bg-[#142918] border-2 border-[#23582d] p-2 text-left hidden">
+        <div id="active-buff-box" class="w-full mt-2.5 bg-[#112415] border-2 border-[#1e4b26] p-2 text-left hidden">
           <div class="flex items-center justify-between text-[7px] text-[#a7f3d0]">
-            <span id="buff-title" class="font-bold">TEA CEREMONY ACTIVE</span>
+            <span id="buff-title" class="font-bold">BUFF ACTIVE</span>
             <span id="buff-timer">30s</span>
           </div>
         </div>
@@ -407,13 +389,13 @@
       <!-- RIGHT COLUMN: Kitchen Stations & Chefs -->
       <section class="lg:col-span-7 flex flex-col gap-3">
         
-        <div class="flex items-center justify-between border-b-2 border-[#551818] pb-2">
-          <div class="text-[9px] text-[#f5b938] tracking-wider">KITCHEN STATIONS & CHEFS</div>
+        <div class="flex items-center justify-between border-b-2 border-[#4a1414] pb-2">
+          <div class="text-[9px] text-[#f5b938] tracking-wider">LITTLE GERRARD ST BRIGADE</div>
           <div class="text-[7px] text-[#e8ba84]">HOURLY YIELD: <span id="hourly-counter" class="text-[#ffd666] font-bold">0.0</span> / hr</div>
         </div>
 
         <!-- Upgrades List -->
-        <div id="upgrades-container" class="flex flex-col gap-2.5 max-h-[480px] overflow-y-auto pr-1">
+        <div id="upgrades-container" class="flex flex-col gap-2 max-h-[490px] overflow-y-auto pr-1">
           <!-- Populated dynamically via JS -->
         </div>
 
@@ -421,24 +403,24 @@
     </div>
 
     <!-- Milestone Goal Progress Bar -->
-    <div class="w-full bg-[#120202] border-2 border-black p-3 mt-1">
+    <div class="w-full bg-[#0d0101] border-2 border-black p-3 mt-1">
       <div class="flex justify-between items-center text-[7px] sm:text-[8px] text-[#f5b938] mb-1.5">
-        <span>ROAD TO 383,000 DIM SUM (2-3 MONTH MASTER GOAL)</span>
+        <span>A.R.C. CORE DRACONIS EXPEDITION TARGET: 383,000 DIM SUM</span>
         <span id="goal-percent" class="text-[#ffe082]">0.0000%</span>
       </div>
-      <div class="w-full h-5 bg-black border-2 border-[#3d1313] overflow-hidden p-0.5">
+      <div class="w-full h-5 bg-black border-2 border-[#330f0f] overflow-hidden p-0.5">
         <div id="goal-bar" class="h-full bg-gradient-to-r from-[#d97706] via-[#f59e0b] to-[#fde047] transition-all duration-300" style="width: 0%;"></div>
       </div>
       <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center text-[6px] sm:text-[7px] text-[#c79c72] mt-1.5 gap-1">
         <span id="goal-remaining">Remaining: 383,000.00 dim sum</span>
-        <span id="goal-estimate">Estimated time: ~70-90 days at current pace</span>
+        <span id="goal-estimate">Estimated voyage duration: ~6 to 7+ months (&ge;180 days) at calibrated pace</span>
       </div>
     </div>
 
-    <!-- Gerrard Street Live Atmospheric Ticker -->
-    <div class="w-full bg-[#0d0101] border-2 border-black p-2 text-[7px] text-[#86efac] flex items-center gap-2 overflow-hidden">
-      <span class="text-[#f5b938] font-bold whitespace-nowrap">[GERRARD ST]</span>
-      <span id="ticker-text" class="truncate">Red lanterns sway on Gerrard Street. Crowds gather outside Dim Sum Diantang for morning tea.</span>
+    <!-- Bottom Deep Space & Sub-Deck Ticker -->
+    <div class="w-full bg-[#080101] border-2 border-black p-2 text-[7px] text-[#86efac] flex items-center gap-2 overflow-hidden">
+      <span class="text-[#f5b938] font-bold whitespace-nowrap">[LITTLE GERRARD]</span>
+      <span id="ticker-text" class="truncate">A.R.C. Core Draconis drifts through the black. Moisture runs down the observation glass over Little Gerrard Street.</span>
     </div>
 
   </div>
@@ -453,34 +435,64 @@
     </div>
   </div>
 
-  <!-- Tea House Modal -->
+  <!-- Tea & Condiment Cellar Modal -->
   <div id="tea-modal" class="fixed inset-0 bg-black/85 z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-[#1f0b08] border-4 border-[#4ade80] p-4 sm:p-5 max-w-lg w-full pixel-box flex flex-col gap-3 text-left">
-      <div class="flex justify-between items-center border-b-2 border-[#2b5934] pb-2">
-        <h3 class="text-[9px] sm:text-[10px] text-[#4ade80]">🍵 DIANTANG TEA & CONDIMENT CELLAR (YUM CHA MULTIPLIERS)</h3>
-        <button id="close-tea-btn" class="text-[#4ade80] text-xs font-bold px-2 py-1 bg-[#122817] border border-black">&times;</button>
+    <div class="bg-[#180907] border-4 border-[#4ade80] p-4 sm:p-5 max-w-lg w-full pixel-box flex flex-col gap-3 text-left">
+      <div class="flex justify-between items-center border-b-2 border-[#224f2b] pb-2">
+        <h3 class="text-[9px] sm:text-[10px] text-[#4ade80]">🍵 DIANTANG TEA, SAKE & RESERVE CELLAR (VOYAGE MULTIPLIERS)</h3>
+        <button id="close-tea-btn" class="text-[#4ade80] text-xs font-bold px-2 py-1 bg-[#0f2414] border border-black">&times;</button>
       </div>
       <p class="text-[7px] text-[#c4e3cb] leading-relaxed">
-        Authentic dim sum pairs hand-brewed vintage tea with artisan condiments. Brew teas and craft reserve sauces to activate permanent compounding multipliers across your entire kitchen!
+        Deep-space dim sum pairs vintage terrestrial tea with artisan condiments and chilled sake reserves. Brew rare batches to unlock permanent compounding multipliers for your entire kitchen brigade!
       </p>
       
       <div id="teas-list" class="flex flex-col gap-2 max-h-[300px] overflow-y-auto pr-1"></div>
 
       <button id="done-tea-btn" class="bg-[#22c55e] text-[#0f2e16] text-[8px] py-2 font-bold pixel-btn border-2 border-black">
-        RETURN TO DINING ROOM
+        RETURN TO HABITATION DECK
+      </button>
+    </div>
+  </div>
+
+  <!-- Secret Easter Egg Modal: The Floating World VIP Salon -->
+  <div id="secret-salon-modal" class="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-[#250919] border-4 border-[#f472b6] p-4 sm:p-5 max-w-lg w-full pixel-box flex flex-col gap-3 text-left shadow-[0_0_35px_rgba(244,114,182,0.45)]">
+      <div class="flex justify-between items-center border-b-2 border-[#831843] pb-2">
+        <div class="flex items-center gap-2">
+          <span class="text-2xl animate-spin" style="animation-duration: 8s;">🌸</span>
+          <h3 class="text-[9px] sm:text-[10px] text-[#f472b6] font-bold">SECRET SUB-CHAMBER: THE FLOATING WORLD (浮世の離れ)</h3>
+        </div>
+        <button id="close-secret-btn" class="text-[#f472b6] text-xs font-bold px-2 py-1 bg-[#4c0519] border border-black">&times;</button>
+      </div>
+      
+      <div class="flex items-center gap-3 bg-[#3d0f28] p-2.5 border-2 border-[#9d174d]">
+        <span class="text-3xl">👘</span>
+        <div class="text-[7px] text-[#fbcfe8] leading-relaxed">
+          <span class="text-[#f472b6] font-bold">DISCOVERED:</span> Hidden behind the primary bamboo steam baffles lies Sub-Deck 4's clandestine VIP salon. An elite retinue of elegant geisha courtesans in trailing silk kimonos pour chilled sake and play synthesized shamisen tunes for weary officers.
+        </div>
+      </div>
+
+      <div class="text-[7px] text-[#fdf2f8] bg-[#1a0410] p-2.5 border border-[#831843] flex flex-col gap-1.5">
+        <div class="text-[#f472b6] font-bold">PERMANENT VOYAGE BLESSING:</div>
+        <div>&bull; <span class="text-[#fbcfe8] font-bold">Secret Salon Patronage:</span> +4% permanent passive culinary speed across the entire carrier!</div>
+        <div>&bull; <span class="text-[#fbcfe8] font-bold">VIP Courtesan Reserve:</span> +50.00 Dim Sum instant ceremonial banquet gift!</div>
+      </div>
+
+      <button id="claim-secret-btn" class="bg-gradient-to-r from-[#ec4899] to-[#be185d] text-white text-[8px] py-2.5 font-bold pixel-btn border-2 border-black tracking-wider">
+        ACCEPT SALON PATRONAGE &amp; SIP COLD SAKE 🍶
       </button>
     </div>
   </div>
 
   <!-- Badges Modal -->
   <div id="badges-modal" class="fixed inset-0 bg-black/85 z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-[#210808] border-4 border-[#f5b938] p-4 sm:p-5 max-w-lg w-full pixel-box flex flex-col gap-3 text-left">
-      <div class="flex justify-between items-center border-b-2 border-[#541d1d] pb-2">
-        <h3 class="text-[9px] sm:text-[10px] text-[#f5b938]">🏆 CHINATOWN HALL OF FAME</h3>
-        <button id="close-badges-btn" class="text-[#f5b938] text-xs font-bold px-2 py-1 bg-[#401212] border border-black">&times;</button>
+    <div class="bg-[#1c0606] border-4 border-[#f5b938] p-4 sm:p-5 max-w-lg w-full pixel-box flex flex-col gap-3 text-left">
+      <div class="flex justify-between items-center border-b-2 border-[#451616] pb-2">
+        <h3 class="text-[9px] sm:text-[10px] text-[#f5b938]">🏆 EXPEDITION HALL OF FAME</h3>
+        <button id="close-badges-btn" class="text-[#f5b938] text-xs font-bold px-2 py-1 bg-[#360e0e] border border-black">&times;</button>
       </div>
       <p class="text-[7px] text-[#e0b892]">
-        Track your culinary legacy across weeks of running Dim Sum Diantang.
+        Track the culinary milestones of Little Gerrard Street across months in deep space.
       </p>
       <div id="badges-list" class="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-[320px] overflow-y-auto pr-1"></div>
       <button id="done-badges-btn" class="bg-[#f5b938] text-[#240808] text-[8px] py-2 font-bold pixel-btn border-2 border-black">
@@ -491,34 +503,34 @@
 
   <!-- Stats Modal -->
   <div id="stats-modal" class="fixed inset-0 bg-black/85 z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-[#210808] border-4 border-[#f5b938] p-4 sm:p-5 max-w-md w-full pixel-box flex flex-col gap-3 text-left">
-      <div class="flex justify-between items-center border-b-2 border-[#541d1d] pb-2">
-        <h3 class="text-[9px] sm:text-[10px] text-[#f5b938]">CHINATOWN LEDGER & METRICS</h3>
-        <button id="close-stats-btn" class="text-[#f5b938] text-xs font-bold px-2 py-1 bg-[#401212] border border-black">&times;</button>
+    <div class="bg-[#1c0606] border-4 border-[#f5b938] p-4 sm:p-5 max-w-md w-full pixel-box flex flex-col gap-3 text-left">
+      <div class="flex justify-between items-center border-b-2 border-[#451616] pb-2">
+        <h3 class="text-[9px] sm:text-[10px] text-[#f5b938]">A.R.C. CORE DRACONIS SHIP LOG</h3>
+        <button id="close-stats-btn" class="text-[#f5b938] text-xs font-bold px-2 py-1 bg-[#360e0e] border border-black">&times;</button>
       </div>
       <div class="text-[7px] text-[#f5eedb] flex flex-col gap-2 my-1 leading-relaxed">
-        <div class="flex justify-between border-b border-[#3b1212] pb-1">
+        <div class="flex justify-between border-b border-[#300c0c] pb-1">
           <span>Total Dim Sum Steamed:</span>
           <span id="stat-total" class="text-[#f5b938] font-bold">0</span>
         </div>
-        <div class="flex justify-between border-b border-[#3b1212] pb-1">
+        <div class="flex justify-between border-b border-[#300c0c] pb-1">
           <span>Manual Steamer Clicks:</span>
           <span id="stat-clicks" class="text-[#f5b938]">0</span>
         </div>
-        <div class="flex justify-between border-b border-[#3b1212] pb-1">
-          <span>Dim Sum From Clicks:</span>
+        <div class="flex justify-between border-b border-[#300c0c] pb-1">
+          <span>Dim Sum From Manual Clicks:</span>
           <span id="stat-click-yield" class="text-[#f5b938]">0</span>
         </div>
-        <div class="flex justify-between border-b border-[#3b1212] pb-1">
-          <span>Kitchen Staff Employed:</span>
+        <div class="flex justify-between border-b border-[#300c0c] pb-1">
+          <span>Sub-Deck Staff Employed:</span>
           <span id="stat-stations" class="text-[#f5b938]">0</span>
         </div>
-        <div class="flex justify-between border-b border-[#3b1212] pb-1">
+        <div class="flex justify-between border-b border-[#300c0c] pb-1">
           <span>Fortune Cookies Cracked:</span>
           <span id="stat-cookies" class="text-[#f5b938]">0</span>
         </div>
-        <div class="flex justify-between border-b border-[#3b1212] pb-1">
-          <span>Gerrard St Grand Opening:</span>
+        <div class="flex justify-between border-b border-[#300c0c] pb-1">
+          <span>Little Gerrard Opening Date:</span>
           <span id="stat-start-date" class="text-[#f5b938]">Today</span>
         </div>
         <div class="flex justify-between">
@@ -534,27 +546,27 @@
 
   <!-- Backup & Export Modal -->
   <div id="data-modal" class="fixed inset-0 bg-black/85 z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-[#210808] border-4 border-[#f5b938] p-4 sm:p-5 max-w-lg w-full pixel-box flex flex-col gap-3 text-left">
-      <div class="flex justify-between items-center border-b-2 border-[#541d1d] pb-2">
-        <h3 class="text-[9px] sm:text-[10px] text-[#f5b938]">SAVE CODE & BACKUP LEDGER</h3>
-        <button id="close-data-btn" class="text-[#f5b938] text-xs font-bold px-2 py-1 bg-[#401212] border border-black">&times;</button>
+    <div class="bg-[#1c0606] border-4 border-[#f5b938] p-4 sm:p-5 max-w-lg w-full pixel-box flex flex-col gap-3 text-left">
+      <div class="flex justify-between items-center border-b-2 border-[#451616] pb-2">
+        <h3 class="text-[9px] sm:text-[10px] text-[#f5b938]">EXPEDITION SAVE KEY & BACKUP</h3>
+        <button id="close-data-btn" class="text-[#f5b938] text-xs font-bold px-2 py-1 bg-[#360e0e] border border-black">&times;</button>
       </div>
       <p class="text-[7px] text-[#e0b892] leading-normal">
-        Because progressing to 383,000 Dim Sum spans weeks to months, copy your backup string and store it safely in your notes!
+        Because progressing to 383,000 Dim Sum spans weeks to months on the voyage, copy your backup key and save it to your flight notes!
       </p>
-      <textarea id="save-data-textarea" class="w-full h-24 bg-black border-2 border-[#551818] p-2 text-[7px] text-[#86efac] font-mono select-all" placeholder="Your exported save key will appear here..."></textarea>
+      <textarea id="save-data-textarea" class="w-full h-24 bg-black border-2 border-[#451616] p-2 text-[7px] text-[#86efac] font-mono select-all" placeholder="Your exported save key will appear here..."></textarea>
       
       <div class="flex flex-wrap gap-2 text-[7px]">
-        <button id="export-btn" class="bg-[#42140d] text-[#f5b938] border border-black px-3 py-2 pixel-btn hover:bg-[#5a1b12]">
+        <button id="export-btn" class="bg-[#38100a] text-[#f5b938] border border-black px-3 py-2 pixel-btn hover:bg-[#4d160e]">
           GENERATE KEY
         </button>
-        <button id="copy-btn" class="bg-[#42140d] text-[#faf2dc] border border-black px-3 py-2 pixel-btn hover:bg-[#5a1b12]">
+        <button id="copy-btn" class="bg-[#38100a] text-[#faf2dc] border border-black px-3 py-2 pixel-btn hover:bg-[#4d160e]">
           COPY KEY
         </button>
-        <button id="import-btn" class="bg-[#7f1d1d] text-white border border-black px-3 py-2 pixel-btn hover:bg-[#991b1b]">
+        <button id="import-btn" class="bg-[#661616] text-white border border-black px-3 py-2 pixel-btn hover:bg-[#801b1b]">
           RESTORE FROM KEY
         </button>
-        <button id="reset-btn" class="bg-[#2a0808] text-[#ef4444] border border-[#ef4444] px-3 py-2 pixel-btn hover:bg-[#450a0a] ml-auto">
+        <button id="reset-btn" class="bg-[#240606] text-[#ef4444] border border-[#ef4444] px-3 py-2 pixel-btn hover:bg-[#3a0a0a] ml-auto">
           RESET SAVE
         </button>
       </div>
@@ -564,12 +576,13 @@
 
   <script>
     /*
-      DIM SUM MASTER: LONDON CHINATOWN ENGINE
-      - Target: 383,000 dim sum over ~75-90 days.
-      - Click: 0.25 Dim Sum (4 clicks = 1 dim sum).
-      - Overheat: Triggered upon rapid mashing to preserve paced idle longevity.
-      - Atmospheric London Weather & Time-of-Day Engine (GMT/BST).
-      - Procedural Web Audio Synthesizer: Continuous London Rain with low-pass pitter-patter.
+      DIM SUM MASTER: LITTLE GERRARD ST (A.R.C. CORE DRACONIS)
+      - Minimum 6-Month (180+ Day) Long-Haul Calibration (Target: 383,000 Dim Sum).
+      - Daily target velocity: ~2,128 dim sum / day (average ~0.0246/sec lifetime pace).
+      - Cost exponent: 1.42x.
+      - Click Yield: 0.10 Dim Sum (heat-limited).
+      - 10 Kitchen tiers & 8 Compounding cellar items (~1.32x max compound boost).
+      - Regular Fortune Cookies (~every 75-140s) with calibrated 1-min idle bonuses.
     */
     const TARGET_GOAL = 383000;
     const SAVE_KEY = 'dim_sum_master_longhaul_save_v3';
@@ -589,63 +602,65 @@
       hapticsEnabled: true,
       timeOfDayMode: 'auto', // 'auto', 'morning', 'afternoon', 'dusk', 'night'
       teaMultiplier: 1.0,
+      secretSalonUnlocked: false,
       activeBuff: null,
-upgrades: {
-  chopsticks:   { count: 0, cost: 8,      rate: 0.0008, name: "Pickle & Chopstick Runner", desc: "Spiced peanuts and tea mugs.", icon: "🥢" },
-  teaBoy:       { count: 0, cost: 30,     rate: 0.0035, name: "Lisle St. Tea Apprentice",   desc: "Refills hot jasmine pots.", icon: "🫖" },
-  scullery:     { count: 0, cost: 95,     rate: 0.0090, name: "Bamboo Tier Scullery Hand", desc: "Scrubs soaked willow racks.", icon: "🧽" },
-  hostess:      { count: 0, cost: 240,    rate: 0.0180, name: "Gerrard St. Qipao Hostess",  desc: "Welcomes rain-soaked crowds.", icon: "💃" },
-  cartAuntie:   { count: 0, cost: 650,    rate: 0.0450, name: "Yum Cha Trolley Auntie", desc: "Clatters down Soho aisles.", icon: "🛒" },
-  wrapperSifu:  { count: 0, cost: 2200,   rate: 0.1100, name: "Wardour Master Pincher",    desc: "Pleats crystal har gow folds.", icon: "🥟" },
-  bambooRack:   { count: 0, cost: 7500,   rate: 0.2600, name: "Shaftesbury Dragon Steamer",desc: "Multi-tiered copper boiler.", icon: "♨️" },
-  headChef:     { count: 0, cost: 24000,  rate: 0.5500, name: "Executive Chef of Chinatown",desc: "Legendary master of dim sum.", icon: "👨‍🍳" },
-  teaGuild:     { count: 0, cost: 80000,  rate: 1.1000, name: "Newport Place Flagship",    desc: "Grand paifang dining room.", icon: "🏯" },
-  goldenDragon: { count: 0, cost: 210000, rate: 2.2000, name: "Gerrard Dragon Float Fleet",desc: "Ceremonial festival banquet.", icon: "🐲" }
-},
+      upgrades: {
+        chopsticks:   { count: 0, cost: 10,     rate: 0.00015, name: "Pickle & Chopstick Runner",    desc: "Dishes out complimentary spiced peanuts and bamboo chopsticks.", icon: "🥢" },
+        teaBoy:       { count: 0, cost: 40,     rate: 0.00050, name: "Lisle St. Tea Apprentice",     desc: "Refills hot jasmine pots amidst the mist.", icon: "🫖" },
+        scullery:     { count: 0, cost: 150,    rate: 0.00120, name: "Bamboo Tier Scullery Hand",    desc: "Scans and soaks willow racks so the chef line never runs out.", icon: "🧽" },
+        hostess:      { count: 0, cost: 480,    rate: 0.00250, name: "Gerrard St. Qipao Hostess",    desc: "Welcomes off-duty flight officers in tailored crimson silk.", icon: "💃" },
+        cartAuntie:   { count: 0, cost: 1600,   rate: 0.00550, name: "Gerrard St. Trolley Auntie",  desc: "Navigates crowded concourses with boiling bamboo tiers.", icon: "🛒" },
+        wrapperSifu:  { count: 0, cost: 5800,   rate: 0.01200, name: "Wardour Master Pincher",      desc: "Pleats translucent crystal har gow on Soho marble.", icon: "🥟" },
+        bambooRack:   { count: 0, cost: 21000,  rate: 0.02200, name: "Shaftesbury Dragon Steamer",  desc: "Commercial multi-tier induction boiler stack.", icon: "♨️" },
+        headChef:     { count: 0, cost: 68000,  rate: 0.04000, name: "Executive Chef of Chinatown",  desc: "Master chef who brought authentic Cantonese yum cha to space.", icon: "👨‍🍳" },
+        teaGuild:     { count: 0, cost: 180000, rate: 0.07500, name: "Newport Place Flagship",      desc: "Multi-tiered dining pavilion beneath the Paifang gate.", icon: "🏯" },
+        goldenDragon: { count: 0, cost: 350000, rate: 0.12000, name: "Gerrard Dragon Float Fleet",  desc: "Festival banquet brigade leading Lunar celebrations on the Carrier.", icon: "🐲" }
+      },
       teas: {
-        jasmine:      { bought: false, cost: 250,    mult: 1.04, name: "Fragrant Jasmine Green (茉莉花茶)", desc: "Gentle floral notes soothe hungry queues (+4% all passive yield)." },
-        chiliCrisp:   { bought: false, cost: 1500,   mult: 1.04, name: "House Chiu Chow Chili Oil (潮州辣椒油)", desc: "Slow-simmered crispy garlic and shallot flakes in chili oil (+4% passive yield)." },
-        tieguanyin:   { bought: false, cost: 6000,   mult: 1.05, name: "Iron Goddess Oolong (鐵觀音)",     desc: "Roasted complex notes boost staff speed (+5% passive yield)." },
-        puerh:        { bought: false, cost: 22000,  mult: 1.06, name: "Vintage Aged Pu-erh (陳年普洱)",     desc: "Deep earthy vintage tea clears rich dim sum (+6% passive yield)." },
-        silverNeedle: { bought: false, cost: 65000,  mult: 1.07, name: "White Silver Needle Peony (白毫銀針)", desc: "Velvety sun-dried Fujian white tea steeped in crystal water (+7% passive yield)." },
-        daHongPao:    { bought: false, cost: 110000, mult: 1.07, name: "Imperial Wuyi Da Hong Pao (大紅袍)", desc: "Rare cliff tea fit for London aristocracy (+7% passive yield)." },
-        xoSauce:      { bought: false, cost: 180000, mult: 1.08, name: "Master Reserve XO Sauce (御品XO醬)", desc: "Hand-shredded dried scallops, Jinhua ham, and aged shallots (+8% passive yield)." },
-        dancongOolong:{ bought: false, cost: 280000, mult: 1.10, name: "Rare Phoenix Dancong Oolong (鳳凰單欉)", desc: "Ancient tree nectar oolong from Guangdong misty peaks (+10% passive yield)." }
+        jasmine:      { bought: false, cost: 350,    mult: 1.02, name: "Fragrant Jasmine Green (茉莉花茶)", desc: "Floral aromatics soothe flight fatigue (+2% passive yield)." },
+        chiliCrisp:   { bought: false, cost: 2200,   mult: 1.02, name: "House Chiu Chow Chili Oil (潮州辣椒油)", desc: "Crispy garlic and shallot flakes in chili oil (+2% passive yield)." },
+        tieguanyin:   { bought: false, cost: 9000,   mult: 1.03, name: "Iron Goddess Oolong (鐵觀音)",     desc: "Charcoal-roasted Fujian notes keep staff sharp (+3% passive yield)." },
+        chilledSake:  { bought: false, cost: 19500,  mult: 1.03, name: "Chilled Junmai Daiginjo (冷酒 清酒)", desc: "Sub-zero polished rice sake served chilled from the ice vault (+3% passive yield)." },
+        puerh:        { bought: false, cost: 32000,  mult: 1.03, name: "Vintage Aged Pu-erh (陳年普洱)",     desc: "Deep earthy vintage brick clears rich dumplings (+3% passive yield)." },
+        silverNeedle: { bought: false, cost: 85000,  mult: 1.04, name: "White Silver Needle Peony (白毫銀針)", desc: "Delicate spring buds steeped in pure condensed water (+4% passive yield)." },
+        daHongPao:    { bought: false, cost: 150000, mult: 1.04, name: "Imperial Wuyi Da Hong Pao (大紅袍)", desc: "Legendary cliff tea reserved for Fleet Admirals (+4% passive yield)." },
+        xoSauce:      { bought: false, cost: 240000, mult: 1.05, name: "Master Reserve XO Sauce (御品XO醬)", desc: "Dried scallops, Jinhua ham, and shallot reduction (+5% passive yield)." },
+        dancongOolong:{ bought: false, cost: 340000, mult: 1.05, name: "Rare Phoenix Dancong Oolong (鳳凰單欉)", desc: "Ancient tree nectar oolong from Guangdong mist peaks (+5% passive yield)." }
       },
       badges: {
-        firstClick:       { unlocked: false, name: "First Steam",       desc: "Hand-crafted your very first dumpling.", icon: "🥟" },
+        firstClick:       { unlocked: false, name: "First Steam",       desc: "Hand-crafted your first dumpling on Sub-Deck 4.", icon: "🥟" },
         hundredClub:      { unlocked: false, name: "Soho Apprentice",   desc: "Accumulated 100 lifetime dim sum.", icon: "🏮" },
-        thousandClub:     { unlocked: false, name: "Gerrard Regular",   desc: "Reached 1,000 lifetime dim sum.", icon: "🥢" },
-        tenThousand:      { unlocked: false, name: "West End Sensation",desc: "Reached 10,000 lifetime dim sum.", icon: "🏆" },
-        hundredThousand:  { unlocked: false, name: "Chinatown Legend",  desc: "Crossed 100,000 lifetime dim sum.", icon: "👑" },
-        dragonFleetOwner: { unlocked: false, name: "Dragon Master",     desc: "Commissioned the Gerrard Dragon Float Fleet.", icon: "🐉" },
+        thousandClub:     { unlocked: false, name: "Concourse Regular", desc: "Reached 1,000 lifetime dim sum.", icon: "🥢" },
+        tenThousand:      { unlocked: false, name: "Fleet Sensation",   desc: "Reached 10,000 lifetime dim sum.", icon: "🏆" },
+        hundredThousand:  { unlocked: false, name: "Little Gerrard Legend", desc: "Crossed 100,000 lifetime dim sum in the black.", icon: "👑" },
+        dragonFleetOwner: { unlocked: false, name: "Dragon Master",     desc: "Commissioned the Gerrard Dragon Float Fleet.", icon: "🐲" },
         teaConnoisseur:   { unlocked: false, name: "Tea Master",        desc: "Brewed the classic four tea varieties.", icon: "🍵" },
-        cellarMaster:     { unlocked: false, name: "Gourmet Cellar",    desc: "Crafted all artisan condiments and reserve teas.", icon: "🫙" },
-        fortuneCracker:   { unlocked: false, name: "Golden Destiny",    desc: "Found and cracked 5 lucky fortune cookies.", icon: "🥠" }
+        cellarMaster:     { unlocked: false, name: "Gourmet Cellar",    desc: "Crafted all artisan reserve teas and sauces.", icon: "🫙" },
+        fortuneCracker:   { unlocked: false, name: "Golden Destiny",    desc: "Cracked 5 golden fortune cookies.", icon: "🥠" },
+        floatingWorld:    { unlocked: false, name: "The Floating World", desc: "Found the clandestine Geisha Salon hidden in Sub-Deck 4.", icon: "🌸" }
       }
     };
 
     const DISH_MILESTONES = [
-      { req: 0,      name: "House Har Gow (蝦餃)",        icon: "🥟", desc: "Translucent crystal shrimp dumpling with tight pleats." },
-      { req: 1500,   name: "Golden Siu Mai (燒賣)",       icon: "🟡", desc: "Open-topped pork and prawn topped with orange tobiko." },
-      { req: 10000,  name: "Fluffy Char Siu Bao (叉燒包)",  icon: "🥟", desc: "Sweet honey barbecue pork tucked in snowy steamed bread." },
+      { req: 0,      name: "House Har Gow (蝦餃)",        icon: "🥟", desc: "Translucent crystal shrimp dumpling pleated on Sub-Deck 4." },
+      { req: 1500,   name: "Golden Siu Mai (燒賣)",       icon: "🟡", desc: "Open-topped pork and prawn crowned with golden tobiko." },
+      { req: 10000,  name: "Fluffy Char Siu Bao (叉燒包)",  icon: "🥟", desc: "Sweet honey barbecue pork tucked inside snowy steamed buns." },
       { req: 40000,  name: "Silky Cheong Fun (腸粉)",     icon: "🥢", desc: "Steamed wide rice sheets drenched in sweet seasoned soy." },
-      { req: 120000, name: "Xiao Long Bao Broth Pouches", icon: "🍲", desc: "Fragile skin filled with rich savory molten broth." },
-      { req: 250000, name: "Flaky Egg Tarts (蛋撻)",       icon: "🥧", desc: "Thousand-layer puff pastry cradling silken baked custard." },
-      { req: 383000, name: "Grand Chinatown Banquet (倫敦唐人街大宴)", icon: "👑", desc: "The crowning imperial feast of Gerrard Street." }
+      { req: 120000, name: "Xiao Long Bao Broth Pouches", icon: "🍲", desc: "Fragile skins holding rich savory molten broth." },
+      { req: 250000, name: "Flaky Egg Tarts (蛋撻)",       icon: "🥧", desc: "Thousand-layer puff pastry cradling warm silken custard." },
+      { req: 383000, name: "Grand Chinatown Banquet (倫敦唐人街大宴)", icon: "👑", desc: "The supreme imperial feast crowning the A.R.C. Core Draconis." }
     ];
 
     const CHINATOWN_NEWS = [
-      "A soft London drizzle falls outside; Gerrard Street red lanterns glow warm on the wet cobblestones.",
-      "The soothing aroma of hot jasmine tea drifts through Dim Sum Diantang's frosted glass windows.",
-      "Trolley aunties navigate between packed bamboo tables amidst the chatter of morning yum cha.",
-      "West End theatre patrons seek shelter from the Soho rain, queuing happily under the Paifang gate.",
-      "Steam rises steadily from thirty stacked bamboo tiers, carrying the aroma of shrimp dumplings.",
-      "Raindrops tap against the restaurant panes as master sifus fold delicate 20-pleat har gow.",
-      "Evening shoppers under black umbrellas pause to admire the golden roast duck window across Gerrard Street."
+      "A soft mist rains against the observation glass; lanterns cast crimson reflections across Sub-Deck 4.",
+      "The soothing aroma of hot jasmine tea drifts through Little Gerrard Street's frosted dining alcoves.",
+      "Trolley aunties weave between packed bamboo tables amidst the happy clatter of morning yum cha.",
+      "Off-duty pilots and engineers seek shelter from the concourse rain under the glowing Paifang gate.",
+      "Thirty stacked bamboo tiers hiss softly, sending rich shrimp and ginger aromas into the air scrubbers.",
+      "Raindrops trickle down the thick reinforced viewport as master sifus fold delicate 20-pleat har gow.",
+      "Outside, distant nebulae glow in silent violet while roast ducks turn golden in the concourse window."
     ];
 
-    // Detect London Time (Europe/London handles GMT / BST automatically)
     function getLondonTimeInfo() {
       try {
         const now = new Date();
@@ -653,10 +668,10 @@ upgrades: {
         const parts = str.split(':');
         const hour = parseInt(parts[0], 10);
         const min = parts[1];
-        return { hour, min, formatted: `${str.slice(0, 5)} London Time` };
+        return { hour, min, formatted: `${str.slice(0, 5)} Carrier Cycle` };
       } catch (e) {
         const d = new Date();
-        return { hour: d.getUTCHours(), min: String(d.getUTCMinutes()).padStart(2, '0'), formatted: `${d.getUTCHours()}:${String(d.getUTCMinutes()).padStart(2, '0')} GMT` };
+        return { hour: d.getUTCHours(), min: String(d.getUTCMinutes()).padStart(2, '0'), formatted: `${d.getUTCHours()}:${String(d.getUTCMinutes()).padStart(2, '0')} UTC` };
       }
     }
 
@@ -674,14 +689,12 @@ upgrades: {
       }
     }
 
-    // Procedural London Rain Generator: Band-filtered noise + randomised gentle raindrop patters
     function startRainSound() {
       if (!gameState.rainEnabled) return;
       try {
         initAudioContext();
-        if (rainSourceNode) return; // already running
+        if (rainSourceNode) return;
 
-        // Generate 3 seconds of pink/brownish soft noise buffer
         const bufferSize = audioCtx.sampleRate * 3;
         const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
         const output = noiseBuffer.getChannelData(0);
@@ -700,14 +713,12 @@ upgrades: {
         rainSourceNode.buffer = noiseBuffer;
         rainSourceNode.loop = true;
 
-        // Lowpass filter for cosy muffled window rain
         rainFilterNode = audioCtx.createBiquadFilter();
         rainFilterNode.type = 'lowpass';
         rainFilterNode.frequency.setValueAtTime(850, audioCtx.currentTime);
 
         rainGainNode = audioCtx.createGain();
         rainGainNode.gain.setValueAtTime(0.001, audioCtx.currentTime);
-        // Fade in smoothly to avoid pop
         rainGainNode.gain.exponentialRampToValueAtTime(0.18, audioCtx.currentTime + 1.2);
 
         rainSourceNode.connect(rainFilterNode);
@@ -715,11 +726,9 @@ upgrades: {
         rainGainNode.connect(audioCtx.destination);
 
         rainSourceNode.start(0);
-
-        // Schedule gentle micro raindrop "pats"
         scheduleRandomPitterPatter();
       } catch (e) {
-        console.warn("Rain audio start prevented by browser policy until interaction:", e);
+        console.warn("Audio start prevented by browser policy:", e);
       }
     }
 
@@ -757,7 +766,6 @@ upgrades: {
         const osc = audioCtx.createOscillator();
         const dropGain = audioCtx.createGain();
         osc.type = 'sine';
-        // Random pitch plunge resembling water drop
         const startFreq = 1100 + Math.random() * 800;
         osc.frequency.setValueAtTime(startFreq, now);
         osc.frequency.exponentialRampToValueAtTime(320, now + 0.04);
@@ -781,7 +789,6 @@ upgrades: {
         gain.connect(audioCtx.destination);
 
         if (type === 'click') {
-          // Hollow bamboo thud
           osc.type = 'triangle';
           osc.frequency.setValueAtTime(340, now);
           osc.frequency.exponentialRampToValueAtTime(105, now + 0.07);
@@ -790,7 +797,6 @@ upgrades: {
           osc.start(now);
           osc.stop(now + 0.08);
         } else if (type === 'buy') {
-          // Cash register double bell
           osc.type = 'sine';
           osc.frequency.setValueAtTime(587.33, now);
           osc.frequency.setValueAtTime(880, now + 0.08);
@@ -799,7 +805,6 @@ upgrades: {
           osc.start(now);
           osc.stop(now + 0.23);
         } else if (type === 'tea') {
-          // Gentle soothing bell chime
           osc.type = 'sine';
           osc.frequency.setValueAtTime(523.25, now);
           osc.frequency.exponentialRampToValueAtTime(1046.50, now + 0.2);
@@ -808,7 +813,6 @@ upgrades: {
           osc.start(now);
           osc.stop(now + 0.36);
         } else if (type === 'overheat') {
-          // Low buzzing warn
           osc.type = 'sawtooth';
           osc.frequency.setValueAtTime(150, now);
           osc.frequency.setValueAtTime(110, now + 0.12);
@@ -817,7 +821,6 @@ upgrades: {
           osc.start(now);
           osc.stop(now + 0.27);
         } else if (type === 'fortune') {
-          // Happy 3-tone arpeggio
           osc.type = 'triangle';
           osc.frequency.setValueAtTime(440, now);
           osc.frequency.setValueAtTime(554.37, now + 0.07);
@@ -837,60 +840,143 @@ upgrades: {
       } catch (e) {}
     }
 
-    const rainCanvas = document.getElementById('rain-canvas');
-    const rainCtx = rainCanvas.getContext('2d');
+    const vCanvas = document.getElementById('viewport-canvas');
+    const vCtx = vCanvas.getContext('2d');
+    let stars = [];
     let raindrops = [];
+    const NUM_STARS = 110;
     const NUM_DROPS = 65;
 
-    function resizeRainCanvas() {
-      rainCanvas.width = window.innerWidth;
-      rainCanvas.height = window.innerHeight;
+    function resizeViewportCanvas() {
+      vCanvas.width = window.innerWidth;
+      vCanvas.height = window.innerHeight;
+      initStars();
       initRaindrops();
+    }
+
+    function initStars() {
+      stars = [];
+      for (let i = 0; i < NUM_STARS; i++) {
+        stars.push({
+          x: Math.random() * vCanvas.width,
+          y: Math.random() * vCanvas.height,
+          radius: Math.random() * 1.5 + 0.4,
+          alpha: Math.random() * 0.7 + 0.2,
+          speed: Math.random() * 0.15 + 0.05,
+          twinkleSpeed: Math.random() * 0.02 + 0.01
+        });
+      }
     }
 
     function initRaindrops() {
       raindrops = [];
       for (let i = 0; i < NUM_DROPS; i++) {
         raindrops.push({
-          x: Math.random() * rainCanvas.width,
-          y: Math.random() * rainCanvas.height,
+          x: Math.random() * vCanvas.width,
+          y: Math.random() * vCanvas.height,
           length: 12 + Math.random() * 16,
           speed: 9 + Math.random() * 7,
-          opacity: 0.12 + Math.random() * 0.22,
           slant: -1.2 + Math.random() * 0.4
         });
       }
     }
 
-    function updateAndDrawRain() {
-      if (!gameState.rainEnabled) {
-        rainCtx.clearRect(0, 0, rainCanvas.width, rainCanvas.height);
-        return;
-      }
+    function drawCarrierHullStruts() {
+      const w = vCanvas.width;
+      const h = vCanvas.height;
 
-      rainCtx.clearRect(0, 0, rainCanvas.width, rainCanvas.height);
-      rainCtx.strokeStyle = 'rgba(215, 235, 255, 0.4)';
-      rainCtx.lineWidth = 1;
-      rainCtx.beginPath();
+      vCtx.save();
+      // Outer viewport border frame
+      vCtx.strokeStyle = 'rgba(25, 8, 10, 0.9)';
+      vCtx.lineWidth = 14;
+      vCtx.strokeRect(0, 0, w, h);
 
-      for (let i = 0; i < raindrops.length; i++) {
-        const d = raindrops[i];
-        rainCtx.moveTo(d.x, d.y);
-        rainCtx.lineTo(d.x + d.slant * d.length, d.y + d.length);
+      // Fine edge highlight line
+      vCtx.strokeStyle = 'rgba(245, 185, 56, 0.15)';
+      vCtx.lineWidth = 1.5;
+      vCtx.strokeRect(14, 14, w - 28, h - 28);
 
-        d.y += d.speed;
-        d.x += d.slant * (d.speed * 0.3);
+      // Top-Left Heavy Carrier Hull Truss
+      vCtx.fillStyle = '#0f0204';
+      vCtx.beginPath();
+      vCtx.moveTo(0, 0);
+      vCtx.lineTo(130, 0);
+      vCtx.lineTo(0, 110);
+      vCtx.closePath();
+      vCtx.fill();
 
-        if (d.y > rainCanvas.height) {
-          d.y = -20;
-          d.x = Math.random() * rainCanvas.width;
-        }
-      }
-      rainCtx.stroke();
+      // Top-Right Heavy Carrier Hull Truss
+      vCtx.beginPath();
+      vCtx.moveTo(w, 0);
+      vCtx.lineTo(w - 130, 0);
+      vCtx.lineTo(w, 110);
+      vCtx.closePath();
+      vCtx.fill();
+
+      // Viewport Rivet and Structural Lines
+      vCtx.strokeStyle = 'rgba(80, 20, 25, 0.6)';
+      vCtx.lineWidth = 2;
+      vCtx.beginPath();
+      vCtx.moveTo(0, 110);
+      vCtx.lineTo(130, 0);
+      vCtx.moveTo(w, 110);
+      vCtx.lineTo(w - 130, 0);
+      vCtx.stroke();
+
+      // Viewport Stencil in top-left
+      vCtx.fillStyle = 'rgba(74, 222, 128, 0.55)';
+      vCtx.font = '7px monospace';
+      vCtx.fillText("A.R.C. CORE DRACONIS // OBSERVATION BAY 04B", 24, 28);
+      vCtx.fillText("PRESSURE: 1.01 ATM // CONDENSATION CYCLE ACTIVE", 24, 38);
+
+      vCtx.restore();
     }
 
-    window.addEventListener('resize', resizeRainCanvas);
-    resizeRainCanvas();
+    function updateAndDrawViewport() {
+      vCtx.clearRect(0, 0, vCanvas.width, vCanvas.height);
+
+      // 1. Draw Starfield & Nebula Glow
+      for (let i = 0; i < stars.length; i++) {
+        const s = stars[i];
+        s.alpha += Math.sin(Date.now() * s.twinkleSpeed) * 0.01;
+        s.x -= s.speed;
+        if (s.x < 0) s.x = vCanvas.width;
+
+        const clampedAlpha = Math.max(0.1, Math.min(0.9, s.alpha));
+        vCtx.fillStyle = `rgba(235, 245, 255, ${clampedAlpha})`;
+        vCtx.beginPath();
+        vCtx.arc(s.x, s.y, s.radius, 0, Math.PI * 2);
+        vCtx.fill();
+      }
+
+      // 2. Draw Carrier Hull Silhouette
+      drawCarrierHullStruts();
+
+      // 3. Draw London Precipitation Running down Viewport Glass
+      if (gameState.rainEnabled) {
+        vCtx.strokeStyle = 'rgba(215, 235, 255, 0.35)';
+        vCtx.lineWidth = 1;
+        vCtx.beginPath();
+
+        for (let i = 0; i < raindrops.length; i++) {
+          const d = raindrops[i];
+          vCtx.moveTo(d.x, d.y);
+          vCtx.lineTo(d.x + d.slant * d.length, d.y + d.length);
+
+          d.y += d.speed;
+          d.x += d.slant * (d.speed * 0.3);
+
+          if (d.y > vCanvas.height) {
+            d.y = -20;
+            d.x = Math.random() * vCanvas.width;
+          }
+        }
+        vCtx.stroke();
+      }
+    }
+
+    window.addEventListener('resize', resizeViewportCanvas);
+    resizeViewportCanvas();
 
     function applyTimeOfDayAtmosphere() {
       const { hour, formatted } = getLondonTimeInfo();
@@ -906,27 +992,24 @@ upgrades: {
         effectivePhase = mode;
       }
 
-      // Update Body CSS Class
       document.body.className = document.body.className.replace(/\btod-\w+/g, '').trim();
       document.body.classList.add(`tod-${effectivePhase}`);
 
-      // Update Top Status Pill
       const todIcon = document.getElementById('tod-icon');
       const todText = document.getElementById('tod-text');
 
       const phaseLabels = {
         morning:   { icon: '🌅', label: 'MORNING MIST & YUM CHA' },
         afternoon: { icon: '🏮', label: 'AFTERNOON YUM CHA RUSH' },
-        dusk:      { icon: '🌆', label: 'WEST END THEATRE DUSK' },
-        night:     { icon: '🌙', label: 'MIDNIGHT LANTERN RAIN' }
+        dusk:      { icon: '🌆', label: 'FLIGHT SHIFT CHANGE DUSK' },
+        night:     { icon: '🌙', label: 'MIDNIGHT LANTERN DRIZZLE' }
       };
 
       const info = phaseLabels[effectivePhase] || phaseLabels.afternoon;
       todIcon.textContent = info.icon;
-      todText.textContent = `${mode === 'auto' ? '🇬🇧 ' + formatted.toUpperCase() : 'MANUAL'}: ${info.label}`;
+      todText.textContent = `${mode === 'auto' ? formatted.toUpperCase() : 'MANUAL'}: ${info.label}`;
     }
 
-    // Toggle/Cycle Time of Day on button click
     document.getElementById('tod-toggle-btn').addEventListener('click', () => {
       const modes = ['auto', 'morning', 'afternoon', 'dusk', 'night'];
       const currentIdx = modes.indexOf(gameState.timeOfDayMode);
@@ -934,7 +1017,7 @@ upgrades: {
       playRetroSound('click');
       triggerHaptic(18);
       applyTimeOfDayAtmosphere();
-      setTicker(`London atmosphere changed to: ${gameState.timeOfDayMode.toUpperCase()} mode.`);
+      setTicker(`Carrier habitat cycle set to: ${gameState.timeOfDayMode.toUpperCase()} mode.`);
     });
 
     function calcBaseRate() {
@@ -949,6 +1032,9 @@ upgrades: {
       let mult = 1.0;
       for (const t in gameState.teas) {
         if (gameState.teas[t].bought) mult *= gameState.teas[t].mult;
+      }
+      if (gameState.secretSalonUnlocked) {
+        mult *= 1.04; // +4% Permanent Floating World Salon Patronage
       }
       if (gameState.activeBuff && gameState.activeBuff.timer > 0) {
         mult *= (gameState.activeBuff.mult || 1);
@@ -980,7 +1066,7 @@ upgrades: {
       try {
         localStorage.setItem(SAVE_KEY, JSON.stringify(gameState));
       } catch (e) {
-        console.warn("Save game error:", e);
+        console.warn("Save error:", e);
       }
     }
 
@@ -1020,6 +1106,7 @@ upgrades: {
             gameState.rainEnabled = parsed.rainEnabled !== false;
             gameState.hapticsEnabled = parsed.hapticsEnabled !== false;
             gameState.timeOfDayMode = parsed.timeOfDayMode || 'auto';
+            gameState.secretSalonUnlocked = !!parsed.secretSalonUnlocked;
 
             // Offline progress calculations
             const now = Date.now();
@@ -1032,12 +1119,12 @@ upgrades: {
               gameState.dimSum += offlineEarned;
               gameState.totalEarned += offlineEarned;
               const hours = (diffSeconds / 3600).toFixed(1);
-              setTicker(`Dim Sum Diantang doors were closed for ${hours} hrs. Staff pre-steamed +${offlineEarned.toFixed(2)} dim sum!`);
+              setTicker(`Little Gerrard doors were closed for ${hours} hrs. Staff steamed +${offlineEarned.toFixed(2)} dim sum in the dark!`);
             }
           }
         }
       } catch (err) {
-        console.error("Failed to parse game data:", err);
+        console.error("Failed to parse save data:", err);
       }
     }
 
@@ -1047,7 +1134,6 @@ upgrades: {
     function handleSteamerTap(e) {
       if (e) e.preventDefault();
 
-      // Ensure audio context is warmed on user tap
       initAudioContext();
       if (gameState.rainEnabled && !rainSourceNode) {
         startRainSound();
@@ -1062,8 +1148,7 @@ upgrades: {
         return;
       }
 
-      // Hand click amount (boosted during Zen Fortune)
-      const clickYield = isZenActive ? 1.50 : 0.25;
+      const clickYield = isZenActive ? 0.25 : 0.10;
       gameState.dimSum += clickYield;
       gameState.totalEarned += clickYield;
       gameState.totalClicks++;
@@ -1074,7 +1159,6 @@ upgrades: {
       playRetroSound('click');
       triggerHaptic(14);
 
-      // Bamboo squash effect
       bambooBody.style.transform = "scale(0.92) translateY(4px)";
       setTimeout(() => {
         bambooBody.style.transform = "scale(1) translateY(0px)";
@@ -1086,14 +1170,13 @@ upgrades: {
       createSteamPuff(clientX, clientY);
       createEarnPopup(clientX, clientY, `+${clickYield.toFixed(2)}`);
 
-      // Overheat evaluation (bypassed if Zen Fortune active)
       if (!isZenActive && gameState.heat >= 100) {
         gameState.heat = 100;
         gameState.isOverheated = true;
         gameState.cooldownTimer = 8.0;
         playRetroSound('overheat');
         triggerHaptic([50, 60, 50]);
-        setTicker("OVERHEAT! Steam pressure peak! Bamboo requires 8s cooling.");
+        setTicker("OVERHEAT! Induction pressure peak! Bamboo tiers require 8s cooling.");
       }
 
       checkAchievements();
@@ -1138,7 +1221,7 @@ upgrades: {
         const upg = gameState.upgrades[key];
         const card = document.createElement('div');
         card.id = `upg-card-${key}`;
-        card.className = "bg-[#250808]/90 border-2 border-[#451616] p-2 sm:p-2.5 flex items-center justify-between gap-3 pixel-box";
+        card.className = "bg-[#180404]/90 border-2 border-[#381111] p-2 sm:p-2.5 flex items-center justify-between gap-3 pixel-box";
         card.innerHTML = `
           <div class="flex items-center gap-2 sm:gap-3">
             <span class="text-xl sm:text-2xl">${upg.icon}</span>
@@ -1163,10 +1246,11 @@ upgrades: {
       if (gameState.dimSum >= upg.cost) {
         gameState.dimSum -= upg.cost;
         upg.count++;
-        upg.cost = Math.ceil(upg.cost * 1.35);
+        // Calibrated 1.42x exponent to ensure long-haul 180+ day longevity
+        upg.cost = Math.ceil(upg.cost * 1.42);
         playRetroSound('buy');
         triggerHaptic(25);
-        setTicker(`Staff hired! ${upg.name} has joined the Dim Sum Diantang team.`);
+        setTicker(`Staff hired! ${upg.name} reported for duty on Sub-Deck 4.`);
         checkAchievements();
         renderUI();
       }
@@ -1179,11 +1263,11 @@ upgrades: {
       for (const t in gameState.teas) {
         const tea = gameState.teas[t];
         const card = document.createElement('div');
-        card.className = "bg-[#180806] border-2 border-[#3d1814] p-2 flex items-center justify-between gap-2 pixel-box";
+        card.className = "bg-[#140604] border-2 border-[#331410] p-2 flex items-center justify-between gap-2 pixel-box";
         
         let actionBtnHtml = '';
         if (tea.bought) {
-          actionBtnHtml = `<span class="text-[7px] text-[#4ade80] font-bold px-2 py-1 bg-[#102916] border border-[#22c55e]">BREWED ✔</span>`;
+          actionBtnHtml = `<span class="text-[7px] text-[#4ade80] font-bold px-2 py-1 bg-[#0d2112] border border-[#22c55e]">BREWED ✔</span>`;
         } else {
           const canAfford = gameState.dimSum >= tea.cost;
           actionBtnHtml = `
@@ -1212,7 +1296,7 @@ upgrades: {
         tea.bought = true;
         playRetroSound('tea');
         triggerHaptic([20, 30, 40]);
-        setTicker(`Exquisite pairing! ${tea.name} is now served to every guest!`);
+        setTicker(`Artisan reserve brewed! ${tea.name} is now served aboard A.R.C. Core Draconis!`);
         renderTeasList();
         checkAchievements();
         renderUI();
@@ -1225,7 +1309,7 @@ upgrades: {
       for (const b in gameState.badges) {
         const badge = gameState.badges[b];
         const item = document.createElement('div');
-        item.className = `p-2 border-2 pixel-box flex items-center gap-2 ${badge.unlocked ? 'bg-[#261608] border-[#f5b938]' : 'bg-[#150404] border-[#381111] opacity-50'}`;
+        item.className = `p-2 border-2 pixel-box flex items-center gap-2 ${badge.unlocked ? 'bg-[#201105] border-[#f5b938]' : 'bg-[#120303] border-[#2e0e0e] opacity-50'}`;
         item.innerHTML = `
           <div class="text-xl">${badge.unlocked ? badge.icon : '🔒'}</div>
           <div class="text-left">
@@ -1254,6 +1338,7 @@ upgrades: {
       if (!gameState.badges.hundredThousand.unlocked && gameState.totalEarned >= 100000) unlockBadge('hundredThousand');
       if (!gameState.badges.dragonFleetOwner.unlocked && gameState.upgrades.goldenDragon?.count >= 1) unlockBadge('dragonFleetOwner');
       if (!gameState.badges.fortuneCracker.unlocked && gameState.fortuneCount >= 5) unlockBadge('fortuneCracker');
+      if (gameState.secretSalonUnlocked && !gameState.badges.floatingWorld.unlocked) unlockBadge('floatingWorld');
       
       const classicTeas = ['jasmine', 'tieguanyin', 'puerh', 'daHongPao'];
       if (!gameState.badges.teaConnoisseur.unlocked && classicTeas.every(k => gameState.teas[k]?.bought)) {
@@ -1265,16 +1350,62 @@ upgrades: {
       }
     }
 
+    // Secret Easter Egg Trigger: Tapping the Left Chinatown Silk Lantern 5 Times
+    let secretTapCount = 0;
+    let secretTapTimer = null;
+    const secretLantern = document.getElementById('secret-lantern');
+    const secretModal = document.getElementById('secret-salon-modal');
+
+    if (secretLantern) {
+      secretLantern.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        secretTapCount++;
+        playRetroSound('click');
+        triggerHaptic(20);
+
+        if (secretTapTimer) clearTimeout(secretTapTimer);
+        secretTapTimer = setTimeout(() => { secretTapCount = 0; }, 2400);
+
+        if (secretTapCount >= 5) {
+          secretTapCount = 0;
+          playRetroSound('fortune');
+          triggerHaptic([30, 40, 50, 60]);
+          secretModal.classList.remove('hidden');
+        }
+      });
+    }
+
+    document.getElementById('close-secret-btn').addEventListener('click', () => {
+      secretModal.classList.add('hidden');
+    });
+
+    document.getElementById('claim-secret-btn').addEventListener('click', () => {
+      secretModal.classList.add('hidden');
+      if (!gameState.secretSalonUnlocked) {
+        gameState.secretSalonUnlocked = true;
+        gameState.dimSum += 50;
+        gameState.totalEarned += 50;
+        playRetroSound('tea');
+        triggerHaptic([40, 50, 60, 40]);
+        setTicker("🌸 The Floating World Salon embraces you! +50 Dim Sum & +4% permanent passive patronage unlocked!");
+        checkAchievements();
+        renderUI();
+        saveGame();
+      } else {
+        setTicker("🌸 The courtesans smile and pour another delicate saucer of chilled Junmai sake.");
+      }
+    });
+
     const fortuneContainer = document.getElementById('fortune-container');
     let fortuneTimer = null;
 
     function scheduleFortuneCookie() {
       if (fortuneTimer) clearTimeout(fortuneTimer);
-      // Spawn cookie every 65 to 130 seconds
-      const delay = 65000 + Math.random() * 65000;
+      // Spawns regularly every 75 to 140 seconds (~every 1.5 to 2.5 minutes)
+      const delay = 75000 + Math.random() * 65000;
       fortuneTimer = setTimeout(() => {
         fortuneContainer.classList.remove('hidden');
-        setTicker("🥠 A Golden Fortune Cookie has drifted into the dining room! Tap it before it leaves!");
+        setTicker("🥠 A Golden Fortune Cookie has floated into the concourse! Tap it before it drifts away!");
       }, delay);
     }
 
@@ -1285,46 +1416,45 @@ upgrades: {
       playRetroSound('fortune');
       triggerHaptic([30, 20, 30, 20, 50]);
 
-      // Expanded Pool: 6 distinct fortune outcomes
       const roll = Math.random();
-      const currentRate = Math.max(0.05, calcPassiveRate());
+      const currentRate = Math.max(0.005, calcPassiveRate());
 
       if (roll < 0.25) {
-        // Fortune 1: Great Wealth Flow (Lump sum 12 minutes)
-        const bonus = Math.max(35, Math.round(currentRate * 720));
+        // Fortune 1: Great Wealth (1-minute payout burst, min 5)
+        const bonus = Math.max(5, Math.round(currentRate * 60));
         gameState.dimSum += bonus;
         gameState.totalEarned += bonus;
-        setTicker(`🥠 FORTUNE REVEALED: "Wealth flows like hot jasmine tea!" (+${bonus.toLocaleString()} Dim Sum burst)`);
+        setTicker(`🥠 FORTUNE REVEALED: "Wealth flows through the void!" (+${bonus.toLocaleString()} Dim Sum burst)`);
       } else if (roll < 0.45) {
-        // Fortune 2: West End Theatre Rush (2.5x speed frenzy for 35s)
-        gameState.activeBuff = { type: 'theatre_rush', name: "THEATRE RUSH (2.5X SPEED)", timer: 35, mult: 2.5 };
-        setTicker("🥠 FORTUNE REVEALED: West End curtains fall! Hungry patrons rush Diantang! (2.5x speed for 35s)");
+        // Fortune 2: Flight Shift Rush (1.4x speed for 25s)
+        gameState.activeBuff = { type: 'theatre_rush', name: "FLIGHT SHIFT RUSH (1.4X SPEED)", timer: 25, mult: 1.4 };
+        setTicker("🥠 FORTUNE REVEALED: Flight deck shift ends! Hungry crew stampede Little Gerrard! (1.4x speed for 25s)");
       } else if (roll < 0.65) {
-        // Fortune 3: Master Sifu's Bamboo Zen (Clear heat + no overheat + +1.50/click for 25s)
+        // Fortune 3: Master Sifu's Bamboo Zen (Clears heat + no overheat + +0.25/click for 20s)
         gameState.heat = 0;
         gameState.isOverheated = false;
         gameState.cooldownTimer = 0;
-        gameState.activeBuff = { type: 'bamboo_zen', name: "BAMBOO ZEN (+1.50/TAP & NO HEAT)", timer: 25, mult: 1.0 };
-        setTicker("🥠 FORTUNE REVEALED: Master Sifu's Zen focus! Steamer cannot overheat & clicks yield +1.50 for 25s!");
+        gameState.activeBuff = { type: 'bamboo_zen', name: "BAMBOO ZEN (+0.25/TAP & NO HEAT)", timer: 20, mult: 1.0 };
+        setTicker("🥠 FORTUNE REVEALED: Master Sifu's Zen focus! Steamer cannot overheat & clicks yield +0.25 for 20s!");
       } else if (roll < 0.80) {
-        // Fortune 4: Soho Mist Rain Blessing (+75% passive bonus for 40s)
-        gameState.activeBuff = { type: 'rain_blessing', name: "SOHO RAIN BLESSING (+75% YIELD)", timer: 40, mult: 1.75 };
-        setTicker("🥠 FORTUNE REVEALED: London drizzle brings good luck! Steaming yield boosted by +75% for 40s!");
+        // Fortune 4: Soho Rain Blessing (+20% yield for 30s)
+        gameState.activeBuff = { type: 'rain_blessing', name: "SOHO RAIN BLESSING (+20% YIELD)", timer: 30, mult: 1.20 };
+        setTicker("🥠 FORTUNE REVEALED: Concourse rain cycle brings good luck! Steaming yield boosted by +20% for 30s!");
       } else if (roll < 0.93) {
-        // Fortune 5: Trolley Caravan Stampede (Instant staff-scaled payout)
+        // Fortune 5: Trolley Caravan Stampede (Scaled modestly by crew size)
         let totalStaff = 0;
         for (const k in gameState.upgrades) totalStaff += gameState.upgrades[k].count;
-        const auntieBonus = Math.max(50, Math.round(totalStaff * 30 + currentRate * 300));
+        const auntieBonus = Math.max(4, Math.round(totalStaff * 1.2 + currentRate * 30));
         gameState.dimSum += auntieBonus;
         gameState.totalEarned += auntieBonus;
-        setTicker(`🥠 FORTUNE REVEALED: Trolley Caravan Stampede! Gerrard Street crowds clear the carts! (+${auntieBonus.toLocaleString()} Dim Sum)`);
+        setTicker(`🥠 FORTUNE REVEALED: Trolley Caravan Stampede! The crew clears out all carts! (+${auntieBonus.toLocaleString()} Dim Sum)`);
       } else {
-        // Fortune 6: Rare Imperial Dragon Blessing (1,000 instant + 3.0x frenzy)
-        const dragonGift = 1000;
+        // Fortune 6: Rare Imperial Dragon Blessing (+50 flat + 1.6x frenzy for 15s)
+        const dragonGift = 50;
         gameState.dimSum += dragonGift;
         gameState.totalEarned += dragonGift;
-        gameState.activeBuff = { type: 'super_frenzy', name: "IMPERIAL DRAGON (3.0X SUPER FRENZY)", timer: 15, mult: 3.0 };
-        setTicker("🥠 RARE GOLDEN FORTUNE: Imperial Dragon Blessing! +1,000 Dim Sum & 3.0x Super Frenzy for 15s!");
+        gameState.activeBuff = { type: 'super_frenzy', name: "IMPERIAL DRAGON (1.6X FRENZY)", timer: 15, mult: 1.6 };
+        setTicker("🥠 RARE GOLDEN FORTUNE: Imperial Dragon Blessing! +50 Dim Sum & 1.6x Frenzy for 15s!");
       }
 
       checkAchievements();
@@ -1332,7 +1462,6 @@ upgrades: {
       renderUI();
     });
 
-    // Sound FX Toggle
     const soundToggleBtn = document.getElementById('sound-toggle-btn');
     const soundStatus = document.getElementById('sound-status');
     soundToggleBtn.addEventListener('click', () => {
@@ -1341,7 +1470,6 @@ upgrades: {
       if (gameState.soundEnabled) playRetroSound('click');
     });
 
-    // Rain Toggle
     const rainToggleBtn = document.getElementById('rain-toggle-btn');
     const rainStatus = document.getElementById('rain-status');
     if (rainToggleBtn && rainStatus) {
@@ -1356,7 +1484,6 @@ upgrades: {
       });
     }
 
-    // Haptics Toggle
     const hapticsToggleBtn = document.getElementById('haptics-toggle-btn');
     const hapticsStatus = document.getElementById('haptics-status');
     hapticsToggleBtn.addEventListener('click', () => {
@@ -1365,7 +1492,6 @@ upgrades: {
       if (gameState.hapticsEnabled) triggerHaptic(20);
     });
 
-    // Tea modal
     const teaModal = document.getElementById('tea-modal');
     document.getElementById('tea-modal-btn').addEventListener('click', () => {
       renderTeasList();
@@ -1374,7 +1500,6 @@ upgrades: {
     document.getElementById('close-tea-btn').addEventListener('click', () => teaModal.classList.add('hidden'));
     document.getElementById('done-tea-btn').addEventListener('click', () => teaModal.classList.add('hidden'));
 
-    // Badges modal
     const badgesModal = document.getElementById('badges-modal');
     document.getElementById('badges-toggle-btn').addEventListener('click', () => {
       renderBadgesList();
@@ -1383,7 +1508,6 @@ upgrades: {
     document.getElementById('close-badges-btn').addEventListener('click', () => badgesModal.classList.add('hidden'));
     document.getElementById('done-badges-btn').addEventListener('click', () => badgesModal.classList.add('hidden'));
 
-    // Stats modal
     const statsModal = document.getElementById('stats-modal');
     document.getElementById('stats-toggle-btn').addEventListener('click', () => {
       document.getElementById('stat-total').textContent = gameState.totalEarned.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -1403,7 +1527,6 @@ upgrades: {
     document.getElementById('close-stats-btn').addEventListener('click', () => statsModal.classList.add('hidden'));
     document.getElementById('ok-stats-btn').addEventListener('click', () => statsModal.classList.add('hidden'));
 
-    // Backup and Save Modal
     const dataModal = document.getElementById('data-modal');
     const saveTextarea = document.getElementById('save-data-textarea');
     const feedback = document.getElementById('data-feedback');
@@ -1420,7 +1543,7 @@ upgrades: {
       saveGame();
       const str = btoa(unescape(encodeURIComponent(JSON.stringify(gameState))));
       saveTextarea.value = str;
-      feedback.textContent = "Save key generated! Copy and store it in your notes.";
+      feedback.textContent = "Save key generated! Copy and store it in your flight log.";
     });
 
     document.getElementById('copy-btn').addEventListener('click', () => {
@@ -1430,7 +1553,7 @@ upgrades: {
       }
       saveTextarea.select();
       document.execCommand('copy');
-      feedback.textContent = "Copied save code to clipboard!";
+      feedback.textContent = "Copied save key to clipboard!";
     });
 
     document.getElementById('import-btn').addEventListener('click', () => {
@@ -1444,7 +1567,6 @@ upgrades: {
         if (decoded && typeof decoded === 'object' && decoded.upgrades) {
           gameState = decoded;
 
-          // Calculate interim offline progress from when the key was exported
           const now = Date.now();
           const lastSaved = decoded.lastSaveTime || now;
           const diffSeconds = Math.max(0, (now - lastSaved) / 1000);
@@ -1455,16 +1577,16 @@ upgrades: {
             gameState.dimSum += offlineEarned;
             gameState.totalEarned += offlineEarned;
             const hours = (diffSeconds / 3600).toFixed(1);
-            setTicker(`Restored save! Kitchen was away for ${hours} hrs. Staff pre-steamed +${offlineEarned.toFixed(2)} dim sum!`);
+            setTicker(`Restored save! Station was away for ${hours} hrs. Staff pre-steamed +${offlineEarned.toFixed(2)} dim sum!`);
           } else {
-            setTicker("Restored Dim Sum Diantang ledger from external backup!");
+            setTicker("Restored Little Gerrard ledger from external backup!");
           }
 
           saveGame();
           initUpgradesList();
           applyTimeOfDayAtmosphere();
           renderUI();
-          feedback.textContent = "Save restored successfully! Welcome back to Gerrard Street.";
+          feedback.textContent = "Expedition save restored successfully! Welcome back to Little Gerrard Street.";
         } else {
           feedback.textContent = "Invalid save format.";
         }
@@ -1479,13 +1601,13 @@ upgrades: {
       const dt = Math.min(1.0, (now - lastTimestamp) / 1000);
       lastTimestamp = now;
 
-      // Passive Dumpling generation
+      // Passive Dim Sum generation
       const rate = calcPassiveRate();
       const earned = rate * dt;
       gameState.dimSum += earned;
       gameState.totalEarned += earned;
 
-      // Active temporary buff countdown
+      // Active buff countdown
       if (gameState.activeBuff) {
         gameState.activeBuff.timer -= dt;
         if (gameState.activeBuff.timer <= 0) {
@@ -1494,12 +1616,12 @@ upgrades: {
           if (finishedType === 'bamboo_zen') {
             setTicker("Master Sifu's Zen focus concludes. Steamer pressure normalizes.");
           } else {
-            setTicker("The festive crowd disperses. Kitchen pace returns to normal.");
+            setTicker("The flight crew disperses. Little Gerrard kitchen pace normalizes.");
           }
         }
       }
 
-      // Heat dissipation & Burnout recovery
+      // Heat dissipation
       if (gameState.isOverheated) {
         gameState.cooldownTimer -= dt;
         if (gameState.cooldownTimer <= 0) {
@@ -1509,17 +1631,15 @@ upgrades: {
           setTicker("Bamboo steamer temperature normalized. Ready for steaming.");
         }
       } else if (gameState.heat > 0) {
-        // Cools by 12% heat per second
         gameState.heat = Math.max(0, gameState.heat - (12 * dt));
       }
 
-      updateAndDrawRain();
+      updateAndDrawViewport();
       renderUI();
       requestAnimationFrame(gameLoop);
     }
 
     function renderUI() {
-      // Numerical displays
       document.getElementById('dimsum-counter').textContent = gameState.dimSum.toLocaleString('en-US', {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2
@@ -1558,7 +1678,7 @@ upgrades: {
         heatBar.style.background = gameState.heat > 75 ? "#ff5e00" : "linear-gradient(to right, #e58a22, #d62828)";
       }
 
-      // Active Buff Box
+      // Active Buff Display
       const buffBox = document.getElementById('active-buff-box');
       if (gameState.activeBuff && gameState.activeBuff.timer > 0) {
         buffBox.classList.remove('hidden');
@@ -1581,7 +1701,7 @@ upgrades: {
         }
       }
 
-      // Goal Calculations based on permanent lifetime production
+      // Expedition Progress Bar
       const progressPercent = Math.min(100, (gameState.totalEarned / TARGET_GOAL) * 100);
       document.getElementById('goal-bar').style.width = `${progressPercent}%`;
       document.getElementById('goal-percent').textContent = `${progressPercent.toFixed(4)}%`;
@@ -1592,33 +1712,33 @@ upgrades: {
       if (currentRate > 0) {
         const secRemaining = remaining / currentRate;
         const daysRemaining = (secRemaining / 86400).toFixed(1);
-        document.getElementById('goal-estimate').textContent = `Estimated time: ~${daysRemaining} days at current pace`;
+        document.getElementById('goal-estimate').textContent = `Estimated voyage time: ~${daysRemaining} days at current pace`;
       } else {
-        document.getElementById('goal-estimate').textContent = `Estimated time: ~70-90 days with kitchen staff`;
+        document.getElementById('goal-estimate').textContent = `Estimated voyage duration: ~6 to 7+ months (≥180 days) at calibrated pace`;
       }
 
-      // Milestone dish
+      // Specialty Dish
       const activeDish = getActiveSpecialty();
       document.getElementById('dish-icon').textContent = activeDish.icon;
       document.getElementById('dish-name').textContent = activeDish.name;
       document.getElementById('dish-desc').textContent = activeDish.desc;
 
-      // Completion celebration check
       if (gameState.totalEarned >= TARGET_GOAL) {
-        document.getElementById('ticker-text').textContent = "CONGRATULATIONS! 383,000 Dim Sum achieved! Dim Sum Diantang is crowned the supreme palace of London Chinatown!";
+        document.getElementById('ticker-text').textContent = "EXPEDITION COMPLETE! 383,000 Dim Sum achieved aboard A.R.C. Core Draconis! Little Gerrard Street reigns supreme in the stars!";
       }
     }
 
+    // Reset Save Trigger
     document.getElementById('reset-btn').addEventListener('click', () => {
       const resetMsgBox = document.createElement('div');
       resetMsgBox.className = "fixed inset-0 bg-black/90 z-[60] flex items-center justify-center p-4";
       resetMsgBox.innerHTML = `
-        <div class="bg-[#240808] border-4 border-[#ef4444] p-4 max-w-xs w-full pixel-box text-center">
-          <div class="text-[8px] text-[#ef4444] font-bold mb-2">ARE YOU SURE?</div>
-          <p class="text-[6px] text-[#faf2dc] mb-3 leading-relaxed">This will erase your Chinatown restaurant progress permanently!</p>
+        <div class="bg-[#200606] border-4 border-[#ef4444] p-4 max-w-xs w-full pixel-box text-center">
+          <div class="text-[8px] text-[#ef4444] font-bold mb-2">ERASE EXPEDITION SAVE?</div>
+          <p class="text-[6px] text-[#faf2dc] mb-3 leading-relaxed">This will erase your Little Gerrard Street progress aboard A.R.C. Core Draconis permanently!</p>
           <div class="flex justify-center gap-2 text-[7px]">
             <button id="confirm-reset" class="bg-[#ef4444] text-white px-3 py-1.5 pixel-btn border border-black">CONFIRM ERASE</button>
-            <button id="cancel-reset" class="bg-[#481810] text-[#f5b938] px-3 py-1.5 pixel-btn border border-black">CANCEL</button>
+            <button id="cancel-reset" class="bg-[#38100a] text-[#f5b938] px-3 py-1.5 pixel-btn border border-black">CANCEL</button>
           </div>
         </div>
       `;
@@ -1646,7 +1766,6 @@ upgrades: {
       requestAnimationFrame(gameLoop);
       setInterval(saveGame, 5000);
 
-      // Start rain sound on very first user interaction anywhere on the screen
       const startAudioOnTouch = () => {
         initAudioContext();
         if (gameState.rainEnabled && !rainSourceNode) {
