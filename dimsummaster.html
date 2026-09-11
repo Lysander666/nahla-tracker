@@ -1696,15 +1696,20 @@ function renderUI() {
       const cooldownBadge = document.getElementById('cooldown-badge');
       heatBar.style.width = `${gameState.heat}%`;
 
-      if (gameState.isOverheated) {
-        heatTitle.textContent = `OVERHEATED! COOLING: ${Math.ceil(gameState.cooldownTimer)}s`;
-        cooldownBadge.classList.remove('hidden');
-        heatBar.style.background = "#e61919";
-      } else {
-        heatTitle.textContent = `BAMBOO HEAT: ${Math.floor(gameState.heat)}%`;
-        cooldownBadge.classList.add('hidden');
-        heatBar.style.background = gameState.heat > 75 ? "#ff5e00" : "linear-gradient(to right, #e58a22, #d62828)";
-      }
+if (gameState.isOverheated) {
+  heatTitle.textContent = `OVERHEATED! COOLING: ${Math.ceil(gameState.cooldownTimer)}s`;
+  cooldownBadge.classList.remove('hidden');
+  heatBar.style.background = "#e61919";
+} else {
+  heatTitle.textContent = `BAMBOO HEAT: ${Math.floor(gameState.heat)}%`;
+  cooldownBadge.classList.add('hidden');
+  if (gameState.heat > 80) {
+    heatBar.style.background = "#ff5e00";
+  } else if (gameState.heat < 70) {
+    heatBar.style.background = "linear-gradient(to right, #e58a22, #d62828)";
+  }
+  // between 70-80, leave whatever it already was — no flip
+}
 
       // Active Buff Display
       const buffBox = document.getElementById('active-buff-box');
