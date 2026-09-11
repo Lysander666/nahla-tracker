@@ -1667,17 +1667,17 @@ toggleMusicBtn.addEventListener('click', () => {
       requestAnimationFrame(gameLoop);
     }
 
-    function renderUI() {
+function renderUI() {
       document.getElementById('dimsum-counter').textContent = gameState.dimSum.toLocaleString('en-US', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
+        minimumFractionDigits: 3,
+        maximumFractionDigits: 3
       });
 
       const lifetimeEl = document.getElementById('lifetime-counter');
       if (lifetimeEl) {
         lifetimeEl.textContent = gameState.totalEarned.toLocaleString('en-US', {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2
+          minimumFractionDigits: 3,
+          maximumFractionDigits: 3
         });
       }
 
