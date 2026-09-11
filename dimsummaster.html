@@ -322,7 +322,7 @@
         <!-- Dual Counter: Spendable vs Lifetime Goal -->
         <div class="w-full bg-[#faecd9] text-[#1b0a06] border-4 border-black p-3 mb-3 pixel-box text-left shadow-inner">
           <div class="flex justify-between items-center border-b border-[#c49b77] pb-1 mb-2">
-            <span class="text-[7px] text-[#6d3923] tracking-wider font-bold">SHIP PANTRY (TO SPEND):</span>
+            <span class="text-[7px] text-[#6d3923] tracking-wider font-bold">Bamboo Tokens (竹籌):</span>
             <span id="dimsum-counter" class="text-sm sm:text-base font-black text-[#961e1e]">0.00</span>
           </div>
           <div>
@@ -421,7 +421,7 @@
 
     <!-- Bottom Deep Space & Sub-Deck Ticker -->
     <div class="w-full bg-[#080101] border-2 border-black p-2 text-[7px] text-[#86efac] flex items-center gap-2 overflow-hidden">
-      <span class="text-[#f5b938] font-bold whitespace-nowrap">[DIM SUM DIANTANG]</span>
+      <span class="text-[#f5b938] font-bold whitespace-nowrap">[DIANTANG]</span>
       <span id="ticker-text" class="truncate">A.R.C. Core Draconis drifts through the black. Moisture runs down the observation glass over Little Gerrard Street.</span>
     </div>
 
@@ -1121,7 +1121,7 @@
               gameState.dimSum += offlineEarned;
               gameState.totalEarned += offlineEarned;
               const hours = (diffSeconds / 3600).toFixed(1);
-              setTicker(`Little Gerrard doors were closed for ${hours} hrs. Staff steamed +${offlineEarned.toFixed(2)} dim sum in the dark!`);
+              setTicker(`Diantang doors were closed for ${hours} hrs. Staff steamed +${offlineEarned.toFixed(2)} dim sum in the dark!`);
             }
           }
         }
@@ -1607,7 +1607,7 @@ toggleMusicBtn.addEventListener('click', () => {
             const hours = (diffSeconds / 3600).toFixed(1);
             setTicker(`Restored save! Station was away for ${hours} hrs. Staff pre-steamed +${offlineEarned.toFixed(2)} dim sum!`);
           } else {
-            setTicker("Restored Little Gerrard ledger from external backup!");
+            setTicker("Restored Diantang ledger from external backup!");
           }
 
           saveGame();
