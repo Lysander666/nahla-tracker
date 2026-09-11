@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Dim Sum Master v0.2</title>
+  <title>Dim Sum Master v0.3</title>
   
   <!-- Offline SVG Favicon: Traditional Character '點' for Dim Sum -->
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='82'>🥠</text></svg>">  
@@ -1673,13 +1673,13 @@ function renderUI() {
         maximumFractionDigits: 3
       });
 
-      const lifetimeEl = document.getElementById('lifetime-counter');
-      if (lifetimeEl) {
-        lifetimeEl.textContent = gameState.totalEarned.toLocaleString('en-US', {
-          minimumFractionDigits: 3,
-          maximumFractionDigits: 3
-        });
-      }
+const lifetimeEl = document.getElementById('lifetime-counter');
+if (lifetimeEl) {
+  lifetimeEl.textContent = gameState.totalEarned.toLocaleString('en-US', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0
+  });
+}
 
       const currentRate = calcPassiveRate();
       document.getElementById('rate-counter').textContent = `Pace: +${currentRate.toFixed(4)}/s`;
