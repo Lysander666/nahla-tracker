@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Dim Sum Master: London Chinatown (倫敦唐人街點心大師)</title>
+  <title>Dim Sum Master 倫敦唐人街點心大師</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🥠</text></svg>">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -388,7 +388,7 @@
         <div class="w-full bg-[#230909] border-2 border-[#541f12] p-2.5 flex items-center gap-3">
           <div id="dish-icon" class="text-3xl">🥟</div>
           <div class="text-left flex-1">
-            <div class="text-[7px] text-[#f5b938]">CHINATOWN SPECIALTY:</div>
+            <div class="text-[7px] text-[#f5b938]">CURRENT SPECIALTY:</div>
             <div id="dish-name" class="text-[8px] text-[#faf2dc] font-bold">House Har Gow</div>
             <div id="dish-desc" class="text-[6px] text-[#d1a880]">Classic translucent crystal shrimp dumpling.</div>
           </div>
@@ -590,25 +590,27 @@
       timeOfDayMode: 'auto', // 'auto', 'morning', 'afternoon', 'dusk', 'night'
       teaMultiplier: 1.0,
       activeBuff: null,
-      upgrades: {
-        pickleRunner:  { count: 0, cost: 4,      rate: 0.0020, name: "Pickle & Chopstick Runner",    desc: "Dishes out complimentary spiced peanuts, pickled greens, and bamboo chopsticks.", icon: "🥢" },
-        teaBoy:        { count: 0, cost: 12,     rate: 0.0075, name: "Lisle St. Tea Apprentice",     desc: "Refills hot jasmine pots amidst Gerrard St rain.", icon: "🫖" },
-        sculleryWash:  { count: 0, cost: 24,     rate: 0.0125, name: "Bamboo Tier Scullery Hand",    desc: "Scans, soaks, and scours bamboo tiers so the line never runs dry.", icon: "🧽" },
-        qipaoHostess:  { count: 0, cost: 42,     rate: 0.0210, name: "Gerrard St. Qipao Hostess",    desc: "Welcomes West End theatre patrons in glamorous red silk beneath the lanterns.", icon: "💃" },
-        cartAuntie:    { count: 0, cost: 65,     rate: 0.0320, name: "Gerrard St. Trolley Auntie",  desc: "Navigates bustling crowds with steaming bamboo tiers.", icon: "🛒" },
-        wrapperSifu:   { count: 0, cost: 320,    rate: 0.1250, name: "Wardour Master Pincher",      desc: "Pleats crystal translucent har gow on Soho marble.", icon: "🥟" },
-        bambooRack:    { count: 0, cost: 1450,   rate: 0.4400, name: "Shaftesbury Dragon Steamer",  desc: "High-power multi-tiered commercial boiler tiers.", icon: "♨️" },
-        dimsumDynasty: { count: 0, cost: 450000, rate: 55.0000, name: "Grand Imperial Paifang Dynasty", desc: "The supreme multi-pavilion culinary empire of London Chinatown.", icon: "👑" }
-      },
+upgrades: {
+  chopsticks:   { count: 0, cost: 8,      rate: 0.0008, name: "Pickle & Chopstick Runner", desc: "Spiced peanuts and tea mugs.", icon: "🥢" },
+  teaBoy:       { count: 0, cost: 30,     rate: 0.0035, name: "Lisle St. Tea Apprentice",   desc: "Refills hot jasmine pots.", icon: "🫖" },
+  scullery:     { count: 0, cost: 95,     rate: 0.0090, name: "Bamboo Tier Scullery Hand", desc: "Scrubs soaked willow racks.", icon: "🧽" },
+  hostess:      { count: 0, cost: 240,    rate: 0.0180, name: "Gerrard St. Qipao Hostess",  desc: "Welcomes rain-soaked crowds.", icon: "💃" },
+  cartAuntie:   { count: 0, cost: 650,    rate: 0.0450, name: "Yum Cha Trolley Auntie", desc: "Clatters down Soho aisles.", icon: "🛒" },
+  wrapperSifu:  { count: 0, cost: 2200,   rate: 0.1100, name: "Wardour Master Pincher",    desc: "Pleats crystal har gow folds.", icon: "🥟" },
+  bambooRack:   { count: 0, cost: 7500,   rate: 0.2600, name: "Shaftesbury Dragon Steamer",desc: "Multi-tiered copper boiler.", icon: "♨️" },
+  headChef:     { count: 0, cost: 24000,  rate: 0.5500, name: "Executive Chef of Chinatown",desc: "Legendary master of dim sum.", icon: "👨‍🍳" },
+  teaGuild:     { count: 0, cost: 80000,  rate: 1.1000, name: "Newport Place Flagship",    desc: "Grand paifang dining room.", icon: "🏯" },
+  goldenDragon: { count: 0, cost: 210000, rate: 2.2000, name: "Gerrard Dragon Float Fleet",desc: "Ceremonial festival banquet.", icon: "🐲" }
+},
       teas: {
-        jasmine:      { bought: false, cost: 150,    mult: 1.08, name: "Fragrant Jasmine Green (茉莉花茶)", desc: "Gentle floral notes soothe hungry queues (+8% all passive yield)." },
-        chiliCrisp:   { bought: false, cost: 750,    mult: 1.12, name: "House Chiu Chow Chili Oil (潮州辣椒油)", desc: "Slow-simmered crispy garlic and shallot flakes in chili oil (+12% passive yield)." },
-        tieguanyin:   { bought: false, cost: 1200,   mult: 1.15, name: "Iron Goddess Oolong (鐵觀音)",     desc: "Roasted complex notes boost staff speed (+15% passive yield)." },
-        puerh:        { bought: false, cost: 6000,   mult: 1.25, name: "Vintage Aged Pu-erh (陳年普洱)",     desc: "Deep earthy vintage tea clears rich dim sum (+25% passive yield)." },
-        silverNeedle: { bought: false, cost: 15000,  mult: 1.30, name: "White Silver Needle Peony (白毫銀針)", desc: "Velvety sun-dried Fujian white tea steeped in crystal water (+30% passive yield)." },
-        daHongPao:    { bought: false, cost: 30000,  mult: 1.40, name: "Imperial Wuyi Da Hong Pao (大紅袍)", desc: "Rare cliff tea fit for London aristocracy (+40% passive yield)." },
-        xoSauce:      { bought: false, cost: 75000,  mult: 1.50, name: "Master Reserve XO Sauce (御品XO醬)", desc: "Hand-shredded dried scallops, Jinhua ham, and aged shallots (+50% passive yield)." },
-        dancongOolong:{ bought: false, cost: 200000, mult: 1.65, name: "Rare Phoenix Dancong Oolong (鳳凰單欉)", desc: "Ancient tree nectar oolong from Guangdong misty peaks (+65% passive yield)." }
+        jasmine:      { bought: false, cost: 250,    mult: 1.04, name: "Fragrant Jasmine Green (茉莉花茶)", desc: "Gentle floral notes soothe hungry queues (+4% all passive yield)." },
+        chiliCrisp:   { bought: false, cost: 1500,   mult: 1.04, name: "House Chiu Chow Chili Oil (潮州辣椒油)", desc: "Slow-simmered crispy garlic and shallot flakes in chili oil (+4% passive yield)." },
+        tieguanyin:   { bought: false, cost: 6000,   mult: 1.05, name: "Iron Goddess Oolong (鐵觀音)",     desc: "Roasted complex notes boost staff speed (+5% passive yield)." },
+        puerh:        { bought: false, cost: 22000,  mult: 1.06, name: "Vintage Aged Pu-erh (陳年普洱)",     desc: "Deep earthy vintage tea clears rich dim sum (+6% passive yield)." },
+        silverNeedle: { bought: false, cost: 65000,  mult: 1.07, name: "White Silver Needle Peony (白毫銀針)", desc: "Velvety sun-dried Fujian white tea steeped in crystal water (+7% passive yield)." },
+        daHongPao:    { bought: false, cost: 110000, mult: 1.07, name: "Imperial Wuyi Da Hong Pao (大紅袍)", desc: "Rare cliff tea fit for London aristocracy (+7% passive yield)." },
+        xoSauce:      { bought: false, cost: 180000, mult: 1.08, name: "Master Reserve XO Sauce (御品XO醬)", desc: "Hand-shredded dried scallops, Jinhua ham, and aged shallots (+8% passive yield)." },
+        dancongOolong:{ bought: false, cost: 280000, mult: 1.10, name: "Rare Phoenix Dancong Oolong (鳳凰單欉)", desc: "Ancient tree nectar oolong from Guangdong misty peaks (+10% passive yield)." }
       },
       badges: {
         firstClick:       { unlocked: false, name: "First Steam",       desc: "Hand-crafted your very first dumpling.", icon: "🥟" },
@@ -1161,7 +1163,7 @@
       if (gameState.dimSum >= upg.cost) {
         gameState.dimSum -= upg.cost;
         upg.count++;
-        upg.cost = Math.ceil(upg.cost * 1.28);
+        upg.cost = Math.ceil(upg.cost * 1.35);
         playRetroSound('buy');
         triggerHaptic(25);
         setTicker(`Staff hired! ${upg.name} has joined the Dim Sum Diantang team.`);
