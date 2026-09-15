@@ -245,10 +245,11 @@
 
     .hull-stencil {
       font-size: 7px;
-      letter-spacing: 1px;
+      letter-spacing: 0.5px;
       color: #4ade80;
       opacity: 0.8;
       text-shadow: 0 0 4px #22c55e;
+      line-height: 1.4;
     }
 
     ::-webkit-scrollbar {
@@ -276,17 +277,17 @@
     <header class="border-b-4 border-[#f5b938] pb-3 flex flex-col gap-3">
       
       <!-- Tier 1: Title, Chinatown Lanterns, & Fleet Cycle Badge -->
-      <div class="flex flex-col md:flex-row items-center justify-between gap-2 text-center md:text-left">
-        <div class="flex items-center gap-3">
+      <div class="flex flex-col md:flex-row items-center justify-between gap-2.5 text-center md:text-left">
+        <div class="flex items-center gap-2 sm:gap-3">
           <span id="secret-lantern" class="text-2xl sm:text-3xl filter lantern-sway cursor-pointer active:scale-125 transition-transform" title="A warm glowing silk lantern...">🏮</span>
           <div>
             <div class="flex items-center gap-2 justify-center md:justify-start">
-              <h1 class="text-sm sm:text-base md:text-lg text-[#f5b938] tracking-wider whitespace-nowrap">
+              <h1 class="text-xs sm:text-base md:text-lg text-[#f5b938] tracking-wider whitespace-nowrap">
                 DEEPSPACE DIM SUM
               </h1>
               <span class="cosy-cup-steam text-xs text-[#a7f3d0]">♨️</span>
             </div>
-            <div class="text-[8px] sm:text-[9px] text-[#ffd666] font-bold tracking-wide mt-0.5">
+            <div class="text-[7px] sm:text-[9px] text-[#ffd666] font-bold tracking-wide mt-0.5 leading-snug">
               DIM SUM DIANTANG 點心殿堂 &bull; LITTLE GERRARD ST, SOHO BIODOME, A.R.C. CORE DRACONIS
             </div>
             <p class="hull-stencil mt-0.5 uppercase">
@@ -296,18 +297,18 @@
           <span class="text-2xl sm:text-3xl filter lantern-sway" style="animation-delay: -1.8s;">🏮</span>
         </div>
 
-        <!-- Live Fleet Time Atmosphere Badge -->
-        <button id="tod-toggle-btn" class="bg-[#2e0e09] text-[#fde047] border border-[#f5b938] px-2.5 py-1 text-[7px] sm:text-[8px] pixel-btn flex items-center gap-1.5 shadow whitespace-nowrap" title="Click to cycle Carrier Habitat day/night cycles">
+        <!-- Live Fleet Time Atmosphere Badge (Mobile-Safe Length) -->
+        <button id="tod-toggle-btn" class="bg-[#2e0e09] text-[#fde047] border border-[#f5b938] px-2.5 py-1 text-[7px] sm:text-[8px] pixel-btn flex items-center justify-center gap-1.5 shadow max-w-full text-center" title="Click to cycle Carrier Habitat day/night cycles">
           <span id="tod-icon">🌆</span>
-          <span id="tod-text">FLEET CYCLE: 15:00 &bull; AFTERNOON YUM CHA</span>
-          <span class="text-[6px] text-[#fcd34d] opacity-80">(CYCLE)</span>
+          <span id="tod-text" class="truncate">15:00 &bull; AFTERNOON YUM CHA</span>
+          <span class="text-[6px] text-[#fcd34d] opacity-80 shrink-0">(CYCLE)</span>
         </button>
       </div>
 
-      <!-- Tier 2: Action Toolbar -->
-      <div class="flex flex-wrap items-center justify-center md:justify-end gap-1.5 text-[7px] sm:text-[8px] pt-1 border-t border-[#3d1212]">
+      <!-- Tier 2: Action Toolbar (Centered Across All Screens) -->
+      <div class="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 text-[7px] sm:text-[8px] pt-1.5 border-t border-[#3d1212] w-full">
         <a href="https://nahla.live" target="_blank" rel="noopener noreferrer" 
-           class="bg-[#0e3b43] hover:bg-[#15535e] text-[#67e8f9] border border-[#22d3ee] px-2.5 py-1 pixel-btn flex items-center gap-1 font-bold no-underline">
+           class="bg-[#0e3b43] hover:bg-[#15535e] text-[#67e8f9] border border-[#22d3ee] px-2.5 py-1 pixel-btn flex items-center gap-1 font-bold no-underline shadow-[0_0_6px_rgba(34,211,238,0.2)]">
           <span>🌌</span> NAHLA TRACKER
         </a>
         <button id="tea-modal-btn" class="bg-[#1f3616] text-[#a7f3d0] border border-[#4ade80] px-2.5 py-1 pixel-btn hover:bg-[#2b4c1f]">
@@ -345,27 +346,27 @@
           
           <!-- Silver Taels & Spendable Balance -->
           <div class="flex justify-between items-baseline border-b border-[#3d1212] pb-2 mb-2.5">
-            <span class="text-[9px] text-[#f5b938] tracking-wider font-bold">SILVER TAELS (銀兩):</span>
-            <span id="dimsum-counter" class="text-lg font-black text-[#ffd666] tracking-tight">0.000</span>
+            <span class="text-[8px] sm:text-[9px] text-[#f5b938] tracking-wider font-bold">SILVER TAELS:</span>
+            <span id="dimsum-counter" class="text-base sm:text-lg font-black text-[#ffd666] tracking-tight">0.000</span>
           </div>
 
           <!-- Lifetime Steamed -->
           <div class="mb-3">
-            <div class="text-[8px] text-[#fca5a5] font-bold tracking-wide">LIFETIME STEAMED (VOYAGE PROGRESS):</div>
-            <div id="lifetime-counter" class="text-2xl font-black text-[#ef4444] my-1 tracking-tight">
+            <div class="text-[7px] sm:text-[8px] text-[#fca5a5] font-bold tracking-wide">LIFETIME STEAMED (VOYAGE PROGRESS):</div>
+            <div id="lifetime-counter" class="text-xl sm:text-2xl font-black text-[#ef4444] my-1 tracking-tight">
               0
             </div>
           </div>
 
-          <!-- Dedicated High-Visibility Pace Panel -->
-          <div class="bg-[#080101] border-2 border-[#3d1212] p-2 flex items-center justify-between">
-            <div class="flex items-center gap-2">
+          <!-- Dedicated High-Visibility Pace Panel (Safe on narrow screens) -->
+          <div class="bg-[#080101] border-2 border-[#3d1212] p-2 flex flex-row items-center justify-between gap-2">
+            <div class="flex items-center gap-1.5 whitespace-nowrap">
               <span class="text-xs">⚡</span>
-              <span id="rate-counter" class="text-[10px] sm:text-[11px] font-bold text-[#4ade80] tracking-wide">
+              <span id="rate-counter" class="text-[9px] sm:text-[11px] font-bold text-[#4ade80] tracking-wide whitespace-nowrap">
                 PACE: +0.0000 /s
               </span>
             </div>
-            <span id="tea-multiplier-tag" class="text-[9px] text-[#fde047] font-bold bg-[#261604] px-2 py-0.5 border border-[#ca8a04]">
+            <span id="tea-multiplier-tag" class="text-[8px] sm:text-[9px] text-[#fde047] font-bold bg-[#261604] px-2 py-0.5 border border-[#ca8a04] whitespace-nowrap shrink-0">
               Tea: 1.00x
             </span>
           </div>
@@ -695,10 +696,12 @@
         const parts = str.split(':');
         const hour = parseInt(parts[0], 10);
         const min = parts[1];
-        return { hour, min, formatted: `${str.slice(0, 5)} Carrier Cycle` };
+        return { hour, min, formatted: `${parts[0]}:${parts[1]}` };
       } catch (e) {
         const d = new Date();
-        return { hour: d.getUTCHours(), min: String(d.getUTCMinutes()).padStart(2, '0'), formatted: `${d.getUTCHours()}:${String(d.getUTCMinutes()).padStart(2, '0')} UTC` };
+        const h = String(d.getUTCHours()).padStart(2, '0');
+        const m = String(d.getUTCMinutes()).padStart(2, '0');
+        return { hour: d.getUTCHours(), min: m, formatted: `${h}:${m}` };
       }
     }
 
@@ -987,7 +990,7 @@
     resizeViewportCanvas();
 
     function applyTimeOfDayAtmosphere() {
-      const { hour, formatted } = getLondonTimeInfo();
+      const { hour, min, formatted } = getLondonTimeInfo();
       let mode = gameState.timeOfDayMode;
       
       let effectivePhase = 'afternoon';
@@ -1007,15 +1010,17 @@
       const todText = document.getElementById('tod-text');
 
       const phaseLabels = {
-        morning:   { icon: '🌅', label: 'MORNING MIST & YUM CHA' },
-        afternoon: { icon: '🏮', label: 'AFTERNOON YUM CHA RUSH' },
-        dusk:      { icon: '🌆', label: 'FLIGHT SHIFT CHANGE DUSK' },
-        night:     { icon: '🌙', label: 'MIDNIGHT LANTERN DRIZZLE' }
+        morning:   { icon: '🌅', label: 'MORNING YUM CHA' },
+        afternoon: { icon: '🏮', label: 'AFTERNOON YUM CHA' },
+        dusk:      { icon: '🌆', label: 'FLIGHT SHIFT DUSK' },
+        night:     { icon: '🌙', label: 'MIDNIGHT DRIZZLE' }
       };
 
       const info = phaseLabels[effectivePhase] || phaseLabels.afternoon;
       if (todIcon) todIcon.textContent = info.icon;
-      if (todText) todText.textContent = `${mode === 'auto' ? formatted.toUpperCase() : 'MANUAL'}: ${info.label}`;
+      if (todText) {
+        todText.textContent = `${mode === 'auto' ? formatted : 'MANUAL'} \u2022 ${info.label}`;
+      }
     }
 
     document.getElementById('tod-toggle-btn').addEventListener('click', () => {
