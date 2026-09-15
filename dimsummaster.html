@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Deepspace Dim Sum v0.42</title>
+  <title>Deepspace Dim Sum v0.43</title>
   
   <!-- Offline SVG Favicon: Traditional Character '點' for Dim Sum -->
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='82'>🥠</text></svg>">  
@@ -64,7 +64,29 @@
       touch-action: manipulation;
       transition: background 1.5s ease;
       position: relative;
+      /* Forces razor-sharp pixel font rendering */
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: geometricPrecision;
+  font-smooth: never;
+
     }
+
+    /* Typography Scale Calibration */
+.text-\[6px\] {
+  font-size: 8px !important;
+  line-height: 1.35 !important;
+}
+
+.text-\[7px\] {
+  font-size: 9px !important;
+  line-height: 1.35 !important;
+}
+
+.text-\[8px\] {
+  font-size: 10px !important;
+  line-height: 1.3 !important;
+}
 
     /* Observation Viewport Canvas (Stars + Carrier Hull Silhouette + Window Rain) */
     #viewport-canvas {
@@ -323,23 +345,36 @@
       <!-- LEFT COLUMN: Steamer, Dual Dumpling Counter, Overheat Guard, Specialty Dish -->
       <section class="lg:col-span-5 bg-[#120202]/90 pixel-box p-3 sm:p-4 flex flex-col items-center text-center">
         
-        <!-- Dual Counter: Spendable vs Lifetime Goal -->
-        <div class="w-full bg-[#faecd9] text-[#1b0a06] border-4 border-black p-3 mb-3 pixel-box text-left shadow-inner">
-          <div class="flex justify-between items-center border-b border-[#c49b77] pb-1 mb-2">
-            <span class="text-[7px] text-[#6d3923] tracking-wider font-bold">Silver Taels (銀兩):</span>
-            <span id="dimsum-counter" class="text-sm sm:text-base font-black text-[#961e1e]">0.00</span>
-          </div>
-          <div>
-            <div class="text-[7px] text-[#854d0e] font-bold">LIFETIME STEAMED (VOYAGE PROGRESS):</div>
-            <div id="lifetime-counter" class="text-base sm:text-xl md:text-2xl font-black text-[#b91c1c] my-1 tracking-tight">
-              0.00
-            </div>
-          </div>
-          <div class="flex justify-between items-center text-[7px] sm:text-[8px] text-[#555] tracking-tight mt-1 border-t border-[#c49b77] pt-1">
-            <span id="rate-counter">Pace: +0.0000/s</span>
-            <span id="tea-multiplier-tag" class="text-[#059669] font-bold">Tea: 1.00x</span>
-          </div>
-        </div>
+<!-- Dual Counter: Spendable vs Lifetime Goal -->
+<div class="w-full bg-[#160404] text-[#faf2dc] border-4 border-black p-3.5 mb-3 pixel-box text-left shadow-inner">
+  
+  <!-- Silver Taels & Spendable Balance -->
+  <div class="flex justify-between items-baseline border-b border-[#3d1212] pb-2 mb-2.5">
+    <span class="text-[9px] text-[#f5b938] tracking-wider font-bold">SILVER TAELS (銀兩):</span>
+    <span id="dimsum-counter" class="text-lg font-black text-[#ffd666] tracking-tight">0.000</span>
+  </div>
+
+  <!-- Lifetime Steamed -->
+  <div class="mb-3">
+    <div class="text-[8px] text-[#fca5a5] font-bold tracking-wide">LIFETIME STEAMED (VOYAGE PROGRESS):</div>
+    <div id="lifetime-counter" class="text-2xl font-black text-[#ef4444] my-1 tracking-tight">
+      0
+    </div>
+  </div>
+
+  <!-- Dedicated High-Visibility Pace Panel -->
+  <div class="bg-[#080101] border-2 border-[#3d1212] p-2 flex items-center justify-between">
+    <div class="flex items-center gap-2">
+      <span class="text-xs">⚡</span>
+      <span id="rate-counter" class="text-[10px] sm:text-[11px] font-bold text-[#4ade80] tracking-wide">
+        PACE: +0.0000 /s
+      </span>
+    </div>
+    <span id="tea-multiplier-tag" class="text-[9px] text-[#fde047] font-bold bg-[#261604] px-2 py-0.5 border border-[#ca8a04]">
+      Tea: 1.00x
+    </span>
+  </div>
+</div>
 
         <!-- Bamboo Steamer Button with Cosy Steam -->
         <div class="relative my-2">
@@ -1228,21 +1263,21 @@
         const card = document.createElement('div');
         card.id = `upg-card-${key}`;
         card.className = "bg-[#180404]/90 border-2 border-[#381111] p-2 sm:p-2.5 flex items-center justify-between gap-3 pixel-box";
-        card.innerHTML = `
-          <div class="flex items-center gap-2 sm:gap-3">
-            <span class="text-xl sm:text-2xl">${upg.icon}</span>
-            <div class="text-left">
-              <div class="text-[7px] sm:text-[8px] text-[#f5b938] font-bold">${upg.name}</div>
-              <div class="text-[6px] text-[#e3b88b] leading-tight my-0.5">${upg.desc}</div>
-              <div class="text-[6px] text-[#86efac]">
-                +${upg.rate.toFixed(4)}/s &bull; <span class="text-[#ffe082]" id="count-${key}">Hired: ${upg.count}</span>
-              </div>
-            </div>
-          </div>
-          <button id="buy-btn-${key}" class="pixel-btn bg-[#f5b938] text-[#240808] text-[7px] font-bold px-2.5 sm:px-3 py-2 border-2 border-black whitespace-nowrap" onclick="purchaseUpgrade('${key}')">
-            HIRE (<span id="cost-${key}">${upg.cost}</span>)
-          </button>
-        `;
+card.innerHTML = `
+  <div class="flex items-center gap-2 sm:gap-3">
+    <span class="text-2xl">${upg.icon}</span>
+    <div class="text-left">
+      <div class="text-[9px] text-[#f5b938] font-bold tracking-wide">${upg.name}</div>
+      <div class="text-[8px] text-[#f3e8ff] leading-relaxed my-0.5">${upg.desc}</div>
+      <div class="text-[8px] text-[#4ade80] font-bold mt-1">
+        +${upg.rate.toFixed(4)}/s &bull; <span class="text-[#fde047]" id="count-${key}">Hired: ${upg.count}</span>
+      </div>
+    </div>
+  </div>
+  <button id="buy-btn-${key}" class="pixel-btn bg-[#f5b938] text-[#240808] text-[8px] font-bold px-3 py-2 border-2 border-black whitespace-nowrap" onclick="purchaseUpgrade('${key}')">
+    HIRE (<span id="cost-${key}">${upg.cost}</span>)
+  </button>
+`;
         upgradesContainer.appendChild(card);
       }
     }
