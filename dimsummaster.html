@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Deepspace Dim Sum v0.43</title>
   
-  <!-- Offline SVG Favicon: Traditional Character '點' for Dim Sum -->
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='82'>🥠</text></svg>">  
+  <!-- Offline SVG Favicon: Dim Sum Emoji -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='82'>🥠</text></svg>">  
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Noto+Serif+TC:wght@600;900&display=swap" rel="stylesheet">
@@ -64,31 +64,26 @@
       touch-action: manipulation;
       transition: background 1.5s ease;
       position: relative;
-      /* Forces razor-sharp pixel font rendering */
-  -webkit-font-smoothing: none;
-  -moz-osx-font-smoothing: grayscale;
-  text-rendering: geometricPrecision;
-  font-smooth: never;
-
+      -webkit-font-smoothing: none;
+      -moz-osx-font-smoothing: grayscale;
+      text-rendering: geometricPrecision;
     }
 
-    /* Typography Scale Calibration */
-.text-\[6px\] {
-  font-size: 8px !important;
-  line-height: 1.35 !important;
-}
+    /* Typography Scale Calibration for Crisp Visibility */
+    .text-\[6px\] {
+      font-size: 8px !important;
+      line-height: 1.35 !important;
+    }
+    .text-\[7px\] {
+      font-size: 9px !important;
+      line-height: 1.35 !important;
+    }
+    .text-\[8px\] {
+      font-size: 10px !important;
+      line-height: 1.3 !important;
+    }
 
-.text-\[7px\] {
-  font-size: 9px !important;
-  line-height: 1.35 !important;
-}
-
-.text-\[8px\] {
-  font-size: 10px !important;
-  line-height: 1.3 !important;
-}
-
-    /* Observation Viewport Canvas (Stars + Carrier Hull Silhouette + Window Rain) */
+    /* Observation Viewport Canvas */
     #viewport-canvas {
       position: fixed;
       top: 0;
@@ -248,12 +243,11 @@
       animation: gentleVapor 2.2s ease-out infinite;
     }
 
-    /* Carrier Hull Viewport Stencil */
     .hull-stencil {
-      font-size: 6px;
+      font-size: 7px;
       letter-spacing: 1px;
       color: #4ade80;
-      opacity: 0.75;
+      opacity: 0.8;
       text-shadow: 0 0 4px #22c55e;
     }
 
@@ -278,10 +272,10 @@
 
   <div class="main-app-container w-full max-w-5xl bg-[#1d0505]/95 backdrop-blur-md pixel-box p-3 sm:p-5 mb-4 flex flex-col gap-4">
     
-<!-- Top Header: Stacked 2-Tier Layout -->
+    <!-- Top Header: Stacked 2-Tier Layout -->
     <header class="border-b-4 border-[#f5b938] pb-3 flex flex-col gap-3">
       
-      <!-- Tier 1: Title, Lanterns, & Fleet Cycle Clock -->
+      <!-- Tier 1: Title, Chinatown Lanterns, & Fleet Cycle Badge -->
       <div class="flex flex-col md:flex-row items-center justify-between gap-2 text-center md:text-left">
         <div class="flex items-center gap-3">
           <span id="secret-lantern" class="text-2xl sm:text-3xl filter lantern-sway cursor-pointer active:scale-125 transition-transform" title="A warm glowing silk lantern...">🏮</span>
@@ -302,7 +296,7 @@
           <span class="text-2xl sm:text-3xl filter lantern-sway" style="animation-delay: -1.8s;">🏮</span>
         </div>
 
-        <!-- Live Fleet Time Badge -->
+        <!-- Live Fleet Time Atmosphere Badge -->
         <button id="tod-toggle-btn" class="bg-[#2e0e09] text-[#fde047] border border-[#f5b938] px-2.5 py-1 text-[7px] sm:text-[8px] pixel-btn flex items-center gap-1.5 shadow whitespace-nowrap" title="Click to cycle Carrier Habitat day/night cycles">
           <span id="tod-icon">🌆</span>
           <span id="tod-text">FLEET CYCLE: 15:00 &bull; AFTERNOON YUM CHA</span>
@@ -320,7 +314,7 @@
           CELLAR 🍶
         </button>
         <button id="rain-toggle-btn" class="bg-[#15272e] text-[#7dd3fc] border border-[#38bdf8] px-2.5 py-1 pixel-btn hover:bg-[#1f3a45]">
-          🌧️ RAIN: <span id="rain-status">OFF</span>
+          🌧️ RAIN: <span id="rain-status">ON</span>
         </button>
         <button id="toggleMusicBtn" class="bg-amber-950/80 hover:bg-amber-900 text-amber-300 border border-amber-500/40 px-2.5 py-1 pixel-btn">
           🎵 BGM: <span id="bgm-label">OFF</span>
@@ -328,14 +322,14 @@
         <button id="sound-toggle-btn" class="bg-[#38100a] text-[#f5b938] border border-[#f5b938] px-2.5 py-1 pixel-btn hover:bg-[#4d160e]">
           SFX: <span id="sound-status">ON</span>
         </button>
-        <button id="badges-toggle-btn" class="bg-[#38100a] text-[#fde68a] border border-black px-2 py-1 pixel-btn hover:bg-[#4d160e]" title="Trophies">
-          🏆
+        <button id="badges-toggle-btn" class="bg-[#38100a] text-[#fde68a] border border-black px-2.5 py-1 pixel-btn hover:bg-[#4d160e]" title="Expedition Hall of Fame">
+          🏆 TROPHIES
         </button>
-        <button id="stats-toggle-btn" class="bg-[#38100a] text-[#faf2dc] border border-black px-2 py-1 pixel-btn hover:bg-[#4d160e]" title="Ship Log">
-          📜
+        <button id="stats-toggle-btn" class="bg-[#38100a] text-[#faf2dc] border border-black px-2.5 py-1 pixel-btn hover:bg-[#4d160e]" title="Ship Log">
+          📜 LOG
         </button>
-        <button id="data-toggle-btn" class="bg-[#38100a] text-[#faf2dc] border border-black px-2 py-1 pixel-btn hover:bg-[#4d160e]" title="Backup & Export">
-          💾
+        <button id="data-toggle-btn" class="bg-[#38100a] text-[#faf2dc] border border-black px-2.5 py-1 pixel-btn hover:bg-[#4d160e]" title="Backup & Export">
+          💾 BACKUP
         </button>
       </div>
 
@@ -346,36 +340,36 @@
       <!-- LEFT COLUMN: Steamer, Dual Dumpling Counter, Overheat Guard, Specialty Dish -->
       <section class="lg:col-span-5 bg-[#120202]/90 pixel-box p-3 sm:p-4 flex flex-col items-center text-center">
         
-<!-- Dual Counter: Spendable vs Lifetime Goal -->
-<div class="w-full bg-[#160404] text-[#faf2dc] border-4 border-black p-3.5 mb-3 pixel-box text-left shadow-inner">
-  
-  <!-- Silver Taels & Spendable Balance -->
-  <div class="flex justify-between items-baseline border-b border-[#3d1212] pb-2 mb-2.5">
-    <span class="text-[9px] text-[#f5b938] tracking-wider font-bold">SILVER TAELS (銀兩):</span>
-    <span id="dimsum-counter" class="text-lg font-black text-[#ffd666] tracking-tight">0.000</span>
-  </div>
+        <!-- Dual Counter: Spendable vs Lifetime Goal -->
+        <div class="w-full bg-[#160404] text-[#faf2dc] border-4 border-black p-3.5 mb-3 pixel-box text-left shadow-inner">
+          
+          <!-- Silver Taels & Spendable Balance -->
+          <div class="flex justify-between items-baseline border-b border-[#3d1212] pb-2 mb-2.5">
+            <span class="text-[9px] text-[#f5b938] tracking-wider font-bold">SILVER TAELS (銀兩):</span>
+            <span id="dimsum-counter" class="text-lg font-black text-[#ffd666] tracking-tight">0.000</span>
+          </div>
 
-  <!-- Lifetime Steamed -->
-  <div class="mb-3">
-    <div class="text-[8px] text-[#fca5a5] font-bold tracking-wide">LIFETIME STEAMED (VOYAGE PROGRESS):</div>
-    <div id="lifetime-counter" class="text-2xl font-black text-[#ef4444] my-1 tracking-tight">
-      0
-    </div>
-  </div>
+          <!-- Lifetime Steamed -->
+          <div class="mb-3">
+            <div class="text-[8px] text-[#fca5a5] font-bold tracking-wide">LIFETIME STEAMED (VOYAGE PROGRESS):</div>
+            <div id="lifetime-counter" class="text-2xl font-black text-[#ef4444] my-1 tracking-tight">
+              0
+            </div>
+          </div>
 
-  <!-- Dedicated High-Visibility Pace Panel -->
-  <div class="bg-[#080101] border-2 border-[#3d1212] p-2 flex items-center justify-between">
-    <div class="flex items-center gap-2">
-      <span class="text-xs">⚡</span>
-      <span id="rate-counter" class="text-[10px] sm:text-[11px] font-bold text-[#4ade80] tracking-wide">
-        PACE: +0.0000 /s
-      </span>
-    </div>
-    <span id="tea-multiplier-tag" class="text-[9px] text-[#fde047] font-bold bg-[#261604] px-2 py-0.5 border border-[#ca8a04]">
-      Tea: 1.00x
-    </span>
-  </div>
-</div>
+          <!-- Dedicated High-Visibility Pace Panel -->
+          <div class="bg-[#080101] border-2 border-[#3d1212] p-2 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="text-xs">⚡</span>
+              <span id="rate-counter" class="text-[10px] sm:text-[11px] font-bold text-[#4ade80] tracking-wide">
+                PACE: +0.0000 /s
+              </span>
+            </div>
+            <span id="tea-multiplier-tag" class="text-[9px] text-[#fde047] font-bold bg-[#261604] px-2 py-0.5 border border-[#ca8a04]">
+              Tea: 1.00x
+            </span>
+          </div>
+        </div>
 
         <!-- Bamboo Steamer Button with Cosy Steam -->
         <div class="relative my-2">
@@ -403,7 +397,7 @@
           <div class="w-full h-3 bg-black border border-[#481810] overflow-hidden">
             <div id="heat-bar" class="h-full bg-gradient-to-r from-[#e58a22] to-[#d62828] transition-[width] duration-100" style="width: 0%;"></div>
           </div>
-          <p class="text-[6px] text-[#c49b75] mt-1.5 leading-relaxed">
+          <p class="text-[6px] text-[#e2d5c5] mt-1.5 leading-relaxed">
             Deliberate pacing preserves heat integrity. Rapid mashing overheats the bamboo tiers, triggering an 8s cooldown.
           </p>
         </div>
@@ -615,7 +609,9 @@
       <div id="data-feedback" class="text-[6px] text-[#f5b938] min-h-[14px]"></div>
     </div>
   </div>
-<audio id="bgMusic" src="茶室静夜.mp3" loop preload="auto"></audio>
+
+  <audio id="bgMusic" src="茶室静夜.mp3" loop preload="auto"></audio>
+
   <script>
     /*
       DEEPSPACE DIM SUM: LITTLE GERRARD ST (A.R.C. CORE DRACONIS)
@@ -641,22 +637,21 @@
       cooldownTimer: 0,
       soundEnabled: true,
       rainEnabled: true,
-      hapticsEnabled: true,
       timeOfDayMode: 'auto', // 'auto', 'morning', 'afternoon', 'dusk', 'night'
       teaMultiplier: 1.0,
       secretSalonUnlocked: false,
       activeBuff: null,
       upgrades: {
-        chopsticks:   { count: 0, cost: 10,     rate: 0.00015, name: "Pickle & Chopstick Runner",    desc: "Gives out complimentary spiced peanuts and bamboo chopsticks.", icon: "🥢" },
-        teaBoy:       { count: 0, cost: 40,     rate: 0.00050, name: "Nahlan Tea Apprentice",     desc: "Refills hot jasmine pots in the mist.", icon: "🫖" },
-        scullery:     { count: 0, cost: 150,    rate: 0.00120, name: "Bamboo Tier Scullery Hand",    desc: "Scans and soaks willow racks so the chef line never runs out.", icon: "🧽" },
-        hostess:      { count: 0, cost: 480,    rate: 0.00250, name: "Qipao Crater Hostess",    desc: "Welcomes weary customers in from the rain above Pâte Sablée.", icon: "💃" },
-        cartAuntie:   { count: 0, cost: 1600,   rate: 0.00550, name: "Yum Cha Trolley Auntie",  desc: "Navigates crowded concourses with boiling bamboo tiers.", icon: "🛒" },
+        chopsticks:   { count: 0, cost: 10,     rate: 0.00015, name: "Pickle & Chopstick Runner",   desc: "Gives out complimentary spiced peanuts and bamboo chopsticks.", icon: "🥢" },
+        teaBoy:       { count: 0, cost: 40,     rate: 0.00050, name: "Nahlan Tea Apprentice",       desc: "Refills hot jasmine pots in the mist.", icon: "🫖" },
+        scullery:     { count: 0, cost: 150,    rate: 0.00120, name: "Bamboo Tier Scullery Hand",   desc: "Scans and soaks willow racks so the chef line never runs out.", icon: "🧽" },
+        hostess:      { count: 0, cost: 480,    rate: 0.00250, name: "Qipao Crater Hostess",        desc: "Welcomes weary customers in from the rain above Pâte Sablée.", icon: "💃" },
+        cartAuntie:   { count: 0, cost: 1600,   rate: 0.00550, name: "Yum Cha Trolley Auntie",      desc: "Navigates crowded concourses with boiling bamboo tiers.", icon: "🛒" },
         wrapperSifu:  { count: 0, cost: 5800,   rate: 0.01200, name: "Miley's Master Pincher",      desc: "Pleats translucent crystal har gow on Soho marble.", icon: "🥟" },
-        bambooRack:   { count: 0, cost: 21000,  rate: 0.02200, name: "Mainship Dragon Steamer",  desc: "Commercial multi-tier induction boiler stack.", icon: "♨️" },
-        headChef:     { count: 0, cost: 68000,  rate: 0.04000, name: "Executive Chef of Chinatown",  desc: "Master chef who brought authentic Cantonese yum cha to space.", icon: "👨‍🍳" },
-        teaGuild:     { count: 0, cost: 180000, rate: 0.07500, name: "Fleet Carrier Flagship Diner",      desc: "Multi-tiered dining pavilion beneath the Paifang gate.", icon: "🏯" },
-        goldenDragon: { count: 0, cost: 350000, rate: 0.12000, name: "Gerrard Dragon Float Fleet",  desc: "Festival banquet brigade leading Lunar celebrations on the Carrier.", icon: "🐲" }
+        bambooRack:   { count: 0, cost: 21000,  rate: 0.02200, name: "Mainship Dragon Steamer",     desc: "Commercial multi-tier induction boiler stack.", icon: "♨️" },
+        headChef:     { count: 0, cost: 68000,  rate: 0.04000, name: "Executive Chef of Chinatown", desc: "Master chef who brought authentic Cantonese yum cha to space.", icon: "👨‍🍳" },
+        teaGuild:     { count: 0, cost: 180000, rate: 0.07500, name: "Fleet Carrier Flagship Diner", desc: "Multi-tiered dining pavilion beneath the Paifang gate.", icon: "🏯" },
+        goldenDragon: { count: 0, cost: 350000, rate: 0.12000, name: "Gerrard Dragon Float Fleet", desc: "Festival banquet brigade leading Lunar celebrations on the Carrier.", icon: "🐲" }
       },
       teas: {
         jasmine:      { bought: false, cost: 350,    mult: 1.02, name: "Fragrant Jasmine Green (茉莉花茶)", desc: "Floral aromatics soothe flight fatigue (+2% passive yield)." },
@@ -691,16 +686,6 @@
       { req: 120000, name: "Xiao Long Bao Broth Pouches", icon: "🍲", desc: "Fragile skins holding rich savory molten broth." },
       { req: 250000, name: "Flaky Egg Tarts (蛋撻)",       icon: "🥧", desc: "Thousand-layer puff pastry cradling warm silken custard." },
       { req: 383000, name: "Grand Chinatown Banquet (倫敦唐人街大宴)", icon: "👑", desc: "The supreme imperial feast crowning the A.R.C. Core Draconis." }
-    ];
-
-    const CHINATOWN_NEWS = [
-      "A soft mist rains against the observation glass; lanterns cast crimson reflections across Sub-Deck 4.",
-      "The soothing aroma of hot jasmine tea drifts through Little Gerrard Street's frosted dining alcoves.",
-      "Trolley aunties weave between packed bamboo tables amidst the clatter of morning yum cha.",
-      "Off-duty pilots and engineers seek shelter from the concourse rain under the Paifang gate.",
-      "Thirty stacked bamboo tiers hiss softly, sending rich shrimp and ginger aromas into the air scrubbers.",
-      "Raindrops trickle down the thick reinforced viewport as master sifus fold delicate har gow.",
-      "Outside, distant nebulae glow in violet while roast ducks turn golden in the concourse window."
     ];
 
     function getLondonTimeInfo() {
@@ -875,13 +860,6 @@
       } catch (err) {}
     }
 
-    function triggerHaptic(duration = 12) {
-      if (!gameState.hapticsEnabled) return;
-      try {
-        if ('vibrate' in navigator) navigator.vibrate(duration);
-      } catch (e) {}
-    }
-
     const vCanvas = document.getElementById('viewport-canvas');
     const vCtx = vCanvas.getContext('2d');
     let stars = [];
@@ -928,12 +906,10 @@
       const h = vCanvas.height;
 
       vCtx.save();
-      // Outer viewport border frame
       vCtx.strokeStyle = 'rgba(25, 8, 10, 0.9)';
       vCtx.lineWidth = 14;
       vCtx.strokeRect(0, 0, w, h);
 
-      // Fine edge highlight line
       vCtx.strokeStyle = 'rgba(245, 185, 56, 0.15)';
       vCtx.lineWidth = 1.5;
       vCtx.strokeRect(14, 14, w - 28, h - 28);
@@ -955,7 +931,7 @@
       vCtx.closePath();
       vCtx.fill();
 
-      // Viewport Rivet and Structural Lines
+      // Structural Rivet Lines
       vCtx.strokeStyle = 'rgba(80, 20, 25, 0.6)';
       vCtx.lineWidth = 2;
       vCtx.beginPath();
@@ -964,20 +940,12 @@
       vCtx.moveTo(w, 110);
       vCtx.lineTo(w - 130, 0);
       vCtx.stroke();
-
-      // Viewport Stencil in top-left
-     // vCtx.fillStyle = 'rgba(74, 222, 128, 0.55)';
-  //    vCtx.font = '7px monospace';
-  //    vCtx.fillText("A.R.C. CORE DRACONIS // OBSERVATION BAY 04B", 24, 28);
-   //   vCtx.fillText("PRESSURE: 1.01 ATM // CONDENSATION CYCLE ACTIVE", 24, 38);
-
-   //   vCtx.restore();
+      vCtx.restore();
     }
 
     function updateAndDrawViewport() {
       vCtx.clearRect(0, 0, vCanvas.width, vCanvas.height);
 
-      // 1. Draw Starfield & Nebula Glow
       for (let i = 0; i < stars.length; i++) {
         const s = stars[i];
         s.alpha += Math.sin(Date.now() * s.twinkleSpeed) * 0.01;
@@ -991,10 +959,8 @@
         vCtx.fill();
       }
 
-      // 2. Draw Carrier Hull Silhouette
       drawCarrierHullStruts();
 
-      // 3. Draw London Precipitation Running down Viewport Glass
       if (gameState.rainEnabled) {
         vCtx.strokeStyle = 'rgba(215, 235, 255, 0.35)';
         vCtx.lineWidth = 1;
@@ -1048,8 +1014,8 @@
       };
 
       const info = phaseLabels[effectivePhase] || phaseLabels.afternoon;
-      todIcon.textContent = info.icon;
-      todText.textContent = `${mode === 'auto' ? formatted.toUpperCase() : 'MANUAL'}: ${info.label}`;
+      if (todIcon) todIcon.textContent = info.icon;
+      if (todText) todText.textContent = `${mode === 'auto' ? formatted.toUpperCase() : 'MANUAL'}: ${info.label}`;
     }
 
     document.getElementById('tod-toggle-btn').addEventListener('click', () => {
@@ -1057,7 +1023,6 @@
       const currentIdx = modes.indexOf(gameState.timeOfDayMode);
       gameState.timeOfDayMode = modes[(currentIdx + 1) % modes.length];
       playRetroSound('click');
-      triggerHaptic(18);
       applyTimeOfDayAtmosphere();
       setTicker(`Carrier habitat cycle set to: ${gameState.timeOfDayMode.toUpperCase()} mode.`);
     });
@@ -1076,7 +1041,7 @@
         if (gameState.teas[t].bought) mult *= gameState.teas[t].mult;
       }
       if (gameState.secretSalonUnlocked) {
-        mult *= 1.04; // +4% Permanent Floating World Salon Patronage
+        mult *= 1.04;
       }
       if (gameState.activeBuff && gameState.activeBuff.timer > 0) {
         mult *= (gameState.activeBuff.mult || 1);
@@ -1146,11 +1111,9 @@
             gameState.startTime = parsed.startTime || Date.now();
             gameState.soundEnabled = parsed.soundEnabled !== false;
             gameState.rainEnabled = parsed.rainEnabled !== false;
-            gameState.hapticsEnabled = parsed.hapticsEnabled !== false;
             gameState.timeOfDayMode = parsed.timeOfDayMode || 'auto';
             gameState.secretSalonUnlocked = !!parsed.secretSalonUnlocked;
 
-            // Offline progress calculations
             const now = Date.now();
             const lastSaved = parsed.lastSaveTime || now;
             const diffSeconds = Math.max(0, (now - lastSaved) / 1000);
@@ -1185,7 +1148,6 @@
 
       if (gameState.isOverheated && !isZenActive) {
         playRetroSound('overheat');
-        triggerHaptic([30, 40, 30]);
         setTicker("Steamer is smoking! Please wait for bamboo tiers to cool down.");
         return;
       }
@@ -1199,7 +1161,6 @@
         gameState.heat += 3.3;
       }
       playRetroSound('click');
-      triggerHaptic(14);
 
       bambooBody.style.transform = "scale(0.92) translateY(4px)";
       setTimeout(() => {
@@ -1217,7 +1178,6 @@
         gameState.isOverheated = true;
         gameState.cooldownTimer = 8.0;
         playRetroSound('overheat');
-        triggerHaptic([50, 60, 50]);
         setTicker("OVERHEAT! Induction pressure peak! Bamboo tiers require 8s cooling.");
       }
 
@@ -1264,21 +1224,21 @@
         const card = document.createElement('div');
         card.id = `upg-card-${key}`;
         card.className = "bg-[#180404]/90 border-2 border-[#381111] p-2 sm:p-2.5 flex items-center justify-between gap-3 pixel-box";
-card.innerHTML = `
-  <div class="flex items-center gap-2 sm:gap-3">
-    <span class="text-2xl">${upg.icon}</span>
-    <div class="text-left">
-      <div class="text-[9px] text-[#f5b938] font-bold tracking-wide">${upg.name}</div>
-      <div class="text-[8px] text-[#f3e8ff] leading-relaxed my-0.5">${upg.desc}</div>
-      <div class="text-[8px] text-[#4ade80] font-bold mt-1">
-        +${upg.rate.toFixed(4)}/s &bull; <span class="text-[#fde047]" id="count-${key}">Hired: ${upg.count}</span>
-      </div>
-    </div>
-  </div>
-  <button id="buy-btn-${key}" class="pixel-btn bg-[#f5b938] text-[#240808] text-[8px] font-bold px-3 py-2 border-2 border-black whitespace-nowrap" onclick="purchaseUpgrade('${key}')">
-    HIRE (<span id="cost-${key}">${upg.cost}</span>)
-  </button>
-`;
+        card.innerHTML = `
+          <div class="flex items-center gap-2 sm:gap-3">
+            <span class="text-2xl">${upg.icon}</span>
+            <div class="text-left">
+              <div class="text-[9px] text-[#f5b938] font-bold tracking-wide">${upg.name}</div>
+              <div class="text-[8px] text-[#f3e8ff] leading-relaxed my-0.5">${upg.desc}</div>
+              <div class="text-[8px] text-[#4ade80] font-bold mt-1">
+                +${upg.rate.toFixed(4)}/s &bull; <span class="text-[#fde047]" id="count-${key}">Hired: ${upg.count}</span>
+              </div>
+            </div>
+          </div>
+          <button id="buy-btn-${key}" class="pixel-btn bg-[#f5b938] text-[#240808] text-[8px] font-bold px-3 py-2 border-2 border-black whitespace-nowrap" onclick="purchaseUpgrade('${key}')">
+            HIRE (<span id="cost-${key}">${upg.cost}</span>)
+          </button>
+        `;
         upgradesContainer.appendChild(card);
       }
     }
@@ -1288,10 +1248,8 @@ card.innerHTML = `
       if (gameState.dimSum >= upg.cost) {
         gameState.dimSum -= upg.cost;
         upg.count++;
-        // Calibrated 1.42x exponent to ensure long-haul 180+ day longevity
         upg.cost = Math.ceil(upg.cost * 1.42);
         playRetroSound('buy');
-        triggerHaptic(25);
         setTicker(`Staff hired! ${upg.name} reported for duty on Sub-Deck 4.`);
         checkAchievements();
         renderUI();
@@ -1337,7 +1295,6 @@ card.innerHTML = `
         gameState.dimSum -= tea.cost;
         tea.bought = true;
         playRetroSound('tea');
-        triggerHaptic([20, 30, 40]);
         setTicker(`Artisan reserve brewed! ${tea.name} is now served aboard A.R.C. Core Draconis!`);
         renderTeasList();
         checkAchievements();
@@ -1367,7 +1324,6 @@ card.innerHTML = `
       if (gameState.badges[key] && !gameState.badges[key].unlocked) {
         gameState.badges[key].unlocked = true;
         playRetroSound('tea');
-        triggerHaptic([25, 40, 25]);
         setTicker(`🏆 TROPHY UNLOCKED: ${gameState.badges[key].name}! (${gameState.badges[key].desc})`);
       }
     }
@@ -1403,7 +1359,6 @@ card.innerHTML = `
         e.preventDefault();
         secretTapCount++;
         playRetroSound('click');
-        triggerHaptic(20);
 
         if (secretTapTimer) clearTimeout(secretTapTimer);
         secretTapTimer = setTimeout(() => { secretTapCount = 0; }, 2400);
@@ -1411,7 +1366,6 @@ card.innerHTML = `
         if (secretTapCount >= 5) {
           secretTapCount = 0;
           playRetroSound('fortune');
-          triggerHaptic([30, 40, 50, 60]);
           secretModal.classList.remove('hidden');
         }
       });
@@ -1428,7 +1382,6 @@ card.innerHTML = `
         gameState.dimSum += 50;
         gameState.totalEarned += 50;
         playRetroSound('tea');
-        triggerHaptic([40, 50, 60, 40]);
         setTicker("🌸 The Floating World Salon embraces you! +50 Dim Sum & +4% permanent passive patronage unlocked!");
         checkAchievements();
         renderUI();
@@ -1443,7 +1396,6 @@ card.innerHTML = `
 
     function scheduleFortuneCookie() {
       if (fortuneTimer) clearTimeout(fortuneTimer);
-      // Spawns regularly every 75 to 140 seconds (~every 1.5 to 2.5 minutes)
       const delay = 75000 + Math.random() * 65000;
       fortuneTimer = setTimeout(() => {
         fortuneContainer.classList.remove('hidden');
@@ -1456,34 +1408,28 @@ card.innerHTML = `
       fortuneContainer.classList.add('hidden');
       gameState.fortuneCount++;
       playRetroSound('fortune');
-      triggerHaptic([30, 20, 30, 20, 50]);
 
       const roll = Math.random();
       const currentRate = Math.max(0.005, calcPassiveRate());
 
       if (roll < 0.25) {
-        // Fortune 1: Great Wealth (1-minute payout burst, min 5)
         const bonus = Math.max(5, Math.round(currentRate * 60));
         gameState.dimSum += bonus;
         gameState.totalEarned += bonus;
         setTicker(`🥠 FORTUNE REVEALED: "Wealth flows through the void!" (+${bonus.toLocaleString()} Dim Sum burst)`);
       } else if (roll < 0.45) {
-        // Fortune 2: Flight Shift Rush (1.4x speed for 25s)
         gameState.activeBuff = { type: 'theatre_rush', name: "FLIGHT SHIFT RUSH (1.4X SPEED)", timer: 25, mult: 1.4 };
         setTicker("🥠 FORTUNE REVEALED: Flight deck shift ends! Hungry crew stampede Little Gerrard! (1.4x speed for 25s)");
       } else if (roll < 0.65) {
-        // Fortune 3: Master Sifu's Bamboo Zen (Clears heat + no overheat + +0.25/click for 20s)
         gameState.heat = 0;
         gameState.isOverheated = false;
         gameState.cooldownTimer = 0;
         gameState.activeBuff = { type: 'bamboo_zen', name: "BAMBOO ZEN (+0.25/TAP & NO HEAT)", timer: 20, mult: 1.0 };
         setTicker("🥠 FORTUNE REVEALED: Master Sifu's Zen focus! Steamer cannot overheat & clicks yield +0.25 for 20s!");
       } else if (roll < 0.80) {
-        // Fortune 4: Soho Rain Blessing (+20% yield for 30s)
         gameState.activeBuff = { type: 'rain_blessing', name: "SOHO RAIN BLESSING (+20% YIELD)", timer: 30, mult: 1.20 };
         setTicker("🥠 FORTUNE REVEALED: Concourse rain cycle brings good luck! Steaming yield boosted by +20% for 30s!");
       } else if (roll < 0.93) {
-        // Fortune 5: Trolley Caravan Stampede (Scaled modestly by crew size)
         let totalStaff = 0;
         for (const k in gameState.upgrades) totalStaff += gameState.upgrades[k].count;
         const auntieBonus = Math.max(4, Math.round(totalStaff * 1.2 + currentRate * 30));
@@ -1491,7 +1437,6 @@ card.innerHTML = `
         gameState.totalEarned += auntieBonus;
         setTicker(`🥠 FORTUNE REVEALED: Trolley Caravan Stampede! The crew clears out all carts! (+${auntieBonus.toLocaleString()} Dim Sum)`);
       } else {
-        // Fortune 6: Rare Imperial Dragon Blessing (+50 flat + 1.6x frenzy for 15s)
         const dragonGift = 50;
         gameState.dimSum += dragonGift;
         gameState.totalEarned += dragonGift;
@@ -1513,30 +1458,29 @@ card.innerHTML = `
     });
 
     const bgMusic = document.getElementById('bgMusic');
-const toggleMusicBtn = document.getElementById('toggleMusicBtn');
-let isMusicPlaying = false;
+    const toggleMusicBtn = document.getElementById('toggleMusicBtn');
+    const bgmLabel = document.getElementById('bgm-label');
+    let isMusicPlaying = false;
+    bgMusic.volume = 0.35;
 
-// Set a comfortable default volume (35%) so it doesn't overpower the rain
-bgMusic.volume = 0.35;
-
-toggleMusicBtn.addEventListener('click', () => {
-  if (isMusicPlaying) {
-    bgMusic.pause();
-    isMusicPlaying = false;
-    toggleMusicBtn.textContent = '🎵 BGM: OFF';
-    toggleMusicBtn.classList.remove('text-amber-200', 'border-amber-400', 'bg-amber-800/80');
-    toggleMusicBtn.classList.add('text-amber-300', 'border-amber-500/40', 'bg-amber-950/80');
-  } else {
-    bgMusic.play().then(() => {
-      isMusicPlaying = true;
-      toggleMusicBtn.textContent = '🎵 BGM: ON';
-      toggleMusicBtn.classList.remove('text-amber-300', 'border-amber-500/40', 'bg-amber-950/80');
-      toggleMusicBtn.classList.add('text-amber-200', 'border-amber-400', 'bg-amber-800/80');
-    }).catch(err => {
-      console.warn("Audio autoplay blocked or file missing:", err);
+    toggleMusicBtn.addEventListener('click', () => {
+      if (isMusicPlaying) {
+        bgMusic.pause();
+        isMusicPlaying = false;
+        if (bgmLabel) bgmLabel.textContent = 'OFF';
+        toggleMusicBtn.classList.remove('text-amber-200', 'border-amber-400', 'bg-amber-800/80');
+        toggleMusicBtn.classList.add('text-amber-300', 'border-amber-500/40', 'bg-amber-950/80');
+      } else {
+        bgMusic.play().then(() => {
+          isMusicPlaying = true;
+          if (bgmLabel) bgmLabel.textContent = 'ON';
+          toggleMusicBtn.classList.remove('text-amber-300', 'border-amber-500/40', 'bg-amber-950/80');
+          toggleMusicBtn.classList.add('text-amber-200', 'border-amber-400', 'bg-amber-800/80');
+        }).catch(err => {
+          console.warn("Audio autoplay blocked or file missing:", err);
+        });
+      }
     });
-  }
-});
 
     const rainToggleBtn = document.getElementById('rain-toggle-btn');
     const rainStatus = document.getElementById('rain-status');
@@ -1551,14 +1495,6 @@ toggleMusicBtn.addEventListener('click', () => {
         }
       });
     }
-
-    const hapticsToggleBtn = document.getElementById('haptics-toggle-btn');
-    const hapticsStatus = document.getElementById('haptics-status');
-    hapticsToggleBtn.addEventListener('click', () => {
-      gameState.hapticsEnabled = !gameState.hapticsEnabled;
-      hapticsStatus.textContent = gameState.hapticsEnabled ? "ON" : "OFF";
-      if (gameState.hapticsEnabled) triggerHaptic(20);
-    });
 
     const teaModal = document.getElementById('tea-modal');
     document.getElementById('tea-modal-btn').addEventListener('click', () => {
@@ -1580,7 +1516,7 @@ toggleMusicBtn.addEventListener('click', () => {
     document.getElementById('stats-toggle-btn').addEventListener('click', () => {
       document.getElementById('stat-total').textContent = gameState.totalEarned.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
       document.getElementById('stat-clicks').textContent = gameState.totalClicks.toLocaleString('en-US');
-      document.getElementById('stat-click-yield').textContent = (gameState.totalClicks * 0.25).toLocaleString('en-US', { minimumFractionDigits: 2 });
+      document.getElementById('stat-click-yield').textContent = (gameState.totalClicks * 0.10).toLocaleString('en-US', { minimumFractionDigits: 2 });
       
       let totalHired = 0;
       for (const k in gameState.upgrades) totalHired += gameState.upgrades[k].count;
@@ -1707,23 +1643,33 @@ toggleMusicBtn.addEventListener('click', () => {
       requestAnimationFrame(gameLoop);
     }
 
-function renderUI() {
-      document.getElementById('dimsum-counter').textContent = gameState.dimSum.toLocaleString('en-US', {
-        minimumFractionDigits: 3,
-        maximumFractionDigits: 3
-      });
+    function renderUI() {
+      const dimSumEl = document.getElementById('dimsum-counter');
+      if (dimSumEl) {
+        dimSumEl.textContent = gameState.dimSum.toLocaleString('en-US', {
+          minimumFractionDigits: 3,
+          maximumFractionDigits: 3
+        });
+      }
 
-const lifetimeEl = document.getElementById('lifetime-counter');
-if (lifetimeEl) {
-  lifetimeEl.textContent = gameState.totalEarned.toLocaleString('en-US', {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0
-  });
-}
+      const lifetimeEl = document.getElementById('lifetime-counter');
+      if (lifetimeEl) {
+        lifetimeEl.textContent = gameState.totalEarned.toLocaleString('en-US', {
+          minimumFractionDigits: 0,
+          maximumFractionDigits: 0
+        });
+      }
 
       const currentRate = calcPassiveRate();
-      document.getElementById('rate-counter').textContent = `Pace: +${currentRate.toFixed(4)}/s`;
-      document.getElementById('hourly-counter').textContent = (currentRate * 3600).toFixed(1);
+      const rateEl = document.getElementById('rate-counter');
+      if (rateEl) {
+        rateEl.textContent = `PACE: +${currentRate.toFixed(4)} /s`;
+      }
+
+      const hourlyEl = document.getElementById('hourly-counter');
+      if (hourlyEl) {
+        hourlyEl.textContent = (currentRate * 3600).toFixed(1);
+      }
 
       const teaMultEl = document.getElementById('tea-multiplier-tag');
       if (teaMultEl) {
@@ -1734,31 +1680,34 @@ if (lifetimeEl) {
       const heatBar = document.getElementById('heat-bar');
       const heatTitle = document.getElementById('heat-title');
       const cooldownBadge = document.getElementById('cooldown-badge');
-      heatBar.style.width = `${gameState.heat}%`;
+      if (heatBar && heatTitle && cooldownBadge) {
+        heatBar.style.width = `${gameState.heat}%`;
 
-if (gameState.isOverheated) {
-  heatTitle.textContent = `OVERHEATED! COOLING: ${Math.ceil(gameState.cooldownTimer)}s`;
-  cooldownBadge.classList.remove('hidden');
-  heatBar.style.background = "#e61919";
-} else {
-  heatTitle.textContent = `BAMBOO HEAT: ${Math.floor(gameState.heat)}%`;
-  cooldownBadge.classList.add('hidden');
-  if (gameState.heat > 80) {
-    heatBar.style.background = "#ff5e00";
-  } else if (gameState.heat < 70) {
-    heatBar.style.background = "linear-gradient(to right, #e58a22, #d62828)";
-  }
-  // between 70-80, leave whatever it already was — no flip
-}
+        if (gameState.isOverheated) {
+          heatTitle.textContent = `OVERHEATED! COOLING: ${Math.ceil(gameState.cooldownTimer)}s`;
+          cooldownBadge.classList.remove('hidden');
+          heatBar.style.background = "#e61919";
+        } else {
+          heatTitle.textContent = `BAMBOO HEAT: ${Math.floor(gameState.heat)}%`;
+          cooldownBadge.classList.add('hidden');
+          if (gameState.heat > 80) {
+            heatBar.style.background = "#ff5e00";
+          } else if (gameState.heat < 70) {
+            heatBar.style.background = "linear-gradient(to right, #e58a22, #d62828)";
+          }
+        }
+      }
 
       // Active Buff Display
       const buffBox = document.getElementById('active-buff-box');
-      if (gameState.activeBuff && gameState.activeBuff.timer > 0) {
-        buffBox.classList.remove('hidden');
-        document.getElementById('buff-title').textContent = gameState.activeBuff.name || "KITCHEN BUFF ACTIVE";
-        document.getElementById('buff-timer').textContent = `${Math.ceil(gameState.activeBuff.timer)}s`;
-      } else {
-        buffBox.classList.add('hidden');
+      if (buffBox) {
+        if (gameState.activeBuff && gameState.activeBuff.timer > 0) {
+          buffBox.classList.remove('hidden');
+          document.getElementById('buff-title').textContent = gameState.activeBuff.name || "KITCHEN BUFF ACTIVE";
+          document.getElementById('buff-timer').textContent = `${Math.ceil(gameState.activeBuff.timer)}s`;
+        } else {
+          buffBox.classList.add('hidden');
+        }
       }
 
       // Upgrade Buttons state
@@ -1776,28 +1725,39 @@ if (gameState.isOverheated) {
 
       // Expedition Progress Bar
       const progressPercent = Math.min(100, (gameState.totalEarned / TARGET_GOAL) * 100);
-      document.getElementById('goal-bar').style.width = `${progressPercent}%`;
-      document.getElementById('goal-percent').textContent = `${progressPercent.toFixed(4)}%`;
+      const goalBar = document.getElementById('goal-bar');
+      const goalPercentEl = document.getElementById('goal-percent');
+      if (goalBar) goalBar.style.width = `${progressPercent}%`;
+      if (goalPercentEl) goalPercentEl.textContent = `${progressPercent.toFixed(4)}%`;
 
       const remaining = Math.max(0, TARGET_GOAL - gameState.totalEarned);
-      document.getElementById('goal-remaining').textContent = `Remaining: ${remaining.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} dim sum`;
+      const goalRemainingEl = document.getElementById('goal-remaining');
+      if (goalRemainingEl) {
+        goalRemainingEl.textContent = `Remaining: ${remaining.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} dim sum`;
+      }
 
-      if (currentRate > 0) {
-        const secRemaining = remaining / currentRate;
-        const daysRemaining = (secRemaining / 86400).toFixed(1);
-        document.getElementById('goal-estimate').textContent = `Estimated voyage time: ~${daysRemaining} days at current pace`;
-      } else {
-        document.getElementById('goal-estimate').textContent = `Estimated voyage duration: ~6 to 7+ months (≥180 days) at calibrated pace`;
+      const goalEstEl = document.getElementById('goal-estimate');
+      if (goalEstEl) {
+        if (currentRate > 0) {
+          const secRemaining = remaining / currentRate;
+          const daysRemaining = (secRemaining / 86400).toFixed(1);
+          goalEstEl.textContent = `Estimated voyage time: ~${daysRemaining} days at current pace`;
+        } else {
+          goalEstEl.textContent = `Estimated voyage duration: ~6 to 7+ months (≥180 days) at calibrated pace`;
+        }
       }
 
       // Specialty Dish
       const activeDish = getActiveSpecialty();
-      document.getElementById('dish-icon').textContent = activeDish.icon;
-      document.getElementById('dish-name').textContent = activeDish.name;
-      document.getElementById('dish-desc').textContent = activeDish.desc;
+      const dishIcon = document.getElementById('dish-icon');
+      const dishName = document.getElementById('dish-name');
+      const dishDesc = document.getElementById('dish-desc');
+      if (dishIcon) dishIcon.textContent = activeDish.icon;
+      if (dishName) dishName.textContent = activeDish.name;
+      if (dishDesc) dishDesc.textContent = activeDish.desc;
 
       if (gameState.totalEarned >= TARGET_GOAL) {
-        document.getElementById('ticker-text').textContent = "EXPEDITION COMPLETE! 383,000 Dim Sum achieved aboard A.R.C. Core Draconis! Little Gerrard Street reigns supreme in the stars!";
+        setTicker("EXPEDITION COMPLETE! 383,000 Dim Sum achieved aboard A.R.C. Core Draconis! Little Gerrard Street reigns supreme in the stars!");
       }
     }
 
@@ -1833,6 +1793,12 @@ if (gameState.isOverheated) {
       initUpgradesList();
       checkAchievements();
       applyTimeOfDayAtmosphere();
+      
+      const rainStatusEl = document.getElementById('rain-status');
+      if (rainStatusEl) {
+        rainStatusEl.textContent = gameState.rainEnabled ? "ON" : "OFF";
+      }
+
       renderUI();
       scheduleFortuneCookie();
       lastTimestamp = performance.now();
