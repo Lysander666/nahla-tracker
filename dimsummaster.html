@@ -278,67 +278,67 @@
 
   <div class="main-app-container w-full max-w-5xl bg-[#1d0505]/95 backdrop-blur-md pixel-box p-3 sm:p-5 mb-4 flex flex-col gap-4">
     
-<!-- Top Header: Title, Chinatown Lanterns, Carrier Nav & Time Controls -->
-    <header class="border-b-4 border-[#f5b938] pb-3 flex flex-col lg:flex-row items-center justify-between gap-4 text-center lg:text-left">
+<!-- Top Header: Stacked 2-Tier Layout -->
+    <header class="border-b-4 border-[#f5b938] pb-3 flex flex-col gap-3">
       
-      <!-- Left: Title and Lore -->
-      <div class="flex items-center gap-3 flex-shrink-0">
-        <span id="secret-lantern" class="text-3xl filter lantern-sway cursor-pointer active:scale-125 transition-transform" title="A warm glowing silk lantern...">🏮</span>
-        <div>
-          <div class="flex items-center gap-2 justify-center lg:justify-start">
-            <h1 class="text-sm sm:text-base lg:text-lg text-[#f5b938] tracking-wider whitespace-nowrap">
-              DEEPSPACE DIM SUM
-            </h1>
-            <span class="cosy-cup-steam text-xs text-[#a7f3d0]">♨️</span>
+      <!-- Tier 1: Title, Lanterns, & Fleet Cycle Clock -->
+      <div class="flex flex-col md:flex-row items-center justify-between gap-2 text-center md:text-left">
+        <div class="flex items-center gap-3">
+          <span id="secret-lantern" class="text-2xl sm:text-3xl filter lantern-sway cursor-pointer active:scale-125 transition-transform" title="A warm glowing silk lantern...">🏮</span>
+          <div>
+            <div class="flex items-center gap-2 justify-center md:justify-start">
+              <h1 class="text-sm sm:text-base md:text-lg text-[#f5b938] tracking-wider whitespace-nowrap">
+                DEEPSPACE DIM SUM
+              </h1>
+              <span class="cosy-cup-steam text-xs text-[#a7f3d0]">♨️</span>
+            </div>
+            <div class="text-[8px] sm:text-[9px] text-[#ffd666] font-bold tracking-wide mt-0.5">
+              DIM SUM DIANTANG 點心殿堂 &bull; LITTLE GERRARD ST, SOHO BIODOME, A.R.C. CORE DRACONIS
+            </div>
+            <p class="hull-stencil mt-0.5 uppercase">
+              PRECIPITATION CARRIER-ACTIVED / EXTERNAL: HARD VACUUM (0.00 ATM) / GOAL: 383,000 DISHES
+            </p>
           </div>
-          <div class="text-[8px] sm:text-[9px] text-[#ffd666] font-bold tracking-wide mt-0.5">
-            DIM SUM DIANTANG 點心殿堂 &bull; LITTLE GERRARD ST, SOHO BIODOME, A.R.C. CORE DRACONIS
-          </div>
-          <p class="hull-stencil mt-1 uppercase">
-            PRECIPITATION CARRIER-ACTIVED / EXTERNAL: HARD VACUUM (0.00 ATM) / GOAL: 383,000 DISHES
-          </p>
+          <span class="text-2xl sm:text-3xl filter lantern-sway" style="animation-delay: -1.8s;">🏮</span>
         </div>
-        <span class="text-3xl filter lantern-sway" style="animation-delay: -1.8s;">🏮</span>
-      </div>
 
-      <!-- Right: Compact Utility Cluster -->
-      <div class="flex flex-col items-center lg:items-end gap-1.5 flex-shrink-0">
-        <!-- Live London / Fleet Time Atmosphere Badge -->
-        <button id="tod-toggle-btn" class="bg-[#2e0e09] text-[#fde047] border border-[#f5b938] px-2.5 py-1 text-[7px] sm:text-[8px] pixel-btn flex items-center gap-1.5 shadow" title="Click to cycle Carrier Habitat day/night cycles">
+        <!-- Live Fleet Time Badge -->
+        <button id="tod-toggle-btn" class="bg-[#2e0e09] text-[#fde047] border border-[#f5b938] px-2.5 py-1 text-[7px] sm:text-[8px] pixel-btn flex items-center gap-1.5 shadow whitespace-nowrap" title="Click to cycle Carrier Habitat day/night cycles">
           <span id="tod-icon">🌆</span>
           <span id="tod-text">FLEET CYCLE: 15:00 &bull; AFTERNOON YUM CHA</span>
           <span class="text-[6px] text-[#fcd34d] opacity-80">(CYCLE)</span>
         </button>
-
-        <!-- Primary Action & Audio Strip -->
-        <div class="flex flex-wrap items-center justify-center lg:justify-end gap-1 text-[7px] sm:text-[8px]">
-          <a href="https://nahla.live" target="_blank" rel="noopener noreferrer" 
-             class="bg-[#0e3b43] hover:bg-[#15535e] text-[#67e8f9] border border-[#22d3ee] px-2 py-1 pixel-btn flex items-center gap-1 font-bold no-underline">
-            <span>🌌</span> NAHLA TRACKER
-          </a>
-          <button id="tea-modal-btn" class="bg-[#1f3616] text-[#a7f3d0] border border-[#4ade80] px-2 py-1 pixel-btn hover:bg-[#2b4c1f]">
-            CELLAR 🍶
-          </button>
-          <button id="rain-toggle-btn" class="bg-[#15272e] text-[#7dd3fc] border border-[#38bdf8] px-2 py-1 pixel-btn hover:bg-[#1f3a45]">
-            🌧️ <span id="rain-status">OFF</span>
-          </button>
-          <button id="toggleMusicBtn" class="bg-amber-950/80 hover:bg-amber-900 text-amber-300 border border-amber-500/40 px-2 py-1 pixel-btn">
-            🎵 <span id="bgm-label">OFF</span>
-          </button>
-          <button id="sound-toggle-btn" class="bg-[#38100a] text-[#f5b938] border border-[#f5b938] px-2 py-1 pixel-btn hover:bg-[#4d160e]">
-            SFX: <span id="sound-status">ON</span>
-          </button>
-          <button id="badges-toggle-btn" class="bg-[#38100a] text-[#fde68a] border border-black px-2 py-1 pixel-btn hover:bg-[#4d160e]">
-            🏆
-          </button>
-          <button id="stats-toggle-btn" class="bg-[#38100a] text-[#faf2dc] border border-black px-2 py-1 pixel-btn hover:bg-[#4d160e]">
-            📜
-          </button>
-          <button id="data-toggle-btn" class="bg-[#38100a] text-[#faf2dc] border border-black px-2 py-1 pixel-btn hover:bg-[#4d160e]">
-            💾
-          </button>
-        </div>
       </div>
+
+      <!-- Tier 2: Action Toolbar -->
+      <div class="flex flex-wrap items-center justify-center md:justify-end gap-1.5 text-[7px] sm:text-[8px] pt-1 border-t border-[#3d1212]">
+        <a href="https://nahla.live" target="_blank" rel="noopener noreferrer" 
+           class="bg-[#0e3b43] hover:bg-[#15535e] text-[#67e8f9] border border-[#22d3ee] px-2.5 py-1 pixel-btn flex items-center gap-1 font-bold no-underline">
+          <span>🌌</span> NAHLA TRACKER
+        </a>
+        <button id="tea-modal-btn" class="bg-[#1f3616] text-[#a7f3d0] border border-[#4ade80] px-2.5 py-1 pixel-btn hover:bg-[#2b4c1f]">
+          CELLAR 🍶
+        </button>
+        <button id="rain-toggle-btn" class="bg-[#15272e] text-[#7dd3fc] border border-[#38bdf8] px-2.5 py-1 pixel-btn hover:bg-[#1f3a45]">
+          🌧️ RAIN: <span id="rain-status">OFF</span>
+        </button>
+        <button id="toggleMusicBtn" class="bg-amber-950/80 hover:bg-amber-900 text-amber-300 border border-amber-500/40 px-2.5 py-1 pixel-btn">
+          🎵 BGM: <span id="bgm-label">OFF</span>
+        </button>
+        <button id="sound-toggle-btn" class="bg-[#38100a] text-[#f5b938] border border-[#f5b938] px-2.5 py-1 pixel-btn hover:bg-[#4d160e]">
+          SFX: <span id="sound-status">ON</span>
+        </button>
+        <button id="badges-toggle-btn" class="bg-[#38100a] text-[#fde68a] border border-black px-2 py-1 pixel-btn hover:bg-[#4d160e]" title="Trophies">
+          🏆
+        </button>
+        <button id="stats-toggle-btn" class="bg-[#38100a] text-[#faf2dc] border border-black px-2 py-1 pixel-btn hover:bg-[#4d160e]" title="Ship Log">
+          📜
+        </button>
+        <button id="data-toggle-btn" class="bg-[#38100a] text-[#faf2dc] border border-black px-2 py-1 pixel-btn hover:bg-[#4d160e]" title="Backup & Export">
+          💾
+        </button>
+      </div>
+
     </header>
 
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
