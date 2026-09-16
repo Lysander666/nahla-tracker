@@ -1475,16 +1475,16 @@
         setTicker(`🥠 FORTUNE REVEALED: "Wealth flows through the void!" (+${bonus.toLocaleString()} Dim Sum burst)`);
       } else if (roll < 0.45) {
         gameState.activeBuff = { type: 'theatre_rush', name: "FLIGHT SHIFT RUSH (1.4X SPEED)", timer: 25, mult: 1.4 };
-        setTicker("🥠 FORTUNE REVEALED: Flight deck shift ends! Hungry crew stampede Little Gerrard! (1.4x speed for 25s)");
+        setTicker("🥠 FORTUNE REVEALED: Flight deck shift ends! (1.4x speed for 25s)");
       } else if (roll < 0.65) {
         gameState.heat = 0;
         gameState.isOverheated = false;
         gameState.cooldownTimer = 0;
         gameState.activeBuff = { type: 'bamboo_zen', name: "BAMBOO ZEN (+0.25/TAP & NO HEAT)", timer: 20, mult: 1.0 };
-        setTicker("🥠 FORTUNE REVEALED: Master Sifu's Zen focus! Steamer cannot overheat & clicks yield +0.25 for 20s!");
+        setTicker("🥠 FORTUNE REVEALED: Steamer cannot overheat & clicks yield +0.25 for 20s!");
       } else if (roll < 0.80) {
         gameState.activeBuff = { type: 'rain_blessing', name: "SOHO RAIN BLESSING (+20% YIELD)", timer: 30, mult: 1.20 };
-        setTicker("🥠 FORTUNE REVEALED: Concourse rain cycle brings good luck! Steaming yield boosted by +20% for 30s!");
+        setTicker("🥠 FORTUNE REVEALED: Steaming yield boosted by +20% for 30s!");
       } else if (roll < 0.93) {
         let totalStaff = 0;
         for (const k in gameState.upgrades) totalStaff += gameState.upgrades[k].count;
