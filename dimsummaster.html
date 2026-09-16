@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Deepspace Dim Sum v0.5</title>
+  <title>Deepspace Dim Sum v0.51</title>
   
   <!-- Offline SVG Favicon: Dim Sum Emoji -->
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='82'>🥠</text></svg>">  
@@ -132,6 +132,13 @@
       filter: grayscale(85%) opacity(0.5);
       cursor: not-allowed;
     }
+
+    .neon-amber-title {
+  color: #ffbe3b;
+  text-shadow:
+    0 0 4px rgba(255, 170, 0, 0.75),
+    0 0 10px rgba(255, 140, 0, 0.45);
+}
 
     .steamer-wrapper {
       position: relative;
@@ -284,9 +291,9 @@
           <span id="secret-lantern" class="text-2xl sm:text-3xl filter lantern-sway cursor-pointer active:scale-125 transition-transform" title="A warm glowing silk lantern...">🏮</span>
           <div>
             <div class="flex items-center gap-2 justify-center md:justify-start">
-              <h1 class="text-xs sm:text-base md:text-lg text-[#f5b938] tracking-wider whitespace-nowrap">
-                DEEPSPACE DIM SUM
-              </h1>
+<h1 class="text-xs sm:text-base md:text-lg neon-amber-title tracking-wider whitespace-nowrap">
+  DEEPSPACE DIM SUM 🌘
+</h1>
               <span class="cosy-cup-steam text-xs text-[#a7f3d0]">♨️</span>
             </div>
             <div class="text-[7px] sm:text-[9px] text-[#ffd666] font-bold tracking-wide mt-0.5 leading-snug">
