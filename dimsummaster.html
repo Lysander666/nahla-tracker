@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Deepspace Dim Sum 0.52</title>
+  <title>Deepspace Dim Sum 0.53</title>
   
   <!-- Offline SVG Favicon: Dim Sum Emoji -->
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='82'>🥠</text></svg>">  
@@ -59,6 +59,11 @@
       image-rendering: pixelated;
     }
 
+    html {
+  background-color: #04010a; /* Prevents white canvas peek during scroll/overscroll */
+  overflow-x: hidden;
+}
+
     body {
       background: radial-gradient(circle at 50% 25%, var(--bg-gradient-top) 0%, var(--bg-gradient-bottom) 100%);
       font-family: 'Press Start 2P', monospace;
@@ -71,6 +76,7 @@
       -webkit-font-smoothing: none;
       -moz-osx-font-smoothing: grayscale;
       text-rendering: geometricPrecision;
+      overscroll-behavior-y: none; /* Disables mobile elastic bounce revealing background margins */
     }
 
     /* Typography Scale Calibration for Crisp Visibility */
@@ -108,13 +114,13 @@
       font-family: 'Noto Serif TC', serif;
     }
 
-    .pixel-box {
-      border: 4px solid var(--border-shadow);
-      box-shadow: 
-        inset 2px 2px 0px rgba(255,255,255,0.1),
-        inset -2px -2px 0px rgba(0,0,0,0.7),
-        4px 4px 0px rgba(0,0,0,0.85);
-    }
+.pixel-box {
+  border: 4px solid var(--border-shadow);
+  box-shadow: 
+    inset 2px 2px 0px rgba(245, 185, 56, 0.08), /* soft amber highlight instead of white */
+    inset -2px -2px 0px rgba(0, 0, 0, 0.8),
+    4px 4px 0px rgba(0, 0, 0, 0.9);
+}
 
     .pixel-btn {
       transition: transform 0.05s ease, filter 0.1s ease;
@@ -653,11 +659,11 @@
       lastSalonVisit: 0, // 12-Hour cooldown timestamp tracker
       activeBuff: null,
       upgrades: {
-        chopsticks:   { count: 0, cost: 10,     rate: 0.00015, name: "Pickle & Chopstick Runner",   desc: "Gives out complimentary spiced peanuts and bamboo chopsticks.", icon: "🥢" },
-        teaBoy:       { count: 0, cost: 40,     rate: 0.00050, name: "Nahlan Tea Apprentice",       desc: "Refills hot jasmine pots in the mist.", icon: "🫖" },
-        scullery:     { count: 0, cost: 150,    rate: 0.00120, name: "Bamboo Tier Scullery Hand",   desc: "Scans and soaks willow racks so the chef line never runs out.", icon: "🧽" },
-        hostess:      { count: 0, cost: 480,    rate: 0.00250, name: "Qipao Crater Hostess",        desc: "Welcomes weary customers in from the rain above Pâte Sablée.", icon: "💃" },
-        cartAuntie:   { count: 0, cost: 1600,   rate: 0.00550, name: "Yum Cha Trolley Auntie",      desc: "Navigates crowded concourses with boiling bamboo tiers.", icon: "🛒" },
+        chopsticks:   { count: 0, cost: 10,     rate: 0.00015, name: "Nahlan Chive & Ginger Chopper", desc: "Dices aromatic fillings and spring onions for the dumpling line.", icon: "🧄" },
+        teaBoy:       { count: 0, cost: 40,     rate: 0.00050, name: "Sub-Deck Dough Kneader",        desc: "Mixes wheat starch and boiling water into delicate translucent pastry.", icon: "🥣" },
+        scullery:     { count: 0, cost: 150,    rate: 0.00120, name: "Pastry Roller Apprentice",      desc: "Flattens dough into paper-thin rounds ready for folding.", icon: "🫔" },
+        hostess:      { count: 0, cost: 480,    rate: 0.00250, name: "Qipao Pleating Specialist",     desc: "Delicately shapes each har gow with twelve traditional pleats.", icon: "💃" },
+        cartAuntie:   { count: 0, cost: 1600,   rate: 0.00550, name: "Biodome Steamer Tender",        desc: "Times the bamboo boiler stacks to steam dumplings to crystal perfection.", icon: "🎋" },
         wrapperSifu:  { count: 0, cost: 5800,   rate: 0.01200, name: "Miley's Master Pincher",      desc: "Pleats translucent crystal har gow on Soho marble.", icon: "🥟" },
         bambooRack:   { count: 0, cost: 21000,  rate: 0.02200, name: "Mainship Dragon Steamer",     desc: "Commercial multi-tier induction boiler stack.", icon: "♨️" },
         headChef:     { count: 0, cost: 68000,  rate: 0.04000, name: "Executive Chef of Chinatown", desc: "Master chef who brought authentic Cantonese yum cha to space.", icon: "👨‍🍳" },
