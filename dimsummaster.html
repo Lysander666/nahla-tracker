@@ -361,24 +361,24 @@
 
           <!-- Lifetime Steamed -->
           <div class="mb-3">
-            <div class="text-[7px] sm:text-[8px] text-[#fca5a5] font-bold tracking-wide">LIFETIME STEAMED (VOYAGE PROGRESS):</div>
+            <div class="text-[7px] sm:text-[8px] text-[#fca5a5] font-bold tracking-wide">LIFETIME STEAMED:</div>
             <div id="lifetime-counter" class="text-xl sm:text-2xl font-black text-[#ef4444] my-1 tracking-tight">
               0
             </div>
           </div>
 
-          <!-- Dedicated High-Visibility Pace Panel (Safe on narrow screens) -->
-          <div class="bg-[#080101] border-2 border-[#3d1212] p-2 flex flex-row items-center justify-between gap-2">
-            <div class="flex items-center gap-1.5 whitespace-nowrap">
-              <span class="text-xs">⚡</span>
-              <span id="rate-counter" class="text-[9px] sm:text-[11px] font-bold text-[#4ade80] tracking-wide whitespace-nowrap">
-                PACE: +0.0000 /s
-              </span>
-            </div>
-            <span id="tea-multiplier-tag" class="text-[8px] sm:text-[9px] text-[#fde047] font-bold bg-[#261604] px-2 py-0.5 border border-[#ca8a04] whitespace-nowrap shrink-0">
-              Tea: 1.00x
-            </span>
-          </div>
+<!-- Dedicated High-Visibility Pace Panel -->
+<div class="bg-[#080101] border-2 border-[#3d1212] px-2 py-1.5 flex items-center justify-between gap-1 w-full box-border">
+  <div class="flex items-center gap-1 min-w-0">
+    <span class="text-[10px]">⚡</span>
+    <span id="rate-counter" class="text-[8px] sm:text-[10px] font-bold text-[#4ade80] tracking-tight whitespace-nowrap truncate">
+      PACE: +0.0000/s
+    </span>
+  </div>
+  <span id="tea-multiplier-tag" class="text-[7px] sm:text-[8px] text-[#fde047] font-bold bg-[#261604] px-1.5 py-0.5 border border-[#ca8a04] whitespace-nowrap shrink-0">
+    Tea: 1.00x
+  </span>
+</div>
         </div>
 
         <!-- Bamboo Steamer Button with Cosy Steam -->
@@ -580,7 +580,7 @@
           <span id="stat-start-date" class="text-[#f5b938]">Today</span>
         </div>
         <div class="flex justify-between">
-          <span>Active Kitchen Playtime:</span>
+          <span>Dim Sum Cooking For:</span>
           <span id="stat-time-played" class="text-[#f5b938]">0.0 hrs</span>
         </div>
       </div>
