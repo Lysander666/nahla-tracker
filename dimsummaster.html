@@ -50,19 +50,18 @@
       --lantern-glow: rgba(168, 85, 247, 0.5);
     }
 
-    * {
+* {
       box-sizing: border-box;
-      user-select: none;
-      -webkit-user-select: none;
-      -webkit-touch-callout: none;
       -webkit-tap-highlight-color: transparent;
       image-rendering: pixelated;
     }
 
-    html {
-  background-color: #04010a; /* Prevents white canvas peek during scroll/overscroll */
-  overflow-x: hidden;
-}
+html {
+      background-color: #04010a;
+      overflow-x: hidden;
+      overflow-y: auto;
+      height: auto;
+    }
 
     body {
       background: radial-gradient(circle at 50% 25%, var(--bg-gradient-top) 0%, var(--bg-gradient-bottom) 100%);
@@ -70,13 +69,13 @@
       color: var(--paper-cream);
       min-height: 100vh;
       overflow-x: hidden;
-      touch-action: manipulation;
+      overflow-y: auto;
+      touch-action: pan-y; /* Allows smooth vertical scrolling on touch devices */
       transition: background 1.5s ease;
       position: relative;
       -webkit-font-smoothing: none;
       -moz-osx-font-smoothing: grayscale;
       text-rendering: geometricPrecision;
-      overscroll-behavior-y: none; /* Disables mobile elastic bounce revealing background margins */
     }
 
     /* Typography Scale Calibration for Crisp Visibility */
