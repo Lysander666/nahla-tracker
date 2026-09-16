@@ -13,37 +13,41 @@
   <script src="https://cdn.tailwindcss.com"></script>
 
   <style>
-    :root {
-      --bg-gradient-top: #360707;
-      --bg-gradient-bottom: #0d0101;
+:root {
+      --bg-gradient-top: #150928;
+      --bg-gradient-bottom: #04010a;
       --gold-accent: #f5b938;
       --gold-glow: #ffd666;
       --paper-cream: #faf2dc;
-      --border-shadow: #080101;
+      --border-shadow: #020108;
       --lantern-glow: rgba(245, 185, 56, 0.45);
       --rain-opacity: 0.85;
     }
 
     /* Environmental Cycle Palettes aboard A.R.C. Core Draconis */
+    /* Morning: Deep Stellar Cyan & Blue Void */
     body.tod-morning {
-      --bg-gradient-top: #2c120c;
-      --bg-gradient-bottom: #0a0404;
-      --lantern-glow: rgba(253, 224, 71, 0.35);
+      --bg-gradient-top: #0a192f;
+      --bg-gradient-bottom: #020612;
+      --lantern-glow: rgba(56, 189, 248, 0.45);
     }
+    /* Afternoon: Rich Deep Cosmic Violet / Nebula Purple */
     body.tod-afternoon {
-      --bg-gradient-top: #380808;
-      --bg-gradient-bottom: #0d0202;
+      --bg-gradient-top: #1e0d36;
+      --bg-gradient-bottom: #06020e;
       --lantern-glow: rgba(245, 185, 56, 0.5);
     }
+    /* Dusk: Magenta Stellar Dust & Electric Cosmic Pink */
     body.tod-dusk {
-      --bg-gradient-top: #24061a;
-      --bg-gradient-bottom: #09010a;
-      --lantern-glow: rgba(251, 146, 60, 0.65);
+      --bg-gradient-top: #2c0b2c;
+      --bg-gradient-bottom: #09010e;
+      --lantern-glow: rgba(244, 114, 182, 0.6);
     }
+    /* Night: Absolute Deep Interstellar Black / Midnight Abyss */
     body.tod-night {
-      --bg-gradient-top: #120412;
-      --bg-gradient-bottom: #040105;
-      --lantern-glow: rgba(244, 63, 94, 0.55);
+      --bg-gradient-top: #050512;
+      --bg-gradient-bottom: #010104;
+      --lantern-glow: rgba(168, 85, 247, 0.5);
     }
 
     * {
@@ -271,9 +275,7 @@
   <!-- Canvas: Deep space starfield + Carrier hull trusses + Simulated London rain -->
   <canvas id="viewport-canvas"></canvas>
 
-  <div class="main-app-container w-full max-w-5xl bg-[#1d0505]/95 backdrop-blur-md pixel-box p-3 sm:p-5 mb-4 flex flex-col gap-4">
-    
-    <!-- Top Header: Stacked 2-Tier Layout -->
+<div class="main-app-container w-full max-w-5xl bg-[#090514]/95 backdrop-blur-md pixel-box p-3 sm:p-5 mb-4 flex flex-col gap-4">    <!-- Top Header: Stacked 2-Tier Layout -->
     <header class="border-b-4 border-[#f5b938] pb-3 flex flex-col gap-3">
       
       <!-- Tier 1: Title, Chinatown Lanterns, & Fleet Cycle Badge -->
@@ -339,11 +341,9 @@
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
 
       <!-- LEFT COLUMN: Steamer, Dual Dumpling Counter, Overheat Guard, Specialty Dish -->
-      <section class="lg:col-span-5 bg-[#120202]/90 pixel-box p-3 sm:p-4 flex flex-col items-center text-center">
-        
+<section class="lg:col-span-5 bg-[#0e0720]/90 pixel-box p-3 sm:p-4 flex flex-col items-center text-center">        
         <!-- Dual Counter: Spendable vs Lifetime Goal -->
-        <div class="w-full bg-[#160404] text-[#faf2dc] border-4 border-black p-3.5 mb-3 pixel-box text-left shadow-inner">
-          
+<div class="w-full bg-[#13092c] text-[#faf2dc] border-4 border-black p-3.5 mb-3 pixel-box text-left shadow-inner">          
           <!-- Silver Taels & Spendable Balance -->
           <div class="flex justify-between items-baseline border-b border-[#3d1212] pb-2 mb-2.5">
             <span class="text-[8px] sm:text-[9px] text-[#f5b938] tracking-wider font-bold">SILVER TAELS:</span>
@@ -390,7 +390,7 @@
         </div>
 
         <!-- Heat Meter Box -->
-        <div class="w-full bg-[#200606] border-2 border-black p-2.5 text-left mb-3">
+        <div class="w-full bg-[#13092a] border-2 border-black p-2.5 text-left mb-3">
           <div class="flex justify-between items-center text-[7px] mb-1.5">
             <span id="heat-title" class="text-[#f5b938]">BAMBOO HEAT: 0%</span>
             <span id="cooldown-badge" class="text-[#ff7878] hidden font-bold animate-pulse">OVERHEATED!</span>
@@ -404,7 +404,7 @@
         </div>
 
         <!-- Active Specialty Dish Milestone -->
-        <div class="w-full bg-[#1c0606] border-2 border-[#481810] p-2.5 flex items-center gap-3">
+        <div class="w-full bg-[#120828] border-[#31175e] p-2.5 flex items-center gap-3">
           <div id="dish-icon" class="text-3xl">🥟</div>
           <div class="text-left flex-1">
             <div class="text-[7px] text-[#f5b938]">CARRIER SPECIALTY DISH:</div>
@@ -1230,8 +1230,7 @@
         const upg = gameState.upgrades[key];
         const card = document.createElement('div');
         card.id = `upg-card-${key}`;
-        card.className = "bg-[#180404]/90 border-2 border-[#381111] p-2 sm:p-2.5 flex items-center justify-between gap-3 pixel-box";
-        card.innerHTML = `
+        card.className = "bg-[#110729]/90 border-2 border-[#2b1658] p-2 sm:p-2.5 flex items-center justify-between gap-3 pixel-box";        card.innerHTML = `
           <div class="flex items-center gap-2 sm:gap-3">
             <span class="text-2xl">${upg.icon}</span>
             <div class="text-left">
