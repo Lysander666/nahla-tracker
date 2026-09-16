@@ -423,16 +423,16 @@
 
       </section>
 
-      <!-- RIGHT COLUMN: Kitchen Stations & Chefs -->
-      <section class="lg:col-span-7 flex flex-col gap-3">
+<!-- RIGHT COLUMN: Kitchen Stations & Chefs -->
+      <section class="lg:col-span-7 flex flex-col h-full">
         
-        <div class="flex items-center justify-between border-b-2 border-[#4a1414] pb-2">
+        <div class="flex items-center justify-between border-b-2 border-[#4a1414] pb-2 mb-2 shrink-0">
           <div class="text-[9px] text-[#f5b938] tracking-wider">LITTLE GERRARD ST BRIGADE</div>
           <div class="text-[7px] text-[#e8ba84]">HOURLY YIELD: <span id="hourly-counter" class="text-[#ffd666] font-bold">0.0</span> / hr</div>
         </div>
 
-        <!-- Upgrades List -->
-        <div id="upgrades-container" class="flex flex-col gap-2 max-h-[490px] overflow-y-auto pr-1">
+        <!-- Upgrades List: Dynamically fills and matches Left Column height -->
+        <div id="upgrades-container" class="flex flex-col gap-2 overflow-y-auto pr-1 max-h-[570px] lg:max-h-[580px]">
           <!-- Populated dynamically via JS -->
         </div>
 
