@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Deepspace Dim Sum 0.53</title>
+  <title>Deepspace Dim Sum 0.54</title>
 
 <!-- Open Graph / Social Embed Meta Tags -->
 <meta property="og:type" content="website">
@@ -323,7 +323,7 @@ html {
   <span class="cosy-cup-steam text-xs text-[#a7f3d0]">♨️</span>
 </div>
             <div class="text-[7px] sm:text-[9px] text-[#ffd666] font-bold tracking-wide mt-0.5 leading-snug">
-              DIM SUM DIANTANG &bull; LITTLE GERRARD ST, A.R.C. CORE DRACONIS
+              NAHLA DIANTANG &bull; LITTLE GERRARD ST, A.R.C. CORE DRACONIS
             </div>
             <p class="hull-stencil mt-0.5 uppercase">
               PRECIPITATION ACTIVE / SOHO BIODOME / GOAL: 383,000 DISHES
@@ -418,9 +418,14 @@ html {
           </button>
         </div>
 
-        <div class="text-[8px] text-[#f5b938] mt-1 mb-2">
-          CLICK STEAMER (+0.10 DIM SUM)
-        </div>
+<div class="text-[8px] text-[#f5b938] mt-1 mb-2">
+  CLICK STEAMER (+0.10 DIM SUM)
+</div>
+
+<!-- Fortune Result Notification Pill -->
+<div id="steamer-fortune-result" class="w-full hidden bg-[#261604] border border-[#f5b938] p-2 mb-2 text-center transition-all animate-pulse">
+  <div class="text-[7px] text-[#ffd666] font-bold tracking-wide" id="steamer-fortune-text"></div>
+</div>
 
         <!-- Heat Meter Box -->
         <div class="w-full bg-[#13092a] border-2 border-black p-2.5 text-left mb-3">
@@ -487,10 +492,27 @@ html {
     </div>
 
     <!-- Bottom Deep Space & Sub-Deck Ticker -->
-    <div class="w-full bg-[#080101] border-2 border-black p-2 text-[7px] text-[#86efac] flex items-center gap-2 overflow-hidden">
-      <span class="text-[#f5b938] font-bold whitespace-nowrap">[DIANTANG]</span>
-      <span id="ticker-text" class="truncate">A.R.C. Core Draconis drifts through the black. Rain runs down the inner observation glass.</span>
+<div id="ticker-bar" class="w-full bg-[#080101] border-2 border-black p-2 text-[7px] text-[#86efac] flex items-center gap-2 overflow-hidden cursor-pointer hover:bg-[#120420] active:scale-[0.99] transition-all" title="Click to view full dispatch">
+  <span class="text-[#f5b938] font-bold whitespace-nowrap shrink-0">[DIANTANG]</span>
+  <span id="ticker-text" class="truncate flex-1">A.R.C. Core Draconis drifts through the black. Rain runs down the inner observation glass.</span>
+  <span class="text-[6px] text-[#38bdf8] opacity-70 shrink-0">🔍</span>
+</div>
+
+  <!-- Ticker Expanded Log Modal -->
+<div id="ticker-modal" class="fixed inset-0 bg-black/85 z-50 flex items-center justify-center p-4 hidden">
+  <div class="bg-[#110729] border-4 border-[#38bdf8] p-4 max-w-md w-full pixel-box flex flex-col gap-3 text-left">
+    <div class="flex justify-between items-center border-b border-[#2b1658] pb-2">
+      <span class="text-[9px] text-[#38bdf8] font-bold tracking-wider">📡 DIANTANG CONCOURSE DISPATCH</span>
+      <button id="close-ticker-modal-btn" class="text-[#38bdf8] text-xs font-bold px-2 py-1 bg-[#1a0c3b] border border-black">&times;</button>
     </div>
+    <div id="ticker-modal-fulltext" class="text-[8px] text-[#faf2dc] leading-relaxed break-words">
+      <!-- Full message injected here -->
+    </div>
+    <button id="ok-ticker-modal-btn" class="bg-[#38bdf8] text-[#04010a] text-[8px] py-2 font-bold pixel-btn border-2 border-black mt-1">
+      DISMISS
+    </button>
+  </div>
+</div>
 
   </div>
 
@@ -896,6 +918,22 @@ html {
         }
       } catch (err) {}
     }
+
+    let fortuneBannerTimeout = null;
+
+function showFortuneResult(text) {
+  const box = document.getElementById('steamer-fortune-result');
+  const txt = document.getElementById('steamer-fortune-text');
+  if (!box || !txt) return;
+
+  txt.textContent = text;
+  box.classList.remove('hidden');
+
+  if (fortuneBannerTimeout) clearTimeout(fortuneBannerTimeout);
+  fortuneBannerTimeout = setTimeout(() => {
+    box.classList.add('hidden');
+  }, 6000);
+}
 
     const vCanvas = document.getElementById('viewport-canvas');
     const vCtx = vCanvas.getContext('2d');
@@ -1388,7 +1426,7 @@ html {
     }
 
 // 12-Hour Salon Cooldown Constant (12 hours in milliseconds)
-    const SALON_COOLDOWN_MS = 12 * 60 * 60 * 1000;
+    const SALON_COOLDOWN_MS = 2 * 60 * 60 * 1000;
 
     function updateSalonModalState() {
       const now = Date.now();
@@ -1500,37 +1538,49 @@ html {
       const roll = Math.random();
       const currentRate = Math.max(0.005, calcPassiveRate());
 
-      if (roll < 0.25) {
-        const bonus = Math.max(5, Math.round(currentRate * 60));
-        gameState.dimSum += bonus;
-        gameState.totalEarned += bonus;
-        setTicker(`🥠 FORTUNE REVEALED: "Wealth flows through the void!" (+${bonus.toLocaleString()} Dim Sum burst)`);
-      } else if (roll < 0.45) {
-        gameState.activeBuff = { type: 'theatre_rush', name: "FLIGHT SHIFT RUSH (1.4X SPEED)", timer: 25, mult: 1.4 };
-        setTicker("🥠 FORTUNE REVEALED: Flight deck shift ends! (1.4x speed for 25s)");
-      } else if (roll < 0.65) {
-        gameState.heat = 0;
-        gameState.isOverheated = false;
-        gameState.cooldownTimer = 0;
-        gameState.activeBuff = { type: 'bamboo_zen', name: "BAMBOO ZEN (+0.25/TAP & NO HEAT)", timer: 20, mult: 1.0 };
-        setTicker("🥠 FORTUNE REVEALED: Steamer cannot overheat & clicks yield +0.25 for 20s!");
-      } else if (roll < 0.80) {
-        gameState.activeBuff = { type: 'rain_blessing', name: "SOHO RAIN BLESSING (+20% YIELD)", timer: 30, mult: 1.20 };
-        setTicker("🥠 FORTUNE REVEALED: Steaming yield boosted by +20% for 30s!");
-      } else if (roll < 0.93) {
-        let totalStaff = 0;
-        for (const k in gameState.upgrades) totalStaff += gameState.upgrades[k].count;
-        const auntieBonus = Math.max(4, Math.round(totalStaff * 1.2 + currentRate * 30));
-        gameState.dimSum += auntieBonus;
-        gameState.totalEarned += auntieBonus;
-        setTicker(`🥠 FORTUNE REVEALED: Trolley Caravan Stampede! The crew clears out all carts! (+${auntieBonus.toLocaleString()} Dim Sum)`);
-      } else {
-        const dragonGift = 50;
-        gameState.dimSum += dragonGift;
-        gameState.totalEarned += dragonGift;
-        gameState.activeBuff = { type: 'super_frenzy', name: "IMPERIAL DRAGON (1.6X FRENZY)", timer: 15, mult: 1.6 };
-        setTicker("🥠 RARE GOLDEN FORTUNE: Imperial Dragon Blessing! +50 Dim Sum & 1.6x Frenzy for 15s!");
-      }
+if (roll < 0.25) {
+  const bonus = Math.max(5, Math.round(currentRate * 60));
+  gameState.dimSum += bonus;
+  gameState.totalEarned += bonus;
+  const msg = `🥠 FORTUNE BURST: +${bonus.toLocaleString()} Dim Sum!`;
+  setTicker(`🥠 FORTUNE REVEALED: "Wealth flows through the void!" (+${bonus.toLocaleString()} Dim Sum burst)`);
+  showFortuneResult(msg);
+} else if (roll < 0.45) {
+  gameState.activeBuff = { type: 'theatre_rush', name: "FLIGHT SHIFT RUSH (1.4X SPEED)", timer: 25, mult: 1.4 };
+  const msg = `🥠 SHIFT RUSH: 1.4x Speed for 25s!`;
+  setTicker("🥠 FORTUNE REVEALED: Flight deck shift ends! (1.4x speed for 25s)");
+  showFortuneResult(msg);
+} else if (roll < 0.65) {
+  gameState.heat = 0;
+  gameState.isOverheated = false;
+  gameState.cooldownTimer = 0;
+  gameState.activeBuff = { type: 'bamboo_zen', name: "BAMBOO ZEN (+0.25/TAP & NO HEAT)", timer: 20, mult: 1.0 };
+  const msg = `🥠 BAMBOO ZEN: No heat & +0.25/tap for 20s!`;
+  setTicker("🥠 FORTUNE REVEALED: Steamer cannot overheat & clicks yield +0.25 for 20s!");
+  showFortuneResult(msg);
+} else if (roll < 0.80) {
+  gameState.activeBuff = { type: 'rain_blessing', name: "SOHO RAIN BLESSING (+20% YIELD)", timer: 30, mult: 1.20 };
+  const msg = `🥠 RAIN BLESSING: +20% Kitchen Yield for 30s!`;
+  setTicker("🥠 FORTUNE REVEALED: Steaming yield boosted by +20% for 30s!");
+  showFortuneResult(msg);
+} else if (roll < 0.93) {
+  let totalStaff = 0;
+  for (const k in gameState.upgrades) totalStaff += gameState.upgrades[k].count;
+  const auntieBonus = Math.max(4, Math.round(totalStaff * 1.2 + currentRate * 30));
+  gameState.dimSum += auntieBonus;
+  gameState.totalEarned += auntieBonus;
+  const msg = `🥠 CARAVAN STAMPEDE: +${auntieBonus.toLocaleString()} Dim Sum!`;
+  setTicker(`🥠 FORTUNE REVEALED: Trolley Caravan Stampede! The crew clears out all carts! (+${auntieBonus.toLocaleString()} Dim Sum)`);
+  showFortuneResult(msg);
+} else {
+  const dragonGift = 50;
+  gameState.dimSum += dragonGift;
+  gameState.totalEarned += dragonGift;
+  gameState.activeBuff = { type: 'super_frenzy', name: "IMPERIAL DRAGON (1.6X FRENZY)", timer: 15, mult: 1.6 };
+  const msg = `🥠 DRAGON FRENZY: +50 Dim Sum & 1.6x Speed for 15s!`;
+  setTicker("🥠 RARE GOLDEN FORTUNE: Imperial Dragon Blessing! +50 Dim Sum & 1.6x Frenzy for 15s!");
+  showFortuneResult(msg);
+}
 
       checkAchievements();
       scheduleFortuneCookie();
@@ -1730,6 +1780,21 @@ html {
       renderUI();
       requestAnimationFrame(gameLoop);
     }
+
+    const tickerBar = document.getElementById('ticker-bar');
+const tickerModal = document.getElementById('ticker-modal');
+const tickerModalText = document.getElementById('ticker-modal-fulltext');
+
+if (tickerBar && tickerModal) {
+  tickerBar.addEventListener('click', () => {
+    tickerModalText.textContent = document.getElementById('ticker-text').textContent;
+    tickerModal.classList.remove('hidden');
+    playRetroSound('click');
+  });
+
+  document.getElementById('close-ticker-modal-btn').addEventListener('click', () => tickerModal.classList.add('hidden'));
+  document.getElementById('ok-ticker-modal-btn').addEventListener('click', () => tickerModal.classList.add('hidden'));
+}
 
     function renderUI() {
       const dimSumEl = document.getElementById('dimsum-counter');
