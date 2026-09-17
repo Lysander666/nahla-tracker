@@ -312,10 +312,10 @@ html {
           <span id="secret-lantern" class="text-2xl sm:text-3xl filter lantern-sway cursor-pointer active:scale-125 transition-transform" title="A warm glowing silk lantern...">🏮</span>
           <div>
 <div class="flex items-center gap-2 justify-center md:justify-start">
-<h1 class="text-xs sm:text-base md:text-lg font-black tracking-widest uppercase flex items-center gap-3.5 whitespace-nowrap">
-  <span class="text-[#ffbe3b] drop-shadow-[0_0_8px_rgba(255,190,59,0.85)]">DEEPSPACE</span>
-  <span class="text-[#ffbe3b] drop-shadow-[0_0_8px_rgba(255,190,59,0.85)]">DIM</span>
-  <span class="text-[#ffbe3b] drop-shadow-[0_0_8px_rgba(255,190,59,0.85)]">SUM</span>
+<h1 class="text-sm sm:text-base md:text-lg font-black tracking-widest uppercase flex items-center gap-2 sm:gap-3.5 whitespace-nowrap">
+  <span class="text-[#ff6b35] drop-shadow-[0_0_8px_rgba(255,107,53,0.85)]">DEEPSPACE</span>
+  <span class="text-[#ff6b35] drop-shadow-[0_0_8px_rgba(255,107,53,0.85)]">DIM</span>
+  <span class="text-[#ff6b35] drop-shadow-[0_0_8px_rgba(255,107,53,0.85)]">SUM</span>
 </h1>
 
 
@@ -498,21 +498,21 @@ html {
   <span class="text-[6px] text-[#38bdf8] opacity-70 shrink-0">🔍</span>
 </div>
 
-  <!-- Ticker Expanded Log Modal -->
-<div id="ticker-modal" class="fixed inset-0 bg-black/85 z-50 flex items-center justify-center p-4 hidden">
-  <div class="bg-[#110729] border-4 border-[#38bdf8] p-4 max-w-md w-full pixel-box flex flex-col gap-3 text-left">
-    <div class="flex justify-between items-center border-b border-[#2b1658] pb-2">
-      <span class="text-[9px] text-[#38bdf8] font-bold tracking-wider">📡 DIANTANG CONCOURSE DISPATCH</span>
-      <button id="close-ticker-modal-btn" class="text-[#38bdf8] text-xs font-bold px-2 py-1 bg-[#1a0c3b] border border-black">&times;</button>
+<!-- Ticker Expanded Log Modal (Anchored to the Bottom) -->
+  <div id="ticker-modal" class="fixed inset-0 bg-black/80 z-50 flex items-end justify-center p-3 sm:p-4 hidden">
+    <div class="bg-[#110729] border-4 border-[#38bdf8] p-3 sm:p-4 max-w-lg w-full pixel-box flex flex-col gap-2.5 text-left mb-2 sm:mb-6 shadow-[0_0_25px_rgba(56,189,248,0.3)]">
+      <div class="flex justify-between items-center border-b border-[#2b1658] pb-1.5">
+        <span class="text-[9px] text-[#38bdf8] font-bold tracking-wider">📡 DIANTANG CONCOURSE DISPATCH</span>
+        <button id="close-ticker-modal-btn" class="text-[#38bdf8] text-xs font-bold px-2 py-0.5 bg-[#1a0c3b] border border-black">&times;</button>
+      </div>
+      <div id="ticker-modal-fulltext" class="text-[8px] text-[#faf2dc] leading-relaxed break-words py-1">
+        <!-- Full message injected here -->
+      </div>
+      <button id="ok-ticker-modal-btn" class="bg-[#38bdf8] text-[#04010a] text-[8px] py-2 font-bold pixel-btn border-2 border-black mt-0.5">
+        DISMISS
+      </button>
     </div>
-    <div id="ticker-modal-fulltext" class="text-[8px] text-[#faf2dc] leading-relaxed break-words">
-      <!-- Full message injected here -->
-    </div>
-    <button id="ok-ticker-modal-btn" class="bg-[#38bdf8] text-[#04010a] text-[8px] py-2 font-bold pixel-btn border-2 border-black mt-1">
-      DISMISS
-    </button>
   </div>
-</div>
 
   </div>
 
