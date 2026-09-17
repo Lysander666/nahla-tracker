@@ -313,9 +313,9 @@ html {
           <div>
 <div class="flex items-center gap-2 justify-center md:justify-start">
 <h1 class="text-sm sm:text-base md:text-lg font-black tracking-widest uppercase flex items-center gap-2 sm:gap-3.5 whitespace-nowrap">
-  <span class="text-[#ff6b35] drop-shadow-[0_0_8px_rgba(255,107,53,0.85)]">DEEPSPACE</span>
-  <span class="text-[#ff6b35] drop-shadow-[0_0_8px_rgba(255,107,53,0.85)]">DIM</span>
-  <span class="text-[#ff6b35] drop-shadow-[0_0_8px_rgba(255,107,53,0.85)]">SUM</span>
+<span class="text-[#ffbe3b] drop-shadow-[0_0_8px_rgba(255,190,59,0.85)]">DEEPSPACE</span>
+  <span class="text-[#ffbe3b] drop-shadow-[0_0_8px_rgba(255,190,59,0.85)]">DIM</span>
+  <span class="text-[#ffbe3b] drop-shadow-[0_0_8px_rgba(255,190,59,0.85)]">SUM</span>
 </h1>
 
 
@@ -422,8 +422,8 @@ html {
   CLICK STEAMER (+0.10 DIM SUM)
 </div>
 
-<!-- Fortune Result Notification Pill -->
-<div id="steamer-fortune-result" class="w-full hidden bg-[#261604] border border-[#f5b938] p-2 mb-2 text-center transition-all animate-pulse">
+<!-- Single Dedicated Fortune / Buff Notification Pill -->
+<div id="steamer-fortune-result" class="w-full hidden bg-[#261604] border-2 border-[#f5b938] p-2 mb-2 text-center transition-all">
   <div class="text-[7px] text-[#ffd666] font-bold tracking-wide" id="steamer-fortune-text"></div>
 </div>
 
@@ -451,13 +451,7 @@ html {
           </div>
         </div>
 
-        <!-- Active Event / Tea Bonus Notification Pill -->
-        <div id="active-buff-box" class="w-full mt-2.5 bg-[#112415] border-2 border-[#1e4b26] p-2 text-left hidden">
-          <div class="flex items-center justify-between text-[7px] text-[#a7f3d0]">
-            <span id="buff-title" class="font-bold">BUFF ACTIVE</span>
-            <span id="buff-timer">30s</span>
-          </div>
-        </div>
+
 
       </section>
 
@@ -919,20 +913,25 @@ html {
       } catch (err) {}
     }
 
-    let fortuneBannerTimeout = null;
+let instantFortuneTimeout = null;
 
-function showFortuneResult(text) {
+function showInstantFortune(text) {
   const box = document.getElementById('steamer-fortune-result');
   const txt = document.getElementById('steamer-fortune-text');
   if (!box || !txt) return;
 
   txt.textContent = text;
   box.classList.remove('hidden');
+  box.classList.add('animate-pulse');
 
-  if (fortuneBannerTimeout) clearTimeout(fortuneBannerTimeout);
-  fortuneBannerTimeout = setTimeout(() => {
-    box.classList.add('hidden');
-  }, 6000);
+  if (instantFortuneTimeout) clearTimeout(instantFortuneTimeout);
+  instantFortuneTimeout = setTimeout(() => {
+    // Only hide if a timed buff hasn't taken over
+    if (!gameState.activeBuff) {
+      box.classList.add('hidden');
+      box.classList.remove('animate-pulse');
+    }
+  }, 5000);
 }
 
     const vCanvas = document.getElementById('viewport-canvas');
@@ -1542,44 +1541,34 @@ if (roll < 0.25) {
   const bonus = Math.max(5, Math.round(currentRate * 60));
   gameState.dimSum += bonus;
   gameState.totalEarned += bonus;
-  const msg = `🥠 FORTUNE BURST: +${bonus.toLocaleString()} Dim Sum!`;
   setTicker(`🥠 FORTUNE REVEALED: "Wealth flows through the void!" (+${bonus.toLocaleString()} Dim Sum burst)`);
-  showFortuneResult(msg);
+  showInstantFortune(`🥠 FORTUNE BURST: +${bonus.toLocaleString()} Dim Sum!`);
 } else if (roll < 0.45) {
   gameState.activeBuff = { type: 'theatre_rush', name: "FLIGHT SHIFT RUSH (1.4X SPEED)", timer: 25, mult: 1.4 };
-  const msg = `🥠 SHIFT RUSH: 1.4x Speed for 25s!`;
   setTicker("🥠 FORTUNE REVEALED: Flight deck shift ends! (1.4x speed for 25s)");
-  showFortuneResult(msg);
 } else if (roll < 0.65) {
   gameState.heat = 0;
   gameState.isOverheated = false;
   gameState.cooldownTimer = 0;
   gameState.activeBuff = { type: 'bamboo_zen', name: "BAMBOO ZEN (+0.25/TAP & NO HEAT)", timer: 20, mult: 1.0 };
-  const msg = `🥠 BAMBOO ZEN: No heat & +0.25/tap for 20s!`;
   setTicker("🥠 FORTUNE REVEALED: Steamer cannot overheat & clicks yield +0.25 for 20s!");
-  showFortuneResult(msg);
 } else if (roll < 0.80) {
   gameState.activeBuff = { type: 'rain_blessing', name: "SOHO RAIN BLESSING (+20% YIELD)", timer: 30, mult: 1.20 };
-  const msg = `🥠 RAIN BLESSING: +20% Kitchen Yield for 30s!`;
   setTicker("🥠 FORTUNE REVEALED: Steaming yield boosted by +20% for 30s!");
-  showFortuneResult(msg);
 } else if (roll < 0.93) {
   let totalStaff = 0;
   for (const k in gameState.upgrades) totalStaff += gameState.upgrades[k].count;
   const auntieBonus = Math.max(4, Math.round(totalStaff * 1.2 + currentRate * 30));
   gameState.dimSum += auntieBonus;
   gameState.totalEarned += auntieBonus;
-  const msg = `🥠 CARAVAN STAMPEDE: +${auntieBonus.toLocaleString()} Dim Sum!`;
-  setTicker(`🥠 FORTUNE REVEALED: Trolley Caravan Stampede! The crew clears out all carts! (+${auntieBonus.toLocaleString()} Dim Sum)`);
-  showFortuneResult(msg);
+  setTicker(`🥠 FORTUNE REVEALED: Trolley Caravan Stampede! (+${auntieBonus.toLocaleString()} Dim Sum)`);
+  showInstantFortune(`🥠 TROLLEY STAMPEDE: +${auntieBonus.toLocaleString()} Dim Sum!`);
 } else {
   const dragonGift = 50;
   gameState.dimSum += dragonGift;
   gameState.totalEarned += dragonGift;
   gameState.activeBuff = { type: 'super_frenzy', name: "IMPERIAL DRAGON (1.6X FRENZY)", timer: 15, mult: 1.6 };
-  const msg = `🥠 DRAGON FRENZY: +50 Dim Sum & 1.6x Speed for 15s!`;
   setTicker("🥠 RARE GOLDEN FORTUNE: Imperial Dragon Blessing! +50 Dim Sum & 1.6x Frenzy for 15s!");
-  showFortuneResult(msg);
 }
 
       checkAchievements();
@@ -1851,17 +1840,21 @@ if (tickerBar && tickerModal) {
         }
       }
 
-      // Active Buff Display
-      const buffBox = document.getElementById('active-buff-box');
-      if (buffBox) {
-        if (gameState.activeBuff && gameState.activeBuff.timer > 0) {
-          buffBox.classList.remove('hidden');
-          document.getElementById('buff-title').textContent = gameState.activeBuff.name || "KITCHEN BUFF ACTIVE";
-          document.getElementById('buff-timer').textContent = `${Math.ceil(gameState.activeBuff.timer)}s`;
-        } else {
-          buffBox.classList.add('hidden');
-        }
-      }
+
+// Keep the steamer fortune pill alive and counting down during active buffs
+const fortuneBox = document.getElementById('steamer-fortune-result');
+const fortuneText = document.getElementById('steamer-fortune-text');
+
+if (fortuneBox && fortuneText) {
+  if (gameState.activeBuff && gameState.activeBuff.timer > 0) {
+    if (instantFortuneTimeout) clearTimeout(instantFortuneTimeout);
+    fortuneBox.classList.remove('hidden');
+    fortuneBox.classList.remove('animate-pulse');
+    fortuneText.innerHTML = `⚡ <span class="text-[#4ade80]">${gameState.activeBuff.name}</span> &bull; <span class="text-[#fde047] font-mono">${Math.ceil(gameState.activeBuff.timer)}s</span>`;
+  } else if (!instantFortuneTimeout && !fortuneBox.classList.contains('animate-pulse')) {
+    fortuneBox.classList.add('hidden');
+  }
+}
 
       // Upgrade Buttons state
       for (const key in gameState.upgrades) {
