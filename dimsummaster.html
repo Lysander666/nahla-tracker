@@ -1738,12 +1738,20 @@ if (roll < 0.25) {
       gameState.dimSum += earned;
       gameState.totalEarned += earned;
 
-      // Active buff countdown
+// Active buff countdown
       if (gameState.activeBuff) {
         gameState.activeBuff.timer -= dt;
         if (gameState.activeBuff.timer <= 0) {
           const finishedType = gameState.activeBuff.type;
           gameState.activeBuff = null;
+
+          // Force pill to dismiss immediately
+          const fortuneBox = document.getElementById('steamer-fortune-result');
+          if (fortuneBox) {
+            fortuneBox.classList.add('hidden');
+            fortuneBox.classList.remove('animate-pulse');
+          }
+
           if (finishedType === 'bamboo_zen') {
             setTicker("Master Sifu's Zen focus concludes. Steamer pressure normalises.");
           } else {
@@ -1847,15 +1855,20 @@ const fortuneText = document.getElementById('steamer-fortune-text');
 
 if (fortuneBox && fortuneText) {
   if (gameState.activeBuff && gameState.activeBuff.timer > 0) {
-    if (instantFortuneTimeout) clearTimeout(instantFortuneTimeout);
+    if (instantFortuneTimeout) {
+      clearTimeout(instantFortuneTimeout);
+      instantFortuneTimeout = null;
+    }
     fortuneBox.classList.remove('hidden');
     fortuneBox.classList.remove('animate-pulse');
-    fortuneText.innerHTML = `⚡ <span class="text-[#4ade80]">${gameState.activeBuff.name}</span> &bull; <span class="text-[#fde047] font-mono">${Math.ceil(gameState.activeBuff.timer)}s</span>`;
-  } else if (!instantFortuneTimeout && !fortuneBox.classList.contains('animate-pulse')) {
+    // Bumped timer from text-[7px] to text-[9px] / text-xs:
+    fortuneText.innerHTML = `⚡ <span class="text-[#4ade80]">${gameState.activeBuff.name}</span> &bull; <span class="text-[#fde047] font-mono text-[9px] sm:text-[10px] font-black">${Math.ceil(gameState.activeBuff.timer)}s</span>`;
+  } else if (!instantFortuneTimeout) {
     fortuneBox.classList.add('hidden');
+    fortuneBox.classList.remove('animate-pulse');
+    fortuneText.textContent = '';
   }
 }
-
       // Upgrade Buttons state
       for (const key in gameState.upgrades) {
         const upg = gameState.upgrades[key];
