@@ -303,6 +303,16 @@ html {
   <!-- Canvas: Deep space starfield + Carrier hull trusses + Simulated London rain -->
   <canvas id="viewport-canvas"></canvas>
 
+  <!-- Initial Splash Sign Modal -->
+  <div id="splash-modal" class="fixed inset-0 bg-black/85 z-[100] flex items-center justify-center p-4 cursor-pointer transition-opacity duration-300">
+    <div class="pixel-box border-4 border-[#f5b938] bg-[#090514] p-2 max-w-sm sm:max-w-md w-full flex flex-col items-center gap-2 text-center shadow-[0_0_35px_rgba(245,185,56,0.35)]">
+      <img src="sign.jpeg" alt="Deepspace Dim Sum" class="w-full h-auto block select-none pointer-events-none border-2 border-black">
+      <div class="text-[7px] sm:text-[8px] text-[#ffd666] font-bold tracking-widest uppercase animate-pulse pt-1">
+        [ TAP ANYWHERE TO ENTER ]
+      </div>
+    </div>
+  </div>
+
 <div class="main-app-container w-full max-w-5xl bg-[#090514]/95 backdrop-blur-md pixel-box p-3 sm:p-5 mb-4 flex flex-col gap-4">    <!-- Top Header: Stacked 2-Tier Layout -->
     <header class="border-b-4 border-[#f5b938] pb-3 flex flex-col gap-3">
       
@@ -672,6 +682,27 @@ html {
       - 10 Kitchen tiers & 8 Compounding cellar items (~1.32x max compound boost).
       - Regular Fortune Cookies (~every 75-140s) with calibrated 1-min idle bonuses.
     */
+    const splashModal = document.getElementById('splash-modal');
+
+    function dismissSplash() {
+      if (!splashModal || splashModal.classList.contains('hidden')) return;
+      splashModal.classList.add('hidden');
+
+      // Satisfies browser gesture requirement for audio:
+      initAudioContext();
+      if (gameState.rainEnabled && !rainSourceNode) {
+        startRainSound();
+      }
+      playRetroSound('click');
+    }
+
+    if (splashModal) {
+      splashModal.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        dismissSplash();
+      });
+    }
+    
     const TARGET_GOAL = 383000;
     const SAVE_KEY = 'dim_sum_master_longhaul_save_v3';
 
