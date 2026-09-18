@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Nahla Diantang 0.61</title>
+  <title>Nahla Diantang 0.62</title>
 
 <!-- Open Graph / Social Embed Meta Tags -->
 <meta property="og:type" content="website">
@@ -303,20 +303,19 @@ html {
   <!-- Canvas: Deep space starfield + Carrier hull trusses + Simulated London rain -->
   <canvas id="viewport-canvas"></canvas>
 
-  <!-- Initial Splash Sign Modal -->
 <!-- Initial Splash Sign Modal -->
   <div id="splash-modal" class="fixed inset-0 bg-black/85 z-[100] flex items-center justify-center p-4 cursor-pointer transition-opacity duration-300">
-    <div class="pixel-box border-4 border-[#f5b938] bg-[#090514] p-2.5 max-w-sm sm:max-w-md w-full flex flex-col items-center gap-2.5 text-center shadow-[0_0_35px_rgba(245,185,56,0.35)]" onclick="event.stopPropagation()">
+    <div class="pixel-box border-4 border-[#38bdf8] bg-[#090514] p-2.5 max-w-sm sm:max-w-md w-full flex flex-col items-center gap-2.5 text-center shadow-[0_0_35px_rgba(56,189,248,0.35)]" onclick="event.stopPropagation()">
       <img id="splash-img" src="sign4.jpeg" alt="Nahla Diantang" class="w-full h-auto block select-none border-2 border-black cursor-pointer" title="Click to enter">
       
-      <div id="splash-enter-text" class="text-[7px] sm:text-[8px] text-[#ffd666] font-bold tracking-widest uppercase animate-pulse cursor-pointer">
+      <div id="splash-enter-text" class="text-[7px] sm:text-[8px] text-[#38bdf8] font-bold tracking-widest uppercase animate-pulse cursor-pointer">
         [ TAP ANYWHERE TO ENTER ]
       </div>
 
-      <!-- Don't show again checkbox -->
-      <label class="flex items-center justify-center gap-2 text-[7px] text-[#e2d5c5] cursor-pointer pt-1 border-t border-[#31175e] w-full select-none">
-        <input type="checkbox" id="splash-dont-show" class="accent-[#f5b938] cursor-pointer">
-        <span>DON'T SHOW THIS AGAIN</span>
+      <!-- Subtle "Don't show again" toggle -->
+      <label class="flex items-center justify-center gap-2 text-[7px] text-[#556987] hover:text-[#8ba2c4] cursor-pointer pt-1.5 border-t border-[#132238]/60 w-full select-none transition-colors">
+        <input type="checkbox" id="splash-dont-show" class="accent-[#2563eb] opacity-60 hover:opacity-100 cursor-pointer">
+        <span class="tracking-wide">DON'T SHOW THIS AGAIN</span>
       </label>
     </div>
   </div>
