@@ -304,12 +304,20 @@ html {
   <canvas id="viewport-canvas"></canvas>
 
   <!-- Initial Splash Sign Modal -->
+<!-- Initial Splash Sign Modal -->
   <div id="splash-modal" class="fixed inset-0 bg-black/85 z-[100] flex items-center justify-center p-4 cursor-pointer transition-opacity duration-300">
-    <div class="pixel-box border-4 border-[#f5b938] bg-[#090514] p-2 max-w-sm sm:max-w-md w-full flex flex-col items-center gap-2 text-center shadow-[0_0_35px_rgba(245,185,56,0.35)]">
-      <img src="sign.jpeg" alt="Deepspace Dim Sum" class="w-full h-auto block select-none pointer-events-none border-2 border-black">
-      <div class="text-[7px] sm:text-[8px] text-[#ffd666] font-bold tracking-widest uppercase animate-pulse pt-1">
+    <div class="pixel-box border-4 border-[#f5b938] bg-[#090514] p-2.5 max-w-sm sm:max-w-md w-full flex flex-col items-center gap-2.5 text-center shadow-[0_0_35px_rgba(245,185,56,0.35)]" onclick="event.stopPropagation()">
+      <img id="splash-img" src="sign.jpeg" alt="Nahla Diantang" class="w-full h-auto block select-none border-2 border-black cursor-pointer" title="Click to enter">
+      
+      <div id="splash-enter-text" class="text-[7px] sm:text-[8px] text-[#ffd666] font-bold tracking-widest uppercase animate-pulse cursor-pointer">
         [ TAP ANYWHERE TO ENTER ]
       </div>
+
+      <!-- Don't show again checkbox -->
+      <label class="flex items-center justify-center gap-2 text-[7px] text-[#e2d5c5] cursor-pointer pt-1 border-t border-[#31175e] w-full select-none">
+        <input type="checkbox" id="splash-dont-show" class="accent-[#f5b938] cursor-pointer">
+        <span>DON'T SHOW THIS AGAIN</span>
+      </label>
     </div>
   </div>
 
@@ -500,11 +508,11 @@ html {
       </div>
     </div>
 
-    <!-- Bottom Deep Space & Sub-Deck Ticker -->
+<!-- Bottom Deep Space & Sub-Deck Ticker -->
 <div id="ticker-bar" class="w-full bg-[#080101] border-2 border-black p-2 text-[7px] text-[#86efac] flex items-center gap-2 overflow-hidden cursor-pointer hover:bg-[#120420] active:scale-[0.99] transition-all" title="Click to view full dispatch">
   <span class="text-[#f5b938] font-bold whitespace-nowrap shrink-0">[DIANTANG]</span>
   <span id="ticker-text" class="truncate flex-1">A.R.C. Core Draconis drifts through the black. Rain runs down the inner observation glass.</span>
-  <span class="text-[6px] text-[#38bdf8] opacity-70 shrink-0">🔍</span>
+  <span class="text-xs sm:text-sm text-[#38bdf8] opacity-80 hover:opacity-100 hover:scale-110 shrink-0 transition-transform select-none">🔍</span>
 </div>
 
 <!-- Ticker Expanded Log Modal (Anchored to the Bottom) -->
