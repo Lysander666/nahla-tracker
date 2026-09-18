@@ -305,11 +305,11 @@ html {
 
 <!-- Initial Splash Sign Modal -->
   <div id="splash-modal" class="fixed inset-0 bg-black/85 z-[100] flex items-center justify-center p-4 cursor-pointer transition-opacity duration-300">
-    <div class="pixel-box border-4 border-[#38bdf8] bg-[#090514] p-2.5 max-w-sm sm:max-w-md w-full flex flex-col items-center gap-2.5 text-center shadow-[0_0_35px_rgba(56,189,248,0.35)]" onclick="event.stopPropagation()">
-      <img id="splash-img" src="sign4.jpeg" alt="Nahla Diantang" class="w-full h-auto block select-none border-2 border-black cursor-pointer" title="Click to enter">
+    <div class="pixel-box border-2 sm:border-4 border-[#0284c7]/70 bg-[#090514] p-2.5 max-w-sm sm:max-w-md w-full flex flex-col items-center gap-2.5 text-center shadow-[0_0_20px_rgba(2,132,199,0.2)]" onclick="event.stopPropagation()">
+      <img id="splash-img" src="g24p2.jpg" alt="Nahla Diantang" class="w-full h-auto block select-none border-2 border-black cursor-pointer" title="Click or press any key to enter">
       
-      <div id="splash-enter-text" class="text-[7px] sm:text-[8px] text-[#38bdf8] font-bold tracking-widest uppercase animate-pulse cursor-pointer">
-        [ TAP ANYWHERE TO ENTER ]
+      <div id="splash-enter-text" class="text-[7px] sm:text-[8px] text-[#38bdf8]/90 font-bold tracking-widest uppercase animate-pulse cursor-pointer">
+        [ ... OR TAP ON MOBILE TO ENTER ]
       </div>
 
       <!-- Subtle "Don't show again" toggle -->
@@ -694,13 +694,24 @@ html {
       - 10 Kitchen tiers & 8 Compounding cellar items (~1.32x max compound boost).
       - Regular Fortune Cookies (~every 75-140s) with calibrated 1-min idle bonuses.
     */
-    const splashModal = document.getElementById('splash-modal');
+const splashModal = document.getElementById('splash-modal');
+    const splashCheckbox = document.getElementById('splash-dont-show');
+
+    // Immediately hide modal if previously opted out
+    if (localStorage.getItem('nahla_hide_splash') === 'true' && splashModal) {
+      splashModal.classList.add('hidden');
+    }
 
     function dismissSplash() {
       if (!splashModal || splashModal.classList.contains('hidden')) return;
+
+      if (splashCheckbox && splashCheckbox.checked) {
+        localStorage.setItem('nahla_hide_splash', 'true');
+      }
+
       splashModal.classList.add('hidden');
 
-      // Satisfies browser gesture requirement for audio:
+      // Satisfy browser audio unlock requirement
       initAudioContext();
       if (gameState.rainEnabled && !rainSourceNode) {
         startRainSound();
@@ -709,9 +720,20 @@ html {
     }
 
     if (splashModal) {
-      splashModal.addEventListener('pointerdown', (e) => {
-        e.preventDefault();
-        dismissSplash();
+      // Tap or Click anywhere on modal/backdrop
+      splashModal.addEventListener('click', dismissSplash);
+      document.getElementById('splash-img')?.addEventListener('click', dismissSplash);
+      document.getElementById('splash-enter-text')?.addEventListener('click', dismissSplash);
+
+      // Press any key on desktop
+      window.addEventListener('keydown', function handleSplashKey(e) {
+        if (!splashModal.classList.contains('hidden')) {
+          // If user focuses the checkbox via tab and presses Space, let it toggle without instantly dismissing
+          if (document.activeElement === splashCheckbox && (e.key === ' ' || e.code === 'Space')) {
+            return;
+          }
+          dismissSplash();
+        }
       });
     }
     
