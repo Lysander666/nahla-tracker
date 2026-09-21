@@ -757,17 +757,19 @@ const splashModal = document.getElementById('splash-modal');
       secretSalonUnlocked: false,
       lastSalonVisit: 0, // 12-Hour cooldown timestamp tracker
       activeBuff: null,
-      upgrades: {
-        chopsticks:   { count: 0, cost: 10,     rate: 0.00015, name: "Chopstick Filling Portioner",   desc: "Whips seasoned prawn mince and places filling with bamboo chopsticks.", icon: "🥢" },
-        teaBoy:       { count: 0, cost: 40,     rate: 0.00050, name: "Sub-Deck Dough Kneader",        desc: "Mixes wheat starch and boiling water into delicate translucent pastry.", icon: "🫓" },
-        scullery:     { count: 0, cost: 150,    rate: 0.00120, name: "Crystal Skin Pleater",          desc: "Rolls paper-thin crystal skins and pleats har gow by hand.",             icon: "🪭" },
-        hostess:      { count: 0, cost: 480,    rate: 0.00250, name: "Qipao Pleating Specialist",     desc: "Delicately shapes each har gow with twelve traditional pleats.", icon: "💃" },
-        cartAuntie:   { count: 0, cost: 1600,   rate: 0.00550, name: "Biodome Steamer Tender",        desc: "Times the bamboo boiler stacks to steam dumplings to crystal perfection.", icon: "⏳" },
-        wrapperSifu:  { count: 0, cost: 5800,   rate: 0.01200, name: "Miley's Master Pincher",      desc: "Pleats translucent crystal har gow on Soho marble.", icon: "🥟" },
-        bambooRack:   { count: 0, cost: 21000,  rate: 0.02200, name: "Mainship Dragon Steamer",     desc: "Commercial multi-tier induction boiler stack.", icon: "♨️" },
-        headChef:     { count: 0, cost: 68000,  rate: 0.04000, name: "Executive Chef of Chinatown", desc: "Master chef who brought authentic Cantonese yum cha to space.", icon: "👨‍🍳" },
-        teaGuild:     { count: 0, cost: 180000, rate: 0.07500, name: "Fleet Carrier Flagship Diner", desc: "Multi-tiered dining pavilion beneath the Paifang gate.", icon: "🏯" },
-        goldenDragon: { count: 0, cost: 350000, rate: 0.12000, name: "Gerrard Dragon Float Fleet", desc: "Festival banquet brigade leading Lunar celebrations on the Carrier.", icon: "🐲" }
+upgrades: {
+        chopsticks:   { count: 0, cost: 10,      rate: 0.00015, name: "Chopstick Filling Portioner",   desc: "Whips seasoned prawn mince and places filling with bamboo chopsticks.", icon: "🥢" },
+        teaBoy:       { count: 0, cost: 40,      rate: 0.00050, name: "Sub-Deck Dough Kneader",        desc: "Mixes wheat starch and boiling water into delicate translucent pastry.", icon: "🫓" },
+        scullery:     { count: 0, cost: 150,     rate: 0.00120, name: "Crystal Skin Pleater",          desc: "Rolls paper-thin crystal skins and pleats har gow by hand.",             icon: "🪭" },
+        hostess:      { count: 0, cost: 480,     rate: 0.00250, name: "Qipao Pleating Specialist",     desc: "Delicately shapes each har gow with twelve traditional pleats.", icon: "💃" },
+        cartAuntie:   { count: 0, cost: 1600,    rate: 0.00550, name: "Biodome Steamer Tender",        desc: "Times the bamboo boiler stacks to steam dumplings to crystal perfection.", icon: "⏳" },
+        wrapperSifu:  { count: 0, cost: 5800,    rate: 0.01200, name: "Miley's Master Pincher",        desc: "Pleats translucent crystal har gow on Soho marble.", icon: "🥟" },
+        bambooRack:   { count: 0, cost: 21000,   rate: 0.02200, name: "Mainship Dragon Steamer",       desc: "Commercial multi-tier induction boiler stack.", icon: "♨️" },
+        headChef:     { count: 0, cost: 68000,   rate: 0.04000, name: "Executive Chef of Chinatown",   desc: "Master chef who brought authentic Cantonese yum cha to space.", icon: "👨‍🍳" },
+        teaGuild:     { count: 0, cost: 180000,  rate: 0.07500, name: "Fleet Carrier Flagship Diner",   desc: "Multi-tiered dining pavilion beneath the Paifang gate.", icon: "🏯" },
+        goldenDragon: { count: 0, cost: 350000,  rate: 0.12000, name: "Gerrard Dragon Float Fleet",   desc: "Festival banquet brigade leading Lunar celebrations on the Carrier.", icon: "🐲" },
+        archwayMaster:{ count: 0, cost: 750000,  rate: 0.18000, name: "Grand Paifang Ceremonial Gate", desc: "Ceremonial concourse gates blessing every tray passing into deep space.", icon: "⛩️" },
+        voidDynasty:  { count: 0, cost: 1500000, rate: 0.28000, name: "Celestial Void Dim Sum Dynasty",desc: "Zero-G automated orbital steamer network feeding the sector.", icon: "🌌" }
       },
       teas: {
         jasmine:      { bought: false, cost: 350,    mult: 1.02, name: "Fragrant Jasmine Green (茉莉花茶)", desc: "Floral aromatics soothe flight fatigue (+2% passive yield)." },
@@ -1359,27 +1361,68 @@ function showInstantFortune(text) {
 
     const upgradesContainer = document.getElementById('upgrades-container');
 
-    function initUpgradesList() {
+function isUpgradeDiscovered(key) {
+      const upg = gameState.upgrades[key];
+      // Discovered if bought at least once, or if lifetime earnings have reached 60% of base cost
+      const baseCosts = {
+        chopsticks: 10, teaBoy: 40, scullery: 150, hostess: 480,
+        cartAuntie: 1600, wrapperSifu: 5800, bambooRack: 21000,
+        headChef: 68000, teaGuild: 180000, goldenDragon: 350000,
+        archwayMaster: 750000, voidDynasty: 1500000
+      };
+      const threshold = (baseCosts[key] || upg.cost) * 0.6;
+      return upg.count > 0 || gameState.totalEarned >= threshold;
+    }
+
+    function renderUpgrades() {
       upgradesContainer.innerHTML = '';
       for (const key in gameState.upgrades) {
         const upg = gameState.upgrades[key];
+        const discovered = isUpgradeDiscovered(key);
+        const canAfford = gameState.dimSum >= upg.cost;
+
         const card = document.createElement('div');
         card.id = `upg-card-${key}`;
-        card.className = "bg-[#110729]/90 border-2 border-[#2b1658] p-2 sm:p-2.5 flex items-center justify-between gap-3 pixel-box";        card.innerHTML = `
-          <div class="flex items-center gap-2 sm:gap-3">
-            <span class="text-2xl">${upg.icon}</span>
-            <div class="text-left">
-              <div class="text-[9px] text-[#f5b938] font-bold tracking-wide">${upg.name}</div>
-              <div class="text-[8px] text-[#f3e8ff] leading-relaxed my-0.5">${upg.desc}</div>
-              <div class="text-[8px] text-[#4ade80] font-bold mt-1">
-                +${upg.rate.toFixed(4)}/s &bull; <span class="text-[#fde047]" id="count-${key}">Hired: ${upg.count}</span>
+        card.className = `p-2 sm:p-2.5 flex items-center justify-between gap-3 pixel-box transition-all ${
+          discovered ? 'bg-[#110729]/90 border-2 border-[#2b1658]' : 'bg-[#0a0418]/60 border-2 border-[#1a0f30] opacity-75'
+        }`;
+
+        if (discovered) {
+          card.innerHTML = `
+            <div class="flex items-center gap-2 sm:gap-3 min-w-0">
+              <span class="text-2xl shrink-0">${upg.icon}</span>
+              <div class="text-left min-w-0">
+                <div class="text-[9px] text-[#f5b938] font-bold tracking-wide truncate">${upg.name}</div>
+                <div class="text-[8px] text-[#f3e8ff] leading-relaxed my-0.5">${upg.desc}</div>
+                <div class="text-[8px] text-[#4ade80] font-bold mt-1">
+                  +${upg.rate.toFixed(4)}/s &bull; <span class="text-[#fde047]" id="count-${key}">Hired: ${upg.count}</span>
+                </div>
               </div>
             </div>
-          </div>
-          <button id="buy-btn-${key}" class="pixel-btn bg-[#f5b938] text-[#240808] text-[8px] font-bold px-3 py-2 border-2 border-black whitespace-nowrap" onclick="purchaseUpgrade('${key}')">
-            HIRE (<span id="cost-${key}">${upg.cost}</span>)
-          </button>
-        `;
+            <button id="buy-btn-${key}" class="pixel-btn ${canAfford ? 'bg-[#f5b938] text-[#240808]' : 'bg-[#2b1510] text-[#785b52]'} text-[8px] font-bold px-3 py-2 border-2 border-black whitespace-nowrap shrink-0" ${!canAfford ? 'disabled' : ''} onclick="purchaseUpgrade('${key}')">
+              HIRE (<span id="cost-${key}">${upg.cost.toLocaleString('en-US')}</span>)
+            </button>
+          `;
+        } else {
+          // Locked / Redacted Mystery State
+          card.innerHTML = `
+            <div class="flex items-center gap-2 sm:gap-3 min-w-0 select-none">
+              <span class="text-2xl shrink-0 opacity-30 grayscale filter">🔒</span>
+              <div class="text-left min-w-0">
+                <div class="text-[9px] text-[#6b5585] font-mono tracking-wider font-bold">??? [SUB-DECK SEALED]</div>
+                <div class="text-[8px] text-[#44335a] select-none filter blur-[3px] my-0.5 pointer-events-none">
+                  Advanced commercial steam equipment awaiting concourse accreditation.
+                </div>
+                <div class="text-[7px] text-[#553c70] font-bold mt-1">
+                  CLASSIFIED BRIGADE
+                </div>
+              </div>
+            </div>
+            <button class="pixel-btn bg-[#180a22] text-[#6a4f80] text-[8px] font-bold px-3 py-2 border-2 border-[#2b1658] whitespace-nowrap shrink-0 cursor-not-allowed" disabled>
+              LOCKED (${upg.cost.toLocaleString('en-US')})
+            </button>
+          `;
+        }
         upgradesContainer.appendChild(card);
       }
     }
@@ -1934,9 +1977,19 @@ if (fortuneBox && fortuneText) {
     fortuneText.textContent = '';
   }
 }
-      // Upgrade Buttons state
+// Check discovery and update upgrade button states
+      let needsRebuild = false;
       for (const key in gameState.upgrades) {
         const upg = gameState.upgrades[key];
+        const card = document.getElementById(`upg-card-${key}`);
+        const isCurrentlyDiscovered = isUpgradeDiscovered(key);
+        
+        // If a card was locked but now crossed threshold, flag to re-render
+        if (card && card.querySelector('.blur-\\[3px\\]') && isCurrentlyDiscovered) {
+          needsRebuild = true;
+          break;
+        }
+
         const btn = document.getElementById(`buy-btn-${key}`);
         const costEl = document.getElementById(`cost-${key}`);
         const countEl = document.getElementById(`count-${key}`);
@@ -1944,7 +1997,16 @@ if (fortuneBox && fortuneText) {
           costEl.textContent = upg.cost.toLocaleString('en-US');
           countEl.textContent = `Hired: ${upg.count}`;
           btn.disabled = gameState.dimSum < upg.cost;
+          if (gameState.dimSum >= upg.cost) {
+            btn.className = "pixel-btn bg-[#f5b938] text-[#240808] text-[8px] font-bold px-3 py-2 border-2 border-black whitespace-nowrap shrink-0";
+          } else {
+            btn.className = "pixel-btn bg-[#2b1510] text-[#785b52] text-[8px] font-bold px-3 py-2 border-2 border-black whitespace-nowrap shrink-0";
+          }
         }
+      }
+
+      if (needsRebuild) {
+        renderUpgrades();
       }
 
       // Expedition Progress Bar
