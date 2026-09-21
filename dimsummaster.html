@@ -1822,7 +1822,7 @@ if (roll < 0.25) {
           }
 
           saveGame();
-          initUpgradesList();
+          renderUpgrades();
           applyTimeOfDayAtmosphere();
           renderUI();
           feedback.textContent = "Expedition save restored successfully! Welcome back to Little Gerrard Street.";
@@ -2076,7 +2076,7 @@ if (fortuneBox && fortuneText) {
 
     window.onload = function() {
       loadGame();
-      initUpgradesList();
+      renderUpgrades();
       checkAchievements();
       applyTimeOfDayAtmosphere();
       
