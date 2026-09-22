@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Nahla Diantang 0.71</title>
+  <title>Nahla Diantang 0.72</title>
 
 <!-- Open Graph / Social Embed Meta Tags -->
 <meta property="og:type" content="website">
@@ -25,7 +25,7 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='82'>🥠</text></svg>">  
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Noto+Serif+TC:wght@600;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Silkscreen:wght@400;700&family=Noto+Serif+TC:wght@600;900&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
 
   <style>
@@ -94,6 +94,10 @@ html {
       text-rendering: geometricPrecision;
     }
 
+    .font-neogeo {
+  font-family: 'Silkscreen', monospace;
+  letter-spacing: 0.5px;
+}
     /* Typography Scale Calibration for Crisp Visibility */
     .text-\[6px\] {
       font-size: 8px !important;
@@ -1386,9 +1390,9 @@ function isUpgradeDiscovered(key) {
           discovered ? 'bg-[#110729]/90 border-2 border-[#2b1658]' : 'bg-[#0a0418]/60 border-2 border-[#1a0f30] opacity-75'
         }`;
 
-        if (discovered) {
+if (discovered) {
           card.innerHTML = `
-            <div class="flex items-center gap-2 sm:gap-3 min-w-0">
+            <div class="flex items-center gap-2 sm:gap-3 min-w-0 font-neogeo">
               <span class="text-2xl shrink-0">${upg.icon}</span>
               <div class="text-left min-w-0">
                 <div class="text-[9px] text-[#f5b938] font-bold tracking-wide truncate">${upg.name}</div>
@@ -1405,10 +1409,10 @@ function isUpgradeDiscovered(key) {
         } else {
           // Locked / Redacted Mystery State
           card.innerHTML = `
-            <div class="flex items-center gap-2 sm:gap-3 min-w-0 select-none">
+            <div class="flex items-center gap-2 sm:gap-3 min-w-0 select-none font-neogeo">
               <span class="text-2xl shrink-0 opacity-30 grayscale filter">🔒</span>
               <div class="text-left min-w-0">
-                <div class="text-[9px] text-[#6b5585] font-mono tracking-wider font-bold">??? [SUB-DECK SEALED]</div>
+                <div class="text-[9px] text-[#6b5585] tracking-wider font-bold">??? [SUB-DECK SEALED]</div>
                 <div class="text-[8px] text-[#44335a] select-none filter blur-[3px] my-0.5 pointer-events-none">
                   Advanced commercial steam equipment awaiting concourse accreditation.
                 </div>
