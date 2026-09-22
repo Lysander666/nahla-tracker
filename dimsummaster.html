@@ -1392,36 +1392,36 @@ function isUpgradeDiscovered(key) {
 
 if (discovered) {
           card.innerHTML = `
-            <div class="flex items-center gap-3 min-w-0 font-neogeo flex-1">
-              <span class="text-3xl shrink-0 select-none">${upg.icon}</span>
+            <div class="flex items-center gap-2 sm:gap-3 min-w-0 font-neogeo flex-1">
+              <span class="text-2xl sm:text-3xl shrink-0 select-none">${upg.icon}</span>
               <div class="text-left min-w-0 flex-1">
-                <div class="text-[14px] text-[#f5b938] font-bold tracking-wide truncate mb-1" style="font-size: 13px !important; line-height: 1.3 !important;">${upg.name}</div>
-                <div class="text-[#f3e8ff] leading-relaxed mb-1 opacity-90" style="font-size: 11px !important; line-height: 1.4 !important;">${upg.desc}</div>
-                <div class="text-[#4ade80] font-bold" style="font-size: 10px !important;">
+                <div class="text-[10px] sm:text-[13px] text-[#f5b938] font-bold tracking-wide leading-tight mb-1 break-words">${upg.name}</div>
+                <div class="text-[#f3e8ff] leading-relaxed mb-1 opacity-90 text-[8px] sm:text-[11px]">${upg.desc}</div>
+                <div class="text-[#4ade80] font-bold text-[8px] sm:text-[10px]">
                   +${upg.rate.toFixed(4)}/s &bull; <span class="text-[#fde047]" id="count-${key}">Hired: ${upg.count}</span>
                 </div>
               </div>
             </div>
-            <button id="buy-btn-${key}" class="pixel-btn ${canAfford ? 'bg-[#f5b938] text-[#240808]' : 'bg-[#2b1510] text-[#785b52]'} text-[8px] font-bold px-3.5 py-2.5 border-2 border-black whitespace-nowrap shrink-0 ml-2" ${!canAfford ? 'disabled' : ''} onclick="purchaseUpgrade('${key}')">
+            <button id="buy-btn-${key}" class="pixel-btn ${canAfford ? 'bg-[#f5b938] text-[#240808]' : 'bg-[#2b1510] text-[#785b52]'} text-[7px] sm:text-[8px] font-bold px-2 sm:px-3.5 py-2 sm:py-2.5 border-2 border-black whitespace-nowrap shrink-0 ml-1.5 sm:ml-2" ${!canAfford ? 'disabled' : ''} onclick="purchaseUpgrade('${key}')">
               HIRE (<span id="cost-${key}">${upg.cost.toLocaleString('en-US')}</span>)
             </button>
           `;
         } else {
           // Locked / Redacted Mystery State
           card.innerHTML = `
-            <div class="flex items-center gap-3 min-w-0 font-neogeo select-none flex-1">
-              <span class="text-3xl shrink-0 opacity-30 grayscale filter">🔒</span>
+            <div class="flex items-center gap-2 sm:gap-3 min-w-0 font-neogeo select-none flex-1">
+              <span class="text-2xl sm:text-3xl shrink-0 opacity-30 grayscale filter">🔒</span>
               <div class="text-left min-w-0 flex-1">
-                <div class="text-[#6b5585] tracking-wider font-bold mb-1" style="font-size: 13px !important; line-height: 1.3 !important;">??? [SUB-DECK SEALED]</div>
-                <div class="text-[#44335a] select-none filter blur-[3px] mb-1 pointer-events-none" style="font-size: 11px !important; line-height: 1.4 !important;">
+                <div class="text-[10px] sm:text-[13px] text-[#6b5585] tracking-wider font-bold leading-tight mb-1 break-words">??? [SUB-DECK SEALED]</div>
+                <div class="text-[#44335a] select-none filter blur-[3px] mb-1 pointer-events-none text-[8px] sm:text-[11px] leading-relaxed">
                   Advanced commercial steam equipment awaiting concourse accreditation.
                 </div>
-                <div class="text-[#553c70] font-bold" style="font-size: 10px !important;">
+                <div class="text-[#553c70] font-bold text-[7px] sm:text-[10px]">
                   CLASSIFIED ZONE
                 </div>
               </div>
             </div>
-            <button class="pixel-btn bg-[#180a22] text-[#6a4f80] text-[8px] font-bold px-3.5 py-2.5 border-2 border-[#2b1658] whitespace-nowrap shrink-0 ml-2 cursor-not-allowed" disabled>
+            <button class="pixel-btn bg-[#180a22] text-[#6a4f80] text-[7px] sm:text-[8px] font-bold px-2 sm:px-3.5 py-2 sm:py-2.5 border-2 border-[#2b1658] whitespace-nowrap shrink-0 ml-1.5 sm:ml-2 cursor-not-allowed" disabled>
               LOCKED (${upg.cost.toLocaleString('en-US')})
             </button>
           `;
