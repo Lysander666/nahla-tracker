@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Voyage Status</title>
 
-    <!-- Google Fonts matching Nahla Tracker aesthetic -->
+    <!-- Google Fonts: JetBrains Mono for body/small text & Consolas fallback -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Consolas&family=Inter:wght@400;500;600;700&family=VT323&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="icon" type="image/png" href="faviconmain16.png">
 
     <style>
@@ -24,9 +24,14 @@
             --magenta-glow: #e0429f;
             --border-dim: #262c37;
             --border-highlight: #3b4657;
-            --text-main: #e2e8f0;
-            --text-muted: #8c9ba5;
+            --text-main: #f1f5f9;
+            /* Lightened secondary and small-text greys for contrast */
+            --text-muted: #cbd5e1;
+            --text-subtle: #94a3b8;
             --green-glow: #34d399;
+
+            --font-heading: 'Consolas', 'Courier New', monospace;
+            --font-body: 'JetBrains Mono', monospace;
         }
 
         * {
@@ -38,12 +43,14 @@
         body {
             background-color: var(--bg-deep);
             color: var(--text-main);
-            font-family: 'Consolas', 'Courier New', monospace;
+            font-family: var(--font-body);
+            font-size: 15px;
+            line-height: 1.6;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 32px 16px 60px 16px;
+            padding: 24px 14px 48px 14px;
             overflow-x: hidden;
             background-image: 
                 radial-gradient(circle at 50% 5%, rgba(58, 242, 255, 0.08) 0%, transparent 60%),
@@ -55,21 +62,25 @@
             background-size: 100% 100%, 100% 100%, 100% 100%, 320px 320px, 380px 380px, 420px 420px;
         }
 
+        h1, h2, h3, h4, .mission-title, .panel-title {
+            font-family: var(--font-heading);
+        }
+
         .container {
             width: 100%;
             max-width: 960px;
             display: flex;
             flex-direction: column;
-            gap: 24px;
+            gap: 20px;
         }
 
         /* Mission Hero Container */
         .voyage-hero {
-            background: rgba(21, 24, 31, 0.88);
+            background: rgba(21, 24, 31, 0.92);
             backdrop-filter: blur(12px);
             border: 1px solid var(--border-dim);
             border-radius: 12px;
-            padding: 36px 30px;
+            padding: 32px 24px;
             box-shadow: 0 0 35px rgba(0, 0, 0, 0.8), 0 0 24px rgba(58, 242, 255, 0.12);
             text-align: center;
             position: relative;
@@ -91,14 +102,14 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 24px;
+            gap: 20px;
             flex-wrap: wrap;
             margin-bottom: 20px;
         }
 
         .voyage-badge {
-            width: 130px;
-            height: 130px;
+            width: 120px;
+            height: 120px;
             border-radius: 50%;
             border: 2px solid rgba(58, 242, 255, 0.6);
             box-shadow: 0 0 24px rgba(58, 242, 255, 0.35);
@@ -114,29 +125,32 @@
         }
 
         .mission-pretitle {
-            font-size: 0.85rem;
+            font-size: 0.82rem;
             text-transform: uppercase;
-            letter-spacing: 0.25em;
+            letter-spacing: 0.22em;
             color: var(--cyan-dim);
             text-shadow: 0 0 8px rgba(97, 218, 251, 0.5);
-            margin-bottom: 6px;
+            margin-bottom: 8px;
+            font-weight: 600;
         }
 
         .mission-title {
-            font-size: 2.25rem;
+            font-size: 2.15rem;
             font-weight: 700;
-            letter-spacing: 0.06em;
+            letter-spacing: 0.05em;
             color: #ffffff;
             text-transform: uppercase;
-            margin-bottom: 8px;
+            margin-bottom: 12px;
+            line-height: 1.25;
             text-shadow: 0 0 16px rgba(255, 255, 255, 0.25);
+            word-break: break-word;
         }
 
         .mission-subtitle {
             font-size: 0.95rem;
             color: var(--text-muted);
-            margin-bottom: 26px;
-            line-height: 1.6;
+            margin-bottom: 24px;
+            line-height: 1.65;
             max-width: 780px;
             margin-left: auto;
             margin-right: auto;
@@ -155,15 +169,15 @@
         .countdown-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 16px;
-            margin: 24px 0;
+            gap: 14px;
+            margin: 20px 0;
         }
 
         .countdown-card {
             background-color: var(--bg-inner);
             border: 1px solid var(--border-dim);
             border-radius: 8px;
-            padding: 18px 8px;
+            padding: 16px 6px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -185,7 +199,8 @@
         }
 
         .digit-value {
-            font-size: 3.2rem;
+            font-family: var(--font-heading);
+            font-size: 3rem;
             font-weight: 700;
             color: var(--cyan-glow);
             text-shadow: 0 0 14px rgba(58, 242, 255, 0.65);
@@ -194,31 +209,46 @@
         }
 
         .digit-unit {
-            font-size: 0.72rem;
-            letter-spacing: 0.2em;
+            font-size: 0.76rem;
+            letter-spacing: 0.16em;
             text-transform: uppercase;
             color: var(--text-muted);
             margin-top: 6px;
+            font-weight: 600;
         }
 
         /* Live HUD strip */
         .hud-clocks {
-            display: flex;
-            justify-content: space-around;
-            flex-wrap: wrap;
-            gap: 14px;
-            padding: 14px 10px;
-            background: rgba(15, 18, 23, 0.8);
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            padding: 14px 16px;
+            background: rgba(15, 18, 23, 0.85);
             border: 1px solid #232832;
             border-radius: 8px;
-            font-size: 0.85rem;
+            font-size: 0.88rem;
             color: var(--text-muted);
-            margin-top: 8px;
+            margin-top: 10px;
+            text-align: left;
         }
 
-        .hud-clock-item span {
+        .hud-clock-item {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .hud-clock-label {
+            font-size: 0.74rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-subtle);
+        }
+
+        .hud-clock-item span.val {
             color: var(--cyan-dim);
-            font-weight: bold;
+            font-weight: 600;
+            word-break: break-word;
         }
 
         /* Info Card Panels */
@@ -226,7 +256,7 @@
             background: var(--bg-card);
             border: 1px solid var(--border-dim);
             border-radius: 10px;
-            padding: 24px;
+            padding: 22px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.45);
         }
 
@@ -246,21 +276,22 @@
             font-weight: 700;
             color: var(--cyan-dim);
             text-transform: uppercase;
-            letter-spacing: 0.1em;
+            letter-spacing: 0.08em;
             display: flex;
             align-items: center;
             gap: 8px;
         }
 
         .panel-tag {
-            font-size: 0.72rem;
+            font-size: 0.75rem;
             text-transform: uppercase;
-            padding: 3px 8px;
+            padding: 4px 10px;
             border-radius: 999px;
-            border: 1px solid rgba(97, 218, 251, 0.4);
+            border: 1px solid rgba(97, 218, 251, 0.45);
             color: var(--cyan-glow);
             background: rgba(58, 242, 255, 0.08);
-            letter-spacing: 0.12em;
+            letter-spacing: 0.1em;
+            font-weight: 600;
         }
 
         /* Flight Legs 3-Way Trajectory */
@@ -275,17 +306,16 @@
             border: 1px solid #262c36;
             border-left: 4px solid var(--cyan-glow);
             border-radius: 8px;
-            padding: 16px 20px;
+            padding: 16px 18px;
             display: flex;
             flex-direction: column;
-            gap: 8px;
-            transition: border-color 0.2s;
+            gap: 10px;
         }
 
         .leg-card.leg-destination {
             border-left-color: var(--magenta-glow);
             background: rgba(224, 66, 159, 0.05);
-            box-shadow: 0 0 16px rgba(224, 66, 159, 0.15);
+            box-shadow: 0 0 16px rgba(224, 66, 159, 0.12);
         }
 
         .leg-card.leg-homeward {
@@ -295,16 +325,17 @@
         .leg-top {
             display: flex;
             justify-content: space-between;
-            align-items: center;
+            align-items: flex-start;
             flex-wrap: wrap;
-            gap: 8px;
+            gap: 6px;
         }
 
         .leg-number {
-            font-size: 0.8rem;
-            font-weight: bold;
+            font-family: var(--font-heading);
+            font-size: 0.85rem;
+            font-weight: 700;
             color: var(--cyan-dim);
-            letter-spacing: 0.15em;
+            letter-spacing: 0.1em;
             text-transform: uppercase;
         }
 
@@ -317,106 +348,33 @@
         }
 
         .leg-status {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            letter-spacing: 0.1em;
+            font-size: 0.78rem;
+            color: var(--text-subtle);
+            letter-spacing: 0.08em;
             text-transform: uppercase;
+            font-weight: 600;
         }
 
         .leg-route {
-            font-size: 1.05rem;
+            font-size: 1rem;
             font-weight: 600;
             color: #ffffff;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
             flex-wrap: wrap;
+            line-height: 1.4;
+        }
+
+        .route-arrow {
+            display: inline-block;
+            opacity: 0.9;
         }
 
         .leg-desc {
-            font-size: 0.88rem;
+            font-size: 0.92rem;
             color: var(--text-muted);
-            line-height: 1.5;
-        }
-
-        /* 2-Column Key Metrics / Services */
-        .grid-2col {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
-
-        .spec-list {
-            list-style: none;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            font-size: 0.9rem;
-        }
-
-        .spec-list li {
-            display: flex;
-            justify-content: space-between;
-            border-bottom: 1px dashed rgba(255, 255, 255, 0.07);
-            padding-bottom: 6px;
-        }
-
-        .spec-list li span.label {
-            color: var(--text-muted);
-        }
-
-        .spec-list li span.value {
-            color: #fff;
-            font-weight: 600;
-            text-align: right;
-        }
-
-        .service-badges {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-top: 10px;
-        }
-
-        .service-badge {
-            background: #181d26;
-            border: 1px solid #2d3644;
-            color: var(--cyan-dim);
-            padding: 6px 10px;
-            border-radius: 6px;
-            font-size: 0.78rem;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .service-badge.inactive {
-            color: #8892a0;
-            opacity: 0.65;
-            text-decoration: line-through;
-        }
-
-        /* Guidelines & Philosophy Box */
-        .guidelines-box {
-            background: rgba(18, 21, 28, 0.95);
-            border-left: 3px solid var(--amber-neon);
-            border-radius: 6px;
-            padding: 16px 20px;
-            margin-top: 14px;
-            font-size: 0.9rem;
-            color: #cbd5e1;
             line-height: 1.6;
-        }
-
-        .guidelines-box strong {
-            color: var(--amber-bright);
-        }
-
-        .guideline-point {
-            margin-bottom: 12px;
-        }
-        .guideline-point:last-child {
-            margin-bottom: 0;
         }
 
         /* Bottom Nav Links */
@@ -424,22 +382,25 @@
             display: flex;
             justify-content: center;
             flex-wrap: wrap;
-            gap: 14px;
-            margin-top: 8px;
+            gap: 12px;
+            margin-top: 6px;
         }
 
         .nav-btn {
             color: var(--cyan-dim);
             text-decoration: none;
             border: 1px solid var(--border-dim);
-            padding: 10px 18px;
-            border-radius: 6px;
+            padding: 12px 18px;
+            border-radius: 8px;
             background: var(--bg-card);
             transition: all 0.2s ease;
             font-size: 0.88rem;
-            display: flex;
+            display: inline-flex;
             align-items: center;
+            justify-content: center;
             gap: 8px;
+            font-weight: 500;
+            text-align: center;
         }
 
         .nav-btn:hover {
@@ -450,31 +411,97 @@
         }
 
         .nav-btn.primary {
-            border-color: rgba(255, 153, 0, 0.5);
+            border-color: rgba(255, 153, 0, 0.55);
             color: var(--amber-bright);
+            font-weight: 600;
         }
         .nav-btn.primary:hover {
             border-color: var(--amber-bright);
             box-shadow: 0 0 16px rgba(255, 153, 0, 0.45);
         }
 
-        /* Responsive Breakpoints */
-        @media (max-width: 768px) {
+        /* Mobile Optimization Breakpoints */
+        @media (max-width: 680px) {
+            body {
+                padding: 16px 12px 36px 12px;
+            }
+
+            .container {
+                gap: 16px;
+            }
+
+            .voyage-hero {
+                padding: 24px 14px;
+            }
+
+            .voyage-badge {
+                width: 95px;
+                height: 95px;
+            }
+
+            .mission-title {
+                font-size: 1.45rem;
+                letter-spacing: 0.03em;
+            }
+
+            .mission-subtitle {
+                font-size: 0.88rem;
+                margin-bottom: 18px;
+            }
+
             .countdown-grid {
                 grid-template-columns: repeat(2, 1fr);
-                gap: 12px;
+                gap: 10px;
+                margin: 16px 0;
             }
+
+            .countdown-card {
+                padding: 12px 4px;
+            }
+
             .digit-value {
-                font-size: 2.5rem;
+                font-size: 2.25rem;
             }
-            .mission-title {
-                font-size: 1.7rem;
+
+            .digit-unit {
+                font-size: 0.7rem;
             }
-            .grid-2col {
+
+            .hud-clocks {
                 grid-template-columns: 1fr;
+                gap: 10px;
+                padding: 12px;
+                font-size: 0.84rem;
             }
-            .insignia-strip {
-                gap: 16px;
+
+            .panel {
+                padding: 16px 14px;
+            }
+
+            .panel-title {
+                font-size: 1rem;
+            }
+
+            .leg-card {
+                padding: 14px 12px;
+            }
+
+            .leg-route {
+                font-size: 0.92rem;
+            }
+
+            .leg-desc {
+                font-size: 0.86rem;
+            }
+
+            .nav-links {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .nav-btn {
+                width: 100%;
+                padding: 14px;
             }
         }
     </style>
@@ -500,7 +527,7 @@
         <h1 class="mission-title">Project Nahla Open Transit Voyage</h1>
         <p class="mission-subtitle">
             Carrier departure initiates from <span class="cyan">Colonia / Pennsylvania</span> on 
-            <span class="amber">24 September 3312 / 2026 at 19:30 GMT</span>.<br>
+            <span class="amber">24 September 3312 / 2026 at 19:30 GMT</span>.
         </p>
 
         <!-- COUNTDOWN DISPLAY -->
@@ -525,10 +552,22 @@
 
         <!-- HUD CLOCK TELEMETRY -->
         <div class="hud-clocks">
-            <div class="hud-clock-item">Live UTC: <span id="clock-gmt">--:--:--</span></div>
-            <div class="hud-clock-item">Departure: <span>24 Sept 2026 • 19:30:00 GMT</span></div>
-            <div class="hud-clock-item">Carrier Status: <span id="mission-status" style="color: var(--amber-bright);">PRE-DEPARTURE STANDBY</span></div>
-            <div class="hud-clock-item">Current Waypoint: <span>Pennsylvania Hub (Colonia)</span></div>
+            <div class="hud-clock-item">
+                <span class="hud-clock-label">Telemetry Clock</span>
+                <span class="val" id="clock-gmt">--:--:-- UTC</span>
+            </div>
+            <div class="hud-clock-item">
+                <span class="hud-clock-label">Departure Window</span>
+                <span class="val">24 Sept 2026 • 19:30:00 GMT</span>
+            </div>
+            <div class="hud-clock-item">
+                <span class="hud-clock-label">Carrier Telemetry</span>
+                <span class="val" id="mission-status" style="color: var(--amber-bright);">PRE-DEPARTURE STANDBY</span>
+            </div>
+            <div class="hud-clock-item">
+                <span class="hud-clock-label">Staging Waypoint</span>
+                <span class="val">Pennsylvania Hub (Colonia)</span>
+            </div>
         </div>
 
     </div>
@@ -536,9 +575,7 @@
     <!-- 3-LEG FLIGHT TRAJECTORY -->
     <div class="panel">
         <div class="panel-header">
-            <div class="panel-title">
-                <span>Galactic Waypoints & Route Trajectory</span>
-            </div>
+            <div class="panel-title">Galactic Waypoints &amp; Route Trajectory</div>
             <div class="panel-tag">1st Quadrant Traverse</div>
         </div>
 
@@ -546,14 +583,14 @@
             <!-- LEG 1 -->
             <div class="leg-card">
                 <div class="leg-top">
-                    <span class="leg-number">Leg 01 • September 2026 – December 2026</span>
+                    <span class="leg-number">Leg 01 • Sept 2026 – Dec 2026</span>
                     <span class="leg-status" style="color: var(--cyan-glow);">Next Jump Sequence</span>
                 </div>
                 <div class="leg-route">
                     <span>Colonia / Pennsylvania</span>
-                    <span style="color: var(--cyan-dim);">➔</span>
+                    <span class="route-arrow" style="color: var(--cyan-dim);">➔</span>
                     <span>Orio-Persean Conflux</span>
-                    <span style="color: var(--cyan-dim);">➔</span>
+                    <span class="route-arrow" style="color: var(--cyan-dim);">➔</span>
                     <span>Hope System (Nahla • Outer Arm)</span>
                 </div>
                 <div class="leg-desc">
@@ -565,13 +602,13 @@
             <div class="leg-card leg-destination">
                 <div class="leg-top">
                     <span class="leg-number">Leg 02 • Primary Research Residence</span>
-                    <span class="leg-status" style="color: var(--magenta-glow);">Stationary Observation Post (~1 Month)</span>
+                    <span class="leg-status" style="color: var(--magenta-glow);">Observation Post (~1 Mo)</span>
                 </div>
                 <div class="leg-route">
                     <span>Hypi Bra EV-P d5-78 6 a (Nahla)</span>
-                    <span style="color: var(--magenta-glow);">➔</span>
+                    <span class="route-arrow" style="color: var(--magenta-glow);">➔</span>
                     <span>The Outer Arm Rift</span>
-                    <span style="color: var(--magenta-glow);">➔</span>
+                    <span class="route-arrow" style="color: var(--magenta-glow);">➔</span>
                     <span>Erikson's Star (The Void)</span>
                 </div>
                 <div class="leg-desc">
@@ -583,17 +620,17 @@
             <div class="leg-card leg-homeward">
                 <div class="leg-top">
                     <span class="leg-number">Leg 03 • Homeward Transit</span>
-                    <span class="leg-status" style="color: var(--amber-bright);">Scheduled for Mid-to-Late 3313 (2027)</span>
+                    <span class="leg-status" style="color: var(--amber-bright);">Mid-to-Late 3313 (2027)</span>
                 </div>
                 <div class="leg-route">
                     <span>Erikson's Star (The Void)</span>
-                    <span style="color: var(--amber-bright);">➔</span>
+                    <span class="route-arrow" style="color: var(--amber-bright);">➔</span>
                     <span>Perseus Arm &amp; The Fallows</span>
-                    <span style="color: var(--amber-bright);">➔</span>
+                    <span class="route-arrow" style="color: var(--amber-bright);">➔</span>
                     <span>Gali / The Bubble (Inner Orion Spur)</span>
                 </div>
                 <div class="leg-desc">
-                    Traversing back through Via Maris and the Perseus Arm, heading inward and evenutally hitting the bubble in summer/autumn 2027.
+                    Traversing back through Via Maris and the Perseus Arm, heading inward and eventually reaching the core bubble in summer/autumn 2027.
                 </div>
             </div>
         </div>
@@ -609,8 +646,8 @@
 </div>
 
 <script>
-// Exact launch time: 24th September 2026 at 19:30:00 GMT (UTC)
-    const LAUNCH_TIMESTAMP = Date.UTC(2026, 8, 24, 19, 30, 0); // Month 8 is September (0-indexed in JS)
+    // Exact launch time: 24th September 2026 at 19:30:00 GMT (UTC)
+    const LAUNCH_TIMESTAMP = Date.UTC(2026, 8, 24, 19, 30, 0);
 
     const daysEl    = document.getElementById('val-days');
     const hoursEl   = document.getElementById('val-hours');
@@ -624,11 +661,9 @@
         const nowMs = now.getTime();
         const diffMs = LAUNCH_TIMESTAMP - nowMs;
 
-        // Display current ISO UTC clock
         gmtClock.textContent = now.toISOString().substring(11, 19) + " UTC";
 
         if (diffMs <= 0) {
-            // Target launch time reached
             daysEl.textContent  = "00";
             hoursEl.textContent = "00";
             minsEl.textContent  = "00";
@@ -650,7 +685,6 @@
         secsEl.textContent  = String(secs).padStart(2, '0');
     }
 
-    // Run immediately on page load and tick every second
     updateCountdown();
     setInterval(updateCountdown, 1000);
 </script>
