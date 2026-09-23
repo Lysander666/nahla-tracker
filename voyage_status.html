@@ -10,19 +10,20 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="icon" type="image/png" href="faviconmain16.png">
-    <!-- Open Graph / Discord & Facebook Embed -->
-<meta property="og:type" content="website">
-<meta property="og:url" content="https://nahla.live/countdown.html">
-<meta property="og:title" content="Project Nahla Open Transit Voyage • Status">
-<meta property="og:description" content="A deep-space traverse to the Outer Arm and The Void.">
-<meta property="og:image" content="https://nahla.live/nahla_voyage-sm.png">
-<meta name="theme-color" content="#3af2ff">
 
-<!-- Twitter Card Embed -->
-<meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Project Nahla Open Transit Voyage • Status">
-<meta name="twitter:description" content="A deep-space traverse to the Outer Arm and The Void.">
-<meta name="twitter:image" content="https://nahla.live/nahla_voyage-sm.png">
+    <!-- Open Graph / Discord & Facebook Embed -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://nahla.live/countdown.html">
+    <meta property="og:title" content="Project Nahla Open Transit Voyage • Status">
+    <meta property="og:description" content="A deep-space traverse to the Outer Arm and The Void.">
+    <meta property="og:image" content="https://nahla.live/nahla_voyage-sm.png">
+    <meta name="theme-color" content="#3af2ff">
+
+    <!-- Twitter Card Embed -->
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Project Nahla Open Transit Voyage • Status">
+    <meta name="twitter:description" content="A deep-space traverse to the Outer Arm and The Void.">
+    <meta name="twitter:image" content="https://nahla.live/nahla_voyage-sm.png">
 
     <style>
         :root {
@@ -536,7 +537,7 @@
                  onerror="this.onerror=null; this.src='faviconmain128.png';">
         </div>
 
-        <div class="mission-pretitle">Status</div>
+        <div class="mission-pretitle" id="mission-mode">Status</div>
         <h1 class="mission-title">Project Nahla Open Transit Voyage</h1>
         <p class="mission-subtitle">
             Carrier departure initiates from <span class="cyan">Colonia / Pennsylvania</span> on 
@@ -589,6 +590,7 @@
     <div class="panel">
         <div class="panel-header">
             <div class="panel-title">Galactic Waypoints &amp; Route Trajectory</div>
+            <div class="panel-tag">1st Quadrant Traverse</div>
         </div>
 
         <div class="legs-container">
@@ -624,7 +626,7 @@
                     <span>Erikson's Star (The Void)</span>
                 </div>
                 <div class="leg-desc">
-                    The <em>A.R.C. Cor Draconis</em> stations herself in the Hope system. Surface study conducted mostly at Pâte Sablée crater, Natalja's Pass (39.23, 104.28). The carrier then moves towards Erikson's Star in The Void.
+                    The <em>A.R.C. Cor Draconis</em> stations itself in the Hope system. Surface study conducted mostly at Pâte Sablée crater, Natalja's Pass (39.23, 104.28). The carrier then moves towards Erikson's Star in The Void.
                 </div>
             </div>
 
@@ -642,7 +644,7 @@
                     <span>Gali / The Bubble (Inner Orion Spur)</span>
                 </div>
                 <div class="leg-desc">
-                    Traversing back through Via Maris and the Perseus Arm, heading inward and eventually reaching the bubble in summer/autumn 2027.
+                    Traversing back through Via Maris and the Perseus Arm, heading inward and eventually reaching the core bubble in summer/autumn 2027.
                 </div>
             </div>
         </div>
@@ -661,12 +663,13 @@
     // Exact launch time: 24th September 2026 at 19:30:00 GMT (UTC)
     const LAUNCH_TIMESTAMP = Date.UTC(2026, 8, 24, 19, 30, 0);
 
-    const daysEl    = document.getElementById('val-days');
-    const hoursEl   = document.getElementById('val-hours');
-    const minsEl    = document.getElementById('val-minutes');
-    const secsEl    = document.getElementById('val-seconds');
-    const gmtClock  = document.getElementById('clock-gmt');
-    const statusEl  = document.getElementById('mission-status');
+    const daysEl      = document.getElementById('val-days');
+    const hoursEl     = document.getElementById('val-hours');
+    const minsEl      = document.getElementById('val-minutes');
+    const secsEl      = document.getElementById('val-seconds');
+    const gmtClock    = document.getElementById('clock-gmt');
+    const statusEl    = document.getElementById('mission-status');
+    const missionMode = document.getElementById('mission-mode');
 
     function updateCountdown() {
         const now = new Date();
@@ -675,17 +678,30 @@
 
         gmtClock.textContent = now.toISOString().substring(11, 19) + " UTC";
 
-        if (diffMs <= 0) {
-            daysEl.textContent  = "00";
-            hoursEl.textContent = "00";
-            minsEl.textContent  = "00";
-            secsEl.textContent  = "00";
+        let totalSeconds = 0;
+
+        if (diffMs > 0) {
+            // Pre-launch: Countdown mode (T-Minus)
+            totalSeconds = Math.floor(diffMs / 1000);
+            if (missionMode) {
+                missionMode.textContent = "Status • T-Minus Countdown";
+                missionMode.style.color = "var(--cyan-dim)";
+            }
+            statusEl.textContent = "PRE-DEPARTURE STANDBY";
+            statusEl.style.color = "var(--amber-bright)";
+        } else {
+            // Post-launch: Voyage Elapsed Time (VET) count-up mode
+            const elapsedMs = Math.abs(diffMs);
+            totalSeconds = Math.floor(elapsedMs / 1000);
+            if (missionMode) {
+                missionMode.textContent = "Status • Voyage Elapsed Time (VET)";
+                missionMode.style.color = "var(--green-glow)";
+                missionMode.style.textShadow = "0 0 10px rgba(52, 211, 153, 0.6)";
+            }
             statusEl.textContent = "VOYAGE ACTIVE • TRANSIT SEQUENCE INITIATED";
-            statusEl.style.color = "#3af2ff";
-            return;
+            statusEl.style.color = "var(--cyan-glow)";
         }
 
-        const totalSeconds = Math.floor(diffMs / 1000);
         const days  = Math.floor(totalSeconds / 86400);
         const hours = Math.floor((totalSeconds % 86400) / 3600);
         const mins  = Math.floor((totalSeconds % 3600) / 60);
