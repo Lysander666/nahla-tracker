@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Nahla Open Transit Voyage • Mission Briefing & Telemetry</title>
+
+    <!-- Google Fonts matching Nahla Tracker aesthetic -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Consolas&family=Inter:wght@400;500;600;700&family=VT323&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="faviconmain16.png">
+
+    <style>
+        :root {
+            --bg-deep: #0c0e12;
+            --bg-card: #15181f;
+            --bg-inner: #0f1217;
+            --bg-card-alt: #1a1e26;
+            --cyan-glow: #3af2ff;
+            --cyan-dim: #61dafb;
+            --amber-neon: #ff9900;
+            --amber-bright: #ffbf00;
+            --magenta-glow: #e0429f;
+            --border-dim: #262c37;
+            --border-highlight: #3b4657;
+            --text-main: #e2e8f0;
+            --text-muted: #8c9ba5;
+            --green-glow: #34d399;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-deep);
+            color: var(--text-main);
+            font-family: 'Consolas', 'Courier New', monospace;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 32px 16px 60px 16px;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 50% 5%, rgba(58, 242, 255, 0.08) 0%, transparent 60%),
+                radial-gradient(circle at 85% 85%, rgba(224, 66, 159, 0.06) 0%, transparent 50%),
+                radial-gradient(circle at 10% 40%, rgba(255, 153, 0, 0.05) 0%, transparent 45%),
+                radial-gradient(2px 2px at 30px 40px, #ffffff 1px, transparent 0),
+                radial-gradient(1.5px 1.5px at 160px 210px, rgba(255,255,255,0.7) 1px, transparent 0),
+                radial-gradient(1.5px 1.5px at 290px 90px, rgba(97,218,251,0.8) 1px, transparent 0);
+            background-size: 100% 100%, 100% 100%, 100% 100%, 320px 320px, 380px 380px, 420px 420px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 960px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        /* Mission Hero Container */
+        .voyage-hero {
+            background: rgba(21, 24, 31, 0.88);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border-dim);
+            border-radius: 12px;
+            padding: 36px 30px;
+            box-shadow: 0 0 35px rgba(0, 0, 0, 0.8), 0 0 24px rgba(58, 242, 255, 0.12);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .voyage-hero::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 10%;
+            right: 10%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--cyan-glow), var(--amber-neon), transparent);
+        }
+
+        /* Voyage Badge */
+        .voyage-badge-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 24px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .voyage-badge {
+            width: 130px;
+            height: 130px;
+            border-radius: 50%;
+            border: 2px solid rgba(58, 242, 255, 0.6);
+            box-shadow: 0 0 24px rgba(58, 242, 255, 0.35);
+            background: #0f1217;
+            padding: 4px;
+            object-fit: contain;
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+
+        .voyage-badge:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 32px rgba(58, 242, 255, 0.6);
+        }
+
+        .mission-pretitle {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.25em;
+            color: var(--cyan-dim);
+            text-shadow: 0 0 8px rgba(97, 218, 251, 0.5);
+            margin-bottom: 6px;
+        }
+
+        .mission-title {
+            font-size: 2.25rem;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            color: #ffffff;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            text-shadow: 0 0 16px rgba(255, 255, 255, 0.25);
+        }
+
+        .mission-subtitle {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            margin-bottom: 26px;
+            line-height: 1.6;
+            max-width: 780px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .mission-subtitle span.amber {
+            color: var(--amber-bright);
+            font-weight: 600;
+        }
+        .mission-subtitle span.cyan {
+            color: var(--cyan-glow);
+            font-weight: 600;
+        }
+
+        /* Countdown Grid */
+        .countdown-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin: 24px 0;
+        }
+
+        .countdown-card {
+            background-color: var(--bg-inner);
+            border: 1px solid var(--border-dim);
+            border-radius: 8px;
+            padding: 18px 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: inset 0 0 18px rgba(0, 0, 0, 0.6);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .countdown-card::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--cyan-dim), var(--amber-neon));
+            opacity: 0.7;
+        }
+
+        .digit-value {
+            font-size: 3.2rem;
+            font-weight: 700;
+            color: var(--cyan-glow);
+            text-shadow: 0 0 14px rgba(58, 242, 255, 0.65);
+            line-height: 1.1;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .digit-unit {
+            font-size: 0.72rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-top: 6px;
+        }
+
+        /* Live HUD strip */
+        .hud-clocks {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 14px;
+            padding: 14px 10px;
+            background: rgba(15, 18, 23, 0.8);
+            border: 1px solid #232832;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 8px;
+        }
+
+        .hud-clock-item span {
+            color: var(--cyan-dim);
+            font-weight: bold;
+        }
+
+        /* Info Card Panels */
+        .panel {
+            background: var(--bg-card);
+            border: 1px solid var(--border-dim);
+            border-radius: 10px;
+            padding: 24px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.45);
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-dim);
+            padding-bottom: 12px;
+            margin-bottom: 18px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .panel-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--cyan-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .panel-tag {
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            padding: 3px 8px;
+            border-radius: 999px;
+            border: 1px solid rgba(97, 218, 251, 0.4);
+            color: var(--cyan-glow);
+            background: rgba(58, 242, 255, 0.08);
+            letter-spacing: 0.12em;
+        }
+
+        /* Flight Legs 3-Way Trajectory */
+        .legs-container {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .leg-card {
+            background: var(--bg-inner);
+            border: 1px solid #262c36;
+            border-left: 4px solid var(--cyan-glow);
+            border-radius: 8px;
+            padding: 16px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            transition: border-color 0.2s;
+        }
+
+        .leg-card.leg-destination {
+            border-left-color: var(--magenta-glow);
+            background: rgba(224, 66, 159, 0.05);
+            box-shadow: 0 0 16px rgba(224, 66, 159, 0.15);
+        }
+
+        .leg-card.leg-homeward {
+            border-left-color: var(--amber-neon);
+        }
+
+        .leg-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .leg-number {
+            font-size: 0.8rem;
+            font-weight: bold;
+            color: var(--cyan-dim);
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+        }
+
+        .leg-card.leg-destination .leg-number {
+            color: var(--magenta-glow);
+        }
+
+        .leg-card.leg-homeward .leg-number {
+            color: var(--amber-bright);
+        }
+
+        .leg-status {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        .leg-route {
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .leg-desc {
+            font-size: 0.88rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        /* 2-Column Key Metrics / Services */
+        .grid-2col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .spec-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            font-size: 0.9rem;
+        }
+
+        .spec-list li {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px dashed rgba(255, 255, 255, 0.07);
+            padding-bottom: 6px;
+        }
+
+        .spec-list li span.label {
+            color: var(--text-muted);
+        }
+
+        .spec-list li span.value {
+            color: #fff;
+            font-weight: 600;
+            text-align: right;
+        }
+
+        .service-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .service-badge {
+            background: #181d26;
+            border: 1px solid #2d3644;
+            color: var(--cyan-dim);
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 0.78rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .service-badge.inactive {
+            color: #8892a0;
+            opacity: 0.65;
+            text-decoration: line-through;
+        }
+
+        /* Guidelines & Philosophy Box */
+        .guidelines-box {
+            background: rgba(18, 21, 28, 0.95);
+            border-left: 3px solid var(--amber-neon);
+            border-radius: 6px;
+            padding: 16px 20px;
+            margin-top: 14px;
+            font-size: 0.9rem;
+            color: #cbd5e1;
+            line-height: 1.6;
+        }
+
+        .guidelines-box strong {
+            color: var(--amber-bright);
+        }
+
+        .guideline-point {
+            margin-bottom: 12px;
+        }
+        .guideline-point:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Bottom Nav Links */
+        .nav-links {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 14px;
+            margin-top: 8px;
+        }
+
+        .nav-btn {
+            color: var(--cyan-dim);
+            text-decoration: none;
+            border: 1px solid var(--border-dim);
+            padding: 10px 18px;
+            border-radius: 6px;
+            background: var(--bg-card);
+            transition: all 0.2s ease;
+            font-size: 0.88rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-btn:hover {
+            border-color: var(--cyan-glow);
+            color: #ffffff;
+            box-shadow: 0 0 16px rgba(58, 242, 255, 0.35);
+            transform: translateY(-2px);
+        }
+
+        .nav-btn.primary {
+            border-color: rgba(255, 153, 0, 0.5);
+            color: var(--amber-bright);
+        }
+        .nav-btn.primary:hover {
+            border-color: var(--amber-bright);
+            box-shadow: 0 0 16px rgba(255, 153, 0, 0.45);
+        }
+
+        /* Responsive Breakpoints */
+        @media (max-width: 768px) {
+            .countdown-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+            }
+            .digit-value {
+                font-size: 2.5rem;
+            }
+            .mission-title {
+                font-size: 1.7rem;
+            }
+            .grid-2col {
+                grid-template-columns: 1fr;
+            }
+            .insignia-strip {
+                gap: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <!-- HERO SECTION -->
+    <div class="voyage-hero">
+
+        <div class="voyage-badge-container">
+            <img src="https://nahla.live/nahla_voyage-sm.png" 
+                 alt="Project Nahla Open Transit Voyage Badge" 
+                 class="voyage-badge" 
+                 onerror="this.onerror=null; this.src='faviconmain128.png';">
+            <img src="https://nahla.live/acd.png" 
+                 alt="A.R.C. Cor Draconis Insignia Badge" 
+                 class="voyage-badge" 
+                 onerror="this.onerror=null; this.src='faviconmain128.png';">
+        </div>
+
+        <div class="mission-pretitle">Field Support Briefing & System Guidelines</div>
+        <h1 class="mission-title">Project Nahla Open Transit Voyage</h1>
+        <p class="mission-subtitle">
+            Carrier departure sequence initiates from <span class="cyan">Colonia / Pennsylvania</span> on 
+            <span class="amber">24 September 3312 / 2026 at 19:30 GMT</span>.<br>
+            A 6–12 month deep-space traverse to the Outer Arm and The Void.
+        </p>
+
+        <!-- COUNTDOWN DISPLAY -->
+        <div class="countdown-grid">
+            <div class="countdown-card">
+                <div class="digit-value" id="val-days">--</div>
+                <div class="digit-unit">Days</div>
+            </div>
+            <div class="countdown-card">
+                <div class="digit-value" id="val-hours">--</div>
+                <div class="digit-unit">Hours</div>
+            </div>
+            <div class="countdown-card">
+                <div class="digit-value" id="val-minutes">--</div>
+                <div class="digit-unit">Minutes</div>
+            </div>
+            <div class="countdown-card">
+                <div class="digit-value" id="val-seconds">--</div>
+                <div class="digit-unit">Seconds</div>
+            </div>
+        </div>
+
+        <!-- HUD CLOCK TELEMETRY -->
+        <div class="hud-clocks">
+            <div class="hud-clock-item">Live UTC: <span id="clock-gmt">--:--:--</span></div>
+            <div class="hud-clock-item">Departure: <span>24 Sept 2026 • 19:30:00 GMT</span></div>
+            <div class="hud-clock-item">Carrier Status: <span id="mission-status" style="color: var(--amber-bright);">PRE-DEPARTURE STANDBY</span></div>
+            <div class="hud-clock-item">Current Waypoint: <span>Pennsylvania Hub (Colonia)</span></div>
+        </div>
+
+    </div>
+
+    <!-- 3-LEG FLIGHT TRAJECTORY -->
+    <div class="panel">
+        <div class="panel-header">
+            <div class="panel-title">
+                <span>Galactic Waypoints & Route Trajectory</span>
+            </div>
+            <div class="panel-tag">1st Quadrant Traverse</div>
+        </div>
+
+        <div class="legs-container">
+            <!-- LEG 1 -->
+            <div class="leg-card">
+                <div class="leg-top">
+                    <span class="leg-number">Leg 01 • September 2026 – December 2026</span>
+                    <span class="leg-status" style="color: var(--cyan-glow);">Next Jump Sequence</span>
+                </div>
+                <div class="leg-route">
+                    <span>Colonia / Pennsylvania</span>
+                    <span style="color: var(--cyan-dim);">➔</span>
+                    <span>Orio-Persean Conflux</span>
+                    <span style="color: var(--cyan-dim);">➔</span>
+                    <span>Hope System (Nahla • Outer Arm)</span>
+                </div>
+                <div class="leg-desc">
+                    Departure follows the Colonia 10-Year Anniversary celebrations. Transit crosses the Outer Arm Rift heading outward to 43,895 light-years from Sol. Estimated carrier arrival at Nahla in December 2026.
+                </div>
+            </div>
+
+            <!-- LEG 2 -->
+            <div class="leg-card leg-destination">
+                <div class="leg-top">
+                    <span class="leg-number">Leg 02 • Primary Research Residence</span>
+                    <span class="leg-status" style="color: var(--magenta-glow);">Stationary Observation Post (~1 Month)</span>
+                </div>
+                <div class="leg-route">
+                    <span>Hypi Bra EV-P d5-78 6 a (Nahla)</span>
+                    <span style="color: var(--magenta-glow);">➔</span>
+                    <span>The Outer Arm Rift</span>
+                    <span style="color: var(--magenta-glow);">➔</span>
+                    <span>Erikson's Star (The Void)</span>
+                </div>
+                <div class="leg-desc">
+                    The <em>A.R.C. Cor Draconis</em> drops anchor in the Hope system as a low-impact research post. Surface study conducted at Pâte Sablée crater, Natalja's Pass (39.23, 104.28). Once completed, the carrier initiates transit into the inter-arm abyss towards Erikson's Star.
+                </div>
+            </div>
+
+            <!-- LEG 3 -->
+            <div class="leg-card leg-homeward">
+                <div class="leg-top">
+                    <span class="leg-number">Leg 03 • Homeward Transit</span>
+                    <span class="leg-status" style="color: var(--amber-bright);">Scheduled for Mid-to-Late 3313 (2027)</span>
+                </div>
+                <div class="leg-route">
+                    <span>Erikson's Star (The Void)</span>
+                    <span style="color: var(--amber-bright);">➔</span>
+                    <span>Perseus Arm &amp; The Fallows</span>
+                    <span style="color: var(--amber-bright);">➔</span>
+                    <span>Gali / The Bubble (Inner Orion Spur)</span>
+                </div>
+                <div class="leg-desc">
+                    Traversing back through Via Maris and the Perseus Arm, heading inward toward civilized space to conclude the 6 to 12 month open transit voyage.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- DIRECT LINKS & TELEMETRY NAV -->
+    <div class="nav-links">
+        <a href="https://nahla.live" class="nav-btn primary">◀ Return to Live Nahla Tracker</a>
+        <a href="https://nahla.live/phase-table.html" target="_blank" class="nav-btn">Nahla Phase Cycle Table</a>
+        <a href="https://inara.cz/elite/station/100000000/" target="_blank" class="nav-btn">A.R.C. Cor Draconis (Inara)</a>
+    </div>
+
+</div>
+
+<script>
+// Exact launch time: 24th September 2026 at 19:30:00 GMT (UTC)
+    const LAUNCH_TIMESTAMP = Date.UTC(2026, 8, 24, 19, 30, 0); // Month 8 is September (0-indexed in JS)
+
+    const daysEl    = document.getElementById('val-days');
+    const hoursEl   = document.getElementById('val-hours');
+    const minsEl    = document.getElementById('val-minutes');
+    const secsEl    = document.getElementById('val-seconds');
+    const gmtClock  = document.getElementById('clock-gmt');
+    const statusEl  = document.getElementById('mission-status');
+
+    function updateCountdown() {
+        const now = new Date();
+        const nowMs = now.getTime();
+        const diffMs = LAUNCH_TIMESTAMP - nowMs;
+
+        // Display current ISO UTC clock
+        gmtClock.textContent = now.toISOString().substring(11, 19) + " UTC";
+
+        if (diffMs <= 0) {
+            // Target launch time reached
+            daysEl.textContent  = "00";
+            hoursEl.textContent = "00";
+            minsEl.textContent  = "00";
+            secsEl.textContent  = "00";
+            statusEl.textContent = "VOYAGE ACTIVE • TRANSIT SEQUENCE INITIATED";
+            statusEl.style.color = "#3af2ff";
+            return;
+        }
+
+        const totalSeconds = Math.floor(diffMs / 1000);
+        const days  = Math.floor(totalSeconds / 86400);
+        const hours = Math.floor((totalSeconds % 86400) / 3600);
+        const mins  = Math.floor((totalSeconds % 3600) / 60);
+        const secs  = totalSeconds % 60;
+
+        daysEl.textContent  = String(days).padStart(2, '0');
+        hoursEl.textContent = String(hours).padStart(2, '0');
+        minsEl.textContent  = String(mins).padStart(2, '0');
+        secsEl.textContent  = String(secs).padStart(2, '0');
+    }
+
+    // Run immediately on page load and tick every second
+    updateCountdown();
+    setInterval(updateCountdown, 1000);
+</script>
+</body>
+</html>
