@@ -321,6 +321,11 @@
             gap: 10px;
         }
 
+        .leg-card.leg-active {
+            background: rgba(58, 242, 255, 0.05);
+            box-shadow: 0 0 16px rgba(58, 242, 255, 0.12);
+        }
+
         .leg-card.leg-destination {
             border-left-color: var(--magenta-glow);
             background: rgba(224, 66, 159, 0.05);
@@ -590,10 +595,10 @@
 
         <div class="legs-container">
             <!-- LEG 1 -->
-            <div class="leg-card">
+            <div class="leg-card" id="leg-01">
                 <div class="leg-top">
                     <span class="leg-number">Leg 01 • Sept 2026 – Dec 2026</span>
-                    <span class="leg-status" style="color: var(--cyan-glow);">Next Jump Sequence</span>
+                    <span class="leg-status" id="leg-01-status" style="color: var(--cyan-glow);">Next Jump Sequence</span>
                 </div>
                 <div class="leg-route">
                     <span>Colonia / Pennsylvania</span>
@@ -665,6 +670,8 @@
     const gmtClock    = document.getElementById('clock-gmt');
     const statusEl    = document.getElementById('mission-status');
     const missionMode = document.getElementById('mission-mode');
+    const leg01       = document.getElementById('leg-01');
+    const leg01Status = document.getElementById('leg-01-status');
 
     function updateCountdown() {
         const now = new Date();
@@ -684,6 +691,8 @@
             }
             statusEl.textContent = "PRE-DEPARTURE STANDBY";
             statusEl.style.color = "var(--amber-bright)";
+            leg01.classList.remove("leg-active");
+            leg01Status.textContent = "Next Jump Sequence";
         } else {
             // Post-launch: Voyage Elapsed Time (VET) count-up mode
             const elapsedMs = Math.abs(diffMs);
@@ -695,6 +704,8 @@
             }
             statusEl.textContent = "VOYAGE ACTIVE • TRANSIT SEQUENCE INITIATED";
             statusEl.style.color = "var(--cyan-glow)";
+            leg01.classList.add("leg-active");
+            leg01Status.textContent = "In Progress";
         }
 
         const days  = Math.floor(totalSeconds / 86400);
