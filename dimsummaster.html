@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Nahla Diantang 0.76</title>
+  <title>Nahla Diantang 0.8</title>
 
 <!-- Open Graph / Social Embed Meta Tags -->
 <meta property="og:type" content="website">
@@ -15,9 +15,7 @@
 <!-- Twitter / Discord Large Card -->
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Deepspace Dim Sum // Project Nahla">
-<meta name="twitter:description" content="Steam dim sum across the void aboard the A.R.C. Core Draconis. Goal: 383,000 dishes.">
-<meta name="twitter:image" content="https://nahla.live/og-dimsum.png">
-
+<meta name="twitter:description" content="Steam dim sum across the void aboard the A.R.C. Core Draconis. Goal: 1,000,000 dishes."><meta name="twitter:image" content="https://nahla.live/og-dimsum.png">
 <meta name="theme-color" content="#150928">
 
   
@@ -353,7 +351,7 @@ html {
               CHINA X JAPAN @ LITTLE GERRARD ST, A.R.C. CORE DRACONIS
             </div>
             <p class="hull-stencil mt-0.5 uppercase">
-              PRECIPITATION ACTIVE / SOHO BIODOME / GOAL: 383,000 DISHES
+              PRECIPITATION ACTIVE / SOHO BIODOME / GOAL: 1,000,000 DISHES
             </p>
           </div>
 
@@ -474,7 +472,7 @@ html {
         <div class="w-full bg-[#120828] border-[#31175e] p-2.5 flex items-center gap-3">
           <div id="dish-icon" class="text-3xl">🥟</div>
           <div class="text-left flex-1">
-            <div class="text-[7px] text-[#f5b938]">CARRIER SPECIALTY DISH:</div>
+            <div class="text-[7px] text-[#f5b938]">CURRENT MILESTONE DISH:</div>
             <div id="dish-name" class="text-[8px] text-[#faf2dc] font-bold">House Har Gow</div>
             <div id="dish-desc" class="text-[6px] text-[#d1a880]">Classic translucent crystal shrimp dumpling folded on Sub-Deck 4.</div>
           </div>
@@ -502,7 +500,7 @@ html {
     <!-- Milestone Goal Progress Bar -->
     <div class="w-full bg-[#0d0101] border-2 border-black p-3 mt-1">
       <div class="flex justify-between items-center text-[7px] sm:text-[8px] text-[#f5b938] mb-1.5">
-        <span>A.R.C. CORE DRACONIS CMDR TARGET: 383,000 DIM SUM</span>
+        <span>A.R.C. CORE DRACONIS CMDR TARGET: 1,000,000 DIM SUM</span>
         <span id="goal-percent" class="text-[#ffe082]">0.0000%</span>
       </div>
       <div class="w-full h-5 bg-black border-2 border-[#330f0f] overflow-hidden p-0.5">
@@ -667,7 +665,7 @@ html {
         <button id="close-data-btn" class="text-[#f5b938] text-xs font-bold px-2 py-1 bg-[#360e0e] border border-black">&times;</button>
       </div>
       <p class="text-[7px] text-[#e0b892] leading-normal">
-        Because progressing 383,000 Dim Sum spans weeks to months, copy your backup key and save it to your flight notes!
+        Because progressing 1M Dim Sum spans weeks to months, copy your backup key and save it to your flight notes!
       </p>
       <textarea id="save-data-textarea" class="w-full h-24 bg-black border-2 border-[#451616] p-2 text-[7px] text-[#86efac] font-mono select-all" placeholder="Your exported save key will appear here..."></textarea>
       
@@ -744,7 +742,7 @@ const splashModal = document.getElementById('splash-modal');
       });
     }
     
-    const TARGET_GOAL = 383000;
+    const TARGET_GOAL = 1000000;
     const SAVE_KEY = 'dim_sum_master_longhaul_save_v3';
 
     let gameState = {
@@ -789,12 +787,13 @@ upgrades: {
         xoSauce:      { bought: false, cost: 240000, mult: 1.05, name: "Master Reserve XO Sauce (御品XO醬)", desc: "Dried scallops, Jinhua ham, and shallots (+5% passive yield)." },
         dancongOolong:{ bought: false, cost: 340000, mult: 1.05, name: "Rare Phoenix Dancong Oolong (鳳凰單欉)", desc: "Ancient tree nectar oolong from Guangdong misty peaks (+5% passive yield)." }
       },
-      badges: {
+badges: {
         firstClick:       { unlocked: false, name: "First Steam",       desc: "Hand-crafted your first dumpling on Sub-Deck 4.", icon: "🥟" },
-        hundredClub:      { unlocked: false, name: "Soho Apprentice",   desc: "Accumulated 100 lifetime dim sum.", icon: "🏮" },
-        thousandClub:     { unlocked: false, name: "Concourse Regular", desc: "Reached 1,000 lifetime dim sum.", icon: "🥢" },
-        tenThousand:      { unlocked: false, name: "Fleet Sensation",   desc: "Reached 10,000 lifetime dim sum.", icon: "🏆" },
-        hundredThousand:  { unlocked: false, name: "Little Gerrard Legend", desc: "Crossed 100,000 lifetime dim sum in the black.", icon: "👑" },
+        hundredClub:      { unlocked: false, name: "Soho Apprentice",   desc: "Accumulated 1,000 lifetime dim sum.", icon: "🏮" },
+        thousandClub:     { unlocked: false, name: "Concourse Regular", desc: "Reached 10,000 lifetime dim sum.", icon: "🥢" },
+        tenThousand:      { unlocked: false, name: "Fleet Sensation",   desc: "Reached 100,000 lifetime dim sum.", icon: "🏆" },
+        hundredThousand:  { unlocked: false, name: "Little Gerrard Legend", desc: "Crossed 500,000 lifetime dim sum in the black.", icon: "👑" },
+        millionaireClub:  { unlocked: false, name: "Soho Millionaire",  desc: "Steamed 1,000,000 lifetime dim sum aboard Core Draconis.", icon: "🌌" },
         dragonFleetOwner: { unlocked: false, name: "Dragon Master",     desc: "Commissioned the Gerrard Dragon Float Fleet.", icon: "🐲" },
         teaConnoisseur:   { unlocked: false, name: "Tea Master",        desc: "Brewed the classic four tea varieties.", icon: "🍵" },
         cellarMaster:     { unlocked: false, name: "Gourmet Cellar",    desc: "Crafted all artisan reserve teas and sauces.", icon: "🫙" },
@@ -803,14 +802,14 @@ upgrades: {
       }
     };
 
-    const DISH_MILESTONES = [
-      { req: 0,      name: "House Har Gow (蝦餃)",        icon: "🥟", desc: "Translucent crystal shrimp dumpling pleated on Sub-Deck 4." },
-      { req: 1500,   name: "Golden Siu Mai (燒賣)",       icon: "🟡", desc: "Open-topped pork and prawn crowned with golden tobiko." },
-      { req: 10000,  name: "Fluffy Char Siu Bao (叉燒包)",  icon: "🥟", desc: "Sweet honey barbecue pork tucked inside snowy steamed buns." },
-      { req: 40000,  name: "Silky Cheong Fun (腸粉)",     icon: "🍚", desc: "Steamed wide rice sheets drenched in sweet seasoned soy." },
-      { req: 120000, name: "Xiao Long Bao Broth Pouches", icon: "🍲", desc: "Fragile skins holding rich savory molten broth." },
-      { req: 250000, name: "Flaky Egg Tarts (蛋撻)",       icon: "🥧", desc: "Thousand-layer puff pastry cradling warm silken custard." },
-      { req: 383000, name: "Grand Chinatown Banquet (倫敦唐人街大宴)", icon: "👑", desc: "The supreme imperial feast crowning the A.R.C. Core Draconis." }
+const DISH_MILESTONES = [
+      { req: 0,       name: "House Har Gow (蝦餃)",        icon: "🥟", desc: "Translucent crystal shrimp dumpling pleated on Sub-Deck 4." },
+      { req: 5000,    name: "Golden Siu Mai (燒賣)",       icon: "🟡", desc: "Open-topped pork and prawn crowned with golden tobiko." },
+      { req: 30000,   name: "Fluffy Char Siu Bao (叉燒包)",  icon: "🥟", desc: "Sweet honey barbecue pork tucked inside snowy steamed buns." },
+      { req: 120000,  name: "Silky Cheong Fun (腸粉)",     icon: "🍚", desc: "Steamed wide rice sheets drenched in sweet seasoned soy." },
+      { req: 350000,  name: "Xiao Long Bao Broth Pouches", icon: "🍲", desc: "Fragile skins holding rich savory molten broth." },
+      { req: 700000,  name: "Flaky Egg Tarts (蛋撻)",       icon: "🥧", desc: "Thousand-layer puff pastry cradling warm silken custard." },
+      { req: 1000000, name: "Grand Chinatown Banquet (倫敦唐人街大宴)", icon: "👑", desc: "The supreme imperial feast crowning the A.R.C. Core Draconis." }
     ];
 
     function getLondonTimeInfo() {
@@ -1265,24 +1264,30 @@ function showInstantFortune(text) {
             gameState.secretSalonUnlocked = !!parsed.secretSalonUnlocked;
             gameState.lastSalonVisit = parsed.lastSalonVisit || 0;
 
-            const now = Date.now();
+const now = Date.now();
             const lastSaved = parsed.lastSaveTime || now;
-            const diffSeconds = Math.max(0, (now - lastSaved) / 1000);
+            const rawDiffSeconds = Math.max(0, (now - lastSaved) / 1000);
 
-            if (diffSeconds > 3) {
+            if (rawDiffSeconds > 3) {
+              const maxOfflineSeconds = 8 * 3600; // 8-hour shift ceiling
+              const effectiveSeconds = Math.min(rawDiffSeconds, maxOfflineSeconds);
+              const offlineEfficiency = 0.50;     // 50% pilot-watch yield
+
               const currentRate = calcPassiveRate();
-              const offlineEarned = diffSeconds * currentRate;
+              const offlineEarned = effectiveSeconds * currentRate * offlineEfficiency;
+
               gameState.dimSum += offlineEarned;
               gameState.totalEarned += offlineEarned;
-              const hours = (diffSeconds / 3600).toFixed(1);
-              setTicker(`Diantang doors were closed for ${hours} hrs. Staff steamed +${offlineEarned.toFixed(2)} dim sum in the dark!`);
+
+              const hoursElapsed = (rawDiffSeconds / 3600).toFixed(1);
+              const hoursCredited = (effectiveSeconds / 3600).toFixed(1);
+
+              if (rawDiffSeconds > maxOfflineSeconds) {
+                setTicker(`Diantang closed for ${hoursElapsed} hrs (Shift capped at ${hoursCredited} hrs pilot-watch). Staff steamed +${offlineEarned.toFixed(2)} dim sum!`);
+              } else {
+                setTicker(`Diantang closed for ${hoursElapsed} hrs. Night-shift staff steamed +${offlineEarned.toFixed(2)} dim sum!`);
+              }
             }
-          }
-        }
-      } catch (err) {
-        console.error("Failed to parse save data:", err);
-      }
-    }
 
     const steamerBtn = document.getElementById('steamer-button');
     const bambooBody = document.getElementById('bamboo-body');
@@ -1519,12 +1524,13 @@ if (discovered) {
       }
     }
 
-    function checkAchievements() {
+function checkAchievements() {
       if (!gameState.badges.firstClick.unlocked && gameState.totalClicks >= 1) unlockBadge('firstClick');
-      if (!gameState.badges.hundredClub.unlocked && gameState.totalEarned >= 100) unlockBadge('hundredClub');
-      if (!gameState.badges.thousandClub.unlocked && gameState.totalEarned >= 1000) unlockBadge('thousandClub');
-      if (!gameState.badges.tenThousand.unlocked && gameState.totalEarned >= 10000) unlockBadge('tenThousand');
-      if (!gameState.badges.hundredThousand.unlocked && gameState.totalEarned >= 100000) unlockBadge('hundredThousand');
+      if (!gameState.badges.hundredClub.unlocked && gameState.totalEarned >= 1000) unlockBadge('hundredClub');
+      if (!gameState.badges.thousandClub.unlocked && gameState.totalEarned >= 10000) unlockBadge('thousandClub');
+      if (!gameState.badges.tenThousand.unlocked && gameState.totalEarned >= 100000) unlockBadge('tenThousand');
+      if (!gameState.badges.hundredThousand.unlocked && gameState.totalEarned >= 500000) unlockBadge('hundredThousand');
+      if (gameState.badges.millionaireClub && !gameState.badges.millionaireClub.unlocked && gameState.totalEarned >= 1000000) unlockBadge('millionaireClub');
       if (!gameState.badges.dragonFleetOwner.unlocked && gameState.upgrades.goldenDragon?.count >= 1) unlockBadge('dragonFleetOwner');
       if (!gameState.badges.fortuneCracker.unlocked && gameState.fortuneCount >= 5) unlockBadge('fortuneCracker');
       if (gameState.secretSalonUnlocked && !gameState.badges.floatingWorld.unlocked) unlockBadge('floatingWorld');
@@ -2050,7 +2056,7 @@ if (fortuneBox && fortuneText) {
       if (dishDesc) dishDesc.textContent = activeDish.desc;
 
       if (gameState.totalEarned >= TARGET_GOAL) {
-        setTicker("EXPEDITION COMPLETE! 383,000 Dim Sum achieved aboard A.R.C. Core Draconis! Little Gerrard Street reigns supreme in the stars!");
+        setTicker("CULINARY JOURNEY COMPLETE! 1,000,000 Dim Sum achieved aboard A.R.C. Core Draconis! Little Gerrard Street reigns supreme in the stars!");
       }
     }
 
