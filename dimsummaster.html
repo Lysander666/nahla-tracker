@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Nahla Diantang 0.8</title>
+  <title>Nahla Diantang 0.9</title>
 
 <!-- Open Graph / Social Embed Meta Tags -->
 <meta property="og:type" content="website">
@@ -580,7 +580,7 @@ html {
       <div class="flex items-center gap-3 bg-[#3d0f28] p-2.5 border-2 border-[#9d174d]">
         <span class="text-3xl">👘</span>
         <div class="text-[7px] text-[#fbcfe8] leading-relaxed">
-          <span class="text-[#f472b6] font-bold">DISCOVERED:</span> Hidden behind the bamboo trusses lies Sub-Deck 4's clandestine VIP salon. A retinue of elegant geisha courtesans in kimonos pour chilled sake and play synthesised shamisen tunes for patrons.
+          <span class="text-[#f472b6] font-bold">DISCOVERED:</span> Hidden behind the bamboo trusses lies Sub-Deck 4's clandestine VIP salon. A retinue of geisha courtesans in kimonos pour chilled sake and play synthesised shamisen tunes for patrons.
         </div>
       </div>
 
@@ -692,18 +692,22 @@ html {
   <script>
     /*
       DEEPSPACE DIM SUM: LITTLE GERRARD ST (A.R.C. CORE DRACONIS)
-      - Minimum 6-Month (180+ Day) Long-Haul Calibration (Target: 383,000 Dim Sum).
-      - Daily target velocity: ~2,128 dim sum / day (average ~0.0246/sec lifetime pace).
+      - 6-12 month voyage (Target: 1,000,000 Dim Sum). PACE scales all passive yield.
+      - Simulated finish (optimal buyer): ~5 mo (24/7 tab), ~7 mo (engaged), ~12.5 mo (casual).
       - Cost exponent: 1.42x.
       - Click Yield: 0.10 Dim Sum (heat-limited).
       - 10 Kitchen tiers & 8 Compounding cellar items (~1.32x max compound boost).
       - Regular Fortune Cookies (~every 75-140s) with calibrated 1-min idle bonuses.
     */
-const splashModal = document.getElementById('splash-modal');
+const safeGet = (k) => { try { return localStorage.getItem(k); } catch (e) { return null; } };
+    const safeSet = (k, v) => { try { localStorage.setItem(k, v); return true; } catch (e) { return false; } };
+    const safeDel = (k) => { try { localStorage.removeItem(k); } catch (e) {} };
+
+    const splashModal = document.getElementById('splash-modal');
     const splashCheckbox = document.getElementById('splash-dont-show');
 
     // Immediately hide modal if previously opted out
-    if (localStorage.getItem('nahla_hide_splash') === 'true' && splashModal) {
+    if (safeGet('nahla_hide_splash') === 'true' && splashModal) {
       splashModal.classList.add('hidden');
     }
 
@@ -711,7 +715,7 @@ const splashModal = document.getElementById('splash-modal');
       if (!splashModal || splashModal.classList.contains('hidden')) return;
 
       if (splashCheckbox && splashCheckbox.checked) {
-        localStorage.setItem('nahla_hide_splash', 'true');
+        safeSet('nahla_hide_splash', 'true');
       }
 
       splashModal.classList.add('hidden');
@@ -744,6 +748,10 @@ const splashModal = document.getElementById('splash-modal');
     
     const TARGET_GOAL = 1000000;
     const SAVE_KEY = 'dim_sum_master_longhaul_save_v3';
+    const PACE = 0.6;                    // global passive-yield multiplier (pacing knob)
+    const COST_GROWTH = 1.42;
+    const MAX_OFFLINE_S = 8 * 3600;      // offline shift ceiling
+    const OFFLINE_EFF = 0.5;             // closed-tab / frozen-device yield
 
     let gameState = {
       dimSum: 0,
@@ -763,24 +771,24 @@ const splashModal = document.getElementById('splash-modal');
       lastSalonVisit: 0, // 12-Hour cooldown timestamp tracker
       activeBuff: null,
 upgrades: {
-        chopsticks:   { count: 0, cost: 10,      rate: 0.00015, name: "Chopstick Filling Portioner",   desc: "Whips seasoned prawn mince and places filling with bamboo chopsticks.", icon: "🥢" },
-        teaBoy:       { count: 0, cost: 40,      rate: 0.00050, name: "Sub-Deck Dough Kneader",        desc: "Mixes wheat starch and boiling water into delicate translucent pastry.", icon: "🫓" },
-        scullery:     { count: 0, cost: 150,     rate: 0.00120, name: "Crystal Skin Pleater",          desc: "Rolls paper-thin crystal skins and pleats har gow by hand.",             icon: "🪭" },
-        hostess:      { count: 0, cost: 480,     rate: 0.00250, name: "Qipao Pleating Specialist",     desc: "Delicately shapes each har gow with twelve traditional pleats.", icon: "💃" },
+        chopsticks:   { count: 0, cost: 10,      rate: 0.00015, name: "Draconis Filling Portioner",   desc: "Whips up seasoned prawn mince and places the filling with bamboo chopsticks.", icon: "🥢" },
+        teaBoy:       { count: 0, cost: 40,      rate: 0.00050, name: "Nahla Dough Kneader",        desc: "Mixes wheat starch and boiling water into delicate translucent pastry.", icon: "🫓" },
+        scullery:     { count: 0, cost: 150,     rate: 0.00120, name: "Rebekah's Skin Pleater",          desc: "Rolls paper-thin crystal skins and pleats har gow by hand.",             icon: "🪭" },
+        hostess:      { count: 0, cost: 480,     rate: 0.00250, name: "Qipao Specialist",     desc: "Delicately shapes each har gow with twelve traditional pleats.", icon: "💃" },
         cartAuntie:   { count: 0, cost: 1600,    rate: 0.00550, name: "Biodome Steamer Tender",        desc: "Times the bamboo boiler stacks to steam dumplings to crystal perfection.", icon: "⏳" },
         wrapperSifu:  { count: 0, cost: 5800,    rate: 0.01200, name: "Miley's Master Pincher",        desc: "Pleats translucent crystal har gow on Soho marble.", icon: "🥟" },
         bambooRack:   { count: 0, cost: 21000,   rate: 0.02200, name: "Mainship Dragon Steamer",       desc: "Commercial multi-tier induction boiler stack.", icon: "♨️" },
         headChef:     { count: 0, cost: 68000,   rate: 0.04000, name: "Executive Chef of Chinatown",   desc: "Master chef who brought authentic Cantonese yum cha to space.", icon: "👨‍🍳" },
         teaGuild:     { count: 0, cost: 180000,  rate: 0.07500, name: "Fleet Carrier Flagship Diner",   desc: "Multi-tiered dining pavilion beneath the Paifang gate.", icon: "🏯" },
-        goldenDragon: { count: 0, cost: 350000,  rate: 0.12000, name: "Gerrard Dragon Float Fleet",   desc: "Festival banquet brigade leading Lunar celebrations on the Carrier.", icon: "🐲" },
-        archwayMaster:{ count: 0, cost: 750000,  rate: 0.18000, name: "Grand Paifang Ceremonial Gate", desc: "Ceremonial concourse gates blessing every tray passing into deep space.", icon: "⛩️" },
-        voidDynasty:  { count: 0, cost: 1500000, rate: 0.28000, name: "Celestial Void Dim Sum Dynasty",desc: "Zero-G automated orbital steamer network feeding the sector.", icon: "🌌" }
+        goldenDragon: { count: 0, cost: 300000,  rate: 0.12000, name: "Gerrard Dragon Float Fleet",   desc: "Festival banquet brigade leading Lunar celebrations on the Carrier.", icon: "🐲" },
+        archwayMaster:{ count: 0, cost: 480000,  rate: 0.18000, name: "Grand Paifang Ceremonial Gate", desc: "Ceremonial concourse gates blessing every tray passing into deep space.", icon: "⛩️" },
+        voidDynasty:  { count: 0, cost: 700000, rate: 0.28000, name: "Celestial Void Dim Sum Dynasty",desc: "Zero-G automated orbital steamer network feeding the sector.", icon: "🌌" }
       },
       teas: {
-        jasmine:      { bought: false, cost: 350,    mult: 1.02, name: "Fragrant Jasmine Green (茉莉花茶)", desc: "Floral aromatics soothe flight fatigue (+2% passive yield)." },
-        chiliCrisp:   { bought: false, cost: 2200,   mult: 1.02, name: "House Chiu Chow Chili Oil (潮州辣椒油)", desc: "Crispy garlic and shallot flakes in chili oil (+2% passive yield)." },
+        jasmine:      { bought: false, cost: 350,    mult: 1.02, name: "Jasmine Green (茉莉花茶)", desc: "Floral aromatics soothe flight fatigue (+2% passive yield)." },
+        chiliCrisp:   { bought: false, cost: 2200,   mult: 1.02, name: "Chiu Chow Chili Oil (潮州辣椒油)", desc: "Crispy garlic and shallot flakes in chili oil (+2% passive yield)." },
         tieguanyin:   { bought: false, cost: 9000,   mult: 1.03, name: "Iron Goddess Oolong (鐵觀音)",     desc: "Charcoal-roasted Fujian notes keep staff sharp (+3% passive yield)." },
-        chilledSake:  { bought: false, cost: 19500,  mult: 1.03, name: "Chilled Junmai Daiginjo (冷酒 清酒)", desc: "Sub-zero polished rice sake served chilled from the ice vault (+3% passive yield)." },
+        chilledSake:  { bought: false, cost: 19500,  mult: 1.03, name: "Junmai Daiginjo (冷酒 清酒)", desc: "Sub-zero polished rice sake served chilled from the ice vault (+3% passive yield)." },
         puerh:        { bought: false, cost: 32000,  mult: 1.03, name: "Vintage Aged Pu-erh (陳年普洱)",     desc: "Deep earthy vintage brick clears rich dumplings (+3% passive yield)." },
         silverNeedle: { bought: false, cost: 85000,  mult: 1.04, name: "White Silver Needle Peony (白毫銀針)", desc: "Delicate spring buds steeped in pure water (+4% passive yield)." },
         daHongPao:    { bought: false, cost: 150000, mult: 1.04, name: "Imperial Wuyi Da Hong Pao (大紅袍)", desc: "Legendary cliff tea reserved for Fleet Admirals (+4% passive yield)." },
@@ -801,6 +809,9 @@ badges: {
         floatingWorld:    { unlocked: false, name: "The Floating World", desc: "Found the clandestine Geisha Salon hidden in Sub-Deck 4.", icon: "🌸" }
       }
     };
+
+const BASE_COSTS = Object.fromEntries(Object.entries(gameState.upgrades).map(([k, u]) => [k, u.cost]));
+    function upgradeCost(key, count) { return Math.ceil(BASE_COSTS[key] * Math.pow(COST_GROWTH, count)); }
 
 const DISH_MILESTONES = [
       { req: 0,       name: "House Har Gow (蝦餃)",        icon: "🥟", desc: "Translucent crystal shrimp dumpling pleated on Sub-Deck 4." },
@@ -832,6 +843,7 @@ const DISH_MILESTONES = [
     let rainSourceNode = null;
     let rainGainNode = null;
     let rainFilterNode = null;
+    let pitterTimer = null;
 
     function initAudioContext() {
       if (!audioCtx) {
@@ -886,31 +898,26 @@ const DISH_MILESTONES = [
     }
 
     function stopRainSound() {
-      if (rainGainNode && audioCtx) {
-        try {
-          const now = audioCtx.currentTime;
-          rainGainNode.gain.setValueAtTime(rainGainNode.gain.value, now);
-          rainGainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
-          setTimeout(() => {
-            if (rainSourceNode) {
-              rainSourceNode.stop();
-              rainSourceNode.disconnect();
-              rainSourceNode = null;
-            }
-          }, 650);
-        } catch (e) {}
-      }
+      clearTimeout(pitterTimer);
+      const node = rainSourceNode, gain = rainGainNode;
+      rainSourceNode = null; rainGainNode = null;
+      if (!node || !audioCtx) return;
+      try {
+        const t = audioCtx.currentTime;
+        gain.gain.cancelScheduledValues(t);
+        gain.gain.setValueAtTime(Math.max(gain.gain.value, 0.001), t);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.6);
+      } catch (e) {}
+      setTimeout(() => { try { node.stop(); node.disconnect(); } catch (e) {} }, 650);
     }
 
     function scheduleRandomPitterPatter() {
+      clearTimeout(pitterTimer);
       if (!gameState.rainEnabled || !rainSourceNode) return;
-      const nextDelay = 800 + Math.random() * 2400;
-      setTimeout(() => {
-        if (gameState.rainEnabled && rainSourceNode && audioCtx && audioCtx.state === 'running') {
-          playMicroRaindrop();
-          scheduleRandomPitterPatter();
-        }
-      }, nextDelay);
+      pitterTimer = setTimeout(() => {
+        if (audioCtx && audioCtx.state === 'running') playMicroRaindrop();
+        scheduleRandomPitterPatter();
+      }, 800 + Math.random() * 2400);
     }
 
     function playMicroRaindrop() {
@@ -1181,7 +1188,7 @@ function showInstantFortune(text) {
       for (const key in gameState.upgrades) {
         base += gameState.upgrades[key].count * gameState.upgrades[key].rate;
       }
-      return base;
+      return base * PACE;
     }
 
     function calcTotalMultiplier() {
@@ -1217,83 +1224,102 @@ function showInstantFortune(text) {
       if (el) el.textContent = msg;
     }
 
+    let saveLocked = false;
     function saveGame() {
+      if (saveLocked) return;
       gameState.lastSaveTime = Date.now();
-      try {
-        localStorage.setItem(SAVE_KEY, JSON.stringify(gameState));
-      } catch (e) {
-        console.warn("Save error:", e);
+      safeSet(SAVE_KEY, JSON.stringify(gameState));
+    }
+
+    const numOr = (v, d = 0, max = 1e15) => (typeof v === 'number' && isFinite(v) && v >= 0) ? Math.min(v, max) : d;
+
+    // Validated merge used by both load and import. Replaces progress; never replaces definitions.
+    function mergeSave(p) {
+      if (!p || typeof p !== 'object') return false;
+      const g = gameState;
+      const pu = (p.upgrades && typeof p.upgrades === 'object') ? p.upgrades : {};
+      for (const k in g.upgrades) {
+        g.upgrades[k].count = Math.floor(numOr(pu[k] && pu[k].count, 0, 1000));
+        g.upgrades[k].cost = upgradeCost(k, g.upgrades[k].count);
       }
+      const pt = (p.teas && typeof p.teas === 'object') ? p.teas : {};
+      for (const t in g.teas) g.teas[t].bought = !!(pt[t] && pt[t].bought);
+      const pb = (p.badges && typeof p.badges === 'object') ? p.badges : {};
+      for (const b in g.badges) g.badges[b].unlocked = !!(pb[b] && pb[b].unlocked);
+      g.dimSum = numOr(p.dimSum);
+      g.totalEarned = Math.max(numOr(p.totalEarned), g.dimSum);
+      g.totalClicks = Math.floor(numOr(p.totalClicks));
+      g.fortuneCount = Math.floor(numOr(p.fortuneCount));
+      g.startTime = numOr(p.startTime) || Date.now();
+      g.soundEnabled = p.soundEnabled !== false;
+      g.rainEnabled = p.rainEnabled !== false;
+      g.timeOfDayMode = ['auto', 'morning', 'afternoon', 'dusk', 'night'].includes(p.timeOfDayMode) ? p.timeOfDayMode : 'auto';
+      g.secretSalonUnlocked = !!p.secretSalonUnlocked;
+      g.lastSalonVisit = numOr(p.lastSalonVisit);
+      g.heat = 0; g.isOverheated = false; g.cooldownTimer = 0; g.activeBuff = null;
+      return true;
+    }
+
+    function creditOffline(lastSaved, prefix) {
+      const now = Date.now();
+      const raw = Math.max(0, (now - (numOr(lastSaved) || now)) / 1000);
+      if (raw <= 3) return false;
+      const eff = Math.min(raw, MAX_OFFLINE_S);
+      const earned = eff * calcPassiveRate() * OFFLINE_EFF;
+      gameState.dimSum += earned;
+      gameState.totalEarned += earned;
+      const hrs = (raw / 3600).toFixed(1);
+      setTicker(raw > MAX_OFFLINE_S
+        ? `${prefix} ${hrs} hrs (shift capped at ${(eff / 3600).toFixed(1)} hrs). Staff steamed +${earned.toFixed(2)} dim sum!`
+        : `${prefix} ${hrs} hrs. Night-shift staff steamed +${earned.toFixed(2)} dim sum!`);
+      return true;
     }
 
     function loadGame() {
       try {
-        let raw = localStorage.getItem(SAVE_KEY);
-        if (!raw) raw = localStorage.getItem('dim_sum_master_longhaul_save_v2');
-        if (!raw) raw = localStorage.getItem('dim_sum_master_longhaul_save');
-
-        if (raw) {
-          const parsed = JSON.parse(raw);
-          if (parsed && typeof parsed === 'object') {
-            if (parsed.upgrades) {
-              for (const k in gameState.upgrades) {
-                if (parsed.upgrades[k]) {
-                  gameState.upgrades[k].count = parsed.upgrades[k].count || 0;
-                  gameState.upgrades[k].cost = parsed.upgrades[k].cost || gameState.upgrades[k].cost;
-                }
-              }
-            }
-            if (parsed.teas) {
-              for (const t in gameState.teas) {
-                if (parsed.teas[t]) gameState.teas[t].bought = !!parsed.teas[t].bought;
-              }
-            }
-            if (parsed.badges) {
-              for (const b in gameState.badges) {
-                if (parsed.badges[b]) gameState.badges[b].unlocked = !!parsed.badges[b].unlocked;
-              }
-            }
-            gameState.dimSum = parsed.dimSum || 0;
-            gameState.totalEarned = parsed.totalEarned || gameState.dimSum;
-            gameState.totalClicks = parsed.totalClicks || 0;
-            gameState.fortuneCount = parsed.fortuneCount || 0;
-            gameState.startTime = parsed.startTime || Date.now();
-            gameState.soundEnabled = parsed.soundEnabled !== false;
-            gameState.rainEnabled = parsed.rainEnabled !== false;
-            gameState.timeOfDayMode = parsed.timeOfDayMode || 'auto';
-            gameState.secretSalonUnlocked = !!parsed.secretSalonUnlocked;
-            gameState.lastSalonVisit = parsed.lastSalonVisit || 0;
-
-const now = Date.now();
-            const lastSaved = parsed.lastSaveTime || now;
-            const rawDiffSeconds = Math.max(0, (now - lastSaved) / 1000);
-
-            if (rawDiffSeconds > 3) {
-              const maxOfflineSeconds = 8 * 3600; // 8-hour shift ceiling
-              const effectiveSeconds = Math.min(rawDiffSeconds, maxOfflineSeconds);
-              const offlineEfficiency = 0.50;     // 50% pilot-watch yield
-
-              const currentRate = calcPassiveRate();
-              const offlineEarned = effectiveSeconds * currentRate * offlineEfficiency;
-
-              gameState.dimSum += offlineEarned;
-              gameState.totalEarned += offlineEarned;
-
-              const hoursElapsed = (rawDiffSeconds / 3600).toFixed(1);
-              const hoursCredited = (effectiveSeconds / 3600).toFixed(1);
-
-              if (rawDiffSeconds > maxOfflineSeconds) {
-                setTicker(`Diantang closed for ${hoursElapsed} hrs (Shift capped at ${hoursCredited} hrs pilot-watch). Staff steamed +${offlineEarned.toFixed(2)} dim sum!`);
-              } else {
-                setTicker(`Diantang closed for ${hoursElapsed} hrs. Night-shift staff steamed +${offlineEarned.toFixed(2)} dim sum!`);
-              }
-            }
-          }
-        }
+        const raw = safeGet(SAVE_KEY) || safeGet('dim_sum_master_longhaul_save_v2') || safeGet('dim_sum_master_longhaul_save');
+        if (!raw) return;
+        const p = JSON.parse(raw);
+        if (mergeSave(p)) creditOffline(p.lastSaveTime, 'Diantang closed for');
       } catch (err) {
         console.error("Failed to parse save data:", err);
       }
     }
+
+    // Background-tab accrual: rAF stops when hidden, so credit elapsed time from timers/visibility.
+    let lastTick = Date.now();
+    function creditGap() {
+      const now = Date.now();
+      const dt = (now - lastTick) / 1000;
+      lastTick = now;
+      if (dt <= 0) return;
+      const frozen = dt > 120; // device slept / page frozen -> treat as offline
+      const secs = frozen ? Math.min(dt, MAX_OFFLINE_S) : dt;
+      const buff = gameState.activeBuff; gameState.activeBuff = null;
+      const rate = calcPassiveRate();
+      gameState.activeBuff = buff;
+      const earned = secs * rate * (frozen ? OFFLINE_EFF : 1);
+      gameState.dimSum += earned;
+      gameState.totalEarned += earned;
+      if (frozen) setTicker(`Welcome back! Staff kept steaming while you were away: +${earned.toFixed(2)} dim sum.`);
+    }
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) { lastTick = Date.now(); saveGame(); }
+      else { creditGap(); lastTimestamp = performance.now(); renderUI(); }
+    });
+    window.addEventListener('pagehide', () => { if (document.hidden) creditGap(); saveGame(); });
+
+    // Multi-tab guard: another tab wrote a save -> this one stops saving instead of clobbering it.
+    window.addEventListener('storage', (e) => {
+      if (e.key !== SAVE_KEY || !e.newValue || saveLocked) return;
+      saveLocked = true;
+      const bar = document.createElement('div');
+      bar.id = 'lock-banner';
+      bar.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:100;background:#7f1d1d;color:#fff;font:600 12px JetBrains Mono,monospace;text-align:center;padding:8px';
+      bar.textContent = 'Diantang is open in another tab. Saving is paused here. Close this tab or reload to take over.';
+      document.body.appendChild(bar);
+    });
+
 
             
     const steamerBtn = document.getElementById('steamer-button');
@@ -1383,13 +1409,7 @@ const now = Date.now();
 function isUpgradeDiscovered(key) {
       const upg = gameState.upgrades[key];
       // Discovered if bought at least once, or if lifetime earnings have reached 60% of base cost
-      const baseCosts = {
-        chopsticks: 10, teaBoy: 40, scullery: 150, hostess: 480,
-        cartAuntie: 1600, wrapperSifu: 5800, bambooRack: 21000,
-        headChef: 68000, teaGuild: 180000, goldenDragon: 350000,
-        archwayMaster: 750000, voidDynasty: 1500000
-      };
-      const threshold = (baseCosts[key] || upg.cost) * 0.6;
+            const threshold = BASE_COSTS[key] * 0.6;
       return upg.count > 0 || gameState.totalEarned >= threshold;
     }
 
@@ -1414,7 +1434,7 @@ if (discovered) {
                 <div class="text-[13.5px] sm:text-[14px] text-[#f5b938] font-bold tracking-tight leading-snug mb-0.5 break-words">${upg.name}</div>
                 <div class="text-[#f3e8ff] leading-relaxed mb-1 opacity-90 text-[11.5px] sm:text-[12px]">${upg.desc}</div>
                 <div class="text-[#4ade80] font-semibold text-[11px] sm:text-[11px]">
-                  +${upg.rate.toFixed(4)}/s &bull; <span class="text-[#fde047]" id="count-${key}">Hired: ${upg.count}</span>
+                  +${(upg.rate * PACE).toFixed(5)}/s &bull; <span class="text-[#fde047]" id="count-${key}">Hired: ${upg.count}</span>
                 </div>
               </div>
             </div>
@@ -1451,7 +1471,7 @@ if (discovered) {
       if (gameState.dimSum >= upg.cost) {
         gameState.dimSum -= upg.cost;
         upg.count++;
-        upg.cost = Math.ceil(upg.cost * 1.42);
+        upg.cost = upgradeCost(key, upg.count);
         playRetroSound('buy');
         setTicker(`Staff hired! ${upg.name} reported for duty on Sub-Deck 4.`);
         checkAchievements();
@@ -1553,7 +1573,7 @@ function checkAchievements() {
     }
 
 // 12-Hour Salon Cooldown Constant (12 hours in milliseconds)
-    const SALON_COOLDOWN_MS = 2 * 60 * 60 * 1000;
+    const SALON_COOLDOWN_MS = 12 * 60 * 60 * 1000;
 
     function updateSalonModalState() {
       const now = Date.now();
@@ -1824,22 +1844,13 @@ if (roll < 0.25) {
       try {
         const decoded = JSON.parse(decodeURIComponent(escape(atob(code))));
         if (decoded && typeof decoded === 'object' && decoded.upgrades) {
-          gameState = decoded;
-
-          const now = Date.now();
-          const lastSaved = decoded.lastSaveTime || now;
-          const diffSeconds = Math.max(0, (now - lastSaved) / 1000);
-
-          if (diffSeconds > 3) {
-            const currentRate = calcPassiveRate();
-            const offlineEarned = diffSeconds * currentRate;
-            gameState.dimSum += offlineEarned;
-            gameState.totalEarned += offlineEarned;
-            const hours = (diffSeconds / 3600).toFixed(1);
-            setTicker(`Restored save! Station was away for ${hours} hrs. Staff pre-steamed +${offlineEarned.toFixed(2)} dim sum!`);
-          } else {
+          mergeSave(decoded);
+          saveLocked = false;
+          document.getElementById('lock-banner')?.remove();
+          if (!creditOffline(decoded.lastSaveTime, 'Restored save! Station was away for')) {
             setTicker("Restored Diantang ledger from external backup!");
           }
+
 
           saveGame();
           renderUpgrades();
@@ -1855,6 +1866,8 @@ if (roll < 0.25) {
     });
 
     let lastTimestamp = performance.now();
+    let lastUiRender = 0;
+    let goalAnnounced = false;
 
     function gameLoop(now) {
       const dt = Math.min(1.0, (now - lastTimestamp) / 1000);
@@ -1902,7 +1915,7 @@ if (roll < 0.25) {
       }
 
       updateAndDrawViewport();
-      renderUI();
+      if (now - lastUiRender >= 200) { renderUI(); lastUiRender = now; }
       requestAnimationFrame(gameLoop);
     }
 
@@ -2062,7 +2075,8 @@ if (fortuneBox && fortuneText) {
       if (dishName) dishName.textContent = activeDish.name;
       if (dishDesc) dishDesc.textContent = activeDish.desc;
 
-      if (gameState.totalEarned >= TARGET_GOAL) {
+      if (gameState.totalEarned >= TARGET_GOAL && !goalAnnounced) {
+        goalAnnounced = true;
         setTicker("CULINARY JOURNEY COMPLETE! 1,000,000 Dim Sum achieved aboard A.R.C. Core Draconis! Little Gerrard Street reigns supreme in the stars!");
       }
     }
@@ -2084,9 +2098,9 @@ if (fortuneBox && fortuneText) {
       document.body.appendChild(resetMsgBox);
 
       document.getElementById('confirm-reset').onclick = () => {
-        localStorage.removeItem(SAVE_KEY);
-        localStorage.removeItem('dim_sum_master_longhaul_save_v2');
-        localStorage.removeItem('dim_sum_master_longhaul_save');
+        safeDel(SAVE_KEY);
+        safeDel('dim_sum_master_longhaul_save_v2');
+        safeDel('dim_sum_master_longhaul_save');
         location.reload();
       };
       document.getElementById('cancel-reset').onclick = () => {
@@ -2094,8 +2108,9 @@ if (fortuneBox && fortuneText) {
       };
     });
 
-    window.onload = function() {
+    function initGame() {
       loadGame();
+      lastTick = Date.now();
       renderUpgrades();
       checkAchievements();
       applyTimeOfDayAtmosphere();
@@ -2109,7 +2124,7 @@ if (fortuneBox && fortuneText) {
       scheduleFortuneCookie();
       lastTimestamp = performance.now();
       requestAnimationFrame(gameLoop);
-      setInterval(saveGame, 5000);
+      setInterval(() => { if (document.hidden) creditGap(); saveGame(); }, 5000);
 
       const startAudioOnTouch = () => {
         initAudioContext();
@@ -2119,7 +2134,9 @@ if (fortuneBox && fortuneText) {
         window.removeEventListener('pointerdown', startAudioOnTouch);
       };
       window.addEventListener('pointerdown', startAudioOnTouch);
-    };
+    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initGame);
+    else initGame();
   </script>
 </body>
 </html>
