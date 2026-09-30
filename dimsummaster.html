@@ -1869,7 +1869,7 @@ if (roll < 0.25) {
     let lastUiRender = 0;
     let goalAnnounced = false;
 
-    function gameLoop(now) {
+function gameLoop(now) {
       const dt = Math.min(1.0, (now - lastTimestamp) / 1000);
       lastTimestamp = now;
 
@@ -1879,14 +1879,13 @@ if (roll < 0.25) {
       gameState.dimSum += earned;
       gameState.totalEarned += earned;
 
-// Active buff countdown
+      // Active buff countdown
       if (gameState.activeBuff) {
         gameState.activeBuff.timer -= dt;
         if (gameState.activeBuff.timer <= 0) {
           const finishedType = gameState.activeBuff.type;
           gameState.activeBuff = null;
 
-          // Force pill to dismiss immediately
           const fortuneBox = document.getElementById('steamer-fortune-result');
           if (fortuneBox) {
             fortuneBox.classList.add('hidden');
@@ -1915,7 +1914,16 @@ if (roll < 0.25) {
       }
 
       updateAndDrawViewport();
-      if (now - lastUiRender >= 200) { renderUI(); lastUiRender = now; }
+
+      // 60fps buttery-smooth counter & heat updates
+      renderSmoothCounters();
+
+      // Throttled 5fps heavy DOM updates (buttons, cards, progress bar)
+      if (now - lastUiRender >= 200) {
+        renderHeavyUI();
+        lastUiRender = now;
+      }
+
       requestAnimationFrame(gameLoop);
     }
 
@@ -1934,7 +1942,8 @@ if (tickerBar && tickerModal) {
   document.getElementById('ok-ticker-modal-btn').addEventListener('click', () => tickerModal.classList.add('hidden'));
 }
 
-    function renderUI() {
+// Runs at full 60fps for silky numbers and smooth meters
+    function renderSmoothCounters() {
       const dimSumEl = document.getElementById('dimsum-counter');
       if (dimSumEl) {
         dimSumEl.textContent = gameState.dimSum.toLocaleString('en-US', {
@@ -1943,6 +1952,14 @@ if (tickerBar && tickerModal) {
         });
       }
 
+      const heatBar = document.getElementById('heat-bar');
+      if (heatBar) {
+        heatBar.style.width = `${gameState.heat}%`;
+      }
+    }
+
+    // Runs throttled at 5fps to keep CPU & battery cool
+    function renderHeavyUI() {
       const lifetimeEl = document.getElementById('lifetime-counter');
       if (lifetimeEl) {
         lifetimeEl.textContent = gameState.totalEarned.toLocaleString('en-US', {
@@ -1967,13 +1984,11 @@ if (tickerBar && tickerModal) {
         teaMultEl.textContent = `Tea: ${calcTotalMultiplier().toFixed(2)}x`;
       }
 
-      // Heat Meter
+      // Heat Meter Status
       const heatBar = document.getElementById('heat-bar');
       const heatTitle = document.getElementById('heat-title');
       const cooldownBadge = document.getElementById('cooldown-badge');
       if (heatBar && heatTitle && cooldownBadge) {
-        heatBar.style.width = `${gameState.heat}%`;
-
         if (gameState.isOverheated) {
           heatTitle.textContent = `OVERHEATED! COOLING: ${Math.ceil(gameState.cooldownTimer)}s`;
           cooldownBadge.classList.remove('hidden');
@@ -1989,35 +2004,32 @@ if (tickerBar && tickerModal) {
         }
       }
 
+      // Steamer fortune pill countdown
+      const fortuneBox = document.getElementById('steamer-fortune-result');
+      const fortuneText = document.getElementById('steamer-fortune-text');
+      if (fortuneBox && fortuneText) {
+        if (gameState.activeBuff && gameState.activeBuff.timer > 0) {
+          if (instantFortuneTimeout) {
+            clearTimeout(instantFortuneTimeout);
+            instantFortuneTimeout = null;
+          }
+          fortuneBox.classList.remove('hidden');
+          fortuneBox.classList.remove('animate-pulse');
+          fortuneText.innerHTML = `⚡ <span class="text-[#4ade80]">${gameState.activeBuff.name}</span> &bull; <span class="text-[#fde047] font-mono text-[9px] sm:text-[10px] font-black">${Math.ceil(gameState.activeBuff.timer)}s</span>`;
+        } else if (!instantFortuneTimeout) {
+          fortuneBox.classList.add('hidden');
+          fortuneBox.classList.remove('animate-pulse');
+          fortuneText.textContent = '';
+        }
+      }
 
-// Keep the steamer fortune pill alive and counting down during active buffs
-const fortuneBox = document.getElementById('steamer-fortune-result');
-const fortuneText = document.getElementById('steamer-fortune-text');
-
-if (fortuneBox && fortuneText) {
-  if (gameState.activeBuff && gameState.activeBuff.timer > 0) {
-    if (instantFortuneTimeout) {
-      clearTimeout(instantFortuneTimeout);
-      instantFortuneTimeout = null;
-    }
-    fortuneBox.classList.remove('hidden');
-    fortuneBox.classList.remove('animate-pulse');
-    // Bumped timer from text-[7px] to text-[9px] / text-xs:
-    fortuneText.innerHTML = `⚡ <span class="text-[#4ade80]">${gameState.activeBuff.name}</span> &bull; <span class="text-[#fde047] font-mono text-[9px] sm:text-[10px] font-black">${Math.ceil(gameState.activeBuff.timer)}s</span>`;
-  } else if (!instantFortuneTimeout) {
-    fortuneBox.classList.add('hidden');
-    fortuneBox.classList.remove('animate-pulse');
-    fortuneText.textContent = '';
-  }
-}
-// Check discovery and update upgrade button states
+      // Upgrade affordance states
       let needsRebuild = false;
       for (const key in gameState.upgrades) {
         const upg = gameState.upgrades[key];
         const card = document.getElementById(`upg-card-${key}`);
         const isCurrentlyDiscovered = isUpgradeDiscovered(key);
         
-        // If a card was locked but now crossed threshold, flag to re-render
         if (card && card.querySelector('.blur-\\[3px\\]') && isCurrentlyDiscovered) {
           needsRebuild = true;
           break;
@@ -2079,6 +2091,12 @@ if (fortuneBox && fortuneText) {
         goalAnnounced = true;
         setTicker("CULINARY JOURNEY COMPLETE! 1,000,000 Dim Sum achieved aboard A.R.C. Core Draconis! Little Gerrard Street reigns supreme in the stars!");
       }
+    }
+
+    // Helper to run both when immediate updates are needed
+    function renderUI() {
+      renderSmoothCounters();
+      renderHeavyUI();
     }
 
     // Reset Save Trigger
