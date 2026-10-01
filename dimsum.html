@@ -2115,7 +2115,8 @@ if (tickerBar && tickerModal) {
       `;
       document.body.appendChild(resetMsgBox);
 
-      document.getElementById('confirm-reset').onclick = () => {
+document.getElementById('confirm-reset').onclick = () => {
+        saveLocked = true; // Prevents pagehide / intervals from saving back
         safeDel(SAVE_KEY);
         safeDel('dim_sum_master_longhaul_save_v2');
         safeDel('dim_sum_master_longhaul_save');
