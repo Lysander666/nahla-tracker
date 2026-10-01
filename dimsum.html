@@ -1683,41 +1683,46 @@ function checkAchievements() {
       playRetroSound('fortune');
 
       const roll = Math.random();
-      const currentRate = Math.max(0.005, calcPassiveRate());
+// Baseline passive rate with a sensible floor
+      const currentRate = Math.max(0.01, calcPassiveRate());
 
-if (roll < 0.25) {
-  const bonus = Math.max(5, Math.round(currentRate * 60));
-  gameState.dimSum += bonus;
-  gameState.totalEarned += bonus;
-  setTicker(`🥠 FORTUNE REVEALED: "Wealth flows through the void!" (+${bonus.toLocaleString()} Dim Sum burst)`);
-  showInstantFortune(`🥠 FORTUNE BURST: +${bonus.toLocaleString()} Dim Sum!`);
-} else if (roll < 0.45) {
-  gameState.activeBuff = { type: 'theatre_rush', name: "FLIGHT SHIFT RUSH (1.4X SPEED)", timer: 25, mult: 1.4 };
-  setTicker("🥠 FORTUNE REVEALED: Flight deck shift ends! (1.4x speed for 25s)");
-} else if (roll < 0.65) {
-  gameState.heat = 0;
-  gameState.isOverheated = false;
-  gameState.cooldownTimer = 0;
-  gameState.activeBuff = { type: 'bamboo_zen', name: "BAMBOO ZEN (+0.25/TAP & NO HEAT)", timer: 20, mult: 1.0 };
-  setTicker("🥠 FORTUNE REVEALED: Steamer cannot overheat & clicks yield +0.25 for 20s!");
-} else if (roll < 0.80) {
-  gameState.activeBuff = { type: 'rain_blessing', name: "SOHO RAIN BLESSING (+20% YIELD)", timer: 30, mult: 1.20 };
-  setTicker("🥠 FORTUNE REVEALED: Steaming yield boosted by +20% for 30s!");
-} else if (roll < 0.93) {
-  let totalStaff = 0;
-  for (const k in gameState.upgrades) totalStaff += gameState.upgrades[k].count;
-  const auntieBonus = Math.max(4, Math.round(totalStaff * 1.2 + currentRate * 30));
-  gameState.dimSum += auntieBonus;
-  gameState.totalEarned += auntieBonus;
-  setTicker(`🥠 FORTUNE REVEALED: Trolley Caravan Stampede! (+${auntieBonus.toLocaleString()} Dim Sum)`);
-  showInstantFortune(`🥠 TROLLEY STAMPEDE: +${auntieBonus.toLocaleString()} Dim Sum!`);
-} else {
-  const dragonGift = 50;
-  gameState.dimSum += dragonGift;
-  gameState.totalEarned += dragonGift;
-  gameState.activeBuff = { type: 'super_frenzy', name: "IMPERIAL DRAGON (1.6X FRENZY)", timer: 15, mult: 1.6 };
-  setTicker("🥠 RARE GOLDEN FORTUNE: Imperial Dragon Blessing! +50 Dim Sum & 1.6x Frenzy for 15s!");
-}
+      if (roll < 0.25) {
+        // Wealth Burst: Grants 15 full minutes (900s) of current passive yield
+        const bonus = Math.max(25, Math.round(currentRate * 900));
+        gameState.dimSum += bonus;
+        gameState.totalEarned += bonus;
+        setTicker(`🥠 FORTUNE REVEALED: "Wealth flows through the void!" (+${bonus.toLocaleString()} Dim Sum burst / 15m yield)`);
+        showInstantFortune(`🥠 FORTUNE BURST: +${bonus.toLocaleString()} Dim Sum!`);
+      } else if (roll < 0.45) {
+        // Shift Rush: 2.0x speed for 40s (punchy acceleration)
+        gameState.activeBuff = { type: 'theatre_rush', name: "FLIGHT SHIFT RUSH (2.0X SPEED)", timer: 40, mult: 2.0 };
+        setTicker("🥠 FORTUNE REVEALED: Shift change surge! (2.0x speed for 40s)");
+      } else if (roll < 0.65) {
+        // Bamboo Zen: No overheat and +1.00 per tap for 30s
+        gameState.heat = 0;
+        gameState.isOverheated = false;
+        gameState.cooldownTimer = 0;
+        gameState.activeBuff = { type: 'bamboo_zen', name: "BAMBOO ZEN (+1.00/TAP & NO HEAT)", timer: 30, mult: 1.0 };
+        setTicker("🥠 FORTUNE REVEALED: Master Sifu's Zen focus! Steamer cannot overheat & clicks yield +1.00 for 30s!");
+      } else if (roll < 0.80) {
+        // Biodome Blessing: +50% yield for 60s
+        gameState.activeBuff = { type: 'rain_blessing', name: "SOHO RAIN BLESSING (+50% YIELD)", timer: 60, mult: 1.50 };
+        setTicker("🥠 FORTUNE REVEALED: Heavy Soho downpour! Kitchen yield boosted by +50% for 60s!");
+      } else if (roll < 0.93) {
+        // Trolley Stampede: Grants 30 full minutes (1800s) of yield
+        const stampedeBonus = Math.max(50, Math.round(currentRate * 1800));
+        gameState.dimSum += stampedeBonus;
+        gameState.totalEarned += stampedeBonus;
+        setTicker(`🥠 FORTUNE REVEALED: Trolley Caravan Stampede! (+${stampedeBonus.toLocaleString()} Dim Sum / 30m yield)`);
+        showInstantFortune(`🥠 TROLLEY STAMPEDE: +${stampedeBonus.toLocaleString()} Dim Sum!`);
+      } else {
+        // Rare Imperial Dragon: 1 full hour of passive income + 2.5x Frenzy for 20s
+        const dragonGift = Math.max(100, Math.round(currentRate * 3600));
+        gameState.dimSum += dragonGift;
+        gameState.totalEarned += dragonGift;
+        gameState.activeBuff = { type: 'super_frenzy', name: "IMPERIAL DRAGON (2.5X FRENZY)", timer: 20, mult: 2.5 };
+        setTicker(`🥠 RARE GOLDEN FORTUNE: Imperial Dragon Blessing! +${dragonGift.toLocaleString()} Dim Sum & 2.5x Frenzy for 20s!`);
+      }
 
       checkAchievements();
       scheduleFortuneCookie();
