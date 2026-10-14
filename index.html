@@ -1514,7 +1514,7 @@
     </div>
     <div class="header-title">
         <div class="title-main">Nahla Tracker</div>
-        <div class="title-sub">LIVE • version 1.44</div>
+        <div class="title-sub">LIVE • version 1.45</div>
     </div>
 </div>
 
@@ -2145,16 +2145,13 @@ function getHopeElevationDeg(phaseIndex0) {
     return Math.sin(angle) * 90;
 }
 
-function get_sun_state_index(phaseIndex0) {
-    return Math.floor(phaseIndex0 / 2);
-}
-
-function get_hope_indicator(isHopeUp, phaseIndex0) {
+function get_hope_indicator(isHopeUp, daylightFraction = 0) {
     if (isHopeUp) {
-        const sunState = Math.min(get_sun_state_index(phaseIndex0), 3);
-        const symbols = ["🌅","☀️","🔆","🌄"];
-        const arc = ["─","─","─","─","─","─"];
-        arc[sunState] = symbols[sunState];
+        // Map 0.0–1.0 daylight progress across all 6 slots (0 to 5)
+        const slot = Math.min(Math.max(Math.floor(daylightFraction * 6), 0), 5);
+        const symbols = ["🌅", "☀️", "🔆", "🔆", "☀️", "🌄"];
+        const arc = ["─", "─", "─", "─", "─", "─"];
+        arc[slot] = symbols[slot];
         return `<strong>Hope:</strong> [${arc.join("")}]`;
     }
 
@@ -2275,11 +2272,11 @@ function updateDisplay() {
     const wrapped          = cycle.wrappedSeconds;
     const hoursIntoDay     = cycle.hoursIntoDay;
 
-// --- DYNAMIC SOLAR DRIFT & SEASONAL DAYLIGHT ---
-    const APPARENT_SOLAR_DAY_SECS = DAY_LENGTH_SECONDS + ((DAY_LENGTH_SECONDS / ORBIT_PERIOD_SECONDS) * DAY_LENGTH_SECONDS);
+    // --- DYNAMIC SOLAR DRIFT & SEASONAL DAYLIGHT ---
+    // Subtract orbital drift (-174.8s/cycle) for retrograde apparent solar motion
+    const APPARENT_SOLAR_DAY_SECS = DAY_LENGTH_SECONDS - ((DAY_LENGTH_SECONDS / ORBIT_PERIOD_SECONDS) * DAY_LENGTH_SECONDS);
     const elapsedFromSolarAnchorSecs = (now.getTime() - HOPE_ANCHOR.getTime()) / 1000;
-    const currentSolarCycleFloat = elapsedFromSolarAnchorSecs / APPARENT_SOLAR_DAY_SECS;
-    const currentSolarCycleIdx = Math.floor(currentSolarCycleFloat);
+    const currentSolarCycleIdx = Math.floor(elapsedFromSolarAnchorSecs / APPARENT_SOLAR_DAY_SECS);
 
     const currentSunriseMs = HOPE_ANCHOR.getTime() + (currentSolarCycleIdx * APPARENT_SOLAR_DAY_SECS * 1000);
     const nextSunriseMs = currentSunriseMs + (APPARENT_SOLAR_DAY_SECS * 1000);
@@ -2293,8 +2290,11 @@ function updateDisplay() {
     const isHopeUp = (nowMs >= currentSunriseMs && nowMs < currentSunsetMs);
 
     let timeToEvent = 0;
+    let daylightFraction = 0;
+
     if (isHopeUp) {
         timeToEvent = (currentSunsetMs - nowMs) / 1000;
+        daylightFraction = (nowMs - currentSunriseMs) / (daylightSpanSecs * 1000);
     } else if (nowMs < currentSunriseMs) {
         timeToEvent = (currentSunriseMs - nowMs) / 1000;
     } else {
@@ -2308,7 +2308,7 @@ function updateDisplay() {
         statusText = `🌙 NIGHT on ${MOON_NAME} | Sunrise in: <span class="time-highlight">${format_timedelta(timeToEvent)}</span> | <span class="time-highlight">${hoursIntoDay.toFixed(2)}h</span> into solar day`;
     }
 
-    const hopeHtml = get_hope_indicator(isHopeUp, phaseIndex0);
+    const hopeHtml = get_hope_indicator(isHopeUp, daylightFraction);
     const bandIndicator = get_galactic_band_indicator(phaseNumber);
     const bandHtml = bandIndicator;
     const rebekahHtml = get_rebekah_status(now);
