@@ -1514,7 +1514,7 @@
     </div>
     <div class="header-title">
         <div class="title-main">Nahla Tracker</div>
-        <div class="title-sub">LIVE • version 1.46</div>
+        <div class="title-sub">LIVE • version 1.47</div>
     </div>
 </div>
 
@@ -1960,14 +1960,14 @@ const PHASE_COUNT          = 12;
 const PHASE_LENGTH_SECONDS = DAY_LENGTH_SECONDS / PHASE_COUNT;
 
 var CYCLE_ANCHOR   = new Date("2026-06-14T01:19:11.450Z");
-var REBEKAH_ANCHOR = new Date("2026-08-31T14:49:00.000Z");
+var REBEKAH_ANCHOR = new Date("2026-10-17T05:10:00.000Z"); // Synced to 2026-10-17T13:28:00Z observed set (-8h 18m arc)
 
 // Master Solar Calibration Epoch (OBS-008: Hope Sunrise over saddle rim)
 const HOPE_ANCHOR = new Date("2026-08-30T12:55:23.000Z");
 
 // Perihelion Epoch (3 July 2026 - Maximum Daylight Alignment)
 const PERIHELION_EPOCH = new Date(Date.UTC(2026, 6, 3, 3, 10, 11));
-const MEAN_DAYLIGHT_SECONDS = (17 * 3600) + (4 * 60) + 0; // 17h 04m 00s empirical equinox mean at Natalja's Pass
+const MEAN_DAYLIGHT_SECONDS = (17 * 3600) + (20 * 60) + 0; // 17h 20m 00s mean (calibrated to Oct 17 23:01Z set)
 
 // Orbital Period of Rebekah/Nahla around Hope (555.2 Earth days in seconds)
 const ORBIT_PERIOD_SECONDS = 555.2 * 86400;
