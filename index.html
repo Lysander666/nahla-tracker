@@ -212,6 +212,15 @@
        text-shadow: 0 0 1px #3af2ff, 0 0 2px #007a85;
       }
 
+       <div style="margin-top: 14px;">
+    <button id="download-schedule-btn" onclick="downloadEphemerisTxt()" 
+            style="background: transparent; border: 1px solid #61dafb; color: #61dafb; font-family: Consolas, monospace; font-size: 0.8rem; font-weight: bold; padding: 5px 12px; border-radius: 4px; cursor: pointer; transition: all 0.2s;"
+            onmouseover="this.style.backgroundColor='#61dafb'; this.style.color='#111'; this.style.boxShadow='0 0 10px rgba(97,218,251,0.5)';"
+            onmouseout="this.style.backgroundColor='transparent'; this.style.color='#61dafb'; this.style.boxShadow='none';">
+        ⬇ DOWNLOAD 7-DAY PREDICTED SCHEDULE (.TXT)
+    </button>
+</div>
+
        
 /* Rebekah static sky compass */
 
@@ -1514,7 +1523,7 @@
     </div>
     <div class="header-title">
         <div class="title-main">Nahla Tracker</div>
-        <div class="title-sub">LIVE • version 1.47</div>
+        <div class="title-sub">LIVE • version 1.5</div>
     </div>
 </div>
 
@@ -1984,6 +1993,97 @@ function mod(a, b) {
 
 // Make mod() globally accessible for the clock
 window.mod = mod;
+
+   function downloadEphemerisTxt() {
+    const now = new Date();
+    const nowMs = now.getTime();
+    const endMs = nowMs + (7 * 86400 * 1000); // Next 7 Earth days
+
+    const events = [];
+    const greek = ["α","β","γ","δ","ε","ζ","η","θ","ι","κ","λ","μ"];
+
+    // 1. Gather Hope Rise and Set events
+    const startCycle = Math.floor((nowMs - CYCLE_ANCHOR.getTime()) / (DAY_LENGTH_SECONDS * 1000)) - 1;
+    const endCycle   = Math.floor((endMs - CYCLE_ANCHOR.getTime()) / (DAY_LENGTH_SECONDS * 1000)) + 2;
+
+    for (let c = startCycle; c <= endCycle; c++) {
+        const cycleStartMs = CYCLE_ANCHOR.getTime() + (c * DAY_LENGTH_SECONDS * 1000);
+        
+        // Hope Rise (02:46:01 NLT)
+        const riseMs = cycleStartMs + (SUNRISE_NLT_SECS * 1000);
+        if (riseMs >= nowMs && riseMs <= endMs) {
+            events.push({ timeMs: riseMs, event: "HOPE RISE", note: `Cycle #${c}` });
+        }
+
+        // Hope Set (Seasonal daylight variation)
+        const orbitalAngle = ((riseMs - PERIHELION_EPOCH.getTime()) / 1000 / ORBIT_PERIOD_SECONDS) * 2 * Math.PI;
+        const daylightSpanSecs = MEAN_DAYLIGHT_SECONDS + (23 * 60 * Math.cos(orbitalAngle));
+        const setMs = riseMs + (daylightSpanSecs * 1000);
+        if (setMs >= nowMs && setMs <= endMs) {
+            events.push({ timeMs: setMs, event: "HOPE SET", note: `Cycle #${c}` });
+        }
+    }
+
+    // 2. Gather Rebekah Rise and Set events
+    const startRebCycle = Math.floor((nowMs - REBEKAH_ANCHOR.getTime()) / (DAY_LENGTH_SECONDS * 1000)) - 1;
+    const endRebCycle   = Math.floor((endMs - REBEKAH_ANCHOR.getTime()) / (DAY_LENGTH_SECONDS * 1000)) + 2;
+
+    for (let rc = startRebCycle; rc <= endRebCycle; rc++) {
+        const rebRiseMs = REBEKAH_ANCHOR.getTime() + (rc * DAY_LENGTH_SECONDS * 1000);
+        if (rebRiseMs >= nowMs && rebRiseMs <= endMs) {
+            events.push({ timeMs: rebRiseMs, event: "REBEKAH RISE", note: `Transit #${rc}` });
+        }
+        const rebSetMs = rebRiseMs + (29880 * 1000); // 8h 18m visible arc
+        if (rebSetMs >= nowMs && rebSetMs <= endMs) {
+            events.push({ timeMs: rebSetMs, event: "REBEKAH SET", note: `Transit #${rc}` });
+        }
+    }
+
+    // Sort chronologically
+    events.sort((a, b) => a.timeMs - b.timeMs);
+
+    // Build plain text table
+    const lines = [
+        "================================================================================",
+        " NAHLA TRACKER - 7-DAY EPHEMERIS PREDICTION SCHEDULE",
+        " Observation Post: Natalja's Pass (39.2, 104.3)",
+        " Celestial Body: Hypi Bra EV-P d5-78 6a (Nahla)",
+        " Generated (UTC): " + now.toISOString().replace("T", " ").replace(/\..+/, " UTC"),
+        " Observational Tolerance: +/- 6 minutes (12-minute contact window)",
+        "================================================================================",
+        "UTC DATE / TIME        | EVENT          | NLT        | PHASE    | DETAILS",
+        "--------------------------------------------------------------------------------"
+    ];
+
+    events.forEach(e => {
+        const dateObj = new Date(e.timeMs);
+        const utcStr = dateObj.toISOString().replace("T", " ").replace(/\..+/, " UTC");
+
+        const wrapped = mod((e.timeMs - CYCLE_ANCHOR.getTime()) / 1000, DAY_LENGTH_SECONDS);
+        const h = String(Math.floor(wrapped / 3600)).padStart(2, "0");
+        const m = String(Math.floor((wrapped % 3600) / 60)).padStart(2, "0");
+        const s = String(Math.floor(wrapped % 60)).padStart(2, "0");
+        const nltStr = `${h}:${m}:${s}`;
+
+        const phaseIdx = Math.floor(wrapped / (DAY_LENGTH_SECONDS / 12));
+        const phaseStr = `Phase ${greek[phaseIdx]}`;
+
+        lines.push(`${utcStr.padEnd(22)} | ${e.event.padEnd(14)} | ${nltStr.padEnd(10)} | ${phaseStr.padEnd(8)} | ${e.note}`);
+    });
+
+    lines.push("================================================================================");
+
+    // Trigger instant browser download
+    const blob = new Blob([lines.join("\r\n")], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `nahla_schedule_${now.toISOString().split("T")[0]}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
 
 // Load anchors from shared storage on startup
 async function loadAnchorsFromStorage() {
