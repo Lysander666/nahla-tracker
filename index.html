@@ -1560,7 +1560,7 @@
                     style="background: transparent; border: 1px solid #61dafb; color: #61dafb; font-family: Consolas, monospace; font-size: 0.82rem; font-weight: bold; padding: 6px 16px; border-radius: 6px; cursor: pointer; transition: all 0.2s;"
                     onmouseover="this.style.backgroundColor='#61dafb'; this.style.color='#111'; this.style.boxShadow='0 0 12px rgba(97,218,251,0.4)';"
                     onmouseout="this.style.backgroundColor='transparent'; this.style.color='#61dafb'; this.style.boxShadow='none';">
-                ⬇ DOWNLOAD 7-DAY PREDICTED SCHEDULE (.TXT)
+                ⬇ DOWNLOAD 7-DAY SCHEDULE (.TXT)
             </button>
         </div>
     </div>
@@ -2578,10 +2578,14 @@ renderGallery();
     updateClock();
 })();
 
-   function downloadEphemerisTxt() {
+function downloadEphemerisTxt() {
     const now = new Date();
     const nowMs = now.getTime();
     const endMs = nowMs + (7 * 86400 * 1000); // 7 Earth days
+
+    // Local constants to avoid scoping issues
+    const SUNRISE_NLT_SECS = (2 * 3600) + (46 * 60) + 1; // 02:46:01 NLT
+    const REBEKAH_VISIBLE_SECONDS = 29880;               // 8h 18m visible arc
 
     const events = [];
     const greek = ["α","β","γ","δ","ε","ζ","η","θ","ι","κ","λ","μ"];
