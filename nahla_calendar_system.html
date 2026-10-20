@@ -631,7 +631,7 @@
       ctx.arc(cx, cy, starRad, 0, 2 * Math.PI);
       ctx.fill();
 
-      // ==========================================
+// ==========================================
       // ORBIT TRACK: Rebekah (Red Giant + Ring) & Nahla
       // ==========================================
       const progressRatio = nDate.dayOfYear / nDate.totalDaysInYear;
@@ -641,60 +641,51 @@
       const my = cy + Math.sin(planetAngle) * orbitRad;
       
       // 1. Gas Giant crimson ambient aura
-      const rebGlow = ctx.createRadialGradient(mx, my, 1, mx, my, 14);
-      rebGlow.addColorStop(0, 'rgba(225, 0, 0, 0.7)');
+      const rebGlow = ctx.createRadialGradient(mx, my, 1, mx, my, 16);
+      rebGlow.addColorStop(0, 'rgba(235, 0, 35, 0.75)');
+      rebGlow.addColorStop(0.5, 'rgba(160, 0, 25, 0.3)');
       rebGlow.addColorStop(1, 'transparent');
       ctx.fillStyle = rebGlow;
       ctx.beginPath();
-      ctx.arc(mx, my, 14, 0, 2 * Math.PI);
+      ctx.arc(mx, my, 16, 0, 2 * Math.PI);
       ctx.fill();
 
-      // 2. Rebekah Miniature Cyan Ring System
+      // 2. Rebekah Cyan Ring System (Tilted)
       ctx.save();
       ctx.translate(mx, my);
       ctx.rotate(-Math.PI / 6);
       ctx.scale(2.2, 0.55);
       
-      ctx.strokeStyle = "rgba(34, 211, 238, 0.85)";
-      ctx.lineWidth = 1.2;
+      ctx.strokeStyle = "rgba(34, 211, 238, 0.9)";
+      ctx.lineWidth = 1.4;
       ctx.beginPath();
-      ctx.arc(0, 0, 8.5, 0, 2 * Math.PI);
+      ctx.arc(0, 0, 9.5, 0, 2 * Math.PI);
       ctx.stroke();
       ctx.restore();
 
-      // 3. Rebekah Core (Red Gas Giant Disc)
-      const rebGrad = ctx.createRadialGradient(mx - 1.5, my - 1.5, 0.5, mx, my, 5.5);
-      rebGrad.addColorStop(0, '#ff1e42');   // Lit highlight
-      rebGrad.addColorStop(0.5, '#b3001b');  // Deep crimson
-      rebGrad.addColorStop(1, '#400006');    // Dark shadow rim
+      // 3. Rebekah Core (Pure Deep Crimson / Ruby Disc)
+      const rebGrad = ctx.createRadialGradient(mx - 1.5, my - 1.5, 0.5, mx, my, 6.5);
+      rebGrad.addColorStop(0, '#ff3b5c');   // Ruby specular highlight
+      rebGrad.addColorStop(0.4, '#c72a4a'); // Rebekah crimson body
+      rebGrad.addColorStop(0.8, '#800018'); // Shadow burgundy
+      rebGrad.addColorStop(1, '#330008');   // Umbral edge
       ctx.fillStyle = rebGrad;
       ctx.beginPath();
-      ctx.arc(mx, my, 5.5, 0, 2 * Math.PI);
+      ctx.arc(mx, my, 6.5, 0, 2 * Math.PI);
       ctx.fill();
 
-      // 4. Tiny companion moon Nahla (Sulphur-yellow speck orbiting beside Rebekah)
-      const moonDist = 12;
-      const moonOrbitAngle = planetAngle + Math.PI / 2;
-      const moonX = mx + Math.cos(moonOrbitAngle) * moonDist;
-      const moonY = my + Math.sin(moonOrbitAngle) * moonDist;
-
-      ctx.fillStyle = '#fbbf24';
-      ctx.beginPath();
-      ctx.arc(moonX, moonY, 2, 0, 2 * Math.PI);
-      ctx.fill();
+      // 4. Nahla (Sulphur-Yellow Moon) Dynamic 25h Orbit around Rebekah
+      const dayFraction = nDate.msInCurrentDay / (91570 * 1000);
+      const nahlaOrbitAngle = (dayFraction * 2 * Math.PI) - Math.PI / 2;
+      const moonDist = 14;
       
-      // Changed moon tracker marker to amber/sulphur hue
-      const glow = ctx.createRadialGradient(mx, my, 1, mx, my, 10);
-      glow.addColorStop(0, '#fbbf24');
-      glow.addColorStop(1, 'transparent');
-      ctx.fillStyle = glow;
-      ctx.beginPath();
-      ctx.arc(mx, my, 10, 0, 2*Math.PI);
-      ctx.fill();
+      const moonX = mx + Math.cos(nahlaOrbitAngle) * moonDist;
+      const moonY = my + Math.sin(nahlaOrbitAngle) * moonDist;
 
-      ctx.fillStyle = '#fbbf24';
+      // Nahla sulphur glow + disc
+      ctx.fillStyle = '#ffbf00';
       ctx.beginPath();
-      ctx.arc(mx, my, 5, 0, 2*Math.PI);
+      ctx.arc(moonX, moonY, 2.5, 0, 2 * Math.PI);
       ctx.fill();
 
       const mobileScale = w < 480 ? 0.85 : 1.0;
