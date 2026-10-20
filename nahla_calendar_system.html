@@ -642,7 +642,7 @@
       
       // 1. Gas Giant crimson ambient aura
       const rebGlow = ctx.createRadialGradient(mx, my, 1, mx, my, 14);
-      rebGlow.addColorStop(0, 'rgba(255, 77, 109, 0.65)');
+      rebGlow.addColorStop(0, 'rgba(225, 0, 0, 0.7)');
       rebGlow.addColorStop(1, 'transparent');
       ctx.fillStyle = rebGlow;
       ctx.beginPath();
@@ -664,9 +664,9 @@
 
       // 3. Rebekah Core (Red Gas Giant Disc)
       const rebGrad = ctx.createRadialGradient(mx - 1.5, my - 1.5, 0.5, mx, my, 5.5);
-      rebGrad.addColorStop(0, '#ff6b81');   // Lit highlight
-      rebGrad.addColorStop(0.5, '#c72a4a');  // Deep crimson
-      rebGrad.addColorStop(1, '#540b0e');    // Dark shadow rim
+      rebGrad.addColorStop(0, '#ff1e42');   // Lit highlight
+      rebGrad.addColorStop(0.5, '#b3001b');  // Deep crimson
+      rebGrad.addColorStop(1, '#400006');    // Dark shadow rim
       ctx.fillStyle = rebGrad;
       ctx.beginPath();
       ctx.arc(mx, my, 5.5, 0, 2 * Math.PI);
