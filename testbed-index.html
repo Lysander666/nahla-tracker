@@ -360,22 +360,48 @@
     white-space: pre; /* Keeps column alignment exact */
 }
 
-/* Mobile responsive */
-@media (max-width: 650px) {
+/* --- MOBILE SCHEDULE MODAL OPTIMISATIONS --- */
+@media (max-width: 768px) {
     .schedule-modal {
-        padding: 8px;
+        padding: 10px 6px;
     }
+
     .schedule-modal-dialog {
-        max-height: 92vh;
+        max-height: 94vh;
+        width: 98vw;
     }
+
     .schedule-modal-header {
         padding: 10px 12px;
+        flex-wrap: wrap; /* Keeps title and buttons tidy on narrow screens */
+        gap: 8px;
     }
+
     .schedule-modal-title {
-        font-size: 0.75rem;
+        font-size: 0.85rem;
     }
+
+    .schedule-modal-actions {
+        margin-left: auto;
+    }
+
+    .schedule-action-btn {
+        font-size: 0.78rem;
+        padding: 6px 12px;
+    }
+
+    .schedule-modal-body {
+        padding: 12px 10px;
+        -webkit-overflow-scrolling: touch; /* Smooth iOS kinetic scrolling */
+    }
+
     #schedule-modal-pre {
-        font-size: 0.72rem;
+        /* Bumped up from 0.72rem to 0.88rem (~14px) */
+        font-size: 0.88rem !important;
+        line-height: 1.65;
+        letter-spacing: 0.02em;
+        color: #e6edf3; /* Higher contrast off-white */
+        -webkit-text-size-adjust: 100%; /* Prevents mobile browsers from auto-shrinking pre tags */
     }
 }
        
