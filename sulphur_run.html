@@ -1595,33 +1595,34 @@ function draw() {
 
         ctx.globalAlpha = alpha;
 
-        const boxW = 220 * scale;
-        const boxH = 56 * scale;
+// --- COMPACT BOX DIMENSIONS ---
+        const boxW = 175 * scale;  // reduced from 220
+        const boxH = 44 * scale;   // reduced from 56
         
         // Background badge
         ctx.fillStyle = 'rgba(6, 4, 10, 0.85)';
         ctx.strokeStyle = '#d4a24e';
-        ctx.lineWidth = 1.5 * scale;
+        ctx.lineWidth = 1.2 * scale;
         ctx.shadowColor = '#d4a24e';
-        ctx.shadowBlur = 14 * scale;
+        ctx.shadowBlur = 10 * scale;
 
         ctx.fillRect(centerX - boxW / 2, centerY - boxH / 2, boxW, boxH);
         ctx.strokeRect(centerX - boxW / 2, centerY - boxH / 2, boxW, boxH);
 
         // Header / Subtitle
         ctx.shadowBlur = 0;
-        ctx.font = `${Math.round(16 * scale)}px "VT323", monospace`;
+        ctx.font = `${Math.round(13 * scale)}px "VT323", monospace`; // reduced from 16
         ctx.fillStyle = '#998877';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText('VELOCITY TIER', centerX, centerY - (13 * scale));
+        ctx.fillText('VELOCITY TIER', centerX, centerY - (10 * scale));
 
         // Speed text
-        ctx.font = `bold ${Math.round(28 * scale)}px "VT323", monospace`;
+        ctx.font = `bold ${Math.round(22 * scale)}px "VT323", monospace`; // reduced from 28
         ctx.fillStyle = '#ffcc66';
         ctx.shadowColor = '#d4a24e';
-        ctx.shadowBlur = 10 * scale;
-        ctx.fillText(speedNotification.text, centerX, centerY + (12 * scale));
+        ctx.shadowBlur = 8 * scale;
+        ctx.fillText(speedNotification.text, centerX, centerY + (9 * scale));
 
         ctx.restore();
     }
