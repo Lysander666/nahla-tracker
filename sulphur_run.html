@@ -299,7 +299,7 @@
         <div class="hud-title" id="hud-title">SULPHUR RUN</div>
 
         <div class="ui-layer" id="start-screen">
-            <h1 id="title-text" style="text-shadow: 2px 2px 0px #444, -2px -2px 0px #d4a24e;">SULPHUR RUN v0.33</h1>
+            <h1 id="title-text" style="text-shadow: 2px 2px 0px #444, -2px -2px 0px #d4a24e;">SULPHUR RUN v0.34</h1>
             <p>SRV SIMULATION // NAHLA SURFACE</p>
             <p class="blink" id="start-blink">[PRESS SPACE or CLICK MOUSE TO START]</p>
             
@@ -479,14 +479,58 @@ const rover = {
     lastShot: -100,
     shotCooldown: 8, 
     
-    draw: function() {
+draw: function() {
         ctx.save();
-        ctx.translate(this.x + this.width/2, this.y + this.height/2);
+        ctx.translate(this.x + this.width / 2, this.y + this.height / 2);
         
+        // 1. DYNAMIC SUSPENSION & PITCH
         let targetAngle = Math.min(Math.max(this.dy * 0.05, -0.3), 0.3);
-        if(this.grounded) targetAngle = 0;
-        this.angle += (targetAngle - this.angle) * 0.1;
+        if (this.grounded) {
+            if (keys.boost) {
+                // Wheelie tilt + high-speed engine vibration jitter
+                targetAngle = -0.12 + (Math.sin(frames * 1.5) * 0.02);
+            } else if (keys.brake) {
+                // Hard front-suspension nose dive
+                targetAngle = 0.14;
+            } else {
+                targetAngle = 0;
+            }
+        }
+        this.angle += (targetAngle - this.angle) * 0.15;
         ctx.rotate(this.angle);
+
+        // 2. BOOST AFTERBURNER JET (Flickering Dual-Cone Flame)
+        if (keys.boost) {
+            ctx.save();
+            ctx.translate(-20, 0);
+            
+            // Random flame flicker length
+            const flameLen = 22 + Math.random() * 14;
+            const flameW = 6 + Math.sin(frames * 0.8) * 2;
+
+            // Outer cyan plasma plume
+            ctx.fillStyle = '#61dafb';
+            ctx.shadowColor = '#61dafb';
+            ctx.shadowBlur = 15;
+            ctx.beginPath();
+            ctx.moveTo(0, -flameW);
+            ctx.lineTo(-flameLen, 0);
+            ctx.lineTo(0, flameW);
+            ctx.closePath();
+            ctx.fill();
+
+            // Inner white-hot needle core
+            ctx.fillStyle = '#ffffff';
+            ctx.shadowBlur = 6;
+            ctx.beginPath();
+            ctx.moveTo(0, -flameW * 0.45);
+            ctx.lineTo(-flameLen * 0.65, 0);
+            ctx.lineTo(0, flameW * 0.45);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.restore();
+        }
 
         // HEADLIGHT
         ctx.save();
@@ -508,6 +552,13 @@ const rover = {
         ctx.fillRect(-20, -10, 40, 16); 
         ctx.shadowBlur = 0; 
 
+        // 3. REAR BRAKE LIGHT (Neon cherry bloom when braking)
+        ctx.fillStyle = keys.brake ? '#ff2222' : '#441111';
+        ctx.shadowColor = keys.brake ? '#ff0033' : 'transparent';
+        ctx.shadowBlur = keys.brake ? 12 : 0;
+        ctx.fillRect(-20, -7, 3, 7);
+        ctx.shadowBlur = 0;
+
         // COCKPIT
         const theme = THEMES[currentThemeIndex];
         ctx.fillStyle = theme.main;
@@ -516,22 +567,27 @@ const rover = {
         ctx.fillRect(-5, -14, 14, 8);
         ctx.shadowBlur = 0; 
         
-        // WHEELS
+        // 4. WHEELS (Faster wheel spin vibration on boost, locked bounce on brake)
         ctx.fillStyle = '#111';
-        const bounce = this.grounded ? Math.sin(frames * 0.5) * 1 : 0;
+        let bounceSpeed = 0.5;
+        if (keys.boost) bounceSpeed = 1.2;
+        if (keys.brake) bounceSpeed = 0.1;
+
+        const bounce = this.grounded ? Math.sin(frames * bounceSpeed) * 1.2 : 0;
         const drawWheel = (ox, oy) => {
             ctx.beginPath(); 
-            ctx.arc(ox, oy, 6, 0, Math.PI*2); 
+            ctx.arc(ox, oy, 6, 0, Math.PI * 2); 
             ctx.fill();
             ctx.strokeStyle = '#555';
             ctx.lineWidth = 1;
             ctx.stroke();
             ctx.fillStyle = '#444';
-            ctx.fillRect(ox-1, oy-1, 2, 2);
+            ctx.fillRect(ox - 1, oy - 1, 2, 2);
         };
         drawWheel(-15, 8 + bounce);
         drawWheel(0, 8 - bounce);
         drawWheel(15, 8 + bounce);
+        
         ctx.restore();
     },
 
@@ -1056,17 +1112,47 @@ function update() {
         speedNotification.timer--;
     }
 
-    // 6. Thruster particle plume while boosting
-    if (keys.boost && Math.random() > 0.3) {
-        addParticle({
-            x: rover.x - 12,
-            y: rover.y + 4,
-            vx: -5 - Math.random() * 4,
-            vy: (Math.random() - 0.5) * 2,
-            life: 14,
-            color: '#61dafb',
-            size: 2
-        });
+// 6. ENHANCED THROTTLE & BRAKE PARTICLES
+    if (rover.grounded) {
+        // BOOST PARTICLES: High-speed exhaust embers + trail smoke
+        if (keys.boost) {
+            addParticle({
+                x: rover.x - 16,
+                y: rover.y + (Math.random() * 8 - 4),
+                vx: -8 - Math.random() * 6,
+                vy: (Math.random() - 0.5) * 3,
+                life: 18,
+                color: Math.random() > 0.4 ? '#61dafb' : '#ffffff',
+                size: Math.random() * 2.5 + 1
+            });
+        }
+
+        // BRAKE PARTICLES: Tire friction sparks & ground skid dust
+        if (keys.brake) {
+            // Hot orange friction sparks kicking up from rear tires
+            addParticle({
+                x: rover.x - 8 + Math.random() * 28,
+                y: GROUND_Y + 8,
+                vx: 3 + Math.random() * 5, // Shoots forward as tires skid
+                vy: -Math.random() * 3 - 0.5,
+                life: 14,
+                color: Math.random() > 0.3 ? '#ffaa00' : '#ff4400',
+                size: 1.5
+            });
+
+            // Skid smoke puff
+            if (frames % 3 === 0) {
+                addParticle({
+                    x: rover.x - 12,
+                    y: GROUND_Y + 5,
+                    vx: -gameSpeed * 0.3,
+                    vy: -Math.random() * 1.5,
+                    life: 20,
+                    color: 'rgba(160, 140, 110, 0.4)',
+                    size: 3 + Math.random() * 2
+                });
+            }
+        }
     }
 
     // --- RESTORED: MOUNTAIN SCROLLING ---
