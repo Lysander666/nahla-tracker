@@ -299,7 +299,7 @@
         <div class="hud-title" id="hud-title">SULPHUR RUN</div>
 
         <div class="ui-layer" id="start-screen">
-            <h1 id="title-text" style="text-shadow: 2px 2px 0px #444, -2px -2px 0px #d4a24e;">SULPHUR RUN v0.3</h1>
+            <h1 id="title-text" style="text-shadow: 2px 2px 0px #444, -2px -2px 0px #d4a24e;">SULPHUR RUN v0.31</h1>
             <p>SRV SIMULATION // NAHLA SURFACE</p>
             <p class="blink" id="start-blink">[PRESS SPACE or CLICK MOUSE TO START]</p>
             
@@ -337,6 +337,13 @@
 
 <script>
 
+// --- SPEED NOTIFICATION STATE ---
+let lastNotifiedSpeed = 0;
+let speedNotification = {
+    text: '',
+    timer: 0,
+    maxTimer: 120 // ~2 seconds at 60fps
+};    
 
 // --- REDIRECT MOBILE DEVICES ---
 if (/Mobi|Android|iPhone|iPad|iPod|Opera Mini|IEMobile/i.test(navigator.userAgent)) {
@@ -805,6 +812,13 @@ function playSound(type) {
         gain.gain.setValueAtTime(0.1, now);
         gain.gain.linearRampToValueAtTime(0.01, now + 0.15);
         duration = 0.15;
+    } else if (type === 'speedup') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(600, now);
+        osc.frequency.exponentialRampToValueAtTime(1200, now + 0.15);
+        gain.gain.setValueAtTime(0.08, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+        duration = 0.15;    
     } 
 
     osc.start();
@@ -880,6 +894,11 @@ function startGame() {
     currentThemeIndex = 0;
     currentPhaseIndex = 0;
     currentLoopIndex = 0;
+
+    // Trigger initial speed milestone
+    lastNotifiedSpeed = Math.floor(gameSpeed * 2) / 2; // rounds to nearest 0.5
+    speedNotification.text = `${gameSpeed.toFixed(1)} km/h`;
+    speedNotification.timer = speedNotification.maxTimer;
     
     currentLighting = LIGHTING.DAWN;
     targetLighting = LIGHTING.DAWN;
@@ -1000,6 +1019,20 @@ function update() {
     // NEW LOGIC: Increase speed by 0.1 every 240 frames (approx 4 seconds)
     // This allows the decimal to climb incrementally (7.0 -> 7.1 -> 7.2)
     if (frames % 240 === 0) gameSpeed += 0.1;
+
+    // Check for 0.5 km/h milestone
+    const currentHalfTier = Math.floor(gameSpeed * 2) / 2;
+    if (currentHalfTier > lastNotifiedSpeed) {
+        lastNotifiedSpeed = currentHalfTier;
+        speedNotification.text = `${currentHalfTier.toFixed(1)} km/h`;
+        speedNotification.timer = speedNotification.maxTimer;
+        playSound('speedup');
+    }
+
+    // Tick notification timer down
+    if (speedNotification.timer > 0) {
+        speedNotification.timer--;
+    }
 
     // SCROLL MOUNTAINS (Parallax)
     mountainScroll -= gameSpeed * 0.2;
@@ -1531,6 +1564,55 @@ function draw() {
         ctx.fillRect(d.x, d.y, d.length, 1);
     });
     ctx.restore(); // <-- RESTORES HD CONTEXT TRANSFORMATION
+
+    // --- SPEED MILESTONE NOTIFICATION ---
+    if (speedNotification.timer > 0) {
+        const progress = speedNotification.timer / speedNotification.maxTimer;
+        // Fade in rapidly during the first 0.2s, stay visible, then fade out
+        let alpha = 1.0;
+        if (progress > 0.85) {
+            alpha = (1.0 - progress) / 0.15;
+        } else if (progress < 0.3) {
+            alpha = progress / 0.3;
+        }
+
+        // Slight upward drift as it displays
+        const yOffset = (1.0 - progress) * 16;
+        const centerX = GAME_W / 2;
+        const centerY = (GAME_H / 2) - 40 - yOffset;
+
+        ctx.save();
+        ctx.globalAlpha = alpha;
+
+        // Subtle dark backdrop pill to keep it readable against mountains & sun
+        ctx.fillStyle = 'rgba(5, 5, 8, 0.75)';
+        ctx.strokeStyle = '#d4a24e';
+        ctx.lineWidth = 1.5;
+        ctx.shadowColor = '#d4a24e';
+        ctx.shadowBlur = 12;
+
+        const boxW = 180;
+        const boxH = 48;
+        ctx.strokeRect(centerX - boxW / 2, centerY - boxH / 2, boxW, boxH);
+        ctx.fillRect(centerX - boxW / 2, centerY - boxH / 2, boxW, boxH);
+
+        // Subtitle tag
+        ctx.shadowBlur = 0;
+        ctx.font = '14px "VT323", monospace';
+        ctx.fillStyle = '#888';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('VELOCITY TIER', centerX, centerY - 12);
+
+        // Speed readout in glowing amber
+        ctx.font = 'bold 26px "VT323", monospace';
+        ctx.fillStyle = '#ffcc66';
+        ctx.shadowColor = '#d4a24e';
+        ctx.shadowBlur = 8;
+        ctx.fillText(speedNotification.text, centerX, centerY + 10);
+
+        ctx.restore();
+    }
 }
 
 function loop() {
