@@ -123,16 +123,16 @@
             background: radial-gradient(circle, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.7) 100%);
         }
 
-        #start-screen, #game-over-screen, #pause-screen {
-            background: rgba(10, 5, 5, 0.9);
-            padding: 10px 20px; 
-            border: 2px solid #d4a24e;
-            box-shadow: 0 0 20px rgba(212, 162, 78, 0.4), inset 0 0 20px rgba(212, 162, 78, 0.1);
-            text-align: center;
-            pointer-events: auto;
-            transform: skew(-2deg); 
-            transition: border-color 1s ease, box-shadow 1s ease;
-        }
+#start-screen, #game-over-screen, #pause-screen, #loop-screen {
+    background: rgba(10, 5, 5, 0.92);
+    padding: 15px 30px; 
+    border: 2px solid #d4a24e;
+    box-shadow: 0 0 20px rgba(212, 162, 78, 0.4), inset 0 0 20px rgba(212, 162, 78, 0.1);
+    text-align: center;
+    pointer-events: auto;
+    transform: skew(-2deg); 
+    transition: border-color 0.4s ease, box-shadow 0.4s ease;
+}
 
         h1 {
             color: #fff;
@@ -299,7 +299,7 @@
         <div class="hud-title" id="hud-title">SULPHUR RUN</div>
 
         <div class="ui-layer" id="start-screen">
-            <h1 id="title-text" style="text-shadow: 2px 2px 0px #444, -2px -2px 0px #d4a24e;">SULPHUR RUN v0.34</h1>
+            <h1 id="title-text" style="text-shadow: 2px 2px 0px #444, -2px -2px 0px #d4a24e;">SULPHUR RUN v0.4</h1>
             <p>SRV SIMULATION // NAHLA SURFACE</p>
             <p class="blink" id="start-blink">[PRESS SPACE or CLICK MOUSE TO START]</p>
             
@@ -323,6 +323,13 @@
             <h1>SYSTEM PAUSED</h1>
             <p class="blink">[PRESS P TO RESUME]</p>
             <p style="font-size: 1rem; color: #888; margin-top: 20px;">PRESS ESC TO QUIT</p>
+        </div>
+
+        <div class="ui-layer" id="loop-screen" style="display: none;">
+            <div class="game-over-title" id="loop-subtitle">CYCLE SYNCHRONISATION</div>
+            <h1 id="loop-title" style="font-size: 3.2rem; margin: 5px 0;">ENTERING LOOP 2</h1>
+            <p style="color: #fff; font-size: 1.8rem; margin: 10px 0;">READY?</p>
+            <p class="blink" id="loop-blink" style="margin-top: 20px; font-size: 1.6rem;">[PRESS SPACE TO CONTINUE]</p>
         </div>
 
         <div class="ui-layer" id="game-over-screen" style="display: none;">
@@ -704,9 +711,47 @@ function addParticle(p) {
     particles.push(p);
 }
 
+    // --- LOOP TRANSITION OVERLAY ---
+function triggerLoopTransition(nextLoopNum) {
+    gameState = 'LOOP_TRANSITION';
+    keys.boost = false;
+    keys.brake = false;
+
+    // Grab the neon theme color assigned to this loop
+    const nextTheme = THEMES[currentThemeIndex];
+    const screen = document.getElementById('loop-screen');
+    const title = document.getElementById('loop-title');
+    const subtitle = document.getElementById('loop-subtitle');
+    const blink = document.getElementById('loop-blink');
+
+    // Sync titles and dynamic loop number
+    title.innerText = `ENTERING LOOP ${nextLoopNum}`;
+    title.style.color = '#ffffff';
+    title.style.textShadow = `0 0 15px ${nextTheme.main}, 2px 2px 0px #222`;
+
+    subtitle.style.color = nextTheme.main;
+    subtitle.style.textShadow = `0 0 8px ${nextTheme.main}`;
+
+    blink.style.color = nextTheme.main;
+    blink.style.textShadow = `0 0 10px ${nextTheme.main}`;
+
+    // Apply the loop's overriding neon color to the border and inner/outer box glow
+    screen.style.borderColor = nextTheme.main;
+    screen.style.boxShadow = `0 0 30px ${nextTheme.glow}, inset 0 0 25px ${nextTheme.glow}`;
+    
+    screen.style.display = 'flex';
+}
+
+function resumeFromLoopTransition() {
+    document.getElementById('loop-screen').style.display = 'none';
+    gameState = 'PLAYING';
+    playSound('collect');
+}
+
 // --- INPUT HANDLER ---
 const handleInput = (action) => {
     if (gameState === 'START') startGame();
+    else if (gameState === 'LOOP_TRANSITION') resumeFromLoopTransition(); // <-- ADD THIS    
     else if (gameState === 'PLAYING') {
         if (action === 'jump') rover.jump();
         if (action === 'shoot') rover.shoot();
@@ -738,6 +783,7 @@ function togglePause() {
 function quitGame() {
     gameState = 'START';
     document.getElementById('pause-screen').style.display = 'none';
+    document.getElementById('loop-screen').style.display = 'none'; // <-- ADD THIS
     document.getElementById('start-screen').style.display = 'flex';
     document.getElementById('hud').style.display = 'none';
     document.getElementById('hud-title').style.display = 'none';
@@ -805,9 +851,14 @@ window.addEventListener('touchstart', e => {
 window.addEventListener('touchend', e => handleRelease('jump'));
 
 window.addEventListener('mousedown', e => {
+    if (gameState === 'LOOP_TRANSITION') {
+        resumeFromLoopTransition();
+        return;
+    }
     if (e.button === 0) handleInput('shoot');
     if (e.button === 2) { e.preventDefault(); handleInput('jump'); }
 });
+    
 window.addEventListener('mouseup', e => { if (e.button === 2) handleRelease('jump'); });
 window.addEventListener('contextmenu', e => e.preventDefault()); 
 
@@ -952,6 +1003,7 @@ function startGame() {
     gameState = 'PLAYING';
     document.getElementById('start-screen').style.display = 'none';
     document.getElementById('game-over-screen').style.display = 'none';
+    document.getElementById('loop-screen').style.display = 'none'; // <-- ADD THIS
     document.getElementById('hud').style.display = 'block';
     document.getElementById('hud-title').style.display = 'block';
     
@@ -1076,12 +1128,17 @@ function update() {
         transitionProgress = 0.0;
     }
 
-    if (newLoopIndex !== currentLoopIndex) {
+if (newLoopIndex !== currentLoopIndex) {
         currentLoopIndex = newLoopIndex;
-        document.getElementById('score-loop').innerText = currentLoopIndex + 1;
+        const nextLoopNum = currentLoopIndex + 1;
+        document.getElementById('score-loop').innerText = nextLoopNum;
         
         currentThemeIndex = currentLoopIndex % THEMES.length;
         updateTheme();
+
+        // Pauses physics & surfaces the neon transition box without stopping BGM
+        triggerLoopTransition(nextLoopNum);
+        return; // <-- ADD THIS LINE
     }
 
     // 1. Passive acceleration steadily builds baseline speed
