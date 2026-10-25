@@ -1565,51 +1565,53 @@ function draw() {
     });
     ctx.restore(); // <-- RESTORES HD CONTEXT TRANSFORMATION
 
-    // --- SPEED MILESTONE NOTIFICATION ---
+// --- SPEED MILESTONE NOTIFICATION (TRUE DEAD CENTER) ---
     if (speedNotification.timer > 0) {
         const progress = speedNotification.timer / speedNotification.maxTimer;
-        // Fade in rapidly during the first 0.2s, stay visible, then fade out
+        
+        // Fast fade-in, steady display, smooth fade-out
         let alpha = 1.0;
         if (progress > 0.85) {
             alpha = (1.0 - progress) / 0.15;
-        } else if (progress < 0.3) {
-            alpha = progress / 0.3;
+        } else if (progress < 0.25) {
+            alpha = progress / 0.25;
         }
 
-        // Slight upward drift as it displays
-        const yOffset = (1.0 - progress) * 16;
+        // Drifts subtly upward around the true center
+        const yDrift = (0.5 - progress) * 10; 
         const centerX = GAME_W / 2;
-        const centerY = (GAME_H / 2) - 40 - yOffset;
+        const centerY = (GAME_H / 2) + yDrift;
 
         ctx.save();
         ctx.globalAlpha = alpha;
 
-        // Subtle dark backdrop pill to keep it readable against mountains & sun
-        ctx.fillStyle = 'rgba(5, 5, 8, 0.75)';
+        // Backdrop badge
+        const boxW = 200;
+        const boxH = 52;
+        
+        ctx.fillStyle = 'rgba(6, 4, 10, 0.82)';
         ctx.strokeStyle = '#d4a24e';
         ctx.lineWidth = 1.5;
         ctx.shadowColor = '#d4a24e';
-        ctx.shadowBlur = 12;
+        ctx.shadowBlur = 14;
 
-        const boxW = 180;
-        const boxH = 48;
-        ctx.strokeRect(centerX - boxW / 2, centerY - boxH / 2, boxW, boxH);
         ctx.fillRect(centerX - boxW / 2, centerY - boxH / 2, boxW, boxH);
+        ctx.strokeRect(centerX - boxW / 2, centerY - boxH / 2, boxW, boxH);
 
-        // Subtitle tag
+        // Header / Tag
         ctx.shadowBlur = 0;
-        ctx.font = '14px "VT323", monospace';
-        ctx.fillStyle = '#888';
+        ctx.font = '15px "VT323", monospace';
+        ctx.fillStyle = '#998877';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText('VELOCITY TIER', centerX, centerY - 12);
+        ctx.fillText('VELOCITY TIER', centerX, centerY - 13);
 
-        // Speed readout in glowing amber
-        ctx.font = 'bold 26px "VT323", monospace';
+        // Main Speed Readout
+        ctx.font = 'bold 28px "VT323", monospace';
         ctx.fillStyle = '#ffcc66';
         ctx.shadowColor = '#d4a24e';
-        ctx.shadowBlur = 8;
-        ctx.fillText(speedNotification.text, centerX, centerY + 10);
+        ctx.shadowBlur = 10;
+        ctx.fillText(speedNotification.text, centerX, centerY + 12);
 
         ctx.restore();
     }
