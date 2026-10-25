@@ -1565,11 +1565,16 @@ function draw() {
     });
     ctx.restore(); // <-- RESTORES HD CONTEXT TRANSFORMATION
 
-// --- SPEED MILESTONE NOTIFICATION (TRUE DEAD CENTER) ---
+// --- SPEED MILESTONE NOTIFICATION (FIXED CENTER) ---
     if (speedNotification.timer > 0) {
+        ctx.save();
+        
+        // Reset transform to pure pixel space so scaling doesn't offset it
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+
         const progress = speedNotification.timer / speedNotification.maxTimer;
         
-        // Fast fade-in, steady display, smooth fade-out
+        // Fade in / out calculation
         let alpha = 1.0;
         if (progress > 0.85) {
             alpha = (1.0 - progress) / 0.15;
@@ -1577,41 +1582,43 @@ function draw() {
             alpha = progress / 0.25;
         }
 
-        // Drifts subtly upward around the true center
-        const yDrift = (0.5 - progress) * 10; 
-        const centerX = GAME_W / 2;
-        const centerY = (GAME_H / 2) + yDrift;
+        // True center of the actual canvas element on screen
+        const centerX = canvas.width / 2;
+        // Scale factor relative to baseline so font/box size scale up nicely in HD
+        const scale = canvas.height / 500;
+        
+        const yDrift = (0.5 - progress) * (15 * scale);
+        const centerY = (canvas.height / 2) + yDrift;
 
-        ctx.save();
         ctx.globalAlpha = alpha;
 
-        // Backdrop badge
-        const boxW = 200;
-        const boxH = 52;
+        const boxW = 220 * scale;
+        const boxH = 56 * scale;
         
-        ctx.fillStyle = 'rgba(6, 4, 10, 0.82)';
+        // Background badge
+        ctx.fillStyle = 'rgba(6, 4, 10, 0.85)';
         ctx.strokeStyle = '#d4a24e';
-        ctx.lineWidth = 1.5;
+        ctx.lineWidth = 1.5 * scale;
         ctx.shadowColor = '#d4a24e';
-        ctx.shadowBlur = 14;
+        ctx.shadowBlur = 14 * scale;
 
         ctx.fillRect(centerX - boxW / 2, centerY - boxH / 2, boxW, boxH);
         ctx.strokeRect(centerX - boxW / 2, centerY - boxH / 2, boxW, boxH);
 
-        // Header / Tag
+        // Header / Subtitle
         ctx.shadowBlur = 0;
-        ctx.font = '15px "VT323", monospace';
+        ctx.font = `${Math.round(16 * scale)}px "VT323", monospace`;
         ctx.fillStyle = '#998877';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText('VELOCITY TIER', centerX, centerY - 13);
+        ctx.fillText('VELOCITY TIER', centerX, centerY - (13 * scale));
 
-        // Main Speed Readout
-        ctx.font = 'bold 28px "VT323", monospace';
+        // Speed text
+        ctx.font = `bold ${Math.round(28 * scale)}px "VT323", monospace`;
         ctx.fillStyle = '#ffcc66';
         ctx.shadowColor = '#d4a24e';
-        ctx.shadowBlur = 10;
-        ctx.fillText(speedNotification.text, centerX, centerY + 12);
+        ctx.shadowBlur = 10 * scale;
+        ctx.fillText(speedNotification.text, centerX, centerY + (12 * scale));
 
         ctx.restore();
     }
