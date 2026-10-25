@@ -61,13 +61,20 @@
                 0 0 40px rgba(212, 162, 78, 0.2), 
                 inset 0 0 80px rgba(0,0,0,0.8);
             background-color: #08060a; 
-            image-rendering: pixelated;
             transition: box-shadow 1s ease;
             user-select: none; 
             -webkit-user-select: none;
             -moz-user-select: none;
             -ms-user-select: none;
             cursor: crosshair;
+        }
+
+        /* Maximizes container when browser is in fullscreen mode */
+        :fullscreen #game-container,
+        :-webkit-full-screen #game-container {
+            width: min(100vw, calc(100vh * 2));
+            max-height: 100vh;
+            border: none;
         }
 
         /* Fullscreen button styling */
@@ -345,6 +352,26 @@ if (/Mobi|Android|iPhone|iPad|iPod|Opera Mini|IEMobile/i.test(navigator.userAgen
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
+// --- HD RESOLUTION ENGINE ---
+const GAME_W = 1000;
+const GAME_H = 500;
+
+function resizeCanvas() {
+    // Uses devicePixelRatio (up to 2x for razor sharpness without frame drops)
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const rect = canvas.getBoundingClientRect();
+    if (rect.width === 0 || rect.height === 0) return;
+    
+    canvas.width = Math.round(rect.width * dpr);
+    canvas.height = Math.round(rect.height * dpr);
+    
+    // Clear cached gradient so it recalculates cleanly at new resolution
+    cachedBeamGrad = null;
+}
+
+window.addEventListener('resize', resizeCanvas);
+document.addEventListener('fullscreenchange', resizeCanvas);
+
 // --- MUSIC CONFIGURATION ---
 const MUSIC_FILE = 'nahla_theme.mp3'; 
 const MUSIC_VOLUME = 0.5;
@@ -592,7 +619,7 @@ function createStar(speedMult) {
     else if (r > 0.8) color = '255, 220, 100'; 
     
     return {
-        x: Math.random() * canvas.width,
+        x: Math.random() * GAME_W,
         y: Math.random() * (GROUND_Y - 50),
         size: Math.random() * 1.8,
         speedMult: speedMult,
@@ -888,58 +915,43 @@ function resetGame() {
 function spawnObstacle() {
     const r = Math.random();
     let type = r > 0.8 ? 'CRATER' : (r > 0.6 ? 'DEBRIS' : (r > 0.45 ? 'SPIKE' : 'ROCK'));
-    obstacles.push({ x: canvas.width + 50, y: GROUND_Y, width: 30, height: 30, type: type, hp: 1 });
+    obstacles.push({ x: GAME_W + 50, y: GROUND_Y, width: 30, height: 30, type: type, hp: 1 });
 }
 
 function spawnSample() {
     const r = Math.random();
     let value = 50;
-    let color = '#61dafb'; // Default Cyan (Blue)
-
-    // Logic: 
-    // Amber (100pts) is ~13% chance (approx 1/5th frequency of blue)
-    // Pink (75pts) is ~22% chance (approx 1/3rd frequency of blue)
-    // Blue (50pts) is ~65% chance (remaining)
-    
-    if (r > 0.87) { 
-        value = 100;
-        color = '#d4a24e'; // Amber
-    } else if (r > 0.65) { 
-        value = 75;
-        color = '#ff61c7'; // Pink/Magenta
-    }
+    let color = '#61dafb';
+    if (r > 0.87) { value = 100; color = '#d4a24e'; }
+    else if (r > 0.65) { value = 75; color = '#ff61c7'; }
 
     samples.push({ 
-        x: canvas.width + 50, 
+        x: GAME_W + 50, 
         y: GROUND_Y - 60 - (Math.random() * 40), 
-        size: 12, 
-        rotation: 0,
-        value: value, 
-        color: color 
+        size: 12, rotation: 0, value: value, color: color 
     });
 }
 
 function spawnBgMeteor() {
     bgMeteors.push({
-        x: canvas.width + Math.random() * 200,
-        y: Math.random() * 200, // High in sky
+        x: GAME_W + Math.random() * 200,
+        y: Math.random() * 200,
         length: 40 + Math.random() * 60,
-        speed: 12 + Math.random() * 4, // Fast, but visually behind
+        speed: 12 + Math.random() * 4,
         alpha: 0.3 + Math.random() * 0.3
     });
 }
 
-
 function spawnMiniCrater() {
-    miniCraters.push({ x: canvas.width + 20, y: GROUND_Y + 15 + Math.random() * 30, width: 10 + Math.random() * 15, height: 3 + Math.random() * 3 });
+    miniCraters.push({ x: GAME_W + 20, y: GROUND_Y + 15 + Math.random() * 30, width: 10 + Math.random() * 15, height: 3 + Math.random() * 3 });
 }
 
 function spawnMeteor() {
-    meteors.push({ x: canvas.width + Math.random() * 200, y: -50, vx: -8 - Math.random() * 4, vy: 4 + Math.random() * 2, size: 4 + Math.random() * 4 });
+    meteors.push({ x: GAME_W + Math.random() * 200, y: -50, vx: -8 - Math.random() * 4, vy: 4 + Math.random() * 2, size: 4 + Math.random() * 4 });
 }
 
 function spawnDustStreak() {
-    dustStreaks.push({ x: canvas.width + 50, y: GROUND_Y - 10 - Math.random() * 100, length: 20 + Math.random() * 40, speed: 8 + Math.random() * 4 });
+    dustStreaks.push({ x: GAME_W + 50, y: GROUND_Y - 10 - Math.random() * 100, length: 20 + Math.random() * 40, speed: 8 + Math.random() * 4 });
 }
 
 function update() {
@@ -1188,7 +1200,7 @@ function update() {
     [starsSlow, starsMed, starsFast].forEach(layer => {
         layer.forEach(star => {
             star.x -= (gameSpeed * star.speedMult * 0.1); 
-            if(star.x < 0) star.x = canvas.width;
+            if (star.x < 0) star.x = GAME_W;
         });
     });
 
@@ -1198,6 +1210,10 @@ function update() {
 }
 
 function draw() {
+    ctx.save();
+    // Scale all 1000x500 coordinates up to the screen's real physical resolution
+    ctx.scale(canvas.width / GAME_W, canvas.height / GAME_H);
+
     const theme = THEMES[currentThemeIndex];
     
     const activeSkyTop = lerpColor(currentLighting.skyTop, targetLighting.skyTop, transitionProgress);
@@ -1206,11 +1222,12 @@ function draw() {
     const activeStars  = lerp(currentLighting.stars, targetLighting.stars, transitionProgress);
     const activeHaze   = lerpRgba(currentLighting.haze, targetLighting.haze, transitionProgress);
 
-    const skyGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+    // Sky Background
+    const skyGrad = ctx.createLinearGradient(0, 0, 0, GAME_H);
     skyGrad.addColorStop(0, activeSkyTop); 
     skyGrad.addColorStop(1, activeSkyBot); 
     ctx.fillStyle = skyGrad;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillRect(0, 0, GAME_W, GAME_H);
 
     [starsSlow, starsMed].forEach(layer => {
         layer.forEach(star => {
@@ -1221,55 +1238,46 @@ function draw() {
         });
     });
 
-    // --- DRAW BACKGROUND METEORS (Behind mountains) ---
+    // Background Meteors
     ctx.save();
     bgMeteors.forEach(bm => {
         ctx.strokeStyle = `rgba(255, 255, 255, ${bm.alpha})`;
         ctx.lineWidth = 1;
         ctx.beginPath();
         ctx.moveTo(bm.x, bm.y);
-        ctx.lineTo(bm.x - bm.length, bm.y - bm.length * 0.2); // Slight angle up/left trail
+        ctx.lineTo(bm.x - bm.length, bm.y - bm.length * 0.2);
         ctx.stroke();
     });
     ctx.restore();
 
-    // --- DRAW "HOPE" (THE SUN) ---
-    // Only visible during phases 0-8 (Dawn to Dusk)
+    // The Sun ("Hope")
     let loopScore = visualScore % (12 * POINTS_PER_PHASE);
-    let dayRange = 9 * POINTS_PER_PHASE; // 900 points is the end of Dusk
-    
+    let dayRange = 9 * POINTS_PER_PHASE;
     let sunX = -999;
     let sunY = -999;
 
     if (loopScore < dayRange) {
-        let t = loopScore / dayRange; // 0.0 (Dawn Start) to 1.0 (Dusk End)
-        
-        // Arc Logic:
-        // X moves from Left (50) to Right (950)
-        // Y moves in a sine wave: Peaks at t=0.5 (Noon)
-        sunX = 100 + t * (canvas.width - 200);
-        sunY = 350 - Math.sin(t * Math.PI) * 280; // High arc
+        let t = loopScore / dayRange;
+        sunX = 100 + t * (GAME_W - 200);
+        sunY = 350 - Math.sin(t * Math.PI) * 280;
 
         ctx.save();
         ctx.translate(sunX, sunY);
-        // Glow (Subtle and smaller)
-        const sunGlow = ctx.createRadialGradient(0, 0, 5, 0, 0, 30); // Reduced radius 40 -> 30
-        
-        // UPDATED: More Cyan/Blue
-        sunGlow.addColorStop(0, 'rgba(160, 240, 255, 0.6)'); // Distinct Cyan/Blue
+        const sunGlow = ctx.createRadialGradient(0, 0, 5, 0, 0, 30);
+        sunGlow.addColorStop(0, 'rgba(160, 240, 255, 0.6)');
         sunGlow.addColorStop(0.4, 'rgba(160, 240, 255, 0.15)'); 
         sunGlow.addColorStop(1, 'rgba(160, 240, 255, 0)');
-        
         ctx.fillStyle = sunGlow;
         ctx.fillRect(-30, -30, 60, 60);
 
-        // Core (Bluer White)
         ctx.fillStyle = 'rgba(220, 250, 255, 0.9)';
         ctx.beginPath();
-        ctx.arc(0, 0, 5, 0, Math.PI*2); // Reduced core 6 -> 5
+        ctx.arc(0, 0, 5, 0, Math.PI*2);
         ctx.fill();
         ctx.restore();
     }
+
+    // Rebekah (Planet) & Rings remain as they are...
 
 
     // REBEKAH (Planet)
@@ -1371,9 +1379,9 @@ function draw() {
     });
 
     // --- DRAW MOUNTAINS (NEW & SMOOTHER) ---
+    // MOUNTAINS
     const mountainColor = lerpColor(theme.main, '#000000', 0.85); 
     ctx.fillStyle = mountainColor;
-    
     ctx.beginPath();
     ctx.moveTo(0, GROUND_Y + 10);
     for (let i = 0; i < mountains.length; i++) {
@@ -1381,19 +1389,18 @@ function draw() {
         let my = GROUND_Y + 10 - mountains[i];
         ctx.lineTo(mx, my);
     }
-    ctx.lineTo(canvas.width, GROUND_Y + 10);
+    ctx.lineTo(GAME_W, GROUND_Y + 10);
     ctx.fill();
-
 
     // GROUND
     ctx.fillStyle = activeGround; 
-    ctx.fillRect(0, GROUND_Y + 10, canvas.width, canvas.height - GROUND_Y);
+    ctx.fillRect(0, GROUND_Y + 10, GAME_W, GAME_H - GROUND_Y);
     
-    const hazeGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+    const hazeGrad = ctx.createLinearGradient(0, 0, 0, GAME_H);
     hazeGrad.addColorStop(0, activeHaze); 
     hazeGrad.addColorStop(0.6, 'rgba(0,0,0,0)');
     ctx.fillStyle = hazeGrad;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillRect(0, 0, GAME_W, GAME_H);
 
     ctx.strokeStyle = theme.main; 
     ctx.lineWidth = 2;
@@ -1401,9 +1408,9 @@ function draw() {
     ctx.shadowBlur = 10;
     ctx.beginPath();
     ctx.moveTo(0, GROUND_Y + 10);
-    ctx.lineTo(canvas.width, GROUND_Y + 10);
+    ctx.lineTo(GAME_W, GROUND_Y + 10);
     ctx.stroke();
-    ctx.shadowBlur = 0; 
+    ctx.shadowBlur = 0;
 
     ctx.fillStyle = 'rgba(30, 20, 10, 0.5)'; 
     miniCraters.forEach(mc => {
@@ -1523,6 +1530,7 @@ function draw() {
     dustStreaks.forEach(d => {
         ctx.fillRect(d.x, d.y, d.length, 1);
     });
+    ctx.restore(); // <-- RESTORES HD CONTEXT TRANSFORMATION
 }
 
 function loop() {
@@ -1530,7 +1538,8 @@ function loop() {
     draw();
     requestAnimationFrame(loop);
 }
-
+    
+resizeCanvas();
 loop();
 
 </script>
