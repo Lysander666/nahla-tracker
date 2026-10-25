@@ -299,7 +299,7 @@
         <div class="hud-title" id="hud-title">SULPHUR RUN</div>
 
         <div class="ui-layer" id="start-screen">
-            <h1 id="title-text" style="text-shadow: 2px 2px 0px #444, -2px -2px 0px #d4a24e;">SULPHUR RUN v0.31</h1>
+            <h1 id="title-text" style="text-shadow: 2px 2px 0px #444, -2px -2px 0px #d4a24e;">SULPHUR RUN v0.32</h1>
             <p>SRV SIMULATION // NAHLA SURFACE</p>
             <p class="blink" id="start-blink">[PRESS SPACE or CLICK MOUSE TO START]</p>
             
@@ -331,6 +331,7 @@
             <p>DISTANCE: <span id="final-dist" style="color:#fff">0</span>m</p>
             <p>DATA COLLECTED: <span id="final-data" style="color:#fff">0</span></p>
             <p>MAX PHASE: <span id="final-phase" style="color:#fff">α</span></p>
+            <p>VELOCITY TIER: <span id="final-speed" style="color:#ffcc66">0.0 km/h</span></p>
             <p class="blink">[PRESS SPACE TO REBOOT]</p>
         </div>
     </div>
@@ -1099,6 +1100,7 @@ function update() {
              document.getElementById('final-dist').innerText = Math.floor(scoreDist);
              document.getElementById('final-data').innerText = scoreData;
              document.getElementById('final-phase').innerText = GREEK_PHASES[currentPhaseIndex];
+             document.getElementById('final-speed').innerText = `${(Math.floor(gameSpeed * 2) / 2).toFixed(1)} km/h`;
              document.getElementById('hud-title').style.display = 'none';
         }
 
@@ -1179,6 +1181,7 @@ function update() {
             document.getElementById('final-dist').innerText = Math.floor(scoreDist);
             document.getElementById('final-data').innerText = scoreData;
             document.getElementById('final-phase').innerText = GREEK_PHASES[currentPhaseIndex];
+            document.getElementById('final-speed').innerText = `${(Math.floor(gameSpeed * 2) / 2).toFixed(1)} km/h`;
             document.getElementById('hud-title').style.display = 'none';
             
             for(let j=0; j<30; j++) {
@@ -1587,7 +1590,7 @@ function draw() {
         // Scale factor relative to baseline so font/box size scale up nicely in HD
         const scale = canvas.height / 500;
         
-        const yDrift = (0.5 - progress) * (15 * scale);
+        const yDrift = (progress - 0.5) * (20 * scale);
         const centerY = (canvas.height / 2) + yDrift;
 
         ctx.globalAlpha = alpha;
