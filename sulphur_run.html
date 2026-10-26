@@ -225,18 +225,36 @@
 
         .hud-shields-bar {
             position: absolute;
-            top: 68px; /* sits right flush under the 25px top HUD */
+            top: 67px;
             left: 25px;
-            font-size: 1.15rem;
-            color: #d4a24e;
+            font-size: 1.4rem; /* Exactly matches the main HUD for crisp pixel rendering */
+            color: #d4a24e;    /* Matches DIST/DATA label color */
+            text-shadow: 0 0 8px #d4a24e;
             display: none;
-            background: rgba(0, 0, 0, 0.7);
-            padding: 4px 14px;
-            border-left: 4px solid #61dafb; /* Cyan accent for shields */
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-            letter-spacing: 2px;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 4px 16px;
+            border-left: 4px solid #61dafb;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            line-height: 1;
             user-select: none;
             pointer-events: none;
+        }
+
+        /* If JS sets style.display = 'block', ensure flex alignment stays active */
+        .hud-shields-bar[style*="display: block"],
+        .hud-shields-bar[style*="display: flex"] {
+            display: flex !important;
+        }
+
+        .hud-shields-pips {
+            color: #61dafb;
+            text-shadow: 0 0 8px #61dafb;
+            margin-left: 8px;
+            letter-spacing: 4px;
+            display: inline-flex;
+            align-items: center;
+            transform: translateY(-1px); /* Nudges fallback glyph onto VT323 text baseline */
         }
 
         .hud-shields-bar span {
@@ -319,8 +337,8 @@
         </div>
 
         <div class="hud-shields-bar" id="hud-shields-bar">
-    <span style="color: #888; font-size: 1.1rem; letter-spacing: 1px; margin-right: 6px;">SHIELDS:</span><span id="hud-shields">⬡ ⬡ ⬡</span>
-</div>
+            SHIELDS: <span class="hud-shields-pips" id="hud-shields">⬡ ⬡ ⬡</span>
+        </div>
 
         <div class="hud-title" id="hud-title">SULPHUR RUN</div>
 
