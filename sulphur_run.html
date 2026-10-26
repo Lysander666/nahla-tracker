@@ -223,6 +223,23 @@
             transition: color 1s ease, border-color 1s ease, text-shadow 1s ease;
         }
 
+        .hud-shields-bar {
+            position: absolute;
+            top: 72px;
+            left: 28px;
+            font-size: 1.35rem;
+            color: #61dafb;
+            text-shadow: 0 0 10px #61dafb;
+            letter-spacing: 4px;
+            display: none;
+            background: transparent;
+            padding: 0;
+            border: none;
+            box-shadow: none;
+            user-select: none;
+            pointer-events: none;
+        }
+
         /* UPDATED TITLE STYLING */
         .hud-title {
             position: absolute;
@@ -293,14 +310,17 @@
             DATA: <span id="score-data" style="color:#fff">0</span> <span style="color:#555">|</span> 
             PHASE: <span id="score-phase" style="font-weight:bold; color: #61dafb; text-shadow: 0 0 5px #61dafb;">α</span> <span style="color:#555">|</span>
             LOOP: <span id="score-loop" style="color:#d4a24e">1</span> <span style="color:#555">|</span>
-            SHIELD: <span id="hud-shields" style="color:#61dafb; letter-spacing: 2px;">⬡ ⬡ ⬡</span> <span style="color:#555">|</span>
             SPD: <span id="score-speed" style="color:#fff">0</span> km/h
+        </div>
+
+        <div class="hud-shields-bar" id="hud-shields-bar">
+            <span id="hud-shields">⬡ ⬡ ⬡</span>
         </div>
 
         <div class="hud-title" id="hud-title">SULPHUR RUN</div>
 
         <div class="ui-layer" id="start-screen">
-            <h1 id="title-text" style="text-shadow: 2px 2px 0px #444, -2px -2px 0px #d4a24e;">SULPHUR RUN v0.41</h1>
+            <h1 id="title-text" style="text-shadow: 2px 2px 0px #444, -2px -2px 0px #d4a24e;">SULPHUR RUN v0.42</h1>
             <p>SRV SIMULATION // NAHLA SURFACE</p>
             <p class="blink" id="start-blink">[PRESS SPACE or CLICK MOUSE TO START]</p>
             
@@ -511,35 +531,7 @@ draw: function() {
         ctx.save();
         ctx.translate(this.x + this.width / 2, this.y + this.height / 2);
 
-        // --- ACTIVE KINETIC SHIELD BUBBLE ---
-        if (shields > 0) {
-            ctx.save();
-            const pulse = Math.sin(frames * 0.1) * 3;
-            const shieldRad = 32 + pulse;
-            const theme = THEMES[currentThemeIndex];
-            
-            ctx.strokeStyle = '#61dafb';
-            ctx.shadowColor = '#61dafb';
-            ctx.shadowBlur = 12;
-            ctx.lineWidth = shields > 1 ? 2.5 : 1.5;
-            
-            // Draw regular hexagon energy perimeter
-            ctx.beginPath();
-            for (let i = 0; i < 6; i++) {
-                const angle = (Math.PI / 3) * i + (frames * 0.02);
-                const hx = Math.cos(angle) * shieldRad;
-                const hy = Math.sin(angle) * (shieldRad * 0.7);
-                if (i === 0) ctx.moveTo(hx, hy);
-                else ctx.lineTo(hx, hy);
-            }
-            ctx.closePath();
-            ctx.stroke();
-
-            // Faint plasma interior fill
-            ctx.fillStyle = 'rgba(97, 218, 251, 0.08)';
-            ctx.fill();
-            ctx.restore();
-        }
+ 
         
         // 1. DYNAMIC SUSPENSION & PITCH
         let targetAngle = Math.min(Math.max(this.dy * 0.05, -0.3), 0.3);
@@ -847,6 +839,7 @@ function quitGame() {
     document.getElementById('loop-screen').style.display = 'none'; // <-- ADD THIS
     document.getElementById('start-screen').style.display = 'flex';
     document.getElementById('hud').style.display = 'none';
+    document.getElementById('hud-shields-bar').style.display = 'none';
     document.getElementById('hud-title').style.display = 'none';
     rover.y = GROUND_Y; 
     obstacles = [];
@@ -1074,6 +1067,7 @@ function startGame() {
     document.getElementById('game-over-screen').style.display = 'none';
     document.getElementById('loop-screen').style.display = 'none'; // <-- ADD THIS
     document.getElementById('hud').style.display = 'block';
+    document.getElementById('hud-shields-bar').style.display = 'block';
     document.getElementById('hud-title').style.display = 'block';
     
     // UPDATED SPEED: Starts at 7 for faster start
@@ -1379,6 +1373,7 @@ function update() {
                 document.getElementById('final-phase').innerText = GREEK_PHASES[currentPhaseIndex];
                 document.getElementById('final-speed').innerText = `${(Math.floor(baseSpeed * 2) / 2).toFixed(1)} km/h`;
                 document.getElementById('hud-title').style.display = 'none';
+                document.getElementById('hud-shields-bar').style.display = 'none';
 
                 for (let j = 0; j < 30; j++) {
                     addParticle({
