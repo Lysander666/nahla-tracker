@@ -1261,13 +1261,13 @@ function update() {
     // 2. Throttle / Brake
     let targetSpeed = baseSpeed;
     if (keys.boost) {
-        targetSpeed = baseSpeed + 3.0;
+        targetSpeed = baseSpeed + 4.5; // Increased from +3.0 km/h for a faster top-end kick
     } else if (keys.brake) {
         targetSpeed = Math.max(4.0, baseSpeed - 3.0);
     }
 
-    // 3. Smooth inertia
-    gameSpeed += (targetSpeed - gameSpeed) * 0.08;
+    // 3. Smooth inertia (0.10 snaps into the boost a touch faster than 0.08)
+    gameSpeed += (targetSpeed - gameSpeed) * 0.10;
 
     // 4. Milestone alerts
     const currentHalfTier = Math.floor(baseSpeed * 2) / 2;
