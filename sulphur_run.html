@@ -251,17 +251,17 @@
         .hud-shields-pips {
             color: #61dafb;
             text-shadow: 0 0 8px #61dafb;
-            margin-left: 14px;
+            margin-left: 14px; /* <--- You set 14px here */
             letter-spacing: 4px;
             display: inline-flex;
             align-items: center;
-            transform: translateY(-1px); /* Nudges fallback glyph onto VT323 text baseline */
+            transform: translateY(-1px);
         }
 
-        .hud-shields-bar span {
+        .hud-shields-bar span { /* <--- THIS OVERRIDES IT! */
             color: #61dafb;
             text-shadow: 0 0 6px #61dafb;
-            margin-left: 6px;
+            margin-left: 6px; /* Squeezes it back to 6px */
         }
 
         /* UPDATED TITLE STYLING */
@@ -344,7 +344,7 @@
         <div class="hud-title" id="hud-title">SULPHUR RUN</div>
 
         <div class="ui-layer" id="start-screen">
-            <h1 id="title-text" style="text-shadow: 2px 2px 0px #444, -2px -2px 0px #d4a24e;">SULPHUR RUN v0.42</h1>
+            <h1 id="title-text" style="text-shadow: 2px 2px 0px #444, -2px -2px 0px #d4a24e;">SULPHUR RUN v0.43</h1>
             <p>SRV SIMULATION // NAHLA SURFACE</p>
             <p class="blink" id="start-blink">[PRESS SPACE or CLICK MOUSE TO START]</p>
             
@@ -384,6 +384,7 @@
             <p style="color:#ff4444; text-shadow: 0 0 10px red;">SRV IN REPAIR!</p>
             <p>DISTANCE: <span id="final-dist" style="color:#fff">0</span>m</p>
             <p>DATA COLLECTED: <span id="final-data" style="color:#fff">0</span></p>
+            <p>SURVIVAL TIME: <span id="final-time" style="color:#fff">00:00</span></p>
             <p>MAX PHASE: <span id="final-phase" style="color:#fff">α</span></p>
             <p>VELOCITY TIER: <span id="final-speed" style="color:#ffcc66">0.0 km/h</span></p>
             <p class="blink">[PRESS SPACE TO REBOOT]</p>
@@ -399,6 +400,16 @@ let speedNotification = {
     timer: 0,
     maxTimer: 120 // ~2 seconds at 60fps
 };    
+
+    // --- RUN TIMER STATE ---
+let runFrames = 0;
+
+function formatRunTime(framesCount) {
+    const totalSeconds = Math.floor(framesCount / 60);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+}
 
     // --- SHIELD SYSTEM STATE ---
 let shields = 0;
@@ -1097,6 +1108,7 @@ function startGame() {
     // UPDATED SPEED: Starts at 7 for faster start
     baseSpeed = 8;
     gameSpeed = 8;
+    runFrames = 0;
     keys.boost = false;
     keys.brake = false;
     scoreDist = 0;
@@ -1214,6 +1226,7 @@ function update() {
     if (gameState !== 'PLAYING') return;
 
     frames++;
+    runFrames++;
 
     if (invulnerableTimer > 0) invulnerableTimer--;
 
@@ -1393,11 +1406,12 @@ function update() {
                 playSound('hit');
                 document.getElementById('game-over-screen').style.display = 'flex';
                 document.getElementById('final-dist').innerText = Math.floor(scoreDist);
+                document.getElementById('final-time').innerText = formatRunTime(runFrames); // <-- ADD THIS
                 document.getElementById('final-data').innerText = scoreData;
                 document.getElementById('final-phase').innerText = GREEK_PHASES[currentPhaseIndex];
                 document.getElementById('final-speed').innerText = `${(Math.floor(baseSpeed * 2) / 2).toFixed(1)} km/h`;
                 document.getElementById('hud-title').style.display = 'none';
-                document.getElementById('hud-shields-bar').style.display = 'none';
+                document.getElementById('hud-shields-bar').style.display = 'none'; // <-- ADD HERE
 
                 for (let j = 0; j < 30; j++) {
                     addParticle({
@@ -1491,10 +1505,12 @@ function update() {
                 gameState = 'GAMEOVER';
                 document.getElementById('game-over-screen').style.display = 'flex';
                 document.getElementById('final-dist').innerText = Math.floor(scoreDist);
+                document.getElementById('final-time').innerText = formatRunTime(runFrames); // <-- ADD THIS
                 document.getElementById('final-data').innerText = scoreData;
                 document.getElementById('final-phase').innerText = GREEK_PHASES[currentPhaseIndex];
                 document.getElementById('final-speed').innerText = `${(Math.floor(baseSpeed * 2) / 2).toFixed(1)} km/h`;
                 document.getElementById('hud-title').style.display = 'none';
+                document.getElementById('hud-shields-bar').style.display = 'none'; // <-- ADD HERE
             
                 for (let j = 0; j < 30; j++) {
                     addParticle({
