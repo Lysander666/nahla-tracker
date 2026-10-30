@@ -16,7 +16,7 @@
         })();
     </script>
     
-    <title>Sulphur Run: Pâte Sablée Descent V0.91 beta</title>
+    <title>Sulphur Run: Pâte Sablée Descent V0.9 beta</title>
 
     <!-- Primary Metadata -->
     <meta name="title" content="Sulphur Run: Pâte Sablée Descent">
@@ -151,7 +151,17 @@
             </div>
         </div>
 
-      
+        <!-- Floating Portrait HUD Layer (Bottom - Observatory Progress Tracker) -->
+        <div id="bottom-hud" class="absolute bottom-4 left-4 right-4 z-20 hidden pointer-events-none flex flex-col gap-1 text-[1.2rem] sm:text-[1.4rem]">
+            <!-- Observatory Neon Nodes Tracker Bar -->
+            <div class="flex justify-between items-center bg-black/85 border-r-4 border-[#d4a24e] px-3 py-1.5 transition-colors duration-300 rounded shadow-md pointer-events-none">
+                <div class="text-gray-200 font-sans font-bold tracking-wide text-[10px] sm:text-xs">OBSERVATORY PROGRESS:</div>
+                <div id="hud-nodes-container" class="flex gap-1 items-center px-1">
+                    <!-- 16 neon indicators dynamically loaded -->
+                </div>
+                <div id="hud-nodes-count" class="text-[#61dafb] font-bold font-mono text-xs">0/16</div>
+            </div>
+        </div>
 
         <!-- Achievement/Node Toast Notification Overlay -->
         <div id="node-toast" class="absolute left-4 right-4 top-1/4 z-40 hidden flex flex-col items-center justify-center bg-black/85 backdrop-blur-sm border-2 border-double border-white py-5 px-6 rounded-lg shadow-[0_0_25px_rgba(255,255,255,0.3)] transform -translate-y-4 opacity-0 transition-all duration-500 pointer-events-auto text-center">
@@ -167,7 +177,7 @@
         <div id="start-screen" class="absolute inset-0 z-30 flex flex-col justify-center items-center bg-black/95 p-6 text-center select-none overflow-y-auto">
             <div class="transform -skew-x-3 border-2 border-[#d4a24e] bg-[#240e03]/80 p-5 shadow-[0_0_20px_rgba(212,162,78,0.4)] w-full max-w-sm">
                 <h1 class="text-4xl sm:text-5xl font-extrabold text-white tracking-widest uppercase text-shadow neon-amber leading-none mb-1">SULPHUR RUN</h1>
-                <h2 class="text-xl sm:text-2xl text-[#d4a24e] font-bold tracking-wider leading-none mb-3">PÂTE SABLÉE DESCENT v0.91 beta</h2>
+                <h2 class="text-xl sm:text-2xl text-[#d4a24e] font-bold tracking-wider leading-none mb-3">PÂTE SABLÉE DESCENT v0.9 beta</h2>
                 <p class="text-[1.05rem] sm:text-base text-gray-300 font-sans tracking-wide leading-relaxed">
                     Navigate the sulphurous rock walls of Pâte Sablée crater on the moon of Nahla. Blast obstructions, neutralise magma vents, and collect data nodes.
                 </p>
@@ -1870,82 +1880,6 @@
             ctx.stroke();
             
             ctx.shadowBlur = 0;
-
-            // ==========================================
-// OBSERVATORY DUAL-WING FREQUENCY BANKS (FULL HEIGHT)
-// ==========================================
-const railLeftX = 18;                  // Perfectly centered between screen edge & rocky peaks
-const railRightX = LOGICAL_WIDTH - 18; // 342 on right edge
-const topY = 120;                      // Starts comfortably below top HUD telemetry
-const step = 62;                       // Expansive vertical pitch spanning full screen
-const bankGapExtra = 26;               // Distinct visual separation between upper/lower color banks
-const nodeRadius = 7;                  // 14px bold indicator rings
-
-// Count gathered nodes per frequency
-const counts = {
-    amber:   completedNodes.filter(t => t === 'amber').length,
-    cyan:    completedNodes.filter(t => t === 'cyan').length,
-    magenta: completedNodes.filter(t => t === 'magenta').length,
-    crimson: completedNodes.filter(t => t === 'crimson').length
-};
-
-const banks = [
-    // Left Gutter: Amber (top 4), Cyan (bottom 4)
-    { type: 'amber',   color: '#d4a24e', x: railLeftX,  count: counts.amber,   offsetIdx: 0 },
-    { type: 'cyan',    color: '#61dafb', x: railLeftX,  count: counts.cyan,    offsetIdx: 4 },
-    // Right Gutter: Magenta (top 4), Crimson (bottom 4)
-    { type: 'magenta', color: '#ff61c7', x: railRightX, count: counts.magenta, offsetIdx: 0 },
-    { type: 'crimson', color: '#ff4444', x: railRightX, count: counts.crimson, offsetIdx: 4 }
-];
-
-banks.forEach(b => {
-    for (let slot = 0; slot < 4; slot++) {
-        const totalSlotIdx = b.offsetIdx + slot; // 0 through 7
-        const py = topY + (totalSlotIdx * step) + (totalSlotIdx >= 4 ? bankGapExtra : 0);
-        const isCharged = slot < b.count;
-
-        ctx.save();
-        if (isCharged) {
-            // --- CHARGED / COLLECTED NODE ---
-            ctx.shadowColor = b.color;
-            ctx.shadowBlur = 12;
-
-            ctx.fillStyle = b.color;
-            ctx.beginPath();
-            ctx.arc(b.x, py, nodeRadius, 0, Math.PI * 2);
-            ctx.fill();
-
-            ctx.strokeStyle = '#ffffff';
-            ctx.lineWidth = 1.5;
-            ctx.stroke();
-
-            ctx.shadowBlur = 0;
-            ctx.fillStyle = '#ffffff';
-            ctx.beginPath();
-            ctx.arc(b.x, py, 2.5, 0, Math.PI * 2);
-            ctx.fill();
-        } else {
-            // --- EMPTY / UNCOLLECTED SOCKET ---
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-            ctx.beginPath();
-            ctx.arc(b.x, py, nodeRadius, 0, Math.PI * 2);
-            ctx.fill();
-
-            ctx.strokeStyle = b.color;
-            ctx.lineWidth = 1.8;
-            ctx.shadowColor = b.color;
-            ctx.shadowBlur = 4;
-            ctx.stroke();
-
-            ctx.fillStyle = b.color;
-            ctx.globalAlpha = 0.35;
-            ctx.beginPath();
-            ctx.arc(b.x, py, 1.5, 0, Math.PI * 2);
-            ctx.fill();
-        }
-        ctx.restore();
-    }
-});
 
             // Render projectiles (Both standard downward/upward lasers and hazard magma orbs)
             projectiles.forEach(p => {
