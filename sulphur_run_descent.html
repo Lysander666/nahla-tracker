@@ -534,7 +534,7 @@
 
         const rover = {
             x: LOGICAL_WIDTH / 2 - 16,
-            y: 110, 
+            y: 125, 
             width: 32,
             height: 20,
             vx: 0,
@@ -1104,6 +1104,7 @@
             speed = 7.0;
             rover.shield = 100;
             rover.x = LOGICAL_WIDTH / 2 - 16;
+            rover.y = 125; // Add or update this here so it doesn't jump back to 110 on reboot!
             rover.targetX = rover.x;
             rover.vx = 0;
             rover.lastShot = 0; 
@@ -2072,52 +2073,53 @@
 obstacles.forEach(obs => {
     if (obs.type === 'BOULDER' && obs.y < rover.y) {
         // High-energy alert strobe
-        const flash = (Math.sin(frames * 0.4) + 1) / 2;
+        const flash = (Math.sin(frames * 0.45) + 1) / 2;
         const centerX = obs.x + obs.width / 2;
-        const radarY = rover.y - 26; // Floats right above the ship plane (y: 84)
+        // Floats right above the ship's nose (clear of the HUD overlay)
+        const radarY = rover.y - 8; 
 
         ctx.save();
 
-        // 1. Dotted warning trace projecting down behind the ship
-        ctx.strokeStyle = `rgba(255, 179, 71, ${0.3 + flash * 0.4})`;
+        // 1. Dotted lane guide tracer
+        ctx.strokeStyle = `rgba(255, 179, 71, ${0.4 + flash * 0.5})`;
         ctx.lineWidth = 2;
         ctx.setLineDash([4, 4]);
         ctx.beginPath();
-        ctx.moveTo(centerX, radarY - 20);
+        ctx.moveTo(centerX, radarY - 18);
         ctx.lineTo(centerX, radarY - 2);
         ctx.stroke();
         ctx.setLineDash([]);
 
-        // 2. Bright Amber/White Double-Chevron pointing downward at the danger lane
+        // 2. High-visibility Amber Chevron with White-Hot Tip
         ctx.shadowColor = '#ffaa00';
-        ctx.shadowBlur = 12 + flash * 8;
+        ctx.shadowBlur = 14 + flash * 10;
 
-        // Outer Neon Amber Chevron
+        // Outer Neon Amber Triangle
         ctx.fillStyle = '#ffb347';
         ctx.beginPath();
-        ctx.moveTo(centerX - 9, radarY - 8);
-        ctx.lineTo(centerX + 9, radarY - 8);
+        ctx.moveTo(centerX - 10, radarY - 12);
+        ctx.lineTo(centerX + 10, radarY - 12);
         ctx.lineTo(centerX, radarY);
         ctx.closePath();
         ctx.fill();
 
-        // Inner White-Hot Core Chevron
+        // Inner White-Hot Accent
         ctx.fillStyle = '#ffffff';
         ctx.beginPath();
-        ctx.moveTo(centerX - 5, radarY - 7);
-        ctx.lineTo(centerX + 5, radarY - 7);
-        ctx.lineTo(centerX, radarY - 2);
+        ctx.moveTo(centerX - 5, radarY - 11);
+        ctx.lineTo(centerX + 5, radarY - 11);
+        ctx.lineTo(centerX, radarY - 3);
         ctx.closePath();
         ctx.fill();
 
-        // 3. Flanking lane brackets indicating boulder collision width
+        // 3. Lane Hazard Brackets
         ctx.strokeStyle = '#ff9900';
         ctx.lineWidth = 2;
-        const halfW = Math.max(12, obs.width / 2);
+        const halfW = Math.max(14, obs.width / 2);
         ctx.beginPath();
-        ctx.moveTo(centerX - halfW, radarY - 8);
+        ctx.moveTo(centerX - halfW, radarY - 12);
         ctx.lineTo(centerX - halfW, radarY);
-        ctx.moveTo(centerX + halfW, radarY - 8);
+        ctx.moveTo(centerX + halfW, radarY - 12);
         ctx.lineTo(centerX + halfW, radarY);
         ctx.stroke();
 
