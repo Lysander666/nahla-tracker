@@ -1155,8 +1155,13 @@
             } else if (gameState === 'PAUSED') {
                 gameState = 'PLAYING';
                 if (pauseScreen) pauseScreen.style.display = 'none';
-                if (bgm) bgm.play().catch(() => {});
-                startProceduralBGM();
+               if (bgm) {
+    bgm.play().catch(() => {
+        startProceduralBGM();
+    });
+} else {
+    startProceduralBGM();
+}
             }
         }
 
