@@ -812,41 +812,45 @@
 
         // Handle physical rendering of the 16 Observatory frequency tracker dots in the HUD bar
         function updateNodeDisplay() {
-            const container = document.getElementById('hud-nodes-container');
-            if (!container) return;
-            container.innerHTML = '';
-            
-            const nodeColorMap = {
-                'amber': '#d4a24e',
-                'cyan': '#61dafb',
-                'magenta': '#ff61c7',
-                'crimson': '#ff4444'
-            };
-            
-            const expectedTypes = ['amber', 'cyan', 'magenta', 'crimson'];
-            
-            for (let i = 0; i < 16; i++) {
-                const type = expectedTypes[i % 4];
-                const isCompleted = i < completedNodes.length;
-                const dot = document.createElement('div');
-                dot.className = 'w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full border transition-all duration-300';
-                
-                if (isCompleted) {
-                    dot.style.backgroundColor = nodeColorMap[type];
-                    dot.style.borderColor = nodeColorMap[type];
-                    dot.style.boxShadow = `0 0 5px ${nodeColorMap[type]}`;
-                } else {
-                    dot.style.backgroundColor = 'transparent';
-                    dot.style.borderColor = 'rgba(156, 163, 175, 0.25)';
-                }
-                container.appendChild(dot);
-            }
-            
-            const nodesCountEl = document.getElementById('hud-nodes-count');
-            if (nodesCountEl) {
-                nodesCountEl.innerText = `${completedNodes.length}/16`;
-            }
+    const container = document.getElementById('hud-nodes-container');
+    if (!container) return;
+    container.innerHTML = '';
+    
+    const nodeColorMap = {
+        'amber': '#d4a24e',
+        'cyan': '#61dafb',
+        'magenta': '#ff61c7',
+        'crimson': '#ff4444'
+    };
+    
+    const expectedTypes = ['amber', 'cyan', 'magenta', 'crimson'];
+    
+    for (let i = 0; i < 16; i++) {
+        const type = expectedTypes[i % 4];
+        const color = nodeColorMap[type];
+        const isCompleted = i < completedNodes.length;
+        const dot = document.createElement('div');
+        dot.className = 'w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full border transition-all duration-300';
+        
+        if (isCompleted) {
+            // Collected: solid fill with neon bloom
+            dot.style.backgroundColor = color;
+            dot.style.borderColor = color;
+            dot.style.boxShadow = `0 0 6px ${color}`;
+        } else {
+            // Uncollected: hollow circle crisply outlined in its target frequency color
+            dot.style.backgroundColor = 'transparent';
+            dot.style.borderColor = color;
+            dot.style.boxShadow = 'none';
         }
+        container.appendChild(dot);
+    }
+    
+    const nodesCountEl = document.getElementById('hud-nodes-count');
+    if (nodesCountEl) {
+        nodesCountEl.innerText = `${completedNodes.length}/16`;
+    }
+}
 
         // Display glorious retro custom warning overlays on collecting a new node
         function showNodeNotification(typeStr, colorHex, count) {
