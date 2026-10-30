@@ -1872,12 +1872,14 @@
             ctx.shadowBlur = 0;
 
             // ==========================================
-// OBSERVATORY DUAL-WING FREQUENCY BANKS
+// OBSERVATORY DUAL-WING FREQUENCY BANKS (FULL HEIGHT)
 // ==========================================
-const railStartY = 148; // Starts cleanly below the top HUD
-const pipSpacing = 22;  // Ample vertical pitch between large nodes
-const bankGap = 16;     // Clean divider gap between the two color banks
-const nodeRadius = 7;   // Large, prominent 14px circular gauge pips
+const railLeftX = 18;                  // Perfectly centered between screen edge & rocky peaks
+const railRightX = LOGICAL_WIDTH - 18; // 342 on right edge
+const topY = 120;                      // Starts comfortably below top HUD telemetry
+const step = 62;                       // Expansive vertical pitch spanning full screen
+const bankGapExtra = 26;               // Distinct visual separation between upper/lower color banks
+const nodeRadius = 7;                  // 14px bold indicator rings
 
 // Count gathered nodes per frequency
 const counts = {
@@ -1888,39 +1890,35 @@ const counts = {
 };
 
 const banks = [
-    // Left Rail: Amber (top 4), Cyan (bottom 4)
-    { type: 'amber',   color: '#d4a24e', x: 20,  count: counts.amber,   offsetIdx: 0 },
-    { type: 'cyan',    color: '#61dafb', x: 20,  count: counts.cyan,    offsetIdx: 4 },
-    // Right Rail: Magenta (top 4), Crimson (bottom 4)
-    { type: 'magenta', color: '#ff61c7', x: 340, count: counts.magenta, offsetIdx: 0 },
-    { type: 'crimson', color: '#ff4444', x: 340, count: counts.crimson, offsetIdx: 4 }
+    // Left Gutter: Amber (top 4), Cyan (bottom 4)
+    { type: 'amber',   color: '#d4a24e', x: railLeftX,  count: counts.amber,   offsetIdx: 0 },
+    { type: 'cyan',    color: '#61dafb', x: railLeftX,  count: counts.cyan,    offsetIdx: 4 },
+    // Right Gutter: Magenta (top 4), Crimson (bottom 4)
+    { type: 'magenta', color: '#ff61c7', x: railRightX, count: counts.magenta, offsetIdx: 0 },
+    { type: 'crimson', color: '#ff4444', x: railRightX, count: counts.crimson, offsetIdx: 4 }
 ];
 
 banks.forEach(b => {
     for (let slot = 0; slot < 4; slot++) {
-        const totalSlotIdx = b.offsetIdx + slot;
-        const py = railStartY + (totalSlotIdx * pipSpacing) + (b.offsetIdx > 0 ? bankGap : 0);
+        const totalSlotIdx = b.offsetIdx + slot; // 0 through 7
+        const py = topY + (totalSlotIdx * step) + (totalSlotIdx >= 4 ? bankGapExtra : 0);
         const isCharged = slot < b.count;
 
         ctx.save();
         if (isCharged) {
             // --- CHARGED / COLLECTED NODE ---
-            // High-intensity neon bloom
             ctx.shadowColor = b.color;
             ctx.shadowBlur = 12;
 
-            // Solid vibrant color fill
             ctx.fillStyle = b.color;
             ctx.beginPath();
             ctx.arc(b.x, py, nodeRadius, 0, Math.PI * 2);
             ctx.fill();
 
-            // Crisp neon outer ring
             ctx.strokeStyle = '#ffffff';
             ctx.lineWidth = 1.5;
             ctx.stroke();
 
-            // White-hot illuminated center bulb
             ctx.shadowBlur = 0;
             ctx.fillStyle = '#ffffff';
             ctx.beginPath();
@@ -1928,20 +1926,17 @@ banks.forEach(b => {
             ctx.fill();
         } else {
             // --- EMPTY / UNCOLLECTED SOCKET ---
-            // Faint colored glass tint interior
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
             ctx.beginPath();
             ctx.arc(b.x, py, nodeRadius, 0, Math.PI * 2);
             ctx.fill();
 
-            // Distinct colored socket ring in its target frequency
             ctx.strokeStyle = b.color;
             ctx.lineWidth = 1.8;
             ctx.shadowColor = b.color;
             ctx.shadowBlur = 4;
             ctx.stroke();
 
-            // Subtle center guide dot
             ctx.fillStyle = b.color;
             ctx.globalAlpha = 0.35;
             ctx.beginPath();
