@@ -812,46 +812,59 @@
 
         // Handle physical rendering of the 16 Observatory frequency tracker dots in the HUD bar
         function updateNodeDisplay() {
-    const container = document.getElementById('hud-nodes-container');
-    if (!container) return;
-    container.innerHTML = '';
-    
-    const nodeColorMap = {
-        'amber': '#d4a24e',
-        'cyan': '#61dafb',
-        'magenta': '#ff61c7',
-        'crimson': '#ff4444'
-    };
-    
-    const expectedTypes = ['amber', 'cyan', 'magenta', 'crimson'];
-    
-    for (let i = 0; i < 16; i++) {
-        const type = expectedTypes[i % 4];
-        const color = nodeColorMap[type];
-        const isCompleted = i < completedNodes.length;
-        const dot = document.createElement('div');
-        dot.className = 'w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full border transition-all duration-300';
-        
-        if (isCompleted) {
-            // Collected: solid fill with neon bloom
-            dot.style.backgroundColor = color;
-            dot.style.borderColor = color;
-            dot.style.boxShadow = `0 0 6px ${color}`;
-        } else {
-            // Uncollected: hollow circle crisply outlined in its target frequency color
-            dot.style.backgroundColor = 'transparent';
-            dot.style.borderColor = color;
-            dot.style.boxShadow = 'none';
+            const container = document.getElementById('hud-nodes-container');
+            if (!container) return;
+            container.innerHTML = '';
+            
+            const nodeColorMap = {
+                'amber': '#d4a24e',
+                'cyan': '#61dafb',
+                'magenta': '#ff61c7',
+                'crimson': '#ff4444'
+            };
+            
+            const colorQuadrants = ['amber', 'cyan', 'magenta', 'crimson'];
+            
+            // Count collected nodes per frequency
+            const counts = {
+                amber:   completedNodes.filter(t => t === 'amber').length,
+                cyan:    completedNodes.filter(t => t === 'cyan').length,
+                magenta: completedNodes.filter(t => t === 'magenta').length,
+                crimson: completedNodes.filter(t => t === 'crimson').length
+            };
+            
+            for (let i = 0; i < 16; i++) {
+                const quadrantIdx = Math.floor(i / 4); // 0: Amber, 1: Cyan, 2: Magenta, 3: Crimson
+                const slotInQuadrant = i % 4;          // Slots 0, 1, 2, 3 within this color
+                const type = colorQuadrants[quadrantIdx];
+                const color = nodeColorMap[type];
+                const isCompleted = slotInQuadrant < counts[type];
+                
+                // Add a small spacer after every 4th pip (except the last) to create 4 neat quadrants
+                const isQuadrantEnd = (i + 1) % 4 === 0 && i !== 15;
+                const dot = document.createElement('div');
+                dot.className = `w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full border transition-all duration-300 ${isQuadrantEnd ? 'mr-1.5 sm:mr-2' : ''}`;
+                
+                if (isCompleted) {
+                    // Filled and glowing when collected
+                    dot.style.backgroundColor = color;
+                    dot.style.borderColor = color;
+                    dot.style.boxShadow = `0 0 6px ${color}`;
+                } else {
+                    // Outlined in its quadrant color while awaiting collection
+                    dot.style.backgroundColor = 'transparent';
+                    dot.style.borderColor = color;
+                    dot.style.boxShadow = 'none';
+                }
+                container.appendChild(dot);
+            }
+            
+            const nodesCountEl = document.getElementById('hud-nodes-count');
+            if (nodesCountEl) {
+                nodesCountEl.innerText = `${completedNodes.length}/16`;
+            }
         }
-        container.appendChild(dot);
-    }
-    
-    const nodesCountEl = document.getElementById('hud-nodes-count');
-    if (nodesCountEl) {
-        nodesCountEl.innerText = `${completedNodes.length}/16`;
-    }
-}
-
+        
         // Display glorious retro custom warning overlays on collecting a new node
         function showNodeNotification(typeStr, colorHex, count) {
             isToastFreezing = true; // Freeze physics loops during achievement celebration
