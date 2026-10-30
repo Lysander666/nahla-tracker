@@ -118,50 +118,46 @@
         <audio id="bgm" loop preload="auto"></audio>
 
         <!-- Floating Portrait HUD Layer (Top) -->
-        <div id="hud" class="absolute top-4 left-4 right-4 z-20 hidden pointer-events-none flex flex-col gap-1 text-[1.2rem] sm:text-[1.4rem]">
-            <!-- Primary Telemetry Grid -->
-            <div class="flex justify-between items-center bg-black/85 border-l-4 border-[#d4a24e] px-3 py-1.5 shadow-md pointer-events-auto">
-                <div class="text-[#d4a24e]">
-                    DPTH: <span id="hud-depth" class="text-white font-bold">0</span>m
-                </div>
-                <div class="text-white">
-                    DATA: <span id="hud-data" class="text-[#61dafb]">0</span>
-                </div>
-                <!-- Interactive Pause Button on HUD -->
-                <button id="hud-pause-btn" class="bg-[#240e03] border border-[#d4a24e]/50 px-2.5 py-0.5 rounded text-xs text-[#d4a24e] hover:bg-[#d4a24e]/20 active:bg-[#d4a24e]/40 transition-all font-sans">
-                    PAUSE
-                </button>
-            </div>
-            
-            <!-- Secondary Telemetry (Loop, Health & Speed) -->
-            <div class="flex justify-between items-center text-[1.1rem] bg-black/75 px-3 py-1">
-                <div class="text-gray-400">
-                    LOOP: <span id="hud-loop" class="text-[#d4a24e]">1</span> (<span id="hud-phase" class="text-[#61dafb] font-bold">α</span>)
-                </div>
-                <!-- Mini Hull Integrity Bar -->
-                <div class="flex items-center gap-2">
-                    <span class="text-[#ff4444] text-xs font-sans">SHIELD</span>
-                    <div class="w-16 bg-gray-800 h-2 border border-[#ff4444]/50 rounded overflow-hidden">
-                        <div id="shield-bar" class="bg-[#ff4444] h-full w-full transition-all duration-150"></div>
-                    </div>
-                </div>
-                <div class="text-gray-400">
-                    SPD: <span id="hud-speed" class="text-white">0</span> km/h
-                </div>
-            </div>
+<div id="hud" class="absolute top-2 left-4 right-4 z-20 hidden pointer-events-none flex flex-col gap-0.5 text-[1.1rem] sm:text-[1.3rem]">
+    
+    <!-- Tier 0: Sleek Observatory Construction Ribbon -->
+    <div class="flex justify-between items-center bg-black/90 border-t-2 border-x-2 border-[#d4a24e] px-3 py-1 rounded-t shadow-md">
+        <span class="text-[10px] sm:text-xs font-sans font-bold tracking-widest text-gray-300">OBSERVATORY</span>
+        <div id="hud-nodes-container" class="flex gap-1 items-center px-1">
+            <!-- 16 neon indicators dynamically loaded here -->
         </div>
+        <span id="hud-nodes-count" class="text-xs font-bold font-mono text-[#61dafb]">0/16</span>
+    </div>
 
-        <!-- Floating Portrait HUD Layer (Bottom - Observatory Progress Tracker) -->
-        <div id="bottom-hud" class="absolute bottom-4 left-4 right-4 z-20 hidden pointer-events-none flex flex-col gap-1 text-[1.2rem] sm:text-[1.4rem]">
-            <!-- Observatory Neon Nodes Tracker Bar -->
-            <div class="flex justify-between items-center bg-black/85 border-r-4 border-[#d4a24e] px-3 py-1.5 transition-colors duration-300 rounded shadow-md pointer-events-none">
-                <div class="text-gray-200 font-sans font-bold tracking-wide text-[10px] sm:text-xs">OBSERVATORY PROGRESS:</div>
-                <div id="hud-nodes-container" class="flex gap-1 items-center px-1">
-                    <!-- 16 neon indicators dynamically loaded -->
-                </div>
-                <div id="hud-nodes-count" class="text-[#61dafb] font-bold font-mono text-xs">0/16</div>
+    <!-- Tier 1: Primary Telemetry Grid -->
+    <div class="flex justify-between items-center bg-black/85 border-x-2 border-l-4 border-[#d4a24e] px-3 py-1 shadow-md pointer-events-auto">
+        <div class="text-[#d4a24e]">
+            DPTH: <span id="hud-depth" class="text-white font-bold">0</span>m
+        </div>
+        <div class="text-white">
+            DATA: <span id="hud-data" class="text-[#61dafb]">0</span>
+        </div>
+        <button id="hud-pause-btn" class="bg-[#240e03] border border-[#d4a24e]/50 px-2.5 py-0.5 rounded text-xs text-[#d4a24e] hover:bg-[#d4a24e]/20 active:bg-[#d4a24e]/40 transition-all font-sans">
+            PAUSE
+        </button>
+    </div>
+    
+    <!-- Tier 2: Secondary Telemetry (Loop, Health & Speed) -->
+    <div class="flex justify-between items-center bg-black/75 border-b-2 border-x-2 border-[#d4a24e] px-3 py-1 rounded-b shadow-md">
+        <div class="text-gray-400">
+            LOOP: <span id="hud-loop" class="text-[#d4a24e]">1</span> (<span id="hud-phase" class="text-[#61dafb] font-bold">α</span>)
+        </div>
+        <div class="flex items-center gap-2">
+            <span class="text-[#ff4444] text-xs font-sans">SHIELD</span>
+            <div class="w-16 bg-gray-800 h-2 border border-[#ff4444]/50 rounded overflow-hidden">
+                <div id="shield-bar" class="bg-[#ff4444] h-full w-full transition-all duration-150"></div>
             </div>
         </div>
+        <div class="text-gray-400">
+            SPD: <span id="hud-speed" class="text-white">0</span> km/h
+        </div>
+    </div>
+</div>
 
         <!-- Achievement/Node Toast Notification Overlay -->
         <div id="node-toast" class="absolute left-4 right-4 top-1/4 z-40 hidden flex flex-col items-center justify-center bg-black/85 backdrop-blur-sm border-2 border-double border-white py-5 px-6 rounded-lg shadow-[0_0_25px_rgba(255,255,255,0.3)] transform -translate-y-4 opacity-0 transition-all duration-500 pointer-events-auto text-center">
@@ -812,41 +808,44 @@
 
         // Handle physical rendering of the 16 Observatory frequency tracker dots in the HUD bar
         function updateNodeDisplay() {
-            const container = document.getElementById('hud-nodes-container');
-            if (!container) return;
-            container.innerHTML = '';
-            
-            const nodeColorMap = {
-                'amber': '#d4a24e',
-                'cyan': '#61dafb',
-                'magenta': '#ff61c7',
-                'crimson': '#ff4444'
-            };
-            
-            const expectedTypes = ['amber', 'cyan', 'magenta', 'crimson'];
-            
-            for (let i = 0; i < 16; i++) {
-                const type = expectedTypes[i % 4];
-                const isCompleted = i < completedNodes.length;
-                const dot = document.createElement('div');
-                dot.className = 'w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full border transition-all duration-300';
-                
-                if (isCompleted) {
-                    dot.style.backgroundColor = nodeColorMap[type];
-                    dot.style.borderColor = nodeColorMap[type];
-                    dot.style.boxShadow = `0 0 5px ${nodeColorMap[type]}`;
-                } else {
-                    dot.style.backgroundColor = 'transparent';
-                    dot.style.borderColor = 'rgba(156, 163, 175, 0.25)';
-                }
-                container.appendChild(dot);
-            }
-            
-            const nodesCountEl = document.getElementById('hud-nodes-count');
-            if (nodesCountEl) {
-                nodesCountEl.innerText = `${completedNodes.length}/16`;
-            }
+    const container = document.getElementById('hud-nodes-container');
+    if (!container) return;
+    container.innerHTML = '';
+    
+    const nodeColorMap = {
+        'amber': '#d4a24e',
+        'cyan': '#61dafb',
+        'magenta': '#ff61c7',
+        'crimson': '#ff4444'
+    };
+    
+    const expectedTypes = ['amber', 'cyan', 'magenta', 'crimson'];
+    
+    for (let i = 0; i < 16; i++) {
+        const type = expectedTypes[i % 4];
+        const isCompleted = i < completedNodes.length;
+        const dot = document.createElement('div');
+        
+        // Add a slightly wider margin every 4 dots to visually break the 4 banks
+        const isGroupEnd = (i + 1) % 4 === 0 && i !== 15;
+        dot.className = `w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full border transition-all duration-300 ${isGroupEnd ? 'mr-1' : ''}`;
+        
+        if (isCompleted) {
+            dot.style.backgroundColor = nodeColorMap[type];
+            dot.style.borderColor = nodeColorMap[type];
+            dot.style.boxShadow = `0 0 5px ${nodeColorMap[type]}`;
+        } else {
+            dot.style.backgroundColor = 'transparent';
+            dot.style.borderColor = 'rgba(156, 163, 175, 0.3)';
         }
+        container.appendChild(dot);
+    }
+    
+    const nodesCountEl = document.getElementById('hud-nodes-count');
+    if (nodesCountEl) {
+        nodesCountEl.innerText = `${completedNodes.length}/16`;
+    }
+}
 
         // Display glorious retro custom warning overlays on collecting a new node
         function showNodeNotification(typeStr, colorHex, count) {
