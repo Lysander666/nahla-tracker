@@ -1872,13 +1872,14 @@
             ctx.shadowBlur = 0;
 
             // ==========================================
-            // OBSERVATORY DUAL-WING FREQUENCY BANKS
-            // ==========================================
-const railStartY = 145; // Starts cleanly below the top HUD
-const pipSpacing = 16;  // Vertical pitch between pips
-const bankGap = 12;     // Deliberate gap between the two color banks
+// OBSERVATORY DUAL-WING FREQUENCY BANKS
+// ==========================================
+const railStartY = 148; // Starts cleanly below the top HUD
+const pipSpacing = 22;  // Ample vertical pitch between large nodes
+const bankGap = 16;     // Clean divider gap between the two color banks
+const nodeRadius = 7;   // Large, prominent 14px circular gauge pips
 
-// Count how many of each frequency have been gathered so far
+// Count gathered nodes per frequency
 const counts = {
     amber:   completedNodes.filter(t => t === 'amber').length,
     cyan:    completedNodes.filter(t => t === 'cyan').length,
@@ -1887,10 +1888,10 @@ const counts = {
 };
 
 const banks = [
-    // Left Rail: Amber (top), Cyan (bottom)
+    // Left Rail: Amber (top 4), Cyan (bottom 4)
     { type: 'amber',   color: '#d4a24e', x: 20,  count: counts.amber,   offsetIdx: 0 },
     { type: 'cyan',    color: '#61dafb', x: 20,  count: counts.cyan,    offsetIdx: 4 },
-    // Right Rail: Magenta (top), Crimson (bottom)
+    // Right Rail: Magenta (top 4), Crimson (bottom 4)
     { type: 'magenta', color: '#ff61c7', x: 340, count: counts.magenta, offsetIdx: 0 },
     { type: 'crimson', color: '#ff4444', x: 340, count: counts.crimson, offsetIdx: 4 }
 ];
@@ -1898,40 +1899,54 @@ const banks = [
 banks.forEach(b => {
     for (let slot = 0; slot < 4; slot++) {
         const totalSlotIdx = b.offsetIdx + slot;
-        // Calculate Y position with the bank separator gap
         const py = railStartY + (totalSlotIdx * pipSpacing) + (b.offsetIdx > 0 ? bankGap : 0);
         const isCharged = slot < b.count;
 
         ctx.save();
         if (isCharged) {
-            // Active charged diamond/pip with soft neon glow
-            ctx.fillStyle = b.color;
+            // --- CHARGED / COLLECTED NODE ---
+            // High-intensity neon bloom
             ctx.shadowColor = b.color;
-            ctx.shadowBlur = 8;
-            
-            // Draw diamond pip
+            ctx.shadowBlur = 12;
+
+            // Solid vibrant color fill
+            ctx.fillStyle = b.color;
             ctx.beginPath();
-            ctx.moveTo(b.x, py - 3.5);
-            ctx.lineTo(b.x + 3.5, py);
-            ctx.lineTo(b.x, py + 3.5);
-            ctx.lineTo(b.x - 3.5, py);
-            ctx.closePath();
+            ctx.arc(b.x, py, nodeRadius, 0, Math.PI * 2);
             ctx.fill();
 
-            // White-hot core dot
-            ctx.fillStyle = '#ffffff';
-            ctx.fillRect(b.x - 1, py - 1, 2, 2);
-        } else {
-            // Uncharged empty docking bezel
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
-            ctx.lineWidth = 1;
-            ctx.beginPath();
-            ctx.moveTo(b.x, py - 3);
-            ctx.lineTo(b.x + 3, py);
-            ctx.lineTo(b.x, py + 3);
-            ctx.lineTo(b.x - 3, py);
-            ctx.closePath();
+            // Crisp neon outer ring
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 1.5;
             ctx.stroke();
+
+            // White-hot illuminated center bulb
+            ctx.shadowBlur = 0;
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.arc(b.x, py, 2.5, 0, Math.PI * 2);
+            ctx.fill();
+        } else {
+            // --- EMPTY / UNCOLLECTED SOCKET ---
+            // Faint colored glass tint interior
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+            ctx.beginPath();
+            ctx.arc(b.x, py, nodeRadius, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Distinct colored socket ring in its target frequency
+            ctx.strokeStyle = b.color;
+            ctx.lineWidth = 1.8;
+            ctx.shadowColor = b.color;
+            ctx.shadowBlur = 4;
+            ctx.stroke();
+
+            // Subtle center guide dot
+            ctx.fillStyle = b.color;
+            ctx.globalAlpha = 0.35;
+            ctx.beginPath();
+            ctx.arc(b.x, py, 1.5, 0, Math.PI * 2);
+            ctx.fill();
         }
         ctx.restore();
     }
