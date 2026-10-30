@@ -2072,17 +2072,16 @@
             // Rear Proximity Radar: Warns directly above the ship in the incoming lane
 obstacles.forEach(obs => {
     if (obs.type === 'BOULDER' && obs.y < rover.y) {
-        // High-energy alert strobe
-        const flash = (Math.sin(frames * 0.45) + 1) / 2;
+        // Softer alert pulse
+        const flash = (Math.sin(frames * 0.35) + 1) / 2;
         const centerX = obs.x + obs.width / 2;
-        // Floats right above the ship's nose (clear of the HUD overlay)
         const radarY = rover.y - 8; 
 
         ctx.save();
 
-        // 1. Dotted lane guide tracer
-        ctx.strokeStyle = `rgba(255, 179, 71, ${0.4 + flash * 0.5})`;
-        ctx.lineWidth = 2;
+        // 1. Subtle dotted lane guide tracer
+        ctx.strokeStyle = `rgba(212, 162, 78, ${0.18 + flash * 0.22})`;
+        ctx.lineWidth = 1.5;
         ctx.setLineDash([4, 4]);
         ctx.beginPath();
         ctx.moveTo(centerX, radarY - 18);
@@ -2090,36 +2089,36 @@ obstacles.forEach(obs => {
         ctx.stroke();
         ctx.setLineDash([]);
 
-        // 2. High-visibility Amber Chevron with White-Hot Tip
-        ctx.shadowColor = '#ffaa00';
-        ctx.shadowBlur = 14 + flash * 10;
+        // 2. Muted Amber Chevron (Removed harsh pure-white core and reduced blur radius)
+        ctx.shadowColor = '#d4a24e';
+        ctx.shadowBlur = 5 + flash * 4;
 
-        // Outer Neon Amber Triangle
-        ctx.fillStyle = '#ffb347';
+        // Outer Amber Chevron
+        ctx.fillStyle = `rgba(212, 162, 78, ${0.65 + flash * 0.25})`;
         ctx.beginPath();
-        ctx.moveTo(centerX - 10, radarY - 12);
-        ctx.lineTo(centerX + 10, radarY - 12);
+        ctx.moveTo(centerX - 9, radarY - 11);
+        ctx.lineTo(centerX + 9, radarY - 11);
         ctx.lineTo(centerX, radarY);
         ctx.closePath();
         ctx.fill();
 
-        // Inner White-Hot Accent
-        ctx.fillStyle = '#ffffff';
+        // Subtle warm inner accent (soft gold instead of high-glare white)
+        ctx.fillStyle = `rgba(255, 214, 138, ${0.45 + flash * 0.25})`;
         ctx.beginPath();
-        ctx.moveTo(centerX - 5, radarY - 11);
-        ctx.lineTo(centerX + 5, radarY - 11);
+        ctx.moveTo(centerX - 5, radarY - 10);
+        ctx.lineTo(centerX + 5, radarY - 10);
         ctx.lineTo(centerX, radarY - 3);
         ctx.closePath();
         ctx.fill();
 
-        // 3. Lane Hazard Brackets
-        ctx.strokeStyle = '#ff9900';
-        ctx.lineWidth = 2;
-        const halfW = Math.max(14, obs.width / 2);
+        // 3. Lane Hazard Brackets (Soft amber outline)
+        ctx.strokeStyle = `rgba(212, 162, 78, ${0.5 + flash * 0.3})`;
+        ctx.lineWidth = 1.5;
+        const halfW = Math.max(13, obs.width / 2);
         ctx.beginPath();
-        ctx.moveTo(centerX - halfW, radarY - 12);
+        ctx.moveTo(centerX - halfW, radarY - 11);
         ctx.lineTo(centerX - halfW, radarY);
-        ctx.moveTo(centerX + halfW, radarY - 12);
+        ctx.moveTo(centerX + halfW, radarY - 11);
         ctx.lineTo(centerX + halfW, radarY);
         ctx.stroke();
 
