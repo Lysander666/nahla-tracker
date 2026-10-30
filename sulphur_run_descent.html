@@ -731,20 +731,20 @@
             }
 
             // Procedurally spawn Crumble Avalanche basalt boulders from top
-            if (frames % 160 === 0 && Math.random() > 0.4) {
-                const boulderSize = 16 + Math.random() * 10;
-                obstacles.push({
-                x: CHASM_L + 20 + Math.random() * (CHASM_R - CHASM_L - 40 - boulderSize),
-                y: -90, // Changed from -50 to give ~1.2s lead time before rover.y (110)
-                width: boulderSize,
-                height: boulderSize,
-                type: 'BOULDER',
-                hp: 2,
-                maxHp: 2,
-                vy: 2.5 + Math.random() * 2.5,
-            hitFlash: 0
-            });
-        }
+        if (frames % 160 === 0 && Math.random() > 0.4) {
+            const boulderSize = 16 + Math.random() * 10;
+            obstacles.push({
+        x: CHASM_L + 20 + Math.random() * (CHASM_R - CHASM_L - 40 - boulderSize),
+        y: -190, // Extended from -90 to give ~2 full seconds of lead time
+        width: boulderSize,
+        height: boulderSize,
+        type: 'BOULDER',
+        hp: 2,
+        maxHp: 2,
+        vy: 2.2 + Math.random() * 2.0,
+        hitFlash: 0
+        });
+    }
 
             if (frames % 80 === 0) {
                 const nodeRand = Math.random();
@@ -2071,30 +2071,58 @@
             // Rear Proximity Radar: Warns when falling boulders are approaching from behind
 obstacles.forEach(obs => {
     if (obs.type === 'BOULDER' && obs.y < rover.y) {
-        const pulse = (Math.sin(frames * 0.25) + 1) / 2; // Smooth scanner glow
+        // Fast, crisp arcade alert flash
+        const flash = (Math.sin(frames * 0.35) + 1) / 2;
         const centerX = obs.x + obs.width / 2;
+        const radarY = 72; // Sits cleanly right under the lower edge of the top HUD
 
         ctx.save();
-        // Faint lane guide beam behind the ship
-        ctx.strokeStyle = `rgba(212, 162, 78, ${0.12 + pulse * 0.15})`;
-        ctx.lineWidth = 1;
-        ctx.setLineDash([4, 6]);
+
+        // 1. Vertical lane tracer line leading from radar down toward the ship
+        ctx.strokeStyle = `rgba(212, 162, 78, ${0.25 + flash * 0.35})`;
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([6, 6]);
         ctx.beginPath();
-        ctx.moveTo(centerX, 0);
-        ctx.lineTo(centerX, rover.y - 12);
+        ctx.moveTo(centerX, radarY + 12);
+        ctx.lineTo(centerX, rover.y - 8);
         ctx.stroke();
         ctx.setLineDash([]);
 
-        // Subtle amber radar chevron at the top chasm border
-        ctx.fillStyle = `rgba(212, 162, 78, ${0.45 + pulse * 0.5})`;
-        ctx.shadowColor = '#d4a24e';
-        ctx.shadowBlur = 6;
+        // 2. High-visibility double amber chevron (stacked)
+        ctx.fillStyle = '#ffb347';
+        ctx.shadowColor = '#ff9900';
+        ctx.shadowBlur = 10 + flash * 8;
+
+        // Top Chevron
         ctx.beginPath();
-        ctx.moveTo(centerX - 4, 4);
-        ctx.lineTo(centerX + 4, 4);
-        ctx.lineTo(centerX, 10);
+        ctx.moveTo(centerX - 8, radarY);
+        ctx.lineTo(centerX + 8, radarY);
+        ctx.lineTo(centerX, radarY + 7);
         ctx.closePath();
         ctx.fill();
+
+        // Lower Chevron (accentuated point)
+        ctx.fillStyle = '#ffffff'; // White-hot core for punchy contrast
+        ctx.beginPath();
+        ctx.moveTo(centerX - 6, radarY + 6);
+        ctx.lineTo(centerX + 6, radarY + 6);
+        ctx.lineTo(centerX, radarY + 12);
+        ctx.closePath();
+        ctx.fill();
+
+        // 3. Flanking bracket ticks to clearly frame the hazard's width
+        ctx.strokeStyle = '#d4a24e';
+        ctx.lineWidth = 2;
+        const halfW = Math.max(10, obs.width / 2);
+        ctx.beginPath();
+        // Left tick
+        ctx.moveTo(centerX - halfW, radarY + 2);
+        ctx.lineTo(centerX - halfW, radarY + 10);
+        // Right tick
+        ctx.moveTo(centerX + halfW, radarY + 2);
+        ctx.lineTo(centerX + halfW, radarY + 10);
+        ctx.stroke();
+
         ctx.restore();
     }
 });
