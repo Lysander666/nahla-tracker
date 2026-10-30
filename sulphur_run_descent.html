@@ -16,7 +16,7 @@
         })();
     </script>
     
-    <title>Sulphur Run: Pâte Sablée Descent V0.7</title>
+    <title>Sulphur Run: Pâte Sablée Descent V0.9 beta</title>
     
     <!-- External Web Fonts for Retro/Sci-Fi Styling -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=VT323&display=swap">
@@ -730,21 +730,21 @@
                 });
             }
 
-            // Procedurally spawn Crumble Avalanche basalt boulders from top (falling down behind player)
+            // Procedurally spawn Crumble Avalanche basalt boulders from top
             if (frames % 160 === 0 && Math.random() > 0.4) {
                 const boulderSize = 16 + Math.random() * 10;
                 obstacles.push({
-                    x: CHASM_L + 20 + Math.random() * (CHASM_R - CHASM_L - 40 - boulderSize),
-                    y: -50, // Falling from top of chasm
-                    width: boulderSize,
-                    height: boulderSize,
-                    type: 'BOULDER',
-                    hp: 2,
-                    maxHp: 2,
-                    vy: 3 + Math.random() * 3.5, // Velocity falling downward relative to viewport
-                    hitFlash: 0
-                });
-            }
+                x: CHASM_L + 20 + Math.random() * (CHASM_R - CHASM_L - 40 - boulderSize),
+                y: -90, // Changed from -50 to give ~1.2s lead time before rover.y (110)
+                width: boulderSize,
+                height: boulderSize,
+                type: 'BOULDER',
+                hp: 2,
+                maxHp: 2,
+                vy: 2.5 + Math.random() * 2.5,
+            hitFlash: 0
+            });
+        }
 
             if (frames % 80 === 0) {
                 const nodeRand = Math.random();
@@ -1130,16 +1130,18 @@
                 actx.resume();
             }
 
-            // Fire up both fallback audio routines
+            // MUSIC RELOOP
             if (bgm) {
-                bgm.currentTime = 0;
+            // Only start playback if it isn't already running; never reset currentTime
+                if (bgm.paused) {
                 bgm.play().then(() => {
-                    stopProceduralBGM(); // kill synthesized track if user file loaded successfully
+                stopProceduralBGM();
                 }).catch(() => {
-                    startProceduralBGM(); // fallback to synth engine
+                if (!bgmInterval) startProceduralBGM();
                 });
-            } else {
-                startProceduralBGM();
+            }
+        } else {
+            if (!bgmInterval) startProceduralBGM();
             }
         }
 
@@ -2060,6 +2062,37 @@
                     ctx.restore();
                 }
             });
+
+            // Rear Proximity Radar: Warns when falling boulders are approaching from behind
+obstacles.forEach(obs => {
+    if (obs.type === 'BOULDER' && obs.y < rover.y) {
+        const pulse = (Math.sin(frames * 0.25) + 1) / 2; // Smooth scanner glow
+        const centerX = obs.x + obs.width / 2;
+
+        ctx.save();
+        // Faint lane guide beam behind the ship
+        ctx.strokeStyle = `rgba(212, 162, 78, ${0.12 + pulse * 0.15})`;
+        ctx.lineWidth = 1;
+        ctx.setLineDash([4, 6]);
+        ctx.beginPath();
+        ctx.moveTo(centerX, 0);
+        ctx.lineTo(centerX, rover.y - 12);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // Subtle amber radar chevron at the top chasm border
+        ctx.fillStyle = `rgba(212, 162, 78, ${0.45 + pulse * 0.5})`;
+        ctx.shadowColor = '#d4a24e';
+        ctx.shadowBlur = 6;
+        ctx.beginPath();
+        ctx.moveTo(centerX - 4, 4);
+        ctx.lineTo(centerX + 4, 4);
+        ctx.lineTo(centerX, 10);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+    }
+});
 
             // Proactive off-screen warnings UI indicators (Bottom edge overlay)
             obstacles.forEach(obs => {
