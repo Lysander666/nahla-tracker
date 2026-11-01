@@ -1,0 +1,316 @@
+
+license.html
+100%
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Nahla Tracker & Sulphur Run - License & Terms</title>
+
+    <!-- Primary Metadata -->
+    <meta name="title" content="Project Nahla — License & Terms of Use">
+    <meta name="description" content="Licensing terms, source code rights, and proprietary creative intellectual property designations for Nahla Tracker and Sulphur Run: Pâte Sablée Descent.">
+    <meta name="theme-color" content="#d4a24e">
+
+    <!-- External Web Fonts -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=VT323&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: #090402;
+            color: #d1d5db;
+        }
+
+        .font-retro {
+            font-family: 'VT323', monospace;
+        }
+
+        .font-mono-code {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Scanline CRT overlay */
+        .scanlines::before {
+            content: " ";
+            display: block;
+            position: fixed;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.22) 50%);
+            background-size: 100% 4px;
+            z-index: 40;
+            pointer-events: none;
+        }
+
+        /* Glowing amber border box */
+        .hud-panel {
+            background-color: rgba(18, 7, 3, 0.88);
+            border: 2px solid #d4a24e;
+            box-shadow: 0 0 20px rgba(212, 162, 78, 0.25), inset 0 0 30px rgba(36, 14, 3, 0.6);
+        }
+
+        .hud-panel-sub {
+            background-color: rgba(10, 4, 2, 0.85);
+            border: 1px solid rgba(212, 162, 78, 0.35);
+        }
+
+        @keyframes amberPulse {
+            0% { text-shadow: 0 0 6px #d4a24e, 0 0 12px rgba(212, 162, 78, 0.4); }
+            50% { text-shadow: 0 0 16px #ffb347, 0 0 24px rgba(255, 179, 71, 0.7); }
+            100% { text-shadow: 0 0 6px #d4a24e, 0 0 12px rgba(212, 162, 78, 0.4); }
+        }
+
+        .neon-amber {
+            animation: amberPulse 2.5s ease-in-out infinite;
+        }
+
+        .blink {
+            animation: blinker 1s steps(2, start) infinite;
+        }
+        @keyframes blinker {
+            50% { opacity: 0; }
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0d0602;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #3a1906;
+            border: 1px solid #d4a24e;
+            border-radius: 2px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #d4a24e;
+        }
+    </style>
+</head>
+<body class="min-h-screen scanlines flex flex-col justify-between py-6 px-3 sm:px-6 relative selection:bg-[#d4a24e] selection:text-black">
+
+    <!-- Ambient Chasm Sulfur Glow FX -->
+    <div class="fixed top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-[#d4a24e]/10 blur-[130px] rounded-full pointer-events-none -z-10"></div>
+    <div class="fixed bottom-0 right-10 w-[450px] h-[250px] bg-[#ff4444]/10 blur-[140px] rounded-full pointer-events-none -z-10"></div>
+
+    <div class="max-w-4xl w-full mx-auto space-y-6">
+
+        <!-- Top Telemetry Header -->
+        <header class="hud-panel p-4 sm:p-6 rounded">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-[#d4a24e]/30 pb-3">
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="inline-block w-2.5 h-2.5 rounded-full bg-[#d4a24e] shadow-[0_0_8px_#d4a24e] blink"></span>
+                        <span class="text-xs font-mono tracking-widest text-[#d4a24e] uppercase font-bold">PROJECT NAHLA // LEGAL DISPATCH</span>
+                    </div>
+                    <h1 class="text-3xl sm:text-5xl font-retro text-white tracking-widest uppercase neon-amber mt-1 leading-none">
+                        LICENSE & TERMS OF USE
+                    </h1>
+                </div>
+                <div class="text-left sm:text-right font-mono text-xs text-gray-400 space-y-0.5">
+                    <p><span class="text-gray-500">SYSTEM:</span> <span class="text-white">Hypi Bra EV-P d5-78</span></p>
+                    <p><span class="text-gray-500">BODY:</span> <span class="text-[#61dafb]">6 a (Nahla)</span></p>
+                    <p><span class="text-gray-500">STATION:</span> <span class="text-[#d4a24e]">Natalja's Pass (39.23, 104.29)</span></p>
+                </div>
+            </div>
+
+            <!-- Quadrant Frequency Sockets Mini Bar -->
+            <div class="mt-4 pt-3 flex flex-wrap items-center justify-between text-xs font-mono text-gray-400 gap-3">
+                <div class="flex items-center gap-2">
+                    <span class="text-[10px] sm:text-xs text-gray-300 tracking-wider">COVERAGE:</span>
+                    <span class="px-2 py-0.5 rounded bg-black/60 border border-[#d4a24e]/60 text-[#d4a24e] font-bold text-[11px]">NAHLA TRACKER</span>
+                    <span class="px-2 py-0.5 rounded bg-black/60 border border-[#61dafb]/60 text-[#61dafb] font-bold text-[11px]">SULPHUR RUN DESCENT</span>
+                </div>
+                <div class="flex items-center gap-1.5 bg-black/60 px-3 py-1 rounded border border-white/10">
+                    <span class="text-[10px] tracking-widest text-gray-400 uppercase">BANKS:</span>
+                    <span class="w-2 h-2 rounded-full border border-[#d4a24e] bg-[#d4a24e] shadow-[0_0_5px_#d4a24e]" title="Amber"></span>
+                    <span class="w-2 h-2 rounded-full border border-[#61dafb] bg-[#61dafb] shadow-[0_0_5px_#61dafb]" title="Cyan"></span>
+                    <span class="w-2 h-2 rounded-full border border-[#ff61c7] bg-[#ff61c7] shadow-[0_0_5px_#ff61c7]" title="Magenta"></span>
+                    <span class="w-2 h-2 rounded-full border border-[#ff4444] bg-[#ff4444] shadow-[0_0_5px_#ff4444]" title="Crimson"></span>
+                    <span class="text-xs text-gray-300 ml-1 font-mono">16/16 SECURE</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Preamble Note -->
+        <section class="hud-panel-sub p-4 sm:p-5 rounded border-l-4 border-l-[#61dafb]">
+            <p class="text-sm sm:text-base leading-relaxed text-gray-200">
+                This project encompasses both <strong class="text-white">open-source software tools</strong> and 
+                <strong class="text-white">proprietary creative intellectual property</strong>. 
+                To foster technical collaboration while protecting the worldbuilding, audiovisual work, and lore of 
+                <span class="text-[#d4a24e] font-semibold">Project Nahla</span>, the software logic and creative assets are governed by distinct terms.
+            </p>
+        </section>
+
+        <!-- Section 1: MIT Open Source Code -->
+        <section class="hud-panel p-5 sm:p-7 rounded space-y-4">
+            <div class="flex items-center justify-between border-b border-[#d4a24e]/30 pb-2">
+                <div class="flex items-center gap-2">
+                    <span class="text-xs font-mono font-bold px-2 py-0.5 bg-[#61dafb]/15 text-[#61dafb] border border-[#61dafb]/40 rounded">SECTION 01</span>
+                    <h2 class="text-2xl sm:text-3xl font-retro text-white tracking-wider uppercase">Source Code License (MIT)</h2>
+                </div>
+                <span class="text-xs font-mono text-gray-400">OPEN ACCESS</span>
+            </div>
+
+            <p class="text-sm text-gray-300 leading-relaxed">
+                The algorithmic systems, orbital math calculators, canvas renderer loops, fixed timestep mechanics, and tracking codebase are distributed under the terms of the MIT License:
+            </p>
+
+            <div class="hud-panel-sub p-4 rounded font-mono-code text-xs sm:text-[13px] text-gray-300 leading-relaxed overflow-x-auto border border-[#d4a24e]/30 bg-black/90">
+                <p class="text-[#d4a24e] font-bold mb-3">Copyright (c) 2025–2026 Sam Grant (CMDR Lysander666)</p>
+                <p class="mb-3">
+                    Permission is hereby granted, free of charge, to any person obtaining a copy
+                    of this software and associated documentation files (the "Software"), to deal
+                    in the Software without restriction, including without limitation the rights
+                    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+                    copies of the Software, and to permit persons to whom the Software is
+                    furnished to do so, subject to the following conditions:
+                </p>
+                <p class="mb-3 text-gray-400">
+                    The above copyright notice and this permission notice shall be included in all
+                    copies or substantial portions of the Software.
+                </p>
+                <p class="text-gray-400 uppercase text-[11px] tracking-wide">
+                    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+                    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+                    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+                    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+                    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+                    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+                    SOFTWARE.
+                </p>
+            </div>
+        </section>
+
+        <!-- Section 2: Proprietary Creative Assets -->
+        <section class="hud-panel p-5 sm:p-7 rounded space-y-4 border-[#ff61c7]">
+            <div class="flex items-center justify-between border-b border-[#ff61c7]/30 pb-2">
+                <div class="flex items-center gap-2">
+                    <span class="text-xs font-mono font-bold px-2 py-0.5 bg-[#ff61c7]/15 text-[#ff61c7] border border-[#ff61c7]/40 rounded">SECTION 02</span>
+                    <h2 class="text-2xl sm:text-3xl font-retro text-white tracking-wider uppercase">Proprietary Creative Media & Lore</h2>
+                </div>
+                <span class="text-xs font-mono text-[#ff61c7] font-bold">ALL RIGHTS RESERVED</span>
+            </div>
+
+            <p class="text-sm text-gray-300 leading-relaxed">
+                The open-source code grant does <strong class="text-white">not</strong> apply to any artistic, audio, narrative, branding, or worldbuilding elements. 
+                All rights are reserved by <strong class="text-[#d4a24e]">Sam Grant</strong> across the following categories:
+            </p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs sm:text-sm font-sans">
+                <div class="hud-panel-sub p-3.5 rounded border-l-2 border-l-[#d4a24e]">
+                    <h3 class="font-bold text-[#d4a24e] font-mono text-sm mb-1 uppercase tracking-wider flex items-center gap-1.5">
+                        <span>🎵</span> Audio & Original Soundtracks
+                    </h3>
+                    <p class="text-gray-300 leading-relaxed text-xs">
+                        All original synthesized compositions, chiptune engine soundscapes, dynamic audio arrangements, and soundtrack files (including <code class="text-white bg-black/60 px-1 py-0.5 rounded font-mono text-[11px]">nahla_theme.mp3</code>).
+                    </p>
+                </div>
+
+                <div class="hud-panel-sub p-3.5 rounded border-l-2 border-l-[#61dafb]">
+                    <h3 class="font-bold text-[#61dafb] font-mono text-sm mb-1 uppercase tracking-wider flex items-center gap-1.5">
+                        <span>🛰️</span> Visual Art & Interface Design
+                    </h3>
+                    <p class="text-gray-300 leading-relaxed text-xs">
+                        Custom pixel sprite designs, crater vector silhouettes, celestial bodies, custom CRT filter aesthetics, promotional preview media (<code class="text-white bg-black/60 px-1 py-0.5 rounded font-mono text-[11px]">srpsd.jpg</code>), and logos.
+                    </p>
+                </div>
+
+                <div class="hud-panel-sub p-3.5 rounded border-l-2 border-l-[#ff61c7]">
+                    <h3 class="font-bold text-[#ff61c7] font-mono text-sm mb-1 uppercase tracking-wider flex items-center gap-1.5">
+                        <span>📖</span> In-Universe Lore & Worldbuilding
+                    </h3>
+                    <p class="text-gray-300 leading-relaxed text-xs">
+                        Original narrative archives, celestial telemetry schemas, lunar logs, expedition manifests, and lore surrounding the moon <em>Nahla</em>, <em>Pâte Sablée crater</em>, and <em>Natalja's Pass Observatory</em>.
+                    </p>
+                </div>
+
+                <div class="hud-panel-sub p-3.5 rounded border-l-2 border-l-[#ff4444]">
+                    <h3 class="font-bold text-[#ff4444] font-mono text-sm mb-1 uppercase tracking-wider flex items-center gap-1.5">
+                        <span>🛡️</span> Project Names & Trademarks
+                    </h3>
+                    <p class="text-gray-300 leading-relaxed text-xs">
+                        The marks, titles, domain identities, and public branding of <strong>Nahla Tracker</strong> (<code class="text-white bg-black/60 px-1 py-0.5 rounded font-mono text-[11px]">nahla.live</code>) and <strong>Sulphur Run: Pâte Sablée Descent</strong>.
+                    </p>
+                </div>
+            </div>
+
+            <p class="text-xs text-gray-400 italic pt-1 leading-relaxed">
+                No license is granted to commercialize, re-publish, or bundle these creative materials into third-party games, media distributions, or web deployments without prior explicit written permission.
+            </p>
+        </section>
+
+        <!-- Section 3: Summary Matrix -->
+        <section class="hud-panel p-5 sm:p-7 rounded space-y-4">
+            <div class="flex items-center gap-2 border-b border-[#d4a24e]/30 pb-2">
+                <span class="text-xs font-mono font-bold px-2 py-0.5 bg-[#d4a24e]/15 text-[#d4a24e] border border-[#d4a24e]/40 rounded">SECTION 03</span>
+                <h2 class="text-2xl sm:text-3xl font-retro text-white tracking-wider uppercase">Usage Rights Matrix</h2>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs sm:text-sm font-sans border-collapse">
+                    <thead>
+                        <tr class="border-b border-[#d4a24e]/30 text-gray-400 font-mono text-xs uppercase">
+                            <th class="py-2.5 px-3">Asset Classification</th>
+                            <th class="py-2.5 px-3">License Type</th>
+                            <th class="py-2.5 px-3">Fork / Modify</th>
+                            <th class="py-2.5 px-3">Commercial Redistribution</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-white/5">
+                        <tr class="hover:bg-white/5 transition-colors">
+                            <td class="py-3 px-3 font-semibold text-white">JavaScript Game Engine & Math Loops</td>
+                            <td class="py-3 px-3 font-mono text-[#61dafb]">MIT</td>
+                            <td class="py-3 px-3 text-green-400 font-mono font-bold">PERMITTED</td>
+                            <td class="py-3 px-3 text-green-400 font-mono font-bold">PERMITTED (with notice)</td>
+                        </tr>
+                        <tr class="hover:bg-white/5 transition-colors">
+                            <td class="py-3 px-3 font-semibold text-white">Orbital Calendar & Telemetry Code</td>
+                            <td class="py-3 px-3 font-mono text-[#61dafb]">MIT</td>
+                            <td class="py-3 px-3 text-green-400 font-mono font-bold">PERMITTED</td>
+                            <td class="py-3 px-3 text-green-400 font-mono font-bold">PERMITTED (with notice)</td>
+                        </tr>
+                        <tr class="hover:bg-white/5 transition-colors">
+                            <td class="py-3 px-3 font-semibold text-white">Soundtracks & Audio Composition</td>
+                            <td class="py-3 px-3 font-mono text-[#ff61c7]">Proprietary</td>
+                            <td class="py-3 px-3 text-yellow-400 font-mono">PERSONAL ONLY</td>
+                            <td class="py-3 px-3 text-[#ff4444] font-mono font-bold">RESTRICTED</td>
+                        </tr>
+                        <tr class="hover:bg-white/5 transition-colors">
+                            <td class="py-3 px-3 font-semibold text-white">Project Nahla Worldbuilding & Lore</td>
+                            <td class="py-3 px-3 font-mono text-[#ff61c7]">Proprietary</td>
+                            <td class="py-3 px-3 text-[#ff4444] font-mono">RESTRICTED</td>
+                            <td class="py-3 px-3 text-[#ff4444] font-mono font-bold">RESTRICTED</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Navigation Buttons / Action Strip -->
+        <footer class="pt-2 pb-6 flex flex-col sm:flex-row items-center justify-between gap-4 font-retro text-xl sm:text-2xl">
+            <div class="flex flex-wrap items-center gap-3">
+                <a href="index.html" class="px-5 py-2 rounded hud-panel text-[#61dafb] hover:bg-[#61dafb]/15 active:bg-[#61dafb]/30 transition-all tracking-wider shadow-md inline-flex items-center gap-2">
+                    <span>&lt;</span> RETURN TO NAHLA TRACKER
+                </a>
+                <a href="sulphur_run_descent.html" class="px-5 py-2 rounded hud-panel text-[#d4a24e] hover:bg-[#d4a24e]/15 active:bg-[#d4a24e]/30 transition-all tracking-wider shadow-md inline-flex items-center gap-2">
+                    SULPHUR RUN DESCENT &gt;
+                </a>
+            </div>
+
+            <div class="text-xs font-mono text-gray-500 text-center sm:text-right">
+                <p>PROJECT NAHLA • EST. 3311</p>
+                <p>CMDR LYSANDER666 // DEEP-SPACE ARCHIVES</p>
+            </div>
+        </footer>
+
+    </div>
+</body>
+</html>
+Displaying license.html.
