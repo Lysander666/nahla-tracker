@@ -10,9 +10,7 @@
                 || (navigator.maxTouchPoints > 0) 
                 || (window.matchMedia("(max-width: 1024px)").matches);
                 
-            if (!isMobile) {
-                window.location.href = "sulphur_run.html";
-            }
+            
         })();
     </script>
     
@@ -42,8 +40,29 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=VT323&display=swap">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap">
     
-    <!-- Tailwind CSS for modern design and structural overlays -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Tailwind CSS for modern design and structural overlays NEW -->
+
+    <style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #000; color: #fff; font-family: monospace; overflow: hidden; }
+  .overlay-screen {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.85);
+    text-align: center;
+    padding: 1.5rem;
+    z-index: 20;
+  }
+  button {
+    cursor: pointer;
+    border-radius: 4px;
+    font-family: inherit;
+  }
+</style>
     
     <style>
         body {
@@ -177,7 +196,7 @@
         <div id="start-screen" class="absolute inset-0 z-30 flex flex-col justify-center items-center bg-black/95 p-6 text-center select-none overflow-y-auto">
             <div class="transform -skew-x-3 border-2 border-[#d4a24e] bg-[#240e03]/80 p-5 shadow-[0_0_20px_rgba(212,162,78,0.4)] w-full max-w-sm">
                 <h1 class="text-4xl sm:text-5xl font-extrabold text-white tracking-widest uppercase text-shadow neon-amber leading-none mb-1">SULPHUR RUN</h1>
-                <h2 class="text-xl sm:text-2xl text-[#d4a24e] font-bold tracking-wider leading-none mb-3">PÂTE SABLÉE DESCENT v0.92 beta</h2>
+                <h2 class="text-xl sm:text-2xl text-[#d4a24e] font-bold tracking-wider leading-none mb-3">PÂTE SABLÉE DESCENT v0.93 beta</h2>
                 <p class="text-[1.05rem] sm:text-base text-gray-300 font-sans tracking-wide leading-relaxed">
                     Navigate the sulphurous rock walls of Pâte Sablée crater on the moon of Nahla. Blast obstructions, neutralise magma vents, and collect data nodes.
                 </p>
