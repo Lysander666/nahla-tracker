@@ -10,9 +10,9 @@ Live deployment: [nahla.live](https://nahla.live) • Pilot Dossier: [CMDR Lysan
 
 This repository contains the standalone client tools and game software powering the Project Nahla ecosystem:
 
-* **Nahla Tracker (`index.html`):** Ground-truth planetary tracking dashboard featuring live 12-phase galactic band clocks, rotational synchronization (25h 26m 10s period), GMT-to-NLT drift calculation, surface temperature simulation, and expedition log archives.
-* **Sulphur Run: Pâte Sablée Descent (`sulphur_run_descent.html`):** Retro sci-fi vertical arcade descent minigame. Piloting an atmospheric surveyor down the unstable volcanic fissures of Pâte Sablée crater, players dodge falling basalt boulders, navigate magma vents, deploy rear defensive pulses, and collect 16 frequency nodes across four color tiers (Amber, Cyan, Magenta, Crimson) to construct Natalja's Pass Observatory.
-
+* **Nahla Tracker (`index.html`):** Ground-truth planetary tracking dashboard featuring live 12-phase galactic band clocks, rotational synchronization (25h 26m 10s period), GMT-to-NLT drift calculation, and surface temperature simulation.
+* **Sulphur Run (`sulphur_run.html`):** Original desktop browser horizontal minigame exploration build.
+* **Sulphur Run: Pâte Sablée Descent (`sulphur_run_descent.html`):** Mobile-optimized vertical arcade descent engine featuring 16 quadrant frequency nodes, CRT scanlines, and 60 Hz deterministic physics.
 ---
 
 ## Technical Architecture
