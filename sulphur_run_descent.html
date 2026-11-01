@@ -16,7 +16,7 @@
         })();
     </script>
     
-    <title>Sulphur Run: Pâte Sablée Descent V0.9 beta</title>
+    <title>Sulphur Run: Pâte Sablée Descent V0.92 beta</title>
 
     <!-- Primary Metadata -->
     <meta name="title" content="Sulphur Run: Pâte Sablée Descent">
@@ -177,7 +177,7 @@
         <div id="start-screen" class="absolute inset-0 z-30 flex flex-col justify-center items-center bg-black/95 p-6 text-center select-none overflow-y-auto">
             <div class="transform -skew-x-3 border-2 border-[#d4a24e] bg-[#240e03]/80 p-5 shadow-[0_0_20px_rgba(212,162,78,0.4)] w-full max-w-sm">
                 <h1 class="text-4xl sm:text-5xl font-extrabold text-white tracking-widest uppercase text-shadow neon-amber leading-none mb-1">SULPHUR RUN</h1>
-                <h2 class="text-xl sm:text-2xl text-[#d4a24e] font-bold tracking-wider leading-none mb-3">PÂTE SABLÉE DESCENT v0.9 beta</h2>
+                <h2 class="text-xl sm:text-2xl text-[#d4a24e] font-bold tracking-wider leading-none mb-3">PÂTE SABLÉE DESCENT v0.92 beta</h2>
                 <p class="text-[1.05rem] sm:text-base text-gray-300 font-sans tracking-wide leading-relaxed">
                     Navigate the sulphurous rock walls of Pâte Sablée crater on the moon of Nahla. Blast obstructions, neutralise magma vents, and collect data nodes.
                 </p>
@@ -198,7 +198,7 @@
                 <p class="mb-1"><span class="text-[#d4a24e]">SPEED:</span> Increases procedurally!</p>
                 <p class="mb-1"><span class="text-[#ff5500]">HAZARDS:</span> Scraping walls deals damage. Avoid or shoot magma spouts!</p>
                 <p class="mb-1"><span class="text-[#ff5500]">COLLECT:</span> Data nodes - these also give small health boosts</p>
-                <p class="text-xs text-gray-500 mt-2 italic font-normal">Synthesized chiptune soundtrack triggers dynamically</p>
+                <p class="text-xs text-gray-500 mt-2 italic font-normal">Synthesised chiptune soundtrack triggers dynamically</p>
                 <br>
                 <p class="mb-1"><a href="index.html" class="text-[#00ffff] no-underline hover:underline font-bold">RETURN TO NAHLA TRACKER</a></p>
             </div>
@@ -898,7 +898,7 @@
             }
 
             if (desc) {
-                desc.innerHTML = `Natalja's Pass Observatory: <strong style="color: ${colorHex}">${count}/16</strong> Nodes Secure`;
+                desc.innerHTML = `Natalja's Pass Observatory: <strong style="color: ${colorHex}">${count}/16</strong> Nodes Secure<br><span style="color: #4ade80; font-weight: bold; font-size: 0.85em;">+25% SHIELD RESTORED</span>`;
             }
 
             // Display and animate overlay entry
@@ -931,6 +931,9 @@
             const awardedType = types[themeIdx];
             
             if (completedNodes.length < 16) {
+                // Restore 1/4 of total hull integrity (capped at 100)
+                rover.shield = Math.min(100, rover.shield + 25);
+
                 completedNodes.push(awardedType);
                 updateNodeDisplay();
                 
