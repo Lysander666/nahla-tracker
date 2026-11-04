@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
    
     
-    <title>Sulphur Run: Pâte Sablée Descent V0.95 beta</title>
+    <title>Sulphur Run: Pâte Sablée Descent V0.95.1 beta</title>
 
     <!-- Primary Metadata -->
     <meta name="title" content="Sulphur Run: Pâte Sablée Descent">
@@ -760,7 +760,7 @@ localStorage.removeItem('sr_vibrancy_level');
 
         const rover = {
             x: LOGICAL_WIDTH / 2 - 16,
-            y: 125, 
+            y: 165, 
             width: 32,
             height: 20,
             vx: 0,
@@ -1121,16 +1121,21 @@ localStorage.removeItem('sr_vibrancy_level');
 
         // Dismiss the achievement toast and restore physical descent action
         function dismissToast() {
-            const toast = document.getElementById('node-toast');
-            if (!toast) return;
+    const toast = document.getElementById('node-toast');
+    if (!toast) return;
 
-            toast.style.transform = 'translateY(-20px)';
-            toast.style.opacity = '0';
-            setTimeout(() => {
-                toast.classList.add('hidden');
-                isToastFreezing = false; // Restore gameplay action
-            }, 500);
+    toast.style.transform = 'translateY(-20px)';
+    toast.style.opacity = '0';
+    setTimeout(() => {
+        toast.classList.add('hidden');
+        isToastFreezing = false; // Restore gameplay action
+        
+        // Trigger victory screen cleanly AFTER toast finishes closing
+        if (completedNodes.length === 16 && !victoryTriggered) {
+            triggerVictory();
         }
+    }, 400);
+}
 
         function awardNode(themeIdx) {
             const types = ['amber', 'cyan', 'magenta', 'crimson'];
@@ -1159,12 +1164,7 @@ localStorage.removeItem('sr_vibrancy_level');
                 // Show physical overlay toast
                 showNodeNotification(nodeDisplayName, nodeColors[themeIdx], completedNodes.length);
                 
-                // Trigger Observatory constructed victory overlay sequence
-                if (completedNodes.length === 16 && !victoryTriggered) {
-                    setTimeout(() => {
-                        triggerVictory();
-                    }, 1000);
-                }
+                
             }
         }
 
@@ -1361,7 +1361,7 @@ bindEvent('mute-btn', 'touchstart', (e) => {
             speed = 7.0;
             rover.shield = 100;
             rover.x = LOGICAL_WIDTH / 2 - 16;
-            rover.y = 125; // Add or update this here so it doesn't jump back to 110 on reboot!
+            rover.y = 165; // Add or update this here so it doesn't jump back to 110 on reboot!
             rover.targetX = rover.x;
             rover.vx = 0;
             rover.lastShot = 0; 
@@ -1452,6 +1452,14 @@ bindEvent('mute-btn', 'touchstart', (e) => {
         }
 
         function triggerVictory() {
+    // Ensure node toast is completely hidden so they never overlap
+    const toast = document.getElementById('node-toast');
+    if (toast) {
+        toast.classList.add('hidden');
+        toast.style.opacity = '0';
+    }
+
+            
             victoryTriggered = true;
             gameState = 'VICTORY';
             if (bgm) bgm.pause();
