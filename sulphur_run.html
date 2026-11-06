@@ -134,6 +134,38 @@
     transition: border-color 0.4s ease, box-shadow 0.4s ease;
 }
 
+        #victory-screen {
+    background: rgba(8, 6, 12, 0.95);
+    padding: 20px 32px;
+    border: 2px solid #61dafb;
+    box-shadow: 0 0 30px rgba(97, 218, 251, 0.4), inset 0 0 25px rgba(97, 218, 251, 0.12);
+    text-align: center;
+    pointer-events: auto;
+    transform: skew(-1deg);
+    max-width: 660px;
+    width: 90%;
+    z-index: 30;
+}
+
+.databoard-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 18px;
+    text-align: left;
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid rgba(97, 218, 251, 0.3);
+    border-left: 3px solid #61dafb;
+    padding: 10px 16px;
+    margin: 12px 0;
+    font-size: 1.25rem;
+    color: #ccc;
+}
+
+.databoard-grid span {
+    color: #fff;
+    font-weight: bold;
+}
+
         h1 {
             color: #fff;
             margin: 0 0 10px 0;
@@ -341,7 +373,7 @@
         <div class="hud-title" id="hud-title">SULPHUR RUN</div>
 
         <div class="ui-layer" id="start-screen">
-            <h1 id="title-text" style="text-shadow: 2px 2px 0px #444, -2px -2px 0px #d4a24e;">SULPHUR RUN v0.5</h1>
+            <h1 id="title-text" style="text-shadow: 2px 2px 0px #444, -2px -2px 0px #d4a24e;">SULPHUR RUN v0.9 beta</h1>
             <p>SRV SIMULATION // NAHLA SURFACE</p>
             <p class="blink" id="start-blink">[PRESS SPACE or CLICK MOUSE TO START]</p>
             
@@ -375,6 +407,34 @@
             <p id="loop-shield-msg" style="color: #61dafb; font-size: 1.6rem; margin: 4px 0; text-shadow: 0 0 8px #61dafb;">+1 KINETIC SHIELD EQUIPPED [ ⬢ ⬡ ⬡ ]</p>
             <p style="color: #fff; font-size: 1.8rem; margin: 10px 0;">READY?</p>
             <p class="blink" id="loop-blink" style="margin-top: 20px; font-size: 1.6rem;">[PRESS SPACE TO CONTINUE]</p>
+        </div>
+
+        <div class="ui-layer" id="victory-screen" style="display: none;">
+            <div class="game-over-title" style="color: #61dafb; text-shadow: 0 0 8px #61dafb; font-size: 1.4rem;">
+                NAHLA SURFACE TELEMETRY // ORBITAL DATABOARD
+            </div>
+            <h1 style="color: #fff; font-size: 3rem; margin: 0 0 6px 0; text-shadow: 0 0 15px #61dafb, 2px 2px 0px #222;">
+                12 LOOPS SYNCHRONISED
+            </h1>
+            <p style="color: #ffd700; font-size: 1.4rem; margin: 0; text-shadow: 0 0 8px rgba(255, 215, 0, 0.5);">
+                REBEKAH CELESTIAL EPHEMERIS RESOLVED // MISSION COMPLETE
+            </p>
+
+            <div class="databoard-grid">
+                <div>DISTANCE: <span id="vic-dist">0</span>m</div>
+                <div>SURVIVAL TIME: <span id="vic-time">00:00</span></div>
+                <div>DATA COLLECTED: <span id="vic-data" style="color:#ffd700">0</span></div>
+                <div>PEAK VELOCITY: <span id="vic-speed" style="color:#ffcc66">0.0 km/h</span></div>
+                <div>ORBITAL STATUS: <span style="color:#61dafb">1:1 TIDAL LOCK</span></div>
+                <div>RESERVE SHIELDS: <span id="vic-shields" style="color:#61dafb; letter-spacing: 2px;">⬡ ⬡ ⬡</span></div>
+            </div>
+
+            <p style="font-size: 1.15rem; color: #888; margin: 4px 0; line-height: 1.3;">
+                Surface telemetry confirms tidal resonance dictates Nahla seismic activity.<br>
+                Orbital observatory array unlocked. Master transmission sent.
+            </p>
+
+            <p class="blink" style="color: #61dafb; margin-top: 14px; font-size: 1.5rem;">[PRESS SPACE TO LOG OUT / RE-ENTER]</p>
         </div>
 
         <div class="ui-layer" id="game-over-screen" style="display: none;">
@@ -842,6 +902,7 @@ function resumeFromLoopTransition() {
     playSound('collect');
 }
 
+
 // --- INPUT HANDLER ---
 const handleInput = (action) => {
     if (gameState === 'START') startGame();
@@ -849,14 +910,14 @@ const handleInput = (action) => {
     else if (gameState === 'PLAYING') {
         if (action === 'jump') rover.jump();
         if (action === 'shoot') rover.shoot();
-        if (action === 'downblast') fireDownblaster(); // <-- ADD THIS
+        if (action === 'downblast') fireDownblaster();
         if (action === 'pause') togglePause();
     }
     else if (gameState === 'PAUSED') {
         if (action === 'pause') togglePause();
         if (action === 'quit') quitGame();
     }
-    else if (gameState === 'GAMEOVER') resetGame();
+    else if (gameState === 'GAMEOVER') resetGame(); // <-- REPLACE THIS LINE
 };
 
 const handleRelease = (action) => {
@@ -883,6 +944,7 @@ function quitGame() {
     document.getElementById('hud').style.display = 'none';
     document.getElementById('hud-shields-bar').style.display = 'none';
     document.getElementById('hud-title').style.display = 'none';
+    document.getElementById('victory-screen').style.display = 'none';
     rover.y = GROUND_Y; 
     obstacles = [];
     initStars();
@@ -1066,8 +1128,22 @@ function playSound(type) {
         gain.gain.setValueAtTime(0.4, now);
         gain.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
         duration = 0.45;
-    }
     
+    } else if (type === 'victory') {
+        const notes = [330, 440, 554.37, 659.25, 880];
+        notes.forEach((freq, idx) => {
+            const oscV = actx.createOscillator();
+            const gainV = actx.createGain();
+            oscV.type = 'sawtooth';
+            oscV.frequency.setValueAtTime(freq, now + idx * 0.09);
+            gainV.gain.setValueAtTime(0.12, now + idx * 0.09);
+            gainV.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.09 + 0.45);
+            oscV.connect(gainV);
+            gainV.connect(actx.destination);
+            oscV.start(now + idx * 0.09);
+            oscV.stop(now + idx * 0.09 + 0.5);
+        });
+        return;
 
     osc.start();
     osc.stop(now + duration);
@@ -1135,6 +1211,7 @@ function startGame() {
     document.getElementById('hud').style.display = 'block';
     document.getElementById('hud-shields-bar').style.display = 'block';
     document.getElementById('hud-title').style.display = 'block';
+    document.getElementById('victory-screen').style.display = 'none';
     
     // UPDATED SPEED: Starts at 7 for faster start
     baseSpeed = 8;
@@ -1370,6 +1447,14 @@ function update() {
 
     if (newLoopIndex !== currentLoopIndex) {
         currentLoopIndex = newLoopIndex;
+        
+        // CHECK 12-LOOP WIN CONDITION:
+        // Completing Loop 12 increments newLoopIndex to 12
+        if (currentLoopIndex >= TARGET_LOOPS_TO_WIN) {
+            triggerVictory();
+            return;
+        }
+
         const nextLoopNum = currentLoopIndex + 1;
         document.getElementById('score-loop').innerText = nextLoopNum;
         
@@ -1379,6 +1464,33 @@ function update() {
         triggerLoopTransition(nextLoopNum);
         return;
     }
+
+    // --- 12-LOOP VICTORY / DATABOARD TRIGGER ---
+const TARGET_LOOPS_TO_WIN = 12;
+
+function triggerVictory() {
+    gameState = 'VICTORY';
+    playSound('victory');
+
+    // Hide active gameplay HUD components
+    document.getElementById('hud').style.display = 'none';
+    document.getElementById('hud-shields-bar').style.display = 'none';
+    document.getElementById('hud-title').style.display = 'none';
+
+    // Populate DataBoard telemetry values
+    document.getElementById('vic-dist').innerText = Math.floor(scoreDist);
+    document.getElementById('vic-time').innerText = formatRunTime(runFrames);
+    document.getElementById('vic-data').innerText = scoreData;
+    document.getElementById('vic-speed').innerText = `${(Math.floor(baseSpeed * 2) / 2).toFixed(1)} km/h`;
+
+    let pips = '';
+    for (let i = 0; i < MAX_SHIELDS; i++) {
+        pips += (i < shields) ? '⬢ ' : '⬡ ';
+    }
+    document.getElementById('vic-shields').innerText = pips.trim();
+
+    document.getElementById('victory-screen').style.display = 'flex';
+}
 
     // 1. Passive acceleration
     if (frames % 240 === 0) baseSpeed += 0.1;
