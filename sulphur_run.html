@@ -147,7 +147,7 @@
     z-index: 30;
 }
 
-.databoard-grid {
+.-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 8px 18px;
@@ -161,7 +161,7 @@
     color: #ccc;
 }
 
-.databoard-grid span {
+.-grid span {
     color: #fff;
     font-weight: bold;
 }
@@ -375,9 +375,12 @@
         <div class="ui-layer" id="start-screen">
             <h1 id="title-text" style="text-shadow: 2px 2px 0px #444, -2px -2px 0px #d4a24e;">SULPHUR RUN v0.9 beta</h1>
             <p>SRV SIMULATION // NAHLA SURFACE</p>
+            <p style="color: #61dafb; font-size: 1.35rem; margin: 2px 0 6px 0; text-shadow: 0 0 8px #61dafb; letter-spacing: 1px;">
+                OBJECTIVE: SYNCHRONISE 12 LOOPS TO UNLOCK THE *ORBITAL DATABANK*
+            </p>
             <p class="blink" id="start-blink">[PRESS SPACE or CLICK MOUSE TO START]</p>
             
-<div class="controls-hint">
+            <div class="controls-hint">
                 <span style="color:#d4a24e">SHOOT:</span> Left-Click / Enter <br>
                 <span style="color:#61dafb">DOWNBLASTER:</span> Space / S (or ▼) <br>
                 <span style="color:#fff">JUMP / DOUBLE JUMP:</span> Right-Click / ▲ <br>
@@ -411,7 +414,7 @@
 
         <div class="ui-layer" id="victory-screen" style="display: none;">
             <div class="game-over-title" style="color: #61dafb; text-shadow: 0 0 8px #61dafb; font-size: 1.4rem;">
-                NAHLA SURFACE TELEMETRY // ORBITAL DATABOARD
+                NAHLA SURFACE TELEMETRY // ORBITAL DATABANK
             </div>
             <h1 style="color: #fff; font-size: 3rem; margin: 0 0 6px 0; text-shadow: 0 0 15px #61dafb, 2px 2px 0px #222;">
                 12 LOOPS SYNCHRONISED
@@ -420,7 +423,7 @@
                 REBEKAH CELESTIAL EPHEMERIS RESOLVED // MISSION COMPLETE
             </p>
 
-            <div class="databoard-grid">
+            <div class="-grid">
                 <div>DISTANCE: <span id="vic-dist">0</span>m</div>
                 <div>SURVIVAL TIME: <span id="vic-time">00:00</span></div>
                 <div>DATA COLLECTED: <span id="vic-data" style="color:#ffd700">0</span></div>
@@ -1465,7 +1468,7 @@ function update() {
         return;
     }
 
-    // --- 12-LOOP VICTORY / DATABOARD TRIGGER ---
+    // --- 12-LOOP VICTORY /  TRIGGER ---
 const TARGET_LOOPS_TO_WIN = 12;
 
 function triggerVictory() {
@@ -1477,7 +1480,7 @@ function triggerVictory() {
     document.getElementById('hud-shields-bar').style.display = 'none';
     document.getElementById('hud-title').style.display = 'none';
 
-    // Populate DataBoard telemetry values
+    // Populate  telemetry values
     document.getElementById('vic-dist').innerText = Math.floor(scoreDist);
     document.getElementById('vic-time').innerText = formatRunTime(runFrames);
     document.getElementById('vic-data').innerText = scoreData;
