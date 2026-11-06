@@ -434,6 +434,44 @@
             box-shadow: 0 0 16px rgba(255, 153, 0, 0.45);
         }
 
+        /* Copy Telemetry Button */
+.copy-btn-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 14px;
+}
+
+.copy-btn {
+    background: rgba(15, 18, 23, 0.9);
+    color: var(--cyan-dim);
+    border: 1px solid var(--border-dim);
+    border-radius: 6px;
+    padding: 8px 16px;
+    font-family: var(--font-body);
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.copy-btn:hover {
+    color: #ffffff;
+    border-color: var(--cyan-glow);
+    box-shadow: 0 0 12px rgba(58, 242, 255, 0.25);
+    transform: translateY(-1px);
+}
+
+.copy-btn.copied {
+    border-color: var(--green-glow);
+    color: var(--green-glow);
+    box-shadow: 0 0 12px rgba(52, 211, 153, 0.3);
+}
+
         /* Mobile Optimization Breakpoints */
         @media (max-width: 680px) {
             body {
@@ -586,6 +624,13 @@
 
     </div>
 
+    <!-- COPY TELEMETRY ACTION -->
+        <div class="copy-btn-container">
+            <button type="button" class="copy-btn" id="btn-copy-telemetry" onclick="copyVoyageDetails()">
+                <span id="copy-btn-text">📋 Copy Voyage Telemetry</span>
+            </button>
+        </div>
+
     <!-- 3-LEG FLIGHT TRAJECTORY -->
     <div class="panel">
         <div class="panel-header">
@@ -672,6 +717,43 @@
     const missionMode = document.getElementById('mission-mode');
     const leg01       = document.getElementById('leg-01');
     const leg01Status = document.getElementById('leg-01-status');
+
+    function copyVoyageDetails() {
+        const d = daysEl.textContent;
+        const h = hoursEl.textContent;
+        const m = minsEl.textContent;
+        const s = secsEl.textContent;
+        const currentMode = missionMode ? missionMode.textContent : "Status";
+        const currentStatus = statusEl ? statusEl.textContent : "STANDBY";
+        const utcTime = gmtClock ? gmtClock.textContent : new Date().toISOString().substring(11, 19) + " UTC";
+
+        const textToCopy = [
+            `PROJECT NAHLA OPEN TRANSIT VOYAGE`,
+            `Vessel: A.R.C. Cor Draconis`,
+            `Telemetry Mode: ${currentMode}`,
+            `Clock: ${d}d ${h}h ${m}m ${s}s`,
+            `Status: ${currentStatus}`,
+            `Live UTC: ${utcTime}`,
+            `Departure: 24 Sept 2026 • 19:30:00 GMT`,
+            `Galactic Region: Inner Scutum-Centaurus Arm`,
+            `Route: Colonia / Pennsylvania ➔ Orio-Persean Conflux ➔ Nahla (Outer Arm)`,
+            `Status Link: https://nahla.live/countdown.html`
+        ].join('\n');
+
+        navigator.clipboard.writeText(textToCopy).then(() => {
+            const btn = document.getElementById('btn-copy-telemetry');
+            const btnText = document.getElementById('copy-btn-text');
+            btn.classList.add('copied');
+            btnText.textContent = '✔ Telemetry Copied!';
+
+            setTimeout(() => {
+                btn.classList.remove('copied');
+                btnText.textContent = '📋 Copy Voyage Telemetry';
+            }, 2500);
+        }).catch(err => {
+            console.error('Failed to copy telemetry to clipboard:', err);
+        });
+    }
 
     function updateCountdown() {
         const now = new Date();
