@@ -147,7 +147,7 @@
     z-index: 30;
 }
 
-.-grid {
+.databank-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 8px 18px;
@@ -161,7 +161,7 @@
     color: #ccc;
 }
 
-.-grid span {
+.databank-grid span {
     color: #fff;
     font-weight: bold;
 }
@@ -423,7 +423,7 @@
                 REBEKAH CELESTIAL EPHEMERIS RESOLVED // MISSION COMPLETE
             </p>
 
-            <div class="-grid">
+            <div class="databank-grid">
                 <div>DISTANCE: <span id="vic-dist">0</span>m</div>
                 <div>SURVIVAL TIME: <span id="vic-time">00:00</span></div>
                 <div>DATA COLLECTED: <span id="vic-data" style="color:#ffd700">0</span></div>
@@ -920,7 +920,7 @@ const handleInput = (action) => {
         if (action === 'pause') togglePause();
         if (action === 'quit') quitGame();
     }
-    else if (gameState === 'GAMEOVER') resetGame(); // <-- REPLACE THIS LINE
+    else if (gameState === 'GAMEOVER' || gameState === 'VICTORY') resetGame();
 };
 
 const handleRelease = (action) => {
@@ -1147,6 +1147,7 @@ function playSound(type) {
             oscV.stop(now + idx * 0.09 + 0.5);
         });
         return;
+    } // <--- ADD THIS CLOSING BRACE HERE!
 
     osc.start();
     osc.stop(now + duration);
@@ -1452,7 +1453,6 @@ function update() {
         currentLoopIndex = newLoopIndex;
         
         // CHECK 12-LOOP WIN CONDITION:
-        // Completing Loop 12 increments newLoopIndex to 12
         if (currentLoopIndex >= TARGET_LOOPS_TO_WIN) {
             triggerVictory();
             return;
@@ -1468,7 +1468,11 @@ function update() {
         return;
     }
 
+    // 1. Passive acceleration
+    if (frames % 240 === 0 && baseSpeed < 25.0) baseSpeed += 0.1;
+
     // --- 12-LOOP VICTORY /  TRIGGER ---
+// --- 12-LOOP VICTORY / DATABANK TRIGGER ---
 const TARGET_LOOPS_TO_WIN = 12;
 
 function triggerVictory() {
@@ -1480,7 +1484,7 @@ function triggerVictory() {
     document.getElementById('hud-shields-bar').style.display = 'none';
     document.getElementById('hud-title').style.display = 'none';
 
-    // Populate  telemetry values
+    // Populate DataBank telemetry values
     document.getElementById('vic-dist').innerText = Math.floor(scoreDist);
     document.getElementById('vic-time').innerText = formatRunTime(runFrames);
     document.getElementById('vic-data').innerText = scoreData;
@@ -2105,7 +2109,7 @@ function draw() {
         ctx.restore();
     }
 
-    rover.draw();
+  
 
     rover.draw();
 
