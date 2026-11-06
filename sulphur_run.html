@@ -906,10 +906,11 @@ function resumeFromLoopTransition() {
 }
 
 
-// --- INPUT HANDLER ---
 const handleInput = (action) => {
     if (gameState === 'START') startGame();
-    else if (gameState === 'LOOP_TRANSITION') resumeFromLoopTransition();
+    else if (gameState === 'LOOP_TRANSITION') {
+        if (action === 'jump' || action === 'downblast') resumeFromLoopTransition();
+    }
     else if (gameState === 'PLAYING') {
         if (action === 'jump') rover.jump();
         if (action === 'shoot') rover.shoot();
@@ -1056,9 +1057,9 @@ window.addEventListener('touchstart', e => {
 window.addEventListener('touchend', e => handleRelease('jump'));
 
 window.addEventListener('mousedown', e => {
+    // Left-click (0) is ignored on loop transitions to prevent accidental skipping
     if (gameState === 'LOOP_TRANSITION') {
-        resumeFromLoopTransition();
-        return;
+        return; 
     }
     if (e.button === 0) handleInput('shoot');      // Left Click: Shoot
     if (e.button === 2) {                          // Right Click: Jump
