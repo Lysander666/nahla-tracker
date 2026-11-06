@@ -108,6 +108,7 @@
             position: absolute;
             bottom: 14px;
             left: 14px;
+            z-index: 35; /* Above Game Over & CRT overlays */
             background: rgba(10, 5, 5, 0.8);
             border: 1px solid #d4a24e;
             color: #d4a24e;
@@ -131,29 +132,33 @@
         }
 
         /* Cyan Return to Tracker Button on Start Screen */
+        /* Cyan Return to Tracker Button (Bottom Center, aligned with Fullscreen button) */
         .return-tracker-btn {
-            display: inline-block;
-            margin-top: 18px;
+            position: absolute;
+            bottom: 14px;
+            left: 50%;
+            transform: translateX(-50%);
             background: rgba(10, 20, 28, 0.85);
             border: 1px solid #61dafb;
             color: #61dafb;
             font-family: 'VT323', monospace;
-            font-size: 1.25rem;
+            font-size: 1.1rem;
+            padding: 4px 10px;
             text-decoration: none;
-            padding: 5px 16px;
             cursor: pointer;
+            z-index: 25; /* Sits above CRT scanline overlay */
             letter-spacing: 1px;
             transition: all 0.2s ease;
-            text-shadow: 0 0 6px #61dafb;
-            box-shadow: 0 0 10px rgba(97, 218, 251, 0.25);
-            pointer-events: auto;
+            text-shadow: 0 0 5px #61dafb;
+            box-shadow: 0 0 10px rgba(97, 218, 251, 0.2);
+            white-space: nowrap;
         }
 
         .return-tracker-btn:hover {
             background: #61dafb;
             color: #050505;
             text-shadow: none;
-            box-shadow: 0 0 18px #61dafb;
+            box-shadow: 0 0 15px #61dafb;
         }
 
         canvas {
@@ -427,7 +432,7 @@
         <div class="hud-title" id="hud-title">SULPHUR RUN</div>
 
         <div class="ui-layer" id="start-screen">
-            <h1 id="title-text" style="text-shadow: 2px 2px 0px #444, -2px -2px 0px #d4a24e;">SULPHUR RUN v0.91 beta</h1>
+            <h1 id="title-text" style="text-shadow: 2px 2px 0px #444, -2px -2px 0px #d4a24e;">SULPHUR RUN v0.92 beta</h1>
             <p>SRV SIMULATION // NAHLA SURFACE</p>
             <p style="color: #61dafb; font-size: 1.35rem; margin: 2px 0 6px 0; text-shadow: 0 0 8px #61dafb; letter-spacing: 1px;">
                 OBJECTIVE: SYNCHRONISE 12 LOOPS TO UNLOCK THE ORBITAL DATABANK
@@ -451,10 +456,10 @@
     for Phases
 </div>
 
-            <!-- RETURN TO NAHLA TRACKER BUTTON -->
-<a href="index.html" class="return-tracker-btn" id="return-tracker-btn">
-    [ ⮌ RETURN TO NAHLA TRACKER ]
-</a>
+            <!-- RETURN TO NAHLA TRACKER (BOTTOM CENTER) -->
+        <a href="index.html" class="return-tracker-btn" id="return-tracker-btn">
+            [ ⮌ RETURN TO NAHLA TRACKER ]
+        </a>
         </div>
 
         <div class="ui-layer" id="pause-screen" style="display: none;">
@@ -980,7 +985,10 @@ const handleInput = (action) => {
         if (action === 'pause') togglePause();
         if (action === 'quit') quitGame();
     }
-    else if (gameState === 'GAMEOVER' || gameState === 'VICTORY') resetGame();
+    else if (gameState === 'GAMEOVER' || gameState === 'VICTORY') {
+        // Only reboot on Space/Downblast or Jump keys, NOT mouse shoot clicks
+        if (action === 'downblast' || action === 'jump') resetGame();
+    }
 };
 
 const handleRelease = (action) => {
@@ -1043,6 +1051,11 @@ function quitGame() {
     document.getElementById('victory-screen').style.display = 'none';
     document.getElementById('home-btn').style.display = 'none';
     if (bgm) { bgm.pause(); bgm.currentTime = 0; }
+
+    // --- RESTORE RETURN TRACKER BUTTON ON TITLE SCREEN ---
+    const trackerBtn = document.getElementById('return-tracker-btn');
+    if (trackerBtn) trackerBtn.style.display = 'block';
+    
     rover.y = GROUND_Y; 
     obstacles = [];
     initStars();
@@ -1097,14 +1110,13 @@ if (fsBtn) {
 
 const homeBtn = document.getElementById('home-btn');
 if (homeBtn) {
-    // stopPropagation prevents button clicks from firing the blaster
     homeBtn.addEventListener('mousedown', e => e.stopPropagation());
     homeBtn.addEventListener('touchstart', e => e.stopPropagation());
     homeBtn.addEventListener('click', e => {
         e.stopPropagation();
-        quitGame(); // Returns cleanly to the game's start screen
+        quitGame(); // Safely returns to title screen
     });
-}    
+}   
 
     const returnTrackerBtn = document.getElementById('return-tracker-btn');
 if (returnTrackerBtn) {
@@ -1331,6 +1343,10 @@ function startGame() {
     document.getElementById('hud-shields-bar').style.display = 'block';
     document.getElementById('hud-title').style.display = 'block';
     document.getElementById('victory-screen').style.display = 'none';
+
+    // --- HIDE RETURN TRACKER BUTTON DURING GAMEPLAY ---
+    const trackerBtn = document.getElementById('return-tracker-btn');
+    if (trackerBtn) trackerBtn.style.display = 'none';
     
     // UPDATED SPEED: Starts at 7 for faster start
     baseSpeed = 8;
