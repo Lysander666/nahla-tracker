@@ -725,7 +725,7 @@
         const s = secsEl.textContent;
         const currentMode = missionMode ? missionMode.textContent : "Status";
         const currentStatus = statusEl ? statusEl.textContent : "STANDBY";
-        const utcTime = gmtClock ? gmtClock.textContent : new Date().toISOString().substring(11, 19) + " UTC";
+        const utcTelemetry = gmtClock ? gmtClock.textContent : new Date().toISOString().replace('T', ' ').substring(0, 19) + " UTC";
 
         const textToCopy = [
             `PROJECT NAHLA OPEN TRANSIT VOYAGE`,
@@ -733,11 +733,10 @@
             `Telemetry Mode: ${currentMode}`,
             `Clock: ${d}d ${h}h ${m}m ${s}s`,
             `Status: ${currentStatus}`,
-            `Live UTC: ${utcTime}`,
+            `Live UTC: ${utcTelemetry}`,
             `Departure: 24 Sept 2026 • 19:30:00 GMT`,
-            `Galactic Region: Inner Scutum-Centaurus Arm`,
             `Route: Colonia / Pennsylvania ➔ Orio-Persean Conflux ➔ Nahla (Outer Arm)`,
-            `Status Link: https://nahla.live/countdown.html`
+            `Status Link: https://nahla.live/voyage_status.html`
         ].join('\n');
 
         navigator.clipboard.writeText(textToCopy).then(() => {
@@ -760,7 +759,13 @@
         const nowMs = now.getTime();
         const diffMs = LAUNCH_TIMESTAMP - nowMs;
 
-        gmtClock.textContent = now.toISOString().substring(11, 19) + " UTC";
+        const day = String(now.getUTCDate()).padStart(2, '0');
+        const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        const month = months[now.getUTCMonth()];
+        const year = now.getUTCFullYear();
+        const timeStr = now.toISOString().substring(11, 19);
+
+        gmtClock.textContent = `${day} ${month} ${year} • ${timeStr} UTC`;
 
         let totalSeconds = 0;
 
