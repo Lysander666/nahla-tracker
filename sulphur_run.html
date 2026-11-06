@@ -927,6 +927,39 @@ const handleRelease = (action) => {
     if (gameState === 'PLAYING' && action === 'jump') rover.cutJump();
 }
 
+function resumeFromLoopTransition() {
+    document.getElementById('loop-screen').style.display = 'none';
+    gameState = 'PLAYING';
+    playSound('collect');
+}
+
+// --- 12-LOOP VICTORY / DATABANK TRIGGER ---
+const TARGET_LOOPS_TO_WIN = 12;
+
+function triggerVictory() {
+    gameState = 'VICTORY';
+    playSound('victory');
+
+    // Hide active gameplay HUD components
+    document.getElementById('hud').style.display = 'none';
+    document.getElementById('hud-shields-bar').style.display = 'none';
+    document.getElementById('hud-title').style.display = 'none';
+
+    // Populate DataBank telemetry values
+    document.getElementById('vic-dist').innerText = Math.floor(scoreDist);
+    document.getElementById('vic-time').innerText = formatRunTime(runFrames);
+    document.getElementById('vic-data').innerText = scoreData;
+    document.getElementById('vic-speed').innerText = `${(Math.floor(baseSpeed * 2) / 2).toFixed(1)} km/h`;
+
+    let pips = '';
+    for (let i = 0; i < MAX_SHIELDS; i++) {
+        pips += (i < shields) ? '⬢ ' : '⬡ ';
+    }
+    document.getElementById('vic-shields').innerText = pips.trim();
+
+    document.getElementById('victory-screen').style.display = 'flex';
+}    
+
 function togglePause() {
     if (gameState === 'PLAYING') {
         gameState = 'PAUSED';
@@ -1468,39 +1501,9 @@ function update() {
         return;
     }
 
-    // 1. Passive acceleration
+    // 1. Passive acceleration (capped at 25.0 km/h)
     if (frames % 240 === 0 && baseSpeed < 25.0) baseSpeed += 0.1;
 
-    // --- 12-LOOP VICTORY /  TRIGGER ---
-// --- 12-LOOP VICTORY / DATABANK TRIGGER ---
-const TARGET_LOOPS_TO_WIN = 12;
-
-function triggerVictory() {
-    gameState = 'VICTORY';
-    playSound('victory');
-
-    // Hide active gameplay HUD components
-    document.getElementById('hud').style.display = 'none';
-    document.getElementById('hud-shields-bar').style.display = 'none';
-    document.getElementById('hud-title').style.display = 'none';
-
-    // Populate DataBank telemetry values
-    document.getElementById('vic-dist').innerText = Math.floor(scoreDist);
-    document.getElementById('vic-time').innerText = formatRunTime(runFrames);
-    document.getElementById('vic-data').innerText = scoreData;
-    document.getElementById('vic-speed').innerText = `${(Math.floor(baseSpeed * 2) / 2).toFixed(1)} km/h`;
-
-    let pips = '';
-    for (let i = 0; i < MAX_SHIELDS; i++) {
-        pips += (i < shields) ? '⬢ ' : '⬡ ';
-    }
-    document.getElementById('vic-shields').innerText = pips.trim();
-
-    document.getElementById('victory-screen').style.display = 'flex';
-}
-
-    // 1. Passive acceleration
-    if (frames % 240 === 0) baseSpeed += 0.1;
 
     // 2. Throttle / Brake
     let targetSpeed = baseSpeed;
