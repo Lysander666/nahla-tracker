@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
    
     
-    <title>Sulphur Run: Pâte Sablée Descent V0.95.1 beta</title>
+    <title>Sulphur Run: Pâte Sablée Descent V0.96 beta</title>
 
     <!-- Primary Metadata -->
     <meta name="title" content="Sulphur Run: Pâte Sablée Descent">
@@ -42,6 +42,16 @@
     
     
     <style>
+
+@font-face {
+    font-family: 'JetBrains Mono';
+    src: url('JetBrainsMono-Regular.woff2') format('woff2');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+        
         body {
     background-color: #000;
     margin: 0;
@@ -106,12 +116,42 @@
             animation: amberPulse 2s ease-in-out infinite;
         }
         
-       /* Force retro VT323 arcade font across EVERYTHING inside the game */
-        #game-frame,
-        #game-frame * {
-            font-family: 'VT323', monospace !important;
-            letter-spacing: 0.04em;
-        }
+       /* Default font for retro arcade elements */
+#game-frame {
+    font-family: 'VT323', monospace;
+    letter-spacing: 0.04em;
+}
+
+/* Explicit arcade elements retaining VT323 */
+#hud,
+#hud *,
+#bottom-hud,
+#bottom-hud *,
+#start-prompt,
+#toast-badge,
+#toast-title,
+#toast-continue-btn,
+#victory-screen h1,
+#victory-screen h2,
+#victory-continue-btn,
+#game-over-screen h1,
+#game-over-screen div:first-child,
+#reboot-prompt {
+    font-family: 'VT323', monospace !important;
+}
+
+/* Crisp JetBrains Mono for narrative, instructions, and node descriptions */
+#start-screen p,
+#start-screen span:not(#start-prompt),
+#start-screen .instructions,
+#start-screen .instructions *,
+#node-toast #toast-desc,
+#node-toast #toast-desc *,
+#victory-screen p,
+#game-over-screen p {
+    font-family: 'JetBrains Mono', monospace, sans-serif !important;
+    letter-spacing: -0.01em;
+}
 
         /* VT323 glyphs are naturally narrower, so boost HUD size slightly for arcade punch */
         #hud {
@@ -169,7 +209,7 @@
         }
 
         #start-screen p {
-            font-size: 1.1rem !important;
+            font-size: 0.76rem !important; /* Scaled down from 1.1rem */            
             line-height: 1.25 !important;
         }
 
@@ -194,7 +234,7 @@
         }
 
         #start-screen .instructions p {
-            font-size: 1.05rem !important;
+            font-size: 0.72rem !important; /* Scaled down from 1.05rem */
             line-height: 1.2 !important;
             margin-bottom: 3px !important;
         }
@@ -238,7 +278,7 @@
         }
 
         #node-toast #toast-desc {
-            font-size: 1.45rem !important;
+            font-size: 0.88rem !important; /* Scaled down from 1.45rem */
             line-height: 1.35 !important;
             color: #e2e8f0 !important;
         }
@@ -344,7 +384,7 @@
         <div class="dossier-card transform -skew-x-3 text-center w-full">
 <span class="block text-xs text-gray-300 tracking-[0.25em] uppercase mb-1">Nahla Labs presents</span>
             <h1 class="font-extrabold text-white uppercase text-shadow neon-amber">SULPHUR RUN</h1>
-            <h2 class="text-[#d4a24e] font-bold tracking-wider">PÂTE SABLÉE DESCENT v0.95.1 beta</h2>
+            <h2 class="text-[#d4a24e] font-bold tracking-wider">PÂTE SABLÉE DESCENT v0.96 beta</h2>
             
             <p class="text-gray-300 tracking-wide mt-1">
                 Navigate the sulphurous rock walls of Pâte Sablée crater on the moon of Nahla. Blast obstructions, neutralise magma vents, and collect data nodes.
