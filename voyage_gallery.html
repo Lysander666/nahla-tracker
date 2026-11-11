@@ -125,6 +125,54 @@
             font-size: 1.4rem;
         }
 
+        <!-- Audio / Visual Section -->
+<section class="video-section">
+    <div class="video-section-title">
+        <span>▶</span> Audio / Visual Transmissions
+    </div>
+
+    <div class="video-card">
+        <div class="video-wrapper">
+            <!-- Replace VIDEO_ID with the YouTube video ID (e.g. dQw4w9WgXcQ) -->
+            <iframe 
+                src="https://www.youtube-nocookie.com/embed/NTD9QwziydI" 
+                title="Nahla Stillcam - Sunset and Tracker Re-anchoring" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                allowfullscreen>
+            </iframe>
+        </div>
+        <div class="video-info">
+            <div class="video-meta">
+                <span class="cmdr-badge">CMDR [Lysander666]</span>
+                <span>3312-08-25</span>
+            </div>
+            <h3 class="video-title">Carrier Jump & Waypoint Departure Reel</h3>
+            <p class="video-desc">Cinematic record of fleet departure maneuvers and orbital transit capture.</p>
+        </div>
+    </div>
+
+         <div class="video-card">
+        <div class="video-wrapper">
+            <!-- Replace VIDEO_ID with the YouTube video ID (e.g. dQw4w9WgXcQ) -->
+            <iframe 
+                src="https://www.youtube-nocookie.com/embed/NTD9QwziydI" 
+                title="Nahla Stillcam - Sunset and Tracker Re-anchoring" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                allowfullscreen>
+            </iframe>
+        </div>
+        <div class="video-info">
+            <div class="video-meta">
+                <span class="cmdr-badge">CMDR [Lysander666]</span>
+                <span>3312-08-25</span>
+            </div>
+            <h3 class="video-title">Carrier Jump & Waypoint Departure Reel</h3>
+            <p class="video-desc">Cinematic record of fleet departure maneuvers and orbital transit capture.</p>
+        </div>
+    </div>
+        
+</section>
+
         /* Filter & Sort Bar */
         .gallery-controls {
             display: flex;
@@ -328,6 +376,86 @@
         .lightbox-close:hover {
             color: #61dafb;
         }
+
+        /* Audio / Visual Transmissions Section */
+.video-section {
+    max-width: 900px;
+    margin: 30px auto 40px auto;
+    padding: 0 15px;
+}
+
+.video-section-title {
+    font-size: 1.1rem;
+    color: #61dafb;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #333;
+    padding-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.video-card {
+    background: #111;
+    border: 1px solid #333;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    margin-bottom: 25px;
+}
+
+.video-wrapper {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    background: #000;
+}
+
+.video-wrapper iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
+.video-info {
+    padding: 15px 18px;
+    background: #161616;
+    border-top: 1px solid #282828;
+}
+
+.video-meta {
+    font-size: 0.8rem;
+    color: #ffbf00;
+    letter-spacing: 0.05em;
+    margin-bottom: 6px;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.video-meta .cmdr-badge {
+    color: #61dafb;
+    font-weight: bold;
+}
+
+.video-title {
+    font-size: 1rem;
+    color: #eee;
+    margin: 0 0 6px 0;
+}
+
+.video-desc {
+    font-size: 0.85rem;
+    color: #888;
+    line-height: 1.4;
+    margin: 0;
+}
 
         /* --- SECRET ADMIN MODAL --- */
         .admin-modal {
