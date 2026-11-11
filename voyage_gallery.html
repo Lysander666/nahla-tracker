@@ -809,7 +809,7 @@ function updateLightbox() {
     document.getElementById('lightbox-caption').textContent = item.title;
 
     const cmdrLabel = item.cmdr ? `CMDR ${item.cmdr.replace(/^CMDR\s+/i, '')}` : 'CMDR Unspecified';
-    const dateLabel = item.date ? ` • Stardate ${item.date}` : '';
+    const dateLabel = item.date ? ` • Date ${item.date}` : '';
     document.getElementById('lightbox-meta').textContent = `${cmdrLabel}${dateLabel}`;
 }
 
