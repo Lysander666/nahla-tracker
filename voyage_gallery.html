@@ -3,28 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Project Nahla Voyage Gallery</title>
-    
+    <title>Project Nahla — Open Transit Voyage Gallery</title>
+
+    <!-- Open Graph / Discord -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Project Nahla — Open Transit Voyage Gallery">
+    <meta property="og:description" content="Visual telemetry, transmissions, and logs from the Project Nahla Open Transit Voyage.">
+    <meta property="og:image" content="https://lysander666.github.io/nahla-tracker/nahla_voyage-sm.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+
+    <!-- Twitter / X -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Project Nahla — Open Transit Voyage Gallery">
+    <meta name="twitter:description" content="Visual telemetry, transmissions, and logs from the Project Nahla Open Transit Voyage.">
+    <meta name="twitter:image" content="https://lysander666.github.io/nahla-tracker/nahla_voyage-sm.png">
+
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap">
 
     <link rel="icon" type="image/png" sizes="16x16" href="faviconmain16.png">
     <link rel="icon" type="image/png" sizes="32x32" href="favicon32@2x.png">
     <link rel="icon" type="image/png" sizes="128x128" href="faviconmain128.png">
-
-    <!-- Open Graph / Discord -->
-<meta property="og:type" content="website">
-<meta property="og:title" content="Project Nahla — Open Transit Voyage Gallery">
-<meta property="og:description" content="Visual telemetry, transmissions, and imagery from the Project Nahla Open Transit Voyage.">
-<meta property="og:image" content="https://lysander666.github.io/nahla-tracker/nahla_voyage-sm.png">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
-
-<!-- Twitter / X -->
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Project Nahla — Open Transit Voyage Gallery">
-<meta name="twitter:description" content="Visual telemetry, transmissions, and imagery from the Project Nahla Open Transit Voyage.">
-<meta name="twitter:image" content="https://lysander666.github.io/nahla-tracker/nahla_voyage-sm.png">
 
     <style>
         body { 
@@ -97,7 +97,7 @@
             text-decoration: underline;
         }
 
-        /* --- GALLERY SECTION --- */
+        /* --- GALLERY CONTAINER --- */
         #gallery-section {
             border: 1px solid #444;
             border-radius: 8px;
@@ -108,8 +108,10 @@
 
         .gallery-header-bar {
             display: flex;
+            flex-wrap: wrap;
             justify-content: space-between;
             align-items: center;
+            gap: 16px;
             border-bottom: 1px solid #333;
             padding-bottom: 14px;
             margin-bottom: 20px;
@@ -119,27 +121,52 @@
             color: #61dafb;
             margin: 0;
             font-family: Consolas, "Courier New", monospace;
-            font-size: 1.5rem;
+            font-size: 1.4rem;
         }
 
-        .admin-hint {
-            font-size: 0.75rem;
-            color: #666;
+        /* Filter & Sort Bar */
+        .gallery-controls {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 12px;
             font-family: Consolas, monospace;
-            user-select: none;
+            font-size: 0.85rem;
         }
 
-        .admin-hint kbd {
-            background: #111;
-            border: 1px solid #444;
-            padding: 2px 5px;
-            border-radius: 4px;
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .control-label {
             color: #888;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
         }
 
+        .gallery-select {
+            background-color: #1a1a1a;
+            border: 1px solid #444;
+            color: #61dafb;
+            padding: 5px 8px;
+            border-radius: 4px;
+            font-family: Consolas, monospace;
+            font-size: 0.85rem;
+            cursor: pointer;
+        }
+
+        .gallery-select:focus {
+            outline: none;
+            border-color: #61dafb;
+        }
+
+        /* Grid & Cards */
         .gallery-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
             gap: 16px;
         }
 
@@ -172,15 +199,39 @@
             bottom: 0;
             left: 0;
             right: 0;
-            background: linear-gradient(transparent, rgba(0,0,0,0.85));
-            padding: 18px 10px 8px 10px;
-            font-size: 0.8rem;
+            background: linear-gradient(transparent, rgba(0,0,0,0.92) 50%);
+            padding: 24px 10px 8px 10px;
             color: #eee;
+            pointer-events: none;
+            font-family: Consolas, "Courier New", monospace;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .overlay-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.7rem;
+            color: #ffbf00;
+            letter-spacing: 0.04em;
+        }
+
+        .overlay-title {
+            font-size: 0.82rem;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            pointer-events: none;
-            font-family: Consolas, "Courier New", monospace;
+            color: #e0e0e0;
+        }
+
+        /* Empty State */
+        .gallery-empty {
+            text-align: center;
+            color: #777;
+            padding: 40px 0;
+            font-family: Consolas, monospace;
+            font-size: 0.95rem;
         }
 
         /* --- LIGHTBOX --- */
@@ -210,19 +261,28 @@
 
         .lightbox-content img {
             max-width: 100%;
-            max-height: 80vh;
+            max-height: 75vh;
             border-radius: 6px;
             border: 1px solid #444;
             box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
             object-fit: contain;
         }
 
-        .lightbox-caption {
+        .lightbox-caption-box {
             margin-top: 12px;
-            color: #61dafb;
-            font-family: Consolas, monospace;
-            font-size: 1rem;
             text-align: center;
+            font-family: Consolas, monospace;
+        }
+
+        .lightbox-meta {
+            font-size: 0.8rem;
+            color: #ffbf00;
+            margin-bottom: 4px;
+        }
+
+        .lightbox-caption {
+            color: #61dafb;
+            font-size: 1.05rem;
         }
 
         .lightbox-nav-btn {
@@ -267,7 +327,7 @@
             color: #61dafb;
         }
 
-        /* --- ADMIN MODAL (CTRL + SHIFT + A) --- */
+        /* --- SECRET ADMIN MODAL --- */
         .admin-modal {
             display: none;
             position: fixed;
@@ -290,7 +350,7 @@
             box-shadow: 0 0 25px rgba(97, 218, 251, 0.3);
             border-radius: 8px;
             width: 100%;
-            max-width: 900px;
+            max-width: 1100px;
             max-height: 90vh;
             display: flex;
             flex-direction: column;
@@ -333,8 +393,8 @@
 
         .admin-add-box {
             display: grid;
-            grid-template-columns: 1fr 1.5fr auto;
-            gap: 10px;
+            grid-template-columns: 1.2fr 1fr 1.6fr 130px auto;
+            gap: 8px;
             background: #111;
             padding: 12px;
             border: 1px solid #333;
@@ -347,10 +407,12 @@
             background: #1e1e1e;
             border: 1px solid #444;
             color: #eee;
-            padding: 8px 10px;
+            padding: 7px 9px;
             border-radius: 4px;
             font-family: Consolas, monospace;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
+            box-sizing: border-box;
+            width: 100%;
         }
 
         .admin-input:focus {
@@ -363,11 +425,12 @@
             border: 1px solid #61dafb;
             color: #61dafb;
             font-family: Consolas, monospace;
-            padding: 8px 14px;
+            padding: 7px 14px;
             border-radius: 4px;
             cursor: pointer;
             transition: all 0.2s;
             font-weight: bold;
+            white-space: nowrap;
         }
 
         .admin-btn:hover {
@@ -383,27 +446,22 @@
 
         .admin-item-row {
             display: grid;
-            grid-template-columns: 40px 1fr 1.5fr 110px;
-            gap: 10px;
+            grid-template-columns: 36px 1.2fr 1fr 1.6fr 130px 40px;
+            gap: 8px;
             align-items: center;
             background: #141414;
-            padding: 8px 12px;
+            padding: 8px 10px;
             border: 1px solid #2a2a2a;
             border-radius: 4px;
         }
 
         .admin-item-thumb {
-            width: 40px;
-            height: 25px;
+            width: 36px;
+            height: 24px;
             object-fit: cover;
             border-radius: 3px;
             border: 1px solid #333;
             background: #000;
-        }
-
-        .admin-actions {
-            display: flex;
-            gap: 4px;
         }
 
         .admin-btn-sm {
@@ -413,7 +471,7 @@
             padding: 4px 8px;
             border-radius: 3px;
             cursor: pointer;
-            font-size: 0.75rem;
+            font-size: 0.8rem;
             font-family: Consolas, monospace;
         }
 
@@ -499,15 +557,12 @@
             text-decoration: none;
         }
 
-        @media (max-width: 768px) {
+        @media (max-width: 850px) {
             .gallery-grid {
                 grid-template-columns: repeat(2, 1fr);
                 gap: 8px;
             }
-            .admin-add-box {
-                grid-template-columns: 1fr;
-            }
-            .admin-item-row {
+            .admin-add-box, .admin-item-row {
                 grid-template-columns: 1fr;
             }
         }
@@ -532,11 +587,28 @@
 
     <div id="gallery-section">
         <div class="gallery-header-bar">
-            <h2>Voyage transmissions</h2>
+            <h2>Voyage Transmissions</h2>
             
+            <div class="gallery-controls">
+                <div class="control-group">
+                    <span class="control-label">CMDR:</span>
+                    <select id="filter-cmdr" class="gallery-select" onchange="renderGallery()">
+                        <option value="ALL">All Personnel</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <span class="control-label">Sort:</span>
+                    <select id="sort-order" class="gallery-select" onchange="renderGallery()">
+                        <option value="newest" selected>Date: Newest First</option>
+                        <option value="oldest">Date: Oldest First</option>
+                    </select>
+                </div>
+            </div>
         </div>
+
         <div class="gallery-grid" id="gallery-grid">
-            <!-- Rendered dynamically -->
+            <!-- Injected dynamically -->
         </div>
     </div>
 
@@ -545,13 +617,16 @@
         <span class="lightbox-close" onclick="closeLightbox()">&times;</span>
         <button class="lightbox-nav-btn lightbox-prev" onclick="prevLightbox(event)">&lt;</button>
         <div class="lightbox-content">
-            <img id="lightbox-image" src="" alt="Enlarged view">
-            <div id="lightbox-caption" class="lightbox-caption"></div>
+            <img id="lightbox-image" src="" alt="Enlarged transmission">
+            <div class="lightbox-caption-box">
+                <div id="lightbox-meta" class="lightbox-meta"></div>
+                <div id="lightbox-caption" class="lightbox-caption"></div>
+            </div>
         </div>
         <button class="lightbox-nav-btn lightbox-next" onclick="nextLightbox(event)">&gt;</button>
     </div>
 
-    <!-- Admin Modal -->
+    <!-- Secret Admin Console -->
     <div class="admin-modal" id="admin-modal">
         <div class="admin-panel">
             <div class="admin-header">
@@ -560,13 +635,15 @@
             </div>
             <div class="admin-body">
                 <div class="admin-add-box">
-                    <input type="text" id="new-img-src" class="admin-input" placeholder="Image filename (e.g. voyage1.jpg)">
-                    <input type="text" id="new-img-title" class="admin-input" placeholder="Caption / Waypoint log">
+                    <input type="text" id="new-img-src" class="admin-input" placeholder="Filename (e.g. waypoint1.jpg)">
+                    <input type="text" id="new-img-cmdr" class="admin-input" placeholder="CMDR name (e.g. Lysander666)">
+                    <input type="text" id="new-img-title" class="admin-input" placeholder="Caption / Log details">
+                    <input type="date" id="new-img-date" class="admin-input">
                     <button class="admin-btn" onclick="addNewImage()">+ Add Image</button>
                 </div>
 
                 <div class="admin-item-list" id="admin-item-list">
-                    <!-- Injected by JS -->
+                    <!-- Injected dynamically -->
                 </div>
             </div>
             <div class="admin-footer">
@@ -582,7 +659,7 @@
 
     <footer class="site-footer">
         <div class="footer-badges">
-            <img src="nahla_voyage-sm.png" alt="Project Nahla Voyage" class="footer-badge-nahla" onclick="openLightbox(this.src, this.alt)">
+            <img src="nahla_voyage-sm.png" alt="Project Nahla Voyage" class="footer-badge-nahla" onclick="openLightbox(0)">
         </div>
         <div class="footer-text">
             Project Nahla • Est. 3311 • <a href="https://inara.cz/elite/cmdr/440263/" target="_blank" rel="noopener noreferrer">CMDR Lysander666</a> • <a href="index.html">Nahla Tracker</a>
@@ -597,12 +674,27 @@
 //  (Paste generated arrays here)
 // ==========================================
 let GALLERY_ITEMS = [
-    { src: 'nahla_voyage-sm.png', title: 'Open Transit Voyage • Official Insignia' },
-    { src: 'Nahla.jpg', title: 'Nahla • Departure survey' },
-    { src: 'Rebekah-from-Nahla.jpg', title: 'Rebekah rising over the crater ridges' }
+    {
+        src: "nahla_voyage-sm.png",
+        cmdr: "Lysander666",
+        title: "Open Transit Voyage • Official Expedition Seal",
+        date: "3312-08-21"
+    },
+    {
+        src: "Nahla.jpg",
+        cmdr: "Lysander666",
+        title: "Nahla • Pre-voyage orbital telemetry and surface mapping",
+        date: "3312-08-15"
+    },
+    {
+        src: "Rebekah-from-Nahla.jpg",
+        cmdr: "Lysander666",
+        title: "Rebekah rising over the crater ridge at Natalja's Pass",
+        date: "3312-08-10"
+    }
 ];
 
-// Check local browser storage cache for working drafts
+// Load working drafts from browser localStorage if available
 const savedDraft = localStorage.getItem('nahla_voyage_gallery_draft');
 if (savedDraft) {
     try {
@@ -613,44 +705,107 @@ if (savedDraft) {
     } catch(e) {}
 }
 
+let activeFilteredItems = [];
 let currentLightboxIndex = 0;
 
-// --- RENDER GALLERY ---
+// Sort master array chronologically
+function sortMasterItems() {
+    GALLERY_ITEMS.sort((a, b) => new Date(b.date || '1970-01-01') - new Date(a.date || '1970-01-01'));
+}
+
+// Update the CMDR selector dropdown based on unique names in GALLERY_ITEMS
+function refreshCmdrFilterDropdown() {
+    const select = document.getElementById('filter-cmdr');
+    const previousVal = select.value;
+
+    const cmdrs = new Set();
+    GALLERY_ITEMS.forEach(item => {
+        if (item.cmdr && item.cmdr.trim() !== '') {
+            cmdrs.add(item.cmdr.trim());
+        }
+    });
+
+    select.innerHTML = '<option value="ALL">All Personnel</option>';
+    Array.from(cmdrs).sort().forEach(cmdr => {
+        const opt = document.createElement('option');
+        opt.value = cmdr;
+        opt.textContent = `CMDR ${cmdr.replace(/^CMDR\s+/i, '')}`;
+        select.appendChild(opt);
+    });
+
+    if (cmdrs.has(previousVal) || previousVal === 'ALL') {
+        select.value = previousVal;
+    } else {
+        select.value = 'ALL';
+    }
+}
+
+// Render gallery grid based on active filters and sort orders
 function renderGallery() {
     const grid = document.getElementById('gallery-grid');
     if (!grid) return;
     grid.innerHTML = '';
 
-    GALLERY_ITEMS.forEach((item, index) => {
+    const selectedCmdr = document.getElementById('filter-cmdr').value;
+    const sortOrder = document.getElementById('sort-order').value;
+
+    // Filter
+    activeFilteredItems = GALLERY_ITEMS.filter(item => {
+        if (selectedCmdr === 'ALL') return true;
+        return (item.cmdr || '').trim().toLowerCase() === selectedCmdr.toLowerCase();
+    });
+
+    // Sort
+    activeFilteredItems.sort((a, b) => {
+        const dateA = new Date(a.date || '1970-01-01').getTime();
+        const dateB = new Date(b.date || '1970-01-01').getTime();
+        return sortOrder === 'newest' ? (dateB - dateA) : (dateA - dateB);
+    });
+
+    if (activeFilteredItems.length === 0) {
+        grid.innerHTML = '<div class="gallery-empty">No transmissions found matching filter criteria.</div>';
+        return;
+    }
+
+    activeFilteredItems.forEach((item, index) => {
         const thumb = document.createElement('div');
         thumb.className = 'gallery-thumb';
         thumb.onclick = () => openLightbox(index);
 
+        const cmdrLabel = item.cmdr ? `CMDR ${item.cmdr.replace(/^CMDR\s+/i, '')}` : 'Unlogged CMDR';
+        const dateLabel = item.date || 'Undated';
+
         thumb.innerHTML = `
             <img src="${item.src}" alt="${item.title}" loading="lazy">
-            <div class="gallery-thumb-overlay">${item.title}</div>
+            <div class="gallery-thumb-overlay">
+                <div class="overlay-meta">
+                    <span>${cmdrLabel}</span>
+                    <span>${dateLabel}</span>
+                </div>
+                <div class="overlay-title">${item.title}</div>
+            </div>
         `;
         grid.appendChild(thumb);
     });
 }
 
-// --- LIGHTBOX FUNCTIONS ---
-function openLightbox(target, caption = '') {
-    if (typeof target === 'number') {
-        currentLightboxIndex = target;
-        updateLightbox();
-    } else if (typeof target === 'string') {
-        document.getElementById('lightbox-image').src = target;
-        document.getElementById('lightbox-caption').textContent = caption;
-    }
+// Lightbox
+function openLightbox(index) {
+    currentLightboxIndex = index;
+    updateLightbox();
     document.getElementById('lightbox').classList.add('active');
 }
 
 function updateLightbox() {
-    const item = GALLERY_ITEMS[currentLightboxIndex];
+    const item = activeFilteredItems[currentLightboxIndex];
     if (!item) return;
+
     document.getElementById('lightbox-image').src = item.src;
     document.getElementById('lightbox-caption').textContent = item.title;
+
+    const cmdrLabel = item.cmdr ? `CMDR ${item.cmdr.replace(/^CMDR\s+/i, '')}` : 'CMDR Unspecified';
+    const dateLabel = item.date ? ` • Stardate ${item.date}` : '';
+    document.getElementById('lightbox-meta').textContent = `${cmdrLabel}${dateLabel}`;
 }
 
 function closeLightbox() {
@@ -659,13 +814,13 @@ function closeLightbox() {
 
 function prevLightbox(e) {
     if (e) e.stopPropagation();
-    currentLightboxIndex = (currentLightboxIndex - 1 + GALLERY_ITEMS.length) % GALLERY_ITEMS.length;
+    currentLightboxIndex = (currentLightboxIndex - 1 + activeFilteredItems.length) % activeFilteredItems.length;
     updateLightbox();
 }
 
 function nextLightbox(e) {
     if (e) e.stopPropagation();
-    currentLightboxIndex = (currentLightboxIndex + 1) % GALLERY_ITEMS.length;
+    currentLightboxIndex = (currentLightboxIndex + 1) % activeFilteredItems.length;
     updateLightbox();
 }
 
@@ -673,7 +828,7 @@ document.getElementById('lightbox').addEventListener('click', (e) => {
     if (e.target.id === 'lightbox') closeLightbox();
 });
 
-// --- ADMIN MODE LOGIC ---
+// Admin Modal
 function toggleAdminModal(show) {
     const modal = document.getElementById('admin-modal');
     if (show) {
@@ -693,61 +848,59 @@ function renderAdminList() {
         row.className = 'admin-item-row';
         row.innerHTML = `
             <img src="${item.src}" class="admin-item-thumb" onerror="this.style.opacity=0.2">
-            <input type="text" class="admin-input" value="${item.src}" onchange="updateItemSrc(${idx}, this.value)">
-            <input type="text" class="admin-input" value="${item.title}" onchange="updateItemTitle(${idx}, this.value)">
-            <div class="admin-actions">
-                <button class="admin-btn-sm" onclick="moveItem(${idx}, -1)" ${idx === 0 ? 'disabled' : ''}>▲</button>
-                <button class="admin-btn-sm" onclick="moveItem(${idx}, 1)" ${idx === GALLERY_ITEMS.length - 1 ? 'disabled' : ''}>▼</button>
-                <button class="admin-btn-sm admin-btn-del" onclick="deleteItem(${idx})">✕</button>
-            </div>
+            <input type="text" class="admin-input" value="${item.src}" placeholder="File" onchange="updateItem(${idx}, 'src', this.value)">
+            <input type="text" class="admin-input" value="${item.cmdr || ''}" placeholder="CMDR" onchange="updateItem(${idx}, 'cmdr', this.value)">
+            <input type="text" class="admin-input" value="${item.title}" placeholder="Caption" onchange="updateItem(${idx}, 'title', this.value)">
+            <input type="date" class="admin-input" value="${item.date || ''}" onchange="updateItemDate(${idx}, this.value)">
+            <button class="admin-btn-sm admin-btn-del" onclick="deleteItem(${idx})">✕</button>
         `;
         list.appendChild(row);
     });
 }
 
 function addNewImage() {
-    const srcInput = document.getElementById('new-img-src');
-    const titleInput = document.getElementById('new-img-title');
-    const src = srcInput.value.trim();
-    const title = titleInput.value.trim() || 'Untitled Voyage Image';
+    const src = document.getElementById('new-img-src').value.trim();
+    const cmdr = document.getElementById('new-img-cmdr').value.trim();
+    const title = document.getElementById('new-img-title').value.trim() || 'Untitled Transmission';
+    const date = document.getElementById('new-img-date').value || new Date().toISOString().split('T')[0];
 
     if (!src) return;
 
-    GALLERY_ITEMS.unshift({ src, title });
-    srcInput.value = '';
-    titleInput.value = '';
+    GALLERY_ITEMS.push({ src, cmdr, title, date });
+    sortMasterItems();
+
+    // Reset inputs
+    document.getElementById('new-img-src').value = '';
+    document.getElementById('new-img-cmdr').value = '';
+    document.getElementById('new-img-title').value = '';
+    document.getElementById('new-img-date').value = '';
+
     persistDraft();
+    refreshCmdrFilterDropdown();
     renderGallery();
     renderAdminList();
 }
 
-function updateItemSrc(index, newSrc) {
-    GALLERY_ITEMS[index].src = newSrc.trim();
+function updateItem(index, key, val) {
+    GALLERY_ITEMS[index][key] = val.trim();
     persistDraft();
+    refreshCmdrFilterDropdown();
     renderGallery();
 }
 
-function updateItemTitle(index, newTitle) {
-    GALLERY_ITEMS[index].title = newTitle.trim();
-    persistDraft();
-    renderGallery();
-}
-
-function moveItem(index, direction) {
-    const target = index + direction;
-    if (target < 0 || target >= GALLERY_ITEMS.length) return;
-    const temp = GALLERY_ITEMS[index];
-    GALLERY_ITEMS[index] = GALLERY_ITEMS[target];
-    GALLERY_ITEMS[target] = temp;
+function updateItemDate(index, val) {
+    GALLERY_ITEMS[index].date = val;
+    sortMasterItems();
     persistDraft();
     renderGallery();
     renderAdminList();
 }
 
 function deleteItem(index) {
-    if (!confirm(`Remove "${GALLERY_ITEMS[index].title}"?`)) return;
+    if (!confirm(`Delete image "${GALLERY_ITEMS[index].title}"?`)) return;
     GALLERY_ITEMS.splice(index, 1);
     persistDraft();
+    refreshCmdrFilterDropdown();
     renderGallery();
     renderAdminList();
 }
@@ -758,6 +911,7 @@ function persistDraft() {
 
 // Generate code snippet to paste back into GitHub
 function exportCodeForGitHub() {
+    sortMasterItems();
     const formatted = 'let GALLERY_ITEMS = ' + JSON.stringify(GALLERY_ITEMS, null, 4) + ';';
     
     navigator.clipboard.writeText(formatted).then(() => {
@@ -767,16 +921,16 @@ function exportCodeForGitHub() {
     });
 
     console.log(
-        '%c[PROJECT NAHLA VOYAGE GALLERY CODE]\n' +
+        '%c[PROJECT NAHLA VOYAGE GALLERY EXPORT]\n' +
         '%cCopy and replace GALLERY_ITEMS in voyage-gallery.html:\n\n' + formatted,
         'color: #ffbf00; font-weight: bold;',
         'color: #61dafb;'
     );
 }
 
-// --- GLOBAL KEY LISTENERS ---
+// Keyboard shortcuts
 document.addEventListener('keydown', (e) => {
-    // Secret Admin shortcut: Ctrl + Shift + A
+    // Ctrl + Shift + A toggles Admin Modal
     if (e.ctrlKey && e.shiftKey && (e.key === 'A' || e.key === 'a')) {
         e.preventDefault();
         const modal = document.getElementById('admin-modal');
@@ -784,7 +938,6 @@ document.addEventListener('keydown', (e) => {
         return;
     }
 
-    // Modal / Lightbox dismiss on Escape
     if (e.key === 'Escape') {
         const adminModal = document.getElementById('admin-modal');
         if (adminModal.classList.contains('active')) {
@@ -794,7 +947,6 @@ document.addEventListener('keydown', (e) => {
         closeLightbox();
     }
 
-    // Lightbox navigation
     const lb = document.getElementById('lightbox');
     if (lb.classList.contains('active')) {
         if (e.key === 'ArrowLeft') prevLightbox();
@@ -802,7 +954,9 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
-// Initial boot
+// Boot sequence
+sortMasterItems();
+refreshCmdrFilterDropdown();
 renderGallery();
 </script>
 </body>
