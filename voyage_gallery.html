@@ -638,7 +638,7 @@
                     <input type="text" id="new-img-src" class="admin-input" placeholder="Filename (e.g. waypoint1.jpg)">
                     <input type="text" id="new-img-cmdr" class="admin-input" placeholder="CMDR name (e.g. Lysander666)">
                     <input type="text" id="new-img-title" class="admin-input" placeholder="Caption / Log details">
-                    <input type="date" id="new-img-date" class="admin-input">
+                    <input type="text" id="new-img-date" class="admin-input" placeholder="Date (e.g. 3312-08-21)">
                     <button class="admin-btn" onclick="addNewImage()">+ Add Image</button>
                 </div>
 
@@ -708,14 +708,22 @@ if (savedDraft) {
 let activeFilteredItems = [];
 let currentLightboxIndex = 0;
 
-// Sort master array chronologically
-function sortMasterItems() {
-    GALLERY_ITEMS.sort((a, b) => new Date(b.date || '1970-01-01') - new Date(a.date || '1970-01-01'));
+// Strips non-numerics to reliably sort any stardate (e.g. "3312-08-21" -> 33120821)
+function parseDateNum(str) {
+    if (!str) return 0;
+    const clean = str.toString().replace(/[^0-9]/g, '');
+    return parseInt(clean, 10) || 0;
 }
 
-// Update the CMDR selector dropdown based on unique names in GALLERY_ITEMS
+// Sort master array chronologically (newest first)
+function sortMasterItems() {
+    GALLERY_ITEMS.sort((a, b) => parseDateNum(b.date) - parseDateNum(a.date));
+}
+
+// Update the CMDR dropdown based on unique names in GALLERY_ITEMS
 function refreshCmdrFilterDropdown() {
     const select = document.getElementById('filter-cmdr');
+    if (!select) return;
     const previousVal = select.value;
 
     const cmdrs = new Set();
@@ -740,7 +748,7 @@ function refreshCmdrFilterDropdown() {
     }
 }
 
-// Render gallery grid based on active filters and sort orders
+// Render gallery grid based on active filter and sort selection
 function renderGallery() {
     const grid = document.getElementById('gallery-grid');
     if (!grid) return;
@@ -755,10 +763,10 @@ function renderGallery() {
         return (item.cmdr || '').trim().toLowerCase() === selectedCmdr.toLowerCase();
     });
 
-    // Sort
+    // Sort using numeric stardate comparison
     activeFilteredItems.sort((a, b) => {
-        const dateA = new Date(a.date || '1970-01-01').getTime();
-        const dateB = new Date(b.date || '1970-01-01').getTime();
+        const dateA = parseDateNum(a.date);
+        const dateB = parseDateNum(b.date);
         return sortOrder === 'newest' ? (dateB - dateA) : (dateA - dateB);
     });
 
@@ -851,7 +859,7 @@ function renderAdminList() {
             <input type="text" class="admin-input" value="${item.src}" placeholder="File" onchange="updateItem(${idx}, 'src', this.value)">
             <input type="text" class="admin-input" value="${item.cmdr || ''}" placeholder="CMDR" onchange="updateItem(${idx}, 'cmdr', this.value)">
             <input type="text" class="admin-input" value="${item.title}" placeholder="Caption" onchange="updateItem(${idx}, 'title', this.value)">
-            <input type="date" class="admin-input" value="${item.date || ''}" onchange="updateItemDate(${idx}, this.value)">
+            <input type="text" class="admin-input" value="${item.date || ''}" placeholder="YYYY-MM-DD" onchange="updateItemDate(${idx}, this.value)">
             <button class="admin-btn-sm admin-btn-del" onclick="deleteItem(${idx})">✕</button>
         `;
         list.appendChild(row);
@@ -862,7 +870,11 @@ function addNewImage() {
     const src = document.getElementById('new-img-src').value.trim();
     const cmdr = document.getElementById('new-img-cmdr').value.trim();
     const title = document.getElementById('new-img-title').value.trim() || 'Untitled Transmission';
-    const date = document.getElementById('new-img-date').value || new Date().toISOString().split('T')[0];
+    let date = document.getElementById('new-img-date').value.trim();
+
+    if (!date) {
+        date = new Date().toISOString().split('T')[0];
+    }
 
     if (!src) return;
 
@@ -889,7 +901,7 @@ function updateItem(index, key, val) {
 }
 
 function updateItemDate(index, val) {
-    GALLERY_ITEMS[index].date = val;
+    GALLERY_ITEMS[index].date = val.trim();
     sortMasterItems();
     persistDraft();
     renderGallery();
@@ -928,9 +940,9 @@ function exportCodeForGitHub() {
     );
 }
 
-// Keyboard shortcuts
+// Global key controls
 document.addEventListener('keydown', (e) => {
-    // Ctrl + Shift + A toggles Admin Modal
+    // Secret Admin shortcut: Ctrl + Shift + A
     if (e.ctrlKey && e.shiftKey && (e.key === 'A' || e.key === 'a')) {
         e.preventDefault();
         const modal = document.getElementById('admin-modal');
@@ -958,6 +970,7 @@ document.addEventListener('keydown', (e) => {
 sortMasterItems();
 refreshCmdrFilterDropdown();
 renderGallery();
-</script>
+</script>    
+
 </body>
 </html>
