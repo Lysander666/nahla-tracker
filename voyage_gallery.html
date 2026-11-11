@@ -678,7 +678,7 @@
 
 </div>
 
-<script>
+    <script>
 // ==========================================
 //  PROJECT NAHLA VOYAGE GALLERY DATA
 //  (Paste generated arrays here)
@@ -704,30 +704,17 @@ let GALLERY_ITEMS = [
     }
 ];
 
-// Load draft from browser localStorage if available
-const savedDraft = localStorage.getItem('nahla_voyage_gallery_draft');
-if (savedDraft) {
-    try {
-        const parsed = JSON.parse(savedDraft);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-            GALLERY_ITEMS = parsed;
-        }
-    } catch(e) {}
-}
-
 let activeFilteredItems = [];
 let currentLightboxIndex = 0;
 
-// Parses any stardate format (e.g., "3312-08-21" -> 33120821) without Date constructor bugs
+// Isolated staging list used strictly inside the admin console
+let adminWorkingList = [];
+
+// Parses any stardate format (e.g., "3312-08-21" -> 33120821)
 function parseDateNum(str) {
     if (!str) return 0;
     const clean = str.toString().replace(/[^0-9]/g, '');
     return parseInt(clean, 10) || 0;
-}
-
-// Initial chronological arrangement
-function sortMasterItems() {
-    GALLERY_ITEMS.sort((a, b) => parseDateNum(b.date) - parseDateNum(a.date));
 }
 
 // Update the CMDR selector dropdown based on unique names in GALLERY_ITEMS
@@ -758,7 +745,7 @@ function refreshCmdrFilterDropdown() {
     }
 }
 
-// Render gallery grid based on active filter and sort choice
+// Render public gallery grid strictly from GALLERY_ITEMS
 function renderGallery() {
     const grid = document.getElementById('gallery-grid');
     if (!grid) return;
@@ -779,7 +766,6 @@ function renderGallery() {
     } else if (sortOrder === 'oldest') {
         activeFilteredItems.sort((a, b) => parseDateNum(a.date) - parseDateNum(b.date));
     }
-    // If 'manual', array stays in the exact manual sequence set by ▲/▼
 
     if (activeFilteredItems.length === 0) {
         grid.innerHTML = '<div class="gallery-empty">No transmissions found matching filter criteria.</div>';
@@ -847,10 +833,11 @@ document.getElementById('lightbox').addEventListener('click', (e) => {
     if (e.target.id === 'lightbox') closeLightbox();
 });
 
-// Admin Modal
+// Admin Modal: Operates strictly on a deep clone of GALLERY_ITEMS
 function toggleAdminModal(show) {
     const modal = document.getElementById('admin-modal');
     if (show) {
+        adminWorkingList = JSON.parse(JSON.stringify(GALLERY_ITEMS));
         renderAdminList();
         modal.classList.add('active');
     } else {
@@ -862,19 +849,19 @@ function renderAdminList() {
     const list = document.getElementById('admin-item-list');
     list.innerHTML = '';
 
-    GALLERY_ITEMS.forEach((item, idx) => {
+    adminWorkingList.forEach((item, idx) => {
         const row = document.createElement('div');
         row.className = 'admin-item-row';
         row.innerHTML = `
             <img src="${item.src}" class="admin-item-thumb" onerror="this.style.opacity=0.2">
-            <input type="text" class="admin-input" value="${item.src}" placeholder="File" onchange="updateItem(${idx}, 'src', this.value)">
-            <input type="text" class="admin-input" value="${item.cmdr || ''}" placeholder="CMDR" onchange="updateItem(${idx}, 'cmdr', this.value)">
-            <input type="text" class="admin-input" value="${item.title}" placeholder="Caption" onchange="updateItem(${idx}, 'title', this.value)">
-            <input type="text" class="admin-input" value="${item.date || ''}" placeholder="YYYY-MM-DD" onchange="updateItem(${idx}, 'date', this.value)">
+            <input type="text" class="admin-input" value="${item.src}" placeholder="File" onchange="updateAdminItem(${idx}, 'src', this.value)">
+            <input type="text" class="admin-input" value="${item.cmdr || ''}" placeholder="CMDR" onchange="updateAdminItem(${idx}, 'cmdr', this.value)">
+            <input type="text" class="admin-input" value="${item.title}" placeholder="Caption" onchange="updateAdminItem(${idx}, 'title', this.value)">
+            <input type="text" class="admin-input" value="${item.date || ''}" placeholder="YYYY-MM-DD" onchange="updateAdminItem(${idx}, 'date', this.value)">
             <div class="admin-actions">
-                <button class="admin-btn-sm" onclick="moveItem(${idx}, -1)" ${idx === 0 ? 'disabled' : ''}>▲</button>
-                <button class="admin-btn-sm" onclick="moveItem(${idx}, 1)" ${idx === GALLERY_ITEMS.length - 1 ? 'disabled' : ''}>▼</button>
-                <button class="admin-btn-sm admin-btn-del" onclick="deleteItem(${idx})">✕</button>
+                <button class="admin-btn-sm" onclick="moveAdminItem(${idx}, -1)" ${idx === 0 ? 'disabled' : ''}>▲</button>
+                <button class="admin-btn-sm" onclick="moveAdminItem(${idx}, 1)" ${idx === adminWorkingList.length - 1 ? 'disabled' : ''}>▼</button>
+                <button class="admin-btn-sm admin-btn-del" onclick="deleteAdminItem(${idx})">✕</button>
             </div>
         `;
         list.appendChild(row);
@@ -893,54 +880,38 @@ function addNewImage() {
 
     if (!src) return;
 
-    GALLERY_ITEMS.push({ src, cmdr, title, date });
+    adminWorkingList.push({ src, cmdr, title, date });
 
-    // Reset inputs
     document.getElementById('new-img-src').value = '';
     document.getElementById('new-img-cmdr').value = '';
     document.getElementById('new-img-title').value = '';
     document.getElementById('new-img-date').value = '';
 
-    persistDraft();
-    refreshCmdrFilterDropdown();
-    renderGallery();
     renderAdminList();
 }
 
-function updateItem(index, key, val) {
-    GALLERY_ITEMS[index][key] = val.trim();
-    persistDraft();
-    refreshCmdrFilterDropdown();
-    renderGallery();
+function updateAdminItem(index, key, val) {
+    adminWorkingList[index][key] = val.trim();
 }
 
-function moveItem(index, direction) {
+function moveAdminItem(index, direction) {
     const target = index + direction;
-    if (target < 0 || target >= GALLERY_ITEMS.length) return;
-    const temp = GALLERY_ITEMS[index];
-    GALLERY_ITEMS[index] = GALLERY_ITEMS[target];
-    GALLERY_ITEMS[target] = temp;
-    persistDraft();
-    renderGallery();
+    if (target < 0 || target >= adminWorkingList.length) return;
+    const temp = adminWorkingList[index];
+    adminWorkingList[index] = adminWorkingList[target];
+    adminWorkingList[target] = temp;
     renderAdminList();
 }
 
-function deleteItem(index) {
-    if (!confirm(`Delete image "${GALLERY_ITEMS[index].title}"?`)) return;
-    GALLERY_ITEMS.splice(index, 1);
-    persistDraft();
-    refreshCmdrFilterDropdown();
-    renderGallery();
+function deleteAdminItem(index) {
+    if (!confirm(`Remove "${adminWorkingList[index].title}" from generated code?`)) return;
+    adminWorkingList.splice(index, 1);
     renderAdminList();
 }
 
-function persistDraft() {
-    localStorage.setItem('nahla_voyage_gallery_draft', JSON.stringify(GALLERY_ITEMS));
-}
-
-// Generate code snippet to paste back into GitHub
+// Generates code strictly from the staged admin working list
 function exportCodeForGitHub() {
-    const formatted = 'let GALLERY_ITEMS = ' + JSON.stringify(GALLERY_ITEMS, null, 4) + ';';
+    const formatted = 'let GALLERY_ITEMS = ' + JSON.stringify(adminWorkingList, null, 4) + ';';
     
     navigator.clipboard.writeText(formatted).then(() => {
         const status = document.getElementById('admin-copy-status');
@@ -982,10 +953,10 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
-// Boot sequence
-sortMasterItems();
+// Boot sequence (only touches hardcoded GALLERY_ITEMS)
 refreshCmdrFilterDropdown();
 renderGallery();
 </script>
+
 </body>
 </html>
