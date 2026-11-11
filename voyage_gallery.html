@@ -302,6 +302,7 @@
             justify-content: center;
             transition: all 0.2s ease;
             user-select: none;
+            z-index: 2010; /* Ensures buttons are always above the image */
         }
 
         .lightbox-nav-btn:hover {
@@ -321,6 +322,7 @@
             font-size: 36px;
             cursor: pointer;
             transition: color 0.2s;
+            z-index: 2010; /* Ensures close button is never blocked */
         }
 
         .lightbox-close:hover {
@@ -567,15 +569,49 @@
             text-decoration: none;
         }
 
-        @media (max-width: 850px) {
-            .gallery-grid {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 8px;
-            }
-            .admin-add-box, .admin-item-row {
-                grid-template-columns: 1fr;
-            }
-        }
+        @media (max-width: 768px) {
+    .lightbox-content {
+        max-width: 95vw;
+        max-height: 80vh;
+    }
+
+    .lightbox-content img {
+        max-height: 65vh; /* Leaves breathing room above & below */
+    }
+
+    /* Mobile thumb buttons anchored cleanly to bottom corners */
+    .lightbox-nav-btn {
+        top: auto;
+        bottom: 25px;
+        transform: none;
+        width: 48px;
+        height: 48px;
+        font-size: 1.6rem;
+        background: rgba(15, 15, 15, 0.9);
+        border: 1px solid #61dafb;
+    }
+
+    .lightbox-prev {
+        left: 20px;
+    }
+
+    .lightbox-next {
+        right: 20px;
+    }
+
+    .lightbox-close {
+        top: 15px;
+        right: 20px;
+        font-size: 34px;
+        background: rgba(15, 15, 15, 0.6);
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+}
     </style>
 </head>
 <body>
