@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Nahla Voyage Gallery</title>
+    
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap">
+
+    <link rel="icon" type="image/png" sizes="16x16" href="faviconmain16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon32@2x.png">
+    <link rel="icon" type="image/png" sizes="128x128" href="faviconmain128.png">
+
+    <style>
+        body { 
+            background-color: #1a1a1a; 
+            color: #e0e0e0; 
+            font-family: monospace; 
+            font-size: 1.1rem; 
+            line-height: 1.6; 
+            padding: 20px;
+            margin: 0;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding-top: 30px;
+        }
+
+        /* --- HEADER --- */
+        .header {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+
+        .header-logo img {
+            width: 68px;
+            height: 68px;
+        }
+
+        .header-title {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.2;
+            text-align: left;
+        }
+
+        .title-main {
+            font-size: 2rem;
+            font-weight: 600;
+            color: #fff;
+            font-family: Consolas, "Courier New", monospace;
+        }
+
+        .title-sub {
+            font-size: 1rem;
+            color: #61dafb;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        .header-nav {
+            text-align: center;
+            margin-bottom: 24px;
+            font-family: Consolas, "Courier New", monospace;
+            font-size: 0.95rem;
+        }
+
+        .header-nav a {
+            color: #61dafb;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .header-nav a:hover {
+            color: #ffbf00;
+            text-decoration: underline;
+        }
+
+        /* --- GALLERY SECTION --- */
+        #gallery-section {
+            border: 1px solid #444;
+            border-radius: 8px;
+            padding: 24px;
+            background-color: #222;
+            box-shadow: 0 0 18px rgba(0, 0, 0, 0.5);
+        }
+
+        .gallery-header-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #333;
+            padding-bottom: 14px;
+            margin-bottom: 20px;
+        }
+
+        .gallery-header-bar h2 {
+            color: #61dafb;
+            margin: 0;
+            font-family: Consolas, "Courier New", monospace;
+            font-size: 1.5rem;
+        }
+
+        .admin-hint {
+            font-size: 0.75rem;
+            color: #666;
+            font-family: Consolas, monospace;
+            user-select: none;
+        }
+
+        .admin-hint kbd {
+            background: #111;
+            border: 1px solid #444;
+            padding: 2px 5px;
+            border-radius: 4px;
+            color: #888;
+        }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 16px;
+        }
+
+        .gallery-thumb {
+            position: relative;
+            aspect-ratio: 16 / 9;
+            border-radius: 6px;
+            overflow: hidden;
+            border: 1px solid #333;
+            cursor: pointer;
+            background-color: #151515;
+            transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .gallery-thumb:hover {
+            transform: translateY(-3px);
+            border-color: #61dafb;
+            box-shadow: 0 4px 14px rgba(97, 218, 251, 0.25);
+        }
+
+        .gallery-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .gallery-thumb-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(transparent, rgba(0,0,0,0.85));
+            padding: 18px 10px 8px 10px;
+            font-size: 0.8rem;
+            color: #eee;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            pointer-events: none;
+            font-family: Consolas, "Courier New", monospace;
+        }
+
+        /* --- LIGHTBOX --- */
+        .lightbox {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background-color: rgba(0, 0, 0, 0.92);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .lightbox.active {
+            display: flex;
+        }
+
+        .lightbox-content {
+            position: relative;
+            max-width: 90vw;
+            max-height: 85vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .lightbox-content img {
+            max-width: 100%;
+            max-height: 80vh;
+            border-radius: 6px;
+            border: 1px solid #444;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
+            object-fit: contain;
+        }
+
+        .lightbox-caption {
+            margin-top: 12px;
+            color: #61dafb;
+            font-family: Consolas, monospace;
+            font-size: 1rem;
+            text-align: center;
+        }
+
+        .lightbox-nav-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(20, 20, 20, 0.7);
+            border: 1px solid #444;
+            color: #61dafb;
+            font-size: 2rem;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+
+        .lightbox-nav-btn:hover {
+            background: #61dafb;
+            color: #111;
+            border-color: #61dafb;
+        }
+
+        .lightbox-prev { left: 25px; }
+        .lightbox-next { right: 25px; }
+
+        .lightbox-close {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            color: #888;
+            font-size: 36px;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .lightbox-close:hover {
+            color: #61dafb;
+        }
+
+        /* --- ADMIN MODAL (CTRL + SHIFT + A) --- */
+        .admin-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 3000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .admin-modal.active {
+            display: flex;
+        }
+
+        .admin-panel {
+            background: #1c1c1c;
+            border: 1px solid #61dafb;
+            box-shadow: 0 0 25px rgba(97, 218, 251, 0.3);
+            border-radius: 8px;
+            width: 100%;
+            max-width: 900px;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 20px;
+            background: #141414;
+            border-bottom: 1px solid #333;
+        }
+
+        .admin-header h3 {
+            margin: 0;
+            color: #ffbf00;
+            font-family: Consolas, monospace;
+            font-size: 1.15rem;
+        }
+
+        .admin-close-btn {
+            background: none;
+            border: none;
+            color: #888;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .admin-close-btn:hover {
+            color: #fff;
+        }
+
+        .admin-body {
+            padding: 20px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .admin-add-box {
+            display: grid;
+            grid-template-columns: 1fr 1.5fr auto;
+            gap: 10px;
+            background: #111;
+            padding: 12px;
+            border: 1px solid #333;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            align-items: center;
+        }
+
+        .admin-input {
+            background: #1e1e1e;
+            border: 1px solid #444;
+            color: #eee;
+            padding: 8px 10px;
+            border-radius: 4px;
+            font-family: Consolas, monospace;
+            font-size: 0.9rem;
+        }
+
+        .admin-input:focus {
+            outline: none;
+            border-color: #61dafb;
+        }
+
+        .admin-btn {
+            background: #222;
+            border: 1px solid #61dafb;
+            color: #61dafb;
+            font-family: Consolas, monospace;
+            padding: 8px 14px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: bold;
+        }
+
+        .admin-btn:hover {
+            background: #61dafb;
+            color: #111;
+        }
+
+        .admin-item-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .admin-item-row {
+            display: grid;
+            grid-template-columns: 40px 1fr 1.5fr 110px;
+            gap: 10px;
+            align-items: center;
+            background: #141414;
+            padding: 8px 12px;
+            border: 1px solid #2a2a2a;
+            border-radius: 4px;
+        }
+
+        .admin-item-thumb {
+            width: 40px;
+            height: 25px;
+            object-fit: cover;
+            border-radius: 3px;
+            border: 1px solid #333;
+            background: #000;
+        }
+
+        .admin-actions {
+            display: flex;
+            gap: 4px;
+        }
+
+        .admin-btn-sm {
+            background: #1c1c1c;
+            border: 1px solid #444;
+            color: #aaa;
+            padding: 4px 8px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            font-family: Consolas, monospace;
+        }
+
+        .admin-btn-sm:hover {
+            color: #fff;
+            border-color: #888;
+        }
+
+        .admin-btn-del:hover {
+            border-color: #ff4d4d;
+            color: #ff4d4d;
+        }
+
+        .admin-footer {
+            padding: 14px 20px;
+            background: #141414;
+            border-top: 1px solid #333;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .admin-copy-status {
+            color: #8f9;
+            font-size: 0.85rem;
+            font-family: Consolas, monospace;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .admin-copy-status.visible {
+            opacity: 1;
+        }
+
+        /* --- FOOTER --- */
+        .site-footer {
+            margin-top: 50px;
+            padding: 30px 20px 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            border-top: 1px solid #333;
+        }
+
+        .footer-badges {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 30px;
+        }
+
+        .footer-badges img {
+            width: 140px;
+            height: 140px;
+            object-fit: contain;
+            border-radius: 50%;
+            display: block;
+            cursor: pointer;
+            overflow: hidden;
+            clip-path: circle(50% at 50% 50%);
+            transition: transform 0.3s ease, filter 0.3s ease;
+        }
+
+        .footer-badges img:hover {
+            transform: scale(1.05);
+        }
+
+        .footer-badge-nahla {
+            filter: drop-shadow(0 0 12px rgba(255, 165, 0, 0.45));
+        }
+
+        .footer-text {
+            margin-top: 18px;
+            font-size: 0.85rem;
+            color: #777;
+            font-family: Consolas, "Courier New", monospace;
+        }
+
+        .footer-text a {
+            color: #61dafb;
+            text-decoration: none;
+        }
+
+        @media (max-width: 768px) {
+            .gallery-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 8px;
+            }
+            .admin-add-box {
+                grid-template-columns: 1fr;
+            }
+            .admin-item-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <div class="header">
+        <div class="header-logo">
+            <img src="nahla_voyage-sm.png" alt="Voyage Logo" onerror="this.src='favicon8.png'">
+        </div>
+        <div class="header-title">
+            <div class="title-main">Project Nahla</div>
+            <div class="title-sub">Open Transit Voyage Gallery</div>
+        </div>
+    </div>
+
+    <div class="header-nav">
+        <a href="index.html">&larr; Return to Live Moon Tracker</a>
+    </div>
+
+    <div id="gallery-section">
+        <div class="gallery-header-bar">
+            <h2>Voyage Transmissions &amp; Imagery</h2>
+            <div class="admin-hint">Admin: <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>A</kbd></div>
+        </div>
+        <div class="gallery-grid" id="gallery-grid">
+            <!-- Rendered dynamically -->
+        </div>
+    </div>
+
+    <!-- Fullscreen Lightbox -->
+    <div class="lightbox" id="lightbox">
+        <span class="lightbox-close" onclick="closeLightbox()">&times;</span>
+        <button class="lightbox-nav-btn lightbox-prev" onclick="prevLightbox(event)">&lt;</button>
+        <div class="lightbox-content">
+            <img id="lightbox-image" src="" alt="Enlarged view">
+            <div id="lightbox-caption" class="lightbox-caption"></div>
+        </div>
+        <button class="lightbox-nav-btn lightbox-next" onclick="nextLightbox(event)">&gt;</button>
+    </div>
+
+    <!-- Admin Modal -->
+    <div class="admin-modal" id="admin-modal">
+        <div class="admin-panel">
+            <div class="admin-header">
+                <h3>Voyage Admin Console</h3>
+                <button class="admin-close-btn" onclick="toggleAdminModal(false)">&times;</button>
+            </div>
+            <div class="admin-body">
+                <div class="admin-add-box">
+                    <input type="text" id="new-img-src" class="admin-input" placeholder="Image filename (e.g. voyage1.jpg)">
+                    <input type="text" id="new-img-title" class="admin-input" placeholder="Caption / Waypoint log">
+                    <button class="admin-btn" onclick="addNewImage()">+ Add Image</button>
+                </div>
+
+                <div class="admin-item-list" id="admin-item-list">
+                    <!-- Injected by JS -->
+                </div>
+            </div>
+            <div class="admin-footer">
+                <span id="admin-copy-status" class="admin-copy-status">&#10003; JavaScript array copied to clipboard!</span>
+                <div>
+                    <button class="admin-btn" style="border-color:#ffbf00; color:#ffbf00;" onclick="exportCodeForGitHub()">
+                        Generate &amp; Copy Code
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="site-footer">
+        <div class="footer-badges">
+            <img src="nahla_voyage-sm.png" alt="Project Nahla Voyage" class="footer-badge-nahla" onclick="openLightbox(this.src, this.alt)">
+        </div>
+        <div class="footer-text">
+            Project Nahla • Est. 3311 • <a href="https://inara.cz/elite/cmdr/440263/" target="_blank" rel="noopener noreferrer">CMDR Lysander666</a> • <a href="index.html">Nahla Tracker</a>
+        </div>
+    </footer>
+
+</div>
+
+<script>
+// ==========================================
+//  PROJECT NAHLA VOYAGE GALLERY DATA
+//  (Paste generated arrays here)
+// ==========================================
+let GALLERY_ITEMS = [
+    { src: 'nahla_voyage-sm.png', title: 'Open Transit Voyage • Official Insignia' },
+    { src: 'Nahla.jpg', title: 'Nahla • Departure survey' },
+    { src: 'Rebekah-from-Nahla.jpg', title: 'Rebekah rising over the crater ridges' }
+];
+
+// Check local browser storage cache for working drafts
+const savedDraft = localStorage.getItem('nahla_voyage_gallery_draft');
+if (savedDraft) {
+    try {
+        const parsed = JSON.parse(savedDraft);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+            GALLERY_ITEMS = parsed;
+        }
+    } catch(e) {}
+}
+
+let currentLightboxIndex = 0;
+
+// --- RENDER GALLERY ---
+function renderGallery() {
+    const grid = document.getElementById('gallery-grid');
+    if (!grid) return;
+    grid.innerHTML = '';
+
+    GALLERY_ITEMS.forEach((item, index) => {
+        const thumb = document.createElement('div');
+        thumb.className = 'gallery-thumb';
+        thumb.onclick = () => openLightbox(index);
+
+        thumb.innerHTML = `
+            <img src="${item.src}" alt="${item.title}" loading="lazy">
+            <div class="gallery-thumb-overlay">${item.title}</div>
+        `;
+        grid.appendChild(thumb);
+    });
+}
+
+// --- LIGHTBOX FUNCTIONS ---
+function openLightbox(target, caption = '') {
+    if (typeof target === 'number') {
+        currentLightboxIndex = target;
+        updateLightbox();
+    } else if (typeof target === 'string') {
+        document.getElementById('lightbox-image').src = target;
+        document.getElementById('lightbox-caption').textContent = caption;
+    }
+    document.getElementById('lightbox').classList.add('active');
+}
+
+function updateLightbox() {
+    const item = GALLERY_ITEMS[currentLightboxIndex];
+    if (!item) return;
+    document.getElementById('lightbox-image').src = item.src;
+    document.getElementById('lightbox-caption').textContent = item.title;
+}
+
+function closeLightbox() {
+    document.getElementById('lightbox').classList.remove('active');
+}
+
+function prevLightbox(e) {
+    if (e) e.stopPropagation();
+    currentLightboxIndex = (currentLightboxIndex - 1 + GALLERY_ITEMS.length) % GALLERY_ITEMS.length;
+    updateLightbox();
+}
+
+function nextLightbox(e) {
+    if (e) e.stopPropagation();
+    currentLightboxIndex = (currentLightboxIndex + 1) % GALLERY_ITEMS.length;
+    updateLightbox();
+}
+
+document.getElementById('lightbox').addEventListener('click', (e) => {
+    if (e.target.id === 'lightbox') closeLightbox();
+});
+
+// --- ADMIN MODE LOGIC ---
+function toggleAdminModal(show) {
+    const modal = document.getElementById('admin-modal');
+    if (show) {
+        renderAdminList();
+        modal.classList.add('active');
+    } else {
+        modal.classList.remove('active');
+    }
+}
+
+function renderAdminList() {
+    const list = document.getElementById('admin-item-list');
+    list.innerHTML = '';
+
+    GALLERY_ITEMS.forEach((item, idx) => {
+        const row = document.createElement('div');
+        row.className = 'admin-item-row';
+        row.innerHTML = `
+            <img src="${item.src}" class="admin-item-thumb" onerror="this.style.opacity=0.2">
+            <input type="text" class="admin-input" value="${item.src}" onchange="updateItemSrc(${idx}, this.value)">
+            <input type="text" class="admin-input" value="${item.title}" onchange="updateItemTitle(${idx}, this.value)">
+            <div class="admin-actions">
+                <button class="admin-btn-sm" onclick="moveItem(${idx}, -1)" ${idx === 0 ? 'disabled' : ''}>▲</button>
+                <button class="admin-btn-sm" onclick="moveItem(${idx}, 1)" ${idx === GALLERY_ITEMS.length - 1 ? 'disabled' : ''}>▼</button>
+                <button class="admin-btn-sm admin-btn-del" onclick="deleteItem(${idx})">✕</button>
+            </div>
+        `;
+        list.appendChild(row);
+    });
+}
+
+function addNewImage() {
+    const srcInput = document.getElementById('new-img-src');
+    const titleInput = document.getElementById('new-img-title');
+    const src = srcInput.value.trim();
+    const title = titleInput.value.trim() || 'Untitled Voyage Image';
+
+    if (!src) return;
+
+    GALLERY_ITEMS.unshift({ src, title });
+    srcInput.value = '';
+    titleInput.value = '';
+    persistDraft();
+    renderGallery();
+    renderAdminList();
+}
+
+function updateItemSrc(index, newSrc) {
+    GALLERY_ITEMS[index].src = newSrc.trim();
+    persistDraft();
+    renderGallery();
+}
+
+function updateItemTitle(index, newTitle) {
+    GALLERY_ITEMS[index].title = newTitle.trim();
+    persistDraft();
+    renderGallery();
+}
+
+function moveItem(index, direction) {
+    const target = index + direction;
+    if (target < 0 || target >= GALLERY_ITEMS.length) return;
+    const temp = GALLERY_ITEMS[index];
+    GALLERY_ITEMS[index] = GALLERY_ITEMS[target];
+    GALLERY_ITEMS[target] = temp;
+    persistDraft();
+    renderGallery();
+    renderAdminList();
+}
+
+function deleteItem(index) {
+    if (!confirm(`Remove "${GALLERY_ITEMS[index].title}"?`)) return;
+    GALLERY_ITEMS.splice(index, 1);
+    persistDraft();
+    renderGallery();
+    renderAdminList();
+}
+
+function persistDraft() {
+    localStorage.setItem('nahla_voyage_gallery_draft', JSON.stringify(GALLERY_ITEMS));
+}
+
+// Generate code snippet to paste back into GitHub
+function exportCodeForGitHub() {
+    const formatted = 'let GALLERY_ITEMS = ' + JSON.stringify(GALLERY_ITEMS, null, 4) + ';';
+    
+    navigator.clipboard.writeText(formatted).then(() => {
+        const status = document.getElementById('admin-copy-status');
+        status.classList.add('visible');
+        setTimeout(() => status.classList.remove('visible'), 3000);
+    });
+
+    console.log(
+        '%c[PROJECT NAHLA VOYAGE GALLERY CODE]\n' +
+        '%cCopy and replace GALLERY_ITEMS in voyage-gallery.html:\n\n' + formatted,
+        'color: #ffbf00; font-weight: bold;',
+        'color: #61dafb;'
+    );
+}
+
+// --- GLOBAL KEY LISTENERS ---
+document.addEventListener('keydown', (e) => {
+    // Secret Admin shortcut: Ctrl + Shift + A
+    if (e.ctrlKey && e.shiftKey && (e.key === 'A' || e.key === 'a')) {
+        e.preventDefault();
+        const modal = document.getElementById('admin-modal');
+        toggleAdminModal(!modal.classList.contains('active'));
+        return;
+    }
+
+    // Modal / Lightbox dismiss on Escape
+    if (e.key === 'Escape') {
+        const adminModal = document.getElementById('admin-modal');
+        if (adminModal.classList.contains('active')) {
+            toggleAdminModal(false);
+            return;
+        }
+        closeLightbox();
+    }
+
+    // Lightbox navigation
+    const lb = document.getElementById('lightbox');
+    if (lb.classList.contains('active')) {
+        if (e.key === 'ArrowLeft') prevLightbox();
+        if (e.key === 'ArrowRight') nextLightbox();
+    }
+});
+
+// Initial boot
+renderGallery();
+</script>
+</body>
+</html>
