@@ -225,7 +225,6 @@
             color: #e0e0e0;
         }
 
-        /* Empty State */
         .gallery-empty {
             text-align: center;
             color: #777;
@@ -446,7 +445,7 @@
 
         .admin-item-row {
             display: grid;
-            grid-template-columns: 36px 1.2fr 1fr 1.6fr 130px 40px;
+            grid-template-columns: 36px 1.2fr 1fr 1.6fr 130px 105px;
             gap: 8px;
             align-items: center;
             background: #141414;
@@ -464,6 +463,11 @@
             background: #000;
         }
 
+        .admin-actions {
+            display: flex;
+            gap: 4px;
+        }
+
         .admin-btn-sm {
             background: #1c1c1c;
             border: 1px solid #444;
@@ -475,9 +479,14 @@
             font-family: Consolas, monospace;
         }
 
-        .admin-btn-sm:hover {
+        .admin-btn-sm:hover:not(:disabled) {
             color: #fff;
             border-color: #888;
+        }
+
+        .admin-btn-sm:disabled {
+            opacity: 0.3;
+            cursor: default;
         }
 
         .admin-btn-del:hover {
@@ -602,13 +611,14 @@
                     <select id="sort-order" class="gallery-select" onchange="renderGallery()">
                         <option value="newest" selected>Date: Newest First</option>
                         <option value="oldest">Date: Oldest First</option>
+                        <option value="manual">Expedition Log Order</option>
                     </select>
                 </div>
             </div>
         </div>
 
         <div class="gallery-grid" id="gallery-grid">
-            <!-- Injected dynamically -->
+            <!-- Rendered dynamically -->
         </div>
     </div>
 
@@ -626,7 +636,7 @@
         <button class="lightbox-nav-btn lightbox-next" onclick="nextLightbox(event)">&gt;</button>
     </div>
 
-    <!-- Secret Admin Console -->
+    <!-- Secret Admin Console (Ctrl + Shift + A) -->
     <div class="admin-modal" id="admin-modal">
         <div class="admin-panel">
             <div class="admin-header">
@@ -638,7 +648,7 @@
                     <input type="text" id="new-img-src" class="admin-input" placeholder="Filename (e.g. waypoint1.jpg)">
                     <input type="text" id="new-img-cmdr" class="admin-input" placeholder="CMDR name (e.g. Lysander666)">
                     <input type="text" id="new-img-title" class="admin-input" placeholder="Caption / Log details">
-                    <input type="text" id="new-img-date" class="admin-input" placeholder="Date (e.g. 3312-08-21)">
+                    <input type="text" id="new-img-date" class="admin-input" placeholder="YYYY-MM-DD">
                     <button class="admin-btn" onclick="addNewImage()">+ Add Image</button>
                 </div>
 
@@ -694,7 +704,7 @@ let GALLERY_ITEMS = [
     }
 ];
 
-// Load working drafts from browser localStorage if available
+// Load draft from browser localStorage if available
 const savedDraft = localStorage.getItem('nahla_voyage_gallery_draft');
 if (savedDraft) {
     try {
@@ -708,19 +718,19 @@ if (savedDraft) {
 let activeFilteredItems = [];
 let currentLightboxIndex = 0;
 
-// Strips non-numerics to reliably sort any stardate (e.g. "3312-08-21" -> 33120821)
+// Parses any stardate format (e.g., "3312-08-21" -> 33120821) without Date constructor bugs
 function parseDateNum(str) {
     if (!str) return 0;
     const clean = str.toString().replace(/[^0-9]/g, '');
     return parseInt(clean, 10) || 0;
 }
 
-// Sort master array chronologically (newest first)
+// Initial chronological arrangement
 function sortMasterItems() {
     GALLERY_ITEMS.sort((a, b) => parseDateNum(b.date) - parseDateNum(a.date));
 }
 
-// Update the CMDR dropdown based on unique names in GALLERY_ITEMS
+// Update the CMDR selector dropdown based on unique names in GALLERY_ITEMS
 function refreshCmdrFilterDropdown() {
     const select = document.getElementById('filter-cmdr');
     if (!select) return;
@@ -748,7 +758,7 @@ function refreshCmdrFilterDropdown() {
     }
 }
 
-// Render gallery grid based on active filter and sort selection
+// Render gallery grid based on active filter and sort choice
 function renderGallery() {
     const grid = document.getElementById('gallery-grid');
     if (!grid) return;
@@ -763,12 +773,13 @@ function renderGallery() {
         return (item.cmdr || '').trim().toLowerCase() === selectedCmdr.toLowerCase();
     });
 
-    // Sort using numeric stardate comparison
-    activeFilteredItems.sort((a, b) => {
-        const dateA = parseDateNum(a.date);
-        const dateB = parseDateNum(b.date);
-        return sortOrder === 'newest' ? (dateB - dateA) : (dateA - dateB);
-    });
+    // Sort
+    if (sortOrder === 'newest') {
+        activeFilteredItems.sort((a, b) => parseDateNum(b.date) - parseDateNum(a.date));
+    } else if (sortOrder === 'oldest') {
+        activeFilteredItems.sort((a, b) => parseDateNum(a.date) - parseDateNum(b.date));
+    }
+    // If 'manual', array stays in the exact manual sequence set by ▲/▼
 
     if (activeFilteredItems.length === 0) {
         grid.innerHTML = '<div class="gallery-empty">No transmissions found matching filter criteria.</div>';
@@ -859,8 +870,12 @@ function renderAdminList() {
             <input type="text" class="admin-input" value="${item.src}" placeholder="File" onchange="updateItem(${idx}, 'src', this.value)">
             <input type="text" class="admin-input" value="${item.cmdr || ''}" placeholder="CMDR" onchange="updateItem(${idx}, 'cmdr', this.value)">
             <input type="text" class="admin-input" value="${item.title}" placeholder="Caption" onchange="updateItem(${idx}, 'title', this.value)">
-            <input type="text" class="admin-input" value="${item.date || ''}" placeholder="YYYY-MM-DD" onchange="updateItemDate(${idx}, this.value)">
-            <button class="admin-btn-sm admin-btn-del" onclick="deleteItem(${idx})">✕</button>
+            <input type="text" class="admin-input" value="${item.date || ''}" placeholder="YYYY-MM-DD" onchange="updateItem(${idx}, 'date', this.value)">
+            <div class="admin-actions">
+                <button class="admin-btn-sm" onclick="moveItem(${idx}, -1)" ${idx === 0 ? 'disabled' : ''}>▲</button>
+                <button class="admin-btn-sm" onclick="moveItem(${idx}, 1)" ${idx === GALLERY_ITEMS.length - 1 ? 'disabled' : ''}>▼</button>
+                <button class="admin-btn-sm admin-btn-del" onclick="deleteItem(${idx})">✕</button>
+            </div>
         `;
         list.appendChild(row);
     });
@@ -879,7 +894,6 @@ function addNewImage() {
     if (!src) return;
 
     GALLERY_ITEMS.push({ src, cmdr, title, date });
-    sortMasterItems();
 
     // Reset inputs
     document.getElementById('new-img-src').value = '';
@@ -900,9 +914,12 @@ function updateItem(index, key, val) {
     renderGallery();
 }
 
-function updateItemDate(index, val) {
-    GALLERY_ITEMS[index].date = val.trim();
-    sortMasterItems();
+function moveItem(index, direction) {
+    const target = index + direction;
+    if (target < 0 || target >= GALLERY_ITEMS.length) return;
+    const temp = GALLERY_ITEMS[index];
+    GALLERY_ITEMS[index] = GALLERY_ITEMS[target];
+    GALLERY_ITEMS[target] = temp;
     persistDraft();
     renderGallery();
     renderAdminList();
@@ -923,7 +940,6 @@ function persistDraft() {
 
 // Generate code snippet to paste back into GitHub
 function exportCodeForGitHub() {
-    sortMasterItems();
     const formatted = 'let GALLERY_ITEMS = ' + JSON.stringify(GALLERY_ITEMS, null, 4) + ';';
     
     navigator.clipboard.writeText(formatted).then(() => {
@@ -970,7 +986,6 @@ document.addEventListener('keydown', (e) => {
 sortMasterItems();
 refreshCmdrFilterDropdown();
 renderGallery();
-</script>    
-
+</script>
 </body>
 </html>
