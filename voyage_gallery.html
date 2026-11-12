@@ -332,9 +332,9 @@
 
         /* Audio / Visual Transmissions Section */
 .video-section {
-    max-width: 900px;
-    margin: 30px auto 40px auto;
-    padding: 0 15px;
+    max-width: 1200px;
+    margin: 50px auto 30px auto;
+    padding: 0 20px;
 }
 
 .video-section-title {
@@ -342,7 +342,7 @@
     color: #61dafb;
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    margin-bottom: 15px;
+    margin-bottom: 20px;
     border-bottom: 1px solid #333;
     padding-bottom: 8px;
     display: flex;
@@ -350,13 +350,24 @@
     gap: 8px;
 }
 
+.video-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 20px;
+}
+
 .video-card {
     background: #111;
     border: 1px solid #333;
-    border-radius: 8px;
+    border-radius: 6px;
     overflow: hidden;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-    margin-bottom: 25px;
+    display: flex;
+    flex-direction: column;
+    transition: border-color 0.2s ease;
+}
+
+.video-card:hover {
+    border-color: #61dafb;
 }
 
 .video-wrapper {
@@ -376,20 +387,20 @@
 }
 
 .video-info {
-    padding: 15px 18px;
+    padding: 12px 14px;
     background: #161616;
     border-top: 1px solid #282828;
+    flex-grow: 1;
 }
 
 .video-meta {
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     color: #ffbf00;
     letter-spacing: 0.05em;
-    margin-bottom: 6px;
+    margin-bottom: 4px;
     display: flex;
     justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 10px;
+    gap: 8px;
 }
 
 .video-meta .cmdr-badge {
@@ -398,13 +409,13 @@
 }
 
 .video-title {
-    font-size: 1rem;
+    font-size: 0.9rem;
     color: #eee;
-    margin: 0 0 6px 0;
+    margin: 0 0 4px 0;
 }
 
 .video-desc {
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     color: #888;
     line-height: 1.4;
     margin: 0;
@@ -741,6 +752,43 @@
             <!-- Rendered dynamically -->
         </div>
     </div>
+
+    <div class="gallery-grid" id="gallery-grid">
+        <!-- Rendered dynamically by JS -->
+    </div>
+
+    <!-- PASTE THE AUDIO / VISUAL SECTION HERE -->
+    <section class="video-section">
+        <div class="video-section-title">
+            <span>▶</span> Audio / Visual Transmissions
+        </div>
+
+        <div class="video-grid">
+            <div class="video-card">
+                <div class="video-wrapper">
+                    <iframe 
+                        src="https://www.youtube-nocookie.com/embed/NTD9QwziydI" 
+                        title="Nahla Stillcam - Sunset and Tracker Re-anchoring" 
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                        allowfullscreen>
+                    </iframe>
+                </div>
+                <div class="video-info">
+                    <div class="video-meta">
+                        <span class="cmdr-badge">CMDR Lysander666</span>
+                        <span>3312-08-25</span>
+                    </div>
+                    <h3 class="video-title">Nahla Stillcam - Sunset and Tracker Re-anchoring</h3>
+                    <p class="video-desc">Cinematic record of fleet departure maneuvers and orbital transit capture.</p>
+                </div>
+            </div>
+
+            <!-- Copy/paste another <div class="video-card">...</div> here for additional videos -->
+        </div>
+    </section>
+
+    <!-- Lightbox Modal -->
+    <div id="lightbox" class="lightbox">
 
     <!-- Fullscreen Lightbox -->
     <div class="lightbox" id="lightbox">
