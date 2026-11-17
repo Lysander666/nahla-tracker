@@ -1518,7 +1518,7 @@
     </div>
     <div class="header-title">
         <div class="title-main">Nahla Tracker</div>
-        <div class="title-sub">LIVE • version 1.54</div>
+        <div class="title-sub">LIVE • version 1.6</div>
     </div>
 </div>
 
@@ -1982,15 +1982,25 @@ const PHASE_LENGTH_SECONDS = DAY_LENGTH_SECONDS / PHASE_COUNT;
 var CYCLE_ANCHOR   = new Date("2026-06-14T01:25:15.450Z");
 var REBEKAH_ANCHOR = new Date("2026-10-17T05:10:00.000Z"); // Synced to 2026-10-17T13:28:00Z observed set (-8h 18m arc)
 
-// Master Solar Calibration Epoch (OBS-008: Hope Sunrise over saddle rim)
-const HOPE_ANCHOR = new Date("2026-08-30T12:55:23.000Z");
+// Master Solar Calibration Epochs (Natalja's Pass: 39.23, 104.29)
+// OBS-008 (30 Aug 2026 12:55:23Z = 02:40:00 NLT) + Nov 15 2026 (22:43:00Z = 03:37:25 NLT)
+const PERIHELION_EPOCH        = new Date(Date.UTC(2026, 6, 3, 3, 10, 11));
+const ORBIT_PERIOD_SECONDS    = 555.2 * 86400;
+const MEAN_SUNRISE_NLT_SECS   = (3 * 3600) + (40 * 60) + 0;  // 03:40:00 NLT equinox mean
+const SUNRISE_SWING_SECONDS   = 76 * 60;                     // +/- 76m seasonal swing (02:24 summer -> 04:56 winter)
+const MEAN_DAYLIGHT_SECONDS   = (16 * 3600) + (38 * 60) + 0; // ~16h 38m equinox daylight (calibrated to Oct 17 23:01Z set)
+const DAYLIGHT_SWING_SECONDS  = 46 * 60;                     // +/- 46m seasonal daylight swing
 
-// Perihelion Epoch (3 July 2026 - Maximum Daylight Alignment)
-const PERIHELION_EPOCH = new Date(Date.UTC(2026, 6, 3, 3, 10, 11));
-const MEAN_DAYLIGHT_SECONDS = (17 * 3600) + (20 * 60) + 0; // 17h 20m 00s mean (calibrated to Oct 17 23:01Z set)
-
-// Orbital Period of Rebekah/Nahla around Hope (555.2 Earth days in seconds)
-const ORBIT_PERIOD_SECONDS = 555.2 * 86400;
+function getHopeSolarWindowNlt(timestampMs) {
+    const orbitalAngle = ((timestampMs - PERIHELION_EPOCH.getTime()) / 1000 / ORBIT_PERIOD_SECONDS) * 2 * Math.PI;
+    const sunriseNltSecs = MEAN_SUNRISE_NLT_SECS - (SUNRISE_SWING_SECONDS * Math.cos(orbitalAngle));
+    const daylightSpanSecs = MEAN_DAYLIGHT_SECONDS + (DAYLIGHT_SWING_SECONDS * Math.cos(orbitalAngle));
+    return {
+        sunriseNltSecs,
+        daylightSpanSecs,
+        sunsetNltSecs: sunriseNltSecs + daylightSpanSecs
+    };
+}
 
 // Base sunrise phase index (0-indexed) at HOPE_ANCHOR (Phase beta 2.305 = index 1.305)
 // Day length arc at Natalja's Pass is ~9.0 phases (~19h daylight arc)
@@ -2294,9 +2304,11 @@ function updateDisplay() {
     const wrapped          = cycle.wrappedSeconds;
     const hoursIntoDay     = cycle.hoursIntoDay;
 
-    // --- SEASONAL NLT SOLAR ENGINE (Synced to Nahlan Calendar Perihelion) ---
-    // Base Sunrise (First Break) in Phase Beta: 02:46:01 NLT (9,961s)
-    const SUNRISE_NLT_SECS = (2 * 3600) + (46 * 60) + 1;
+    // --- SEASONAL NLT SOLAR ENGINE (Synced to Ground Sunrise & Set Observations) ---
+    const solar = getHopeSolarWindowNlt(now.getTime());
+    const SUNRISE_NLT_SECS = solar.sunriseNltSecs;
+    const daylightSpanSecs = solar.daylightSpanSecs;
+    const SUNSET_NLT_SECS  = solar.sunsetNltSecs;
 
     // Seasonal harmonic variation (+/- 23 min swing between Hope 1 Perihelion and Aeoga Aphelion)
     const orbitalAngle = ((now.getTime() - PERIHELION_EPOCH.getTime()) / 1000 / ORBIT_PERIOD_SECONDS) * 2 * Math.PI;
@@ -2590,7 +2602,24 @@ function downloadEphemerisTxt() {
     const endMs = nowMs + (7 * 86400 * 1000); // 7 Earth days
 
     // Local constants to avoid scoping issues
-    const SUNRISE_NLT_SECS = (2 * 3600) + (46 * 60) + 1; // 02:46:01 NLT
+      for (let c = startCycle; c <= endCycle; c++) {
+        const cycleStartMs = CYCLE_ANCHOR.getTime() + (c * DAY_LENGTH_SECONDS * 1000);
+        const approxMidMs  = cycleStartMs + (DAY_LENGTH_SECONDS * 500);
+        const solar        = getHopeSolarWindowNlt(approxMidMs);
+        
+        // Hope Rise (Seasonal NLT)
+        const riseMs = cycleStartMs + (solar.sunriseNltSecs * 1000);
+        if (riseMs >= nowMs && riseMs <= endMs) {
+            events.push({ timeMs: riseMs, event: "HOPE RISE", note: `Cycle #${c + 1}` });
+        }
+
+        // Hope Set (Seasonal Daylight)
+        const setMs = riseMs + (solar.daylightSpanSecs * 1000);
+        if (setMs >= nowMs && setMs <= endMs) {
+            events.push({ timeMs: setMs, event: "HOPE SET", note: `Cycle #${c + 1}` });
+        }
+    }
+   
     const REBEKAH_VISIBLE_SECONDS = 29880;               // 8h 18m visible arc
 
     const events = [];
