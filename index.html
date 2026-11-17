@@ -2310,11 +2310,6 @@ function updateDisplay() {
     const daylightSpanSecs = solar.daylightSpanSecs;
     const SUNSET_NLT_SECS  = solar.sunsetNltSecs;
 
-    // Seasonal harmonic variation (+/- 23 min swing between Hope 1 Perihelion and Aeoga Aphelion)
-    const orbitalAngle = ((now.getTime() - PERIHELION_EPOCH.getTime()) / 1000 / ORBIT_PERIOD_SECONDS) * 2 * Math.PI;
-    const daylightSpanSecs = MEAN_DAYLIGHT_SECONDS + (23 * 60 * Math.cos(orbitalAngle));
-    const SUNSET_NLT_SECS = SUNRISE_NLT_SECS + daylightSpanSecs;
-
     const isHopeUp = (wrapped >= SUNRISE_NLT_SECS && wrapped < SUNSET_NLT_SECS);
 
     let timeToEvent = 0;
@@ -2601,8 +2596,16 @@ function downloadEphemerisTxt() {
     const nowMs = now.getTime();
     const endMs = nowMs + (7 * 86400 * 1000); // 7 Earth days
 
-    // Local constants to avoid scoping issues
-      for (let c = startCycle; c <= endCycle; c++) {
+    const REBEKAH_VISIBLE_SECONDS = 29880; // 8h 18m visible arc
+
+    const events = [];
+    const greek = ["α","β","γ","δ","ε","ζ","η","θ","ι","κ","λ","μ"];
+
+    // 1. Gather Hope Rise and Set (resets relative to CYCLE_ANCHOR)
+    const startCycle = Math.floor((nowMs - CYCLE_ANCHOR.getTime()) / (DAY_LENGTH_SECONDS * 1000)) - 1;
+    const endCycle   = Math.floor((endMs - CYCLE_ANCHOR.getTime()) / (DAY_LENGTH_SECONDS * 1000)) + 2;
+
+    for (let c = startCycle; c <= endCycle; c++) {
         const cycleStartMs = CYCLE_ANCHOR.getTime() + (c * DAY_LENGTH_SECONDS * 1000);
         const approxMidMs  = cycleStartMs + (DAY_LENGTH_SECONDS * 500);
         const solar        = getHopeSolarWindowNlt(approxMidMs);
@@ -2615,33 +2618,6 @@ function downloadEphemerisTxt() {
 
         // Hope Set (Seasonal Daylight)
         const setMs = riseMs + (solar.daylightSpanSecs * 1000);
-        if (setMs >= nowMs && setMs <= endMs) {
-            events.push({ timeMs: setMs, event: "HOPE SET", note: `Cycle #${c + 1}` });
-        }
-    }
-   
-    const REBEKAH_VISIBLE_SECONDS = 29880;               // 8h 18m visible arc
-
-    const events = [];
-    const greek = ["α","β","γ","δ","ε","ζ","η","θ","ι","κ","λ","μ"];
-
-    // 1. Gather Hope Rise and Set (resets relative to CYCLE_ANCHOR)
-    const startCycle = Math.floor((nowMs - CYCLE_ANCHOR.getTime()) / (DAY_LENGTH_SECONDS * 1000)) - 1;
-    const endCycle   = Math.floor((endMs - CYCLE_ANCHOR.getTime()) / (DAY_LENGTH_SECONDS * 1000)) + 2;
-
-    for (let c = startCycle; c <= endCycle; c++) {
-        const cycleStartMs = CYCLE_ANCHOR.getTime() + (c * DAY_LENGTH_SECONDS * 1000);
-        
-        // Hope Rise (02:46:01 NLT)
-        const riseMs = cycleStartMs + (SUNRISE_NLT_SECS * 1000);
-        if (riseMs >= nowMs && riseMs <= endMs) {
-            events.push({ timeMs: riseMs, event: "HOPE RISE", note: `Cycle #${c + 1}` });
-        }
-
-        // Hope Set (Seasonal Daylight)
-        const orbitalAngle = ((riseMs - PERIHELION_EPOCH.getTime()) / 1000 / ORBIT_PERIOD_SECONDS) * 2 * Math.PI;
-        const daylightSpanSecs = MEAN_DAYLIGHT_SECONDS + (23 * 60 * Math.cos(orbitalAngle));
-        const setMs = riseMs + (daylightSpanSecs * 1000);
         if (setMs >= nowMs && setMs <= endMs) {
             events.push({ timeMs: setMs, event: "HOPE SET", note: `Cycle #${c + 1}` });
         }
