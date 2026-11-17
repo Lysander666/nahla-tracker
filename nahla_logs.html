@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Nahla — Expedition Logbook Index</title>
+
+    <!-- Open Graph / Discord -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Project Nahla — Expedition Logbook Index">
+    <meta property="og:description" content="Commander dispatches, field reports, and Inara logbook entries from the Project Nahla Open Transit Voyage.">
+    <meta property="og:image" content="https://lysander666.github.io/nahla-tracker/voyage/serani1.webp">
+    <meta property="og:image:type" content="image/webp">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="675">
+
+    <!-- Twitter / X -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Project Nahla — Expedition Logbook Index">
+    <meta name="twitter:description" content="Commander dispatches, field reports, and Inara logbook entries from the Project Nahla Open Transit Voyage.">
+    <meta name="twitter:image" content="https://lysander666.github.io/nahla-tracker/voyage/serani1.webp">
+
+    <link rel="icon" type="image/png" sizes="16x16" href="faviconmain16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon32@2x.png">
+    <link rel="icon" type="image/png" sizes="128x128" href="faviconmain128.png">
+
+    <style>
+        body { 
+            background-color: #1a1a1a; 
+            color: #e0e0e0; 
+            font-family: monospace; 
+            font-size: 1.1rem; 
+            line-height: 1.6; 
+            padding: 20px;
+            margin: 0;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding-top: 30px;
+        }
+
+        /* --- HEADER --- */
+        .header {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+
+        .header-logo {
+            cursor: pointer;
+        }
+
+        .header-logo img {
+            width: 68px;
+            height: 68px;
+        }
+
+        .header-title {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.2;
+            text-align: left;
+        }
+
+        .title-main {
+            font-size: 2rem;
+            font-weight: 600;
+            color: #fff;
+            font-family: Consolas, "Courier New", monospace;
+        }
+
+        .title-sub {
+            font-size: 0.85rem;
+            color: #61dafb;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            margin-top: 2px;
+        }
+
+        .header-nav {
+            text-align: center;
+            margin-bottom: 24px;
+            font-family: Consolas, "Courier New", monospace;
+            font-size: 0.95rem;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 18px;
+        }
+
+        .header-nav a {
+            color: #61dafb;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .header-nav a:hover {
+            color: #ffbf00;
+            text-decoration: underline;
+        }
+
+        /* --- LOGBOOK CONTAINER --- */
+        #logs-section {
+            border: 1px solid #444;
+            border-radius: 8px;
+            padding: 24px;
+            background-color: #222;
+            box-shadow: 0 0 18px rgba(0, 0, 0, 0.5);
+        }
+
+        .logs-header-bar {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            border-bottom: 1px solid #333;
+            padding-bottom: 14px;
+            margin-bottom: 20px;
+        }
+
+        .logs-header-bar h2 {
+            color: #61dafb;
+            margin: 0;
+            font-family: Consolas, "Courier New", monospace;
+            font-size: 1.4rem;
+        }
+
+        /* Filter & Sort Bar */
+        .logs-controls {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 12px;
+            font-family: Consolas, monospace;
+            font-size: 0.85rem;
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .control-label {
+            color: #888;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+        }
+
+        .logs-select {
+            background-color: #1a1a1a;
+            border: 1px solid #444;
+            color: #61dafb;
+            padding: 5px 8px;
+            border-radius: 4px;
+            font-family: Consolas, monospace;
+            font-size: 0.85rem;
+            cursor: pointer;
+        }
+
+        .logs-select:focus {
+            outline: none;
+            border-color: #61dafb;
+        }
+
+        /* --- DISPATCH CARDS GRID --- */
+        .logs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 20px;
+        }
+
+        .log-card {
+            background-color: #151515;
+            border: 1px solid #333;
+            border-radius: 6px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            text-decoration: none;
+            color: inherit;
+            transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .log-card:hover {
+            transform: translateY(-3px);
+            border-color: #61dafb;
+            box-shadow: 0 4px 16px rgba(97, 218, 251, 0.22);
+        }
+
+        .log-card-banner {
+            position: relative;
+            aspect-ratio: 16 / 9;
+            background-color: #0e0e0e;
+            border-bottom: 1px solid #282828;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .log-card-banner img.log-hero {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .log-card-fallback {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, #1e242b 0%, #0d0d0d 100%);
+            color: #555;
+            font-family: Consolas, monospace;
+            font-size: 0.75rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        .log-card-fallback img {
+            width: 48px;
+            height: 48px;
+            opacity: 0.45;
+        }
+
+        .log-card-body {
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+            font-family: Consolas, "Courier New", monospace;
+        }
+
+        .log-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.78rem;
+            color: #ffbf00;
+            letter-spacing: 0.04em;
+            margin-bottom: 8px;
+        }
+
+        .log-cmdr {
+            color: #61dafb;
+            font-weight: bold;
+        }
+
+        .log-title {
+            font-size: 1.05rem;
+            font-weight: bold;
+            color: #fff;
+            margin: 0 0 8px 0;
+            line-height: 1.35;
+        }
+
+        .log-excerpt {
+            font-size: 0.85rem;
+            color: #aaa;
+            line-height: 1.5;
+            margin: 0 0 16px 0;
+            flex-grow: 1;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .log-footer-link {
+            font-size: 0.8rem;
+            color: #ffbf00;
+            border-top: 1px solid #262626;
+            padding-top: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            letter-spacing: 0.04em;
+        }
+
+        .log-card:hover .log-footer-link {
+            color: #61dafb;
+        }
+
+        .logs-empty {
+            text-align: center;
+            color: #777;
+            padding: 40px 0;
+            font-family: Consolas, monospace;
+            font-size: 0.95rem;
+        }
+
+        /* --- SECRET ADMIN MODAL --- */
+        .admin-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 3000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .admin-modal.active {
+            display: flex;
+        }
+
+        .admin-panel {
+            background: #1c1c1c;
+            border: 1px solid #61dafb;
+            box-shadow: 0 0 25px rgba(97, 218, 251, 0.3);
+            border-radius: 8px;
+            width: 100%;
+            max-width: 1200px;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 20px;
+            background: #141414;
+            border-bottom: 1px solid #333;
+        }
+
+        .admin-header h3 {
+            margin: 0;
+            color: #ffbf00;
+            font-family: Consolas, monospace;
+            font-size: 1.15rem;
+        }
+
+        .admin-close-btn {
+            background: none;
+            border: none;
+            color: #888;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .admin-close-btn:hover {
+            color: #fff;
+        }
+
+        .admin-body {
+            padding: 20px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .admin-add-box {
+            background: #111;
+            padding: 14px;
+            border: 1px solid #333;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .admin-add-row-top {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 8px;
+        }
+
+        .admin-add-row-mid {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr 1.4fr 130px;
+            gap: 8px;
+        }
+
+        .admin-add-row-bot {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 8px;
+        }
+
+        .admin-fetch-status {
+            font-size: 0.78rem;
+            font-family: Consolas, monospace;
+            color: #888;
+            min-height: 1.1em;
+        }
+
+        .admin-input {
+            background: #1e1e1e;
+            border: 1px solid #444;
+            color: #eee;
+            padding: 7px 9px;
+            border-radius: 4px;
+            font-family: Consolas, monospace;
+            font-size: 0.85rem;
+            box-sizing: border-box;
+            width: 100%;
+        }
+
+        .admin-input:focus {
+            outline: none;
+            border-color: #61dafb;
+        }
+
+        .admin-btn {
+            background: #222;
+            border: 1px solid #61dafb;
+            color: #61dafb;
+            font-family: Consolas, monospace;
+            padding: 7px 14px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        .admin-btn:hover {
+            background: #61dafb;
+            color: #111;
+        }
+
+        .admin-item-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .admin-item-card {
+            background: #141414;
+            padding: 10px 12px;
+            border: 1px solid #2a2a2a;
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .admin-item-top {
+            display: grid;
+            grid-template-columns: 1.2fr 0.9fr 1.3fr 120px 105px;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .admin-item-bot {
+            display: grid;
+            grid-template-columns: 1fr 1.3fr;
+            gap: 8px;
+        }
+
+        .admin-actions {
+            display: flex;
+            gap: 4px;
+            justify-content: flex-end;
+        }
+
+        .admin-btn-sm {
+            background: #1c1c1c;
+            border: 1px solid #444;
+            color: #aaa;
+            padding: 4px 8px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-family: Consolas, monospace;
+        }
+
+        .admin-btn-sm:hover:not(:disabled) {
+            color: #fff;
+            border-color: #888;
+        }
+
+        .admin-btn-sm:disabled {
+            opacity: 0.3;
+            cursor: default;
+        }
+
+        .admin-btn-del:hover {
+            border-color: #ff4d4d;
+            color: #ff4d4d;
+        }
+
+        .admin-footer {
+            padding: 14px 20px;
+            background: #141414;
+            border-top: 1px solid #333;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .admin-copy-status {
+            color: #8f9;
+            font-size: 0.85rem;
+            font-family: Consolas, monospace;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .admin-copy-status.visible {
+            opacity: 1;
+        }
+
+        /* --- FOOTER --- */
+        .site-footer {
+            margin-top: 50px;
+            padding: 30px 20px 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            border-top: 1px solid #333;
+        }
+
+        .footer-badges {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 30px;
+        }
+
+        .footer-badges img {
+            width: 140px;
+            height: 140px;
+            object-fit: contain;
+            border-radius: 50%;
+            display: block;
+            overflow: hidden;
+            clip-path: circle(50% at 50% 50%);
+            transition: transform 0.3s ease, filter 0.3s ease;
+        }
+
+        .footer-badges img:hover {
+            transform: scale(1.05);
+        }
+
+        .footer-badge-nahla {
+            filter: drop-shadow(0 0 12px rgba(255, 165, 0, 0.45));
+        }
+
+        .footer-text {
+            margin-top: 18px;
+            font-size: 0.85rem;
+            color: #777;
+            font-family: Consolas, "Courier New", monospace;
+        }
+
+        .footer-text a {
+            color: #61dafb;
+            text-decoration: none;
+        }
+
+        @media (max-width: 768px) {
+            .admin-add-row-mid,
+            .admin-item-top,
+            .admin-item-bot {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <div class="header">
+        <div class="header-logo" ondblclick="toggleAdminModal(true)" title="Project Nahla">
+            <img src="nahla_voyage-sm.png" alt="Voyage Logo" onerror="this.src='favicon8.png'">
+        </div>
+        <div class="header-title">
+            <div class="title-main">Project Nahla</div>
+            <div class="title-sub">Expedition Logbook Index</div>
+        </div>
+    </div>
+
+    <div class="header-nav">
+        <a href="index.html">&larr; Live Moon Tracker</a>
+        <a href="voyage_gallery.html">Visual &amp; AV Gallery &rarr;</a>
+    </div>
+
+    <div id="logs-section">
+        <div class="logs-header-bar">
+            <h2>Commander Dispatches (Inara)</h2>
+
+            <div class="logs-controls">
+                <div class="control-group">
+                    <span class="control-label">CMDR:</span>
+                    <select id="filter-cmdr" class="logs-select" onchange="renderLogs()">
+                        <option value="ALL">All Personnel</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <span class="control-label">Sort:</span>
+                    <select id="sort-order" class="logs-select" onchange="renderLogs()">
+                        <option value="manual" selected>Expedition Log Order</option>
+                        <option value="newest">Date: Newest First</option>
+                        <option value="oldest">Date: Oldest First</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="logs-grid" id="logs-grid">
+            <!-- Rendered dynamically by JS -->
+        </div>
+    </div>
+
+    <!-- Secret Admin Console (Ctrl + Shift + A or Double-Click Logo) -->
+    <div class="admin-modal" id="admin-modal">
+        <div class="admin-panel">
+            <div class="admin-header">
+                <h3>Logbook Admin Console</h3>
+                <button class="admin-close-btn" onclick="toggleAdminModal(false)">&times;</button>
+            </div>
+            <div class="admin-body">
+                <div class="admin-add-box">
+                    <div class="admin-add-row-top">
+                        <input type="text" id="new-log-url" class="admin-input" placeholder="Inara Logbook URL (e.g. https://inara.cz/elite/cmdr-logbook-entry/...)">
+                        <button class="admin-btn" style="border-color:#888; color:#ccc;" onclick="autoFetchInaraMeta()">Auto-Fetch Info</button>
+                    </div>
+                    <div class="admin-add-row-mid">
+                        <input type="text" id="new-log-img" class="admin-input" placeholder="Image URL (optional — right-click image on Inara &rarr; Copy Image Link)">
+                        <input type="text" id="new-log-cmdr" class="admin-input" placeholder="CMDR Name (e.g. Lysander666)">
+                        <input type="text" id="new-log-title" class="admin-input" placeholder="Log Entry Title">
+                        <input type="text" id="new-log-date" class="admin-input" placeholder="YYYY-MM-DD">
+                    </div>
+                    <div class="admin-add-row-bot">
+                        <input type="text" id="new-log-excerpt" class="admin-input" placeholder="Short excerpt / summary from the log entry...">
+                        <button class="admin-btn" onclick="addNewLog()">+ Add Log Entry</button>
+                    </div>
+                    <div id="admin-fetch-status" class="admin-fetch-status"></div>
+                </div>
+
+                <div class="admin-item-list" id="admin-item-list">
+                    <!-- Injected dynamically -->
+                </div>
+            </div>
+            <div class="admin-footer">
+                <span id="admin-copy-status" class="admin-copy-status">&#10003; JavaScript array copied to clipboard!</span>
+                <div>
+                    <button class="admin-btn" style="border-color:#ffbf00; color:#ffbf00;" onclick="exportCodeForGitHub()">
+                        Generate &amp; Copy Code
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="site-footer">
+        <div class="footer-badges">
+            <img src="nahla_voyage-sm.png" alt="Project Nahla Voyage" class="footer-badge-nahla" ondblclick="toggleAdminModal(true)">
+        </div>
+        <div class="footer-text">
+            Project Nahla • Est. 3311 • <a href="https://inara.cz/elite/cmdr/440263/" target="_blank" rel="noopener noreferrer">CMDR Lysander666</a> • <a href="nahla_labs.html" target="_blank" rel="noopener noreferrer"><strong>Nahla Labs</strong></a> • <a href="license.html" target="_blank" rel="noopener noreferrer">License</a>
+        </div>
+    </footer>
+
+</div>
+
+<script>
+// ==========================================
+//  PROJECT NAHLA INARA LOGBOOK DATA
+//  (Paste generated arrays here)
+// ==========================================
+let LOGBOOK_ENTRIES = [
+    {
+        "url": "https://inara.cz/elite/cmdr-logbook/440263/",
+        "img": "voyage/serani1.webp",
+        "cmdr": "Lysander666",
+        "title": "Hypi Bra EV-P d5-78 6a — Orbital Survey & Phase Telemetry",
+        "excerpt": "Initial transit logbook and orbital mechanics notes recorded during the Project Nahla open expedition.",
+        "date": "3312-11-11"
+    }
+];
+
+let adminWorkingList = [];
+
+function parseDateNum(str) {
+    if (!str) return 0;
+    const clean = str.toString().replace(/[^0-9]/g, '');
+    return parseInt(clean, 10) || 0;
+}
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return str.toString()
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+}
+
+function refreshCmdrFilterDropdown() {
+    const select = document.getElementById('filter-cmdr');
+    if (!select) return;
+    const previousVal = select.value;
+
+    const cmdrs = new Set();
+    LOGBOOK_ENTRIES.forEach(item => {
+        if (item.cmdr && item.cmdr.trim() !== '') {
+            cmdrs.add(item.cmdr.trim());
+        }
+    });
+
+    select.innerHTML = '<option value="ALL">All Personnel</option>';
+    Array.from(cmdrs).sort().forEach(cmdr => {
+        const opt = document.createElement('option');
+        opt.value = cmdr;
+        opt.textContent = `CMDR ${cmdr.replace(/^CMDR\s+/i, '')}`;
+        select.appendChild(opt);
+    });
+
+    if (cmdrs.has(previousVal) || previousVal === 'ALL') {
+        select.value = previousVal;
+    } else {
+        select.value = 'ALL';
+    }
+}
+
+function renderLogs() {
+    const grid = document.getElementById('logs-grid');
+    if (!grid) return;
+    grid.innerHTML = '';
+
+    const selectedCmdr = document.getElementById('filter-cmdr').value;
+    const sortOrder = document.getElementById('sort-order').value;
+
+    let filtered = LOGBOOK_ENTRIES.filter(item => {
+        if (selectedCmdr === 'ALL') return true;
+        return (item.cmdr || '').trim().toLowerCase() === selectedCmdr.toLowerCase();
+    });
+
+    if (sortOrder === 'newest') {
+        filtered.sort((a, b) => parseDateNum(b.date) - parseDateNum(a.date));
+    } else if (sortOrder === 'oldest') {
+        filtered.sort((a, b) => parseDateNum(a.date) - parseDateNum(b.date));
+    }
+
+    if (filtered.length === 0) {
+        grid.innerHTML = '<div class="logs-empty">No expedition logbooks found matching filter criteria.</div>';
+        return;
+    }
+
+    filtered.forEach(item => {
+        const card = document.createElement('a');
+        card.className = 'log-card';
+        card.href = item.url || '#';
+        card.target = '_blank';
+        card.rel = 'noopener noreferrer';
+
+        const cmdrLabel = item.cmdr ? `CMDR ${escapeHtml(item.cmdr.replace(/^CMDR\s+/i, ''))}` : 'Unlogged CMDR';
+        const dateLabel = escapeHtml(item.date || 'Undated');
+        const titleLabel = escapeHtml(item.title || 'Untitled Logbook Entry');
+        const excerptLabel = escapeHtml(item.excerpt || 'Open full dispatch on Inara.');
+
+        const bannerHtml = item.img && item.img.trim() !== ''
+            ? `<img class="log-hero" src="${escapeHtml(item.img)}" alt="${titleLabel}" referrerpolicy="no-referrer" loading="lazy" onerror="this.outerHTML='<div class=\\'log-card-fallback\\'><img src=\\'nahla_voyage-sm.png\\' alt=\\'Seal\\'><span>Text Dispatch</span></div>'">`
+            : `<div class="log-card-fallback"><img src="nahla_voyage-sm.png" alt="Seal"><span>Text Dispatch</span></div>`;
+
+        card.innerHTML = `
+            <div class="log-card-banner">
+                ${bannerHtml}
+            </div>
+            <div class="log-card-body">
+                <div class="log-meta">
+                    <span class="log-cmdr">${cmdrLabel}</span>
+                    <span>${dateLabel}</span>
+                </div>
+                <h3 class="log-title">${titleLabel}</h3>
+                <p class="log-excerpt">${excerptLabel}</p>
+                <div class="log-footer-link">
+                    <span>INARA LOGBOOK</span>
+                    <span>Read Entry &nearr;</span>
+                </div>
+            </div>
+        `;
+        grid.appendChild(card);
+    });
+}
+
+// Optional CORS-proxy metadata helper inside Admin Modal
+async function autoFetchInaraMeta() {
+    const urlInput = document.getElementById('new-log-url').value.trim();
+    const statusEl = document.getElementById('admin-fetch-status');
+    if (!urlInput) {
+        statusEl.style.color = '#ffbf00';
+        statusEl.textContent = 'Paste an Inara URL first.';
+        return;
+    }
+
+    statusEl.style.color = '#61dafb';
+    statusEl.textContent = 'Querying Inara metadata via proxy...';
+
+    try {
+        const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(urlInput)}`;
+        const res = await fetch(proxyUrl);
+        if (!res.ok) throw new Error('Proxy error');
+        const data = await res.json();
+        if (!data || !data.contents) throw new Error('Empty response');
+
+        const doc = new DOMParser().parseFromString(data.contents, 'text/html');
+        const ogTitle = doc.querySelector('meta[property="og:title"]')?.content || doc.title || '';
+        const ogDesc = doc.querySelector('meta[property="og:description"]')?.content || '';
+        const ogImg = doc.querySelector('meta[property="og:image"]')?.content || '';
+
+        if (!ogTitle && !ogDesc && !ogImg) {
+            throw new Error('Blocked by Cloudflare');
+        }
+
+        if (ogTitle && !document.getElementById('new-log-title').value) {
+            document.getElementById('new-log-title').value = ogTitle.replace(/\s*\|\s*INARA.*$/i, '').trim();
+        }
+        if (ogDesc && !document.getElementById('new-log-excerpt').value) {
+            document.getElementById('new-log-excerpt').value = ogDesc.trim();
+        }
+        if (ogImg && !document.getElementById('new-log-img').value) {
+            document.getElementById('new-log-img').value = ogImg.trim();
+        }
+
+        statusEl.style.color = '#8f9';
+        statusEl.textContent = '✓ Metadata populated! Review fields below and click + Add Log Entry.';
+    } catch (err) {
+        statusEl.style.color = '#ffbf00';
+        statusEl.textContent = 'Inara anti-bot protection blocked auto-fetch — fill in the fields manually below.';
+    }
+}
+
+// Admin Modal Controls
+function toggleAdminModal(show) {
+    const modal = document.getElementById('admin-modal');
+    if (show) {
+        adminWorkingList = JSON.parse(JSON.stringify(LOGBOOK_ENTRIES));
+        renderAdminList();
+        modal.classList.add('active');
+    } else {
+        modal.classList.remove('active');
+    }
+}
+
+function renderAdminList() {
+    const list = document.getElementById('admin-item-list');
+    list.innerHTML = '';
+
+    adminWorkingList.forEach((item, idx) => {
+        const card = document.createElement('div');
+        card.className = 'admin-item-card';
+        card.innerHTML = `
+            <div class="admin-item-top">
+                <input type="text" class="admin-input" value="${escapeHtml(item.url)}" placeholder="Inara URL" onchange="updateAdminItem(${idx}, 'url', this.value)">
+                <input type="text" class="admin-input" value="${escapeHtml(item.cmdr || '')}" placeholder="CMDR" onchange="updateAdminItem(${idx}, 'cmdr', this.value)">
+                <input type="text" class="admin-input" value="${escapeHtml(item.title)}" placeholder="Title" onchange="updateAdminItem(${idx}, 'title', this.value)">
+                <input type="text" class="admin-input" value="${escapeHtml(item.date || '')}" placeholder="YYYY-MM-DD" onchange="updateAdminItem(${idx}, 'date', this.value)">
+                <div class="admin-actions">
+                    <button class="admin-btn-sm" onclick="moveAdminItem(${idx}, -1)" ${idx === 0 ? 'disabled' : ''}>▲</button>
+                    <button class="admin-btn-sm" onclick="moveAdminItem(${idx}, 1)" ${idx === adminWorkingList.length - 1 ? 'disabled' : ''}>▼</button>
+                    <button class="admin-btn-sm admin-btn-del" onclick="deleteAdminItem(${idx})">✕</button>
+                </div>
+            </div>
+            <div class="admin-item-bot">
+                <input type="text" class="admin-input" value="${escapeHtml(item.img || '')}" placeholder="Image URL (optional)" onchange="updateAdminItem(${idx}, 'img', this.value)">
+                <input type="text" class="admin-input" value="${escapeHtml(item.excerpt || '')}" placeholder="Short excerpt" onchange="updateAdminItem(${idx}, 'excerpt', this.value)">
+            </div>
+        `;
+        list.appendChild(card);
+    });
+}
+
+function addNewLog() {
+    const url = document.getElementById('new-log-url').value.trim();
+    const img = document.getElementById('new-log-img').value.trim();
+    const cmdr = document.getElementById('new-log-cmdr').value.trim();
+    const title = document.getElementById('new-log-title').value.trim() || 'Untitled Logbook Entry';
+    const excerpt = document.getElementById('new-log-excerpt').value.trim();
+    let date = document.getElementById('new-log-date').value.trim();
+
+    if (!date) {
+        const now = new Date();
+        const edYear = now.getUTCFullYear() + 1286;
+        const mm = String(now.getUTCMonth() + 1).padStart(2, '0');
+        const dd = String(now.getUTCDate()).padStart(2, '0');
+        date = `${edYear}-${mm}-${dd}`;
+    }
+
+    if (!url) return;
+
+    adminWorkingList.push({ url, img, cmdr, title, excerpt, date });
+
+    document.getElementById('new-log-url').value = '';
+    document.getElementById('new-log-img').value = '';
+    document.getElementById('new-log-cmdr').value = '';
+    document.getElementById('new-log-title').value = '';
+    document.getElementById('new-log-excerpt').value = '';
+    document.getElementById('new-log-date').value = '';
+    document.getElementById('admin-fetch-status').textContent = '';
+
+    renderAdminList();
+}
+
+function updateAdminItem(index, key, val) {
+    adminWorkingList[index][key] = val.trim();
+}
+
+function moveAdminItem(index, direction) {
+    const target = index + direction;
+    if (target < 0 || target >= adminWorkingList.length) return;
+    const temp = adminWorkingList[index];
+    adminWorkingList[index] = adminWorkingList[target];
+    adminWorkingList[target] = temp;
+    renderAdminList();
+}
+
+function deleteAdminItem(index) {
+    if (!confirm(`Remove "${adminWorkingList[index].title}" from generated code?`)) return;
+    adminWorkingList.splice(index, 1);
+    renderAdminList();
+}
+
+function exportCodeForGitHub() {
+    const formatted = 'let LOGBOOK_ENTRIES = ' + JSON.stringify(adminWorkingList, null, 4) + ';';
+
+    navigator.clipboard.writeText(formatted).then(() => {
+        const status = document.getElementById('admin-copy-status');
+        status.classList.add('visible');
+        setTimeout(() => status.classList.remove('visible'), 3000);
+    });
+
+    console.log(
+        '%c[PROJECT NAHLA LOGBOOK EXPORT]\n' +
+        '%cCopy and replace LOGBOOK_ENTRIES in nahla_logs.html:\n\n' + formatted,
+        'color: #ffbf00; font-weight: bold;',
+        'color: #61dafb;'
+    );
+}
+
+// Global key controls
+document.addEventListener('keydown', (e) => {
+    if (e.ctrlKey && e.shiftKey && (e.key === 'A' || e.key === 'a')) {
+        e.preventDefault();
+        const modal = document.getElementById('admin-modal');
+        toggleAdminModal(!modal.classList.contains('active'));
+        return;
+    }
+
+    if (e.key === 'Escape') {
+        const adminModal = document.getElementById('admin-modal');
+        if (adminModal.classList.contains('active')) {
+            toggleAdminModal(false);
+        }
+    }
+});
+
+// Boot sequence
+refreshCmdrFilterDropdown();
+renderLogs();
+</script>
+
+</body>
+</html>
