@@ -70,7 +70,7 @@
           </h1>
         </div> 
         <p class="text-[10px] sm:text-xs text-slate-500 mt-1 uppercase tracking-wider">
-           Hypi Bra EV-P d5-78 | Orbiting Body: Rebekah (6) | Moon: Nahla (6 a)
+           Hypi Bra EV-P d5-78 | Binary Pair: Rebekah (6) &amp; Aeoga (7) | Moon: Nahla (6 a)
         </p>
       </div>
       <a href="index.html" class="px-2.5 py-1.5 rounded border border-[#1d2228] text-[10px] sm:text-xs text-slate-400 hover:text-[#5cb6e4] hover:border-[#5cb6e4] transition-all font-mono whitespace-nowrap">
@@ -86,7 +86,7 @@
         
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2.5 mb-3">
           <span class="text-xs sm:text-sm text-[#5cb6e4] font-bold uppercase tracking-widest font-sans">
-            Real-Time Year Quarter
+            Real-Time Binary Year Quarter (RAB Orbit)
           </span>
           <div class="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
             <button id="reset-time-btn" class="px-3 py-1.5 text-[11px] sm:text-xs font-mono font-bold rounded border border-[#5cb6e4] text-[#5cb6e4] bg-[#5cb6e4]/10 hover:bg-[#5cb6e4]/20 hover:shadow-[0_0_12px_rgba(92,182,228,0.3)] transition-all uppercase tracking-wider bg-[#0f1115]">
@@ -101,7 +101,7 @@
         <div class="relative w-full aspect-[4/3] sm:aspect-[16/9] md:aspect-[21/9] bg-[#090b0d] rounded border border-[#1d2228] overflow-hidden">
           <canvas id="orbitalCanvas" class="w-full h-full block cursor-crosshair"></canvas>
           <div class="absolute bottom-2 left-2 right-2 sm:right-auto bg-[#0d0f12]/90 border border-[#1d2228] px-2 py-1 rounded text-[10px] sm:text-xs font-mono text-slate-400 pointer-events-none text-center sm:text-left">
-            Click orbit track to fast-forward time.
+            Click binary orbit track to fast-forward time.
           </div>
         </div>
       </section>
@@ -262,7 +262,7 @@
       <!-- Calendar Grid Panel -->
       <section class="bg-[#121519] border border-[#1d2228] rounded-lg p-3 sm:p-5 shadow-lg">
         <h3 class="text-[11px] sm:text-xs text-[#5cb6e4] mb-4 uppercase tracking-wider sm:tracking-widest font-semibold font-mono">
-          555 day Nahlan calendar - 4 Quarters | 12 Months at 46 days each
+          555 day Nahlan calendar - 4 Quarters | 12 Months at 46 days each (RAB Binary Year)
         </h3>
 
         <!-- 12 Months Grid -->
@@ -313,13 +313,13 @@
     const WEEKDAY_SHORTS = ["ABE", "JAN", "MIR", "MAR", "THE", "FER", "HER", "ASM", "SAR", "GAU", "CHA"];
 
     const MONTHS_LORE = [
-      { name: "Hope", desc: "Sun of fierce beginnings, blue-white light and rebirth.", alignment: "Start of Year / Peak Sunlight" },
-      { name: "Simone", desc: "Primeval scorching planet of the healing dawn and the life-giving breath.", alignment: "Late Morning Orbit" },
-      { name: "Marika", desc: "Mystical dark ringed world of secrets and promise.", alignment: "Approaching Outer Orbit" },
+      { name: "Hope", desc: "Sun of fierce beginnings, blue-white light and rebirth.", alignment: "Start of Binary Cycle / RAB Periapsis" },
+      { name: "Simone", desc: "Primeval scorching planet of the healing dawn and the life-giving breath.", alignment: "Late Morning Binary Arc" },
+      { name: "Marika", desc: "Mystical dark ringed world of secrets and promise.", alignment: "Approaching Outer Binary Node" },
       { name: "Ružena", desc: "Marika's sister world, it is also shrouded in mystique, darkness and hidden wonder.", alignment: "High Horizon Phase" },
-      { name: "Rayne", desc: "Dazzling pink/red goddess of the middle system.", alignment: "Stellar Apex Alignment" },
+      { name: "Rayne", desc: "Dazzling pink/red goddess of the middle system.", alignment: "Binary Apex Alignment" },
       { name: "Báthory", desc: "The earth/night goddess. Honouring Nahla's dense, metal and sulphur-rich planetary mantle.", alignment: "Peak Magnetic Alignment" },
-      { name: "Aeoga", desc: "God of dust, sterility, and the burning heat of Hope. Day 277 commences the Festival of Mot - a 1-day dark beer event celebrating the furthest point from Hope and the return.", alignment: "Aphelion" },
+      { name: "Aeoga", desc: "God of dust, sterility, and the burning heat of Hope. Day 277 commences the Festival of Mot - a 1-day dark beer event celebrating the furthest point of the binary orbit and the return.", alignment: "RAB Apoapsis (Outer Binary Node)" },
       { name: "Skaði", desc: "Goddess of cosmic love, beauty, and the locked bond of giant and moon.", alignment: "Tidal Symmetrical Node" },
       { name: "Draupadi", desc: "Goddess of high mountain peaks, offering shelter and safe passage through the shadows of the descending orbit.", alignment: "Descending Node" },
       { name: "Sita", desc: "Goddess of writing, cosmic records, and mapping the stars.", alignment: "Apsidal Alignment" },
@@ -418,7 +418,7 @@
         
         const daysRemainingInFestival = totalDaysInYear - dayOfYear;
         msUntilNextMilestone = (daysRemainingInFestival * DAY_MS) + msLeftInCurrentDay;
-        nextMilestoneName = `Year ${year + 1}, Hope 1 (Perihelion)`;
+        nextMilestoneName = `Year ${year + 1}, Hope 1 (RAB Periapsis)`;
       }
 
       return {
@@ -556,6 +556,7 @@
       const h = canvas.height / window.devicePixelRatio;
       const cx = w / 2;
       const cy = h / 2;
+      const mobileScale = w < 480 ? 0.85 : 1.0;
       
       ctx.clearRect(0, 0, w, h);
       
@@ -573,7 +574,7 @@
         ctx.fill();
       }
 
-      // Brightened Orbit line tracking
+      // Brightened Binary Orbit track
       ctx.strokeStyle = "rgba(92, 182, 228, 0.45)";
       ctx.lineWidth = 2;
       ctx.setLineDash([4, 4]);
@@ -594,10 +595,9 @@
         ctx.stroke();
         
         const textTheta = theta + Math.PI/4;
-        const labelR = orbitRad * 1.05;
+        const labelR = orbitRad * 1.16;
         
-        // Enlarged and brightened Quarter titles (Bellatrix, Bunika, etc.)
-        const sizeMultiplier = w < 480 ? 1.1 : 1.35;
+        const sizeMultiplier = w < 480 ? 1.0 : 1.3;
         ctx.font = `bold ${Math.round(10 * sizeMultiplier)}px "JetBrains Mono", Courier, monospace`;
         ctx.fillStyle = "#7dd3fc"; 
         ctx.textBaseline = "middle";
@@ -606,40 +606,102 @@
       }
 
       // ==========================================
-      // CENTER: Primary Star Hope (A5 Vb Blue-White)
-      // ==========================================
-      const starRad = w < 480 ? 18 : 24;
-
-      // 1. Broad stellar corona / ambient glow
-      const coronaGrad = ctx.createRadialGradient(cx, cy, starRad * 0.4, cx, cy, starRad * 2.8);
-      coronaGrad.addColorStop(0, 'rgba(165, 230, 255, 0.45)');
-      coronaGrad.addColorStop(0.4, 'rgba(97, 218, 251, 0.20)');
-      coronaGrad.addColorStop(1, 'transparent');
-      ctx.fillStyle = coronaGrad;
-      ctx.beginPath();
-      ctx.arc(cx, cy, starRad * 2.8, 0, 2 * Math.PI);
-      ctx.fill();
-
-      // 2. Photosphere (blazing white core to electric cyan/blue edge)
-      const starGrad = ctx.createRadialGradient(cx, cy, 1, cx, cy, starRad);
-      starGrad.addColorStop(0, '#ffffff');       // Pure white core
-      starGrad.addColorStop(0.35, '#e0f7ff');    // Ultra-hot blue-white
-      starGrad.addColorStop(0.75, '#61dafb');    // Electric cyan mid
-      starGrad.addColorStop(1, '#1e88e5');       // Deep blue limb
-      ctx.fillStyle = starGrad;
-      ctx.beginPath();
-      ctx.arc(cx, cy, starRad, 0, 2 * Math.PI);
-      ctx.fill();
-
-// ==========================================
-      // ORBIT TRACK: Rebekah (Red Giant + Ring) & Nahla
+      // BINARY POSITIONS: Rebekah & Aeoga around RAB
       // ==========================================
       const progressRatio = nDate.dayOfYear / nDate.totalDaysInYear;
       const planetAngle = (progressRatio * 2 * Math.PI) - Math.PI / 2;
+      const aeogaAngle  = planetAngle + Math.PI; // Counter-orbiting 180 deg opposite across RAB
       
       const mx = cx + Math.cos(planetAngle) * orbitRad;
       const my = cy + Math.sin(planetAngle) * orbitRad;
-      
+
+      const ax = cx + Math.cos(aeogaAngle) * orbitRad;
+      const ay = cy + Math.sin(aeogaAngle) * orbitRad;
+
+      // Barycentric tether line linking Rebekah <-> RAB <-> Aeoga
+      ctx.strokeStyle = "rgba(148, 163, 184, 0.22)";
+      ctx.lineWidth = 1;
+      ctx.setLineDash([2, 3]);
+      ctx.beginPath();
+      ctx.moveTo(mx, my);
+      ctx.lineTo(ax, ay);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // ==========================================
+      // CENTER: Rebekah–Aeoga Barycentre (RAB)
+      // ==========================================
+      const rabRad = w < 480 ? 10 : 13;
+
+      const rabGlow = ctx.createRadialGradient(cx, cy, 1, cx, cy, rabRad * 2.2);
+      rabGlow.addColorStop(0, 'rgba(92, 182, 228, 0.35)');
+      rabGlow.addColorStop(0.6, 'rgba(251, 191, 36, 0.12)');
+      rabGlow.addColorStop(1, 'transparent');
+      ctx.fillStyle = rabGlow;
+      ctx.beginPath();
+      ctx.arc(cx, cy, rabRad * 2.2, 0, 2 * Math.PI);
+      ctx.fill();
+
+      // Barycentre orbital reticle ring
+      ctx.strokeStyle = "rgba(125, 211, 252, 0.85)";
+      ctx.lineWidth = 1.4;
+      ctx.beginPath();
+      ctx.arc(cx, cy, rabRad * 0.72, 0, 2 * Math.PI);
+      ctx.stroke();
+
+      // Crosshair ticks through RAB
+      ctx.strokeStyle = "rgba(251, 191, 36, 0.75)";
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.moveTo(cx - rabRad * 1.15, cy);
+      ctx.lineTo(cx + rabRad * 1.15, cy);
+      ctx.moveTo(cx, cy - rabRad * 1.15);
+      ctx.lineTo(cx, cy + rabRad * 1.15);
+      ctx.stroke();
+
+      // Central barycentre node
+      ctx.fillStyle = "#e0f2fe";
+      ctx.beginPath();
+      ctx.arc(cx, cy, 2.5, 0, 2 * Math.PI);
+      ctx.fill();
+
+      ctx.font = `bold ${Math.round(8.5 * mobileScale)}px "JetBrains Mono", Courier, monospace`;
+      ctx.fillStyle = "#93c5fd";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "top";
+      ctx.fillText("RAB", cx, cy + rabRad + 3);
+
+      // ==========================================
+      // COUNTER-ORBITING COMPANION: Aeoga (Body 7)
+      // ==========================================
+      const aeogaGlow = ctx.createRadialGradient(ax, ay, 1, ax, ay, 14);
+      aeogaGlow.addColorStop(0, 'rgba(251, 208, 97, 0.55)');
+      aeogaGlow.addColorStop(0.55, 'rgba(56, 189, 248, 0.22)');
+      aeogaGlow.addColorStop(1, 'transparent');
+      ctx.fillStyle = aeogaGlow;
+      ctx.beginPath();
+      ctx.arc(ax, ay, 14, 0, 2 * Math.PI);
+      ctx.fill();
+
+      const aeogaGrad = ctx.createRadialGradient(ax - 1.5, ay - 1.5, 0.5, ax, ay, 5.8);
+      aeogaGrad.addColorStop(0, '#fef08a');   // Warm sunlit cloud top
+      aeogaGrad.addColorStop(0.45, '#eab308'); // Golden water-life gas band
+      aeogaGrad.addColorStop(0.85, '#0e7490'); // Deep ocean-teal limb
+      aeogaGrad.addColorStop(1, '#083344');
+      ctx.fillStyle = aeogaGrad;
+      ctx.beginPath();
+      ctx.arc(ax, ay, 5.8, 0, 2 * Math.PI);
+      ctx.fill();
+
+      ctx.font = `bold ${Math.round(8 * mobileScale)}px "JetBrains Mono", Courier, monospace`;
+      ctx.fillStyle = "#fbd061";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "bottom";
+      ctx.fillText("AEOGA", ax, ay - 9);
+
+      // ==========================================
+      // PRIMARY BINARY BODY: Rebekah (6) & Nahla (6a)
+      // ==========================================
       // 1. Gas Giant crimson ambient aura
       const rebGlow = ctx.createRadialGradient(mx, my, 1, mx, my, 16);
       rebGlow.addColorStop(0, 'rgba(235, 0, 35, 0.75)');
@@ -688,17 +750,35 @@
       ctx.arc(moonX, moonY, 2.5, 0, 2 * Math.PI);
       ctx.fill();
 
-      const mobileScale = w < 480 ? 0.85 : 1.0;
-      
+      ctx.font = `bold ${Math.round(8 * mobileScale)}px "JetBrains Mono", Courier, monospace`;
+      ctx.fillStyle = "#fda4af";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "bottom";
+      ctx.fillText("REBEKAH / NAHLA", mx, my - 16);
+
+      // Top-left HUD status readout (Binary Cycle)
       ctx.font = `bold ${Math.round(9 * mobileScale)}px "JetBrains Mono", Courier, monospace`;
       ctx.fillStyle = '#9ca4b0';
       ctx.textAlign = 'left';
-      ctx.fillText(`SYSTEM MONITOR: ACTIVE`, 15, 20);
+      ctx.textBaseline = 'alphabetic';
+      ctx.fillText(`BINARY MONITOR: ACTIVE`, 15, 20);
       
       ctx.font = `${Math.round(8 * mobileScale)}px "JetBrains Mono", Courier, monospace`;
       ctx.fillStyle = '#5cb6e4';
-      ctx.fillText(`YEAR PROGRESS: ${(progressRatio*100).toFixed(2)}%`, 15, 20 + Math.round(12 * mobileScale));
+      ctx.fillText(`RAB ORBIT (555.2d): ${(progressRatio*100).toFixed(2)}%`, 15, 20 + Math.round(12 * mobileScale));
       ctx.fillText(`CURRENT NODE: ${nDate.quarterName.toUpperCase()}`, 15, 20 + Math.round(24 * mobileScale));
+
+      // Top-right HUD status readout (Hope Solar Orbit)
+      ctx.font = `bold ${Math.round(9 * mobileScale)}px "JetBrains Mono", Courier, monospace`;
+      ctx.fillStyle = '#9ca4b0';
+      ctx.textAlign = 'right';
+      ctx.fillText(`HOPE SOLAR ORBIT`, w - 15, 20);
+
+      ctx.font = `${Math.round(8 * mobileScale)}px "JetBrains Mono", Courier, monospace`;
+      ctx.fillStyle = '#fbd061';
+      ctx.fillText(`PERIOD: 10.6 EARTH YR`, w - 15, 20 + Math.round(12 * mobileScale));
+      ctx.fillStyle = '#94a3b8';
+      ctx.fillText(`~6.97 RAB CYCLES / YR`, w - 15, 20 + Math.round(24 * mobileScale));
 
       if (hoveredAngle !== null) {
         ctx.strokeStyle = '#49d38188';
@@ -799,7 +879,7 @@
         toast.className = "text-[10px] sm:text-xs font-mono text-[#49d381] bg-[#49d381]/10 px-1.5 py-0.5 rounded uppercase tracking-wider font-semibold";
         alertBanner.innerHTML = `
           <span class="inline-block w-2 h-2 rounded-full bg-[#49d381]"></span>
-          <span class="text-slate-400">46-day month: 4 weeks (44 days), each month ending with a 2-day festival. 12 months (+3 intercalary days) per cycle of 555 days.</span>
+          <span class="text-slate-400">46-day month: 4 weeks (44 days), each month ending with a 2-day festival. 12 months (+3 intercalary days) per RAB binary cycle of 555 days.</span>
         `;
       }
     }
@@ -866,7 +946,6 @@
             : 'bg-[#121519] border-[#1d2228] text-slate-400 hover:border-slate-700 hover:bg-[#15191e]'
         }`;
 
-        // Replaced substring truncation with full names of the Quarters at the top of the cards
         button.innerHTML = `
           <div class="flex justify-between items-start">
             <span class="text-[10px] sm:text-xs text-slate-500 font-medium font-mono">M ${idx + 1} | ${QUARTERS[qIdx]}</span>
@@ -937,7 +1016,7 @@
               Primary System Festival named after the parent gas giant Rebekah.
             </p>
             <p class="text-xs sm:text-sm text-slate-300 mt-2.5 leading-relaxed font-sans">
-              This 3-day (4-day in leap years) celebration sits outside standard months and quarters. Standard weekday clocks pause as Rebekah coordinates shift into maximum orbital acceleration, preparing to loop safely back into Month 1 (Hope) Day 1 at Perihelion.
+              This 3-day (4-day in leap years) celebration sits outside standard months and quarters. Standard weekday clocks pause as Rebekah and Aeoga complete their binary orbit around their shared barycentre (RAB), preparing to loop safely back into Month 1 (Hope) Day 1 at RAB Periapsis.
             </p>
             <div class="mt-3 inline-flex items-center gap-1.5 text-[11px] sm:text-xs text-purple-400 font-sans">
               <span class="w-1.5 h-1.5 rounded-full bg-purple-400"></span>
@@ -999,7 +1078,7 @@
       if (nDate.isYearZero) {
         epochRefSpan.innerText = "Target Epoch: 2026-07-03 03:10:11 UTC";
       } else {
-        epochRefSpan.innerText = `Year Alignment: Year ${nDate.year}`;
+        epochRefSpan.innerText = `Binary Year Alignment: Year ${nDate.year}`;
       }
 
       const totalSecsInDay = Math.floor(nDate.msInCurrentDay / 1000);
@@ -1098,7 +1177,7 @@
       } else {
         const progressPct = (nDate.dayOfYear / nDate.totalDaysInYear) * 100;
         progressBarFill.style.width = `${progressPct}%`;
-        progressionText.innerText = `Day ${nDate.dayOfYear} of ${nDate.totalDaysInYear} | ${progressPct.toFixed(2)}% orbital progression complete.`;
+        progressionText.innerText = `Day ${nDate.dayOfYear} of ${nDate.totalDaysInYear} | ${progressPct.toFixed(2)}% binary orbital progression complete.`;
       }
 
       const currentYear = nDate.year;
