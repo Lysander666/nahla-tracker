@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Consolas&family=Inter:wght@400;600&family=JetBrains+Mono:wght@400;500;600;700&display=swap">
+    <link rel="icon" type="image/png" sizes="16x16" href="faviconmain16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon32@2x.png">
+    <title>Contents — Project Nahla</title>
+
+    <!-- Open Graph (Discord, Facebook, Mastodon, Slack) -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Project Nahla Directory">
+    <meta property="og:description" content="Index of telemetry tools, field logs, expedition manifests, games and documentation for Project Nahla (Hypi Bra EV-P d5-78 6 a).">
+    <meta property="og:url" content="https://nahla.live/contents.html">
+    <meta property="og:image" content="https://nahla.live/nahla_voyage-sm.png">
+    <meta property="og:image:alt" content="Project Nahla Expedition Insignia">
+
+    <!-- Twitter / X Cards -->
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Project Nahla Directory">
+    <meta name="twitter:description" content="Index of telemetry tools, field logs, expedition manifests, games and documentation for Project Nahla.">
+    <meta name="twitter:image" content="https://nahla.live/nahla_voyage-sm.png">
+
+    <!-- Discord Embedded Border Theme Color -->
+    <meta name="theme-color" content="#61dafb">
+
+    <style>
+        body {
+            background-color: #1a1a1a;
+            color: #e5e7eb;
+            font-family: "JetBrains Mono", Consolas, "Courier New", monospace;
+            font-size: 0.95rem;
+            letter-spacing: 0.015em;
+            line-height: 1.65;
+            padding: 30px 20px;
+            margin: 0;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1120px;
+            margin: 0 auto;
+            box-sizing: border-box;
+        }
+
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .back-nav a {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: #61dafb;
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border: 1px solid #333;
+            padding: 6px 14px;
+            border-radius: 6px;
+            background-color: #222;
+            transition: all 0.2s ease;
+        }
+
+        .back-nav a:hover {
+            border-color: #61dafb;
+            background-color: #2a2a2a;
+            box-shadow: 0 0 10px rgba(97, 218, 251, 0.2);
+            transform: translateY(-1px);
+        }
+
+        .index-meta {
+            font-size: 0.8rem;
+            color: #9ca3af;
+            border: 1px solid #333;
+            background-color: #222;
+            padding: 5px 12px;
+            border-radius: 6px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .header-badge-wrap {
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .expedition-badge {
+            width: 105px;
+            height: 105px;
+            object-fit: contain;
+            border-radius: 50%;
+            clip-path: circle(50% at 50% 50%);
+            filter: drop-shadow(0 0 14px rgba(255, 175, 0, 0.45));
+            transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1), filter 0.3s ease;
+            transform: translateZ(0);
+        }
+
+        .expedition-badge:hover {
+            transform: scale(1.06) translateZ(0);
+            filter: drop-shadow(0 0 24px rgba(255, 191, 0, 0.85));
+        }
+
+        .header h1 {
+            color: #61dafb;
+            font-size: 1.9rem;
+            margin: 0 0 8px 0;
+            text-shadow: 0 0 12px rgba(97, 218, 251, 0.35);
+        }
+
+        .header-tagline {
+            color: #9ca3af;
+            font-size: 0.95rem;
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 14px;
+            border-bottom: 1px solid #333;
+            padding-bottom: 8px;
+        }
+
+        .section-title {
+            margin: 0;
+            font-size: 0.85rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: #ffbf00;
+        }
+
+        .section-count {
+            font-size: 0.75rem;
+            color: #9ca3af;
+            background: #161616;
+            border: 1px solid #333;
+            padding: 1px 8px;
+            border-radius: 4px;
+        }
+
+        .directory-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 14px;
+        }
+
+        .entry-card {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            background-color: #222;
+            border: 1px solid #444;
+            border-radius: 8px;
+            padding: 16px 18px;
+            text-decoration: none;
+            color: inherit;
+            box-shadow: 0 0 18px rgba(0, 0, 0, 0.35);
+            transition: border-color 0.2s ease, background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .entry-card:hover {
+            border-color: #61dafb;
+            background-color: #262626;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 18px rgba(97, 218, 251, 0.16);
+        }
+
+        .entry-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 6px;
+        }
+
+        .entry-title {
+            color: #61dafb;
+            font-size: 1.02rem;
+            font-weight: 600;
+            transition: color 0.15s ease;
+        }
+
+        .entry-card:hover .entry-title {
+            color: #8ffaff;
+        }
+
+        .entry-file {
+            font-size: 0.72rem;
+            color: #9ca3af;
+            background-color: #161616;
+            border: 1px solid #383838;
+            padding: 2px 7px;
+            border-radius: 4px;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .entry-desc {
+            font-size: 0.85rem;
+            color: #d1d5db;
+            line-height: 1.55;
+            margin: 0;
+        }
+
+        .footer {
+            margin-top: 35px;
+            text-align: center;
+            font-size: 0.8rem;
+            color: #666;
+            border-top: 1px solid #333;
+            padding-top: 20px;
+        }
+
+        @media (max-width: 800px) {
+            body {
+                padding: 16px 12px;
+                font-family: "JetBrains Mono", Consolas, "Liberation Mono", monospace !important;
+                font-size: 0.95rem !important;
+                line-height: 1.6 !important;
+                letter-spacing: normal !important;
+            }
+
+            .top-bar {
+                justify-content: center;
+                margin-bottom: 16px;
+            }
+
+            .back-nav {
+                width: 100%;
+            }
+
+            .back-nav a {
+                display: flex;
+                width: 100%;
+                box-sizing: border-box;
+                justify-content: center;
+                text-align: center;
+                padding: 10px 14px;
+            }
+
+            .index-meta {
+                display: none;
+            }
+
+            .header h1 {
+                font-size: 1.5rem;
+            }
+
+            .expedition-badge {
+                width: 90px;
+                height: 90px;
+            }
+
+            .directory-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .entry-card {
+                border-color: #4a4a4a;
+            }
+
+            .entry-title {
+                color: #e6f7ff;
+            }
+
+            .entry-desc {
+                font-size: 0.9rem;
+                color: #e6f7ff;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="top-bar">
+        <div class="back-nav">
+            <a href="index.html">&larr; Return to Main Tracker</a>
+        </div>
+        <div class="index-meta">NAHLA.LIVE // DIRECTORY</div>
+    </div>
+
+    <div class="header">
+        <div class="header-badge-wrap">
+            <a href="index.html" title="Return to Main Tracker">
+                <img src="nahla_voyage-sm.png"
+                     alt="Project Nahla Expedition Insignia"
+                     class="expedition-badge"
+                     onerror="this.onerror=null; this.src='favicon8.png';">
+            </a>
+        </div>
+        <h1>Project Nahla Directory</h1>
+        <div class="header-tagline">Telemetry utilities, expedition archives, surface logs and field simulations</div>
+    </div>
+
+    <!-- CORE TELEMETRY & REFERENCE -->
+    <section class="section">
+        <div class="section-header">
+            <h2 class="section-title">Core Telemetry &amp; Reference</h2>
+            <span class="section-count">3</span>
+        </div>
+        <div class="directory-grid">
+            <a href="index.html" class="entry-card">
+                <div class="entry-top">
+                    <span class="entry-title">Main Nahla Tracker</span>
+                    <span class="entry-file">index.html</span>
+                </div>
+                <p class="entry-desc">Live solar and gas-giant rise/set predictions, surface horizon telemetry, and 7-day cycle schedules for Natalja's Pass.</p>
+            </a>
+
+            <a href="nahla_calendar_system.html" class="entry-card">
+                <div class="entry-top">
+                    <span class="entry-title">Nahla Calendar System</span>
+                    <span class="entry-file">nahla_calendar_system.html</span>
+                </div>
+                <p class="entry-desc">Epoch calibration, orbital period conversions, and Rebekah–Aeoga barycentre phase rendering.</p>
+            </a>
+
+            <a href="nahla_calculator.html" class="entry-card">
+                <div class="entry-top">
+                    <span class="entry-title">Nahla Calculator</span>
+                    <span class="entry-file">nahla_calculator.html</span>
+                </div>
+                <p class="entry-desc">Surface coordinate, angular elevation, and custom timestamp calculation utility for field observations.</p>
+            </a>
+        </div>
+    </section>
+
+    <!-- EXPEDITION, LOGS & MEDIA -->
+    <section class="section">
+        <div class="section-header">
+            <h2 class="section-title">Expedition, Logs &amp; Media</h2>
+            <span class="section-count">4</span>
+        </div>
+        <div class="directory-grid">
+            <a href="voyage_status.html" class="entry-card">
+                <div class="entry-top">
+                    <span class="entry-title">Voyage Status</span>
+                    <span class="entry-file">voyage_status.html</span>
+                </div>
+                <p class="entry-desc">Transit carrier deployment updates, waypoint progress, and expedition operational status.</p>
+            </a>
+
+            <a href="voyage_gallery.html" class="entry-card">
+                <div class="entry-top">
+                    <span class="entry-title">Voyage Gallery</span>
+                    <span class="entry-file">voyage_gallery.html</span>
+                </div>
+                <p class="entry-desc">Visual reconnaissance archive featuring surface photography, ring alignments, and mission video logs.</p>
+            </a>
+
+            <a href="nahla_logs.html" class="entry-card">
+                <div class="entry-top">
+                    <span class="entry-title">Nahla Field Logs</span>
+                    <span class="entry-file">nahla_logs.html</span>
+                </div>
+                <p class="entry-desc">Chronological surface dispatches, thermal readings, and observational notes from Hypi Bra EV-P d5-78 6 a.</p>
+            </a>
+
+            <a href="contributors.html" class="entry-card">
+                <div class="entry-top">
+                    <span class="entry-title">Expedition Contributors</span>
+                    <span class="entry-file">contributors.html</span>
+                </div>
+                <p class="entry-desc">Field manifest of commanders, fleet carriers, and researchers contributing data to Project Nahla.</p>
+            </a>
+        </div>
+    </section>
+
+    <!-- GAMES -->
+    <section class="section">
+        <div class="section-header">
+            <h2 class="section-title">Games</h2>
+            <span class="section-count">3</span>
+        </div>
+        <div class="directory-grid">
+            <a href="sulphur_run.html" class="entry-card">
+                <div class="entry-top">
+                    <span class="entry-title">Sulphur Run (Desktop)</span>
+                    <span class="entry-file">sulphur_run.html</span>
+                </div>
+                <p class="entry-desc">Browser-based arcade canyon run across Nahla's sulphur plains with full-screen keyboard controls.</p>
+            </a>
+
+            <a href="sulphur_run_descent.html" class="entry-card">
+                <div class="entry-top">
+                    <span class="entry-title">Sulphur Run: Pâte Sablée Descent</span>
+                    <span class="entry-file">sulphur_run_descent.html</span>
+                </div>
+                <p class="entry-desc">Mobile-tuned edition descending into Pâte Sablée crater with touch controls and revised soundtrack.</p>
+            </a>
+
+            <a href="dimsum.html" class="entry-card">
+                <div class="entry-top">
+                    <span class="entry-title">Deepspace Dim Sum (Nahla Diantang)</span>
+                    <span class="entry-file">dimsum.html</span>
+                </div>
+                <p class="entry-desc">Incremental galley management game aboard the A.R.C. Cor Draconis deep-space expedition.</p>
+            </a>
+        </div>
+    </section>
+
+    <!-- META -->
+    <section class="section">
+        <div class="section-header">
+            <h2 class="section-title">Meta</h2>
+            <span class="section-count">2</span>
+        </div>
+        <div class="directory-grid">
+            <a href="nahla_labs.html" class="entry-card">
+                <div class="entry-top">
+                    <span class="entry-title">Nahla Labs — Privacy Policy</span>
+                    <span class="entry-file">nahla_labs.html</span>
+                </div>
+                <p class="entry-desc">Data handling, telemetry storage, and privacy documentation for Nahla Labs web and mobile releases.</p>
+            </a>
+
+            <a href="license.html" class="entry-card">
+                <div class="entry-top">
+                    <span class="entry-title">License &amp; Frequency Specs</span>
+                    <span class="entry-file">license.html</span>
+                </div>
+                <p class="entry-desc">Usage terms, attribution details, and broadcast frequency specifications for Project Nahla.</p>
+            </a>
+        </div>
+    </section>
+
+    <div class="footer">
+        Project Nahla • Hypi Bra EV-P d5-78 6 a
+    </div>
+</div>
+
+</body>
+</html>
