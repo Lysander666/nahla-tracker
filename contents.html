@@ -221,13 +221,58 @@
             margin: 0;
         }
 
-        .footer {
-            margin-top: 35px;
+        /* --- FOOTER (matching nahla_logs.html) --- */
+        .site-footer {
+            margin-top: 50px;
+            padding: 30px 20px 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
             text-align: center;
-            font-size: 0.8rem;
-            color: #666;
             border-top: 1px solid #333;
-            padding-top: 20px;
+        }
+
+        .footer-badges {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 30px;
+        }
+
+        .footer-badges img {
+            width: 140px;
+            height: 140px;
+            object-fit: contain;
+            border-radius: 50%;
+            display: block;
+            overflow: hidden;
+            clip-path: circle(50% at 50% 50%);
+            transition: transform 0.3s ease, filter 0.3s ease;
+        }
+
+        .footer-badges img:hover {
+            transform: scale(1.05);
+        }
+
+        .footer-badge-nahla {
+            filter: drop-shadow(0 0 12px rgba(255, 165, 0, 0.45));
+        }
+
+        .footer-text {
+            margin-top: 18px;
+            font-size: 0.85rem;
+            color: #777;
+            font-family: Consolas, "Courier New", monospace;
+        }
+
+        .footer-text a {
+            color: #61dafb;
+            text-decoration: none;
+        }
+
+        .footer-text a:hover {
+            text-decoration: underline;
         }
 
         @media (max-width: 800px) {
@@ -444,14 +489,15 @@
         </div>
     </section>
 
-     <footer class="site-footer">
+    <footer class="site-footer">
         <div class="footer-badges">
-            <img src="nahla_voyage-sm.png" alt="Project Nahla Voyage" class="footer-badge-nahla" ondblclick="toggleAdminModal(true)">
+            <img src="nahla_voyage-sm.png" alt="Project Nahla Voyage" class="footer-badge-nahla">
         </div>
         <div class="footer-text">
             Project Nahla • Est. 3311 • <a href="https://inara.cz/elite/cmdr/440263/" target="_blank" rel="noopener noreferrer">CMDR Lysander666</a> • <a href="nahla_labs.html" target="_blank" rel="noopener noreferrer"><strong>Nahla Labs</strong></a> • <a href="license.html" target="_blank" rel="noopener noreferrer">License</a>
         </div>
     </footer>
+</div>
 
 </body>
 </html>
