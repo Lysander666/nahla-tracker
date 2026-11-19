@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>31 // Void Vector — Nahla Tracker</title>
+  <title>Void Vector</title>
   <style>
     /* ==========================================================================
        NAHLA TRACKER DESIGN TOKENS & PHOSPHOR TERMINAL GREEN THEME
@@ -228,11 +228,6 @@
       color: var(--emerald);
     }
 
-    .brief-warn {
-      color: var(--amber);
-      font-weight: 600;
-    }
-
     /* 20 Four-Letter Callsign Lexicon Grid */
     .lexicon-note {
       font-size: 0.7rem;
@@ -303,6 +298,67 @@
 
     .lex-item.lex-null .lex-meaning {
       color: #fcd34d;
+    }
+
+    /* Bottom Mode Explanation Bar */
+    .mode-legend-bar {
+      width: 100%;
+      max-width: 600px;
+      background: var(--bg-terminal);
+      border: 1px solid var(--border-bright);
+      border-radius: 10px;
+      box-shadow: 0 14px 36px rgba(0, 0, 0, 0.65), inset 0 0 0 1px rgba(34, 197, 94, 0.05);
+      padding: 0.7rem 0.95rem;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0.55rem;
+    }
+
+    @media (min-width: 920px) {
+      .mode-legend-bar {
+        grid-column: 1 / -1;
+        max-width: none;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 0.75rem;
+      }
+    }
+
+    .mode-legend-item {
+      background: var(--bg-panel);
+      border: 1px solid var(--border-dim);
+      border-radius: 6px;
+      padding: 0.5rem 0.65rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+      transition: border-color 0.15s ease, background-color 0.15s ease;
+    }
+
+    .mode-legend-item.active-mode-info {
+      border-color: var(--term-green);
+      background: rgba(34, 197, 94, 0.12);
+    }
+
+    .mode-legend-title {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      color: var(--term-green);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .mode-legend-tag {
+      font-size: 0.62rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    .mode-legend-desc {
+      font-size: 0.7rem;
+      color: var(--text-primary);
+      line-height: 1.38;
     }
 
     /* Top Header Bar */
@@ -845,8 +901,7 @@
       <header class="terminal-header">
         <div class="brand-block">
           <div class="brand-title">
-            
-            VOID VECTOR v0.1
+           VOID VECTOR v0.1
           </div>
           <div class="brand-sub">NAHLA TRACKER • HOPE SYSTEM (31 BODIES)</div>
         </div>
@@ -963,6 +1018,31 @@
         </div>
       </section>
     </aside>
+
+    <!-- Bottom Mode Explanation Bar -->
+    <section class="mode-legend-bar" aria-label="Sector Difficulty Modes">
+      <div class="mode-legend-item active-mode-info" data-mode-info="SURVEY">
+        <div class="mode-legend-title">
+          <span>SURVEY MODE</span>
+          <span class="mode-legend-tag">5×5 GRID</span>
+        </div>
+        <div class="mode-legend-desc">Positive mass nodes only (01–09) with a 3-letter callsign. Unrequested decoy letters can be crossed safely.</div>
+      </div>
+      <div class="mode-legend-item" data-mode-info="ORBITAL">
+        <div class="mode-legend-title">
+          <span>ORBITAL MODE</span>
+          <span class="mode-legend-tag">6×6 GRID</span>
+        </div>
+        <div class="mode-legend-desc">Introduces negative Gravity Wells (-2 to -4) to bleed off excess mass, paired with a 3-letter callsign.</div>
+      </div>
+      <div class="mode-legend-item" data-mode-info="DEEP">
+        <div class="mode-legend-title">
+          <span>DEEP SPACE MODE</span>
+          <span class="mode-legend-tag">6×6 • STRICT</span>
+        </div>
+        <div class="mode-legend-desc">Gravity Wells + 4-letter callsign under Strict Protocol: touching any out-of-order or decoy letter is blocked.</div>
+      </div>
+    </section>
   </div>
 
   <!-- Unified Terminal Modal (Victory / Help / Stats / Seed) -->
@@ -1106,8 +1186,8 @@
         { code: "ANNE", meaning: "Anneke" },
         { code: "ARIA", meaning: "Ariana" },
         { code: "BATH", meaning: "Bathory" },
+        { code: "BELL", meaning: "Bellatrix" },
         { code: "DRAU", meaning: "Draupadi" },
-        { code: "HALO", meaning: "Halo" },
         { code: "HOPE", meaning: "Hope System" },
         { code: "LUNA", meaning: "Luna" },
         { code: "MRKA", meaning: "Marika" },
@@ -1127,211 +1207,247 @@
         "NAHL", "HOPE", "SMNE", "MRKA", "RBKA",
         "ANNE", "VOID", "PHSE", "ARIA", "DRAU",
         "RUZE", "RAYN", "AEOG", "BATH", "SKAD",
-        "SITA", "RING", "HALO", "LUNA", "NULL"
+        "SITA", "RING", "BELL", "LUNA", "NULL"
       ],
       ALPHABET: "ABCDEFGHJKLMNPQRSTUVWXYZ".split(""),
 
-      configs: {
-        SURVEY:  { size: 5, minSteps: 9,  maxSteps: 11, wordLen: 3, wells: 0, voids: 3, decoys: 2, strictCallsign: false },
-        ORBITAL: { size: 6, minSteps: 10, maxSteps: 13, wordLen: 3, wells: 2, voids: 5, decoys: 3, strictCallsign: false },
-        DEEP:    { size: 6, minSteps: 11, maxSteps: 14, wordLen: 4, wells: 3, voids: 5, decoys: 4, strictCallsign: true }
-      },
-
       generate(mode, seedStr, forcedWord = null) {
-        const cfg = this.configs[mode] || this.configs.SURVEY;
-        const rng = new SeededRandom(`${mode}:${seedStr}${forcedWord ? `:${forcedWord}` : ""}`);
-        const targetWord = forcedWord
-          ? forcedWord
-          : cfg.wordLen === 4
-          ? rng.pick(this.WORDS_4)
-          : rng.pick(this.WORDS_3);
+        const rng = new SeededRandom(`${mode}:${seedStr}`);
+        const config = {
+          SURVEY:  { size: 5, minLen: 7,  maxLen: 10, allowWells: false, wordLen: 3, strictRelays: false, voids: 3, decoyLetters: 2 },
+          ORBITAL: { size: 6, minLen: 9,  maxLen: 13, allowWells: true,  wordLen: 3, strictRelays: false, voids: 5, decoyLetters: 3 },
+          DEEP:    { size: 6, minLen: 10, maxLen: 14, allowWells: true,  wordLen: 4, strictRelays: true,  voids: 5, decoyLetters: 4 }
+        }[mode] || { size: 5, minLen: 7, maxLen: 10, allowWells: false, wordLen: 3, strictRelays: false, voids: 3, decoyLetters: 2 };
 
-        // 1. Carve a self-avoiding walk from [>] to [X]
-        const solutionPath = this.carvePath(cfg.size, cfg.minSteps, cfg.maxSteps, rng);
-        const totalSteps = solutionPath.length - 1;
-        const interiorIndices = [];
-        for (let i = 1; i < solutionPath.length - 1; i++) {
-          interiorIndices.push(i);
-        }
+        const size = config.size;
+        const wordPool = config.wordLen === 4 ? this.WORDS_4 : this.WORDS_3;
+        const word = (forcedWord && wordPool.includes(forcedWord)) ? forcedWord : rng.pick(wordPool);
 
-        // 2. Select ordered indices along the solution path for Callsign Relays
-        const chosenRelaySlots = rng.shuffle(interiorIndices).slice(0, cfg.wordLen).sort((a, b) => a - b);
+        // 1. Carve a guaranteed self-avoiding path
+        const solutionPath = this.carvePath(rng, size, config.minLen, config.maxLen);
+        const startPos = solutionPath[0];
+        const exitPos = solutionPath[solutionPath.length - 1];
+        const interior = solutionPath.slice(1, -1); // nodes between start and exit
+
+        // 2. Pick ordered positions along interior path for target callsign letters
+        const allIndices = Array.from({ length: interior.length }, (_, i) => i);
+        const chosenIndices = rng.shuffle(allIndices).slice(0, word.length).sort((a, b) => a - b);
+
         const relayMap = new Map();
-        chosenRelaySlots.forEach((pathIdx, letterIdx) => {
-          relayMap.set(pathIdx, targetWord[letterIdx]);
+        chosenIndices.forEach((idx, letterIdx) => {
+          relayMap.set(idx, word[letterIdx]);
         });
 
-        // 3. Partition mass sum = 31 across the remaining interior solution nodes
-        const numericPathIndices = interiorIndices.filter((idx) => !relayMap.has(idx));
-        const massValues = this.partitionMass(numericPathIndices.length, 31, cfg.wells, rng);
+        // 3. Partition 31 across the remaining numeric interior nodes
+        const numericIndices = allIndices.filter((idx) => !relayMap.has(idx));
+        const massValues = this.partition31(rng, numericIndices.length, config.allowWells);
+        const massMap = new Map();
+        numericIndices.forEach((idx, mIdx) => {
+          massMap.set(idx, massValues[mIdx]);
+        });
 
-        // 4. Initialize empty grid and place solution path cells
-        const grid = Array.from({ length: cfg.size }, () => Array(cfg.size).fill(null));
-        const onSolution = new Set();
+        // 4. Construct empty grid and stamp solution path
+        const grid = Array.from({ length: size }, (_, r) =>
+          Array.from({ length: size }, (_, c) => ({
+            r,
+            c,
+            type: "EMPTY",
+            val: 0,
+            letter: null,
+            onSolution: false
+          }))
+        );
 
-        solutionPath.forEach(([r, c], idx) => {
-          onSolution.add(`${r},${c}`);
-          if (idx === 0) {
-            grid[r][c] = { type: "START", value: 0 };
-          } else if (idx === solutionPath.length - 1) {
-            grid[r][c] = { type: "EXIT", value: 0 };
-          } else if (relayMap.has(idx)) {
-            grid[r][c] = { type: "RELAY", letter: relayMap.get(idx), value: 0 };
+        grid[startPos.r][startPos.c] = {
+          r: startPos.r,
+          c: startPos.c,
+          type: "START",
+          val: 0,
+          letter: null,
+          onSolution: true
+        };
+
+        grid[exitPos.r][exitPos.c] = {
+          r: exitPos.r,
+          c: exitPos.c,
+          type: "EXIT",
+          val: 0,
+          letter: null,
+          onSolution: true
+        };
+
+        interior.forEach((pt, idx) => {
+          if (relayMap.has(idx)) {
+            grid[pt.r][pt.c] = {
+              r: pt.r,
+              c: pt.c,
+              type: "RELAY",
+              val: 0,
+              letter: relayMap.get(idx),
+              onSolution: true
+            };
           } else {
-            const val = massValues.pop();
-            grid[r][c] = {
-              type: val < 0 ? "WELL" : "MASS",
-              value: val
+            const v = massMap.get(idx);
+            grid[pt.r][pt.c] = {
+              r: pt.r,
+              c: pt.c,
+              type: v < 0 ? "WELL" : "MASS",
+              val: v,
+              letter: null,
+              onSolution: true
             };
           }
         });
 
-        // 5. Fill all off-path cells with Voids, Decoy Relays, Wells, and Mass nodes
-        const offPathCoords = [];
-        for (let r = 0; r < cfg.size; r++) {
-          for (let c = 0; c < cfg.size; c++) {
-            if (!onSolution.has(`${r},${c}`)) {
-              offPathCoords.push([r, c]);
+        // 5. Fill remaining cells with Voids, Decoy Letters, and Decoy Numbers
+        const offPath = [];
+        for (let r = 0; r < size; r++) {
+          for (let c = 0; c < size; c++) {
+            if (!grid[r][c].onSolution) {
+              offPath.push(grid[r][c]);
             }
           }
         }
 
-        const shuffledOff = rng.shuffle(offPathCoords);
+        const shuffledOff = rng.shuffle(offPath);
         let cursor = 0;
 
-        // Place Void sectors (##)
-        for (let i = 0; i < cfg.voids && cursor < shuffledOff.length; i++, cursor++) {
-          const [r, c] = shuffledOff[cursor];
-          grid[r][c] = { type: "VOID", value: 0 };
+        // Place Voids
+        for (let i = 0; i < config.voids && cursor < shuffledOff.length; i++, cursor++) {
+          shuffledOff[cursor].type = "VOID";
         }
 
-        // Place Decoy letter relays
-        const decoyPool = this.ALPHABET.filter((ch) => !targetWord.includes(ch));
-        for (let i = 0; i < cfg.decoys && cursor < shuffledOff.length; i++, cursor++) {
-          const [r, c] = shuffledOff[cursor];
-          grid[r][c] = {
-            type: "RELAY",
-            letter: rng.pick(decoyPool.length ? decoyPool : this.ALPHABET),
-            value: 0
-          };
+        // Place Decoy Callsign Relays
+        const decoyPool = this.ALPHABET.filter((ch) => !word.includes(ch));
+        for (let i = 0; i < config.decoyLetters && cursor < shuffledOff.length; i++, cursor++) {
+          shuffledOff[cursor].type = "RELAY";
+          shuffledOff[cursor].letter = rng.pick(decoyPool);
         }
 
-        // Place off-path Gravity Wells on Orbital/Deep modes
-        const extraWells = cfg.wells > 0 ? Math.max(1, cfg.wells - 1) : 0;
-        for (let i = 0; i < extraWells && cursor < shuffledOff.length; i++, cursor++) {
-          const [r, c] = shuffledOff[cursor];
-          grid[r][c] = { type: "WELL", value: -rng.int(2, 4) };
-        }
-
-        // Fill remaining off-path nodes with positive mass values (1..9)
-        while (cursor < shuffledOff.length) {
-          const [r, c] = shuffledOff[cursor++];
-          grid[r][c] = { type: "MASS", value: rng.int(1, 9) };
+        // Fill rest with numeric masses (and occasional gravity wells in Orbital/Deep)
+        for (; cursor < shuffledOff.length; cursor++) {
+          if (config.allowWells && rng.next() < 0.2) {
+            const wellVal = rng.pick([-2, -3, -4]);
+            shuffledOff[cursor].type = "WELL";
+            shuffledOff[cursor].val = wellVal;
+          } else {
+            shuffledOff[cursor].type = "MASS";
+            shuffledOff[cursor].val = rng.int(1, 9);
+          }
         }
 
         return {
-          size: cfg.size,
+          mode,
+          seed: seedStr,
+          size,
           grid,
+          word,
+          strictRelays: config.strictRelays,
           solutionPath,
-          par: totalSteps,
-          targetWord,
-          strictCallsign: cfg.strictCallsign
+          par: solutionPath.length - 1
         };
       },
 
-      carvePath(size, minSteps, maxSteps, rng) {
-        const targetSteps = rng.int(minSteps, maxSteps);
+      carvePath(rng, size, minLen, maxLen) {
         const dirs = [
-          [-1, 0],
-          [1, 0],
-          [0, -1],
-          [0, 1]
+          { dr: -1, dc: 0 },
+          { dr: 1, dc: 0 },
+          { dr: 0, dc: -1 },
+          { dr: 0, dc: 1 }
         ];
 
-        for (let attempt = 0; attempt < 250; attempt++) {
-          const startR = rng.int(0, size - 1);
-          const startC = rng.int(0, size - 1);
-          const path = [[startR, startC]];
-          const visited = new Set([`${startR},${startC}`]);
+        for (let attempt = 0; attempt < 400; attempt++) {
+          const targetLen = rng.int(minLen, maxLen);
+          const start = { r: rng.int(0, size - 1), c: rng.int(0, size - 1) };
+          const path = [start];
+          const visited = new Set([`${start.r},${start.c}`]);
 
-          while (path.length - 1 < targetSteps) {
-            const [r, c] = path[path.length - 1];
+          while (path.length < targetLen) {
+            const head = path[path.length - 1];
             const neighbors = rng.shuffle(dirs)
-              .map(([dr, dc]) => [r + dr, c + dc])
-              .filter(([nr, nc]) =>
-                nr >= 0 && nr < size &&
-                nc >= 0 && nc < size &&
-                !visited.has(`${nr},${nc}`)
-              );
+              .map((d) => ({ r: head.r + d.dr, c: head.c + d.dc }))
+              .filter((p) => p.r >= 0 && p.r < size && p.c >= 0 && p.c < size && !visited.has(`${p.r},${p.c}`));
 
             if (neighbors.length === 0) break;
-            const nextCell = neighbors[0];
-            path.push(nextCell);
-            visited.add(`${nextCell[0]},${nextCell[1]}`);
+            const nextPt = neighbors[0];
+            path.push(nextPt);
+            visited.add(`${nextPt.r},${nextPt.c}`);
           }
 
-          if (path.length - 1 >= minSteps) {
+          if (path.length >= minLen) {
             return path;
           }
         }
 
-        // Deterministic serpentine fallback if randomized walk hits dead ends
+        // Deterministic fallback snake path if randomized walk ever hits max attempts
         const fallback = [];
         for (let r = 0; r < size; r++) {
-          if (r % 2 === 0) {
-            for (let c = 0; c < size; c++) fallback.push([r, c]);
-          } else {
-            for (let c = size - 1; c >= 0; c--) fallback.push([r, c]);
+          for (let c = 0; c < size; c++) {
+            const col = r % 2 === 0 ? c : size - 1 - c;
+            fallback.push({ r, c: col });
+            if (fallback.length === minLen) return fallback;
           }
         }
-        return fallback.slice(0, minSteps + 1);
+        return fallback;
       },
 
-      partitionMass(count, targetSum, wellCount, rng) {
-        const safeCount = Math.max(1, count);
-        const maxWells = Math.max(0, safeCount - 5);
-        const pathWells = Math.min(wellCount, maxWells, 2);
+      partition31(rng, count, allowWells) {
+        if (count <= 0) return [];
+        const TARGET = 31;
 
-        const wellValues = [];
-        let wellDrain = 0;
-        for (let i = 0; i < pathWells; i++) {
-          const w = -rng.int(2, 3);
-          wellValues.push(w);
-          wellDrain += w;
-        }
+        for (let attempt = 0; attempt < 500; attempt++) {
+          const vals = [];
+          let sum = 0;
 
-        const posCount = safeCount - pathWells;
-        const posTarget = targetSum - wellDrain;
-        const posValues = Array(posCount).fill(1);
-        let remaining = Math.max(0, posTarget - posCount);
+          // Inject 1 or 2 gravity wells on Orbital / Deep Space modes
+          const wellCount = (allowWells && count >= 5) ? rng.int(1, 2) : 0;
+          for (let w = 0; w < wellCount; w++) {
+            const wVal = rng.pick([-2, -3, -4]);
+            vals.push(wVal);
+            sum += wVal;
+          }
 
-        let guard = 0;
-        while (remaining > 0 && guard < 1000) {
-          guard++;
-          const idx = rng.int(0, posCount - 1);
-          if (posValues[idx] < 9) {
-            posValues[idx]++;
-            remaining--;
+          const posSlots = count - wellCount;
+          let valid = true;
+          for (let i = 0; i < posSlots; i++) {
+            const remainingSlots = posSlots - i - 1;
+            const needed = TARGET - sum;
+            const minAllowed = Math.max(1, needed - remainingSlots * 9);
+            const maxAllowed = Math.min(9, needed - remainingSlots * 1);
+
+            if (minAllowed > maxAllowed) {
+              valid = false;
+              break;
+            }
+            const pickVal = rng.int(minAllowed, maxAllowed);
+            vals.push(pickVal);
+            sum += pickVal;
+          }
+
+          if (valid && sum === TARGET) {
+            return rng.shuffle(vals);
           }
         }
 
-        return rng.shuffle([...posValues, ...wellValues]);
+        // Guaranteed balanced fallback partition
+        const base = Math.floor(TARGET / count);
+        const rem = TARGET % count;
+        const fallback = Array.from({ length: count }, (_, i) => base + (i < rem ? 1 : 0));
+        return rng.shuffle(fallback);
       }
     };
 
     // --------------------------------------------------------------------------
-    // 4. MAIN GAME & TERMINAL CONTROLLER
+    // 4. MAIN GAME CONTROLLER & UI RENDERER
     // --------------------------------------------------------------------------
     const Game = {
       mode: "SURVEY",
       seed: "",
-      sector: null,
+      puzzle: null,
       path: [],
-      solved: false,
-      hintCell: null,
-      hintsUsed: 0,
       isDragging: false,
-      audio: new TelemetryAudio(),
+      hintCell: null,
+      solved: false,
       stats: {
         solved: 0,
         optimal: 0,
@@ -1339,686 +1455,124 @@
         dailyCompleted: ""
       },
 
-      init() {
-        this.loadStats();
-        this.renderLexicon();
-        this.bindEvents();
-        this.loadNewSector(this.generateRandomSeed());
-      },
-
-      renderLexicon() {
-        const container = document.getElementById("lexicon-grid");
-        if (!container) return;
-        container.innerHTML = "";
-        const sortedLexicon = [...SectorGenerator.CALLSIGN_LEXICON].sort((a, b) =>
-          a.code.localeCompare(b.code)
-        );
-        sortedLexicon.forEach((entry) => {
-          const btn = document.createElement("button");
-          btn.type = "button";
-          btn.className = `lex-item${entry.isNull ? " lex-null" : ""}`;
-          btn.dataset.code = entry.code;
-          btn.title = `Launch Deep Space sector with callsign ${entry.code} (${entry.meaning})`;
-          btn.innerHTML = `<span class="lex-code">${entry.code}</span><span class="lex-meaning">${entry.meaning}</span>`;
-          btn.addEventListener("click", () => {
-            this.mode = "DEEP";
-            document.querySelectorAll(".mode-group .btn").forEach((b) => {
-              b.classList.toggle("active", b.dataset.mode === "DEEP");
-            });
-            this.loadNewSector(this.generateRandomSeed(), entry.code);
-          });
-          container.appendChild(btn);
-        });
-      },
-
       loadStats() {
         try {
-          const raw = localStorage.getItem("nahla_31_bv_stats");
+          const raw = localStorage.getItem("nahla_void_vector_stats");
           if (raw) {
             this.stats = { ...this.stats, ...JSON.parse(raw) };
           }
-        } catch (_) {
-          // Ignore storage errors in sandboxed previews
-        }
+        } catch (_) {}
       },
 
       saveStats() {
         try {
-          localStorage.setItem("nahla_31_bv_stats", JSON.stringify(this.stats));
-        } catch (_) {
-          // Ignore storage errors in sandboxed previews
-        }
+          localStorage.setItem("nahla_void_vector_stats", JSON.stringify(this.stats));
+        } catch (_) {}
       },
 
-      getDailySeedString() {
-        const now = new Date();
-        const mm = String(now.getUTCMonth() + 1).padStart(2, "0");
-        const dd = String(now.getUTCDate()).padStart(2, "0");
-        return `H0P3-${mm}${dd}`;
+      init() {
+        this.audio = new TelemetryAudio();
+        this.loadStats();
+        this.renderLexicon();
+        this.bindEvents();
+        this.loadSector(this.randomSeed());
       },
 
-      generateRandomSeed() {
-        const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-        let suffix = "";
-        for (let i = 0; i < 4; i++) {
-          suffix += chars[Math.floor(Math.random() * chars.length)];
-        }
-        return `H0P3-${suffix}`;
-      },
-
-      loadNewSector(seedStr, forcedWord = null) {
-        this.seed = String(seedStr || this.generateRandomSeed()).toUpperCase().trim();
-        this.sector = SectorGenerator.generate(this.mode, this.seed, forcedWord);
-        this.resetPath(true);
-      },
-
-      resetPath(isFresh = false) {
-        const [sr, sc] = this.sector.solutionPath[0];
-        this.path = [{ r: sr, c: sc }];
-        this.solved = false;
-        this.hintCell = null;
-        if (isFresh) this.hintsUsed = 0;
-
-        document.getElementById("seed-display").textContent = `#${this.seed}`;
-        this.renderBoard();
-        this.updateHUD();
-
-        const isNullSignal = this.sector.targetWord === "NULL";
-        const modeNote = isNullSignal
-          ? "<NULL SIGNAL> ANOMALY: SPELL [NULL] FOR BONUS INSTA-SOLVE."
-          : this.sector.strictCallsign
-          ? "STRICT RELAY PROTOCOL ACTIVE."
-          : "ROUTE TO [X] WITH MASS = 31.";
-        this.log(`SECTOR #${this.seed} ONLINE. ${modeNote}`, isNullSignal ? "warn" : "normal");
-      },
-
-      computeTelemetry() {
-        let sum = 0;
-        let collected = "";
-        for (let i = 1; i < this.path.length; i++) {
-          const { r, c } = this.path[i];
-          const cell = this.sector.grid[r][c];
-          sum += cell.value;
-          if (cell.type === "RELAY") {
-            const expectedNext = this.sector.targetWord[collected.length];
-            if (cell.letter === expectedNext) {
-              collected += cell.letter;
-            }
-          }
-        }
-        return {
-          sum,
-          collected,
-          steps: this.path.length - 1
-        };
-      },
-
-      handleCellStep(r, c) {
-        if (this.solved) return;
-        const size = this.sector.size;
-        if (r < 0 || r >= size || c < 0 || c >= size) return;
-
-        // If stepping onto the immediately preceding node, backtrack one step
-        if (this.path.length > 1) {
-          const prev = this.path[this.path.length - 2];
-          if (prev.r === r && prev.c === c) {
-            this.undoStep();
-            return;
-          }
-        }
-
-        // If tapping an earlier node in the existing path (non-drag), truncate back to it
-        const existingIdx = this.path.findIndex((p) => p.r === r && p.c === c);
-        if (existingIdx !== -1) {
-          if (!this.isDragging && existingIdx < this.path.length - 1) {
-            this.path = this.path.slice(0, existingIdx + 1);
-            this.hintCell = null;
-            this.audio.undo();
-            this.renderBoard();
-            this.updateHUD();
-            this.log("VECTOR RETRACTED TO WAYPOINT.");
-          }
-          return;
-        }
-
-        // Enforce orthogonal adjacency from current head
-        const head = this.path[this.path.length - 1];
-        const dist = Math.abs(r - head.r) + Math.abs(c - head.c);
-        if (dist !== 1) return;
-
-        const targetCell = this.sector.grid[r][c];
-
-        // Block Void Sectors
-        if (targetCell.type === "VOID") {
-          this.audio.error();
-          this.log("VOID SECTOR [##] IMPASSABLE.", "err");
-          return;
-        }
-
-        const currentTelemetry = this.computeTelemetry();
-        const nextExpectedLetter = this.sector.targetWord[currentTelemetry.collected.length];
-
-        // Handle Callsign Relays
-        if (targetCell.type === "RELAY") {
-          if (targetCell.letter === nextExpectedLetter) {
-            this.path.push({ r, c });
-            this.hintCell = null;
-            const newCount = currentTelemetry.collected.length + 1;
-
-            if (this.sector.targetWord === "NULL" && newCount === this.sector.targetWord.length) {
-              this.triggerNullInstaSolve();
-              return;
-            }
-
-            this.audio.relay(newCount);
-            this.renderBoard();
-            this.updateHUD();
-            const nextChar = this.sector.targetWord[newCount];
-            this.log(
-              nextChar
-                ? `CALLSIGN RELAY [${targetCell.letter}] LOCKED (${newCount}/${this.sector.targetWord.length}). NEXT: [${nextChar}].`
-                : `ALL CALLSIGN RELAYS LOCKED (${this.sector.targetWord}). PROCEED TO [X] AT MASS 31.`,
-              "ok"
-            );
-            return;
-          } else {
-            if (this.sector.strictCallsign) {
-              this.audio.error();
-              this.log(
-                `STRICT PROTOCOL: RELAY [${targetCell.letter}] REJECTED (NEED [${nextExpectedLetter || "EXIT"}]).`,
-                "err"
-              );
-              return;
-            } else {
-              // Permissive mode: pass through unrequested/decoy relay as 0-mass transit node
-              this.path.push({ r, c });
-              this.hintCell = null;
-              this.audio.step(currentTelemetry.sum);
-              this.renderBoard();
-              this.updateHUD();
-              this.log(`RELAY [${targetCell.letter}] BYPASSED (0 MASS). TARGET: [${nextExpectedLetter || "EXIT"}].`);
-              return;
-            }
-          }
-        }
-
-        // Handle Exit Node [X]
-        if (targetCell.type === "EXIT") {
-          this.path.push({ r, c });
-          this.hintCell = null;
-          this.renderBoard();
-          const finalTelemetry = this.computeTelemetry();
-          this.updateHUD();
-          this.evaluateExit(finalTelemetry);
-          return;
-        }
-
-        // Handle Standard Mass & Gravity Well Nodes
-        this.path.push({ r, c });
-        this.hintCell = null;
-        const updated = this.computeTelemetry();
-
-        if (targetCell.type === "WELL") {
-          this.audio.well();
-        } else {
-          this.audio.step(updated.sum);
-        }
-
-        this.renderBoard();
-        this.updateHUD();
-
-        if (updated.sum > 31) {
-          this.log(`WARNING: BARYCENTRE MASS OVERLOAD (${updated.sum}/31). USE GRAVITY WELL OR UNDO.`, "warn");
-        } else if (updated.sum === 31 && updated.collected === this.sector.targetWord) {
-          this.log("MASS 31 & CALLSIGN LOCKED! ROUTE TO EXTRACTION NODE [X].", "ok");
-        } else {
-          const sign = targetCell.value > 0 ? `+${targetCell.value}` : `${targetCell.value}`;
-          this.log(`NODE [${sign}] LOCKED • CURRENT MASS: ${updated.sum}/31.`);
-        }
-      },
-
-      evaluateExit(telemetry) {
-        const callsignComplete = telemetry.collected === this.sector.targetWord;
-        const massComplete = telemetry.sum === 31;
-
-        if (callsignComplete && massComplete) {
-          this.solved = true;
-          this.audio.win();
-          this.stats.solved++;
-          this.stats.streak++;
-          const isOptimal = telemetry.steps <= this.sector.par && this.hintsUsed === 0;
-          if (isOptimal) this.stats.optimal++;
-          if (this.seed === this.getDailySeedString()) {
-            this.stats.dailyCompleted = this.seed;
-          }
-          this.saveStats();
-
-          this.log(`BARYCENTRE LOCKED! MASS 31 & CALLSIGN ${this.sector.targetWord} VERIFIED.`, "ok");
-          setTimeout(() => this.openVictoryModal(telemetry, isOptimal, false), 340);
-        } else {
-          this.audio.error();
-          const reasons = [];
-          if (!massComplete) reasons.push(`MASS IS ${telemetry.sum} (NEED 31)`);
-          if (!callsignComplete) reasons.push(`CALLSIGN INCOMPLETE (${telemetry.collected || "NONE"}/${this.sector.targetWord})`);
-          this.log(`EXIT UNLOCK FAILED: ${reasons.join(" & ")}. UNDO TO ADJUST.`, "err");
-        }
-      },
-
-      triggerNullInstaSolve() {
-        const telemetry = this.computeTelemetry();
-        this.solved = true;
-        this.audio.win();
-        this.stats.solved++;
-        this.stats.streak++;
-        const isOptimal = this.hintsUsed === 0;
-        if (isOptimal) this.stats.optimal++;
-        if (this.seed === this.getDailySeedString()) {
-          this.stats.dailyCompleted = this.seed;
-        }
-        this.saveStats();
-
-        this.renderBoard();
-        this.updateHUD();
-        this.log("<NULL SIGNAL> OVERRIDE! BONUS INSTA-SOLVE EXECUTED.", "ok");
-        setTimeout(() => this.openVictoryModal(telemetry, isOptimal, true), 340);
-      },
-
-      undoStep() {
-        if (this.solved || this.path.length <= 1) return;
-        this.path.pop();
-        this.hintCell = null;
-        this.audio.undo();
-        this.renderBoard();
-        this.updateHUD();
-        const updated = this.computeTelemetry();
-        this.log(`STEP RETRACTED • MASS: ${updated.sum}/31.`);
-      },
-
-      pingNextNode() {
-        if (this.solved) return;
-        const sol = this.sector.solutionPath;
-
-        // Find longest prefix where player's path matches the carved solution path
-        let matchLen = 0;
-        while (
-          matchLen < this.path.length &&
-          matchLen < sol.length &&
-          this.path[matchLen].r === sol[matchLen][0] &&
-          this.path[matchLen].c === sol[matchLen][1]
-        ) {
-          matchLen++;
-        }
-
-        if (matchLen < this.path.length) {
-          // Player diverged from carved solution; highlight divergence point to backtrack to
-          const divergeNode = sol[matchLen - 1];
-          this.hintCell = { r: divergeNode[0], c: divergeNode[1] };
-          this.hintsUsed++;
-          this.audio.relay(1);
-          this.renderBoard();
-          this.log("TELEMETRY PING: RETRACT TO PULSING WAYPOINT TO REALIGN VECTOR.", "warn");
-        } else if (matchLen < sol.length) {
-          const nextNode = sol[matchLen];
-          this.hintCell = { r: nextNode[0], c: nextNode[1] };
-          this.hintsUsed++;
-          this.audio.relay(2);
-          this.renderBoard();
-          this.log("TELEMETRY PING: OPTIMAL NEXT NODE ILLUMINATED.", "warn");
-        }
-      },
-
-      renderBoard() {
-        const gridEl = document.getElementById("sector-grid");
-        const svgEl = document.getElementById("vector-svg");
-        const size = this.sector.size;
-
-        gridEl.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
-        gridEl.style.gridTemplateRows = `repeat(${size}, 1fr)`;
+      renderLexicon() {
+        const gridEl = document.getElementById("lexicon-grid");
+        if (!gridEl) return;
         gridEl.innerHTML = "";
 
-        const pathSet = new Set(this.path.map((p) => `${p.r},${p.c}`));
-        const head = this.path[this.path.length - 1];
+        SectorGenerator.CALLSIGN_LEXICON.forEach((entry) => {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "lex-item" + (entry.isNull ? " lex-null" : "");
+          btn.dataset.code = entry.code;
+          btn.title = `Launch Deep Space sector locked to ${entry.code} (${entry.meaning})`;
 
-        for (let r = 0; r < size; r++) {
-          for (let c = 0; c < size; c++) {
-            const cell = this.sector.grid[r][c];
-            const el = document.createElement("div");
-            el.className = "cell";
-            el.dataset.r = r;
-            el.dataset.c = c;
-            el.setAttribute("role", "gridcell");
+          const codeSpan = document.createElement("span");
+          codeSpan.className = "lex-code";
+          codeSpan.textContent = entry.code;
 
-            let mainText = "";
-            let tagText = "";
+          const meaningSpan = document.createElement("span");
+          meaningSpan.className = "lex-meaning";
+          meaningSpan.textContent = entry.meaning;
 
-            if (cell.type === "START") {
-              el.classList.add("cell-start");
-              mainText = "[>]";
-              tagText = "ORIGIN";
-            } else if (cell.type === "EXIT") {
-              el.classList.add("cell-exit");
-              mainText = "[X]";
-              tagText = "EXIT";
-            } else if (cell.type === "VOID") {
-              el.classList.add("cell-void");
-              mainText = "##";
-              tagText = "VOID";
-            } else if (cell.type === "RELAY") {
-              el.classList.add("cell-relay");
-              mainText = `[${cell.letter}]`;
-              tagText = "RELAY";
-            } else if (cell.type === "WELL") {
-              el.classList.add("cell-well");
-              mainText = `${cell.value}`;
-              tagText = "WELL";
-            } else {
-              mainText = String(cell.value).padStart(2, "0");
-              tagText = "MASS";
-            }
+          btn.appendChild(codeSpan);
+          btn.appendChild(meaningSpan);
 
-            if (pathSet.has(`${r},${c}`)) {
-              el.classList.add("in-path");
-            }
-            if (head && head.r === r && head.c === c) {
-              el.classList.add("path-head");
-            }
-            if (this.hintCell && this.hintCell.r === r && this.hintCell.c === c) {
-              el.classList.add("hint-pulse");
-            }
+          btn.addEventListener("click", () => {
+            this.mode = "DEEP";
+            document.querySelectorAll("[data-mode]").forEach((b) => {
+              b.classList.toggle("active", b.dataset.mode === "DEEP");
+            });
+            this.loadSector(this.randomSeed(), entry.code);
+            this.setLog(`DEEP SPACE LOCKED TO CALLSIGN [${entry.code}] — ${entry.meaning.toUpperCase()}.`, "ok");
+          });
 
-            el.innerHTML = `<span class="cell-main">${mainText}</span><span class="cell-tag">${tagText}</span>`;
-            gridEl.appendChild(el);
-          }
-        }
-
-        // Render SVG Vector Polyline connecting visited cells
-        svgEl.innerHTML = "";
-        if (this.path.length > 1) {
-          const stepUnit = 600 / size;
-          const points = this.path
-            .map(({ r, c }) => `${(c + 0.5) * stepUnit},${(r + 0.5) * stepUnit}`)
-            .join(" ");
-
-          const telemetry = this.computeTelemetry();
-          const strokeColor =
-            this.solved || (telemetry.sum === 31 && telemetry.collected === this.sector.targetWord)
-              ? "#86efac"
-              : telemetry.sum > 31
-              ? "#f43f5e"
-              : "#22c55e";
-
-          const glowLine = document.createElementNS("http://www.w3.org/2000/svg", "polyline");
-          glowLine.setAttribute("points", points);
-          glowLine.setAttribute("fill", "none");
-          glowLine.setAttribute("stroke", strokeColor);
-          glowLine.setAttribute("stroke-width", "12");
-          glowLine.setAttribute("stroke-linecap", "round");
-          glowLine.setAttribute("stroke-linejoin", "round");
-          glowLine.setAttribute("opacity", "0.22");
-
-          const coreLine = document.createElementNS("http://www.w3.org/2000/svg", "polyline");
-          coreLine.setAttribute("points", points);
-          coreLine.setAttribute("fill", "none");
-          coreLine.setAttribute("stroke", strokeColor);
-          coreLine.setAttribute("stroke-width", "4");
-          coreLine.setAttribute("stroke-linecap", "round");
-          coreLine.setAttribute("stroke-linejoin", "round");
-
-          svgEl.appendChild(glowLine);
-          svgEl.appendChild(coreLine);
-        }
-      },
-
-      updateHUD() {
-        const telemetry = this.computeTelemetry();
-        const massEl = document.getElementById("hud-mass");
-        const deltaEl = document.getElementById("hud-delta");
-        const stepsEl = document.getElementById("hud-steps");
-        const parEl = document.getElementById("hud-par");
-        const csContainer = document.getElementById("hud-callsign");
-
-        massEl.textContent = String(telemetry.sum).padStart(2, "0");
-        massEl.className =
-          telemetry.sum === 31
-            ? "mass-exact"
-            : telemetry.sum > 31
-            ? "mass-over"
-            : "mass-under";
-
-        const diff = telemetry.sum - 31;
-        deltaEl.textContent = diff > 0 ? `+${diff}` : `${diff}`;
-
-        stepsEl.textContent = String(telemetry.steps).padStart(2, "0");
-        parEl.textContent = String(this.sector.par).padStart(2, "0");
-
-        // Render Callsign Relay Pills
-        csContainer.innerHTML = "";
-        const word = this.sector.targetWord;
-        for (let i = 0; i < word.length; i++) {
-          const pill = document.createElement("span");
-          pill.className = "cs-pill";
-          pill.textContent = word[i];
-          if (i < telemetry.collected.length) {
-            pill.classList.add("locked");
-          } else if (i === telemetry.collected.length) {
-            pill.classList.add("next");
-          }
-          csContainer.appendChild(pill);
-        }
-
-        // Highlight matching callsign in the 20-term lexicon
-        document.querySelectorAll(".lex-item").forEach((item) => {
-          item.classList.toggle("active-callsign", item.dataset.code === word);
+          gridEl.appendChild(btn);
         });
       },
 
-      log(msg, level = "normal") {
-        const logEl = document.getElementById("log-text");
-        logEl.textContent = msg;
-        logEl.className =
-          level === "warn"
-            ? "log-warn"
-            : level === "err"
-            ? "log-err"
-            : level === "ok"
-            ? "log-ok"
-            : "";
-      },
-
-      // ------------------------------------------------------------------------
-      // MODAL CONTROLLERS
-      // ------------------------------------------------------------------------
-      openModal(title, bodyHTML, footerHTML) {
-        document.getElementById("modal-title").textContent = title;
-        document.getElementById("modal-body").innerHTML = bodyHTML;
-        document.getElementById("modal-footer").innerHTML = footerHTML;
-        document.getElementById("modal-backdrop").classList.add("open");
-      },
-
-      closeModal() {
-        document.getElementById("modal-backdrop").classList.remove("open");
-      },
-
-      openVictoryModal(telemetry, isOptimal, isNullBonus = false) {
-        const badgeText = isNullBonus
-          ? "<NULL SIGNAL> BONUS INSTA-SOLVE"
-          : isOptimal
-          ? "OPTIMAL TELEMETRY LOCK (PAR OR BETTER)"
-          : "SECTOR BARYCENTRE VERIFIED";
-
-        const summaryText = isNullBonus
-          ? "Ghost telemetry signal [NULL] intercepted — sector bypassed and stabilized immediately."
-          : "Hope System trajectory stabilized across 31 orbital mass units.";
-
-        const bodyHTML = `
-          <div class="rule-item" style="border-left-color:var(--emerald)">
-            <strong style="color:var(--emerald)">${badgeText}</strong><br/>
-            ${summaryText}
-          </div>
-          <div class="stat-grid">
-            <div class="stat-box">
-              <div class="stat-box-label">Final Mass</div>
-              <div class="stat-box-val">${isNullBonus ? `${telemetry.sum} (BYPASSED)` : `${telemetry.sum} / 31`}</div>
-            </div>
-            <div class="stat-box">
-              <div class="stat-box-label">Callsign Lock</div>
-              <div class="stat-box-val">${isNullBonus ? "&lt;NULL SIGNAL&gt;" : this.sector.targetWord}</div>
-            </div>
-            <div class="stat-box">
-              <div class="stat-box-label">Vector Steps</div>
-              <div class="stat-box-val">${telemetry.steps} (PAR ${this.sector.par})</div>
-            </div>
-            <div class="stat-box">
-              <div class="stat-box-label">Sector Seed</div>
-              <div class="stat-box-val" style="font-size:0.9rem;color:var(--term-green)">#${this.seed}</div>
-            </div>
-          </div>
-        `;
-
-        const footerHTML = `
-          <button class="btn" id="modal-replay">REPLAY SEED</button>
-          <button class="btn btn-primary" id="modal-next-sector">NEXT SECTOR [N]</button>
-        `;
-
-        this.openModal(isNullBonus ? "<NULL SIGNAL> OVERRIDE" : "TELEMETRY SYNCHRONIZED", bodyHTML, footerHTML);
-
-        document.getElementById("modal-replay").addEventListener("click", () => {
-          this.closeModal();
-          this.resetPath(false);
-        });
-
-        document.getElementById("modal-next-sector").addEventListener("click", () => {
-          this.closeModal();
-          this.loadNewSector(this.generateRandomSeed());
-        });
-      },
-
-      openHelpModal() {
-        const bodyHTML = `
-          <div class="rule-item">
-            <strong>1. BARYCENTRE TARGET (31):</strong><br/>
-            Draw a continuous, non-overlapping vector from <strong>[&gt;]</strong> to <strong>[X]</strong> so the sum of all visited mass nodes equals <strong>31</strong> (representing the 31 bodies of the Hope System).
-          </div>
-          <div class="rule-item">
-            <strong>2. CALLSIGN RELAYS:</strong><br/>
-            Pass through the target letter nodes (e.g. <strong>N - A - H - L</strong>) in the exact order shown in the HUD. Relays add 0 mass. Intercepting <strong>&lt;NULL SIGNAL&gt;</strong> (<strong>NULL</strong>) triggers an immediate bonus insta-solve.
-          </div>
-          <div class="rule-item">
-            <strong>3. GRAVITY WELLS &amp; VOIDS:</strong><br/>
-            Negative nodes (<strong>-2, -3, -4</strong>) subtract mass so you can bleed off an overshoot. <strong>##</strong> sectors are impassable.
-          </div>
-          <div class="rule-item">
-            <strong>4. CONTROLS:</strong><br/>
-            Click/tap or drag across adjacent cells, or use <strong>WASD / Arrows</strong>. Tap any earlier node in your path or press <strong>Z</strong> to backtrack.
-          </div>
-        `;
-        const footerHTML = `<button class="btn btn-primary" id="modal-ok">ACKNOWLEDGED</button>`;
-        this.openModal("NAHLA TRACKER // PROTOCOL", bodyHTML, footerHTML);
-        document.getElementById("modal-ok").addEventListener("click", () => this.closeModal());
-      },
-
-      openStatsModal() {
-        const dailyStatus = this.stats.dailyCompleted === this.getDailySeedString()
-          ? "LOCKED"
-          : "PENDING";
-
-        const bodyHTML = `
-          <div class="stat-grid">
-            <div class="stat-box">
-              <div class="stat-box-label">Sectors Solved</div>
-              <div class="stat-box-val">${this.stats.solved}</div>
-            </div>
-            <div class="stat-box">
-              <div class="stat-box-label">Optimal Par Locks</div>
-              <div class="stat-box-val">${this.stats.optimal}</div>
-            </div>
-            <div class="stat-box">
-              <div class="stat-box-label">Active Streak</div>
-              <div class="stat-box-val">${this.stats.streak}</div>
-            </div>
-            <div class="stat-box">
-              <div class="stat-box-label">Daily Seed</div>
-              <div class="stat-box-val" style="font-size:0.9rem;color:var(--term-green)">${dailyStatus}</div>
-            </div>
-          </div>
-        `;
-        const footerHTML = `<button class="btn btn-primary" id="modal-ok">CLOSE LOG</button>`;
-        this.openModal("TRACKER TELEMETRY LOG", bodyHTML, footerHTML);
-        document.getElementById("modal-ok").addEventListener("click", () => this.closeModal());
-      },
-
-      openSeedModal() {
-        const bodyHTML = `
-          <div class="rule-item">
-            <strong>DETERMINISTIC SECTOR SEED:</strong><br/>
-            Every seed generates the exact same Hope System matrix offline. Share or enter any code below.
-          </div>
-          <div class="seed-input-row">
-            <input type="text" id="custom-seed-input" class="seed-input" maxlength="14" value="${this.seed}" placeholder="H0P3-XXXX" />
-            <button class="btn" id="btn-copy-seed">COPY</button>
-          </div>
-        `;
-        const footerHTML = `
-          <button class="btn" id="modal-cancel">CANCEL</button>
-          <button class="btn btn-primary" id="modal-load-seed">LOAD SECTOR</button>
-        `;
-        this.openModal("SECTOR SEED MATRIX", bodyHTML, footerHTML);
-
-        const inputEl = document.getElementById("custom-seed-input");
-        inputEl.focus();
-        inputEl.select();
-
-        document.getElementById("btn-copy-seed").addEventListener("click", () => {
-          inputEl.select();
-          try {
-            document.execCommand("copy");
-            document.getElementById("btn-copy-seed").textContent = "COPIED";
-          } catch (_) {}
-        });
-
-        const commitSeed = () => {
-          const val = inputEl.value.trim();
-          this.closeModal();
-          if (val) this.loadNewSector(val);
-        };
-
-        document.getElementById("modal-load-seed").addEventListener("click", commitSeed);
-        document.getElementById("modal-cancel").addEventListener("click", () => this.closeModal());
-        inputEl.addEventListener("keydown", (e) => {
-          if (e.key === "Enter") commitSeed();
-        });
-      },
-
-      // ------------------------------------------------------------------------
-      // EVENT LISTENERS (Pointer Drag, Keyboard, Mode Switcher, Buttons)
-      // ------------------------------------------------------------------------
       bindEvents() {
+        // Difficulty mode switches
+        document.querySelectorAll("[data-mode]").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            this.setMode(btn.dataset.mode);
+          });
+        });
+
+        // Header actions
+        document.getElementById("btn-audio").addEventListener("click", (e) => {
+          this.audio.enabled = !this.audio.enabled;
+          e.currentTarget.textContent = this.audio.enabled ? "SFX:ON" : "SFX:OFF";
+          if (this.audio.enabled) this.audio.step(10);
+        });
+
+        document.getElementById("btn-stats").addEventListener("click", () => this.showStatsModal());
+        document.getElementById("btn-help").addEventListener("click", () => this.showHelpModal());
+
+        // Seed controls
+        document.getElementById("btn-daily").addEventListener("click", () => {
+          const daily = this.getDailySeed();
+          this.loadSector(daily);
+          this.setLog(`DAILY HOPE SYSTEM TELEMETRY LOADED (${daily}).`, "ok");
+        });
+
+        document.getElementById("btn-seed-modal").addEventListener("click", () => this.showSeedModal());
+
+        // Footer controls
+        document.getElementById("btn-undo").addEventListener("click", () => this.undoStep());
+        document.getElementById("btn-reset").addEventListener("click", () => this.resetPath());
+        document.getElementById("btn-hint").addEventListener("click", () => this.triggerHint());
+        document.getElementById("btn-next").addEventListener("click", () => this.loadSector(this.randomSeed()));
+
+        // Modal dismiss
+        document.getElementById("modal-close").addEventListener("click", () => this.closeModal());
+        document.getElementById("modal-backdrop").addEventListener("click", (e) => {
+          if (e.target.id === "modal-backdrop") this.closeModal();
+        });
+
+        // Pointer / Touch Drag Tracing on Board
         const stage = document.getElementById("board-stage");
-
-        const resolveCellFromPoint = (clientX, clientY) => {
-          const target = document.elementFromPoint(clientX, clientY);
-          const cellEl = target ? target.closest(".cell") : null;
-          if (!cellEl) return null;
-          return {
-            r: parseInt(cellEl.dataset.r, 10),
-            c: parseInt(cellEl.dataset.c, 10)
-          };
-        };
-
         stage.addEventListener("pointerdown", (e) => {
           this.audio.ensureContext();
-          const coords = resolveCellFromPoint(e.clientX, e.clientY);
-          if (!coords) return;
+          const cellEl = e.target.closest(".cell");
+          if (!cellEl) return;
           this.isDragging = true;
-          this.handleCellStep(coords.r, coords.c);
+          const r = Number(cellEl.dataset.r);
+          const c = Number(cellEl.dataset.c);
+          this.tryStepTo(r, c);
         });
 
         window.addEventListener("pointermove", (e) => {
           if (!this.isDragging) return;
-          const coords = resolveCellFromPoint(e.clientX, e.clientY);
-          if (coords) {
-            this.handleCellStep(coords.r, coords.c);
-          }
+          const el = document.elementFromPoint(e.clientX, e.clientY);
+          const cellEl = el ? el.closest(".cell") : null;
+          if (!cellEl) return;
+          const r = Number(cellEl.dataset.r);
+          const c = Number(cellEl.dataset.c);
+          this.tryStepTo(r, c);
         });
 
         window.addEventListener("pointerup", () => {
@@ -2029,90 +1583,571 @@
           this.isDragging = false;
         });
 
-        // Mode switcher
-        document.querySelectorAll(".mode-group .btn").forEach((btn) => {
-          btn.addEventListener("click", () => {
-            document.querySelectorAll(".mode-group .btn").forEach((b) => b.classList.remove("active"));
-            btn.classList.add("active");
-            this.mode = btn.dataset.mode;
-            this.loadNewSector(this.generateRandomSeed());
-          });
-        });
-
-        // Top & Footer Action Buttons
-        document.getElementById("btn-audio").addEventListener("click", (e) => {
-          this.audio.enabled = !this.audio.enabled;
-          e.currentTarget.textContent = this.audio.enabled ? "SFX:ON" : "SFX:OFF";
-          if (this.audio.enabled) this.audio.step(12);
-        });
-
-        document.getElementById("btn-stats").addEventListener("click", () => this.openStatsModal());
-        document.getElementById("btn-help").addEventListener("click", () => this.openHelpModal());
-        document.getElementById("btn-daily").addEventListener("click", () => {
-          this.loadNewSector(this.getDailySeedString());
-        });
-        document.getElementById("btn-seed-modal").addEventListener("click", () => this.openSeedModal());
-
-        document.getElementById("btn-undo").addEventListener("click", () => this.undoStep());
-        document.getElementById("btn-reset").addEventListener("click", () => this.resetPath(false));
-        document.getElementById("btn-hint").addEventListener("click", () => this.pingNextNode());
-        document.getElementById("btn-next").addEventListener("click", () => {
-          this.loadNewSector(this.generateRandomSeed());
-        });
-
-        // Modal close controls
-        document.getElementById("modal-close").addEventListener("click", () => this.closeModal());
-        document.getElementById("modal-backdrop").addEventListener("click", (e) => {
-          if (e.target.id === "modal-backdrop") this.closeModal();
-        });
-
         // Keyboard Navigation
         window.addEventListener("keydown", (e) => {
-          const modalOpen = document.getElementById("modal-backdrop").classList.contains("open");
-          if (modalOpen) {
+          if (document.getElementById("modal-backdrop").classList.contains("open")) {
             if (e.key === "Escape") this.closeModal();
             return;
           }
-
-          if (e.target && (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA")) {
-            return;
-          }
+          if (e.target.tagName === "INPUT") return;
 
           const head = this.path[this.path.length - 1];
           const key = e.key.toLowerCase();
 
-          if (e.key === "ArrowUp" || key === "w") {
+          if (key === "arrowup" || key === "w") {
             e.preventDefault();
-            this.handleCellStep(head.r - 1, head.c);
-          } else if (e.key === "ArrowDown" || key === "s") {
+            this.tryStepTo(head.r - 1, head.c);
+          } else if (key === "arrowdown" || key === "s") {
             e.preventDefault();
-            this.handleCellStep(head.r + 1, head.c);
-          } else if (e.key === "ArrowLeft" || key === "a") {
+            this.tryStepTo(head.r + 1, head.c);
+          } else if (key === "arrowleft" || key === "a") {
             e.preventDefault();
-            this.handleCellStep(head.r, head.c - 1);
-          } else if (e.key === "ArrowRight" || key === "d") {
+            this.tryStepTo(head.r, head.c - 1);
+          } else if (key === "arrowright" || key === "d") {
             e.preventDefault();
-            this.handleCellStep(head.r, head.c + 1);
-          } else if (key === "z" || e.key === "Backspace") {
+            this.tryStepTo(head.r, head.c + 1);
+          } else if (key === "z" || key === "backspace") {
             e.preventDefault();
             this.undoStep();
           } else if (key === "r") {
             e.preventDefault();
-            this.resetPath(false);
-          } else if (key === "n") {
-            e.preventDefault();
-            this.loadNewSector(this.generateRandomSeed());
+            this.resetPath();
           } else if (key === "h") {
             e.preventDefault();
-            this.pingNextNode();
+            this.triggerHint();
+          } else if (key === "n") {
+            e.preventDefault();
+            this.loadSector(this.randomSeed());
           }
         });
+      },
+
+      getDailySeed() {
+        const now = new Date();
+        const y = now.getFullYear();
+        const m = String(now.getMonth() + 1).padStart(2, "0");
+        const d = String(now.getDate()).padStart(2, "0");
+        return `DAY-${y}${m}${d}`;
+      },
+
+      randomSeed() {
+        const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+        let code = "";
+        for (let i = 0; i < 4; i++) {
+          code += chars[Math.floor(Math.random() * chars.length)];
+        }
+        return `H0P3-${code}`;
+      },
+
+      setMode(newMode) {
+        this.mode = newMode;
+        document.querySelectorAll("[data-mode]").forEach((btn) => {
+          btn.classList.toggle("active", btn.dataset.mode === newMode);
+        });
+        this.loadSector(this.randomSeed());
+      },
+
+      loadSector(seedStr, forcedWord = null) {
+        this.seed = seedStr.toUpperCase().replace(/^#/, "");
+        this.puzzle = SectorGenerator.generate(this.mode, this.seed, forcedWord);
+        this.solved = false;
+        this.hintCell = null;
+
+        document.getElementById("seed-display").textContent = `#${this.seed}`;
+        this.resetPath(true);
+        this.setLog(`SECTOR #${this.seed} ONLINE • TARGET MASS: 31 • CALLSIGN: ${this.puzzle.word}`);
+      },
+
+      resetPath(silent = false) {
+        const start = this.puzzle.solutionPath[0];
+        this.path = [{ r: start.r, c: start.c }];
+        this.solved = false;
+        this.hintCell = null;
+        this.renderBoard();
+        this.updateHUD();
+        if (!silent) {
+          this.audio.undo();
+          this.setLog("TELEMETRY VECTOR RESET TO ORIGIN [>].");
+        }
+      },
+
+      undoStep() {
+        if (this.path.length <= 1) {
+          this.audio.error();
+          return;
+        }
+        this.path.pop();
+        this.solved = false;
+        this.hintCell = null;
+        this.audio.undo();
+        this.renderBoard();
+        this.updateHUD();
+        this.setLog("STEP RETRACTED.");
+      },
+
+      tryStepTo(r, c) {
+        if (!this.puzzle || this.solved) return;
+        const size = this.puzzle.size;
+        if (r < 0 || r >= size || c < 0 || c >= size) return;
+
+        const head = this.path[this.path.length - 1];
+        if (head.r === r && head.c === c) return;
+
+        // If tapping/dragging onto an already visited node in the path, backtrack to it
+        const existingIdx = this.path.findIndex((p) => p.r === r && p.c === c);
+        if (existingIdx !== -1) {
+          this.path = this.path.slice(0, existingIdx + 1);
+          this.hintCell = null;
+          this.audio.undo();
+          this.renderBoard();
+          this.updateHUD();
+          this.setLog("VECTOR BACKTRACKED TO NODE.");
+          return;
+        }
+
+        // Enforce orthogonal adjacency
+        const dist = Math.abs(head.r - r) + Math.abs(head.c - c);
+        if (dist !== 1) return;
+
+        const cell = this.puzzle.grid[r][c];
+        if (cell.type === "VOID") {
+          this.audio.error();
+          this.setLog("BLOCKED: VOID SECTOR [##] IMPASSABLE.", "err");
+          return;
+        }
+
+        // Strict relay check on Deep Space mode
+        if (cell.type === "RELAY" && this.puzzle.strictRelays) {
+          const lockedSoFar = this.getLockedRelayCount();
+          const expectedLetter = this.puzzle.word[lockedSoFar];
+          if (cell.letter !== expectedLetter) {
+            this.audio.error();
+            this.setLog(
+              `STRICT PROTOCOL: EXPECTED [${expectedLetter || "EXIT"}], BLOCKED BY [${cell.letter}].`,
+              "err"
+            );
+            return;
+          }
+        }
+
+        this.path.push({ r, c });
+        this.hintCell = null;
+        this.renderBoard();
+        const status = this.updateHUD();
+
+        // Sound & feedback
+        if (cell.type === "WELL") {
+          this.audio.well();
+          this.setLog(`GRAVITY WELL (${cell.val}) • MASS ADJUSTED TO ${status.mass}.`, "warn");
+        } else if (cell.type === "RELAY") {
+          this.audio.relay(status.lockedCount);
+          this.setLog(`RELAY [${cell.letter}] PINGED • CALLSIGN ${status.lockedCount}/${this.puzzle.word.length}.`, "ok");
+        } else {
+          this.audio.step(status.mass);
+        }
+
+        this.evaluateProgress(status);
+      },
+
+      getLockedRelayCount() {
+        let locked = 0;
+        for (const pt of this.path) {
+          const cell = this.puzzle.grid[pt.r][pt.c];
+          if (cell.type === "RELAY" && cell.letter === this.puzzle.word[locked]) {
+            locked++;
+          }
+        }
+        return locked;
+      },
+
+      evaluateProgress(status) {
+        const head = this.path[this.path.length - 1];
+        const cell = this.puzzle.grid[head.r][head.c];
+        const wordLen = this.puzzle.word.length;
+
+        // <Null signal> bonus insta-solve when NULL is spelled
+        if (this.puzzle.word === "NULL" && status.lockedCount === wordLen) {
+          this.handleVictory(true);
+          return;
+        }
+
+        if (cell.type === "EXIT") {
+          if (status.mass === 31 && status.lockedCount === wordLen) {
+            this.handleVictory(false);
+          } else {
+            this.audio.error();
+            const reasons = [];
+            if (status.mass !== 31) reasons.push(`MASS IS ${status.mass} (NEED 31)`);
+            if (status.lockedCount < wordLen) reasons.push(`CALLSIGN ${status.lockedCount}/${wordLen}`);
+            this.setLog(`EXTRACTION REJECTED: ${reasons.join(" • ")}. BACKTRACK TO ADJUST.`, "err");
+          }
+        }
+      },
+
+      handleVictory(isNullBonus = false) {
+        this.solved = true;
+        this.isDragging = false;
+        this.audio.win();
+
+        const steps = this.path.length - 1;
+        const optimal = isNullBonus || steps <= this.puzzle.par;
+
+        this.stats.solved += 1;
+        if (optimal) {
+          this.stats.optimal += 1;
+          this.stats.streak += 1;
+        } else {
+          this.stats.streak = 0;
+        }
+        if (this.seed === this.getDailySeed()) {
+          this.stats.dailyCompleted = this.seed;
+        }
+        this.saveStats();
+
+        const msg = isNullBonus
+          ? "<NULL SIGNAL> INTERCEPTED • BONUS INSTA-SOLVE!"
+          : `BARYCENTRE LOCKED AT 31 IN ${steps} STEPS${optimal ? " (OPTIMAL PAR!)" : ""}.`;
+        this.setLog(msg, "ok");
+
+        setTimeout(() => {
+          this.showVictoryModal(optimal, isNullBonus);
+        }, 280);
+      },
+
+      triggerHint() {
+        if (!this.puzzle || this.solved) return;
+        const sol = this.puzzle.solutionPath;
+
+        // Find longest prefix of current path matching the carved solution
+        let matchLen = 0;
+        for (let i = 0; i < this.path.length && i < sol.length; i++) {
+          if (this.path[i].r === sol[i].r && this.path[i].c === sol[i].c) {
+            matchLen++;
+          } else {
+            break;
+          }
+        }
+
+        // If player deviated off the solution path, snap back to last valid solution node
+        if (matchLen < this.path.length) {
+          this.path = this.path.slice(0, matchLen);
+        }
+
+        if (matchLen < sol.length) {
+          this.hintCell = { r: sol[matchLen].r, c: sol[matchLen].c };
+          this.audio.relay(1);
+          this.renderBoard();
+          this.updateHUD();
+          this.setLog("TELEMETRY PING: NEXT OPTIMAL NODE HIGHLIGHTED IN AMBER.", "warn");
+        }
+      },
+
+      renderBoard() {
+        const gridEl = document.getElementById("sector-grid");
+        const size = this.puzzle.size;
+        gridEl.style.gridTemplateColumns = `repeat(${size}, minmax(0, 1fr))`;
+        gridEl.style.gridTemplateRows = `repeat(${size}, minmax(0, 1fr))`;
+        gridEl.innerHTML = "";
+
+        const pathSet = new Set(this.path.map((p) => `${p.r},${p.c}`));
+        const head = this.path[this.path.length - 1];
+
+        for (let r = 0; r < size; r++) {
+          for (let c = 0; c < size; c++) {
+            const cell = this.puzzle.grid[r][c];
+            const el = document.createElement("div");
+            el.className = "cell";
+            el.dataset.r = r;
+            el.dataset.c = c;
+
+            if (cell.type === "START") el.classList.add("cell-start");
+            else if (cell.type === "EXIT") el.classList.add("cell-exit");
+            else if (cell.type === "WELL") el.classList.add("cell-well");
+            else if (cell.type === "RELAY") el.classList.add("cell-relay");
+            else if (cell.type === "VOID") el.classList.add("cell-void");
+
+            if (pathSet.has(`${r},${c}`)) el.classList.add("in-path");
+            if (head.r === r && head.c === c) el.classList.add("path-head");
+            if (this.hintCell && this.hintCell.r === r && this.hintCell.c === c) {
+              el.classList.add("hint-pulse");
+            }
+
+            const mainSpan = document.createElement("span");
+            mainSpan.className = "cell-main";
+
+            const tagSpan = document.createElement("span");
+            tagSpan.className = "cell-tag";
+
+            if (cell.type === "START") {
+              mainSpan.textContent = "[>]";
+              tagSpan.textContent = "ORIG";
+            } else if (cell.type === "EXIT") {
+              mainSpan.textContent = "[X]";
+              tagSpan.textContent = "EXIT";
+            } else if (cell.type === "VOID") {
+              mainSpan.textContent = "##";
+              tagSpan.textContent = "VOID";
+            } else if (cell.type === "RELAY") {
+              mainSpan.textContent = `[${cell.letter}]`;
+              tagSpan.textContent = "RLY";
+            } else if (cell.type === "WELL") {
+              mainSpan.textContent = `${cell.val}`;
+              tagSpan.textContent = "WELL";
+            } else {
+              mainSpan.textContent = String(cell.val).padStart(2, "0");
+              tagSpan.textContent = "MASS";
+            }
+
+            el.appendChild(mainSpan);
+            el.appendChild(tagSpan);
+            gridEl.appendChild(el);
+          }
+        }
+
+        this.renderVectorLine();
+      },
+
+      renderVectorLine() {
+        const svg = document.getElementById("vector-svg");
+        svg.innerHTML = "";
+        if (this.path.length < 2) return;
+
+        const size = this.puzzle.size;
+        const step = 600 / size;
+        const points = this.path
+          .map((p) => `${(p.c + 0.5) * step},${(p.r + 0.5) * step}`)
+          .join(" ");
+
+        const status = this.computeStatus();
+        const isLocked31 = status.mass === 31 && status.lockedCount === this.puzzle.word.length;
+        const strokeColor = isLocked31 ? "#86efac" : "#22c55e";
+
+        const glow = document.createElementNS("http://www.w3.org/2000/svg", "polyline");
+        glow.setAttribute("points", points);
+        glow.setAttribute("fill", "none");
+        glow.setAttribute("stroke", strokeColor);
+        glow.setAttribute("stroke-width", "14");
+        glow.setAttribute("stroke-linecap", "round");
+        glow.setAttribute("stroke-linejoin", "round");
+        glow.setAttribute("opacity", "0.22");
+
+        const line = document.createElementNS("http://www.w3.org/2000/svg", "polyline");
+        line.setAttribute("points", points);
+        line.setAttribute("fill", "none");
+        line.setAttribute("stroke", strokeColor);
+        line.setAttribute("stroke-width", "5");
+        line.setAttribute("stroke-linecap", "round");
+        line.setAttribute("stroke-linejoin", "round");
+
+        svg.appendChild(glow);
+        svg.appendChild(line);
+      },
+
+      computeStatus() {
+        let mass = 0;
+        let lockedCount = 0;
+        const word = this.puzzle.word;
+
+        for (const pt of this.path) {
+          const cell = this.puzzle.grid[pt.r][pt.c];
+          mass += cell.val;
+          if (cell.type === "RELAY" && cell.letter === word[lockedCount]) {
+            lockedCount++;
+          }
+        }
+
+        return {
+          mass,
+          delta: mass - 31,
+          lockedCount,
+          steps: this.path.length - 1
+        };
+      },
+
+      updateHUD() {
+        const status = this.computeStatus();
+        const massEl = document.getElementById("hud-mass");
+        const deltaEl = document.getElementById("hud-delta");
+
+        massEl.textContent = String(status.mass).padStart(2, "0");
+        massEl.className = status.mass === 31 ? "mass-exact" : status.mass > 31 ? "mass-over" : "mass-under";
+
+        const sign = status.delta > 0 ? "+" : "";
+        deltaEl.textContent = `${sign}${status.delta}`;
+
+        // Render Callsign Relay Pills
+        const csEl = document.getElementById("hud-callsign");
+        csEl.innerHTML = "";
+        const word = this.puzzle.word;
+        for (let i = 0; i < word.length; i++) {
+          const pill = document.createElement("span");
+          pill.className = "cs-pill";
+          if (i < status.lockedCount) pill.classList.add("locked");
+          else if (i === status.lockedCount) pill.classList.add("next");
+          pill.textContent = word[i];
+          csEl.appendChild(pill);
+        }
+
+        document.getElementById("hud-steps").textContent = String(status.steps).padStart(2, "0");
+        document.getElementById("hud-par").textContent = String(this.puzzle.par).padStart(2, "0");
+
+        // Highlight matching callsign in the 20-term lexicon
+        document.querySelectorAll(".lex-item").forEach((item) => {
+          item.classList.toggle("active-callsign", item.dataset.code === word);
+        });
+
+        // Highlight active mode card in the bottom explanation bar
+        document.querySelectorAll(".mode-legend-item").forEach((card) => {
+          card.classList.toggle("active-mode-info", card.dataset.modeInfo === this.mode);
+        });
+
+        return status;
+      },
+
+      setLog(msg, tone = "") {
+        const logEl = document.getElementById("terminal-log");
+        const textEl = document.getElementById("log-text");
+        logEl.className = "terminal-log" + (tone ? ` log-${tone}` : "");
+        textEl.textContent = msg;
+      },
+
+      // ------------------------------------------------------------------------
+      // MODAL DIALOGS
+      // ------------------------------------------------------------------------
+      openModal(title, bodyHTML, footerButtons = []) {
+        document.getElementById("modal-title").textContent = title;
+        document.getElementById("modal-body").innerHTML = bodyHTML;
+        const footer = document.getElementById("modal-footer");
+        footer.innerHTML = "";
+
+        footerButtons.forEach((cfg) => {
+          const btn = document.createElement("button");
+          btn.className = "btn" + (cfg.primary ? " btn-primary" : "");
+          btn.textContent = cfg.label;
+          btn.addEventListener("click", cfg.onClick);
+          footer.appendChild(btn);
+        });
+
+        document.getElementById("modal-backdrop").classList.add("open");
+      },
+
+      closeModal() {
+        document.getElementById("modal-backdrop").classList.remove("open");
+      },
+
+      showHelpModal() {
+        this.openModal(
+          "31 // VOID VECTOR PROTOCOL",
+          `
+            <div class="rule-item"><strong>OBJECTIVE:</strong> Trace one continuous orthogonal vector from <strong>[&gt;]</strong> to <strong>[X]</strong> such that the total mass equals <strong>31</strong> (representing the 31 bodies of the Hope System).</div>
+            <div class="rule-item"><strong>CALLSIGN RELAYS:</strong> Pass through the required letter relays in the <strong>exact sequence</strong> displayed on your HUD. Letter relays add 0 mass.</div>
+            <div class="rule-item"><strong>GRAVITY WELLS &amp; VOIDS:</strong> Negative wells (<strong>-2, -3, -4</strong>) bleed off excess mass. <strong>##</strong> Void sectors are impassable.</div>
+            <div class="rule-item"><strong>DEEP SPACE STRICT PROTOCOL:</strong> On Deep Space mode, touching any out-of-order or decoy letter is blocked.</div>
+            <div class="rule-item"><strong>NULL SIGNAL BONUS:</strong> Spelling <strong>NULL</strong> triggers an immediate bonus extraction on the final <strong>L</strong>.</div>
+          `,
+          [{ label: "ACKNOWLEDGED", primary: true, onClick: () => this.closeModal() }]
+        );
+      },
+
+      showStatsModal() {
+        const dailyDone = this.stats.dailyCompleted === this.getDailySeed() ? "COMPLETE" : "PENDING";
+        this.openModal(
+          "NAHLA TRACKER // TELEMETRY LOG",
+          `
+            <div class="stat-grid">
+              <div class="stat-box">
+                <div class="stat-box-label">Sectors Solved</div>
+                <div class="stat-box-val">${this.stats.solved}</div>
+              </div>
+              <div class="stat-box">
+                <div class="stat-box-label">Optimal Par Locks</div>
+                <div class="stat-box-val">${this.stats.optimal}</div>
+              </div>
+              <div class="stat-box">
+                <div class="stat-box-label">Optimal Streak</div>
+                <div class="stat-box-val">${this.stats.streak}</div>
+              </div>
+              <div class="stat-box">
+                <div class="stat-box-label">Daily Seed</div>
+                <div class="stat-box-val" style="font-size:0.92rem;">${dailyDone}</div>
+              </div>
+            </div>
+          `,
+          [{ label: "CLOSE", primary: true, onClick: () => this.closeModal() }]
+        );
+      },
+
+      showSeedModal() {
+        this.openModal(
+          "SECTOR SEED COORDINATES",
+          `
+            <p style="color:var(--text-secondary);font-size:0.75rem;">Share or enter any seed string to generate an identical Hope System sector offline:</p>
+            <div class="seed-input-row">
+              <input type="text" id="seed-input-field" class="seed-input" value="${this.seed}" maxlength="18" />
+              <button class="btn" id="btn-copy-seed">COPY</button>
+            </div>
+          `,
+          [
+            { label: "CANCEL", onClick: () => this.closeModal() },
+            {
+              label: "LOAD SEED",
+              primary: true,
+              onClick: () => {
+                const val = document.getElementById("seed-input-field").value.trim();
+                if (val) {
+                  this.loadSector(val);
+                  this.closeModal();
+                }
+              }
+            }
+          ]
+        );
+
+        document.getElementById("btn-copy-seed").addEventListener("click", (e) => {
+          const input = document.getElementById("seed-input-field");
+          input.select();
+          try {
+            document.execCommand("copy");
+            e.currentTarget.textContent = "COPIED!";
+          } catch (_) {}
+        });
+      },
+
+      showVictoryModal(optimal, isNullBonus = false) {
+        const steps = this.path.length - 1;
+        const badgeText = isNullBonus
+          ? "<NULL SIGNAL> BONUS EXTRACTION"
+          : optimal
+            ? "OPTIMAL PAR TELEMETRY"
+            : "SECTOR SYNCHRONIZED";
+
+        this.openModal(
+          "VECTOR LOCKED // 31",
+          `
+            <div style="text-align:center;padding:0.4rem 0;">
+              <div style="color:var(--emerald);font-weight:700;font-size:0.92rem;letter-spacing:0.06em;">${badgeText}</div>
+              <div style="color:var(--text-secondary);font-size:0.74rem;margin-top:0.25rem;">SEED #${this.seed} • CALLSIGN ${this.puzzle.word}</div>
+            </div>
+            <div class="stat-grid">
+              <div class="stat-box">
+                <div class="stat-box-label">Final Mass</div>
+                <div class="stat-box-val">${isNullBonus ? "NULL" : "31 / 31"}</div>
+              </div>
+              <div class="stat-box">
+                <div class="stat-box-label">Vector Steps</div>
+                <div class="stat-box-val">${steps} <span style="font-size:0.72rem;color:var(--text-secondary);">(PAR ${this.puzzle.par})</span></div>
+              </div>
+            </div>
+          `,
+          [
+            { label: "REPLAY SECTOR", onClick: () => { this.closeModal(); this.resetPath(); } },
+            { label: "NEXT SECTOR [N]", primary: true, onClick: () => { this.closeModal(); this.loadSector(this.randomSeed()); } }
+          ]
+        );
       }
     };
 
-    window.addEventListener("DOMContentLoaded", () => {
-      Game.init();
-    });
+    window.addEventListener("DOMContentLoaded", () => Game.init());
   </script>
 </body>
 </html>
