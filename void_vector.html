@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>31 // Void Vector</title>
+  <title>31 // Void Vector v0.3 — Nahla Tracker</title>
   <meta name="description" content="31 // Void Vector — An offline spatial arithmetic and callsign routing puzzle terminal for the Hope System." />
   <meta name="theme-color" content="#050a07" />
 
@@ -404,15 +404,6 @@
       display: flex;
       align-items: center;
       gap: 0.45rem;
-    }
-
-    .status-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--emerald);
-      box-shadow: 0 0 8px var(--emerald);
-      display: inline-block;
     }
 
     .brand-sub {
@@ -947,10 +938,9 @@
       <header class="terminal-header">
         <div class="brand-block">
           <div class="brand-title">
-           
-            VOID VECTOR v0.2
+            31 // VOID VECTOR
           </div>
-          <div class="brand-sub">NAHLA TRACKER • HOPE SYSTEM (31 BODIES)</div>
+          <div class="brand-sub">NAHLA TRACKER • HOPE SYSTEM (31 BODIES) • v0.3</div>
         </div>
         <div class="header-actions">
           <button class="btn" id="btn-audio" title="Toggle Telemetry Audio">SFX:ON</button>
@@ -1366,8 +1356,75 @@
       static WORDS_4 = SectorGenerator.DEEP_LEXICON.map((item) => item.code);
       static ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ".split("");
 
+      // Public entry point: deterministically re-rolls (salted by attempt number) until the
+      // sector has exactly ONE valid route from [>] to [X]. Same seed => same sector everywhere.
       static generate(mode, seedStr, forcedWord = null) {
-        const rng = new SeededRandom(`${mode}:${seedStr}`);
+        const MAX_ATTEMPTS = 400;
+        let last = null;
+        for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+          const puzzle = this.generateOnce(mode, seedStr, forcedWord, attempt);
+          const result = this.countSolutions(puzzle, 2);
+          if (result.count === 1 && !result.aborted) {
+            puzzle.unique = true;
+            puzzle.attempt = attempt;
+            return puzzle;
+          }
+          last = puzzle;
+        }
+        last.unique = false; // extremely unlikely; sector is still solvable via the carved path
+        return last;
+      }
+
+      // Counts distinct winning routes (stops early at `limit`). Mirrors the live game rules:
+      // orthogonal steps, no revisits, VOIDs blocked, strict relay gating in Deep Space,
+      // greedy in-order callsign locking, mass must equal 31 on arrival at [X].
+      static countSolutions(puzzle, limit = 2, budget = 4000000) {
+        const { grid, size, word, strictRelays, solutionPath } = puzzle;
+        const start = solutionPath[0];
+        const hasWells = grid.some((row) => row.some((cell) => cell.type === "WELL"));
+        const visited = Array.from({ length: size }, () => Array(size).fill(false));
+        const dirs = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+        let count = 0;
+        let nodes = 0;
+        let aborted = false;
+
+        const dfs = (r, c, mass, locked) => {
+          if (count >= limit || aborted) return;
+          if (++nodes > budget) { aborted = true; return; }
+          for (const [dr, dc] of dirs) {
+            const nr = r + dr;
+            const nc = c + dc;
+            if (nr < 0 || nr >= size || nc < 0 || nc >= size || visited[nr][nc]) continue;
+            const cell = grid[nr][nc];
+            if (cell.type === "VOID") continue;
+
+            let nl = locked;
+            if (cell.type === "RELAY") {
+              if (strictRelays && cell.letter !== word[locked]) continue;
+              if (cell.letter === word[locked]) nl++;
+            }
+            const nm = mass + cell.val;
+
+            if (cell.type === "EXIT") {
+              // [X] can only be entered once, so it ends the route either way.
+              if (nm === 31 && nl === word.length) count++;
+              continue;
+            }
+            if (!hasWells && nm > 31) continue; // masses only grow without wells
+            visited[nr][nc] = true;
+            dfs(nr, nc, nm, nl);
+            visited[nr][nc] = false;
+            if (count >= limit || aborted) return;
+          }
+        };
+
+        visited[start.r][start.c] = true;
+        dfs(start.r, start.c, 0, 0);
+        return { count, aborted };
+      }
+
+      static generateOnce(mode, seedStr, forcedWord = null, attempt = 0) {
+        const rng = new SeededRandom(attempt === 0 ? `${mode}:${seedStr}` : `${mode}:${seedStr}:${attempt}`);
         const config = {
           SURVEY:  { size: 5, minLen: 8,  maxLen: 10, allowWells: false, wordLen: 3, strictRelays: false, voids: 3, cloneDecoys: 2, decoyLetters: 2 },
           ORBITAL: { size: 6, minLen: 9,  maxLen: 13, allowWells: true,  wordLen: 3, strictRelays: false, voids: 5, cloneDecoys: 3, decoyLetters: 3 },
