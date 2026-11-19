@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Void Vector</title>
+  <title>31 // Void Vector — Nahla Tracker</title>
   <style>
     /* ==========================================================================
        NAHLA TRACKER DESIGN TOKENS & PHOSPHOR TERMINAL GREEN THEME
@@ -595,7 +595,7 @@
       width: 100%;
       height: 100%;
       pointer-events: none;
-      z-index: 2;
+      z-index: 4;
     }
 
     /* Grid Cell Matrix */
@@ -623,7 +623,22 @@
 
     .cell:hover:not(.cell-void) {
       border-color: var(--border-bright);
-      background: var(--bg-cell-hover);
+      background: rgba(23, 45, 34, 0.9);
+    }
+
+    .cell.in-path:hover {
+      border-color: var(--emerald);
+      background: rgba(34, 197, 94, 0.3);
+    }
+
+    .cell.in-path.cell-well:hover {
+      border-color: var(--crimson);
+      background: rgba(244, 63, 94, 0.28);
+    }
+
+    .cell.in-path.cell-relay:hover {
+      border-color: var(--emerald);
+      background: rgba(74, 222, 128, 0.3);
     }
 
     .cell-main {
@@ -901,7 +916,8 @@
       <header class="terminal-header">
         <div class="brand-block">
           <div class="brand-title">
-           VOID VECTOR v0.1
+            
+            VOID VECTOR v0.1
           </div>
           <div class="brand-sub">NAHLA TRACKER • HOPE SYSTEM (31 BODIES)</div>
         </div>
@@ -1935,6 +1951,7 @@
         line.setAttribute("points", points);
         line.setAttribute("fill", "none");
         line.setAttribute("stroke", strokeColor);
+        line.setAttribute("stroke-opacity", "0.85");
         line.setAttribute("stroke-width", "5");
         line.setAttribute("stroke-linecap", "round");
         line.setAttribute("stroke-linejoin", "round");
