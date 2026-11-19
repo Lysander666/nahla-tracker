@@ -594,7 +594,7 @@
       width: 100%;
       max-width: 440px;
       aspect-ratio: 1 / 1;
-      touch-action: none;
+      touch-action: manipulation;
       user-select: none;
     }
 
@@ -950,7 +950,7 @@
         </div>
       </header>
 
-      <!-- Mode & Seed Controls -->
+      <!-- Mode & Seed Bar -->
       <nav class="control-strip" aria-label="Difficulty and Seed Selection">
         <div class="mode-group">
           <button class="btn active" data-mode="SURVEY">SURVEY</button>
@@ -1039,7 +1039,7 @@
           </div>
           <div class="brief-step">
             <span class="brief-num">04</span>
-            <div><strong>CONTROLS:</strong> Drag or tap adjacent tiles (or use <strong>WASD / Arrows</strong>). Tap any earlier node in your trail or press <strong>Z</strong> to backtrack.</div>
+            <div><strong>CONTROLS:</strong> Tap adjacent tiles (or click-drag on desktop / use <strong>WASD / Arrows</strong>). Tap any earlier node in your trail or press <strong>Z</strong> to backtrack.</div>
           </div>
         </div>
       </section>
@@ -1649,6 +1649,7 @@
       path: [],
       solved: false,
       isDragging: false,
+      touchOrigin: null,
       hintCell: null,
       audio: new TelemetryAudio(),
       stats: {
@@ -1782,34 +1783,60 @@
           if (e.target.id === "modal-backdrop") this.closeModal();
         });
 
-        // Pointer / Touch Drag Tracing on Board
+        // Desktop Mouse Drag + Mobile Tap-Only (preserves vertical page scroll on touch)
         const stage = document.getElementById("board-stage");
         stage.addEventListener("pointerdown", (e) => {
-          this.audio.ensureContext();
           const cellEl = e.target.closest(".cell");
           if (!cellEl) return;
-          this.isDragging = true;
           const r = Number(cellEl.dataset.r);
           const c = Number(cellEl.dataset.c);
-          this.tryStepTo(r, c);
+
+          if (e.pointerType === "mouse") {
+            if (e.button !== 0) return;
+            this.audio.ensureContext();
+            this.isDragging = true;
+            this.tryStepTo(r, c);
+          } else {
+            // Touch / pen: defer action until pointerup so vertical swipes scroll normally
+            this.touchOrigin = { x: e.clientX, y: e.clientY, r, c };
+          }
         });
 
         window.addEventListener("pointermove", (e) => {
-          if (!this.isDragging) return;
-          const el = document.elementFromPoint(e.clientX, e.clientY);
-          const cellEl = el ? el.closest(".cell") : null;
-          if (!cellEl) return;
-          const r = Number(cellEl.dataset.r);
-          const c = Number(cellEl.dataset.c);
-          this.tryStepTo(r, c);
+          if (e.pointerType === "mouse") {
+            if (!this.isDragging) return;
+            const el = document.elementFromPoint(e.clientX, e.clientY);
+            const cellEl = el ? el.closest(".cell") : null;
+            if (!cellEl) return;
+            const r = Number(cellEl.dataset.r);
+            const c = Number(cellEl.dataset.c);
+            this.tryStepTo(r, c);
+          } else if (this.touchOrigin) {
+            const moved = Math.hypot(e.clientX - this.touchOrigin.x, e.clientY - this.touchOrigin.y);
+            if (moved > 10) {
+              this.touchOrigin = null;
+            }
+          }
         });
 
-        window.addEventListener("pointerup", () => {
-          this.isDragging = false;
+        window.addEventListener("pointerup", (e) => {
+          if (e.pointerType === "mouse") {
+            this.isDragging = false;
+          } else if (this.touchOrigin) {
+            const origin = this.touchOrigin;
+            this.touchOrigin = null;
+            const el = document.elementFromPoint(e.clientX, e.clientY);
+            const cellEl = el ? el.closest(".cell") : null;
+            if (cellEl && Number(cellEl.dataset.r) === origin.r && Number(cellEl.dataset.c) === origin.c) {
+              this.audio.ensureContext();
+              this.tryStepTo(origin.r, origin.c);
+            }
+          }
         });
 
         window.addEventListener("pointercancel", () => {
           this.isDragging = false;
+          this.touchOrigin = null;
         });
 
         // Keyboard Navigation
@@ -2016,6 +2043,7 @@
       handleVictory(isNullBonus = false) {
         this.solved = true;
         this.isDragging = false;
+        this.touchOrigin = null;
         this.audio.win();
 
         const steps = this.path.length - 1;
