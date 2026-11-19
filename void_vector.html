@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>31 // Void Vector v0.3 — Nahla Tracker</title>
-  <meta name="description" content="31 // Void Vector — An offline spatial arithmetic and callsign routing puzzle terminal for the Hope System." />
+  <title>31 // Void Vector v0.4 — Nahla Tracker</title>
+  <meta name="description" content="31 // Void Vector — An offline spatial arithmetic, bash terminal override, and callsign routing puzzle workstation for the Hope System." />
   <meta name="theme-color" content="#050a07" />
 
   <!-- Phosphor Terminal Favicon (Offline Vector SVG) -->
@@ -14,18 +14,18 @@
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="Nahla Tracker" />
   <meta property="og:title" content="31 // Void Vector — Nahla Tracker" />
-  <meta property="og:description" content="Trace a continuous telemetry vector across the Hope System to hit Barycentre Mass 31 and lock orbital callsigns." />
+  <meta property="og:description" content="Trace a continuous telemetry vector across the Hope System and execute bash grid overrides to hit Barycentre Mass 31." />
   <meta property="og:image" content="https://placehold.co/1200x630/050a07/22c55e?text=31+%2F%2F+VOID+VECTOR%0ANAHLA+TRACKER" />
   <meta property="og:image:alt" content="31 // Void Vector phosphor green telemetry puzzle terminal" />
 
   <!-- Twitter / X Card -->
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="31 // Void Vector — Nahla Tracker" />
-  <meta name="twitter:description" content="Trace a continuous telemetry vector across the Hope System to hit Barycentre Mass 31 and lock orbital callsigns." />
+  <meta name="twitter:description" content="Trace a continuous telemetry vector across the Hope System and execute bash grid overrides to hit Barycentre Mass 31." />
   <meta name="twitter:image" content="https://placehold.co/1200x630/050a07/22c55e?text=31+%2F%2F+VOID+VECTOR%0ANAHLA+TRACKER" />
   <style>
     /* ==========================================================================
-       NAHLA TRACKER DESIGN TOKENS & PHOSPHOR TERMINAL GREEN THEME
+       NAHLA TRACKER DESIGN TOKENS & PHOSPHOR TERMINAL GREEN THEME (v0.4)
        Offline-ready, zero external dependencies, pure monospace aesthetics.
        ========================================================================== */
     :root {
@@ -49,6 +49,7 @@
       --amber-glow: rgba(245, 158, 11, 0.25);
       --crimson: #f43f5e;
       --crimson-glow: rgba(244, 63, 94, 0.25);
+      --cyan: #38bdf8;
 
       --font-mono: ui-monospace, SFMono-Regular, "JetBrains Mono", "Fira Code", Menlo, Monaco, Consolas, "Liberation Mono", monospace;
     }
@@ -64,8 +65,8 @@
 
     /* Dark Phosphor Green Terminal Scrollbars */
     ::-webkit-scrollbar {
-      width: 8px;
-      height: 8px;
+      width: 7px;
+      height: 7px;
     }
 
     ::-webkit-scrollbar-track {
@@ -128,7 +129,7 @@
     /* Responsive Desktop + Mobile Workstation Shell */
     .workspace-shell {
       width: 100%;
-      max-width: 1060px;
+      max-width: 1140px;
       margin: auto 0;
       display: grid;
       grid-template-columns: 1fr;
@@ -137,13 +138,13 @@
       justify-items: center;
     }
 
-    @media (min-width: 920px) {
+    @media (min-width: 960px) {
       body {
-        padding: 1.25rem 1rem;
+        padding: 1.15rem 1rem;
       }
       .workspace-shell {
-        grid-template-columns: minmax(480px, 580px) minmax(320px, 1fr);
-        gap: 1.15rem;
+        grid-template-columns: minmax(470px, 560px) minmax(380px, 1fr);
+        gap: 1.1rem;
         align-items: stretch;
         justify-items: stretch;
       }
@@ -151,21 +152,12 @@
       .intel-column {
         height: 100%;
       }
-      .intel-column .intel-panel:last-child {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-      }
-      .intel-column .intel-panel:last-child .intel-body {
-        flex: 1;
-        justify-content: space-between;
-      }
       .board-stage {
-        max-width: 460px;
+        max-width: 420px;
       }
     }
 
-    /* Main Terminal Container */
+    /* Main Left Sector Matrix Frame */
     .terminal-frame {
       width: 100%;
       max-width: 600px;
@@ -178,12 +170,13 @@
       overflow: hidden;
     }
 
-    /* Side / Bottom Intel Column (Instructions + 20 Callsigns) */
+    /* Right Column: Top Green Bash Terminal + Bottom Flippable Protocol/Lexicon Card */
     .intel-column {
       width: 100%;
       max-width: 600px;
       display: flex;
       flex-direction: column;
+      justify-content: space-between;
       gap: 0.9rem;
     }
 
@@ -193,19 +186,28 @@
       border-radius: 10px;
       box-shadow: 0 14px 36px rgba(0, 0, 0, 0.65), inset 0 0 0 1px rgba(34, 197, 94, 0.05);
       overflow: hidden;
+      display: flex;
+      flex-direction: column;
     }
 
     .intel-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 0.65rem 0.95rem;
+      padding: 0.6rem 0.9rem;
       background: var(--bg-panel);
       border-bottom: 1px solid var(--border-dim);
-      font-size: 0.78rem;
+      font-size: 0.76rem;
       font-weight: 700;
       letter-spacing: 0.07em;
       color: var(--term-green);
+      gap: 0.4rem;
+    }
+
+    .intel-header-right {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
     }
 
     .intel-badge {
@@ -216,15 +218,217 @@
       border: 1px solid var(--border-dim);
       padding: 0.14rem 0.42rem;
       border-radius: 4px;
+      white-space: nowrap;
+    }
+
+    .intel-badge.charges-ok {
+      color: var(--emerald);
+      border-color: rgba(74, 222, 128, 0.45);
+    }
+
+    .intel-badge.charges-empty {
+      color: var(--crimson);
+      border-color: rgba(244, 63, 94, 0.45);
+    }
+
+    /* ==========================================================================
+       EMBEDDED GREEN BASH & GRID OVERRIDE TERMINAL (TOP RIGHT)
+       Locked viewport height so scrollback never resizes the workstation.
+       ========================================================================== */
+    .bash-panel {
+      flex: 0 0 auto;
+      border-color: var(--term-green);
+      box-shadow: 0 14px 36px rgba(0, 0, 0, 0.72), 0 0 18px rgba(34, 197, 94, 0.08);
+    }
+
+    .bash-screen {
+      flex: 0 0 220px;
+      height: 220px;
+      min-height: 220px;
+      max-height: 220px;
+      overflow-y: auto;
+      background: #030705;
+      padding: 0.65rem 0.8rem;
+      font-size: 0.73rem;
+      line-height: 1.45;
+      display: flex;
+      flex-direction: column;
+      gap: 0.24rem;
+      cursor: text;
+    }
+
+    @media (min-width: 960px) {
+      .bash-screen {
+        flex: 0 0 232px;
+        height: 232px;
+        min-height: 232px;
+        max-height: 232px;
+      }
+    }
+
+    .term-line {
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .term-line.cmd   { color: #bbf7d0; font-weight: 600; }
+    .term-line.sys   { color: var(--term-green); }
+    .term-line.info  { color: var(--text-secondary); }
+    .term-line.ok    { color: var(--emerald); }
+    .term-line.warn  { color: var(--amber); }
+    .term-line.err   { color: var(--crimson); }
+    .term-line.cyan  { color: var(--cyan); }
+
+    .bash-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.3rem;
+      padding: 0.42rem 0.75rem;
+      background: #070e0a;
+      border-top: 1px solid var(--border-dim);
+    }
+
+    .chip-btn {
+      font-family: var(--font-mono);
+      font-size: 0.64rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      color: var(--text-secondary);
+      background: var(--bg-panel);
+      border: 1px solid var(--border-dim);
+      border-radius: 4px;
+      padding: 0.2rem 0.44rem;
+      cursor: pointer;
+      transition: all 0.12s ease;
+    }
+
+    .chip-btn:hover {
+      color: var(--term-green);
+      border-color: var(--term-green);
+      background: rgba(34, 197, 94, 0.12);
+    }
+
+    .bash-prompt-row {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.5rem 0.75rem;
+      background: #040906;
+      border-top: 1px solid var(--border-bright);
+    }
+
+    .bash-prompt-label {
+      font-size: 0.74rem;
+      font-weight: 700;
+      color: var(--term-green);
+      white-space: nowrap;
+      user-select: none;
+    }
+
+    .bash-input {
+      flex: 1;
+      min-width: 0;
+      background: transparent;
+      border: none;
+      color: #dcfce7;
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      caret-color: var(--term-green);
+    }
+
+    .bash-input:focus {
+      outline: none;
+    }
+
+    .bash-input::placeholder {
+      color: var(--text-dim);
+      font-size: 0.7rem;
+    }
+
+    .bash-run-btn {
+      font-family: var(--font-mono);
+      font-size: 0.66rem;
+      font-weight: 700;
+      color: var(--term-green);
+      background: rgba(34, 197, 94, 0.14);
+      border: 1px solid var(--term-green);
+      border-radius: 4px;
+      padding: 0.22rem 0.5rem;
+      cursor: pointer;
+    }
+
+    .bash-run-btn:hover {
+      background: rgba(34, 197, 94, 0.26);
+    }
+
+    /* ==========================================================================
+       FLIPPABLE PROTOCOL / CALLSIGN LEXICON PANEL (BOTTOM RIGHT)
+       Fixed-height stacked faces so flipping never shifts layout height.
+       ========================================================================== */
+    .flip-panel {
+      flex: 0 0 auto;
+      transition: transform 0.24s ease, border-color 0.2s ease;
+      transform-style: preserve-3d;
+    }
+
+    .flip-panel.flipping {
+      transform: perspective(900px) rotateY(90deg);
+    }
+
+    .flip-btn {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      color: var(--amber);
+      background: rgba(245, 158, 11, 0.12);
+      border: 1px solid rgba(245, 158, 11, 0.5);
+      border-radius: 4px;
+      padding: 0.2rem 0.5rem;
+      cursor: pointer;
+      transition: all 0.14s ease;
+    }
+
+    .flip-btn:hover {
+      background: rgba(245, 158, 11, 0.24);
+      border-color: var(--amber);
+    }
+
+    .flip-body-stack {
+      display: grid;
+      grid-template-areas: "face";
+      height: 312px;
+      min-height: 312px;
+      max-height: 312px;
+      overflow: hidden;
+    }
+
+    @media (min-width: 960px) {
+      .flip-body-stack {
+        height: 306px;
+        min-height: 306px;
+        max-height: 306px;
+      }
     }
 
     .intel-body {
-      padding: 0.8rem 0.95rem;
+      grid-area: face;
+      height: 100%;
+      overflow-y: auto;
+      padding: 0.7rem 0.85rem;
       display: flex;
       flex-direction: column;
-      gap: 0.55rem;
-      font-size: 0.76rem;
+      justify-content: space-between;
+      gap: 0.42rem;
+      font-size: 0.73rem;
       color: var(--text-primary);
+      transition: opacity 0.16s ease;
+    }
+
+    .intel-body.face-inactive {
+      visibility: hidden;
+      opacity: 0;
+      pointer-events: none;
     }
 
     .brief-step {
@@ -234,7 +438,7 @@
       background: rgba(13, 25, 19, 0.78);
       border: 1px solid var(--border-dim);
       border-radius: 6px;
-      padding: 0.48rem 0.6rem;
+      padding: 0.42rem 0.56rem;
     }
 
     .brief-num {
@@ -247,28 +451,33 @@
       color: var(--emerald);
     }
 
+    .cmd-code {
+      color: var(--amber);
+      font-weight: 700;
+    }
+
     /* 20 Four-Letter Callsign Lexicon Grid */
     .lexicon-note {
-      font-size: 0.7rem;
+      font-size: 0.67rem;
       color: var(--text-secondary);
-      margin-bottom: 0.15rem;
+      line-height: 1.3;
     }
 
     .lexicon-grid {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 0.4rem;
+      gap: 0.28rem;
     }
 
     .lex-item {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 0.4rem;
+      gap: 0.35rem;
       background: var(--bg-panel);
       border: 1px solid var(--border-dim);
-      border-radius: 6px;
-      padding: 0.36rem 0.52rem;
+      border-radius: 5px;
+      padding: 0.24rem 0.44rem;
       font-family: var(--font-mono);
       text-align: left;
       cursor: pointer;
@@ -291,7 +500,7 @@
     }
 
     .lex-code {
-      font-size: 0.76rem;
+      font-size: 0.74rem;
       font-weight: 700;
       letter-spacing: 0.06em;
       color: var(--term-green);
@@ -299,7 +508,7 @@
     }
 
     .lex-meaning {
-      font-size: 0.68rem;
+      font-size: 0.66rem;
       color: var(--text-secondary);
       white-space: nowrap;
       overflow: hidden;
@@ -333,7 +542,7 @@
       gap: 0.55rem;
     }
 
-    @media (min-width: 920px) {
+    @media (min-width: 960px) {
       .mode-legend-bar {
         grid-column: 1 / -1;
         max-width: none;
@@ -385,7 +594,7 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 0.75rem 1rem;
+      padding: 0.7rem 0.95rem;
       background: var(--bg-panel);
       border-bottom: 1px solid var(--border-dim);
       gap: 0.5rem;
@@ -407,7 +616,7 @@
     }
 
     .brand-sub {
-      font-size: 0.68rem;
+      font-size: 0.66rem;
       color: var(--text-secondary);
       letter-spacing: 0.06em;
       margin-top: 2px;
@@ -416,19 +625,21 @@
     .header-actions {
       display: flex;
       gap: 0.35rem;
+      flex-wrap: wrap;
+      justify-content: flex-end;
     }
 
     /* Buttons */
     .btn {
       font-family: var(--font-mono);
-      font-size: 0.72rem;
+      font-size: 0.71rem;
       font-weight: 600;
       letter-spacing: 0.04em;
       color: var(--text-primary);
       background: var(--bg-cell);
       border: 1px solid var(--border-dim);
       border-radius: 6px;
-      padding: 0.42rem 0.65rem;
+      padding: 0.4rem 0.6rem;
       cursor: pointer;
       transition: all 0.14s ease;
       display: inline-flex;
@@ -470,7 +681,7 @@
       justify-content: space-between;
       align-items: center;
       gap: 0.5rem;
-      padding: 0.6rem 1rem;
+      padding: 0.55rem 0.95rem;
       background: rgba(13, 25, 19, 0.72);
       border-bottom: 1px solid var(--border-dim);
     }
@@ -483,12 +694,12 @@
 
     .seed-badge {
       font-family: var(--font-mono);
-      font-size: 0.72rem;
+      font-size: 0.71rem;
       color: var(--text-secondary);
       background: var(--bg-void);
       border: 1px solid var(--border-dim);
       border-radius: 6px;
-      padding: 0.36rem 0.55rem;
+      padding: 0.35rem 0.55rem;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
@@ -506,7 +717,7 @@
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 0.5rem;
-      padding: 0.75rem 1rem;
+      padding: 0.7rem 0.95rem;
       border-bottom: 1px solid var(--border-dim);
       background: var(--bg-terminal);
     }
@@ -515,30 +726,30 @@
       background: var(--bg-panel);
       border: 1px solid var(--border-dim);
       border-radius: 8px;
-      padding: 0.5rem 0.65rem;
+      padding: 0.46rem 0.62rem;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
     }
 
     .hud-label {
-      font-size: 0.64rem;
+      font-size: 0.62rem;
       color: var(--text-secondary);
       letter-spacing: 0.08em;
       text-transform: uppercase;
     }
 
     .hud-value {
-      font-size: 1.15rem;
+      font-size: 1.12rem;
       font-weight: 700;
-      margin-top: 0.2rem;
+      margin-top: 0.18rem;
       display: flex;
       align-items: baseline;
-      gap: 0.35rem;
+      gap: 0.32rem;
     }
 
     .hud-sub {
-      font-size: 0.72rem;
+      font-size: 0.7rem;
       font-weight: 500;
       color: var(--text-secondary);
     }
@@ -550,15 +761,15 @@
     /* Callsign Pill Sequence */
     .callsign-pills {
       display: flex;
-      gap: 0.28rem;
-      margin-top: 0.25rem;
+      gap: 0.26rem;
+      margin-top: 0.22rem;
       flex-wrap: wrap;
     }
 
     .cs-pill {
-      font-size: 0.78rem;
+      font-size: 0.76rem;
       font-weight: 700;
-      padding: 0.1rem 0.38rem;
+      padding: 0.08rem 0.36rem;
       border-radius: 4px;
       border: 1px solid var(--border-dim);
       background: var(--bg-void);
@@ -579,20 +790,57 @@
       box-shadow: 0 0 8px var(--amber-glow);
     }
 
-    /* Interactive Grid Arena */
+    /* Interactive Grid Arena with Coordinate Axes */
     .grid-wrapper {
       flex: 1;
-      padding: 0.9rem 1rem;
+      padding: 0.75rem 0.85rem 0.85rem;
       display: flex;
+      flex-direction: column;
       justify-content: center;
       align-items: center;
       background: radial-gradient(circle at center, #0c1a13 0%, #050a07 100%);
     }
 
+    .board-axis-shell {
+      width: 100%;
+      max-width: 446px;
+      display: grid;
+      grid-template-columns: 18px 1fr;
+      grid-template-rows: 16px 1fr;
+      gap: 4px;
+      align-items: center;
+    }
+
+    .axis-corner {
+      font-size: 0.58rem;
+      color: var(--text-dim);
+      text-align: center;
+    }
+
+    .axis-cols {
+      display: grid;
+      text-align: center;
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+      letter-spacing: 0.05em;
+      user-select: none;
+    }
+
+    .axis-rows {
+      height: 100%;
+      display: grid;
+      align-items: center;
+      text-align: center;
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+      user-select: none;
+    }
+
     .board-stage {
       position: relative;
       width: 100%;
-      max-width: 440px;
       aspect-ratio: 1 / 1;
       touch-action: manipulation;
       user-select: none;
@@ -643,7 +891,7 @@
       transition: transform 0.1s ease, border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
     }
 
-    .cell:hover:not(.cell-void) {
+    .cell:hover:not(.cell-void):not(.cell-jammed) {
       border-color: var(--border-bright);
       background: rgba(23, 45, 34, 0.9);
     }
@@ -663,15 +911,25 @@
       background: rgba(74, 222, 128, 0.3);
     }
 
+    .cell-coord-hint {
+      position: absolute;
+      top: 3px;
+      left: 5px;
+      font-size: 0.5rem;
+      color: var(--text-dim);
+      letter-spacing: 0.02em;
+      pointer-events: none;
+    }
+
     .cell-main {
-      font-size: clamp(0.95rem, 3.6vw, 1.25rem);
+      font-size: clamp(0.92rem, 3.5vw, 1.22rem);
       font-weight: 700;
       letter-spacing: 0.02em;
       z-index: 2;
     }
 
     .cell-tag {
-      font-size: 0.56rem;
+      font-size: 0.54rem;
       letter-spacing: 0.06em;
       color: var(--text-secondary);
       margin-top: 1px;
@@ -702,11 +960,36 @@
       border-color: rgba(245, 158, 11, 0.35);
     }
 
+    .cell-relay.phase-locked {
+      border-style: dashed;
+      border-color: var(--cyan);
+      color: var(--cyan);
+      background: rgba(56, 189, 248, 0.08);
+    }
+
+    .cell-jammed {
+      border-style: dashed;
+      border-color: rgba(245, 158, 11, 0.55);
+      background: rgba(245, 158, 11, 0.09);
+      color: var(--amber);
+      cursor: not-allowed;
+    }
+
     .cell-void {
       background: rgba(5, 10, 7, 0.92);
       border-color: #101f17;
       color: #223d2f;
       cursor: not-allowed;
+    }
+
+    /* Mutated cell flash animation */
+    @keyframes nodeMutateFlash {
+      0%   { box-shadow: 0 0 0 2px var(--emerald), inset 0 0 18px var(--emerald-glow); transform: scale(1.06); }
+      100% { box-shadow: none; transform: scale(1); }
+    }
+
+    .cell.mutated-flash {
+      animation: nodeMutateFlash 0.65s ease-out;
     }
 
     /* Active Path States */
@@ -744,15 +1027,15 @@
       to   { box-shadow: 0 0 16px var(--amber); }
     }
 
-    /* Terminal Log Strip */
+    /* Terminal Status Strip */
     .terminal-log {
-      padding: 0.55rem 1rem;
+      padding: 0.5rem 0.95rem;
       background: var(--bg-void);
       border-top: 1px solid var(--border-dim);
       border-bottom: 1px solid var(--border-dim);
-      font-size: 0.74rem;
+      font-size: 0.72rem;
       color: var(--term-green);
-      min-height: 2.3rem;
+      min-height: 2.2rem;
       display: flex;
       align-items: center;
       gap: 0.45rem;
@@ -764,7 +1047,7 @@
 
     /* Bottom Controls Footer */
     .footer-controls {
-      padding: 0.65rem 1rem;
+      padding: 0.6rem 0.95rem;
       background: var(--bg-panel);
       display: flex;
       justify-content: space-between;
@@ -797,7 +1080,7 @@
 
     .modal-card {
       width: 100%;
-      max-width: 440px;
+      max-width: 450px;
       background: var(--bg-terminal);
       border: 1px solid var(--term-green);
       border-radius: 10px;
@@ -920,12 +1203,12 @@
         gap: 4px;
       }
       .btn {
-        padding: 0.5rem 0.6rem;
-        min-height: 36px;
-        font-size: 0.72rem;
+        padding: 0.46rem 0.55rem;
+        min-height: 34px;
+        font-size: 0.7rem;
       }
       .lex-item {
-        padding: 0.34rem 0.44rem;
+        padding: 0.32rem 0.42rem;
       }
     }
   </style>
@@ -933,6 +1216,7 @@
 <body class="scanlines">
 
   <div class="workspace-shell">
+    <!-- LEFT PANEL: INTERACTIVE SECTOR GRID & HUD -->
     <main class="terminal-frame" role="application" aria-label="31: Void Vector Terminal">
       <!-- Top Header -->
       <header class="terminal-header">
@@ -940,7 +1224,7 @@
           <div class="brand-title">
             31 // VOID VECTOR
           </div>
-          <div class="brand-sub">NAHLA TRACKER • HOPE SYSTEM (31 BODIES) • v0.3</div>
+          <div class="brand-sub">NAHLA TRACKER • HOPE SYSTEM (31 BODIES) • v0.4</div>
         </div>
         <div class="header-actions">
           <button class="btn" id="btn-audio" title="Toggle Telemetry Audio">SFX:ON</button>
@@ -989,11 +1273,16 @@
         </div>
       </section>
 
-      <!-- Interactive Grid Stage -->
+      <!-- Interactive Grid Stage with Coordinate Headers -->
       <div class="grid-wrapper">
-        <div class="board-stage" id="board-stage">
-          <svg class="vector-overlay" id="vector-svg" viewBox="0 0 600 600" preserveAspectRatio="none"></svg>
-          <div class="sector-grid" id="sector-grid" role="grid"></div>
+        <div class="board-axis-shell">
+          <div class="axis-corner">#</div>
+          <div class="axis-cols" id="axis-cols"></div>
+          <div class="axis-rows" id="axis-rows"></div>
+          <div class="board-stage" id="board-stage">
+            <svg class="vector-overlay" id="vector-svg" viewBox="0 0 600 600" preserveAspectRatio="none"></svg>
+            <div class="sector-grid" id="sector-grid" role="grid"></div>
+          </div>
         </div>
       </div>
 
@@ -1007,52 +1296,99 @@
       <footer class="footer-controls">
         <div class="footer-left">
           <button class="btn" id="btn-undo" title="Undo Last Step (Z / Backspace)">UNDO [Z]</button>
-          <button class="btn" id="btn-reset" title="Clear Current Vector (R)">RESET [R]</button>
+          <button class="btn" id="btn-reset" title="Clear Vector & Restore Sector (R)">RESET [R]</button>
         </div>
         <div class="footer-right">
-          <button class="btn" id="btn-hint" title="Ping Next Optimal Node (H)">PING</button>
+          <button class="btn" id="btn-hint" title="Resolve Next Anomaly or Ping Node (H)">PING</button>
           <button class="btn btn-primary" id="btn-next" title="Generate New Sector (N)">NEXT [N]</button>
         </div>
       </footer>
     </main>
 
-    <!-- Field Protocol & 20-Term Lexicon Column -->
-    <aside class="intel-column" aria-label="Protocol Instructions and Callsign Lexicon">
-      <!-- Simple Instructions Panel -->
-      <section class="intel-panel">
+    <!-- RIGHT COLUMN: TOP GREEN BASH TERMINAL + BOTTOM FLIPPABLE PROTOCOL / LEXICON CARD -->
+    <aside class="intel-column" aria-label="Nahla Bash Terminal and Protocol Flip Card">
+
+      <!-- TOP RIGHT: LIVE BASH & GRID OVERRIDE TERMINAL -->
+      <section class="intel-panel bash-panel" aria-label="Nahla Command Line Terminal">
         <div class="intel-header">
-          <span>FIELD PROTOCOL // HOW TO PLAY</span>
-          <span class="intel-badge">HOPE SYSTEM</span>
-        </div>
-        <div class="intel-body">
-          <div class="brief-step">
-            <span class="brief-num">01</span>
-            <div><strong>REACH MASS 31:</strong> Trace a single continuous path from <strong>[&gt;]</strong> to <strong>[X]</strong> so the visited numbers sum to exactly <strong>31</strong>.</div>
-          </div>
-          <div class="brief-step">
-            <span class="brief-num">02</span>
-            <div><strong>LOCK CALLSIGN RELAYS:</strong> Your vector <strong>must</strong> pass through the target HUD letters in exact order (0 mass). Duplicate decoy letters exist—only one sequence reaches <strong>[X]</strong> at mass <strong>31</strong>.</div>
-          </div>
-          <div class="brief-step">
-            <span class="brief-num">03</span>
-            <div><strong>WELLS &amp; VOIDS:</strong> Negative nodes (<strong>-2, -3, -4</strong>) reduce excess mass. <strong>##</strong> sectors cannot be crossed.</div>
-          </div>
-          <div class="brief-step">
-            <span class="brief-num">04</span>
-            <div><strong>CONTROLS:</strong> Tap adjacent tiles (or click-drag on desktop / use <strong>WASD / Arrows</strong>). Tap any earlier node in your trail or press <strong>Z</strong> to backtrack.</div>
+          <span>NAHLA SHELL // ttyS0</span>
+          <div class="intel-header-right">
+            <span class="intel-badge charges-ok" id="hud-charges" title="Remaining Grid Override Charges">CHG: 2/2</span>
+            <button type="button" class="chip-btn" id="btn-term-clear" title="Clear Terminal Buffer (clear)">CLEAR</button>
           </div>
         </div>
+
+        <!-- Scrollback Output Buffer (Persists until 'clear' or new sector) -->
+        <div class="bash-screen" id="bash-screen" role="log" aria-live="polite"></div>
+
+        <!-- Quick Verb Chips for Fast Tap Entry -->
+        <div class="bash-chips" aria-label="Quick Terminal Commands">
+          <button type="button" class="chip-btn" data-insert="scan" data-exec="true">scan</button>
+          <button type="button" class="chip-btn" data-insert="vent ">vent &lt;xy&gt;</button>
+          <button type="button" class="chip-btn" data-insert="invert ">invert &lt;xy&gt;</button>
+          <button type="button" class="chip-btn" data-insert="purge ">purge &lt;xy&gt;</button>
+          <button type="button" class="chip-btn" data-insert="sync ">sync &lt;code&gt;</button>
+          <button type="button" class="chip-btn" data-insert="ls -la" data-exec="true">ls</button>
+          <button type="button" class="chip-btn" data-insert="help" data-exec="true">help</button>
+        </div>
+
+        <!-- Interactive Command Line Input -->
+        <form class="bash-prompt-row" id="bash-form" autocomplete="off">
+          <label for="bash-input" class="bash-prompt-label" id="bash-prompt-label">nahla@hope:~$</label>
+          <input
+            type="text"
+            id="bash-input"
+            class="bash-input"
+            placeholder="type 'scan', 'vent c4', 'ls', 'help'..."
+            spellcheck="false"
+            autocapitalize="none"
+            autocomplete="off"
+          />
+          <button type="submit" class="bash-run-btn">RUN</button>
+        </form>
       </section>
 
-      <!-- All 20 Four-Letter Code Terms Panel -->
-      <section class="intel-panel">
+      <!-- BOTTOM RIGHT: FLIPPABLE HOW TO PLAY / DEEP SPACE CALLSIGN LEXICON -->
+      <section class="intel-panel flip-panel" id="flip-panel">
         <div class="intel-header">
-          <span>DEEP SPACE CALLSIGN LEXICON</span>
-          <span class="intel-badge">20 TERMS</span>
+          <span id="flip-panel-title">FIELD PROTOCOL // HOW TO PLAY</span>
+          <div class="intel-header-right">
+            <span class="intel-badge" id="flip-panel-badge">OVERRIDE OPS</span>
+            <button type="button" class="flip-btn" id="btn-flip-card" title="Flip between How to Play and Deep Space Callsign Lexicon">FLIP ⇄</button>
+          </div>
         </div>
-        <div class="intel-body">
-          <div class="lexicon-note">Active in <strong>DEEP SPACE</strong> mode. Tap any callsign below to load a sector locked to that code:</div>
-          <div class="lexicon-grid" id="lexicon-grid"></div>
+
+        <div class="flip-body-stack">
+          <!-- FRONT FACE: HOW TO PLAY & GRID OVERRIDE COMMANDS -->
+          <div class="intel-body" id="face-protocol">
+            <div class="brief-step">
+              <span class="brief-num">01</span>
+              <div><strong>REACH MASS 31:</strong> Trace a continuous orthogonal path from <strong>[&gt;]</strong> to <strong>[X]</strong> summing to <strong>31</strong> while locking HUD callsign relays in exact order.</div>
+            </div>
+            <div class="brief-step">
+              <span class="brief-num">02</span>
+              <div><strong>TERMINAL GRID OVERRIDES:</strong> Every sector has sabotaged nodes blocking your route. Run <span class="cmd-code">scan</span> in <strong>ttyS0</strong> to locate anomalies, then mutate tiles mid-play:</div>
+            </div>
+            <div class="brief-step">
+              <span class="brief-num">03</span>
+              <div>
+                <span class="cmd-code">vent &lt;xy&gt;</span> clears collapsed <strong>##</strong> voids •
+                <span class="cmd-code">invert &lt;xy&gt;</span> flips <strong>±</strong> mass polarity •
+                <span class="cmd-code">purge &lt;xy&gt;</span> clears <strong>[!]</strong> static •
+                <span class="cmd-code">sync &lt;code&gt;</span> unlocks <strong>[?]</strong> phase relays.
+              </div>
+            </div>
+            <div class="brief-step">
+              <span class="brief-num">04</span>
+              <div><strong>BASH &amp; CONTROLS:</strong> Tap tiles (click-drag on desktop / <strong>WASD</strong>). <strong>ttyS0</strong> keeps command scrollback until <span class="cmd-code">clear</span> and supports <span class="cmd-code">ls</span>, <span class="cmd-code">cd</span>, <span class="cmd-code">cat</span>, <span class="cmd-code">grep</span>, <span class="cmd-code">reboot</span>.</div>
+            </div>
+          </div>
+
+          <!-- BACK FACE: ALL 20 FOUR-LETTER CALLSIGN LEXICON TERMS -->
+          <div class="intel-body face-inactive" id="face-lexicon">
+            <div class="lexicon-note">Active in <strong>DEEP SPACE</strong> mode &amp; <span class="cmd-code">sync &lt;code&gt;</span> overrides. Tap any callsign to sync or launch a sector:</div>
+            <div class="lexicon-grid" id="lexicon-grid"></div>
+          </div>
         </div>
       </section>
     </aside>
@@ -1062,23 +1398,23 @@
       <div class="mode-legend-item active-mode-info" data-mode-info="SURVEY">
         <div class="mode-legend-title">
           <span>SURVEY MODE</span>
-          <span class="mode-legend-tag">5×5 GRID</span>
+          <span class="mode-legend-tag">5×5 • 1 ANOMALY</span>
         </div>
-        <div class="mode-legend-desc">Positive mass nodes only (01–09) with a 3-letter callsign. Unrequested decoy letters can be crossed safely.</div>
+        <div class="mode-legend-desc">Positive mass nodes (01–09), 3-letter callsign, and 1 terminal anomaly along the route (2 Override Charges).</div>
       </div>
       <div class="mode-legend-item" data-mode-info="ORBITAL">
         <div class="mode-legend-title">
           <span>ORBITAL MODE</span>
-          <span class="mode-legend-tag">6×6 GRID</span>
+          <span class="mode-legend-tag">6×6 • 2 ANOMALIES</span>
         </div>
-        <div class="mode-legend-desc">Introduces negative Gravity Wells (-2 to -4) to bleed off excess mass, paired with a 3-letter callsign.</div>
+        <div class="mode-legend-desc">Adds negative Gravity Wells (-2 to -4) plus 2 mid-route terminal anomalies requiring grid overrides (3 Charges).</div>
       </div>
       <div class="mode-legend-item" data-mode-info="DEEP">
         <div class="mode-legend-title">
           <span>DEEP SPACE MODE</span>
-          <span class="mode-legend-tag">6×6 • STRICT</span>
+          <span class="mode-legend-tag">6×6 • STRICT + PHASE</span>
         </div>
-        <div class="mode-legend-desc">Gravity Wells + 4-letter callsign under Strict Protocol: touching any out-of-order or decoy letter is blocked.</div>
+        <div class="mode-legend-desc">Gravity Wells + 4-letter callsign under Strict Protocol, phase-locked relays (<span class="cmd-code">sync</span>), and 2 anomalies (3 Charges).</div>
       </div>
     </section>
   </div>
@@ -1098,8 +1434,9 @@
   <script>
     /**
      * ==========================================================================
-     * 31: VOID VECTOR — CORE ENGINE
-     * Deterministic Carve-First Puzzle Generator, WebAudio Synthesizer & UI Controller
+     * 31: VOID VECTOR v0.4 — CORE ENGINE
+     * Deterministic Carve-First Puzzle Generator, Anomaly Saboteur,
+     * Embedded Bash/Override Shell, WebAudio Synthesizer & UI Controller
      * ==========================================================================
      */
 
@@ -1173,12 +1510,11 @@
         if (this.noiseBuffers[type]) return this.noiseBuffers[type];
 
         const sampleRate = this.ctx.sampleRate;
-        const length = sampleRate * 5; // 5-second seamless loop
+        const length = sampleRate * 5;
         const buffer = this.ctx.createBuffer(1, length, sampleRate);
         const output = buffer.getChannelData(0);
 
         if (type === "PINK") {
-          // Paul Kellet's warm 1/f pink noise filter
           let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
           for (let i = 0; i < length; i++) {
             const white = Math.random() * 2 - 1;
@@ -1192,12 +1528,10 @@
             b6 = white * 0.115926;
           }
         } else if (type === "WHITE") {
-          // Wideband flat-spectrum white noise
           for (let i = 0; i < length; i++) {
             output[i] = (Math.random() * 2 - 1) * 0.14;
           }
         } else if (type === "BROWN") {
-          // Integrated Brownian (1/f^2) deep rumble noise
           let lastOut = 0;
           for (let i = 0; i < length; i++) {
             const white = Math.random() * 2 - 1;
@@ -1308,6 +1642,15 @@
         this.tone(165, "sawtooth", 0.12, 0.06);
       }
 
+      mutate() {
+        this.tone(330, "square", 0.06, 0.06, 0);
+        this.tone(660, "sine", 0.12, 0.08, 0.05);
+      }
+
+      cmdOk() {
+        this.tone(480, "sine", 0.05, 0.05);
+      }
+
       undo() {
         this.tone(210, "sine", 0.05, 0.05);
       }
@@ -1325,9 +1668,10 @@
     }
 
     // --------------------------------------------------------------------------
-    // 3. CARVE-FIRST PUZZLE GENERATOR (Guaranteed Solvable Sector Matrix)
+    // 3. CARVE-FIRST PUZZLE GENERATOR + DETERMINISTIC ANOMALY INJECTOR
     // --------------------------------------------------------------------------
     class SectorGenerator {
+      static COLS = ["A", "B", "C", "D", "E", "F"];
       static WORDS_3 = ["SOL", "ORB", "ION", "ARC", "LUX", "SKY", "RAY", "RIM"];
 
       static DEEP_LEXICON = [
@@ -1356,28 +1700,45 @@
       static WORDS_4 = SectorGenerator.DEEP_LEXICON.map((item) => item.code);
       static ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ".split("");
 
-      // Public entry point: deterministically re-rolls (salted by attempt number) until the
-      // sector has exactly ONE valid route from [>] to [X]. Same seed => same sector everywhere.
+      static toCoord(r, c) {
+        return `${this.COLS[c]}${r + 1}`;
+      }
+
+      static parseCoord(str, size) {
+        const clean = String(str || "").trim().toUpperCase();
+        const match = clean.match(/^([A-F])([1-6])$/);
+        if (!match) return null;
+        const c = this.COLS.indexOf(match[1]);
+        const r = Number(match[2]) - 1;
+        if (c < 0 || c >= size || r < 0 || r >= size) return null;
+        return { r, c, coord: clean };
+      }
+
+      // Public entry point: builds a guaranteed-unique clean sector, then injects
+      // mid-route terminal anomalies so players must alter the grid via ttyS0.
       static generate(mode, seedStr, forcedWord = null) {
         const MAX_ATTEMPTS = 400;
-        let last = null;
+        let chosen = null;
+
         for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
           const puzzle = this.generateOnce(mode, seedStr, forcedWord, attempt);
           const result = this.countSolutions(puzzle, 2);
           if (result.count === 1 && !result.aborted) {
             puzzle.unique = true;
             puzzle.attempt = attempt;
-            return puzzle;
+            chosen = puzzle;
+            break;
           }
-          last = puzzle;
+          chosen = puzzle;
         }
-        last.unique = false; // extremely unlikely; sector is still solvable via the carved path
-        return last;
+
+        if (!chosen.unique) chosen.unique = false;
+
+        // Snapshot clean baseline and inject deterministic terminal anomalies
+        this.injectAnomalies(chosen);
+        return chosen;
       }
 
-      // Counts distinct winning routes (stops early at `limit`). Mirrors the live game rules:
-      // orthogonal steps, no revisits, VOIDs blocked, strict relay gating in Deep Space,
-      // greedy in-order callsign locking, mass must equal 31 on arrival at [X].
       static countSolutions(puzzle, limit = 2, budget = 4000000) {
         const { grid, size, word, strictRelays, solutionPath } = puzzle;
         const start = solutionPath[0];
@@ -1396,7 +1757,7 @@
             const nc = c + dc;
             if (nr < 0 || nr >= size || nc < 0 || nc >= size || visited[nr][nc]) continue;
             const cell = grid[nr][nc];
-            if (cell.type === "VOID") continue;
+            if (cell.type === "VOID" || cell.type === "JAMMED") continue;
 
             let nl = locked;
             if (cell.type === "RELAY") {
@@ -1406,11 +1767,10 @@
             const nm = mass + cell.val;
 
             if (cell.type === "EXIT") {
-              // [X] can only be entered once, so it ends the route either way.
               if (nm === 31 && nl === word.length) count++;
               continue;
             }
-            if (!hasWells && nm > 31) continue; // masses only grow without wells
+            if (!hasWells && nm > 31) continue;
             visited[nr][nc] = true;
             dfs(nr, nc, nm, nl);
             visited[nr][nc] = false;
@@ -1436,15 +1796,17 @@
         const wordPool = config.wordLen === 4 ? this.WORDS_4 : this.WORDS_3;
         const word = (forcedWord && wordPool.includes(forcedWord)) ? forcedWord : rng.pick(wordPool);
 
-        // Initialize grid
         const grid = Array.from({ length: size }, (_, r) =>
           Array.from({ length: size }, (_, c) => ({
             r,
             c,
+            coord: this.toCoord(r, c),
             type: "EMPTY",
             val: 0,
             letter: null,
-            onSolution: false
+            onSolution: false,
+            phaseLocked: false,
+            anomaly: null
           }))
         );
 
@@ -1457,7 +1819,6 @@
         grid[startPt.r][startPt.c].type = "START";
         grid[exitPt.r][exitPt.c].type = "EXIT";
 
-        // Select interior indices along solutionPath for Callsign Relays
         const interiorIndices = [];
         for (let i = 1; i < solutionPath.length - 1; i++) {
           interiorIndices.push(i);
@@ -1475,7 +1836,6 @@
           grid[pt.r][pt.c].val = 0;
         });
 
-        // Remaining interior solution nodes receive numeric mass values summing to 31
         const numericNodes = interiorIndices
           .filter((idx) => !relayIndexSet.has(idx))
           .map((idx) => solutionPath[idx]);
@@ -1487,7 +1847,6 @@
           grid[pt.r][pt.c].type = v < 0 ? "WELL" : "MASS";
         });
 
-        // Collect all off-solution cells
         const offPathCells = [];
         for (let r = 0; r < size; r++) {
           for (let c = 0; c < size; c++) {
@@ -1497,26 +1856,22 @@
         const shuffledOff = rng.shuffle(offPathCells);
         let cursor = 0;
 
-        // Place Voids
         for (let i = 0; i < config.voids && cursor < shuffledOff.length; i++, cursor++) {
           shuffledOff[cursor].type = "VOID";
         }
 
-        // Place Red-Herring Clones of Target Callsign Letters (so letters don't give away the path)
         const wordChars = rng.shuffle(word.split(""));
         for (let i = 0; i < config.cloneDecoys && cursor < shuffledOff.length; i++, cursor++) {
           shuffledOff[cursor].type = "RELAY";
           shuffledOff[cursor].letter = wordChars[i % wordChars.length];
         }
 
-        // Place Unrelated Decoy Callsign Relays
         const decoyPool = this.ALPHABET.filter((ch) => !word.includes(ch));
         for (let i = 0; i < config.decoyLetters && cursor < shuffledOff.length; i++, cursor++) {
           shuffledOff[cursor].type = "RELAY";
           shuffledOff[cursor].letter = rng.pick(decoyPool);
         }
 
-        // Fill rest with numeric masses (and occasional gravity wells in Orbital/Deep)
         for (; cursor < shuffledOff.length; cursor++) {
           const cell = shuffledOff[cursor];
           if (config.allowWells && rng.next() < 0.22) {
@@ -1536,8 +1891,128 @@
           word,
           strictRelays: config.strictRelays,
           solutionPath,
-          par: solutionPath.length - 1
+          par: solutionPath.length - 1,
+          anomalies: [],
+          maxCharges: 2
         };
+      }
+
+      // Sabotages 1 (Survey) or 2 (Orbital / Deep) interior nodes on the winning route
+      // so the player must execute bash grid-override commands mid-play.
+      static injectAnomalies(puzzle) {
+        const rng = new SeededRandom(`ANOM:${puzzle.mode}:${puzzle.seedStr}`);
+        const targetCount = puzzle.mode === "SURVEY" ? 1 : 2;
+
+        // Save clean snapshot of every cell before sabotage
+        for (let r = 0; r < puzzle.size; r++) {
+          for (let c = 0; c < puzzle.size; c++) {
+            const cell = puzzle.grid[r][c];
+            cell.clean = {
+              type: cell.type,
+              val: cell.val,
+              letter: cell.letter
+            };
+          }
+        }
+
+        const interiorPts = puzzle.solutionPath.slice(1, -1);
+        const candidates = rng.shuffle(interiorPts);
+        const usedKinds = new Set();
+        const anomalies = [];
+
+        for (const pt of candidates) {
+          if (anomalies.length >= targetCount) break;
+          const cell = puzzle.grid[pt.r][pt.c];
+
+          // Choose an anomaly type appropriate for this node
+          const possibleKinds = [];
+          if (cell.clean.type === "MASS" || cell.clean.type === "WELL") {
+            possibleKinds.push("COLLAPSED_VOID");
+            if (Math.abs(cell.clean.val) >= 2) possibleKinds.push("POLARITY_FLIP");
+            possibleKinds.push("STATIC_JAM");
+          } else if (cell.clean.type === "RELAY") {
+            if (puzzle.mode === "DEEP") {
+              possibleKinds.push("PHASE_LOCK");
+            }
+            possibleKinds.push("STATIC_JAM");
+          }
+
+          // Prefer distinct anomaly kinds so multi-anomaly sectors showcase different verbs
+          const freshKinds = possibleKinds.filter((k) => !usedKinds.has(k));
+          const kind = rng.pick(freshKinds.length > 0 ? freshKinds : possibleKinds);
+          if (!kind) continue;
+
+          usedKinds.add(kind);
+
+          if (kind === "COLLAPSED_VOID") {
+            cell.type = "VOID";
+            cell.val = 0;
+            cell.anomaly = "COLLAPSED_VOID";
+            anomalies.push({
+              coord: cell.coord,
+              r: cell.r,
+              c: cell.c,
+              kind,
+              fixCmd: `vent ${cell.coord.toLowerCase()}`,
+              summary: `COLLAPSED VOID @ ${cell.coord} (MASKS ${cell.clean.val >= 0 ? "+" : ""}${cell.clean.val} MASS)`
+            });
+          } else if (kind === "POLARITY_FLIP") {
+            cell.val = -cell.clean.val;
+            cell.type = cell.val < 0 ? "WELL" : "MASS";
+            cell.anomaly = "POLARITY_FLIP";
+            anomalies.push({
+              coord: cell.coord,
+              r: cell.r,
+              c: cell.c,
+              kind,
+              fixCmd: `invert ${cell.coord.toLowerCase()}`,
+              summary: `POLARITY INVERSION @ ${cell.coord} (SHOWS ${cell.val >= 0 ? "+" : ""}${cell.val}, TRUE ${cell.clean.val >= 0 ? "+" : ""}${cell.clean.val})`
+            });
+          } else if (kind === "STATIC_JAM") {
+            cell.type = "JAMMED";
+            cell.val = 0;
+            cell.anomaly = "STATIC_JAM";
+            const maskDesc = cell.clean.type === "RELAY"
+              ? `RELAY [${cell.clean.letter}]`
+              : `${cell.clean.val >= 0 ? "+" : ""}${cell.clean.val} MASS`;
+            anomalies.push({
+              coord: cell.coord,
+              r: cell.r,
+              c: cell.c,
+              kind,
+              fixCmd: `purge ${cell.coord.toLowerCase()}`,
+              summary: `STATIC INTERFERENCE [!] @ ${cell.coord} (JAMS ${maskDesc})`
+            });
+          } else if (kind === "PHASE_LOCK") {
+            cell.phaseLocked = true;
+            cell.anomaly = "PHASE_LOCK";
+            anomalies.push({
+              coord: cell.coord,
+              r: cell.r,
+              c: cell.c,
+              kind,
+              fixCmd: `sync ${puzzle.word.toLowerCase()}`,
+              summary: `PHASE-LOCKED RELAY [${cell.letter}] @ ${cell.coord} (REQUIRES CALLSIGN SYNC)`
+            });
+          }
+        }
+
+        // Snapshot initial sabotaged state so 'reboot' / RESET restores anomalies cleanly
+        for (let r = 0; r < puzzle.size; r++) {
+          for (let c = 0; c < puzzle.size; c++) {
+            const cell = puzzle.grid[r][c];
+            cell.initial = {
+              type: cell.type,
+              val: cell.val,
+              letter: cell.letter,
+              phaseLocked: cell.phaseLocked,
+              anomaly: cell.anomaly
+            };
+          }
+        }
+
+        puzzle.anomalies = anomalies;
+        puzzle.maxCharges = anomalies.length + 1; // +1 spare tactical charge
       }
 
       static buildSelfAvoidingWalk(rng, size, minLen, maxLen) {
@@ -1577,7 +2052,6 @@
           }
         }
 
-        // Deterministic serpentine fallback (guaranteed valid)
         const fallback = [];
         for (let r = 0; r < size; r++) {
           for (let c = 0; c < size; c++) {
@@ -1594,7 +2068,6 @@
         const vals = Array(count).fill(1);
         let currentSum = count;
 
-        // Distribute positive mass up to target
         let guard = 0;
         while (currentSum < target && guard < 2000) {
           guard++;
@@ -1605,7 +2078,6 @@
           }
         }
 
-        // Inject 1 or 2 negative Gravity Wells on Orbital/Deep Space modes
         if (allowWells && count >= 4) {
           const wellCount = count >= 6 ? 2 : 1;
           const indices = rng.shuffle(Array.from({ length: count }, (_, i) => i));
@@ -1616,7 +2088,6 @@
             const wellVal = rng.pick([-2, -3]);
             const compensation = vals[wIdx] - wellVal;
 
-            // Find other nodes able to absorb the compensation without exceeding 9
             const donors = indices.filter((i) => i !== wIdx && vals[i] > 0 && vals[i] < 9);
             const spareCapacity = donors.reduce((acc, i) => acc + (9 - vals[i]), 0);
 
@@ -1640,7 +2111,689 @@
     }
 
     // --------------------------------------------------------------------------
-    // 4. GAME STATE & INTERFACE CONTROLLER
+    // 4. NAHLA BASH & GRID OVERRIDE SHELL (ttyS0)
+    // --------------------------------------------------------------------------
+    class NahlaTerminal {
+      static MAX_LINES = 300;
+      static COMMANDS = [
+        "scan", "vent", "invert", "purge", "sync", "dampen", "boost", "reboot",
+        "help", "man", "clear", "cls", "ls", "ll", "cd", "pwd", "cat", "grep",
+        "echo", "whoami", "uname", "date", "uptime", "ps", "df", "history", "sudo"
+      ];
+
+      constructor(game) {
+        this.game = game;
+        this.lines = [];
+        this.cmdHistory = [];
+        this.historyIdx = -1;
+        this.cwd = "/home/nahla/sector";
+        this.startTime = Date.now();
+        this.pendingPrompt = null; // e.g., { type: "RELAY_DRIFT", coord: "B3", r, c }
+      }
+
+      resetForSector(puzzle) {
+        this.lines = [];
+        this.cwd = "/home/nahla/sector";
+        this.pendingPrompt = null;
+        this.updatePromptLabel();
+
+        this.print(`HopeOS 3.1.0-void-vector (ttyS0) — SECTOR #${puzzle.seedStr}`, "sys");
+        this.print(`MODE: ${puzzle.mode} (${puzzle.size}x${puzzle.size}) • CALLSIGN: ${puzzle.word} • OVERRIDE CHG: ${this.game.chargesLeft}/${puzzle.maxCharges}`, "info");
+
+        if (puzzle.anomalies.length > 0) {
+          this.print(`[WARN] ${puzzle.anomalies.length} GRID ANOMAL${puzzle.anomalies.length === 1 ? "Y" : "IES"} DETECTED ON VECTOR ROUTE. TYPE 'scan' TO INSPECT.`, "warn");
+        } else {
+          this.print(`[OK] SECTOR NOMINAL. TYPE 'help' FOR BASH & OVERRIDE COMMANDS.`, "ok");
+        }
+      }
+
+      clear() {
+        this.lines = [];
+        this.render();
+      }
+
+      print(text, tone = "info") {
+        this.lines.push({ text: String(text), tone });
+        if (this.lines.length > NahlaTerminal.MAX_LINES) {
+          this.lines.splice(0, this.lines.length - NahlaTerminal.MAX_LINES);
+        }
+        this.render();
+      }
+
+      render() {
+        const screen = document.getElementById("bash-screen");
+        if (!screen) return;
+        screen.innerHTML = "";
+        for (const entry of this.lines) {
+          const div = document.createElement("div");
+          div.className = `term-line ${entry.tone}`;
+          div.textContent = entry.text;
+          screen.appendChild(div);
+        }
+        screen.scrollTop = screen.scrollHeight;
+      }
+
+      updatePromptLabel() {
+        const lbl = document.getElementById("bash-prompt-label");
+        if (!lbl) return;
+        const shortCwd = this.cwd === "/home/nahla/sector"
+          ? "~/sector"
+          : this.cwd === "/home/nahla"
+            ? "~"
+            : this.cwd;
+        lbl.textContent = `nahla@hope:${shortCwd}$`;
+      }
+
+      triggerRelayPrompt(cell) {
+        if (this.pendingPrompt) return;
+        this.pendingPrompt = {
+          type: "RELAY_DRIFT",
+          coord: cell.coord,
+          r: cell.r,
+          c: cell.c
+        };
+        this.print("", "info");
+        this.print(`[TX // RELAY ${cell.coord}] HARMONIC DRIFT DETECTED (+00 MASS).`, "cyan");
+        this.print(`  > REPLY 'dampen' TO LOCK (+00) OR 'boost' TO INJECT +02 MASS AT ${cell.coord}.`, "warn");
+      }
+
+      autocomplete(rawInput) {
+        const parts = rawInput.split(/\s+/);
+        if (parts.length === 1) {
+          const prefix = parts[0].toLowerCase();
+          if (!prefix) return rawInput;
+          const matches = NahlaTerminal.COMMANDS.filter((c) => c.startsWith(prefix));
+          if (matches.length === 1) return matches[0] + " ";
+          if (matches.length > 1) this.print(matches.join("  "), "info");
+          return rawInput;
+        }
+
+        const cmd = parts[0].toLowerCase();
+        const argPrefix = parts[1].toUpperCase();
+
+        if (cmd === "sync") {
+          const codes = SectorGenerator.WORDS_4.filter((w) => w.startsWith(argPrefix));
+          if (codes.length === 1) return `${parts[0]} ${codes[0]}`;
+          if (codes.length > 1) this.print(codes.join("  "), "info");
+        } else if (["vent", "invert", "purge", "scan"].includes(cmd)) {
+          const size = this.game.puzzle.size;
+          const coords = [];
+          for (let r = 0; r < size; r++) {
+            for (let c = 0; c < size; c++) {
+              coords.push(SectorGenerator.toCoord(r, c));
+            }
+          }
+          const matches = coords.filter((xy) => xy.startsWith(argPrefix));
+          if (matches.length === 1) return `${parts[0]} ${matches[0]}`;
+          if (matches.length > 1 && matches.length <= 12) this.print(matches.join("  "), "info");
+        } else if (["cat", "grep", "ls", "cd"].includes(cmd)) {
+          const files = this.getDirEntries(this.cwd).map((f) => f.replace(/\/$/, ""));
+          const matches = files.filter((f) => f.toLowerCase().startsWith(parts[1].toLowerCase()));
+          if (matches.length === 1) return `${parts[0]} ${matches[0]}`;
+        }
+
+        return rawInput;
+      }
+
+      execute(raw) {
+        const trimmed = String(raw || "").trim();
+        if (!trimmed) return;
+
+        this.cmdHistory.push(trimmed);
+        this.historyIdx = this.cmdHistory.length;
+
+        const shortCwd = this.cwd === "/home/nahla/sector"
+          ? "~/sector"
+          : this.cwd === "/home/nahla"
+            ? "~"
+            : this.cwd;
+        this.print(`nahla@hope:${shortCwd}$ ${trimmed}`, "cmd");
+
+        const tokens = trimmed.split(/\s+/);
+        let cmd = tokens[0].toLowerCase();
+        let args = tokens.slice(1);
+
+        if (cmd === "sudo") {
+          if (args.length === 0) {
+            this.print("usage: sudo <command>", "info");
+            return;
+          }
+          this.print("[sudo] password for nahla: ********** (local ttyS0 bypass)", "info");
+          cmd = args[0].toLowerCase();
+          args = args.slice(1);
+        }
+
+        switch (cmd) {
+          case "clear":
+          case "cls":
+            this.clear();
+            break;
+
+          case "help":
+          case "man":
+          case "?":
+            this.cmdHelp();
+            break;
+
+          case "scan":
+            this.cmdScan(args[0]);
+            break;
+
+          case "vent":
+            this.cmdVent(args[0]);
+            break;
+
+          case "invert":
+            this.cmdInvert(args[0]);
+            break;
+
+          case "purge":
+            this.cmdPurge(args[0]);
+            break;
+
+          case "sync":
+            this.cmdSync(args[0]);
+            break;
+
+          case "dampen":
+            this.cmdReplyDrift("dampen");
+            break;
+
+          case "boost":
+            this.cmdReplyDrift("boost");
+            break;
+
+          case "reboot":
+            this.game.resetPath(false, true);
+            break;
+
+          case "ls":
+          case "ll":
+            this.cmdLs(args);
+            break;
+
+          case "cd":
+            this.cmdCd(args[0]);
+            break;
+
+          case "pwd":
+            this.print(this.cwd, "info");
+            break;
+
+          case "cat":
+            this.cmdCat(args[0]);
+            break;
+
+          case "grep":
+            this.cmdGrep(args);
+            break;
+
+          case "echo":
+            this.print(args.join(" "), "info");
+            break;
+
+          case "whoami":
+            this.print("nahla-tracker", "ok");
+            break;
+
+          case "uname":
+            if (args.includes("-a")) {
+              this.print("HopeOS 3.1.0-void-vector #31 SMP MONO riscv64 GNU/Linux", "info");
+            } else {
+              this.print("HopeOS", "info");
+            }
+            break;
+
+          case "date":
+            this.print(new Date().toUTCString(), "info");
+            break;
+
+          case "uptime": {
+            const secs = Math.floor((Date.now() - this.startTime) / 1000);
+            const mins = Math.floor(secs / 60);
+            this.print(`up ${mins}m ${secs % 60}s, 1 operator, solved_sectors=${this.game.stats.solved}`, "info");
+            break;
+          }
+
+          case "ps":
+            this.print("  PID TTY      TIME CMD\n    1 ttyS0    00:00:01 init\n   31 ttyS0    00:00:04 barycentre_sync\n   42 ttyS0    00:00:02 vector_router\n   88 ttyS0    00:00:01 nahla_sh", "info");
+            break;
+
+          case "df":
+            this.print(`Filesystem      Size  Used Avail Use% Mounted on\n/dev/hope0       31M   ${String(this.game.computeStatus().mass).padStart(2, "0")}M   ${Math.max(0, 31 - this.game.computeStatus().mass)}M  ${Math.min(100, Math.round((this.game.computeStatus().mass / 31) * 100))}% /home/nahla/sector\n/dev/override   ${this.game.puzzle.maxCharges}CHG  ${this.game.puzzle.maxCharges - this.game.chargesLeft}CHG  ${this.game.chargesLeft}CHG   --% /sys/override`, "info");
+            break;
+
+          case "history":
+            this.cmdHistory.forEach((entry, idx) => {
+              this.print(`  ${String(idx + 1).padStart(2, " ")}  ${entry}`, "info");
+            });
+            break;
+
+          case "exit":
+            this.print("logout blocked: active telemetry lock in progress.", "warn");
+            break;
+
+          default:
+            this.game.audio.error();
+            this.print(`nahla_sh: ${cmd}: command not found (type 'help' for commands)`, "err");
+        }
+      }
+
+      // --- Grid Override Commands ---
+      cmdHelp() {
+        this.print("=== GRID OVERRIDE COMMANDS (ttyS0) ===", "sys");
+        this.print("  scan [xy]     Scan sector (or tile) for hidden anomalies", "info");
+        this.print("  vent <xy>     Vaporize a ## Void node (e.g. vent c4)", "info");
+        this.print("  invert <xy>   Flip +/- polarity of a numeric node", "info");
+        this.print("  purge <xy>    Clear [!] static interference or decoy relay", "info");
+        this.print("  sync <code>   Sync callsign to unlock [?] phase relays", "info");
+        this.print("  dampen|boost  Reply to incoming relay harmonic drift", "info");
+        this.print("  reboot        Reset vector & restore initial sector anomalies", "info");
+        this.print("=== BASH / SYSTEM UTILITIES ===", "sys");
+        this.print("  ls, cd, pwd, cat <file>, grep <str>, echo, ps, df,", "info");
+        this.print("  whoami, uname -a, date, uptime, history, clear", "info");
+      }
+
+      cmdScan(coordArg) {
+        const puzzle = this.game.puzzle;
+        this.game.audio.cmdOk();
+
+        if (coordArg) {
+          const parsed = SectorGenerator.parseCoord(coordArg, puzzle.size);
+          if (!parsed) {
+            this.game.audio.error();
+            this.print(`scan: invalid coordinate '${coordArg}' (valid: A1..${SectorGenerator.COLS[puzzle.size - 1]}${puzzle.size})`, "err");
+            return;
+          }
+          const cell = puzzle.grid[parsed.r][parsed.c];
+          if (cell.anomaly) {
+            const item = puzzle.anomalies.find((a) => a.coord === parsed.coord);
+            this.print(`[SCAN ${parsed.coord}] ANOMALY ACTIVE: ${item ? item.summary : cell.anomaly}`, "warn");
+          } else {
+            this.print(`[SCAN ${parsed.coord}] TYPE=${cell.type} VAL=${cell.val >= 0 ? "+" : ""}${cell.val}${cell.letter ? ` RELAY=[${cell.letter}]` : ""} (NOMINAL)`, "ok");
+          }
+          return;
+        }
+
+        const active = puzzle.anomalies.filter((a) => puzzle.grid[a.r][a.c].anomaly !== null);
+        if (active.length === 0) {
+          this.print("[SCAN] 0 ACTIVE ANOMALIES REMAINING. SECTOR ROUTE CLEAR.", "ok");
+          return;
+        }
+
+        this.print(`[SCAN] DETECTED ${active.length} ACTIVE SECTOR ANOMAL${active.length === 1 ? "Y" : "IES"}:`, "sys");
+        active.forEach((a, idx) => {
+          this.print(`  0${idx + 1}. ${a.summary}  -->  run '${a.fixCmd}'`, "warn");
+        });
+      }
+
+      consumeChargeOrWarn() {
+        if (this.game.chargesLeft <= 0) {
+          this.game.audio.error();
+          this.print("err: 0 OVERRIDE CHARGES REMAINING. Type 'reboot' or press [R] to restore sector.", "err");
+          return false;
+        }
+        return true;
+      }
+
+      cmdVent(coordArg) {
+        const puzzle = this.game.puzzle;
+        if (!coordArg) {
+          this.game.audio.error();
+          this.print("usage: vent <coord>  (example: vent c4)", "err");
+          return;
+        }
+        const parsed = SectorGenerator.parseCoord(coordArg, puzzle.size);
+        if (!parsed) {
+          this.game.audio.error();
+          this.print(`vent: coordinate '${coordArg}' out of bounds.`, "err");
+          return;
+        }
+        const cell = puzzle.grid[parsed.r][parsed.c];
+        if (cell.type !== "VOID") {
+          this.game.audio.error();
+          this.print(`vent: ${parsed.coord} is not a ## VOID node (current: ${cell.type}).`, "err");
+          return;
+        }
+        if (!this.consumeChargeOrWarn()) return;
+
+        this.game.chargesLeft--;
+        if (cell.anomaly === "COLLAPSED_VOID" && cell.clean) {
+          cell.type = cell.clean.type;
+          cell.val = cell.clean.val;
+          cell.anomaly = null;
+          this.print(`[OK] VENTED ${parsed.coord}: COLLAPSED VOID CLEARED -> RESTORED ${cell.val >= 0 ? "+" : ""}${cell.val} (${cell.type}).`, "ok");
+        } else {
+          cell.type = "MASS";
+          cell.val = 0;
+          cell.anomaly = null;
+          this.print(`[OK] VENTED ${parsed.coord}: NATURAL VOID VAPORIZED -> 00 TRANSIT NODE.`, "ok");
+        }
+        this.game.onGridMutated(parsed.r, parsed.c);
+      }
+
+      cmdInvert(coordArg) {
+        const puzzle = this.game.puzzle;
+        if (!coordArg) {
+          this.game.audio.error();
+          this.print("usage: invert <coord>  (example: invert d2)", "err");
+          return;
+        }
+        const parsed = SectorGenerator.parseCoord(coordArg, puzzle.size);
+        if (!parsed) {
+          this.game.audio.error();
+          this.print(`invert: coordinate '${coordArg}' out of bounds.`, "err");
+          return;
+        }
+        const cell = puzzle.grid[parsed.r][parsed.c];
+        if (cell.type !== "MASS" && cell.type !== "WELL") {
+          this.game.audio.error();
+          this.print(`invert: ${parsed.coord} has no numeric polarity to invert (type: ${cell.type}).`, "err");
+          return;
+        }
+        if (cell.val === 0) {
+          this.game.audio.error();
+          this.print(`invert: ${parsed.coord} has 00 neutral mass.`, "err");
+          return;
+        }
+        if (!this.consumeChargeOrWarn()) return;
+
+        this.game.chargesLeft--;
+        const prev = cell.val;
+        cell.val = -prev;
+        cell.type = cell.val < 0 ? "WELL" : "MASS";
+        if (cell.anomaly === "POLARITY_FLIP") cell.anomaly = null;
+
+        this.print(`[OK] INVERTED ${parsed.coord}: ${prev >= 0 ? "+" : ""}${prev} -> ${cell.val >= 0 ? "+" : ""}${cell.val} (${cell.type}).`, "ok");
+        this.game.onGridMutated(parsed.r, parsed.c);
+      }
+
+      cmdPurge(coordArg) {
+        const puzzle = this.game.puzzle;
+        if (!coordArg) {
+          this.game.audio.error();
+          this.print("usage: purge <coord>  (example: purge b3)", "err");
+          return;
+        }
+        const parsed = SectorGenerator.parseCoord(coordArg, puzzle.size);
+        if (!parsed) {
+          this.game.audio.error();
+          this.print(`purge: coordinate '${coordArg}' out of bounds.`, "err");
+          return;
+        }
+        const cell = puzzle.grid[parsed.r][parsed.c];
+        if (cell.type !== "JAMMED" && cell.type !== "RELAY") {
+          this.game.audio.error();
+          this.print(`purge: ${parsed.coord} has no static interference or relay signal (type: ${cell.type}).`, "err");
+          return;
+        }
+        if (!this.consumeChargeOrWarn()) return;
+
+        this.game.chargesLeft--;
+        if (cell.type === "JAMMED" && cell.clean) {
+          cell.type = cell.clean.type;
+          cell.val = cell.clean.val;
+          cell.letter = cell.clean.letter;
+          cell.anomaly = null;
+          const desc = cell.type === "RELAY" ? `RELAY [${cell.letter}]` : `${cell.val >= 0 ? "+" : ""}${cell.val} ${cell.type}`;
+          this.print(`[OK] PURGED STATIC AT ${parsed.coord} -> RESTORED ${desc}.`, "ok");
+        } else {
+          const oldLetter = cell.letter;
+          cell.type = "MASS";
+          cell.val = 0;
+          cell.letter = null;
+          cell.phaseLocked = false;
+          cell.anomaly = null;
+          this.print(`[OK] PURGED RELAY [${oldLetter}] AT ${parsed.coord} -> 00 TRANSIT NODE.`, "ok");
+        }
+        this.game.onGridMutated(parsed.r, parsed.c);
+      }
+
+      cmdSync(codeArg) {
+        const puzzle = this.game.puzzle;
+        if (!codeArg) {
+          this.game.audio.error();
+          this.print(`usage: sync <callsign>  (active sector callsign: ${puzzle.word})`, "err");
+          return;
+        }
+        const code = codeArg.trim().toUpperCase();
+        const validWords = [...SectorGenerator.WORDS_3, ...SectorGenerator.WORDS_4];
+        if (!validWords.includes(code)) {
+          this.game.audio.error();
+          this.print(`sync: unknown callsign '${code}'. Flip the bottom card to inspect the Lexicon.`, "err");
+          return;
+        }
+
+        if (code !== puzzle.word && code !== "NULL") {
+          this.game.audio.error();
+          this.print(`sync: handshake rejected — sector carrier expects '${puzzle.word}' (or 'NULL').`, "err");
+          return;
+        }
+
+        // Unlock all phase-locked relays on the grid
+        let unlockedCells = [];
+        for (let r = 0; r < puzzle.size; r++) {
+          for (let c = 0; c < puzzle.size; c++) {
+            const cell = puzzle.grid[r][c];
+            if (cell.phaseLocked) {
+              cell.phaseLocked = false;
+              cell.anomaly = null;
+              unlockedCells.push(cell);
+            }
+          }
+        }
+
+        if (unlockedCells.length === 0 && code !== "NULL") {
+          this.game.audio.cmdOk();
+          this.print(`[SYNC] CALLSIGN ${code} VERIFIED. NO PHASE-LOCKED RELAYS PENDING.`, "info");
+          return;
+        }
+
+        if (!this.consumeChargeOrWarn()) return;
+        this.game.chargesLeft--;
+
+        if (unlockedCells.length > 0) {
+          const coords = unlockedCells.map((c) => c.coord).join(", ");
+          this.print(`[OK] CALLSIGN ${code} SYNCHRONIZED -> PHASE-LOCK CLEARED AT ${coords}.`, "ok");
+          unlockedCells.forEach((c) => this.game.onGridMutated(c.r, c.c));
+        } else {
+          this.print(`[OK] <NULL SIGNAL> CARRIER OVERRIDE SYNCHRONIZED.`, "ok");
+          this.game.updateChargesHUD();
+        }
+      }
+
+      cmdReplyDrift(choice) {
+        if (!this.pendingPrompt) {
+          this.game.audio.error();
+          this.print(`${choice}: no active relay harmonic transmission awaiting reply.`, "err");
+          return;
+        }
+        const { coord, r, c } = this.pendingPrompt;
+        const cell = this.game.puzzle.grid[r][c];
+        this.pendingPrompt = null;
+
+        if (choice === "dampen") {
+          this.game.audio.cmdOk();
+          this.print(`[OK] RELAY ${coord} HARMONIC DAMPENED (+00 MASS).`, "ok");
+        } else {
+          cell.val += 2;
+          this.print(`[OK] RELAY ${coord} OVERDRIVEN -> INJECTED +02 MASS!`, "ok");
+          this.game.onGridMutated(r, c);
+        }
+      }
+
+      // --- Virtual Bash Filesystem ---
+      getDirEntries(dir) {
+        const fs = {
+          "/": ["home/", "sys/", "var/", "etc/"],
+          "/home": ["nahla/"],
+          "/home/nahla": ["sector/", "readme.txt"],
+          "/home/nahla/sector": ["anomalies.dat", "sector.map", "telemetry.log", "lexicon.db"],
+          "/sys": ["sector/", "override/"],
+          "/sys/sector": ["barycentre", "anomalies.dat"],
+          "/sys/override": ["charges", "vent", "invert", "purge", "sync"],
+          "/var": ["log/"],
+          "/var/log": ["telemetry.log"],
+          "/etc": ["lexicon.db"]
+        };
+        return fs[dir] || [];
+      }
+
+      resolvePath(target) {
+        if (!target || target === "~") return "/home/nahla";
+        if (target === "~/sector") return "/home/nahla/sector";
+        if (target === "..") {
+          if (this.cwd === "/") return "/";
+          const parts = this.cwd.split("/").filter(Boolean);
+          parts.pop();
+          return "/" + parts.join("/");
+        }
+        if (target.startsWith("/")) {
+          return target.replace(/\/+$/, "") || "/";
+        }
+        const base = this.cwd === "/" ? "" : this.cwd;
+        return `${base}/${target.replace(/\/+$/, "")}`;
+      }
+
+      cmdLs(args) {
+        const pathArg = args.find((a) => !a.startsWith("-"));
+        const target = pathArg ? this.resolvePath(pathArg) : this.cwd;
+        const entries = this.getDirEntries(target);
+        if (entries.length === 0) {
+          this.game.audio.error();
+          this.print(`ls: cannot access '${pathArg || target}': No such file or directory`, "err");
+          return;
+        }
+        if (args.includes("-la") || args.includes("-l")) {
+          this.print(`total ${entries.length * 4}`, "info");
+          entries.forEach((e) => {
+            const isDir = e.endsWith("/");
+            this.print(`${isDir ? "drwxr-xr-x" : "-rw-r--r--"} 1 nahla hope 4096 Nov 19 17:18 ${e}`, isDir ? "cyan" : "info");
+          });
+        } else {
+          this.print(entries.join("   "), "cyan");
+        }
+      }
+
+      cmdCd(target) {
+        const next = this.resolvePath(target || "~");
+        const validDirs = ["/", "/home", "/home/nahla", "/home/nahla/sector", "/sys", "/sys/sector", "/sys/override", "/var", "/var/log", "/etc"];
+        if (!validDirs.includes(next)) {
+          this.game.audio.error();
+          this.print(`cd: ${target}: No such directory`, "err");
+          return;
+        }
+        this.cwd = next;
+        this.updatePromptLabel();
+      }
+
+      getFileContent(filename) {
+        const puzzle = this.game.puzzle;
+        const status = this.game.computeStatus();
+
+        if (filename === "readme.txt") {
+          return [
+            "NAHLA TRACKER // HOPE SYSTEM FIELD MANUAL",
+            "1. Route vector from [>] to [X] with exact Barycentre Mass = 31.",
+            "2. Use 'scan' to inspect sabotaged tiles along the sector grid.",
+            "3. Commands: 'vent <xy>', 'invert <xy>', 'purge <xy>', 'sync <code>'.",
+            "4. Type 'clear' to wipe ttyS0 scrollback; 'reboot' to reset sector."
+          ].join("\n");
+        }
+
+        if (filename === "anomalies.dat") {
+          const active = puzzle.anomalies.filter((a) => puzzle.grid[a.r][a.c].anomaly !== null);
+          if (active.length === 0) return "STATUS: CLEAN (0 active anomalies)";
+          return active.map((a, i) => `[0${i + 1}] ${a.summary} -> ${a.fixCmd}`).join("\n");
+        }
+
+        if (filename === "lexicon.db") {
+          return SectorGenerator.DEEP_LEXICON.map((e) => `${e.code}  ::  ${e.label}`).join("\n");
+        }
+
+        if (filename === "telemetry.log") {
+          const trail = this.game.path.map((p) => SectorGenerator.toCoord(p.r, p.c)).join(" -> ");
+          return [
+            `SEED: #${puzzle.seedStr}  MODE: ${puzzle.mode}`,
+            `MASS: ${status.mass} / 31 (DELTA ${status.delta >= 0 ? "+" : ""}${status.delta})`,
+            `CALLSIGN: ${puzzle.word} (${status.lockedCount}/${puzzle.word.length} locked)`,
+            `CHARGES: ${this.game.chargesLeft}/${puzzle.maxCharges}`,
+            `VECTOR: ${trail}`
+          ].join("\n");
+        }
+
+        if (filename === "sector.map") {
+          const header = "    " + SectorGenerator.COLS.slice(0, puzzle.size).map((c) => c.padEnd(4, " ")).join("");
+          const rows = [header];
+          for (let r = 0; r < puzzle.size; r++) {
+            const tokens = [];
+            for (let c = 0; c < puzzle.size; c++) {
+              const cell = puzzle.grid[r][c];
+              if (cell.type === "START") tokens.push("[>] ");
+              else if (cell.type === "EXIT") tokens.push("[X] ");
+              else if (cell.type === "VOID") tokens.push("##  ");
+              else if (cell.type === "JAMMED") tokens.push("[!] ");
+              else if (cell.type === "RELAY") tokens.push(cell.phaseLocked ? "[?] " : `[${cell.letter}] `);
+              else if (cell.type === "WELL") tokens.push(`${String(cell.val).padEnd(4, " ")}`);
+              else tokens.push(`${String(cell.val).padStart(2, "0")}  `);
+            }
+            rows.push(` ${r + 1}  ${tokens.join("")}`);
+          }
+          return rows.join("\n");
+        }
+
+        if (filename === "charges") {
+          return `${this.game.chargesLeft}/${puzzle.maxCharges}`;
+        }
+
+        if (filename === "barycentre") {
+          return `${status.mass}/31`;
+        }
+
+        return null;
+      }
+
+      cmdCat(arg) {
+        if (!arg) {
+          this.game.audio.error();
+          this.print("usage: cat <filename>", "err");
+          return;
+        }
+        const baseName = arg.split("/").pop();
+        const content = this.getFileContent(baseName);
+        if (content === null) {
+          this.game.audio.error();
+          this.print(`cat: ${arg}: No such file`, "err");
+          return;
+        }
+        this.print(content, "info");
+      }
+
+      cmdGrep(args) {
+        if (args.length === 0) {
+          this.game.audio.error();
+          this.print("usage: grep <pattern> [file]", "err");
+          return;
+        }
+        const pattern = args[0].toLowerCase();
+        const file = args[1] ? args[1].split("/").pop() : "lexicon.db";
+        const content = this.getFileContent(file);
+        if (content === null) {
+          this.game.audio.error();
+          this.print(`grep: ${file}: No such file`, "err");
+          return;
+        }
+        const hits = content.split("\n").filter((line) => line.toLowerCase().includes(pattern));
+        if (hits.length === 0) {
+          this.print(`(no matches for '${args[0]}' in ${file})`, "info");
+        } else {
+          this.print(hits.join("\n"), "ok");
+        }
+      }
+    }
+
+    // --------------------------------------------------------------------------
+    // 5. GAME STATE & INTERFACE CONTROLLER
     // --------------------------------------------------------------------------
     const Game = {
       mode: "SURVEY",
@@ -1651,7 +2804,10 @@
       isDragging: false,
       touchOrigin: null,
       hintCell: null,
+      chargesLeft: 2,
+      flipShowingLexicon: false,
       audio: new TelemetryAudio(),
+      term: null,
       stats: {
         solved: 0,
         optimal: 0,
@@ -1660,6 +2816,7 @@
       },
 
       init() {
+        this.term = new NahlaTerminal(this);
         this.loadStats();
         this.renderLexicon();
         this.bindEvents();
@@ -1675,6 +2832,33 @@
         btn.classList.toggle("active", isDone);
       },
 
+      toggleFlipCard() {
+        const panel = document.getElementById("flip-panel");
+        const titleEl = document.getElementById("flip-panel-title");
+        const badgeEl = document.getElementById("flip-panel-badge");
+        const protoFace = document.getElementById("face-protocol");
+        const lexFace = document.getElementById("face-lexicon");
+
+        panel.classList.add("flipping");
+        this.audio.cmdOk();
+
+        setTimeout(() => {
+          this.flipShowingLexicon = !this.flipShowingLexicon;
+          if (this.flipShowingLexicon) {
+            titleEl.textContent = "DEEP SPACE CALLSIGN LEXICON";
+            badgeEl.textContent = "20 TERMS";
+            protoFace.classList.add("face-inactive");
+            lexFace.classList.remove("face-inactive");
+          } else {
+            titleEl.textContent = "FIELD PROTOCOL // HOW TO PLAY";
+            badgeEl.textContent = "OVERRIDE OPS";
+            lexFace.classList.add("face-inactive");
+            protoFace.classList.remove("face-inactive");
+          }
+          panel.classList.remove("flipping");
+        }, 160);
+      },
+
       renderLexicon() {
         const container = document.getElementById("lexicon-grid");
         if (!container) return;
@@ -1685,7 +2869,7 @@
           btn.type = "button";
           btn.className = "lex-item" + (entry.code === "NULL" ? " lex-null" : "");
           btn.dataset.code = entry.code;
-          btn.title = `Launch Deep Space sector with callsign ${entry.code} (${entry.label})`;
+          btn.title = `Sync ${entry.code} if phase-locked, or launch Deep Space sector (${entry.label})`;
 
           const codeSpan = document.createElement("span");
           codeSpan.className = "lex-code";
@@ -1699,6 +2883,13 @@
           btn.appendChild(labelSpan);
 
           btn.addEventListener("click", () => {
+            // If current sector has a phase-locked relay matching this callsign, execute 'sync'
+            const hasPhaseLock = this.puzzle && this.puzzle.grid.some((row) => row.some((c) => c.phaseLocked));
+            if (hasPhaseLock && (this.puzzle.word === entry.code || entry.code === "NULL")) {
+              this.term.execute(`sync ${entry.code.toLowerCase()}`);
+              return;
+            }
+
             if (this.mode !== "DEEP") {
               this.mode = "DEEP";
               document.querySelectorAll("[data-mode]").forEach((mBtn) => {
@@ -1762,6 +2953,70 @@
         document.getElementById("btn-stats").addEventListener("click", () => this.showStatsModal());
         document.getElementById("btn-help").addEventListener("click", () => this.showHelpModal());
 
+        // Flip card toggle
+        document.getElementById("btn-flip-card").addEventListener("click", () => this.toggleFlipCard());
+
+        // Embedded Bash Terminal events
+        const bashForm = document.getElementById("bash-form");
+        const bashInput = document.getElementById("bash-input");
+        const bashScreen = document.getElementById("bash-screen");
+
+        bashForm.addEventListener("submit", (e) => {
+          e.preventDefault();
+          const val = bashInput.value;
+          bashInput.value = "";
+          this.audio.ensureContext();
+          this.term.execute(val);
+        });
+
+        bashInput.addEventListener("keydown", (e) => {
+          if (e.key === "ArrowUp") {
+            e.preventDefault();
+            if (this.term.cmdHistory.length > 0) {
+              this.term.historyIdx = Math.max(0, this.term.historyIdx - 1);
+              bashInput.value = this.term.cmdHistory[this.term.historyIdx] || "";
+            }
+          } else if (e.key === "ArrowDown") {
+            e.preventDefault();
+            if (this.term.cmdHistory.length > 0) {
+              this.term.historyIdx = Math.min(this.term.cmdHistory.length, this.term.historyIdx + 1);
+              bashInput.value = this.term.cmdHistory[this.term.historyIdx] || "";
+            }
+          } else if (e.key === "Tab") {
+            e.preventDefault();
+            bashInput.value = this.term.autocomplete(bashInput.value);
+          } else if (e.ctrlKey && e.key.toLowerCase() === "l") {
+            e.preventDefault();
+            this.term.clear();
+          }
+        });
+
+        bashScreen.addEventListener("click", () => {
+          // Focus input only if user didn't highlight text to copy
+          const sel = window.getSelection();
+          if (!sel || sel.toString().length === 0) {
+            bashInput.focus();
+          }
+        });
+
+        document.getElementById("btn-term-clear").addEventListener("click", () => {
+          this.term.clear();
+          this.audio.cmdOk();
+        });
+
+        document.querySelectorAll(".chip-btn[data-insert]").forEach((chip) => {
+          chip.addEventListener("click", () => {
+            const snippet = chip.dataset.insert;
+            if (chip.dataset.exec === "true") {
+              this.audio.ensureContext();
+              this.term.execute(snippet);
+            } else {
+              bashInput.value = snippet;
+              bashInput.focus();
+            }
+          });
+        });
+
         // Seed controls
         document.getElementById("btn-daily").addEventListener("click", () => {
           const daily = this.getDailySeed();
@@ -1773,7 +3028,7 @@
 
         // Footer controls
         document.getElementById("btn-undo").addEventListener("click", () => this.undoStep());
-        document.getElementById("btn-reset").addEventListener("click", () => this.resetPath());
+        document.getElementById("btn-reset").addEventListener("click", () => this.resetPath(false, true));
         document.getElementById("btn-hint").addEventListener("click", () => this.triggerHint());
         document.getElementById("btn-next").addEventListener("click", () => this.loadSector(this.randomSeed()));
 
@@ -1797,7 +3052,6 @@
             this.isDragging = true;
             this.tryStepTo(r, c);
           } else {
-            // Touch / pen: defer action until pointerup so vertical swipes scroll normally
             this.touchOrigin = { x: e.clientX, y: e.clientY, r, c };
           }
         });
@@ -1839,13 +3093,22 @@
           this.touchOrigin = null;
         });
 
-        // Keyboard Navigation
+        // Keyboard Navigation (skips shortcuts when typing inside bash-input or modal input)
         window.addEventListener("keydown", (e) => {
           if (document.getElementById("modal-backdrop").classList.contains("open")) {
             if (e.key === "Escape") this.closeModal();
             return;
           }
-          if (e.target.tagName === "INPUT") return;
+          if (e.target.tagName === "INPUT") {
+            if (e.key === "Escape") e.target.blur();
+            return;
+          }
+
+          if (e.key === "/" || e.key === "`") {
+            e.preventDefault();
+            bashInput.focus();
+            return;
+          }
 
           const head = this.path[this.path.length - 1];
           const key = e.key.toLowerCase();
@@ -1867,7 +3130,7 @@
             this.undoStep();
           } else if (key === "r") {
             e.preventDefault();
-            this.resetPath();
+            this.resetPath(false, true);
           } else if (key === "h") {
             e.preventDefault();
             this.triggerHint();
@@ -1906,15 +3169,41 @@
       loadSector(seedStr, forcedWord = null) {
         this.seed = seedStr.toUpperCase().replace(/^#/, "");
         this.puzzle = SectorGenerator.generate(this.mode, this.seed, forcedWord);
+        this.chargesLeft = this.puzzle.maxCharges;
         this.solved = false;
         this.hintCell = null;
 
         document.getElementById("seed-display").textContent = `#${this.seed}`;
-        this.resetPath(true);
-        this.setLog(`SECTOR #${this.seed} ONLINE • TARGET MASS: 31 • CALLSIGN: ${this.puzzle.word}`);
+        this.renderAxes();
+        this.resetPath(true, false);
+        this.term.resetForSector(this.puzzle);
+        this.updateChargesHUD();
+        this.setLog(`SECTOR #${this.seed} ONLINE • MASS 31 • CALLSIGN ${this.puzzle.word} • ${this.puzzle.anomalies.length} ANOMALIES`);
       },
 
-      resetPath(silent = false) {
+      restoreInitialGridState() {
+        if (!this.puzzle) return;
+        for (let r = 0; r < this.puzzle.size; r++) {
+          for (let c = 0; c < this.puzzle.size; c++) {
+            const cell = this.puzzle.grid[r][c];
+            if (cell.initial) {
+              cell.type = cell.initial.type;
+              cell.val = cell.initial.val;
+              cell.letter = cell.initial.letter;
+              cell.phaseLocked = cell.initial.phaseLocked;
+              cell.anomaly = cell.initial.anomaly;
+            }
+          }
+        }
+        this.chargesLeft = this.puzzle.maxCharges;
+        this.term.pendingPrompt = null;
+        this.updateChargesHUD();
+      },
+
+      resetPath(silent = false, restoreAnomalies = false) {
+        if (restoreAnomalies) {
+          this.restoreInitialGridState();
+        }
         const start = this.puzzle.solutionPath[0];
         this.path = [{ r: start.r, c: start.c }];
         this.solved = false;
@@ -1923,8 +3212,31 @@
         this.updateHUD();
         if (!silent) {
           this.audio.undo();
-          this.setLog("TELEMETRY VECTOR RESET TO ORIGIN [>].");
+          const msg = restoreAnomalies
+            ? "SECTOR REBOOTED: VECTOR RESET & OVERRIDE CHARGES RESTORED."
+            : "TELEMETRY VECTOR RESET TO ORIGIN [>].";
+          this.setLog(msg);
+          if (restoreAnomalies && this.term) {
+            this.term.print("[REBOOT] Sector anomalies and override charges restored.", "warn");
+          }
         }
+      },
+
+      updateChargesHUD() {
+        const el = document.getElementById("hud-charges");
+        if (!el || !this.puzzle) return;
+        el.textContent = `CHG: ${this.chargesLeft}/${this.puzzle.maxCharges}`;
+        el.className = "intel-badge " + (this.chargesLeft > 0 ? "charges-ok" : "charges-empty");
+      },
+
+      onGridMutated(r, c) {
+        this.audio.mutate();
+        this.hintCell = null;
+        this.updateChargesHUD();
+        this.renderBoard({ r, c });
+        const status = this.updateHUD();
+        this.setLog(`GRID MUTATED @ ${SectorGenerator.toCoord(r, c)} • MASS ${status.mass}/31.`, "ok");
+        this.evaluateProgress(status);
       },
 
       undoStep() {
@@ -1949,7 +3261,7 @@
         const head = this.path[this.path.length - 1];
         if (head.r === r && head.c === c) return;
 
-        // If tapping/dragging onto an already visited node in the path, backtrack to it
+        // Backtrack when tapping an earlier node in the active vector
         const existingIdx = this.path.findIndex((p) => p.r === r && p.c === c);
         if (existingIdx !== -1) {
           this.path = this.path.slice(0, existingIdx + 1);
@@ -1961,18 +3273,28 @@
           return;
         }
 
-        // Enforce orthogonal adjacency
         const dist = Math.abs(head.r - r) + Math.abs(head.c - c);
         if (dist !== 1) return;
 
         const cell = this.puzzle.grid[r][c];
         if (cell.type === "VOID") {
           this.audio.error();
-          this.setLog("BLOCKED: VOID SECTOR [##] IMPASSABLE.", "err");
+          this.setLog(`BLOCKED: VOID AT ${cell.coord}. TRY 'vent ${cell.coord.toLowerCase()}' IN ttyS0.`, "err");
           return;
         }
 
-        // Strict relay check on Deep Space mode
+        if (cell.type === "JAMMED") {
+          this.audio.error();
+          this.setLog(`BLOCKED: STATIC [!] AT ${cell.coord}. RUN 'purge ${cell.coord.toLowerCase()}' IN ttyS0.`, "err");
+          return;
+        }
+
+        if (cell.type === "RELAY" && cell.phaseLocked) {
+          this.audio.error();
+          this.setLog(`PHASE-LOCKED RELAY [${cell.letter}] @ ${cell.coord}. RUN 'sync ${this.puzzle.word.toLowerCase()}' IN ttyS0.`, "err");
+          return;
+        }
+
         if (cell.type === "RELAY" && this.puzzle.strictRelays) {
           const lockedSoFar = this.getLockedRelayCount();
           const expectedLetter = this.puzzle.word[lockedSoFar];
@@ -1991,13 +3313,15 @@
         this.renderBoard();
         const status = this.updateHUD();
 
-        // Sound & feedback
         if (cell.type === "WELL") {
           this.audio.well();
-          this.setLog(`GRAVITY WELL (${cell.val}) • MASS ADJUSTED TO ${status.mass}.`, "warn");
+          this.setLog(`GRAVITY WELL (${cell.val}) @ ${cell.coord} • MASS ${status.mass}.`, "warn");
         } else if (cell.type === "RELAY") {
           this.audio.relay(status.lockedCount);
-          this.setLog(`RELAY [${cell.letter}] PINGED • CALLSIGN ${status.lockedCount}/${this.puzzle.word.length}.`, "ok");
+          this.setLog(`RELAY [${cell.letter}] @ ${cell.coord} • CALLSIGN ${status.lockedCount}/${this.puzzle.word.length}.`, "ok");
+          if (status.lockedCount === 1) {
+            this.term.triggerRelayPrompt(cell);
+          }
         } else {
           this.audio.step(status.mass);
         }
@@ -2021,7 +3345,6 @@
         const cell = this.puzzle.grid[head.r][head.c];
         const wordLen = this.puzzle.word.length;
 
-        // <Null signal> bonus insta-solve when NULL is spelled
         if (this.puzzle.word === "NULL" && status.lockedCount === wordLen) {
           this.handleVictory(true);
           return;
@@ -2035,7 +3358,7 @@
             const reasons = [];
             if (status.mass !== 31) reasons.push(`MASS IS ${status.mass} (NEED 31)`);
             if (status.lockedCount < wordLen) reasons.push(`CALLSIGN ${status.lockedCount}/${wordLen}`);
-            this.setLog(`EXTRACTION REJECTED: ${reasons.join(" • ")}. BACKTRACK TO ADJUST.`, "err");
+            this.setLog(`EXTRACTION REJECTED: ${reasons.join(" • ")}. ADJUST VECTOR OR USE ttyS0.`, "err");
           }
         }
       },
@@ -2066,6 +3389,7 @@
           ? "<NULL SIGNAL> INTERCEPTED • BONUS INSTA-SOLVE!"
           : `BARYCENTRE LOCKED AT 31 IN ${steps} STEPS${optimal ? " (OPTIMAL PAR!)" : ""}.`;
         this.setLog(msg, "ok");
+        this.term.print(`[LOCKED] ${msg}`, "ok");
 
         setTimeout(() => {
           this.showVictoryModal(optimal, isNullBonus);
@@ -2074,9 +3398,21 @@
 
       triggerHint() {
         if (!this.puzzle || this.solved) return;
-        const sol = this.puzzle.solutionPath;
 
-        // Find longest prefix of current path matching the carved solution
+        // First check if an active anomaly still blocks the solutionPath
+        const activeAnomaly = this.puzzle.anomalies.find(
+          (a) => this.puzzle.grid[a.r][a.c].anomaly !== null
+        );
+        if (activeAnomaly) {
+          this.hintCell = { r: activeAnomaly.r, c: activeAnomaly.c };
+          this.audio.relay(1);
+          this.renderBoard();
+          this.setLog(`PING: ANOMALY AT ${activeAnomaly.coord} — RUN '${activeAnomaly.fixCmd}' IN ttyS0.`, "warn");
+          this.term.print(`[PING] Anomaly highlighted at ${activeAnomaly.coord} -> run '${activeAnomaly.fixCmd}'`, "warn");
+          return;
+        }
+
+        const sol = this.puzzle.solutionPath;
         let matchLen = 0;
         for (let i = 0; i < this.path.length && i < sol.length; i++) {
           if (this.path[i].r === sol[i].r && this.path[i].c === sol[i].c) {
@@ -2086,7 +3422,6 @@
           }
         }
 
-        // If player deviated off the solution path, snap back to last valid solution node
         if (matchLen < this.path.length) {
           this.path = this.path.slice(0, matchLen);
         }
@@ -2096,11 +3431,33 @@
           this.audio.relay(1);
           this.renderBoard();
           this.updateHUD();
-          this.setLog("TELEMETRY PING: NEXT OPTIMAL NODE HIGHLIGHTED IN AMBER.", "warn");
+          this.setLog(`TELEMETRY PING: NEXT OPTIMAL NODE (${SectorGenerator.toCoord(this.hintCell.r, this.hintCell.c)}) HIGHLIGHTED.`, "warn");
         }
       },
 
-      renderBoard() {
+      renderAxes() {
+        const size = this.puzzle.size;
+        const colsEl = document.getElementById("axis-cols");
+        const rowsEl = document.getElementById("axis-rows");
+
+        colsEl.style.gridTemplateColumns = `repeat(${size}, minmax(0, 1fr))`;
+        colsEl.innerHTML = "";
+        for (let c = 0; c < size; c++) {
+          const span = document.createElement("span");
+          span.textContent = SectorGenerator.COLS[c];
+          colsEl.appendChild(span);
+        }
+
+        rowsEl.style.gridTemplateRows = `repeat(${size}, minmax(0, 1fr))`;
+        rowsEl.innerHTML = "";
+        for (let r = 0; r < size; r++) {
+          const span = document.createElement("span");
+          span.textContent = String(r + 1);
+          rowsEl.appendChild(span);
+        }
+      },
+
+      renderBoard(flashPt = null) {
         const gridEl = document.getElementById("sector-grid");
         const size = this.puzzle.size;
         gridEl.style.gridTemplateColumns = `repeat(${size}, minmax(0, 1fr))`;
@@ -2117,11 +3474,16 @@
             el.className = "cell";
             el.dataset.r = r;
             el.dataset.c = c;
+            el.title = `${cell.coord} (${cell.type})`;
 
             if (cell.type === "START") el.classList.add("cell-start");
             else if (cell.type === "EXIT") el.classList.add("cell-exit");
             else if (cell.type === "WELL") el.classList.add("cell-well");
-            else if (cell.type === "RELAY") el.classList.add("cell-relay");
+            else if (cell.type === "RELAY") {
+              el.classList.add("cell-relay");
+              if (cell.phaseLocked) el.classList.add("phase-locked");
+            }
+            else if (cell.type === "JAMMED") el.classList.add("cell-jammed");
             else if (cell.type === "VOID") el.classList.add("cell-void");
 
             if (pathSet.has(`${r},${c}`)) el.classList.add("in-path");
@@ -2129,6 +3491,13 @@
             if (this.hintCell && this.hintCell.r === r && this.hintCell.c === c) {
               el.classList.add("hint-pulse");
             }
+            if (flashPt && flashPt.r === r && flashPt.c === c) {
+              el.classList.add("mutated-flash");
+            }
+
+            const coordSpan = document.createElement("span");
+            coordSpan.className = "cell-coord-hint";
+            coordSpan.textContent = cell.coord;
 
             const mainSpan = document.createElement("span");
             mainSpan.className = "cell-main";
@@ -2145,9 +3514,12 @@
             } else if (cell.type === "VOID") {
               mainSpan.textContent = "##";
               tagSpan.textContent = "VOID";
+            } else if (cell.type === "JAMMED") {
+              mainSpan.textContent = "[!]";
+              tagSpan.textContent = "JAM";
             } else if (cell.type === "RELAY") {
-              mainSpan.textContent = `[${cell.letter}]`;
-              tagSpan.textContent = "RLY";
+              mainSpan.textContent = cell.phaseLocked ? "[?]" : `[${cell.letter}]`;
+              tagSpan.textContent = cell.phaseLocked ? "LOCK" : "RLY";
             } else if (cell.type === "WELL") {
               mainSpan.textContent = `${cell.val}`;
               tagSpan.textContent = "WELL";
@@ -2156,6 +3528,7 @@
               tagSpan.textContent = "MASS";
             }
 
+            el.appendChild(coordSpan);
             el.appendChild(mainSpan);
             el.appendChild(tagSpan);
             gridEl.appendChild(el);
@@ -2210,7 +3583,7 @@
         for (const pt of this.path) {
           const cell = this.puzzle.grid[pt.r][pt.c];
           mass += cell.val;
-          if (cell.type === "RELAY" && cell.letter === word[lockedCount]) {
+          if (cell.type === "RELAY" && !cell.phaseLocked && cell.letter === word[lockedCount]) {
             lockedCount++;
           }
         }
@@ -2234,7 +3607,6 @@
         const sign = status.delta > 0 ? "+" : "";
         deltaEl.textContent = `${sign}${status.delta}`;
 
-        // Render Callsign Relay Pills
         const csEl = document.getElementById("hud-callsign");
         csEl.innerHTML = "";
         const word = this.puzzle.word;
@@ -2250,12 +3622,10 @@
         document.getElementById("hud-steps").textContent = String(status.steps).padStart(2, "0");
         document.getElementById("hud-par").textContent = String(this.puzzle.par).padStart(2, "0");
 
-        // Highlight matching callsign in the 20-term lexicon
         document.querySelectorAll(".lex-item").forEach((item) => {
           item.classList.toggle("active-callsign", item.dataset.code === word);
         });
 
-        // Highlight active mode card in the bottom explanation bar
         document.querySelectorAll(".mode-legend-item").forEach((card) => {
           card.classList.toggle("active-mode-info", card.dataset.modeInfo === this.mode);
         });
@@ -2296,13 +3666,12 @@
 
       showHelpModal() {
         this.openModal(
-          "31 // VOID VECTOR PROTOCOL",
+          "31 // VOID VECTOR v0.4 PROTOCOL",
           `
-            <div class="rule-item"><strong>OBJECTIVE:</strong> Trace one continuous orthogonal vector from <strong>[&gt;]</strong> to <strong>[X]</strong> such that the total mass equals <strong>31</strong> (representing the 31 bodies of the Hope System).</div>
-            <div class="rule-item"><strong>CALLSIGN RELAYS:</strong> Pass through the required letter relays in the <strong>exact sequence</strong> displayed on your HUD. Letter relays add 0 mass.</div>
-            <div class="rule-item"><strong>GRAVITY WELLS &amp; VOIDS:</strong> Negative wells (<strong>-2, -3, -4</strong>) bleed off excess mass. <strong>##</strong> Void sectors are impassable.</div>
-            <div class="rule-item"><strong>DEEP SPACE STRICT PROTOCOL:</strong> On Deep Space mode, touching any out-of-order or decoy letter is blocked.</div>
-            <div class="rule-item"><strong>NULL SIGNAL BONUS:</strong> Spelling <strong>NULL</strong> triggers an immediate bonus extraction on the final <strong>L</strong>.</div>
+            <div class="rule-item"><strong>OBJECTIVE:</strong> Trace a single orthogonal vector from <strong>[&gt;]</strong> to <strong>[X]</strong> summing to <strong>31</strong> while locking HUD callsign relays in exact order.</div>
+            <div class="rule-item"><strong>NAHLA SHELL (ttyS0):</strong> Every sector has sabotaged nodes blocking your route. Type <strong>scan</strong> to inspect anomalies, then alter the grid mid-play using <strong>vent &lt;xy&gt;</strong>, <strong>invert &lt;xy&gt;</strong>, <strong>purge &lt;xy&gt;</strong>, or <strong>sync &lt;code&gt;</strong>.</div>
+            <div class="rule-item"><strong>BASH UTILITIES:</strong> ttyS0 retains your command history until <strong>clear</strong> (or a new game) and supports <strong>ls</strong>, <strong>cd</strong>, <strong>pwd</strong>, <strong>cat</strong>, <strong>grep</strong>, <strong>ps</strong>, <strong>df</strong>, and <strong>reboot</strong>.</div>
+            <div class="rule-item"><strong>FLIP CARD:</strong> Use the <strong>FLIP ⇄</strong> button on the bottom-right panel to toggle between Field Protocol and the 20-term Deep Space Callsign Lexicon.</div>
           `,
           [{ label: "ACKNOWLEDGED", primary: true, onClick: () => this.closeModal() }]
         );
@@ -2399,7 +3768,7 @@
             </div>
           `,
           [
-            { label: "REPLAY SECTOR", onClick: () => { this.closeModal(); this.resetPath(); } },
+            { label: "REPLAY SECTOR", onClick: () => { this.closeModal(); this.resetPath(false, true); } },
             { label: "NEXT SECTOR [N]", primary: true, onClick: () => { this.closeModal(); this.loadSector(this.randomSeed()); } }
           ]
         );
