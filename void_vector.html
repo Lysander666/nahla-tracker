@@ -1,0 +1,2093 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>31 // Void Vector — Nahla Tracker</title>
+  <style>
+    /* ==========================================================================
+       NAHLA TRACKER DESIGN TOKENS & PHOSPHOR TERMINAL GREEN THEME
+       Offline-ready, zero external dependencies, pure monospace aesthetics.
+       ========================================================================== */
+    :root {
+      --bg-void: #050a07;
+      --bg-terminal: #09110d;
+      --bg-panel: #0d1913;
+      --bg-cell: #112119;
+      --bg-cell-hover: #172d22;
+      --border-dim: #1b3829;
+      --border-bright: #28523c;
+
+      --text-primary: #d8f5e3;
+      --text-secondary: #75a88b;
+      --text-dim: #3d634e;
+
+      --term-green: #22c55e;
+      --term-green-glow: rgba(34, 197, 94, 0.28);
+      --emerald: #4ade80;
+      --emerald-glow: rgba(74, 222, 128, 0.34);
+      --amber: #f59e0b;
+      --amber-glow: rgba(245, 158, 11, 0.25);
+      --crimson: #f43f5e;
+      --crimson-glow: rgba(244, 63, 94, 0.25);
+
+      --font-mono: ui-monospace, SFMono-Regular, "JetBrains Mono", "Fira Code", Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border-bright) var(--bg-void);
+    }
+
+    /* Dark Phosphor Green Terminal Scrollbars */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--bg-void);
+      border-left: 1px solid var(--border-dim);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--border-bright);
+      border: 1px solid var(--border-dim);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--term-green);
+    }
+
+    ::-webkit-scrollbar-corner {
+      background: var(--bg-void);
+    }
+
+    html, body {
+      width: 100%;
+      min-height: 100vh;
+      min-height: 100dvh;
+      overscroll-behavior-y: contain;
+      background-color: var(--bg-void);
+      color: var(--text-primary);
+      font-family: var(--font-mono);
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 0.75rem 0.5rem 2rem;
+      overflow-x: hidden;
+      line-height: 1.4;
+    }
+
+    /* Subtle CRT scanline overlay */
+    body.scanlines::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background: linear-gradient(
+        rgba(18, 16, 16, 0) 50%,
+        rgba(0, 0, 0, 0.22) 50%
+      );
+      background-size: 100% 4px;
+      z-index: 999;
+    }
+
+    /* Responsive Desktop + Mobile Workstation Shell */
+    .workspace-shell {
+      width: 100%;
+      max-width: 1060px;
+      margin: auto;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0.9rem;
+      align-items: start;
+      justify-items: center;
+    }
+
+    @media (min-width: 920px) {
+      html, body {
+        align-items: center;
+        padding: 1.25rem 1rem;
+      }
+      .workspace-shell {
+        grid-template-columns: minmax(480px, 580px) minmax(320px, 1fr);
+        gap: 1.15rem;
+        justify-items: stretch;
+      }
+    }
+
+    /* Main Terminal Container */
+    .terminal-frame {
+      width: 100%;
+      max-width: 600px;
+      background: var(--bg-terminal);
+      border: 1px solid var(--border-bright);
+      border-radius: 10px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.78), inset 0 0 0 1px rgba(34, 197, 94, 0.08);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* Side / Bottom Intel Column (Instructions + 20 Callsigns) */
+    .intel-column {
+      width: 100%;
+      max-width: 600px;
+      display: flex;
+      flex-direction: column;
+      gap: 0.9rem;
+    }
+
+    .intel-panel {
+      background: var(--bg-terminal);
+      border: 1px solid var(--border-bright);
+      border-radius: 10px;
+      box-shadow: 0 14px 36px rgba(0, 0, 0, 0.65), inset 0 0 0 1px rgba(34, 197, 94, 0.05);
+      overflow: hidden;
+    }
+
+    .intel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.65rem 0.95rem;
+      background: var(--bg-panel);
+      border-bottom: 1px solid var(--border-dim);
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.07em;
+      color: var(--term-green);
+    }
+
+    .intel-badge {
+      font-size: 0.64rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      background: var(--bg-void);
+      border: 1px solid var(--border-dim);
+      padding: 0.14rem 0.42rem;
+      border-radius: 4px;
+    }
+
+    .intel-body {
+      padding: 0.8rem 0.95rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.55rem;
+      font-size: 0.76rem;
+      color: var(--text-primary);
+    }
+
+    .brief-step {
+      display: flex;
+      gap: 0.55rem;
+      align-items: flex-start;
+      background: rgba(13, 25, 19, 0.78);
+      border: 1px solid var(--border-dim);
+      border-radius: 6px;
+      padding: 0.48rem 0.6rem;
+    }
+
+    .brief-num {
+      color: var(--term-green);
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .brief-step strong {
+      color: var(--emerald);
+    }
+
+    .brief-warn {
+      color: var(--amber);
+      font-weight: 600;
+    }
+
+    /* 20 Four-Letter Callsign Lexicon Grid */
+    .lexicon-note {
+      font-size: 0.7rem;
+      color: var(--text-secondary);
+      margin-bottom: 0.15rem;
+    }
+
+    .lexicon-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.4rem;
+    }
+
+    .lex-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.4rem;
+      background: var(--bg-panel);
+      border: 1px solid var(--border-dim);
+      border-radius: 6px;
+      padding: 0.36rem 0.52rem;
+      font-family: var(--font-mono);
+      text-align: left;
+      cursor: pointer;
+      transition: border-color 0.14s ease, background-color 0.14s ease, transform 0.1s ease;
+    }
+
+    .lex-item:hover {
+      background: var(--bg-cell-hover);
+      border-color: var(--border-bright);
+    }
+
+    .lex-item:active {
+      transform: translateY(1px);
+    }
+
+    .lex-item.active-callsign {
+      border-color: var(--term-green);
+      background: rgba(34, 197, 94, 0.16);
+      box-shadow: 0 0 10px var(--term-green-glow);
+    }
+
+    .lex-code {
+      font-size: 0.76rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      color: var(--term-green);
+      flex-shrink: 0;
+    }
+
+    .lex-meaning {
+      font-size: 0.68rem;
+      color: var(--text-secondary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .lex-item.lex-null {
+      border-color: rgba(245, 158, 11, 0.45);
+      background: rgba(245, 158, 11, 0.08);
+    }
+
+    .lex-item.lex-null .lex-code {
+      color: var(--amber);
+    }
+
+    .lex-item.lex-null .lex-meaning {
+      color: #fcd34d;
+    }
+
+    /* Top Header Bar */
+    .terminal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.75rem 1rem;
+      background: var(--bg-panel);
+      border-bottom: 1px solid var(--border-dim);
+      gap: 0.5rem;
+    }
+
+    .brand-block {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .brand-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: var(--term-green);
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--emerald);
+      box-shadow: 0 0 8px var(--emerald);
+      display: inline-block;
+    }
+
+    .brand-sub {
+      font-size: 0.68rem;
+      color: var(--text-secondary);
+      letter-spacing: 0.06em;
+      margin-top: 2px;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 0.35rem;
+    }
+
+    /* Buttons */
+    .btn {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      color: var(--text-primary);
+      background: var(--bg-cell);
+      border: 1px solid var(--border-dim);
+      border-radius: 6px;
+      padding: 0.42rem 0.65rem;
+      cursor: pointer;
+      transition: all 0.14s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.3rem;
+      user-select: none;
+    }
+
+    .btn:hover {
+      background: var(--bg-cell-hover);
+      border-color: var(--border-bright);
+    }
+
+    .btn:active {
+      transform: translateY(1px);
+    }
+
+    .btn.active {
+      background: rgba(34, 197, 94, 0.16);
+      border-color: var(--term-green);
+      color: var(--term-green);
+    }
+
+    .btn-primary {
+      background: rgba(34, 197, 94, 0.16);
+      border-color: var(--term-green);
+      color: var(--term-green);
+    }
+
+    .btn-primary:hover {
+      background: rgba(34, 197, 94, 0.26);
+    }
+
+    /* Mode & Seed Bar */
+    .control-strip {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.6rem 1rem;
+      background: rgba(13, 25, 19, 0.72);
+      border-bottom: 1px solid var(--border-dim);
+    }
+
+    .mode-group, .seed-group {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .seed-badge {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--text-secondary);
+      background: var(--bg-void);
+      border: 1px solid var(--border-dim);
+      border-radius: 6px;
+      padding: 0.36rem 0.55rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      transition: all 0.14s ease;
+    }
+
+    .seed-badge:hover {
+      border-color: var(--term-green);
+      color: var(--text-primary);
+    }
+
+    /* Telemetry Readout HUD */
+    .telemetry-hud {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.5rem;
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--border-dim);
+      background: var(--bg-terminal);
+    }
+
+    .hud-card {
+      background: var(--bg-panel);
+      border: 1px solid var(--border-dim);
+      border-radius: 8px;
+      padding: 0.5rem 0.65rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .hud-label {
+      font-size: 0.64rem;
+      color: var(--text-secondary);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .hud-value {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-top: 0.2rem;
+      display: flex;
+      align-items: baseline;
+      gap: 0.35rem;
+    }
+
+    .hud-sub {
+      font-size: 0.72rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+    }
+
+    .mass-under { color: var(--term-green); }
+    .mass-exact { color: var(--emerald); text-shadow: 0 0 10px var(--emerald-glow); }
+    .mass-over  { color: var(--crimson); text-shadow: 0 0 10px var(--crimson-glow); }
+
+    /* Callsign Pill Sequence */
+    .callsign-pills {
+      display: flex;
+      gap: 0.28rem;
+      margin-top: 0.25rem;
+      flex-wrap: wrap;
+    }
+
+    .cs-pill {
+      font-size: 0.78rem;
+      font-weight: 700;
+      padding: 0.1rem 0.38rem;
+      border-radius: 4px;
+      border: 1px solid var(--border-dim);
+      background: var(--bg-void);
+      color: var(--text-dim);
+      transition: all 0.15s ease;
+    }
+
+    .cs-pill.locked {
+      border-color: var(--emerald);
+      background: rgba(74, 222, 128, 0.16);
+      color: var(--emerald);
+    }
+
+    .cs-pill.next {
+      border-color: var(--amber);
+      background: rgba(245, 158, 11, 0.14);
+      color: var(--amber);
+      box-shadow: 0 0 8px var(--amber-glow);
+    }
+
+    /* Interactive Grid Arena */
+    .grid-wrapper {
+      padding: 0.9rem 1rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: radial-gradient(circle at center, #0c1a13 0%, #050a07 100%);
+    }
+
+    .board-stage {
+      position: relative;
+      width: 100%;
+      max-width: 440px;
+      aspect-ratio: 1 / 1;
+      touch-action: none;
+      user-select: none;
+    }
+
+    /* SVG Telemetry Vector Layer */
+    .vector-overlay {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    /* Grid Cell Matrix */
+    .sector-grid {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: grid;
+      gap: 6px;
+      z-index: 3;
+    }
+
+    .cell {
+      background: rgba(17, 33, 25, 0.88);
+      border: 1px solid var(--border-dim);
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      position: relative;
+      transition: transform 0.1s ease, border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .cell:hover:not(.cell-void) {
+      border-color: var(--border-bright);
+      background: var(--bg-cell-hover);
+    }
+
+    .cell-main {
+      font-size: clamp(0.95rem, 3.6vw, 1.25rem);
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      z-index: 2;
+    }
+
+    .cell-tag {
+      font-size: 0.56rem;
+      letter-spacing: 0.06em;
+      color: var(--text-secondary);
+      margin-top: 1px;
+      text-transform: uppercase;
+      z-index: 2;
+    }
+
+    /* Cell Variants */
+    .cell-start {
+      border-color: var(--term-green);
+      background: rgba(34, 197, 94, 0.14);
+      color: var(--term-green);
+    }
+
+    .cell-exit {
+      border-color: var(--emerald);
+      background: rgba(74, 222, 128, 0.1);
+      color: var(--emerald);
+    }
+
+    .cell-well {
+      color: var(--crimson);
+      border-color: rgba(244, 63, 94, 0.35);
+    }
+
+    .cell-relay {
+      color: var(--amber);
+      border-color: rgba(245, 158, 11, 0.35);
+    }
+
+    .cell-void {
+      background: rgba(5, 10, 7, 0.92);
+      border-color: #101f17;
+      color: #223d2f;
+      cursor: not-allowed;
+    }
+
+    /* Active Path States */
+    .cell.in-path {
+      border-color: var(--term-green);
+      background: rgba(34, 197, 94, 0.2);
+      box-shadow: inset 0 0 12px rgba(34, 197, 94, 0.18);
+    }
+
+    .cell.in-path.cell-well {
+      border-color: var(--crimson);
+      background: rgba(244, 63, 94, 0.2);
+    }
+
+    .cell.in-path.cell-relay {
+      border-color: var(--emerald);
+      background: rgba(74, 222, 128, 0.22);
+      color: var(--emerald);
+    }
+
+    .cell.path-head {
+      border-width: 2px;
+      border-color: #dcfce7;
+      box-shadow: 0 0 14px var(--term-green-glow);
+      transform: scale(1.03);
+    }
+
+    .cell.hint-pulse {
+      animation: hintPulse 1.1s infinite alternate;
+      border-color: var(--amber);
+    }
+
+    @keyframes hintPulse {
+      from { box-shadow: 0 0 4px var(--amber-glow); }
+      to   { box-shadow: 0 0 16px var(--amber); }
+    }
+
+    /* Terminal Log Strip */
+    .terminal-log {
+      padding: 0.55rem 1rem;
+      background: var(--bg-void);
+      border-top: 1px solid var(--border-dim);
+      border-bottom: 1px solid var(--border-dim);
+      font-size: 0.74rem;
+      color: var(--term-green);
+      min-height: 2.3rem;
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+    }
+
+    .log-warn { color: var(--amber); }
+    .log-err  { color: var(--crimson); }
+    .log-ok   { color: var(--emerald); }
+
+    /* Bottom Controls Footer */
+    .footer-controls {
+      padding: 0.65rem 1rem;
+      background: var(--bg-panel);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+    }
+
+    .footer-left, .footer-right {
+      display: flex;
+      gap: 0.4rem;
+    }
+
+    /* Modal System */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(4, 9, 6, 0.85);
+      backdrop-filter: blur(4px);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      padding: 1rem;
+      z-index: 100;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal-card {
+      width: 100%;
+      max-width: 440px;
+      background: var(--bg-terminal);
+      border: 1px solid var(--term-green);
+      border-radius: 10px;
+      padding: 1.25rem;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.85);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border-dim);
+      padding-bottom: 0.65rem;
+      margin-bottom: 0.9rem;
+    }
+
+    .modal-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--term-green);
+      letter-spacing: 0.06em;
+    }
+
+    .modal-body {
+      font-size: 0.8rem;
+      color: var(--text-primary);
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+    }
+
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.5rem;
+      margin: 0.35rem 0;
+    }
+
+    .stat-box {
+      background: var(--bg-panel);
+      border: 1px solid var(--border-dim);
+      border-radius: 6px;
+      padding: 0.55rem;
+    }
+
+    .stat-box-label {
+      font-size: 0.65rem;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+    }
+
+    .stat-box-val {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--emerald);
+      margin-top: 2px;
+    }
+
+    .seed-input-row {
+      display: flex;
+      gap: 0.4rem;
+      margin-top: 0.3rem;
+    }
+
+    .seed-input {
+      flex: 1;
+      background: var(--bg-void);
+      border: 1px solid var(--border-bright);
+      border-radius: 6px;
+      color: var(--term-green);
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      padding: 0.45rem 0.6rem;
+      text-transform: uppercase;
+    }
+
+    .seed-input:focus {
+      outline: none;
+      border-color: var(--term-green);
+    }
+
+    .rule-item {
+      background: var(--bg-panel);
+      border-left: 3px solid var(--term-green);
+      padding: 0.5rem 0.65rem;
+      border-radius: 0 6px 6px 0;
+      font-size: 0.76rem;
+      line-height: 1.45;
+    }
+
+    .rule-item strong {
+      color: var(--term-green);
+    }
+
+    .modal-footer {
+      margin-top: 1rem;
+      padding-top: 0.75rem;
+      border-top: 1px solid var(--border-dim);
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.5rem;
+    }
+
+    /* Responsive Adjustments */
+    @media (max-width: 440px) {
+      .terminal-frame, .intel-panel {
+        border-radius: 8px;
+      }
+      .telemetry-hud {
+        padding: 0.55rem 0.65rem;
+        gap: 0.35rem;
+      }
+      .hud-card {
+        padding: 0.4rem 0.5rem;
+      }
+      .hud-value {
+        font-size: 1rem;
+      }
+      .sector-grid {
+        gap: 4px;
+      }
+      .btn {
+        padding: 0.5rem 0.6rem;
+        min-height: 36px;
+        font-size: 0.72rem;
+      }
+      .lex-item {
+        padding: 0.34rem 0.44rem;
+      }
+    }
+  </style>
+</head>
+<body class="scanlines">
+
+  <div class="workspace-shell">
+    <main class="terminal-frame" role="application" aria-label="31: Void Vector Terminal">
+      <!-- Top Header -->
+      <header class="terminal-header">
+        <div class="brand-block">
+          <div class="brand-title">
+            <span class="status-dot" id="sys-dot"></span>
+            31 // VOID VECTOR
+          </div>
+          <div class="brand-sub">NAHLA TRACKER • HOPE SYSTEM (31 BODIES)</div>
+        </div>
+        <div class="header-actions">
+          <button class="btn" id="btn-audio" title="Toggle Telemetry Audio">SFX:ON</button>
+          <button class="btn" id="btn-stats" title="View Tracker Telemetry Stats">LOG</button>
+          <button class="btn" id="btn-help" title="Protocol Manual">[?]</button>
+        </div>
+      </header>
+
+      <!-- Mode & Seed Controls -->
+      <nav class="control-strip" aria-label="Difficulty and Seed Selection">
+        <div class="mode-group">
+          <button class="btn active" data-mode="SURVEY">SURVEY</button>
+          <button class="btn" data-mode="ORBITAL">ORBITAL</button>
+          <button class="btn" data-mode="DEEP">DEEP SPACE</button>
+        </div>
+        <div class="seed-group">
+          <button class="btn" id="btn-daily" title="Load Today's Hope System Seed">DAILY</button>
+          <button class="seed-badge" id="btn-seed-modal" title="Enter or Copy Sector Seed">
+            <span id="seed-display">#H0P3-0000</span>
+          </button>
+        </div>
+      </nav>
+
+      <!-- Live Telemetry Readout -->
+      <section class="telemetry-hud" aria-label="Telemetry Status">
+        <div class="hud-card">
+          <span class="hud-label">BARYCENTRE MASS</span>
+          <div class="hud-value">
+            <span id="hud-mass" class="mass-under">00</span>
+            <span class="hud-sub">/ 31 (<span id="hud-delta">-31</span>)</span>
+          </div>
+        </div>
+
+        <div class="hud-card">
+          <span class="hud-label">CALLSIGN RELAYS</span>
+          <div class="callsign-pills" id="hud-callsign"></div>
+        </div>
+
+        <div class="hud-card">
+          <span class="hud-label">VECTOR STEPS</span>
+          <div class="hud-value">
+            <span id="hud-steps">00</span>
+            <span class="hud-sub">PAR <span id="hud-par">00</span></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Interactive Grid Stage -->
+      <div class="grid-wrapper">
+        <div class="board-stage" id="board-stage">
+          <svg class="vector-overlay" id="vector-svg" viewBox="0 0 600 600" preserveAspectRatio="none"></svg>
+          <div class="sector-grid" id="sector-grid" role="grid"></div>
+        </div>
+      </div>
+
+      <!-- Terminal Status Output -->
+      <div class="terminal-log" id="terminal-log" aria-live="polite">
+        <span>&gt;</span>
+        <span id="log-text">INITIALIZING SECTOR TELEMETRY...</span>
+      </div>
+
+      <!-- Bottom Action Bar -->
+      <footer class="footer-controls">
+        <div class="footer-left">
+          <button class="btn" id="btn-undo" title="Undo Last Step (Z / Backspace)">UNDO [Z]</button>
+          <button class="btn" id="btn-reset" title="Clear Current Vector (R)">RESET [R]</button>
+        </div>
+        <div class="footer-right">
+          <button class="btn" id="btn-hint" title="Ping Next Optimal Node (H)">PING</button>
+          <button class="btn btn-primary" id="btn-next" title="Generate New Sector (N)">NEXT [N]</button>
+        </div>
+      </footer>
+    </main>
+
+    <!-- Field Protocol & 20-Term Lexicon Column -->
+    <aside class="intel-column" aria-label="Protocol Instructions and Callsign Lexicon">
+      <!-- Simple Instructions Panel -->
+      <section class="intel-panel">
+        <div class="intel-header">
+          <span>FIELD PROTOCOL // HOW TO PLAY</span>
+          <span class="intel-badge">HOPE SYSTEM</span>
+        </div>
+        <div class="intel-body">
+          <div class="brief-step">
+            <span class="brief-num">01</span>
+            <div><strong>REACH MASS 31:</strong> Trace a single continuous path from <strong>[&gt;]</strong> to <strong>[X]</strong> so the visited numbers sum to exactly <strong>31</strong>.</div>
+          </div>
+          <div class="brief-step">
+            <span class="brief-num">02</span>
+            <div><strong>LOCK CALLSIGN RELAYS:</strong> Your vector <strong>must</strong> pass through the target HUD letters in exact order (0 mass). Decoy letters are optional on Survey/Orbital, but blocked on Deep Space.</div>
+          </div>
+          <div class="brief-step">
+            <span class="brief-num">03</span>
+            <div><strong>WELLS &amp; VOIDS:</strong> Negative nodes (<strong>-2, -3, -4</strong>) reduce excess mass. <strong>##</strong> sectors cannot be crossed.</div>
+          </div>
+          <div class="brief-step">
+            <span class="brief-num">04</span>
+            <div><strong>CONTROLS:</strong> Drag or tap adjacent tiles (or use <strong>WASD / Arrows</strong>). Tap any earlier node in your trail or press <strong>Z</strong> to backtrack.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- All 20 Four-Letter Code Terms Panel -->
+      <section class="intel-panel">
+        <div class="intel-header">
+          <span>DEEP SPACE CALLSIGN LEXICON</span>
+          <span class="intel-badge">20 TERMS</span>
+        </div>
+        <div class="intel-body">
+          <div class="lexicon-note">Active in <strong>DEEP SPACE</strong> mode. Tap any callsign below to load a sector locked to that code:</div>
+          <div class="lexicon-grid" id="lexicon-grid"></div>
+        </div>
+      </section>
+    </aside>
+  </div>
+
+  <!-- Unified Terminal Modal (Victory / Help / Stats / Seed) -->
+  <div class="modal-backdrop" id="modal-backdrop" role="dialog" aria-modal="true">
+    <div class="modal-card">
+      <div class="modal-header">
+        <span class="modal-title" id="modal-title">PROTOCOL</span>
+        <button class="btn" id="modal-close">ESC [X]</button>
+      </div>
+      <div class="modal-body" id="modal-body"></div>
+      <div class="modal-footer" id="modal-footer"></div>
+    </div>
+  </div>
+
+  <script>
+    /**
+     * ==========================================================================
+     * 31: VOID VECTOR — CORE ENGINE
+     * Deterministic Carve-First Puzzle Generator, WebAudio Synthesizer & UI Controller
+     * ==========================================================================
+     */
+
+    // --------------------------------------------------------------------------
+    // 1. DETERMINISTIC SEEDED PRNG (Mulberry32 + FNV-1a Hash)
+    // --------------------------------------------------------------------------
+    class SeededRandom {
+      constructor(seedStr) {
+        this.seedStr = String(seedStr).toUpperCase().trim();
+        this.state = this.hashString(this.seedStr);
+      }
+
+      hashString(str) {
+        let h = 2166136261 >>> 0;
+        for (let i = 0; i < str.length; i++) {
+          h ^= str.charCodeAt(i);
+          h = Math.imul(h, 16777619);
+        }
+        return h >>> 0;
+      }
+
+      next() {
+        let t = (this.state += 0x6D2B79F5);
+        t = Math.imul(t ^ (t >>> 15), t | 1);
+        t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+      }
+
+      int(min, max) {
+        return Math.floor(this.next() * (max - min + 1)) + min;
+      }
+
+      pick(arr) {
+        return arr[Math.floor(this.next() * arr.length)];
+      }
+
+      shuffle(arr) {
+        const copy = arr.slice();
+        for (let i = copy.length - 1; i > 0; i--) {
+          const j = Math.floor(this.next() * (i + 1));
+          [copy[i], copy[j]] = [copy[j], copy[i]];
+        }
+        return copy;
+      }
+    }
+
+    // --------------------------------------------------------------------------
+    // 2. RETRO TERMINAL AUDIO SYNTHESIZER (Offline Web Audio API)
+    // --------------------------------------------------------------------------
+    class TelemetryAudio {
+      constructor() {
+        this.enabled = true;
+        this.ctx = null;
+      }
+
+      ensureContext() {
+        if (!this.ctx && (window.AudioContext || window.webkitAudioContext)) {
+          this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (this.ctx && this.ctx.state === "suspended") {
+          this.ctx.resume().catch(() => {});
+        }
+      }
+
+      playTone(freq, type = "sine", duration = 0.08, gainVal = 0.08, delay = 0) {
+        if (!this.enabled) return;
+        try {
+          this.ensureContext();
+          if (!this.ctx) return;
+          const now = this.ctx.currentTime + delay;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = type;
+          osc.frequency.setValueAtTime(freq, now);
+          gain.gain.setValueAtTime(gainVal, now);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now);
+          osc.stop(now + duration);
+        } catch (_) {
+          // Fail silently if audio context is restricted
+        }
+      }
+
+      step(mass) {
+        const base = 320 + Math.min(mass, 35) * 10;
+        this.playTone(base, "triangle", 0.06, 0.06);
+      }
+
+      well() {
+        this.playTone(150, "sawtooth", 0.14, 0.07);
+      }
+
+      relay(index) {
+        this.playTone(520 + index * 110, "sine", 0.14, 0.09);
+      }
+
+      undo() {
+        this.playTone(260, "sine", 0.06, 0.05);
+      }
+
+      error() {
+        this.playTone(115, "sawtooth", 0.16, 0.08);
+      }
+
+      win() {
+        this.playTone(440, "triangle", 0.16, 0.09, 0.00);
+        this.playTone(554.37, "triangle", 0.16, 0.09, 0.09);
+        this.playTone(659.25, "triangle", 0.16, 0.09, 0.18);
+        this.playTone(880, "sine", 0.35, 0.11, 0.27);
+      }
+    }
+
+    // --------------------------------------------------------------------------
+    // 3. CARVE-FIRST SECTOR GENERATOR (Guaranteed Solvable to Mass = 31)
+    // --------------------------------------------------------------------------
+    const SectorGenerator = {
+      WORDS_3: ["SOL", "ORB", "ION", "ARC", "EXO", "GEO", "LUX", "NIX", "SKY", "SUN", "RAY", "ERA", "APO", "PER"],
+      CALLSIGN_LEXICON: [
+        { code: "AEOG", meaning: "Aeoga" },
+        { code: "ANNE", meaning: "Anneke" },
+        { code: "ARIA", meaning: "Ariana" },
+        { code: "BATH", meaning: "Bathory" },
+        { code: "DRAU", meaning: "Draupadi" },
+        { code: "HALO", meaning: "Halo" },
+        { code: "HOPE", meaning: "Hope System" },
+        { code: "LUNA", meaning: "Luna" },
+        { code: "MRKA", meaning: "Marika" },
+        { code: "NAHL", meaning: "Nahla" },
+        { code: "NULL", meaning: "<Null signal> • Insta-Solve", isNull: true },
+        { code: "PHSE", meaning: "Phase" },
+        { code: "RAYN", meaning: "Rayne" },
+        { code: "RBKA", meaning: "Rebekah" },
+        { code: "RING", meaning: "Ring" },
+        { code: "RUZE", meaning: "Ruzena" },
+        { code: "SITA", meaning: "Sita" },
+        { code: "SKAD", meaning: "Skadi" },
+        { code: "SMNE", meaning: "Simone" },
+        { code: "VOID", meaning: "Void" }
+      ],
+      WORDS_4: [
+        "NAHL", "HOPE", "SMNE", "MRKA", "RBKA",
+        "ANNE", "VOID", "PHSE", "ARIA", "DRAU",
+        "RUZE", "RAYN", "AEOG", "BATH", "SKAD",
+        "SITA", "RING", "HALO", "LUNA", "NULL"
+      ],
+      ALPHABET: "ABCDEFGHJKLMNPQRSTUVWXYZ".split(""),
+
+      configs: {
+        SURVEY:  { size: 5, minSteps: 9,  maxSteps: 11, wordLen: 3, wells: 0, voids: 3, decoys: 2, strictCallsign: false },
+        ORBITAL: { size: 6, minSteps: 10, maxSteps: 13, wordLen: 3, wells: 2, voids: 5, decoys: 3, strictCallsign: false },
+        DEEP:    { size: 6, minSteps: 11, maxSteps: 14, wordLen: 4, wells: 3, voids: 5, decoys: 4, strictCallsign: true }
+      },
+
+      generate(mode, seedStr, forcedWord = null) {
+        const cfg = this.configs[mode] || this.configs.SURVEY;
+        const rng = new SeededRandom(`${mode}:${seedStr}${forcedWord ? `:${forcedWord}` : ""}`);
+        const targetWord = forcedWord
+          ? forcedWord
+          : cfg.wordLen === 4
+          ? rng.pick(this.WORDS_4)
+          : rng.pick(this.WORDS_3);
+
+        // 1. Carve a self-avoiding walk from [>] to [X]
+        const solutionPath = this.carvePath(cfg.size, cfg.minSteps, cfg.maxSteps, rng);
+        const totalSteps = solutionPath.length - 1;
+        const interiorIndices = [];
+        for (let i = 1; i < solutionPath.length - 1; i++) {
+          interiorIndices.push(i);
+        }
+
+        // 2. Select ordered indices along the solution path for Callsign Relays
+        const chosenRelaySlots = rng.shuffle(interiorIndices).slice(0, cfg.wordLen).sort((a, b) => a - b);
+        const relayMap = new Map();
+        chosenRelaySlots.forEach((pathIdx, letterIdx) => {
+          relayMap.set(pathIdx, targetWord[letterIdx]);
+        });
+
+        // 3. Partition mass sum = 31 across the remaining interior solution nodes
+        const numericPathIndices = interiorIndices.filter((idx) => !relayMap.has(idx));
+        const massValues = this.partitionMass(numericPathIndices.length, 31, cfg.wells, rng);
+
+        // 4. Initialize empty grid and place solution path cells
+        const grid = Array.from({ length: cfg.size }, () => Array(cfg.size).fill(null));
+        const onSolution = new Set();
+
+        solutionPath.forEach(([r, c], idx) => {
+          onSolution.add(`${r},${c}`);
+          if (idx === 0) {
+            grid[r][c] = { type: "START", value: 0 };
+          } else if (idx === solutionPath.length - 1) {
+            grid[r][c] = { type: "EXIT", value: 0 };
+          } else if (relayMap.has(idx)) {
+            grid[r][c] = { type: "RELAY", letter: relayMap.get(idx), value: 0 };
+          } else {
+            const val = massValues.pop();
+            grid[r][c] = {
+              type: val < 0 ? "WELL" : "MASS",
+              value: val
+            };
+          }
+        });
+
+        // 5. Fill all off-path cells with Voids, Decoy Relays, Wells, and Mass nodes
+        const offPathCoords = [];
+        for (let r = 0; r < cfg.size; r++) {
+          for (let c = 0; c < cfg.size; c++) {
+            if (!onSolution.has(`${r},${c}`)) {
+              offPathCoords.push([r, c]);
+            }
+          }
+        }
+
+        const shuffledOff = rng.shuffle(offPathCoords);
+        let cursor = 0;
+
+        // Place Void sectors (##)
+        for (let i = 0; i < cfg.voids && cursor < shuffledOff.length; i++, cursor++) {
+          const [r, c] = shuffledOff[cursor];
+          grid[r][c] = { type: "VOID", value: 0 };
+        }
+
+        // Place Decoy letter relays
+        const decoyPool = this.ALPHABET.filter((ch) => !targetWord.includes(ch));
+        for (let i = 0; i < cfg.decoys && cursor < shuffledOff.length; i++, cursor++) {
+          const [r, c] = shuffledOff[cursor];
+          grid[r][c] = {
+            type: "RELAY",
+            letter: rng.pick(decoyPool.length ? decoyPool : this.ALPHABET),
+            value: 0
+          };
+        }
+
+        // Place off-path Gravity Wells on Orbital/Deep modes
+        const extraWells = cfg.wells > 0 ? Math.max(1, cfg.wells - 1) : 0;
+        for (let i = 0; i < extraWells && cursor < shuffledOff.length; i++, cursor++) {
+          const [r, c] = shuffledOff[cursor];
+          grid[r][c] = { type: "WELL", value: -rng.int(2, 4) };
+        }
+
+        // Fill remaining off-path nodes with positive mass values (1..9)
+        while (cursor < shuffledOff.length) {
+          const [r, c] = shuffledOff[cursor++];
+          grid[r][c] = { type: "MASS", value: rng.int(1, 9) };
+        }
+
+        return {
+          size: cfg.size,
+          grid,
+          solutionPath,
+          par: totalSteps,
+          targetWord,
+          strictCallsign: cfg.strictCallsign
+        };
+      },
+
+      carvePath(size, minSteps, maxSteps, rng) {
+        const targetSteps = rng.int(minSteps, maxSteps);
+        const dirs = [
+          [-1, 0],
+          [1, 0],
+          [0, -1],
+          [0, 1]
+        ];
+
+        for (let attempt = 0; attempt < 250; attempt++) {
+          const startR = rng.int(0, size - 1);
+          const startC = rng.int(0, size - 1);
+          const path = [[startR, startC]];
+          const visited = new Set([`${startR},${startC}`]);
+
+          while (path.length - 1 < targetSteps) {
+            const [r, c] = path[path.length - 1];
+            const neighbors = rng.shuffle(dirs)
+              .map(([dr, dc]) => [r + dr, c + dc])
+              .filter(([nr, nc]) =>
+                nr >= 0 && nr < size &&
+                nc >= 0 && nc < size &&
+                !visited.has(`${nr},${nc}`)
+              );
+
+            if (neighbors.length === 0) break;
+            const nextCell = neighbors[0];
+            path.push(nextCell);
+            visited.add(`${nextCell[0]},${nextCell[1]}`);
+          }
+
+          if (path.length - 1 >= minSteps) {
+            return path;
+          }
+        }
+
+        // Deterministic serpentine fallback if randomized walk hits dead ends
+        const fallback = [];
+        for (let r = 0; r < size; r++) {
+          if (r % 2 === 0) {
+            for (let c = 0; c < size; c++) fallback.push([r, c]);
+          } else {
+            for (let c = size - 1; c >= 0; c--) fallback.push([r, c]);
+          }
+        }
+        return fallback.slice(0, minSteps + 1);
+      },
+
+      partitionMass(count, targetSum, wellCount, rng) {
+        const safeCount = Math.max(1, count);
+        const maxWells = Math.max(0, safeCount - 5);
+        const pathWells = Math.min(wellCount, maxWells, 2);
+
+        const wellValues = [];
+        let wellDrain = 0;
+        for (let i = 0; i < pathWells; i++) {
+          const w = -rng.int(2, 3);
+          wellValues.push(w);
+          wellDrain += w;
+        }
+
+        const posCount = safeCount - pathWells;
+        const posTarget = targetSum - wellDrain;
+        const posValues = Array(posCount).fill(1);
+        let remaining = Math.max(0, posTarget - posCount);
+
+        let guard = 0;
+        while (remaining > 0 && guard < 1000) {
+          guard++;
+          const idx = rng.int(0, posCount - 1);
+          if (posValues[idx] < 9) {
+            posValues[idx]++;
+            remaining--;
+          }
+        }
+
+        return rng.shuffle([...posValues, ...wellValues]);
+      }
+    };
+
+    // --------------------------------------------------------------------------
+    // 4. MAIN GAME & TERMINAL CONTROLLER
+    // --------------------------------------------------------------------------
+    const Game = {
+      mode: "SURVEY",
+      seed: "",
+      sector: null,
+      path: [],
+      solved: false,
+      hintCell: null,
+      hintsUsed: 0,
+      isDragging: false,
+      audio: new TelemetryAudio(),
+      stats: {
+        solved: 0,
+        optimal: 0,
+        streak: 0,
+        dailyCompleted: ""
+      },
+
+      init() {
+        this.loadStats();
+        this.renderLexicon();
+        this.bindEvents();
+        this.loadNewSector(this.generateRandomSeed());
+      },
+
+      renderLexicon() {
+        const container = document.getElementById("lexicon-grid");
+        if (!container) return;
+        container.innerHTML = "";
+        const sortedLexicon = [...SectorGenerator.CALLSIGN_LEXICON].sort((a, b) =>
+          a.code.localeCompare(b.code)
+        );
+        sortedLexicon.forEach((entry) => {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = `lex-item${entry.isNull ? " lex-null" : ""}`;
+          btn.dataset.code = entry.code;
+          btn.title = `Launch Deep Space sector with callsign ${entry.code} (${entry.meaning})`;
+          btn.innerHTML = `<span class="lex-code">${entry.code}</span><span class="lex-meaning">${entry.meaning}</span>`;
+          btn.addEventListener("click", () => {
+            this.mode = "DEEP";
+            document.querySelectorAll(".mode-group .btn").forEach((b) => {
+              b.classList.toggle("active", b.dataset.mode === "DEEP");
+            });
+            this.loadNewSector(this.generateRandomSeed(), entry.code);
+          });
+          container.appendChild(btn);
+        });
+      },
+
+      loadStats() {
+        try {
+          const raw = localStorage.getItem("nahla_31_bv_stats");
+          if (raw) {
+            this.stats = { ...this.stats, ...JSON.parse(raw) };
+          }
+        } catch (_) {
+          // Ignore storage errors in sandboxed previews
+        }
+      },
+
+      saveStats() {
+        try {
+          localStorage.setItem("nahla_31_bv_stats", JSON.stringify(this.stats));
+        } catch (_) {
+          // Ignore storage errors in sandboxed previews
+        }
+      },
+
+      getDailySeedString() {
+        const now = new Date();
+        const mm = String(now.getUTCMonth() + 1).padStart(2, "0");
+        const dd = String(now.getUTCDate()).padStart(2, "0");
+        return `H0P3-${mm}${dd}`;
+      },
+
+      generateRandomSeed() {
+        const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+        let suffix = "";
+        for (let i = 0; i < 4; i++) {
+          suffix += chars[Math.floor(Math.random() * chars.length)];
+        }
+        return `H0P3-${suffix}`;
+      },
+
+      loadNewSector(seedStr, forcedWord = null) {
+        this.seed = String(seedStr || this.generateRandomSeed()).toUpperCase().trim();
+        this.sector = SectorGenerator.generate(this.mode, this.seed, forcedWord);
+        this.resetPath(true);
+      },
+
+      resetPath(isFresh = false) {
+        const [sr, sc] = this.sector.solutionPath[0];
+        this.path = [{ r: sr, c: sc }];
+        this.solved = false;
+        this.hintCell = null;
+        if (isFresh) this.hintsUsed = 0;
+
+        document.getElementById("seed-display").textContent = `#${this.seed}`;
+        this.renderBoard();
+        this.updateHUD();
+
+        const isNullSignal = this.sector.targetWord === "NULL";
+        const modeNote = isNullSignal
+          ? "<NULL SIGNAL> ANOMALY: SPELL [NULL] FOR BONUS INSTA-SOLVE."
+          : this.sector.strictCallsign
+          ? "STRICT RELAY PROTOCOL ACTIVE."
+          : "ROUTE TO [X] WITH MASS = 31.";
+        this.log(`SECTOR #${this.seed} ONLINE. ${modeNote}`, isNullSignal ? "warn" : "normal");
+      },
+
+      computeTelemetry() {
+        let sum = 0;
+        let collected = "";
+        for (let i = 1; i < this.path.length; i++) {
+          const { r, c } = this.path[i];
+          const cell = this.sector.grid[r][c];
+          sum += cell.value;
+          if (cell.type === "RELAY") {
+            const expectedNext = this.sector.targetWord[collected.length];
+            if (cell.letter === expectedNext) {
+              collected += cell.letter;
+            }
+          }
+        }
+        return {
+          sum,
+          collected,
+          steps: this.path.length - 1
+        };
+      },
+
+      handleCellStep(r, c) {
+        if (this.solved) return;
+        const size = this.sector.size;
+        if (r < 0 || r >= size || c < 0 || c >= size) return;
+
+        // If stepping onto the immediately preceding node, backtrack one step
+        if (this.path.length > 1) {
+          const prev = this.path[this.path.length - 2];
+          if (prev.r === r && prev.c === c) {
+            this.undoStep();
+            return;
+          }
+        }
+
+        // If tapping an earlier node in the existing path (non-drag), truncate back to it
+        const existingIdx = this.path.findIndex((p) => p.r === r && p.c === c);
+        if (existingIdx !== -1) {
+          if (!this.isDragging && existingIdx < this.path.length - 1) {
+            this.path = this.path.slice(0, existingIdx + 1);
+            this.hintCell = null;
+            this.audio.undo();
+            this.renderBoard();
+            this.updateHUD();
+            this.log("VECTOR RETRACTED TO WAYPOINT.");
+          }
+          return;
+        }
+
+        // Enforce orthogonal adjacency from current head
+        const head = this.path[this.path.length - 1];
+        const dist = Math.abs(r - head.r) + Math.abs(c - head.c);
+        if (dist !== 1) return;
+
+        const targetCell = this.sector.grid[r][c];
+
+        // Block Void Sectors
+        if (targetCell.type === "VOID") {
+          this.audio.error();
+          this.log("VOID SECTOR [##] IMPASSABLE.", "err");
+          return;
+        }
+
+        const currentTelemetry = this.computeTelemetry();
+        const nextExpectedLetter = this.sector.targetWord[currentTelemetry.collected.length];
+
+        // Handle Callsign Relays
+        if (targetCell.type === "RELAY") {
+          if (targetCell.letter === nextExpectedLetter) {
+            this.path.push({ r, c });
+            this.hintCell = null;
+            const newCount = currentTelemetry.collected.length + 1;
+
+            if (this.sector.targetWord === "NULL" && newCount === this.sector.targetWord.length) {
+              this.triggerNullInstaSolve();
+              return;
+            }
+
+            this.audio.relay(newCount);
+            this.renderBoard();
+            this.updateHUD();
+            const nextChar = this.sector.targetWord[newCount];
+            this.log(
+              nextChar
+                ? `CALLSIGN RELAY [${targetCell.letter}] LOCKED (${newCount}/${this.sector.targetWord.length}). NEXT: [${nextChar}].`
+                : `ALL CALLSIGN RELAYS LOCKED (${this.sector.targetWord}). PROCEED TO [X] AT MASS 31.`,
+              "ok"
+            );
+            return;
+          } else {
+            if (this.sector.strictCallsign) {
+              this.audio.error();
+              this.log(
+                `STRICT PROTOCOL: RELAY [${targetCell.letter}] REJECTED (NEED [${nextExpectedLetter || "EXIT"}]).`,
+                "err"
+              );
+              return;
+            } else {
+              // Permissive mode: pass through unrequested/decoy relay as 0-mass transit node
+              this.path.push({ r, c });
+              this.hintCell = null;
+              this.audio.step(currentTelemetry.sum);
+              this.renderBoard();
+              this.updateHUD();
+              this.log(`RELAY [${targetCell.letter}] BYPASSED (0 MASS). TARGET: [${nextExpectedLetter || "EXIT"}].`);
+              return;
+            }
+          }
+        }
+
+        // Handle Exit Node [X]
+        if (targetCell.type === "EXIT") {
+          this.path.push({ r, c });
+          this.hintCell = null;
+          this.renderBoard();
+          const finalTelemetry = this.computeTelemetry();
+          this.updateHUD();
+          this.evaluateExit(finalTelemetry);
+          return;
+        }
+
+        // Handle Standard Mass & Gravity Well Nodes
+        this.path.push({ r, c });
+        this.hintCell = null;
+        const updated = this.computeTelemetry();
+
+        if (targetCell.type === "WELL") {
+          this.audio.well();
+        } else {
+          this.audio.step(updated.sum);
+        }
+
+        this.renderBoard();
+        this.updateHUD();
+
+        if (updated.sum > 31) {
+          this.log(`WARNING: BARYCENTRE MASS OVERLOAD (${updated.sum}/31). USE GRAVITY WELL OR UNDO.`, "warn");
+        } else if (updated.sum === 31 && updated.collected === this.sector.targetWord) {
+          this.log("MASS 31 & CALLSIGN LOCKED! ROUTE TO EXTRACTION NODE [X].", "ok");
+        } else {
+          const sign = targetCell.value > 0 ? `+${targetCell.value}` : `${targetCell.value}`;
+          this.log(`NODE [${sign}] LOCKED • CURRENT MASS: ${updated.sum}/31.`);
+        }
+      },
+
+      evaluateExit(telemetry) {
+        const callsignComplete = telemetry.collected === this.sector.targetWord;
+        const massComplete = telemetry.sum === 31;
+
+        if (callsignComplete && massComplete) {
+          this.solved = true;
+          this.audio.win();
+          this.stats.solved++;
+          this.stats.streak++;
+          const isOptimal = telemetry.steps <= this.sector.par && this.hintsUsed === 0;
+          if (isOptimal) this.stats.optimal++;
+          if (this.seed === this.getDailySeedString()) {
+            this.stats.dailyCompleted = this.seed;
+          }
+          this.saveStats();
+
+          this.log(`BARYCENTRE LOCKED! MASS 31 & CALLSIGN ${this.sector.targetWord} VERIFIED.`, "ok");
+          setTimeout(() => this.openVictoryModal(telemetry, isOptimal, false), 340);
+        } else {
+          this.audio.error();
+          const reasons = [];
+          if (!massComplete) reasons.push(`MASS IS ${telemetry.sum} (NEED 31)`);
+          if (!callsignComplete) reasons.push(`CALLSIGN INCOMPLETE (${telemetry.collected || "NONE"}/${this.sector.targetWord})`);
+          this.log(`EXIT UNLOCK FAILED: ${reasons.join(" & ")}. UNDO TO ADJUST.`, "err");
+        }
+      },
+
+      triggerNullInstaSolve() {
+        const telemetry = this.computeTelemetry();
+        this.solved = true;
+        this.audio.win();
+        this.stats.solved++;
+        this.stats.streak++;
+        const isOptimal = this.hintsUsed === 0;
+        if (isOptimal) this.stats.optimal++;
+        if (this.seed === this.getDailySeedString()) {
+          this.stats.dailyCompleted = this.seed;
+        }
+        this.saveStats();
+
+        this.renderBoard();
+        this.updateHUD();
+        this.log("<NULL SIGNAL> OVERRIDE! BONUS INSTA-SOLVE EXECUTED.", "ok");
+        setTimeout(() => this.openVictoryModal(telemetry, isOptimal, true), 340);
+      },
+
+      undoStep() {
+        if (this.solved || this.path.length <= 1) return;
+        this.path.pop();
+        this.hintCell = null;
+        this.audio.undo();
+        this.renderBoard();
+        this.updateHUD();
+        const updated = this.computeTelemetry();
+        this.log(`STEP RETRACTED • MASS: ${updated.sum}/31.`);
+      },
+
+      pingNextNode() {
+        if (this.solved) return;
+        const sol = this.sector.solutionPath;
+
+        // Find longest prefix where player's path matches the carved solution path
+        let matchLen = 0;
+        while (
+          matchLen < this.path.length &&
+          matchLen < sol.length &&
+          this.path[matchLen].r === sol[matchLen][0] &&
+          this.path[matchLen].c === sol[matchLen][1]
+        ) {
+          matchLen++;
+        }
+
+        if (matchLen < this.path.length) {
+          // Player diverged from carved solution; highlight divergence point to backtrack to
+          const divergeNode = sol[matchLen - 1];
+          this.hintCell = { r: divergeNode[0], c: divergeNode[1] };
+          this.hintsUsed++;
+          this.audio.relay(1);
+          this.renderBoard();
+          this.log("TELEMETRY PING: RETRACT TO PULSING WAYPOINT TO REALIGN VECTOR.", "warn");
+        } else if (matchLen < sol.length) {
+          const nextNode = sol[matchLen];
+          this.hintCell = { r: nextNode[0], c: nextNode[1] };
+          this.hintsUsed++;
+          this.audio.relay(2);
+          this.renderBoard();
+          this.log("TELEMETRY PING: OPTIMAL NEXT NODE ILLUMINATED.", "warn");
+        }
+      },
+
+      renderBoard() {
+        const gridEl = document.getElementById("sector-grid");
+        const svgEl = document.getElementById("vector-svg");
+        const size = this.sector.size;
+
+        gridEl.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
+        gridEl.style.gridTemplateRows = `repeat(${size}, 1fr)`;
+        gridEl.innerHTML = "";
+
+        const pathSet = new Set(this.path.map((p) => `${p.r},${p.c}`));
+        const head = this.path[this.path.length - 1];
+
+        for (let r = 0; r < size; r++) {
+          for (let c = 0; c < size; c++) {
+            const cell = this.sector.grid[r][c];
+            const el = document.createElement("div");
+            el.className = "cell";
+            el.dataset.r = r;
+            el.dataset.c = c;
+            el.setAttribute("role", "gridcell");
+
+            let mainText = "";
+            let tagText = "";
+
+            if (cell.type === "START") {
+              el.classList.add("cell-start");
+              mainText = "[>]";
+              tagText = "ORIGIN";
+            } else if (cell.type === "EXIT") {
+              el.classList.add("cell-exit");
+              mainText = "[X]";
+              tagText = "EXIT";
+            } else if (cell.type === "VOID") {
+              el.classList.add("cell-void");
+              mainText = "##";
+              tagText = "VOID";
+            } else if (cell.type === "RELAY") {
+              el.classList.add("cell-relay");
+              mainText = `[${cell.letter}]`;
+              tagText = "RELAY";
+            } else if (cell.type === "WELL") {
+              el.classList.add("cell-well");
+              mainText = `${cell.value}`;
+              tagText = "WELL";
+            } else {
+              mainText = String(cell.value).padStart(2, "0");
+              tagText = "MASS";
+            }
+
+            if (pathSet.has(`${r},${c}`)) {
+              el.classList.add("in-path");
+            }
+            if (head && head.r === r && head.c === c) {
+              el.classList.add("path-head");
+            }
+            if (this.hintCell && this.hintCell.r === r && this.hintCell.c === c) {
+              el.classList.add("hint-pulse");
+            }
+
+            el.innerHTML = `<span class="cell-main">${mainText}</span><span class="cell-tag">${tagText}</span>`;
+            gridEl.appendChild(el);
+          }
+        }
+
+        // Render SVG Vector Polyline connecting visited cells
+        svgEl.innerHTML = "";
+        if (this.path.length > 1) {
+          const stepUnit = 600 / size;
+          const points = this.path
+            .map(({ r, c }) => `${(c + 0.5) * stepUnit},${(r + 0.5) * stepUnit}`)
+            .join(" ");
+
+          const telemetry = this.computeTelemetry();
+          const strokeColor =
+            this.solved || (telemetry.sum === 31 && telemetry.collected === this.sector.targetWord)
+              ? "#86efac"
+              : telemetry.sum > 31
+              ? "#f43f5e"
+              : "#22c55e";
+
+          const glowLine = document.createElementNS("http://www.w3.org/2000/svg", "polyline");
+          glowLine.setAttribute("points", points);
+          glowLine.setAttribute("fill", "none");
+          glowLine.setAttribute("stroke", strokeColor);
+          glowLine.setAttribute("stroke-width", "12");
+          glowLine.setAttribute("stroke-linecap", "round");
+          glowLine.setAttribute("stroke-linejoin", "round");
+          glowLine.setAttribute("opacity", "0.22");
+
+          const coreLine = document.createElementNS("http://www.w3.org/2000/svg", "polyline");
+          coreLine.setAttribute("points", points);
+          coreLine.setAttribute("fill", "none");
+          coreLine.setAttribute("stroke", strokeColor);
+          coreLine.setAttribute("stroke-width", "4");
+          coreLine.setAttribute("stroke-linecap", "round");
+          coreLine.setAttribute("stroke-linejoin", "round");
+
+          svgEl.appendChild(glowLine);
+          svgEl.appendChild(coreLine);
+        }
+      },
+
+      updateHUD() {
+        const telemetry = this.computeTelemetry();
+        const massEl = document.getElementById("hud-mass");
+        const deltaEl = document.getElementById("hud-delta");
+        const stepsEl = document.getElementById("hud-steps");
+        const parEl = document.getElementById("hud-par");
+        const csContainer = document.getElementById("hud-callsign");
+
+        massEl.textContent = String(telemetry.sum).padStart(2, "0");
+        massEl.className =
+          telemetry.sum === 31
+            ? "mass-exact"
+            : telemetry.sum > 31
+            ? "mass-over"
+            : "mass-under";
+
+        const diff = telemetry.sum - 31;
+        deltaEl.textContent = diff > 0 ? `+${diff}` : `${diff}`;
+
+        stepsEl.textContent = String(telemetry.steps).padStart(2, "0");
+        parEl.textContent = String(this.sector.par).padStart(2, "0");
+
+        // Render Callsign Relay Pills
+        csContainer.innerHTML = "";
+        const word = this.sector.targetWord;
+        for (let i = 0; i < word.length; i++) {
+          const pill = document.createElement("span");
+          pill.className = "cs-pill";
+          pill.textContent = word[i];
+          if (i < telemetry.collected.length) {
+            pill.classList.add("locked");
+          } else if (i === telemetry.collected.length) {
+            pill.classList.add("next");
+          }
+          csContainer.appendChild(pill);
+        }
+
+        // Highlight matching callsign in the 20-term lexicon
+        document.querySelectorAll(".lex-item").forEach((item) => {
+          item.classList.toggle("active-callsign", item.dataset.code === word);
+        });
+      },
+
+      log(msg, level = "normal") {
+        const logEl = document.getElementById("log-text");
+        logEl.textContent = msg;
+        logEl.className =
+          level === "warn"
+            ? "log-warn"
+            : level === "err"
+            ? "log-err"
+            : level === "ok"
+            ? "log-ok"
+            : "";
+      },
+
+      // ------------------------------------------------------------------------
+      // MODAL CONTROLLERS
+      // ------------------------------------------------------------------------
+      openModal(title, bodyHTML, footerHTML) {
+        document.getElementById("modal-title").textContent = title;
+        document.getElementById("modal-body").innerHTML = bodyHTML;
+        document.getElementById("modal-footer").innerHTML = footerHTML;
+        document.getElementById("modal-backdrop").classList.add("open");
+      },
+
+      closeModal() {
+        document.getElementById("modal-backdrop").classList.remove("open");
+      },
+
+      openVictoryModal(telemetry, isOptimal, isNullBonus = false) {
+        const badgeText = isNullBonus
+          ? "<NULL SIGNAL> BONUS INSTA-SOLVE"
+          : isOptimal
+          ? "OPTIMAL TELEMETRY LOCK (PAR OR BETTER)"
+          : "SECTOR BARYCENTRE VERIFIED";
+
+        const summaryText = isNullBonus
+          ? "Ghost telemetry signal [NULL] intercepted — sector bypassed and stabilized immediately."
+          : "Hope System trajectory stabilized across 31 orbital mass units.";
+
+        const bodyHTML = `
+          <div class="rule-item" style="border-left-color:var(--emerald)">
+            <strong style="color:var(--emerald)">${badgeText}</strong><br/>
+            ${summaryText}
+          </div>
+          <div class="stat-grid">
+            <div class="stat-box">
+              <div class="stat-box-label">Final Mass</div>
+              <div class="stat-box-val">${isNullBonus ? `${telemetry.sum} (BYPASSED)` : `${telemetry.sum} / 31`}</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-box-label">Callsign Lock</div>
+              <div class="stat-box-val">${isNullBonus ? "&lt;NULL SIGNAL&gt;" : this.sector.targetWord}</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-box-label">Vector Steps</div>
+              <div class="stat-box-val">${telemetry.steps} (PAR ${this.sector.par})</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-box-label">Sector Seed</div>
+              <div class="stat-box-val" style="font-size:0.9rem;color:var(--term-green)">#${this.seed}</div>
+            </div>
+          </div>
+        `;
+
+        const footerHTML = `
+          <button class="btn" id="modal-replay">REPLAY SEED</button>
+          <button class="btn btn-primary" id="modal-next-sector">NEXT SECTOR [N]</button>
+        `;
+
+        this.openModal(isNullBonus ? "<NULL SIGNAL> OVERRIDE" : "TELEMETRY SYNCHRONIZED", bodyHTML, footerHTML);
+
+        document.getElementById("modal-replay").addEventListener("click", () => {
+          this.closeModal();
+          this.resetPath(false);
+        });
+
+        document.getElementById("modal-next-sector").addEventListener("click", () => {
+          this.closeModal();
+          this.loadNewSector(this.generateRandomSeed());
+        });
+      },
+
+      openHelpModal() {
+        const bodyHTML = `
+          <div class="rule-item">
+            <strong>1. BARYCENTRE TARGET (31):</strong><br/>
+            Draw a continuous, non-overlapping vector from <strong>[&gt;]</strong> to <strong>[X]</strong> so the sum of all visited mass nodes equals <strong>31</strong> (representing the 31 bodies of the Hope System).
+          </div>
+          <div class="rule-item">
+            <strong>2. CALLSIGN RELAYS:</strong><br/>
+            Pass through the target letter nodes (e.g. <strong>N - A - H - L</strong>) in the exact order shown in the HUD. Relays add 0 mass. Intercepting <strong>&lt;NULL SIGNAL&gt;</strong> (<strong>NULL</strong>) triggers an immediate bonus insta-solve.
+          </div>
+          <div class="rule-item">
+            <strong>3. GRAVITY WELLS &amp; VOIDS:</strong><br/>
+            Negative nodes (<strong>-2, -3, -4</strong>) subtract mass so you can bleed off an overshoot. <strong>##</strong> sectors are impassable.
+          </div>
+          <div class="rule-item">
+            <strong>4. CONTROLS:</strong><br/>
+            Click/tap or drag across adjacent cells, or use <strong>WASD / Arrows</strong>. Tap any earlier node in your path or press <strong>Z</strong> to backtrack.
+          </div>
+        `;
+        const footerHTML = `<button class="btn btn-primary" id="modal-ok">ACKNOWLEDGED</button>`;
+        this.openModal("NAHLA TRACKER // PROTOCOL", bodyHTML, footerHTML);
+        document.getElementById("modal-ok").addEventListener("click", () => this.closeModal());
+      },
+
+      openStatsModal() {
+        const dailyStatus = this.stats.dailyCompleted === this.getDailySeedString()
+          ? "LOCKED"
+          : "PENDING";
+
+        const bodyHTML = `
+          <div class="stat-grid">
+            <div class="stat-box">
+              <div class="stat-box-label">Sectors Solved</div>
+              <div class="stat-box-val">${this.stats.solved}</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-box-label">Optimal Par Locks</div>
+              <div class="stat-box-val">${this.stats.optimal}</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-box-label">Active Streak</div>
+              <div class="stat-box-val">${this.stats.streak}</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-box-label">Daily Seed</div>
+              <div class="stat-box-val" style="font-size:0.9rem;color:var(--term-green)">${dailyStatus}</div>
+            </div>
+          </div>
+        `;
+        const footerHTML = `<button class="btn btn-primary" id="modal-ok">CLOSE LOG</button>`;
+        this.openModal("TRACKER TELEMETRY LOG", bodyHTML, footerHTML);
+        document.getElementById("modal-ok").addEventListener("click", () => this.closeModal());
+      },
+
+      openSeedModal() {
+        const bodyHTML = `
+          <div class="rule-item">
+            <strong>DETERMINISTIC SECTOR SEED:</strong><br/>
+            Every seed generates the exact same Hope System matrix offline. Share or enter any code below.
+          </div>
+          <div class="seed-input-row">
+            <input type="text" id="custom-seed-input" class="seed-input" maxlength="14" value="${this.seed}" placeholder="H0P3-XXXX" />
+            <button class="btn" id="btn-copy-seed">COPY</button>
+          </div>
+        `;
+        const footerHTML = `
+          <button class="btn" id="modal-cancel">CANCEL</button>
+          <button class="btn btn-primary" id="modal-load-seed">LOAD SECTOR</button>
+        `;
+        this.openModal("SECTOR SEED MATRIX", bodyHTML, footerHTML);
+
+        const inputEl = document.getElementById("custom-seed-input");
+        inputEl.focus();
+        inputEl.select();
+
+        document.getElementById("btn-copy-seed").addEventListener("click", () => {
+          inputEl.select();
+          try {
+            document.execCommand("copy");
+            document.getElementById("btn-copy-seed").textContent = "COPIED";
+          } catch (_) {}
+        });
+
+        const commitSeed = () => {
+          const val = inputEl.value.trim();
+          this.closeModal();
+          if (val) this.loadNewSector(val);
+        };
+
+        document.getElementById("modal-load-seed").addEventListener("click", commitSeed);
+        document.getElementById("modal-cancel").addEventListener("click", () => this.closeModal());
+        inputEl.addEventListener("keydown", (e) => {
+          if (e.key === "Enter") commitSeed();
+        });
+      },
+
+      // ------------------------------------------------------------------------
+      // EVENT LISTENERS (Pointer Drag, Keyboard, Mode Switcher, Buttons)
+      // ------------------------------------------------------------------------
+      bindEvents() {
+        const stage = document.getElementById("board-stage");
+
+        const resolveCellFromPoint = (clientX, clientY) => {
+          const target = document.elementFromPoint(clientX, clientY);
+          const cellEl = target ? target.closest(".cell") : null;
+          if (!cellEl) return null;
+          return {
+            r: parseInt(cellEl.dataset.r, 10),
+            c: parseInt(cellEl.dataset.c, 10)
+          };
+        };
+
+        stage.addEventListener("pointerdown", (e) => {
+          this.audio.ensureContext();
+          const coords = resolveCellFromPoint(e.clientX, e.clientY);
+          if (!coords) return;
+          this.isDragging = true;
+          this.handleCellStep(coords.r, coords.c);
+        });
+
+        window.addEventListener("pointermove", (e) => {
+          if (!this.isDragging) return;
+          const coords = resolveCellFromPoint(e.clientX, e.clientY);
+          if (coords) {
+            this.handleCellStep(coords.r, coords.c);
+          }
+        });
+
+        window.addEventListener("pointerup", () => {
+          this.isDragging = false;
+        });
+
+        window.addEventListener("pointercancel", () => {
+          this.isDragging = false;
+        });
+
+        // Mode switcher
+        document.querySelectorAll(".mode-group .btn").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            document.querySelectorAll(".mode-group .btn").forEach((b) => b.classList.remove("active"));
+            btn.classList.add("active");
+            this.mode = btn.dataset.mode;
+            this.loadNewSector(this.generateRandomSeed());
+          });
+        });
+
+        // Top & Footer Action Buttons
+        document.getElementById("btn-audio").addEventListener("click", (e) => {
+          this.audio.enabled = !this.audio.enabled;
+          e.currentTarget.textContent = this.audio.enabled ? "SFX:ON" : "SFX:OFF";
+          if (this.audio.enabled) this.audio.step(12);
+        });
+
+        document.getElementById("btn-stats").addEventListener("click", () => this.openStatsModal());
+        document.getElementById("btn-help").addEventListener("click", () => this.openHelpModal());
+        document.getElementById("btn-daily").addEventListener("click", () => {
+          this.loadNewSector(this.getDailySeedString());
+        });
+        document.getElementById("btn-seed-modal").addEventListener("click", () => this.openSeedModal());
+
+        document.getElementById("btn-undo").addEventListener("click", () => this.undoStep());
+        document.getElementById("btn-reset").addEventListener("click", () => this.resetPath(false));
+        document.getElementById("btn-hint").addEventListener("click", () => this.pingNextNode());
+        document.getElementById("btn-next").addEventListener("click", () => {
+          this.loadNewSector(this.generateRandomSeed());
+        });
+
+        // Modal close controls
+        document.getElementById("modal-close").addEventListener("click", () => this.closeModal());
+        document.getElementById("modal-backdrop").addEventListener("click", (e) => {
+          if (e.target.id === "modal-backdrop") this.closeModal();
+        });
+
+        // Keyboard Navigation
+        window.addEventListener("keydown", (e) => {
+          const modalOpen = document.getElementById("modal-backdrop").classList.contains("open");
+          if (modalOpen) {
+            if (e.key === "Escape") this.closeModal();
+            return;
+          }
+
+          if (e.target && (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA")) {
+            return;
+          }
+
+          const head = this.path[this.path.length - 1];
+          const key = e.key.toLowerCase();
+
+          if (e.key === "ArrowUp" || key === "w") {
+            e.preventDefault();
+            this.handleCellStep(head.r - 1, head.c);
+          } else if (e.key === "ArrowDown" || key === "s") {
+            e.preventDefault();
+            this.handleCellStep(head.r + 1, head.c);
+          } else if (e.key === "ArrowLeft" || key === "a") {
+            e.preventDefault();
+            this.handleCellStep(head.r, head.c - 1);
+          } else if (e.key === "ArrowRight" || key === "d") {
+            e.preventDefault();
+            this.handleCellStep(head.r, head.c + 1);
+          } else if (key === "z" || e.key === "Backspace") {
+            e.preventDefault();
+            this.undoStep();
+          } else if (key === "r") {
+            e.preventDefault();
+            this.resetPath(false);
+          } else if (key === "n") {
+            e.preventDefault();
+            this.loadNewSector(this.generateRandomSeed());
+          } else if (key === "h") {
+            e.preventDefault();
+            this.pingNextNode();
+          }
+        });
+      }
+    };
+
+    window.addEventListener("DOMContentLoaded", () => {
+      Game.init();
+    });
+  </script>
+</body>
+</html>
