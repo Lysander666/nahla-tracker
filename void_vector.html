@@ -68,19 +68,27 @@
       background: var(--bg-void);
     }
 
-    html, body {
+    html {
+      width: 100%;
+      height: auto;
+      min-height: 100%;
+      overflow-y: auto;
+      overflow-x: clip;
+      background-color: var(--bg-void);
+    }
+
+    body {
       width: 100%;
       min-height: 100vh;
       min-height: 100dvh;
-      overscroll-behavior-y: contain;
       background-color: var(--bg-void);
       color: var(--text-primary);
       font-family: var(--font-mono);
       display: flex;
-      justify-content: center;
-      align-items: flex-start;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: center;
       padding: 0.75rem 0.5rem 2rem;
-      overflow-x: hidden;
       line-height: 1.4;
     }
 
@@ -102,7 +110,7 @@
     .workspace-shell {
       width: 100%;
       max-width: 1060px;
-      margin: auto;
+      margin: auto 0;
       display: grid;
       grid-template-columns: 1fr;
       gap: 0.9rem;
@@ -111,14 +119,30 @@
     }
 
     @media (min-width: 920px) {
-      html, body {
-        align-items: center;
+      body {
         padding: 1.25rem 1rem;
       }
       .workspace-shell {
         grid-template-columns: minmax(480px, 580px) minmax(320px, 1fr);
         gap: 1.15rem;
+        align-items: stretch;
         justify-items: stretch;
+      }
+      .terminal-frame,
+      .intel-column {
+        height: 100%;
+      }
+      .intel-column .intel-panel:last-child {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+      }
+      .intel-column .intel-panel:last-child .intel-body {
+        flex: 1;
+        justify-content: space-between;
+      }
+      .board-stage {
+        max-width: 460px;
       }
     }
 
@@ -491,6 +515,7 @@
 
     /* Interactive Grid Arena */
     .grid-wrapper {
+      flex: 1;
       padding: 0.9rem 1rem;
       display: flex;
       justify-content: center;
@@ -820,8 +845,8 @@
       <header class="terminal-header">
         <div class="brand-block">
           <div class="brand-title">
-            <span class="status-dot" id="sys-dot"></span>
-            31 // VOID VECTOR
+            
+            VOID VECTOR v0.1
           </div>
           <div class="brand-sub">NAHLA TRACKER • HOPE SYSTEM (31 BODIES)</div>
         </div>
