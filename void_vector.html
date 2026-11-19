@@ -3,7 +3,26 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>31 // Void Vector — Nahla Tracker</title>
+  <title>31 // Void Vector</title>
+  <meta name="description" content="31 // Void Vector — An offline spatial arithmetic and callsign routing puzzle terminal for the Hope System." />
+  <meta name="theme-color" content="#050a07" />
+
+  <!-- Phosphor Terminal Favicon (Offline Vector SVG) -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23050a07' stroke='%2322c55e' stroke-width='4'/%3E%3Ctext x='50%25' y='54%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-weight='bold' font-size='28' fill='%2322c55e'%3E31%3C/text%3E%3C/svg%3E" />
+
+  <!-- Open Graph & Thumbnail Preview -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Nahla Tracker" />
+  <meta property="og:title" content="31 // Void Vector — Nahla Tracker" />
+  <meta property="og:description" content="Trace a continuous telemetry vector across the Hope System to hit Barycentre Mass 31 and lock orbital callsigns." />
+  <meta property="og:image" content="https://placehold.co/1200x630/050a07/22c55e?text=31+%2F%2F+VOID+VECTOR%0ANAHLA+TRACKER" />
+  <meta property="og:image:alt" content="31 // Void Vector phosphor green telemetry puzzle terminal" />
+
+  <!-- Twitter / X Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="31 // Void Vector — Nahla Tracker" />
+  <meta name="twitter:description" content="Trace a continuous telemetry vector across the Hope System to hit Barycentre Mass 31 and lock orbital callsigns." />
+  <meta name="twitter:image" content="https://placehold.co/1200x630/050a07/22c55e?text=31+%2F%2F+VOID+VECTOR%0ANAHLA+TRACKER" />
   <style>
     /* ==========================================================================
        NAHLA TRACKER DESIGN TOKENS & PHOSPHOR TERMINAL GREEN THEME
@@ -589,6 +608,17 @@
     }
 
     /* SVG Telemetry Vector Layer */
+    @keyframes vectorPulse {
+      0%, 100% {
+        opacity: 0.72;
+        filter: drop-shadow(0 0 3px rgba(34, 197, 94, 0.35));
+      }
+      50% {
+        opacity: 1;
+        filter: drop-shadow(0 0 11px rgba(74, 222, 128, 0.85));
+      }
+    }
+
     .vector-overlay {
       position: absolute;
       inset: 0;
@@ -596,6 +626,7 @@
       height: 100%;
       pointer-events: none;
       z-index: 4;
+      animation: vectorPulse 2.2s ease-in-out infinite;
     }
 
     /* Grid Cell Matrix */
@@ -916,13 +947,14 @@
       <header class="terminal-header">
         <div class="brand-block">
           <div class="brand-title">
-            
-            VOID VECTOR v0.1
+           
+            VOID VECTOR v0.2
           </div>
           <div class="brand-sub">NAHLA TRACKER • HOPE SYSTEM (31 BODIES)</div>
         </div>
         <div class="header-actions">
           <button class="btn" id="btn-audio" title="Toggle Telemetry Audio">SFX:ON</button>
+          <button class="btn" id="btn-static" title="Cycle Ambient Carrier Noise (Pink / White / Brown / Off)">STATIC:OFF</button>
           <button class="btn" id="btn-stats" title="View Tracker Telemetry Stats">LOG</button>
           <button class="btn" id="btn-help" title="Protocol Manual">[?]</button>
         </div>
@@ -1009,7 +1041,7 @@
           </div>
           <div class="brief-step">
             <span class="brief-num">02</span>
-            <div><strong>LOCK CALLSIGN RELAYS:</strong> Your vector <strong>must</strong> pass through the target HUD letters in exact order (0 mass). Decoy letters are optional on Survey/Orbital, but blocked on Deep Space.</div>
+            <div><strong>LOCK CALLSIGN RELAYS:</strong> Your vector <strong>must</strong> pass through the target HUD letters in exact order (0 mass). Duplicate decoy letters exist—only one sequence reaches <strong>[X]</strong> at mass <strong>31</strong>.</div>
           </div>
           <div class="brief-step">
             <span class="brief-num">03</span>
@@ -1128,9 +1160,14 @@
     // 2. RETRO TERMINAL AUDIO SYNTHESIZER (Offline Web Audio API)
     // --------------------------------------------------------------------------
     class TelemetryAudio {
+      static STATIC_MODES = ["OFF", "PINK", "WHITE", "BROWN"];
+
       constructor() {
         this.enabled = true;
+        this.staticMode = "OFF";
         this.ctx = null;
+        this.noiseBuffers = {};
+        this.activeStatic = null;
       }
 
       ensureContext() {
@@ -1142,127 +1179,207 @@
         }
       }
 
-      playTone(freq, type = "sine", duration = 0.08, gainVal = 0.08, delay = 0) {
+      getNoiseBuffer(type) {
+        if (this.noiseBuffers[type]) return this.noiseBuffers[type];
+
+        const sampleRate = this.ctx.sampleRate;
+        const length = sampleRate * 5; // 5-second seamless loop
+        const buffer = this.ctx.createBuffer(1, length, sampleRate);
+        const output = buffer.getChannelData(0);
+
+        if (type === "PINK") {
+          // Paul Kellet's warm 1/f pink noise filter
+          let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
+          for (let i = 0; i < length; i++) {
+            const white = Math.random() * 2 - 1;
+            b0 = 0.99886 * b0 + white * 0.0555179;
+            b1 = 0.99332 * b1 + white * 0.0750759;
+            b2 = 0.96900 * b2 + white * 0.1538520;
+            b3 = 0.86650 * b3 + white * 0.3104856;
+            b4 = 0.55000 * b4 + white * 0.5329522;
+            b5 = -0.7616 * b5 - white * 0.0168980;
+            output[i] = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362) * 0.045;
+            b6 = white * 0.115926;
+          }
+        } else if (type === "WHITE") {
+          // Wideband flat-spectrum white noise
+          for (let i = 0; i < length; i++) {
+            output[i] = (Math.random() * 2 - 1) * 0.14;
+          }
+        } else if (type === "BROWN") {
+          // Integrated Brownian (1/f^2) deep rumble noise
+          let lastOut = 0;
+          for (let i = 0; i < length; i++) {
+            const white = Math.random() * 2 - 1;
+            lastOut = (lastOut + 0.02 * white) / 1.02;
+            output[i] = lastOut * 0.65;
+          }
+        }
+
+        this.noiseBuffers[type] = buffer;
+        return buffer;
+      }
+
+      stopStatic() {
+        if (!this.activeStatic || !this.ctx) return;
+        const { source, gain } = this.activeStatic;
+        const now = this.ctx.currentTime;
+        try {
+          gain.gain.cancelScheduledValues(now);
+          gain.gain.setTargetAtTime(0.0001, now, 0.05);
+          source.stop(now + 0.18);
+        } catch (_) {}
+        this.activeStatic = null;
+      }
+
+      startStatic(type) {
+        this.stopStatic();
+        if (!this.ctx) return;
+
+        const profiles = {
+          PINK:  { cutoff: 2200, gain: 0.22 },
+          WHITE: { cutoff: 4200, gain: 0.12 },
+          BROWN: { cutoff: 950,  gain: 0.32 }
+        };
+        const profile = profiles[type] || profiles.PINK;
+
+        const source = this.ctx.createBufferSource();
+        source.buffer = this.getNoiseBuffer(type);
+        source.loop = true;
+
+        const filter = this.ctx.createBiquadFilter();
+        filter.type = "lowpass";
+        filter.frequency.value = profile.cutoff;
+
+        const gain = this.ctx.createGain();
+        const now = this.ctx.currentTime;
+        gain.gain.setValueAtTime(0.0001, now);
+        gain.gain.setTargetAtTime(profile.gain, now, 0.08);
+
+        source.connect(filter);
+        filter.connect(gain);
+        gain.connect(this.ctx.destination);
+        source.start(0);
+
+        this.activeStatic = { source, gain };
+      }
+
+      cycleStatic() {
+        const idx = TelemetryAudio.STATIC_MODES.indexOf(this.staticMode);
+        this.staticMode = TelemetryAudio.STATIC_MODES[(idx + 1) % TelemetryAudio.STATIC_MODES.length];
+
+        try {
+          this.ensureContext();
+          if (this.staticMode === "OFF") {
+            this.stopStatic();
+          } else {
+            this.startStatic(this.staticMode);
+          }
+        } catch (_) {}
+
+        return this.staticMode;
+      }
+
+      tone(freq, type = "sine", duration = 0.08, vol = 0.08, delay = 0) {
         if (!this.enabled) return;
         try {
           this.ensureContext();
           if (!this.ctx) return;
+
           const now = this.ctx.currentTime + delay;
           const osc = this.ctx.createOscillator();
           const gain = this.ctx.createGain();
+
           osc.type = type;
           osc.frequency.setValueAtTime(freq, now);
-          gain.gain.setValueAtTime(gainVal, now);
+
+          gain.gain.setValueAtTime(0.0001, now);
+          gain.gain.exponentialRampToValueAtTime(vol, now + 0.01);
           gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+
           osc.connect(gain);
           gain.connect(this.ctx.destination);
+
           osc.start(now);
-          osc.stop(now + duration);
-        } catch (_) {
-          // Fail silently if audio context is restricted
-        }
+          osc.stop(now + duration + 0.02);
+        } catch (_) {}
       }
 
       step(mass) {
-        const base = 320 + Math.min(mass, 35) * 10;
-        this.playTone(base, "triangle", 0.06, 0.06);
-      }
-
-      well() {
-        this.playTone(150, "sawtooth", 0.14, 0.07);
+        const pitch = 240 + Math.min(Math.max(mass, 0), 35) * 11;
+        this.tone(pitch, "triangle", 0.06, 0.07);
       }
 
       relay(index) {
-        this.playTone(520 + index * 110, "sine", 0.14, 0.09);
+        this.tone(520 + index * 95, "sine", 0.11, 0.09);
+      }
+
+      well() {
+        this.tone(165, "sawtooth", 0.12, 0.06);
       }
 
       undo() {
-        this.playTone(260, "sine", 0.06, 0.05);
+        this.tone(210, "sine", 0.05, 0.05);
       }
 
       error() {
-        this.playTone(115, "sawtooth", 0.16, 0.08);
+        this.tone(115, "square", 0.14, 0.07);
       }
 
       win() {
-        this.playTone(440, "triangle", 0.16, 0.09, 0.00);
-        this.playTone(554.37, "triangle", 0.16, 0.09, 0.09);
-        this.playTone(659.25, "triangle", 0.16, 0.09, 0.18);
-        this.playTone(880, "sine", 0.35, 0.11, 0.27);
+        this.tone(440, "triangle", 0.12, 0.09, 0);
+        this.tone(554.37, "triangle", 0.12, 0.09, 0.09);
+        this.tone(659.25, "triangle", 0.14, 0.09, 0.18);
+        this.tone(880, "sine", 0.28, 0.11, 0.27);
       }
     }
 
     // --------------------------------------------------------------------------
-    // 3. CARVE-FIRST SECTOR GENERATOR (Guaranteed Solvable to Mass = 31)
+    // 3. CARVE-FIRST PUZZLE GENERATOR (Guaranteed Solvable Sector Matrix)
     // --------------------------------------------------------------------------
-    const SectorGenerator = {
-      WORDS_3: ["SOL", "ORB", "ION", "ARC", "EXO", "GEO", "LUX", "NIX", "SKY", "SUN", "RAY", "ERA", "APO", "PER"],
-      CALLSIGN_LEXICON: [
-        { code: "AEOG", meaning: "Aeoga" },
-        { code: "ANNE", meaning: "Anneke" },
-        { code: "ARIA", meaning: "Ariana" },
-        { code: "BATH", meaning: "Bathory" },
-        { code: "BELL", meaning: "Bellatrix" },
-        { code: "DRAU", meaning: "Draupadi" },
-        { code: "HOPE", meaning: "Hope System" },
-        { code: "LUNA", meaning: "Luna" },
-        { code: "MRKA", meaning: "Marika" },
-        { code: "NAHL", meaning: "Nahla" },
-        { code: "NULL", meaning: "<Null signal> • Insta-Solve", isNull: true },
-        { code: "PHSE", meaning: "Phase" },
-        { code: "RAYN", meaning: "Rayne" },
-        { code: "RBKA", meaning: "Rebekah" },
-        { code: "RING", meaning: "Ring" },
-        { code: "RUZE", meaning: "Ruzena" },
-        { code: "SITA", meaning: "Sita" },
-        { code: "SKAD", meaning: "Skadi" },
-        { code: "SMNE", meaning: "Simone" },
-        { code: "VOID", meaning: "Void" }
-      ],
-      WORDS_4: [
-        "NAHL", "HOPE", "SMNE", "MRKA", "RBKA",
-        "ANNE", "VOID", "PHSE", "ARIA", "DRAU",
-        "RUZE", "RAYN", "AEOG", "BATH", "SKAD",
-        "SITA", "RING", "BELL", "LUNA", "NULL"
-      ],
-      ALPHABET: "ABCDEFGHJKLMNPQRSTUVWXYZ".split(""),
+    class SectorGenerator {
+      static WORDS_3 = ["SOL", "ORB", "ION", "ARC", "LUX", "SKY", "RAY", "RIM"];
 
-      generate(mode, seedStr, forcedWord = null) {
+      static DEEP_LEXICON = [
+        { code: "AEOG", label: "Aeoga" },
+        { code: "ANNE", label: "Anneke" },
+        { code: "ARIA", label: "Ariana" },
+        { code: "BATH", label: "Bathory" },
+        { code: "BELL", label: "Bellatrix" },
+        { code: "DRAU", label: "Draupadi" },
+        { code: "HOPE", label: "Hope System" },
+        { code: "LUNA", label: "Luna" },
+        { code: "MRKA", label: "Marika" },
+        { code: "NAHL", label: "Nahla" },
+        { code: "NULL", label: "<Null signal>" },
+        { code: "PHSE", label: "Phase" },
+        { code: "RAYN", label: "Rayne" },
+        { code: "RBKA", label: "Rebekah" },
+        { code: "RING", label: "Ring" },
+        { code: "RUZE", label: "Ruzena" },
+        { code: "SITA", label: "Sita" },
+        { code: "SKAD", label: "Skadi" },
+        { code: "SMNE", label: "Simone" },
+        { code: "VOID", label: "Void" }
+      ];
+
+      static WORDS_4 = SectorGenerator.DEEP_LEXICON.map((item) => item.code);
+      static ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ".split("");
+
+      static generate(mode, seedStr, forcedWord = null) {
         const rng = new SeededRandom(`${mode}:${seedStr}`);
         const config = {
-          SURVEY:  { size: 5, minLen: 7,  maxLen: 10, allowWells: false, wordLen: 3, strictRelays: false, voids: 3, decoyLetters: 2 },
-          ORBITAL: { size: 6, minLen: 9,  maxLen: 13, allowWells: true,  wordLen: 3, strictRelays: false, voids: 5, decoyLetters: 3 },
-          DEEP:    { size: 6, minLen: 10, maxLen: 14, allowWells: true,  wordLen: 4, strictRelays: true,  voids: 5, decoyLetters: 4 }
-        }[mode] || { size: 5, minLen: 7, maxLen: 10, allowWells: false, wordLen: 3, strictRelays: false, voids: 3, decoyLetters: 2 };
+          SURVEY:  { size: 5, minLen: 8,  maxLen: 10, allowWells: false, wordLen: 3, strictRelays: false, voids: 3, cloneDecoys: 2, decoyLetters: 2 },
+          ORBITAL: { size: 6, minLen: 9,  maxLen: 13, allowWells: true,  wordLen: 3, strictRelays: false, voids: 5, cloneDecoys: 3, decoyLetters: 3 },
+          DEEP:    { size: 6, minLen: 10, maxLen: 14, allowWells: true,  wordLen: 4, strictRelays: true,  voids: 5, cloneDecoys: 4, decoyLetters: 3 }
+        }[mode] || { size: 5, minLen: 7, maxLen: 10, allowWells: false, wordLen: 3, strictRelays: false, voids: 3, cloneDecoys: 2, decoyLetters: 2 };
 
         const size = config.size;
+        const solutionPath = this.buildSelfAvoidingWalk(rng, size, config.minLen, config.maxLen);
         const wordPool = config.wordLen === 4 ? this.WORDS_4 : this.WORDS_3;
         const word = (forcedWord && wordPool.includes(forcedWord)) ? forcedWord : rng.pick(wordPool);
 
-        // 1. Carve a guaranteed self-avoiding path
-        const solutionPath = this.carvePath(rng, size, config.minLen, config.maxLen);
-        const startPos = solutionPath[0];
-        const exitPos = solutionPath[solutionPath.length - 1];
-        const interior = solutionPath.slice(1, -1); // nodes between start and exit
-
-        // 2. Pick ordered positions along interior path for target callsign letters
-        const allIndices = Array.from({ length: interior.length }, (_, i) => i);
-        const chosenIndices = rng.shuffle(allIndices).slice(0, word.length).sort((a, b) => a - b);
-
-        const relayMap = new Map();
-        chosenIndices.forEach((idx, letterIdx) => {
-          relayMap.set(idx, word[letterIdx]);
-        });
-
-        // 3. Partition 31 across the remaining numeric interior nodes
-        const numericIndices = allIndices.filter((idx) => !relayMap.has(idx));
-        const massValues = this.partition31(rng, numericIndices.length, config.allowWells);
-        const massMap = new Map();
-        numericIndices.forEach((idx, mIdx) => {
-          massMap.set(idx, massValues[mIdx]);
-        });
-
-        // 4. Construct empty grid and stamp solution path
+        // Initialize grid
         const grid = Array.from({ length: size }, (_, r) =>
           Array.from({ length: size }, (_, c) => ({
             r,
@@ -1274,58 +1391,53 @@
           }))
         );
 
-        grid[startPos.r][startPos.c] = {
-          r: startPos.r,
-          c: startPos.c,
-          type: "START",
-          val: 0,
-          letter: null,
-          onSolution: true
-        };
-
-        grid[exitPos.r][exitPos.c] = {
-          r: exitPos.r,
-          c: exitPos.c,
-          type: "EXIT",
-          val: 0,
-          letter: null,
-          onSolution: true
-        };
-
-        interior.forEach((pt, idx) => {
-          if (relayMap.has(idx)) {
-            grid[pt.r][pt.c] = {
-              r: pt.r,
-              c: pt.c,
-              type: "RELAY",
-              val: 0,
-              letter: relayMap.get(idx),
-              onSolution: true
-            };
-          } else {
-            const v = massMap.get(idx);
-            grid[pt.r][pt.c] = {
-              r: pt.r,
-              c: pt.c,
-              type: v < 0 ? "WELL" : "MASS",
-              val: v,
-              letter: null,
-              onSolution: true
-            };
-          }
+        solutionPath.forEach((pt) => {
+          grid[pt.r][pt.c].onSolution = true;
         });
 
-        // 5. Fill remaining cells with Voids, Decoy Letters, and Decoy Numbers
-        const offPath = [];
-        for (let r = 0; r < size; r++) {
-          for (let c = 0; c < size; c++) {
-            if (!grid[r][c].onSolution) {
-              offPath.push(grid[r][c]);
-            }
-          }
+        const startPt = solutionPath[0];
+        const exitPt = solutionPath[solutionPath.length - 1];
+        grid[startPt.r][startPt.c].type = "START";
+        grid[exitPt.r][exitPt.c].type = "EXIT";
+
+        // Select interior indices along solutionPath for Callsign Relays
+        const interiorIndices = [];
+        for (let i = 1; i < solutionPath.length - 1; i++) {
+          interiorIndices.push(i);
         }
 
-        const shuffledOff = rng.shuffle(offPath);
+        const relaySlotPositions = rng.shuffle(interiorIndices)
+          .slice(0, word.length)
+          .sort((a, b) => a - b);
+
+        const relayIndexSet = new Set(relaySlotPositions);
+        relaySlotPositions.forEach((pathIdx, letterIdx) => {
+          const pt = solutionPath[pathIdx];
+          grid[pt.r][pt.c].type = "RELAY";
+          grid[pt.r][pt.c].letter = word[letterIdx];
+          grid[pt.r][pt.c].val = 0;
+        });
+
+        // Remaining interior solution nodes receive numeric mass values summing to 31
+        const numericNodes = interiorIndices
+          .filter((idx) => !relayIndexSet.has(idx))
+          .map((idx) => solutionPath[idx]);
+
+        const values = this.partitionTarget(rng, numericNodes.length, 31, config.allowWells);
+        numericNodes.forEach((pt, idx) => {
+          const v = values[idx];
+          grid[pt.r][pt.c].val = v;
+          grid[pt.r][pt.c].type = v < 0 ? "WELL" : "MASS";
+        });
+
+        // Collect all off-solution cells
+        const offPathCells = [];
+        for (let r = 0; r < size; r++) {
+          for (let c = 0; c < size; c++) {
+            if (!grid[r][c].onSolution) offPathCells.push(grid[r][c]);
+          }
+        }
+        const shuffledOff = rng.shuffle(offPathCells);
         let cursor = 0;
 
         // Place Voids
@@ -1333,7 +1445,14 @@
           shuffledOff[cursor].type = "VOID";
         }
 
-        // Place Decoy Callsign Relays
+        // Place Red-Herring Clones of Target Callsign Letters (so letters don't give away the path)
+        const wordChars = rng.shuffle(word.split(""));
+        for (let i = 0; i < config.cloneDecoys && cursor < shuffledOff.length; i++, cursor++) {
+          shuffledOff[cursor].type = "RELAY";
+          shuffledOff[cursor].letter = wordChars[i % wordChars.length];
+        }
+
+        // Place Unrelated Decoy Callsign Relays
         const decoyPool = this.ALPHABET.filter((ch) => !word.includes(ch));
         for (let i = 0; i < config.decoyLetters && cursor < shuffledOff.length; i++, cursor++) {
           shuffledOff[cursor].type = "RELAY";
@@ -1342,19 +1461,19 @@
 
         // Fill rest with numeric masses (and occasional gravity wells in Orbital/Deep)
         for (; cursor < shuffledOff.length; cursor++) {
-          if (config.allowWells && rng.next() < 0.2) {
-            const wellVal = rng.pick([-2, -3, -4]);
-            shuffledOff[cursor].type = "WELL";
-            shuffledOff[cursor].val = wellVal;
+          const cell = shuffledOff[cursor];
+          if (config.allowWells && rng.next() < 0.22) {
+            cell.type = "WELL";
+            cell.val = rng.pick([-2, -3, -4]);
           } else {
-            shuffledOff[cursor].type = "MASS";
-            shuffledOff[cursor].val = rng.int(1, 9);
+            cell.type = "MASS";
+            cell.val = rng.int(1, 9);
           }
         }
 
         return {
           mode,
-          seed: seedStr,
+          seedStr,
           size,
           grid,
           word,
@@ -1362,108 +1481,119 @@
           solutionPath,
           par: solutionPath.length - 1
         };
-      },
+      }
 
-      carvePath(rng, size, minLen, maxLen) {
+      static buildSelfAvoidingWalk(rng, size, minLen, maxLen) {
         const dirs = [
-          { dr: -1, dc: 0 },
-          { dr: 1, dc: 0 },
-          { dr: 0, dc: -1 },
-          { dr: 0, dc: 1 }
+          [-1, 0],
+          [1, 0],
+          [0, -1],
+          [0, 1]
         ];
 
-        for (let attempt = 0; attempt < 400; attempt++) {
-          const targetLen = rng.int(minLen, maxLen);
-          const start = { r: rng.int(0, size - 1), c: rng.int(0, size - 1) };
-          const path = [start];
-          const visited = new Set([`${start.r},${start.c}`]);
+        for (let attempt = 0; attempt < 250; attempt++) {
+          const targetSteps = rng.int(minLen, maxLen);
+          const startR = rng.int(0, size - 1);
+          const startC = rng.int(0, size - 1);
+          const visited = Array.from({ length: size }, () => Array(size).fill(false));
+          const path = [{ r: startR, c: startC }];
+          visited[startR][startC] = true;
 
-          while (path.length < targetLen) {
+          while (path.length - 1 < targetSteps) {
             const head = path[path.length - 1];
-            const neighbors = rng.shuffle(dirs)
-              .map((d) => ({ r: head.r + d.dr, c: head.c + d.dc }))
-              .filter((p) => p.r >= 0 && p.r < size && p.c >= 0 && p.c < size && !visited.has(`${p.r},${p.c}`));
-
+            const neighbors = [];
+            for (const [dr, dc] of dirs) {
+              const nr = head.r + dr;
+              const nc = head.c + dc;
+              if (nr >= 0 && nr < size && nc >= 0 && nc < size && !visited[nr][nc]) {
+                neighbors.push({ r: nr, c: nc });
+              }
+            }
             if (neighbors.length === 0) break;
-            const nextPt = neighbors[0];
-            path.push(nextPt);
-            visited.add(`${nextPt.r},${nextPt.c}`);
+            const next = rng.pick(neighbors);
+            visited[next.r][next.c] = true;
+            path.push(next);
           }
 
-          if (path.length >= minLen) {
+          if (path.length - 1 >= minLen) {
             return path;
           }
         }
 
-        // Deterministic fallback snake path if randomized walk ever hits max attempts
+        // Deterministic serpentine fallback (guaranteed valid)
         const fallback = [];
         for (let r = 0; r < size; r++) {
           for (let c = 0; c < size; c++) {
             const col = r % 2 === 0 ? c : size - 1 - c;
             fallback.push({ r, c: col });
-            if (fallback.length === minLen) return fallback;
+            if (fallback.length - 1 === minLen) return fallback;
           }
         }
         return fallback;
-      },
+      }
 
-      partition31(rng, count, allowWells) {
+      static partitionTarget(rng, count, target, allowWells) {
         if (count <= 0) return [];
-        const TARGET = 31;
+        const vals = Array(count).fill(1);
+        let currentSum = count;
 
-        for (let attempt = 0; attempt < 500; attempt++) {
-          const vals = [];
-          let sum = 0;
-
-          // Inject 1 or 2 gravity wells on Orbital / Deep Space modes
-          const wellCount = (allowWells && count >= 5) ? rng.int(1, 2) : 0;
-          for (let w = 0; w < wellCount; w++) {
-            const wVal = rng.pick([-2, -3, -4]);
-            vals.push(wVal);
-            sum += wVal;
-          }
-
-          const posSlots = count - wellCount;
-          let valid = true;
-          for (let i = 0; i < posSlots; i++) {
-            const remainingSlots = posSlots - i - 1;
-            const needed = TARGET - sum;
-            const minAllowed = Math.max(1, needed - remainingSlots * 9);
-            const maxAllowed = Math.min(9, needed - remainingSlots * 1);
-
-            if (minAllowed > maxAllowed) {
-              valid = false;
-              break;
-            }
-            const pickVal = rng.int(minAllowed, maxAllowed);
-            vals.push(pickVal);
-            sum += pickVal;
-          }
-
-          if (valid && sum === TARGET) {
-            return rng.shuffle(vals);
+        // Distribute positive mass up to target
+        let guard = 0;
+        while (currentSum < target && guard < 2000) {
+          guard++;
+          const idx = rng.int(0, count - 1);
+          if (vals[idx] < 9) {
+            vals[idx]++;
+            currentSum++;
           }
         }
 
-        // Guaranteed balanced fallback partition
-        const base = Math.floor(TARGET / count);
-        const rem = TARGET % count;
-        const fallback = Array.from({ length: count }, (_, i) => base + (i < rem ? 1 : 0));
-        return rng.shuffle(fallback);
+        // Inject 1 or 2 negative Gravity Wells on Orbital/Deep Space modes
+        if (allowWells && count >= 4) {
+          const wellCount = count >= 6 ? 2 : 1;
+          const indices = rng.shuffle(Array.from({ length: count }, (_, i) => i));
+          let placed = 0;
+
+          for (const wIdx of indices) {
+            if (placed >= wellCount) break;
+            const wellVal = rng.pick([-2, -3]);
+            const compensation = vals[wIdx] - wellVal;
+
+            // Find other nodes able to absorb the compensation without exceeding 9
+            const donors = indices.filter((i) => i !== wIdx && vals[i] > 0 && vals[i] < 9);
+            const spareCapacity = donors.reduce((acc, i) => acc + (9 - vals[i]), 0);
+
+            if (spareCapacity >= compensation) {
+              vals[wIdx] = wellVal;
+              let rem = compensation;
+              while (rem > 0) {
+                const d = rng.pick(donors);
+                if (vals[d] < 9) {
+                  vals[d]++;
+                  rem--;
+                }
+              }
+              placed++;
+            }
+          }
+        }
+
+        return rng.shuffle(vals);
       }
-    };
+    }
 
     // --------------------------------------------------------------------------
-    // 4. MAIN GAME CONTROLLER & UI RENDERER
+    // 4. GAME STATE & INTERFACE CONTROLLER
     // --------------------------------------------------------------------------
     const Game = {
       mode: "SURVEY",
       seed: "",
       puzzle: null,
       path: [],
+      solved: false,
       isDragging: false,
       hintCell: null,
-      solved: false,
+      audio: new TelemetryAudio(),
       stats: {
         solved: 0,
         optimal: 0,
@@ -1471,9 +1601,62 @@
         dailyCompleted: ""
       },
 
+      init() {
+        this.loadStats();
+        this.renderLexicon();
+        this.bindEvents();
+        this.updateDailyButton();
+        this.loadSector(this.getDailySeed());
+      },
+
+      updateDailyButton() {
+        const btn = document.getElementById("btn-daily");
+        if (!btn) return;
+        const isDone = this.stats.dailyCompleted === this.getDailySeed();
+        btn.textContent = isDone ? "DAILY ✓" : "DAILY";
+        btn.classList.toggle("active", isDone);
+      },
+
+      renderLexicon() {
+        const container = document.getElementById("lexicon-grid");
+        if (!container) return;
+        container.innerHTML = "";
+
+        SectorGenerator.DEEP_LEXICON.forEach((entry) => {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "lex-item" + (entry.code === "NULL" ? " lex-null" : "");
+          btn.dataset.code = entry.code;
+          btn.title = `Launch Deep Space sector with callsign ${entry.code} (${entry.label})`;
+
+          const codeSpan = document.createElement("span");
+          codeSpan.className = "lex-code";
+          codeSpan.textContent = entry.code;
+
+          const labelSpan = document.createElement("span");
+          labelSpan.className = "lex-meaning";
+          labelSpan.textContent = entry.label;
+
+          btn.appendChild(codeSpan);
+          btn.appendChild(labelSpan);
+
+          btn.addEventListener("click", () => {
+            if (this.mode !== "DEEP") {
+              this.mode = "DEEP";
+              document.querySelectorAll("[data-mode]").forEach((mBtn) => {
+                mBtn.classList.toggle("active", mBtn.dataset.mode === "DEEP");
+              });
+            }
+            this.loadSector(this.randomSeed(), entry.code);
+          });
+
+          container.appendChild(btn);
+        });
+      },
+
       loadStats() {
         try {
-          const raw = localStorage.getItem("nahla_void_vector_stats");
+          const raw = localStorage.getItem("nahla_31_void_vector_stats");
           if (raw) {
             this.stats = { ...this.stats, ...JSON.parse(raw) };
           }
@@ -1482,59 +1665,18 @@
 
       saveStats() {
         try {
-          localStorage.setItem("nahla_void_vector_stats", JSON.stringify(this.stats));
+          localStorage.setItem("nahla_31_void_vector_stats", JSON.stringify(this.stats));
         } catch (_) {}
       },
 
-      init() {
-        this.audio = new TelemetryAudio();
-        this.loadStats();
-        this.renderLexicon();
-        this.bindEvents();
-        this.loadSector(this.randomSeed());
-      },
-
-      renderLexicon() {
-        const gridEl = document.getElementById("lexicon-grid");
-        if (!gridEl) return;
-        gridEl.innerHTML = "";
-
-        SectorGenerator.CALLSIGN_LEXICON.forEach((entry) => {
-          const btn = document.createElement("button");
-          btn.type = "button";
-          btn.className = "lex-item" + (entry.isNull ? " lex-null" : "");
-          btn.dataset.code = entry.code;
-          btn.title = `Launch Deep Space sector locked to ${entry.code} (${entry.meaning})`;
-
-          const codeSpan = document.createElement("span");
-          codeSpan.className = "lex-code";
-          codeSpan.textContent = entry.code;
-
-          const meaningSpan = document.createElement("span");
-          meaningSpan.className = "lex-meaning";
-          meaningSpan.textContent = entry.meaning;
-
-          btn.appendChild(codeSpan);
-          btn.appendChild(meaningSpan);
-
-          btn.addEventListener("click", () => {
-            this.mode = "DEEP";
-            document.querySelectorAll("[data-mode]").forEach((b) => {
-              b.classList.toggle("active", b.dataset.mode === "DEEP");
-            });
-            this.loadSector(this.randomSeed(), entry.code);
-            this.setLog(`DEEP SPACE LOCKED TO CALLSIGN [${entry.code}] — ${entry.meaning.toUpperCase()}.`, "ok");
-          });
-
-          gridEl.appendChild(btn);
-        });
-      },
-
       bindEvents() {
-        // Difficulty mode switches
+        // Mode buttons
         document.querySelectorAll("[data-mode]").forEach((btn) => {
           btn.addEventListener("click", () => {
-            this.setMode(btn.dataset.mode);
+            const nextMode = btn.dataset.mode;
+            if (nextMode !== this.mode) {
+              this.setMode(nextMode);
+            }
           });
         });
 
@@ -1543,6 +1685,20 @@
           this.audio.enabled = !this.audio.enabled;
           e.currentTarget.textContent = this.audio.enabled ? "SFX:ON" : "SFX:OFF";
           if (this.audio.enabled) this.audio.step(10);
+        });
+
+        document.getElementById("btn-static").addEventListener("click", (e) => {
+          const mode = this.audio.cycleStatic();
+          e.currentTarget.textContent = `STATIC:${mode}`;
+          e.currentTarget.classList.toggle("active", mode !== "OFF");
+
+          const messages = {
+            PINK:  "CARRIER STATIC: PINK NOISE (1/F) ACTIVE.",
+            WHITE: "CARRIER STATIC: WHITE NOISE (WIDEBAND) ACTIVE.",
+            BROWN: "CARRIER STATIC: BROWNIAN NOISE (DEEP RUMBLE) ACTIVE.",
+            OFF:   "AMBIENT CARRIER STATIC MUTED."
+          };
+          this.setLog(messages[mode]);
         });
 
         document.getElementById("btn-stats").addEventListener("click", () => this.showStatsModal());
@@ -1640,9 +1796,9 @@
 
       getDailySeed() {
         const now = new Date();
-        const y = now.getFullYear();
-        const m = String(now.getMonth() + 1).padStart(2, "0");
-        const d = String(now.getDate()).padStart(2, "0");
+        const y = now.getUTCFullYear();
+        const m = String(now.getUTCMonth() + 1).padStart(2, "0");
+        const d = String(now.getUTCDate()).padStart(2, "0");
         return `DAY-${y}${m}${d}`;
       },
 
@@ -1817,6 +1973,7 @@
         }
         if (this.seed === this.getDailySeed()) {
           this.stats.dailyCompleted = this.seed;
+          this.updateDailyButton();
         }
         this.saveStats();
 
