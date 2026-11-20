@@ -3974,6 +3974,30 @@
         );
       },
 
+      showNextSectorModal() {
+  this.openModal(
+    "LOAD NEXT SECTOR?",
+    `
+      <div class="rule-item" style="border-left-color:var(--amber);">
+        <strong style="color:var(--amber);">WARNING — PROGRESS WILL BE LOST:</strong>
+        Generating a new sector will abort your current sweep (<strong>#${this.seed}</strong>) and clear any vector steps or terminal overrides.
+      </div>
+    `,
+    [
+      { label: "CANCEL", onClick: () => this.closeModal() },
+      {
+        label: "NEXT SECTOR",
+        primary: true,
+        onClick: () => {
+          this.closeModal();
+          this.loadSector(this.randomSeed());
+        }
+      }
+    ],
+    { mini: true }
+  );
+},
+
       showHelpModal() {
         this.openModal(
           "HOPE SYSTEM LORE & PROTOCOL",
@@ -4052,29 +4076,7 @@
           ]
         );
 
-        showNextSectorModal() {
-  this.openModal(
-    "LOAD NEXT SECTOR?",
-    `
-      <div class="rule-item" style="border-left-color:var(--amber);">
-        <strong style="color:var(--amber);">WARNING — PROGRESS WILL BE LOST:</strong>
-        Generating a new sector will abort your current sweep (<strong>#${this.seed}</strong>) and clear any vector steps or terminal overrides.
-      </div>
-    `,
-    [
-      { label: "CANCEL", onClick: () => this.closeModal() },
-      {
-        label: "NEXT SECTOR",
-        primary: true,
-        onClick: () => {
-          this.closeModal();
-          this.loadSector(this.randomSeed());
-        }
-      }
-    ],
-    { mini: true }
-  );
-},
+       
 
         document.getElementById("btn-copy-seed").addEventListener("click", (e) => {
           const input = document.getElementById("seed-input-field");
