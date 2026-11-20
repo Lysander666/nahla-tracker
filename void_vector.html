@@ -1289,7 +1289,7 @@
       <header class="terminal-header">
         <div class="brand-block">
           <div class="brand-title">
-            VOID VECTOR v0.52
+            VOID VECTOR v0.53
           </div>
           <div class="brand-sub">NAHLA@HOPE (31 BODIES)</div>
         </div>
@@ -3297,7 +3297,7 @@
         document.getElementById("btn-undo").addEventListener("click", () => this.undoStep());
         document.getElementById("btn-reset").addEventListener("click", () => this.resetPath(false, true));
       //  document.getElementById("btn-hint").addEventListener("click", () => this.triggerHint());
-        document.getElementById("btn-next").addEventListener("click", () => this.loadSector(this.randomSeed()));
+        document.getElementById("btn-next").addEventListener("click", () => this.showNextSectorModal());
 
         // Modal dismiss
         document.getElementById("modal-close").addEventListener("click", () => this.closeModal());
@@ -3402,9 +3402,9 @@
          //   e.preventDefault();
          //   this.triggerHint();
           } else if (key === "n") {
-            e.preventDefault();
-            this.loadSector(this.randomSeed());
-          }
+  e.preventDefault();
+  this.showNextSectorModal();
+}
         });
       },
 
@@ -4051,6 +4051,30 @@
             }
           ]
         );
+
+        showNextSectorModal() {
+  this.openModal(
+    "LOAD NEXT SECTOR?",
+    `
+      <div class="rule-item" style="border-left-color:var(--amber);">
+        <strong style="color:var(--amber);">WARNING — PROGRESS WILL BE LOST:</strong>
+        Generating a new sector will abort your current sweep (<strong>#${this.seed}</strong>) and clear any vector steps or terminal overrides.
+      </div>
+    `,
+    [
+      { label: "CANCEL", onClick: () => this.closeModal() },
+      {
+        label: "NEXT SECTOR",
+        primary: true,
+        onClick: () => {
+          this.closeModal();
+          this.loadSector(this.randomSeed());
+        }
+      }
+    ],
+    { mini: true }
+  );
+},
 
         document.getElementById("btn-copy-seed").addEventListener("click", (e) => {
           const input = document.getElementById("seed-input-field");
