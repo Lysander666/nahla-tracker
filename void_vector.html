@@ -140,11 +140,11 @@
 
     @media (min-width: 960px) {
       body {
-        padding: 1.15rem 1rem;
+        padding: 0.85rem 1rem;
       }
       .workspace-shell {
-        grid-template-columns: minmax(470px, 560px) minmax(380px, 1fr);
-        gap: 1.1rem;
+        grid-template-columns: minmax(450px, 550px) minmax(380px, 1fr);
+        gap: 1rem;
         align-items: stretch;
         justify-items: stretch;
       }
@@ -153,10 +153,10 @@
         height: 100%;
       }
       .intel-column {
-        gap: 1.1rem;
+        gap: 1rem;
       }
-      .board-stage {
-        max-width: 420px;
+      .board-axis-shell {
+        max-width: clamp(300px, calc(100dvh - 280px), 446px);
       }
     }
 
@@ -262,10 +262,10 @@
 
     @media (min-width: 960px) {
       .bash-screen {
-        flex: 0 0 232px;
-        height: 232px;
-        min-height: 232px;
-        max-height: 232px;
+        flex: 0 0 clamp(160px, 25dvh, 232px);
+        height: clamp(160px, 25dvh, 232px);
+        min-height: clamp(160px, 25dvh, 232px);
+        max-height: clamp(160px, 25dvh, 232px);
       }
     }
 
@@ -398,8 +398,7 @@
     }
 
     .flip-body-stack {
-      display: grid;
-      grid-template-areas: "face";
+      position: relative;
       height: 312px;
       min-height: 312px;
       max-height: 312px;
@@ -413,23 +412,23 @@
       }
       .flip-body-stack {
         flex: 1 1 auto;
-        height: auto;
-        min-height: 0;
+        height: 0;
+        min-height: 160px;
         max-height: none;
       }
     }
 
     .intel-body {
-      grid-area: face;
-      height: 100%;
-      min-height: 0;
+      position: absolute;
+      inset: 0;
       overflow-y: auto;
-      padding: 0.7rem 0.85rem;
+      scrollbar-gutter: stable;
+      padding: 0.65rem 0.8rem;
       display: flex;
       flex-direction: column;
-      justify-content: space-between;
-      gap: 0.42rem;
-      font-size: 0.73rem;
+      justify-content: flex-start;
+      gap: 0.45rem;
+      font-size: 0.72rem;
       color: var(--text-primary);
       transition: opacity 0.16s ease;
     }
