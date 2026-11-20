@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Void Vector v0.5 — Nahla Tracker</title>
+  <title>Void Vector</title>
   <meta name="description" content="31 // Void Vector — An offline spatial triangulation, bash terminal override, and beacon routing workstation for the Hope System." />
   <meta name="theme-color" content="#050a07" />
 
@@ -207,6 +207,12 @@
       gap: 0.35rem;
     }
 
+    .intel-header-right {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
     .intel-badge {
       font-size: 0.64rem;
       font-weight: 600;
@@ -239,10 +245,10 @@
     }
 
     .bash-screen {
-      flex: 0 0 220px;
-      height: 220px;
-      min-height: 220px;
-      max-height: 220px;
+      flex: 0 0 240px;
+      height: 240px;
+      min-height: 240px;
+      max-height: 240px;
       overflow-y: auto;
       background: #030705;
       padding: 0.65rem 0.8rem;
@@ -256,10 +262,10 @@
 
     @media (min-width: 960px) {
       .bash-screen {
-        flex: 0 0 clamp(160px, 25dvh, 232px);
-        height: clamp(160px, 25dvh, 232px);
-        min-height: clamp(160px, 25dvh, 232px);
-        max-height: clamp(160px, 25dvh, 232px);
+        flex: 0 0 clamp(180px, calc(25dvh + 20px), 252px);
+        height: clamp(180px, calc(25dvh + 20px), 252px);
+        min-height: clamp(180px, calc(25dvh + 20px), 252px);
+        max-height: clamp(180px, calc(25dvh + 20px), 252px);
       }
     }
 
@@ -320,6 +326,10 @@
       color: var(--term-green);
       white-space: nowrap;
       user-select: none;
+    }
+
+    .bash-prompt-label.is-root {
+      color: var(--amber);
     }
 
     .bash-input {
@@ -416,7 +426,7 @@
       .flip-body-stack {
         flex: 1 1 auto;
         height: 0;
-        min-height: 160px;
+        min-height: 140px;
         max-height: none;
       }
     }
@@ -548,7 +558,7 @@
       margin-top: 0.15rem;
     }
 
-    .lex-grid-3 {
+    .lexicon-grid-3 {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 0.28rem;
@@ -1131,7 +1141,9 @@
 
     .modal-card {
       width: 100%;
-      max-width: 450px;
+      max-width: 480px;
+      max-height: 88dvh;
+      overflow-y: auto;
       background: var(--bg-terminal);
       border: 1px solid var(--term-green);
       border-radius: 10px;
@@ -1277,9 +1289,9 @@
       <header class="terminal-header">
         <div class="brand-block">
           <div class="brand-title">
-            VOID VECTOR v0.5
+            VOID VECTOR v0.51
           </div>
-          <div class="brand-sub">NAHLA@HOPE (31 BODIES)</div>
+          <div class="brand-sub">NAHLA TRACKER / HOPE SYSTEM (31 BODIES)</div>
         </div>
         <div class="header-actions">
           <button class="btn" id="btn-audio" title="Toggle Telemetry Audio">SFX:ON</button>
@@ -1389,7 +1401,7 @@
 
         <!-- Interactive Command Line Input -->
         <form class="bash-prompt-row" id="bash-form" autocomplete="off">
-          <label for="bash-input" class="bash-prompt-label" id="bash-prompt-label">nahla@hope:~$</label>
+          <label for="bash-input" class="bash-prompt-label" id="bash-prompt-label">nahla@hope:~/sector$</label>
           <input
             type="text"
             id="bash-input"
@@ -1435,7 +1447,7 @@
             </div>
             <div class="brief-step">
               <span class="brief-num">04</span>
-              <div><strong>BASH &amp; CONTROLS:</strong> Tap tiles (click-drag on desktop / <strong>WASD</strong>). <strong>ttyS0</strong> keeps scrollback until <span class="cmd-code">clear</span> and supports <span class="cmd-code">ls</span>, <span class="cmd-code">cd</span>, <span class="cmd-code">cat</span>, <span class="cmd-code">grep</span>, <span class="cmd-code">reboot</span>.</div>
+              <div><strong>BASH &amp; CONTROLS:</strong> Tap tiles (click-drag on desktop / <strong>WASD</strong>). <strong>ttyS0</strong> keeps scrollback until <span class="cmd-code">clear</span> and supports <span class="cmd-code">ls</span>, <span class="cmd-code">cd</span>, <span class="cmd-code">cat</span>, <span class="cmd-code">grep</span>, <span class="cmd-code">su -</span>, <span class="cmd-code">reboot</span>.</div>
             </div>
           </div>
 
@@ -1477,9 +1489,9 @@
     </section>
   </div>
 
-  <!-- Unified Terminal Modal (Victory / Help / Stats / Seed) -->
+  <!-- Unified Terminal Modal (Victory / Help / Stats / Seed / Confirm) -->
   <div class="modal-backdrop" id="modal-backdrop" role="dialog" aria-modal="true">
-    <div class="modal-card">
+    <div class="modal-card" id="modal-card">
       <div class="modal-header">
         <span class="modal-title" id="modal-title">PROTOCOL</span>
         <button class="btn" id="modal-close">ESC [X]</button>
@@ -1776,7 +1788,7 @@
 
       static WORDS_3 = SectorGenerator.INNER_BEACONS.map((item) => item.code);
       static WORDS_4 = SectorGenerator.DEEP_LEXICON.map((item) => item.code);
-      static ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ9".split("");
+      static ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ".split("");
 
       static lookupBeacon(code) {
         const up = String(code || "").toUpperCase();
@@ -2205,7 +2217,7 @@
       static COMMANDS = [
         "scan", "vent", "invert", "purge", "sync", "dampen", "boost", "reboot",
         "help", "man", "clear", "cls", "ls", "ll", "cd", "pwd", "cat", "grep",
-        "echo", "whoami", "uname", "date", "uptime", "ps", "df", "history", "sudo"
+        "echo", "whoami", "uname", "date", "uptime", "ps", "df", "history", "sudo", "su", "exit"
       ];
 
       constructor(game) {
@@ -2216,12 +2228,16 @@
         this.cwd = "/home/nahla/sector";
         this.startTime = Date.now();
         this.pendingPrompt = null; // e.g., { type: "RELAY_DRIFT", coord: "B3", r, c }
+        this.isRoot = false;
+        this.rootChargeGranted = false;
       }
 
       resetForSector(puzzle) {
         this.lines = [];
         this.cwd = "/home/nahla/sector";
         this.pendingPrompt = null;
+        this.isRoot = false;
+        this.rootChargeGranted = false;
         this.updatePromptLabel();
 
         const beacon = SectorGenerator.lookupBeacon(puzzle.word);
@@ -2269,7 +2285,10 @@
           : this.cwd === "/home/nahla"
             ? "~"
             : this.cwd;
-        lbl.textContent = `nahla@hope:${shortCwd}$`;
+        const user = this.isRoot ? "root" : "nahla";
+        const sigil = this.isRoot ? "#" : "$";
+        lbl.textContent = `${user}@hope:${shortCwd}${sigil}`;
+        lbl.classList.toggle("is-root", this.isRoot);
       }
 
       triggerRelayPrompt(cell) {
@@ -2300,8 +2319,7 @@
         const argPrefix = parts[1].toUpperCase();
 
         if (cmd === "sync") {
-          const allCodes = [...SectorGenerator.WORDS_3, ...SectorGenerator.WORDS_4];
-          const codes = allCodes.filter((w) => w.startsWith(argPrefix));
+          const codes = [...SectorGenerator.WORDS_3, ...SectorGenerator.WORDS_4].filter((w) => w.startsWith(argPrefix));
           if (codes.length === 1) return `${parts[0]} ${codes[0]}`;
           if (codes.length > 1) this.print(codes.join("  "), "info");
         } else if (["vent", "invert", "purge", "scan"].includes(cmd)) {
@@ -2336,23 +2354,59 @@
           : this.cwd === "/home/nahla"
             ? "~"
             : this.cwd;
-        this.print(`nahla@hope:${shortCwd}$ ${trimmed}`, "cmd");
+        const user = this.isRoot ? "root" : "nahla";
+        const sigil = this.isRoot ? "#" : "$";
+        this.print(`${user}@hope:${shortCwd}${sigil} ${trimmed}`, "cmd");
 
         const tokens = trimmed.split(/\s+/);
-        let cmd = tokens[0].toLowerCase();
-        let args = tokens.slice(1);
+        const cmd = tokens[0].toLowerCase();
+        const args = tokens.slice(1);
 
         if (cmd === "sudo") {
-          if (args.length === 0) {
-            this.print("usage: sudo <command>", "info");
-            return;
-          }
-          this.print("[sudo] password for nahla: ********** (local ttyS0 bypass)", "info");
-          cmd = args[0].toLowerCase();
-          args = args.slice(1);
+          this.game.audio.error();
+          this.print("sudo: not permitted. nahla is not in the sudoers file — this incident will be reported. Use 'su -'.", "err");
+          return;
         }
 
         switch (cmd) {
+          case "su": {
+            const isLoginShell = args.includes("-") || args.includes("-l") || args.includes("--login");
+            const targetUser = args.find((a) => !a.startsWith("-")) || "root";
+            if (targetUser !== "root" && targetUser !== "nahla") {
+              this.game.audio.error();
+              this.print(`su: user ${targetUser} does not exist`, "err");
+              break;
+            }
+            if (targetUser === "nahla") {
+              this.isRoot = false;
+              if (isLoginShell) this.cwd = "/home/nahla/sector";
+              this.updatePromptLabel();
+              this.game.audio.cmdOk();
+              this.print("Session switched to operator 'nahla'.", "info");
+              break;
+            }
+            const alreadyRoot = this.isRoot;
+            this.isRoot = true;
+            if (isLoginShell) {
+              this.cwd = "/home/nahla/sector";
+            }
+            this.updatePromptLabel();
+            this.game.audio.mutate();
+            if (!alreadyRoot) {
+              this.print("Password: ********", "info");
+            }
+            if (!this.rootChargeGranted) {
+              this.rootChargeGranted = true;
+              this.game.chargesLeft += 1;
+              this.game.updateChargesHUD();
+              this.print("[ROOT] Elevated to uid=0(root) on HopeOS ttyS0 — +1 EMERGENCY OVERRIDE CHG UNLOCKED.", "ok");
+            } else {
+              this.print("[ROOT] Active uid=0(root) session on HopeOS ttyS0.", "ok");
+            }
+            this.print("Hardware privileges active: deep 'scan <xy>' route probe + '/root' directory unlocked.", "cyan");
+            break;
+          }
+
           case "clear":
           case "cls":
             this.clear();
@@ -2422,7 +2476,7 @@
             break;
 
           case "whoami":
-            this.print("nahla-tracker", "ok");
+            this.print(this.isRoot ? "root" : "nahla-tracker", this.isRoot ? "warn" : "ok");
             break;
 
           case "uname":
@@ -2433,9 +2487,12 @@
             }
             break;
 
-          case "date":
-            this.print(new Date().toUTCString(), "info");
+          case "date": {
+            const now = new Date();
+            const utc = now.toUTCString().replace(String(now.getUTCFullYear()), "3312");
+            this.print(`${utc} (Hope Epoch 3312)`, "info");
             break;
+          }
 
           case "uptime": {
             const secs = Math.floor((Date.now() - this.startTime) / 1000);
@@ -2445,12 +2502,17 @@
           }
 
           case "ps":
-            this.print("  PID TTY      TIME CMD\n    1 ttyS0    00:00:01 init\n   31 ttyS0    00:00:04 echo_triangulator\n   42 ttyS0    00:00:02 vector_router\n   88 ttyS0    00:00:01 nahla_sh", "info");
+            this.print("  PID TTY      TIME CMD\n    1 ttyS0    00:00:01 init\n   31 ttyS0    00:00:04 echo_sweep_31\n   42 ttyS0    00:00:02 vector_router\n   88 ttyS0    00:00:01 nahla_sh", "info");
             break;
 
-          case "df":
-            this.print(`Filesystem      Size  Used Avail Use% Mounted on\n/dev/hope0       31B   ${String(this.game.computeStatus().mass).padStart(2, "0")}B   ${Math.max(0, 31 - this.game.computeStatus().mass)}B  ${Math.min(100, Math.round((this.game.computeStatus().mass / 31) * 100))}% /home/nahla/sector\n/dev/override   ${this.game.puzzle.maxCharges}CHG  ${this.game.puzzle.maxCharges - this.game.chargesLeft}CHG  ${this.game.chargesLeft}CHG   --% /sys/override`, "info");
+          case "df": {
+            const status = this.game.computeStatus();
+            const used = status.mass;
+            const avail = Math.max(0, 31 - used);
+            const pct = Math.min(100, Math.round((used / 31) * 100));
+            this.print(`Filesystem      Size  Used Avail Use% Mounted on\n/dev/hope0       31E   ${String(used).padStart(2, "0")}E   ${String(avail).padStart(2, "0")}E  ${pct}% /home/nahla/sector\n/dev/override   ${this.game.puzzle.maxCharges}CHG  ${Math.max(0, this.game.puzzle.maxCharges - this.game.chargesLeft)}CHG  ${this.game.chargesLeft}CHG   --% /sys/override`, "info");
             break;
+          }
 
           case "history":
             this.cmdHistory.forEach((entry, idx) => {
@@ -2459,7 +2521,15 @@
             break;
 
           case "exit":
-            this.print("logout blocked: active telemetry lock in progress.", "warn");
+            if (this.isRoot) {
+              this.isRoot = false;
+              if (this.cwd.startsWith("/root")) this.cwd = "/home/nahla/sector";
+              this.updatePromptLabel();
+              this.game.audio.cmdOk();
+              this.print("logout: dropped uid=0(root), returned to nahla@hope.", "info");
+            } else {
+              this.print("logout blocked: active telemetry lock in progress on ttyS0.", "warn");
+            }
             break;
 
           default:
@@ -2473,13 +2543,13 @@
         this.print("=== GRID OVERRIDE COMMANDS (ttyS0) ===", "sys");
         this.print("  scan [xy]     Scan sector (or tile) for hidden anomalies", "info");
         this.print("  vent <xy>     Vaporize a ## Void node (e.g. vent c4)", "info");
-        this.print("  invert <xy>   Flip +/- echo/shadow polarity of a node", "info");
+        this.print("  invert <xy>   Flip +/- polarity of an Echo or Phase Shadow", "info");
         this.print("  purge <xy>    Clear [!] static interference or decoy relay", "info");
-        this.print("  sync <code>   Sync beacon callsign to unlock [?] relays", "info");
+        this.print("  sync <code>   Sync beacon to unlock [?] phase relays", "info");
         this.print("  dampen|boost  Reply to incoming relay harmonic drift", "info");
         this.print("  reboot        Reset vector & restore initial sector anomalies", "info");
         this.print("=== BASH / SYSTEM UTILITIES ===", "sys");
-        this.print("  ls, cd, pwd, cat <file>, grep <str>, echo, ps, df,", "info");
+        this.print("  ls, cd, pwd, cat <file>, grep <str>, su -, echo, ps, df,", "info");
         this.print("  whoami, uname -a, date, uptime, history, clear", "info");
       }
 
@@ -2501,19 +2571,29 @@
           } else {
             this.print(`[SCAN ${parsed.coord}] TYPE=${cell.type} VAL=${cell.val >= 0 ? "+" : ""}${cell.val}${cell.letter ? ` RELAY=[${cell.letter}]` : ""} (NOMINAL)`, "ok");
           }
+          if (this.isRoot && cell.clean) {
+            const baseDesc = cell.clean.type === "RELAY"
+              ? `RELAY[${cell.clean.letter}]`
+              : `${cell.clean.type}(${cell.clean.val >= 0 ? "+" : ""}${cell.clean.val})`;
+            this.print(`  [ROOT-HW] ON_SWEEP_ROUTE=${cell.onSolution ? "YES" : "NO (DECOY/OFF-PATH)"} • FACTORY_NODE=${baseDesc}`, "cyan");
+          }
           return;
         }
 
         const active = puzzle.anomalies.filter((a) => puzzle.grid[a.r][a.c].anomaly !== null);
         if (active.length === 0) {
           this.print("[SCAN] 0 ACTIVE ANOMALIES REMAINING. SECTOR ROUTE CLEAR.", "ok");
-          return;
+        } else {
+          this.print(`[SCAN] DETECTED ${active.length} ACTIVE SECTOR ANOMAL${active.length === 1 ? "Y" : "IES"}:`, "sys");
+          active.forEach((a, idx) => {
+            this.print(`  0${idx + 1}. ${a.summary}  -->  run '${a.fixCmd}'`, "warn");
+          });
         }
 
-        this.print(`[SCAN] DETECTED ${active.length} ACTIVE SECTOR ANOMAL${active.length === 1 ? "Y" : "IES"}:`, "sys");
-        active.forEach((a, idx) => {
-          this.print(`  0${idx + 1}. ${a.summary}  -->  run '${a.fixCmd}'`, "warn");
-        });
+        if (this.isRoot) {
+          const routeCoords = puzzle.solutionPath.map((p) => SectorGenerator.toCoord(p.r, p.c)).join(" -> ");
+          this.print(`[ROOT-HW] NOMINAL SWEEP VECTOR: ${routeCoords}`, "cyan");
+        }
       }
 
       consumeChargeOrWarn() {
@@ -2577,7 +2657,7 @@
         const cell = puzzle.grid[parsed.r][parsed.c];
         if (cell.type !== "MASS" && cell.type !== "WELL") {
           this.game.audio.error();
-          this.print(`invert: ${parsed.coord} has no numeric echo polarity to invert (type: ${cell.type}).`, "err");
+          this.print(`invert: ${parsed.coord} has no numeric polarity to invert (type: ${cell.type}).`, "err");
           return;
         }
         if (cell.val === 0) {
@@ -2625,7 +2705,7 @@
           cell.val = cell.clean.val;
           cell.letter = cell.clean.letter;
           cell.anomaly = null;
-          const desc = cell.type === "RELAY" ? `RELAY [${cell.letter}]` : `${cell.val >= 0 ? "+" : ""}${cell.val} ${cell.type}`;
+          const desc = cell.type === "RELAY" ? `RELAY [${cell.letter}]` : `${cell.val >= 0 ? "+" : ""}${cell.val} ${cell.type === "WELL" ? "SHADOW" : "ECHO"}`;
           this.print(`[OK] PURGED STATIC AT ${parsed.coord} -> RESTORED ${desc}.`, "ok");
         } else {
           const oldLetter = cell.letter;
@@ -2643,14 +2723,14 @@
         const puzzle = this.game.puzzle;
         if (!codeArg) {
           this.game.audio.error();
-          this.print(`usage: sync <callsign>  (active sector callsign: ${puzzle.word})`, "err");
+          this.print(`usage: sync <beacon>  (active sector beacon: ${puzzle.word})`, "err");
           return;
         }
         const code = codeArg.trim().toUpperCase();
         const validWords = [...SectorGenerator.WORDS_3, ...SectorGenerator.WORDS_4];
         if (!validWords.includes(code)) {
           this.game.audio.error();
-          this.print(`sync: unknown callsign '${code}'. Flip the bottom card to inspect the Lexicon.`, "err");
+          this.print(`sync: unknown beacon '${code}'. Flip the bottom card to inspect the 28-Beacon Roster.`, "err");
           return;
         }
 
@@ -2675,7 +2755,7 @@
 
         if (unlockedCells.length === 0 && code !== "NULL") {
           this.game.audio.cmdOk();
-          this.print(`[SYNC] CALLSIGN ${code} VERIFIED. NO PHASE-LOCKED RELAYS PENDING.`, "info");
+          this.print(`[SYNC] BEACON ${code} VERIFIED. NO PHASE-LOCKED RELAYS PENDING.`, "info");
           return;
         }
 
@@ -2684,7 +2764,7 @@
 
         if (unlockedCells.length > 0) {
           const coords = unlockedCells.map((c) => c.coord).join(", ");
-          this.print(`[OK] CALLSIGN ${code} SYNCHRONIZED -> PHASE-LOCK CLEARED AT ${coords}.`, "ok");
+          this.print(`[OK] BEACON ${code} SYNCHRONIZED -> PHASE-LOCK CLEARED AT ${coords}.`, "ok");
           unlockedCells.forEach((c) => this.game.onGridMutated(c.r, c.c));
         } else {
           this.print(`[OK] <NULL SIGNAL> CARRIER OVERRIDE SYNCHRONIZED.`, "ok");
@@ -2715,22 +2795,23 @@
       // --- Virtual Bash Filesystem ---
       getDirEntries(dir) {
         const fs = {
-          "/": ["home/", "sys/", "var/", "etc/"],
+          "/": ["home/", "root/", "sys/", "var/", "etc/"],
           "/home": ["nahla/"],
           "/home/nahla": ["sector/", "readme.txt"],
-          "/home/nahla/sector": ["anomalies.dat", "sector.map", "telemetry.log", "lexicon.db"],
+          "/home/nahla/sector": ["anomalies.dat", "sector.map", "telemetry.log", "beacons.db"],
+          "/root": ["array_override.cfg", "transceiver.key"],
           "/sys": ["sector/", "override/"],
           "/sys/sector": ["echo_returns", "anomalies.dat"],
           "/sys/override": ["charges", "vent", "invert", "purge", "sync"],
           "/var": ["log/"],
           "/var/log": ["telemetry.log"],
-          "/etc": ["lexicon.db"]
+          "/etc": ["beacons.db"]
         };
         return fs[dir] || [];
       }
 
       resolvePath(target) {
-        if (!target || target === "~") return "/home/nahla";
+        if (!target || target === "~") return this.isRoot ? "/root" : "/home/nahla";
         if (target === "~/sector") return "/home/nahla/sector";
         if (target === "..") {
           if (this.cwd === "/") return "/";
@@ -2748,6 +2829,11 @@
       cmdLs(args) {
         const pathArg = args.find((a) => !a.startsWith("-"));
         const target = pathArg ? this.resolvePath(pathArg) : this.cwd;
+        if ((target === "/root" || target.startsWith("/root/")) && !this.isRoot) {
+          this.game.audio.error();
+          this.print(`ls: cannot open directory '${pathArg || target}': Permission denied (use 'su -')`, "err");
+          return;
+        }
         const entries = this.getDirEntries(target);
         if (entries.length === 0) {
           this.game.audio.error();
@@ -2758,7 +2844,8 @@
           this.print(`total ${entries.length * 4}`, "info");
           entries.forEach((e) => {
             const isDir = e.endsWith("/");
-            this.print(`${isDir ? "drwxr-xr-x" : "-rw-r--r--"} 1 nahla hope 4096 Nov 19 17:18 ${e}`, isDir ? "cyan" : "info");
+            const owner = target.startsWith("/root") ? "root  root " : "nahla hope ";
+            this.print(`${isDir ? "drwxr-xr-x" : "-rw-r--r--"} 1 ${owner}4096 Nov 20 3312 ${e}`, isDir ? "cyan" : "info");
           });
         } else {
           this.print(entries.join("   "), "cyan");
@@ -2767,7 +2854,12 @@
 
       cmdCd(target) {
         const next = this.resolvePath(target || "~");
-        const validDirs = ["/", "/home", "/home/nahla", "/home/nahla/sector", "/sys", "/sys/sector", "/sys/override", "/var", "/var/log", "/etc"];
+        if ((next === "/root" || next.startsWith("/root/")) && !this.isRoot) {
+          this.game.audio.error();
+          this.print(`cd: ${target}: Permission denied (use 'su -')`, "err");
+          return;
+        }
+        const validDirs = ["/", "/home", "/home/nahla", "/home/nahla/sector", "/root", "/sys", "/sys/sector", "/sys/override", "/var", "/var/log", "/etc"];
         if (!validDirs.includes(next)) {
           this.game.audio.error();
           this.print(`cd: ${target}: No such directory`, "err");
@@ -2780,16 +2872,28 @@
       getFileContent(filename) {
         const puzzle = this.game.puzzle;
         const status = this.game.computeStatus();
-        const beacon = SectorGenerator.lookupBeacon(puzzle.word);
+
+        if (filename === "array_override.cfg" || filename === "transceiver.key") {
+          if (!this.isRoot) return "__PERM_DENIED__";
+          const route = puzzle.solutionPath.map((p) => SectorGenerator.toCoord(p.r, p.c)).join(" -> ");
+          const beacon = SectorGenerator.lookupBeacon(puzzle.word);
+          return [
+            `[NAHLA_ROOT_KEY // SECTOR #${puzzle.seedStr}]`,
+            `TARGET_BEACON: ${puzzle.word} [${beacon.label}]`,
+            `PAR_STEPS: ${puzzle.par} • EMERGENCY_CAPACITOR: ${this.rootChargeGranted ? "DISCHARGED (+1 GRANTED)" : "READY"}`,
+            `NOMINAL_SWEEP: ${route}`
+          ].join("\n");
+        }
 
         if (filename === "readme.txt") {
           return [
-            "NAHLA TRACKING ARRAY (ttyS0) // HOPE SYSTEM PROTOCOL",
-            "You are an operator re-establishing dead radio links across the Hope System.",
-            "• 28 Beaconed Worlds: 8 inner moons (3-letter) + 20 primary/outer worlds (4-letter).",
-            "• 3 Unbeaconed Dark Bodies: Bellatrix rocky belt + Theresa (2da) & Kali (9da) binary submoons.",
-            "• Goal: Bounce an echo off all 31 system bodies (31/31) from [>] to [X] while locking",
-            "  the target beacon relays in sequence. Use 'scan' and override commands in ttyS0."
+            "NAHLA TRACKER // HOPE SYSTEM FIELD MANUAL (EPOCH 3312)",
+            "1. Patched into ttyS0 at Nahla Tracking Array (Moon 6a).",
+            "2. Bounce 31 telemetry echoes across all 31 Hope System bodies:",
+            "   28 Beaconed Worlds (8x3-letter moons + 20x4-letter outer)",
+            "   + 3 Unbeaconed Dark Bodies (Bellatrix Belt, Theresa, Kali).",
+            "3. Commands: 'scan', 'vent <xy>', 'invert <xy>', 'purge <xy>', 'sync <code>'.",
+            "4. Type 'su -' for root transceiver access; 'reboot' to reset sector."
           ].join("\n");
         }
 
@@ -2799,19 +2903,27 @@
           return active.map((a, i) => `[0${i + 1}] ${a.summary} -> ${a.fixCmd}`).join("\n");
         }
 
-        if (filename === "lexicon.db") {
-          const deep = SectorGenerator.DEEP_LEXICON.map((e) => `[4L] ${e.code}  ::  ${e.label}`);
-          const inner = SectorGenerator.INNER_BEACONS.map((e) => `[3L] ${e.code}   ::  ${e.label}`);
-          const dark = SectorGenerator.DARK_BODIES.map((d) => `[DARK] ${d.name} — ${d.note}`);
-          return ["=== 20 DEEP-SPACE BEACONS ===", ...deep, "", "=== 8 INNER-SYSTEM BEACONS ===", ...inner, "", "=== 3 UNBEACONED DARK BODIES ===", ...dark].join("\n");
+        if (filename === "beacons.db") {
+          const outer = SectorGenerator.DEEP_LEXICON.map((e) => `${e.code}   ::  ${e.label}`);
+          const inner = SectorGenerator.INNER_BEACONS.map((e) => `${e.code}    ::  ${e.label}`);
+          const dark = SectorGenerator.DARK_BODIES.map((d) => `DARK   ::  ${d.name} (${d.note})`);
+          return [
+            "--- 20 DEEP-SPACE BEACONS (4-LETTER) ---",
+            ...outer,
+            "--- 8 INNER-SYSTEM BEACONS (3-LETTER) ---",
+            ...inner,
+            "--- 3 UNBEACONED DARK BODIES ---",
+            ...dark
+          ].join("\n");
         }
 
         if (filename === "telemetry.log") {
           const trail = this.game.path.map((p) => SectorGenerator.toCoord(p.r, p.c)).join(" -> ");
+          const beacon = SectorGenerator.lookupBeacon(puzzle.word);
           return [
             `SEED: #${puzzle.seedStr}  MODE: ${puzzle.mode}`,
-            `ECHO RETURNS: ${status.mass} / 31 (DELTA ${status.delta >= 0 ? "+" : ""}${status.delta})`,
-            `BEACON: ${puzzle.word} — ${beacon.label} (${status.lockedCount}/${puzzle.word.length} locked)`,
+            `ECHOES: ${status.mass} / 31 (DELTA ${status.delta >= 0 ? "+" : ""}${status.delta})`,
+            `BEACON: ${puzzle.word} [${beacon.label}] (${status.lockedCount}/${puzzle.word.length} locked)`,
             `CHARGES: ${this.game.chargesLeft}/${puzzle.maxCharges}`,
             `VECTOR: ${trail}`
           ].join("\n");
@@ -2841,7 +2953,7 @@
           return `${this.game.chargesLeft}/${puzzle.maxCharges}`;
         }
 
-        if (filename === "echo_returns" || filename === "barycentre") {
+        if (filename === "echo_returns") {
           return `${status.mass}/31`;
         }
 
@@ -2854,8 +2966,18 @@
           this.print("usage: cat <filename>", "err");
           return;
         }
+        if ((arg.startsWith("/root") || this.cwd === "/root") && !this.isRoot) {
+          this.game.audio.error();
+          this.print(`cat: ${arg}: Permission denied (use 'su -')`, "err");
+          return;
+        }
         const baseName = arg.split("/").pop();
         const content = this.getFileContent(baseName);
+        if (content === "__PERM_DENIED__") {
+          this.game.audio.error();
+          this.print(`cat: ${arg}: Permission denied (use 'su -')`, "err");
+          return;
+        }
         if (content === null) {
           this.game.audio.error();
           this.print(`cat: ${arg}: No such file`, "err");
@@ -2871,8 +2993,13 @@
           return;
         }
         const pattern = args[0].toLowerCase();
-        const file = args[1] ? args[1].split("/").pop() : "lexicon.db";
+        const file = args[1] ? args[1].split("/").pop() : "beacons.db";
         const content = this.getFileContent(file);
+        if (content === "__PERM_DENIED__") {
+          this.game.audio.error();
+          this.print(`grep: ${file}: Permission denied (use 'su -')`, "err");
+          return;
+        }
         if (content === null) {
           this.game.audio.error();
           this.print(`grep: ${file}: No such file`, "err");
@@ -2919,6 +3046,21 @@
         this.loadSector(this.getDailySeed());
       },
 
+      loadStats() {
+        try {
+          const raw = localStorage.getItem("nahla_31_void_vector_stats");
+          if (raw) {
+            this.stats = { ...this.stats, ...JSON.parse(raw) };
+          }
+        } catch (_) {}
+      },
+
+      saveStats() {
+        try {
+          localStorage.setItem("nahla_31_void_vector_stats", JSON.stringify(this.stats));
+        } catch (_) {}
+      },
+
       updateDailyButton() {
         const btn = document.getElementById("btn-daily");
         if (!btn) return;
@@ -2941,7 +3083,7 @@
           this.flipShowingLexicon = !this.flipShowingLexicon;
           if (this.flipShowingLexicon) {
             titleEl.textContent = "HOPE SYSTEM BEACON ROSTER";
-            badgeEl.textContent = "28 + 3 BODIES";
+            badgeEl.textContent = "28 BEACONS + 3 DARK";
             protoFace.classList.add("face-inactive");
             lexFace.classList.remove("face-inactive");
           } else {
@@ -2955,56 +3097,53 @@
       },
 
       renderLexicon() {
-        const container4 = document.getElementById("lexicon-grid");
-        const container3 = document.getElementById("lexicon-grid-3");
-        if (!container4) return;
-        container4.innerHTML = "";
+        const outerContainer = document.getElementById("lexicon-grid");
+        const innerContainer = document.getElementById("lexicon-grid-3");
+        if (outerContainer) {
+          outerContainer.innerHTML = "";
+          SectorGenerator.DEEP_LEXICON.forEach((entry) => {
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "lex-item" + (entry.code === "NULL" ? " lex-null" : "");
+            btn.dataset.code = entry.code;
+            btn.title = `Sync ${entry.code} if phase-locked, or launch Deep Space sector (${entry.label})`;
 
-        SectorGenerator.DEEP_LEXICON.forEach((entry) => {
-          const btn = document.createElement("button");
-          btn.type = "button";
-          btn.className = "lex-item" + (entry.code === "NULL" ? " lex-null" : "");
-          btn.dataset.code = entry.code;
-          btn.title = `Sync ${entry.code} if phase-locked, or launch Deep Space sector (${entry.label})`;
+            const codeSpan = document.createElement("span");
+            codeSpan.className = "lex-code";
+            codeSpan.textContent = entry.code;
 
-          const codeSpan = document.createElement("span");
-          codeSpan.className = "lex-code";
-          codeSpan.textContent = entry.code;
+            const labelSpan = document.createElement("span");
+            labelSpan.className = "lex-meaning";
+            labelSpan.textContent = entry.label;
 
-          const labelSpan = document.createElement("span");
-          labelSpan.className = "lex-meaning";
-          labelSpan.textContent = entry.label;
+            btn.appendChild(codeSpan);
+            btn.appendChild(labelSpan);
 
-          btn.appendChild(codeSpan);
-          btn.appendChild(labelSpan);
+            btn.addEventListener("click", () => {
+              const hasPhaseLock = this.puzzle && this.puzzle.grid.some((row) => row.some((c) => c.phaseLocked));
+              if (hasPhaseLock && (this.puzzle.word === entry.code || entry.code === "NULL")) {
+                this.term.execute(`sync ${entry.code.toLowerCase()}`);
+                return;
+              }
+              if (this.mode !== "DEEP") {
+                this.showModeSwitchModal("DEEP", entry.code);
+                return;
+              }
+              this.loadSector(this.randomSeed(), entry.code);
+            });
 
-          btn.addEventListener("click", () => {
-            const hasPhaseLock = this.puzzle && this.puzzle.grid.some((row) => row.some((c) => c.phaseLocked));
-            if (hasPhaseLock && (this.puzzle.word === entry.code || entry.code === "NULL")) {
-              this.term.execute(`sync ${entry.code.toLowerCase()}`);
-              return;
-            }
-
-            if (this.mode !== "DEEP") {
-              this.mode = "DEEP";
-              document.querySelectorAll("[data-mode]").forEach((mBtn) => {
-                mBtn.classList.toggle("active", mBtn.dataset.mode === "DEEP");
-              });
-            }
-            this.loadSector(this.randomSeed(), entry.code);
+            outerContainer.appendChild(btn);
           });
+        }
 
-          container4.appendChild(btn);
-        });
-
-        if (container3) {
-          container3.innerHTML = "";
+        if (innerContainer) {
+          innerContainer.innerHTML = "";
           SectorGenerator.INNER_BEACONS.forEach((entry) => {
             const btn = document.createElement("button");
             btn.type = "button";
             btn.className = "lex-item";
             btn.dataset.code = entry.code;
-            btn.title = `Launch inner-system sector locked to ${entry.code} — ${entry.label}`;
+            btn.title = `Launch Survey sector for ${entry.label} (${entry.code})`;
 
             const codeSpan = document.createElement("span");
             codeSpan.className = "lex-code";
@@ -3019,58 +3158,41 @@
 
             btn.addEventListener("click", () => {
               if (this.mode === "DEEP") {
-                this.mode = "ORBITAL";
-                document.querySelectorAll("[data-mode]").forEach((mBtn) => {
-                  mBtn.classList.toggle("active", mBtn.dataset.mode === "ORBITAL");
-                });
+                this.showModeSwitchModal("SURVEY", entry.code);
+                return;
               }
               this.loadSector(this.randomSeed(), entry.code);
             });
 
-            container3.appendChild(btn);
+            innerContainer.appendChild(btn);
           });
         }
       },
 
-      loadStats() {
-        try {
-          const raw = localStorage.getItem("nahla_31_void_vector_stats");
-          if (raw) {
-            this.stats = { ...this.stats, ...JSON.parse(raw) };
-          }
-        } catch (_) {}
-      },
-
-      saveStats() {
-        try {
-          localStorage.setItem("nahla_31_void_vector_stats", JSON.stringify(this.stats));
-        } catch (_) {}
-      },
-
       bindEvents() {
-        // Mode buttons (top-left bar — confirm before discarding current sector progress)
+        // Top-left mode buttons (warn before discarding current sector progress)
         document.querySelectorAll("[data-mode]").forEach((btn) => {
           btn.addEventListener("click", () => {
             const nextMode = btn.dataset.mode;
-            if (nextMode && nextMode !== this.mode) {
+            if (nextMode !== this.mode) {
               this.showModeSwitchModal(nextMode);
             }
           });
         });
 
-        // Bottom difficulty cards (confirm before discarding current sector progress)
+        // Bottom difficulty explanation cards (warn before discarding current sector progress)
         document.querySelectorAll("[data-mode-info]").forEach((card) => {
-          const handleCardSelect = () => {
+          const handleSelect = () => {
             const nextMode = card.dataset.modeInfo;
             if (nextMode && nextMode !== this.mode) {
               this.showModeSwitchModal(nextMode);
             }
           };
-          card.addEventListener("click", handleCardSelect);
+          card.addEventListener("click", handleSelect);
           card.addEventListener("keydown", (e) => {
             if (e.key === "Enter" || e.key === " ") {
               e.preventDefault();
-              handleCardSelect();
+              handleSelect();
             }
           });
         });
@@ -3183,7 +3305,7 @@
           if (e.target.id === "modal-backdrop") this.closeModal();
         });
 
-        // Desktop Mouse Drag + Mobile Tap-Only (preserves vertical page scroll on touch)
+        // Desktop Mouse Drag + Mobile Tap-Only
         const stage = document.getElementById("board-stage");
         stage.addEventListener("pointerdown", (e) => {
           const cellEl = e.target.closest(".cell");
@@ -3238,7 +3360,7 @@
           this.touchOrigin = null;
         });
 
-        // Keyboard Navigation (skips shortcuts when typing inside bash-input or modal input)
+        // Keyboard Navigation
         window.addEventListener("keydown", (e) => {
           if (document.getElementById("modal-backdrop").classList.contains("open")) {
             if (e.key === "Escape") this.closeModal();
@@ -3303,12 +3425,12 @@
         return `H0P3-${code}`;
       },
 
-      setMode(newMode) {
+      setMode(newMode, forcedWord = null) {
         this.mode = newMode;
         document.querySelectorAll("[data-mode]").forEach((btn) => {
           btn.classList.toggle("active", btn.dataset.mode === newMode);
         });
-        this.loadSector(this.randomSeed());
+        this.loadSector(this.randomSeed(), forcedWord);
       },
 
       loadSector(seedStr, forcedWord = null) {
@@ -3318,12 +3440,17 @@
         this.solved = false;
         this.hintCell = null;
 
-        const beacon = SectorGenerator.lookupBeacon(this.puzzle.word);
         document.getElementById("seed-display").textContent = `#${this.seed}`;
         this.renderAxes();
         this.resetPath(true, false);
         this.term.resetForSector(this.puzzle);
         this.updateChargesHUD();
+
+        const beacon = SectorGenerator.lookupBeacon(this.puzzle.word);
+        const beaconCard = document.getElementById("hud-beacon-card");
+        if (beaconCard) {
+          beaconCard.title = `Target Beacon: ${this.puzzle.word} — ${beacon.label}`;
+        }
         this.setLog(`SECTOR #${this.seed} ONLINE • 31 ECHOES • BEACON ${this.puzzle.word} [${beacon.label}] • ${this.puzzle.anomalies.length} ANOMALIES`);
       },
 
@@ -3343,6 +3470,9 @@
         }
         this.chargesLeft = this.puzzle.maxCharges;
         this.term.pendingPrompt = null;
+        this.term.isRoot = false;
+        this.term.rootChargeGranted = false;
+        this.term.updatePromptLabel();
         this.updateChargesHUD();
       },
 
@@ -3360,7 +3490,7 @@
           this.audio.undo();
           const msg = restoreAnomalies
             ? "SECTOR REBOOTED: VECTOR RESET & OVERRIDE CHARGES RESTORED."
-            : "CARRIER VECTOR RESET TO ORIGIN [>].";
+            : "TELEMETRY VECTOR RESET TO ORIGIN [>].";
           this.setLog(msg);
           if (restoreAnomalies && this.term) {
             this.term.print("[REBOOT] Sector anomalies and override charges restored.", "warn");
@@ -3461,10 +3591,10 @@
 
         if (cell.type === "WELL") {
           this.audio.well();
-          this.setLog(`PHASE SHADOW (${cell.val}) @ ${cell.coord} • ECHO RETURNS ${status.mass}.`, "warn");
+          this.setLog(`PHASE SHADOW (${cell.val}) @ ${cell.coord} • ECHOES ${status.mass}.`, "warn");
         } else if (cell.type === "RELAY") {
           this.audio.relay(status.lockedCount);
-          this.setLog(`BEACON RELAY [${cell.letter}] @ ${cell.coord} • LOCKED ${status.lockedCount}/${this.puzzle.word.length}.`, "ok");
+          this.setLog(`RELAY [${cell.letter}] @ ${cell.coord} • BEACON ${status.lockedCount}/${this.puzzle.word.length}.`, "ok");
           if (status.lockedCount === 1) {
             this.term.triggerRelayPrompt(cell);
           }
@@ -3502,9 +3632,9 @@
           } else {
             this.audio.error();
             const reasons = [];
-            if (status.mass !== 31) reasons.push(`ECHOES ${status.mass} (NEED 31)`);
+            if (status.mass !== 31) reasons.push(`ECHOES AT ${status.mass} (NEED 31)`);
             if (status.lockedCount < wordLen) reasons.push(`BEACON ${status.lockedCount}/${wordLen}`);
-            this.setLog(`EXTRACTION REJECTED: ${reasons.join(" • ")}. ADJUST VECTOR OR USE ttyS0.`, "err");
+            this.setLog(`EXTRACTION REJECTED: ${reasons.join(" • ")}. ADJUST SWEEP OR USE ttyS0.`, "err");
           }
         }
       },
@@ -3517,6 +3647,7 @@
 
         const steps = this.path.length - 1;
         const optimal = isNullBonus || steps <= this.puzzle.par;
+        const beacon = SectorGenerator.lookupBeacon(this.puzzle.word);
 
         this.stats.solved += 1;
         if (optimal) {
@@ -3532,8 +3663,8 @@
         this.saveStats();
 
         const msg = isNullBonus
-          ? "<NULL SIGNAL> INTERCEPTED • BONUS INSTA-SOLVE!"
-          : `31 ECHOES LOCKED IN ${steps} STEPS${optimal ? " (OPTIMAL PAR!)" : ""}.`;
+          ? "<NULL SIGNAL> INTERCEPTED AT RATI (9d) • BONUS EXTRACTION!"
+          : `LINK RESTORED: ${this.puzzle.word} [${beacon.label}] • 31 ECHOES IN ${steps} STEPS${optimal ? " (OPTIMAL PAR!)" : ""}.`;
         this.setLog(msg, "ok");
         this.term.print(`[LOCKED] ${msg}`, "ok");
 
@@ -3620,7 +3751,7 @@
             el.className = "cell";
             el.dataset.r = r;
             el.dataset.c = c;
-            el.title = `${cell.coord} (${cell.type === "WELL" ? "SHADOW" : cell.type === "MASS" ? "ECHO" : cell.type})`;
+            el.title = `${cell.coord} (${cell.type})`;
 
             if (cell.type === "START") el.classList.add("cell-start");
             else if (cell.type === "EXIT") el.classList.add("cell-exit");
@@ -3765,12 +3896,6 @@
           csEl.appendChild(pill);
         }
 
-        const beacon = SectorGenerator.lookupBeacon(word);
-        const beaconCard = document.getElementById("hud-beacon-card");
-        if (beaconCard) {
-          beaconCard.title = `Target Beacon: ${word} — ${beacon.label}`;
-        }
-
         document.getElementById("hud-steps").textContent = String(status.steps).padStart(2, "0");
         document.getElementById("hud-par").textContent = String(this.puzzle.par).padStart(2, "0");
 
@@ -3795,9 +3920,9 @@
       // ------------------------------------------------------------------------
       // MODAL DIALOGS
       // ------------------------------------------------------------------------
-      openModal(title, bodyHTML, footerButtons = [], isMini = false) {
-        const card = document.querySelector(".modal-card");
-        if (card) card.classList.toggle("modal-mini", Boolean(isMini));
+      openModal(title, bodyHTML, footerButtons = [], options = {}) {
+        const card = document.getElementById("modal-card");
+        card.className = "modal-card" + (options.mini ? " modal-mini" : "");
         document.getElementById("modal-title").textContent = title;
         document.getElementById("modal-body").innerHTML = bodyHTML;
         const footer = document.getElementById("modal-footer");
@@ -3818,21 +3943,20 @@
         document.getElementById("modal-backdrop").classList.remove("open");
       },
 
-      showModeSwitchModal(nextMode) {
+      showModeSwitchModal(nextMode, forcedWord = null) {
         const labels = {
           SURVEY: "SURVEY MODE (5×5)",
           ORBITAL: "ORBITAL MODE (6×6)",
           DEEP: "DEEP SPACE MODE (6×6)"
         };
         const targetLabel = labels[nextMode] || nextMode;
-        this.audio.cmdOk();
 
         this.openModal(
-          "SWITCH SECTOR MODE?",
+          "SWITCH SECTOR DIFFICULTY?",
           `
             <div class="rule-item" style="border-left-color:var(--amber);">
-              <strong style="color:var(--amber);">WARNING — PROGRESS WILL BE LOST:</strong><br/>
-              Switching to <strong>${targetLabel}</strong> will abort your current carrier sweep and discard any unsaved sector progress.
+              <strong style="color:var(--amber);">WARNING — PROGRESS WILL BE LOST:</strong>
+              Switching to <strong>${targetLabel}</strong> will abort your current sector sweep (<strong>#${this.seed}</strong>) and clear any unsaved vector steps or terminal overrides.
             </div>
           `,
           [
@@ -3842,22 +3966,33 @@
               primary: true,
               onClick: () => {
                 this.closeModal();
-                this.setMode(nextMode);
+                this.setMode(nextMode, forcedWord);
               }
             }
           ],
-          true
+          { mini: true }
         );
       },
 
       showHelpModal() {
         this.openModal(
-          "HOPE SYSTEM LORE & PROTOCOL (v0.5)",
+          "HOPE SYSTEM LORE & PROTOCOL // v0.5",
           `
-            <div class="rule-item"><strong>NAHLA TRACKING ARRAY (ttyS0):</strong> You are a deep-space telemetry operator patched into the Nahla Array's primary serial transceiver line, re-establishing dead radio links across the <strong>Hope System</strong>.</div>
-            <div class="rule-item"><strong>THE 31 SYSTEM BODIES (28 + 3):</strong> <strong>28 Beaconed Worlds</strong> (8 inner 3-letter moons + 20 primary/outer 4-letter worlds) carry drifted orbital transponders. <strong>3 Unbeaconed Dark Bodies</strong>—the <strong>Bellatrix</strong> rocky belt and the tight binary submoons <strong>Theresa (2da)</strong> &amp; <strong>Kali (9da)</strong>—remain dead space.</div>
-            <div class="rule-item"><strong>ECHO RETURNS (31 / 31):</strong> Route a carrier sweep from <strong>[&gt;]</strong> to <strong>[X]</strong> bouncing an echo off all <strong>31</strong> bodies while locking target beacon relays in sequence. <strong>&lt;Null signal&gt; (NULL)</strong> is an outer-rim ghost wave masking <strong>Rati (9d)</strong> that short-circuits normal extraction on completion.</div>
-            <div class="rule-item"><strong>GRID OVERRIDES (ttyS0):</strong> Run <strong>scan</strong> to diagnose corrupted nodes, then patch them live with <strong>vent &lt;xy&gt;</strong>, <strong>invert &lt;xy&gt;</strong>, <strong>purge &lt;xy&gt;</strong>, or <strong>sync &lt;code&gt;</strong>. Flip the bottom-right card (<strong>FLIP ⇄</strong>) to view all 28 beacons.</div>
+            <div class="rule-item">
+              <strong>NAHLA TRACKING ARRAY (ttyS0):</strong> You are a deep-space telemetry operator patched directly into the primary serial transceiver line (<strong>ttyS0</strong>) on moon <strong>Nahla (6a)</strong>, re-establishing dead radio links across the <strong>Hope System</strong>.
+            </div>
+            <div class="rule-item">
+              <strong>THE 31 SYSTEM BODIES (28 BEACONS + 3 DARK):</strong> Every major planet and moon carries one of <strong>28 orbital beacons</strong> (<strong>8 × 3-letter</strong> inner moon relays + <strong>20 × 4-letter</strong> primary/outer beacons) whose transponder has drifted out of phase. Three dark bodies carry no beacons: the diffuse <strong>Bellatrix</strong> rocky belt and the tight binary submoon pair <strong>Theresa (2da)</strong> &amp; <strong>Kali (9da)</strong>.
+            </div>
+            <div class="rule-item">
+              <strong>BOUNCE 31 ECHOES:</strong> To lock a drifted beacon’s phase, route a carrier sweep from <strong>[&gt;]</strong> to <strong>[X]</strong> that bounces an echo off all <strong>31 system bodies</strong> while locking the target beacon’s relays in order. Negative nodes (<strong>-2 to -4</strong>) are <strong>Phase Shadows</strong> canceling multipath echo overflow.
+            </div>
+            <div class="rule-item">
+              <strong>&lt;NULL SIGNAL&gt; (NULL):</strong> A ghost carrier wave emanating from the outer dark sector around moon <strong>Rati (9d)</strong> and submoon <strong>Kali (9da)</strong> that short-circuits normal extraction once all four relays lock.
+            </div>
+            <div class="rule-item">
+              <strong>LIVE GRID OVERRIDES:</strong> Solar shear corrupts sector nodes. Run <strong>scan</strong> in <strong>ttyS0</strong> to diagnose faults, then rewrite tiles mid-sweep with <strong>vent &lt;xy&gt;</strong>, <strong>invert &lt;xy&gt;</strong>, <strong>purge &lt;xy&gt;</strong>, or <strong>sync &lt;code&gt;</strong> (plus <strong>su -</strong> for root transceiver diagnostics).
+            </div>
           `,
           [{ label: "ACKNOWLEDGED", primary: true, onClick: () => this.closeModal() }]
         );
@@ -3870,7 +4005,7 @@
           `
             <div class="stat-grid">
               <div class="stat-box">
-                <div class="stat-box-label">Beacons Restored</div>
+                <div class="stat-box-label">Links Restored</div>
                 <div class="stat-box-val">${this.stats.solved}</div>
               </div>
               <div class="stat-box">
@@ -3941,7 +4076,7 @@
           `
             <div style="text-align:center;padding:0.4rem 0;">
               <div style="color:var(--emerald);font-weight:700;font-size:0.92rem;letter-spacing:0.06em;">${badgeText}</div>
-              <div style="color:var(--text-secondary);font-size:0.74rem;margin-top:0.25rem;">SEED #${this.seed} • BEACON ${this.puzzle.word} [${beacon.label}]</div>
+              <div style="color:var(--text-secondary);font-size:0.74rem;margin-top:0.25rem;">SEED #${this.seed} • ${this.puzzle.word} [${beacon.label}]</div>
             </div>
             <div class="stat-grid">
               <div class="stat-box">
