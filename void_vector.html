@@ -1289,7 +1289,7 @@
       <header class="terminal-header">
         <div class="brand-block">
           <div class="brand-title">
-            VOID VECTOR v0.51
+            VOID VECTOR v0.52
           </div>
           <div class="brand-sub">NAHLA@HOPE (31 BODIES)</div>
         </div>
@@ -1434,7 +1434,7 @@
             </div>
             <div class="brief-step">
               <span class="brief-num">02</span>
-              <div><strong>TERMINAL GRID OVERRIDES:</strong> Solar shear corrupts nodes along your route. Run <span class="cmd-code">scan</span> in <strong>ttyS0</strong> to diagnose anomalies, then rewrite tiles mid-play:</div>
+              <div><strong>TERMINAL GRID OVERRIDES:</strong> Solar shear corrupts nodes along your route. Run <span class="cmd-code">scan</span> in <strong>ttyS0</strong> to diagnose anomalies, then rewrite tiles mid-play.</div>
             </div>
             <div class="brief-step">
               <span class="brief-num">03</span>
@@ -3296,7 +3296,7 @@
         // Footer controls
         document.getElementById("btn-undo").addEventListener("click", () => this.undoStep());
         document.getElementById("btn-reset").addEventListener("click", () => this.resetPath(false, true));
-        document.getElementById("btn-hint").addEventListener("click", () => this.triggerHint());
+      //  document.getElementById("btn-hint").addEventListener("click", () => this.triggerHint());
         document.getElementById("btn-next").addEventListener("click", () => this.loadSector(this.randomSeed()));
 
         // Modal dismiss
@@ -3397,10 +3397,10 @@
             this.undoStep();
           } else if (key === "r") {
             e.preventDefault();
-            this.resetPath(false, true);
-          } else if (key === "h") {
-            e.preventDefault();
-            this.triggerHint();
+            this.resetPath(false, true); 
+         // } else if (key === "h") {
+         //   e.preventDefault();
+         //   this.triggerHint();
           } else if (key === "n") {
             e.preventDefault();
             this.loadSector(this.randomSeed());
@@ -3976,19 +3976,19 @@
 
       showHelpModal() {
         this.openModal(
-          "HOPE SYSTEM LORE & PROTOCOL // v0.5",
+          "HOPE SYSTEM LORE & PROTOCOL",
           `
             <div class="rule-item">
-              <strong>NAHLA TRACKING ARRAY (ttyS0):</strong> You are a deep-space telemetry operator patched directly into the primary serial transceiver line (<strong>ttyS0</strong>) on moon <strong>Nahla (6a)</strong>, re-establishing dead radio links across the <strong>Hope System</strong>.
+              <strong>NAHLA TRACKING ARRAY (ttyS0):</strong> You are a deep-space telemetry operator patched directly into the primary serial transceiver line (<strong>ttyS0</strong>)at Natalja's Pass Observatory on moon <strong>Nahla (6a)</strong>, re-establishing dead radio links across the <strong>Hope System</strong>.
             </div>
             <div class="rule-item">
               <strong>THE 31 SYSTEM BODIES (28 BEACONS + 3 DARK):</strong> Every major planet and moon carries one of <strong>28 orbital beacons</strong> (<strong>8 × 3-letter</strong> inner moon relays + <strong>20 × 4-letter</strong> primary/outer beacons) whose transponder has drifted out of phase. Three dark bodies carry no beacons: the diffuse <strong>Bellatrix</strong> rocky belt and the tight binary submoon pair <strong>Theresa (2da)</strong> &amp; <strong>Kali (9da)</strong>.
             </div>
             <div class="rule-item">
-              <strong>BOUNCE 31 ECHOES:</strong> To lock a drifted beacon’s phase, route a carrier sweep from <strong>[&gt;]</strong> to <strong>[X]</strong> that bounces an echo off all <strong>31 system bodies</strong> while locking the target beacon’s relays in order. Negative nodes (<strong>-2 to -4</strong>) are <strong>Phase Shadows</strong> canceling multipath echo overflow.
+              <strong>BOUNCE 31 ECHOES:</strong> To lock a drifted beacon’s phase, route a carrier sweep from <strong>[&gt;]</strong> to <strong>[X]</strong> that bounces an echo off all <strong>31 system bodies</strong> while locking the target beacon’s relays in order. Negative nodes (<strong>-2 to -4</strong>) are <strong>Phase Shadows</strong> cancelling multipath echo overflow.
             </div>
             <div class="rule-item">
-              <strong>&lt;NULL SIGNAL&gt; (NULL):</strong> A ghost carrier wave emanating from the outer dark sector around moon <strong>Rati (9d)</strong> and submoon <strong>Kali (9da)</strong> that short-circuits normal extraction once all four relays lock.
+              <strong>&lt;NULL SIGNAL&gt; (NULL):</strong> A ghost carrier wave emanating from the outer dark sector around moon <strong>Rati (9d)</strong> and submoon <strong>Kali (9da)</strong> that short-circuits normal extraction once all four relays lock, ensuring instant solution.
             </div>
             <div class="rule-item">
               <strong>LIVE GRID OVERRIDES:</strong> Solar shear corrupts sector nodes. Run <strong>scan</strong> in <strong>ttyS0</strong> to diagnose faults, then rewrite tiles mid-sweep with <strong>vent &lt;xy&gt;</strong>, <strong>invert &lt;xy&gt;</strong>, <strong>purge &lt;xy&gt;</strong>, or <strong>sync &lt;code&gt;</strong> (plus <strong>su -</strong> for root transceiver diagnostics).
