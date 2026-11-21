@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Void Vector v0.55 — Nahla Tracker</title>
+  <title>Void Vector v0.56 — Nahla Tracker</title>
   <meta name="description" content="31 // Void Vector — An offline spatial triangulation, bash terminal override, and beacon routing workstation for the Hope System." />
   <meta name="theme-color" content="#050a07" />
 
@@ -1578,7 +1578,7 @@
       <header class="terminal-header">
         <div class="brand-block">
           <div class="brand-title">
-            VOID VECTOR v0.55
+            VOID VECTOR v0.56
           </div>
           <div class="brand-sub">NAHLA@HOPE (31 BODIES)</div>
         </div>
@@ -2406,7 +2406,7 @@
               kind,
               fixCmd: `vent ${coordLow}`,
               why: `${cell.coord} collapsed into ## debris — blocking your sweep corridor and burying ${buriedLabel}.`,
-              actionNote: `Clears the ## debris at ${cell.coord} so you can pass through and collect ${buriedLabel}.`,
+              req: `REQ: Needs debris vented at ${cell.coord} to reopen transit and recover ${buriedLabel}.`,
               summary: `COLLAPSED DEBRIS @ ${cell.coord} (BLOCKS CORRIDOR / BURIES ${buriedLabel})`
             });
           } else if (kind === "POLARITY_FLIP") {
@@ -2421,7 +2421,7 @@
               kind,
               fixCmd: `invert ${coordLow}`,
               why: `${cell.coord} is phase-inverted — reading ${cell.val >= 0 ? "+" : ""}${cell.val} instead of ${cell.clean.val >= 0 ? "+" : ""}${cell.clean.val} (${swing}-echo error).`,
-              actionNote: `Flips the +/- sign at ${cell.coord} back to ${cell.clean.val >= 0 ? "+" : ""}${cell.clean.val} so your sweep totals 31.`,
+              req: `REQ: Needs +/- polarity inverted at ${cell.coord} to restore ${cell.clean.val >= 0 ? "+" : ""}${cell.clean.val}.`,
               summary: `POLARITY INVERSION @ ${cell.coord} (READS ${cell.val >= 0 ? "+" : ""}${cell.val}, TRUE ${cell.clean.val >= 0 ? "+" : ""}${cell.clean.val})`
             });
           } else if (kind === "STATIC_JAM") {
@@ -2439,9 +2439,9 @@
               kind,
               fixCmd: `purge ${coordLow}`,
               why: `${cell.coord} is jammed by solar static [!] — masking ${maskDesc}.`,
-              actionNote: isRelay
-                ? `Burns off static at ${cell.coord} so Relay [${cell.clean.letter}] can be lit in sequence.`
-                : `Burns off static at ${cell.coord} to restore ${maskDesc}.`,
+              req: isRelay
+                ? `REQ: Needs static purged at ${cell.coord} to uncover Relay [${cell.clean.letter}].`
+                : `REQ: Needs static purged at ${cell.coord} to restore ${maskDesc}.`,
               summary: `SOLAR STATIC [!] @ ${cell.coord} (MASKS ${isRelay ? `RELAY [${cell.clean.letter}]` : maskDesc})`
             });
           } else if (kind === "PHASE_LOCK") {
@@ -2454,7 +2454,7 @@
               kind,
               fixCmd: `sync ${puzzle.word.toLowerCase()}`,
               why: `Relay [${cell.letter}] at ${cell.coord} lost carrier lock [?] — it cannot register for beacon ${puzzle.word} until retuned.`,
-              actionNote: `Broadcasts the ${puzzle.word} carrier frequency to unlock [?] back into [${cell.letter}].`,
+              req: `REQ: Needs active beacon carrier (${puzzle.word}) synced to unlock [?].`,
               summary: `CARRIER PHASE-LOCK [?] @ ${cell.coord} (HOLDS RELAY [${cell.letter}] FOR ${puzzle.word})`
             });
           }
@@ -2917,7 +2917,7 @@
             const item = puzzle.anomalies.find((a) => a.coord === parsed.coord);
             this.print(`[SCAN ${parsed.coord}] ${item ? item.why : cell.anomaly}${rootSuffix}`, "warn");
             if (item) {
-              this.print(`  FIX: ${item.fixCmd}  (${item.actionNote})`, "cyan");
+              this.print(`  ${item.req}`, "cyan");
             }
           } else {
             this.print(`[SCAN ${parsed.coord}] TYPE=${cell.type} ECHO=${cell.val >= 0 ? "+" : ""}${cell.val}${cell.letter ? ` RELAY=[${cell.letter}]` : ""} (NOMINAL)${rootSuffix}`, "ok");
@@ -2938,7 +2938,7 @@
         this.print(`[SCAN] ${active.length} ANOMAL${active.length === 1 ? "Y" : "IES"} BLOCKING YOUR 31-ECHO / ${puzzle.word} SWEEP:`, "sys");
         active.forEach((a, idx) => {
           this.print(`  0${idx + 1}. ${a.why}`, "warn");
-          this.print(`      FIX: '${a.fixCmd}' — ${a.actionNote}`, "cyan");
+          this.print(`      ${a.req}`, "cyan");
         });
         if (this.isRoot) {
           const route = puzzle.solutionPath.map((p) => SectorGenerator.toCoord(p.r, p.c)).join(" -> ");
@@ -3243,7 +3243,7 @@
         if (filename === "anomalies.dat") {
           const active = puzzle.anomalies.filter((a) => puzzle.grid[a.r][a.c].anomaly !== null);
           if (active.length === 0) return "STATUS: CLEAN (0 active anomalies)";
-          return active.map((a, i) => `[0${i + 1}] ${a.why}\n     FIX: ${a.fixCmd}`).join("\n");
+          return active.map((a, i) => `[0${i + 1}] ${a.why}\n     ${a.req}`).join("\n");
         }
 
         if (filename === "lexicon.db") {
@@ -4463,7 +4463,7 @@
           return {
             done: true,
             tag: "TRAINING COMPLETE // LINK LOCKED",
-            html: "You lit <strong>A → B → E</strong>, repaired two sabotaged tiles via <strong>ttyS0</strong>, and hit <strong>31 / 31</strong> at <strong>[X]</strong>. Click <strong>ENTER HOPE SYSTEM</strong> when ready."
+            html: "You lit <strong>A → B → E</strong>, repaired two sabotaged tiles via <strong>ttyS0</strong>, and hit <strong>31 / 31</strong> at <strong>[X]</strong>. Click <strong>ENTER HOPE SYSTEM</strong> when ready!"
           };
         }
 
@@ -4471,7 +4471,7 @@
           return {
             done: false,
             tag: "STEP 1 OF 5 // CLICK B1 [A]",
-            html: "Tap <strong>B1 [A]</strong> to start lighting beacon <strong>ABE</strong>. (Notice <strong>A2</strong> has 31 echoes, but skipping <strong>A-B-E</strong> will be rejected at <strong>[X]</strong>.)"
+            html: "Tap <strong>B1 [A]</strong> to start lighting beacon <strong>ABE</strong>. (Notice <strong>A2</strong> has 31 echoes, but skipping <strong>A-B-E</strong> will be rejected at <strong>[X]</strong>!)"
           };
         }
 
@@ -4479,7 +4479,7 @@
           return {
             done: false,
             tag: "STEP 2 OF 5 // CLICK C1 (15)",
-            html: "<strong>[A]</strong> is lit. Now tap <strong>C1 (15)</strong>. Watch the <strong>ECHO</strong> counter add up automatically."
+            html: "<strong>[A]</strong> is lit! Now tap <strong>C1 (15)</strong>. Watch the <strong>ECHO</strong> counter add automatically—no mental arithmetic required."
           };
         }
 
@@ -4487,7 +4487,7 @@
           return {
             done: false,
             tag: "STEP 3 OF 5 // WHY RUN 'vent c2'?",
-            html: "<strong>C2</strong> collapsed into <strong>## debris (≈)</strong> — blocking the corridor AND burying Relay <strong>[B]</strong>. Run <span class='cmd-code'>vent c2</span> to clear the debris, then tap <strong>C2</strong>."
+            html: "<strong>C2</strong> collapsed into <strong>## debris (≈)</strong>—blocking the corridor AND burying Relay <strong>[B]</strong>. Run <span class='cmd-code'>vent c2</span> to clear the debris, then tap <strong>C2</strong>."
           };
         }
 
@@ -4495,7 +4495,7 @@
           return {
             done: false,
             tag: "STEP 3B // STEP ONTO C2 [B]",
-            html: "Debris cleared. Tap <strong>C2 [B]</strong> to lock the second relay of <strong>ABE</strong>."
+            html: "Debris cleared! Tap <strong>C2 [B]</strong> to lock the second relay of <strong>ABE</strong>."
           };
         }
 
@@ -4511,7 +4511,7 @@
           return {
             done: false,
             tag: "STEP 4B // STEP ONTO C3 (16)",
-            html: "Polarity restored. Tap <strong>C3 (16)</strong> to bring your Echo Returns to <strong>15 + 16 = 31</strong>."
+            html: "Polarity restored! Tap <strong>C3 (16)</strong> to bring your Echo Returns to <strong>15 + 16 = 31</strong>."
           };
         }
 
