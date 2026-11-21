@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Void Vector</title>
+  <title>Void Vector v0.54 — Nahla Tracker</title>
   <meta name="description" content="31 // Void Vector — An offline spatial triangulation, bash terminal override, and beacon routing workstation for the Hope System." />
   <meta name="theme-color" content="#050a07" />
 
@@ -11,21 +11,21 @@
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23050a07' stroke='%2322c55e' stroke-width='4'/%3E%3Ctext x='50%25' y='54%25' dominant-baseline='middle' text-anchor='middle' font-family='monospace' font-weight='bold' font-size='28' fill='%2322c55e'%3E31%3C/text%3E%3C/svg%3E" />
 
   <!-- Open Graph & Thumbnail Preview -->
-<meta property="og:type" content="website" />
-<meta property="og:site_name" content="Nahla Tracker" />
-<meta property="og:title" content="Void Vector — tile/terminal game within Nahla Tracker" />
-<meta property="og:description" content="Route a carrier sweep across the Hope System and execute ttyS0 grid overrides to bounce 31 telemetry echoes and lock drifted beacons." />
-<meta property="og:image" content="https://nahla.live/vvthumb.jpg" />
-<meta property="og:image:alt" content="Void Vector — tile/terminal game within Nahla Tracker" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Nahla Tracker" />
+  <meta property="og:title" content="31 // Void Vector — Nahla Tracker" />
+  <meta property="og:description" content="Route a carrier sweep across the Hope System and execute ttyS0 grid overrides to bounce 31 telemetry echoes and lock drifted beacons." />
+  <meta property="og:image" content="https://placehold.co/1200x630/050a07/22c55e?text=31+%2F%2F+VOID+VECTOR%0ANAHLA+TRACKER" />
+  <meta property="og:image:alt" content="31 // Void Vector phosphor green telemetry puzzle terminal" />
 
-<!-- Twitter / X Card -->
-<meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="Void Vector — tile/terminal game within Nahla Tracker" />
-<meta name="twitter:description" content="Route a carrier sweep across the Hope System and execute ttyS0 grid overrides to bounce 31 telemetry echoes and lock drifted beacons." />
-<meta name="twitter:image" content="https://nahla.live/vvthumb.jpg" />
-<style>  
+  <!-- Twitter / X Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="31 // Void Vector — Nahla Tracker" />
+  <meta name="twitter:description" content="Route a carrier sweep across the Hope System and execute ttyS0 grid overrides to bounce 31 telemetry echoes and lock drifted beacons." />
+  <meta name="twitter:image" content="https://placehold.co/1200x630/050a07/22c55e?text=31+%2F%2F+VOID+VECTOR%0ANAHLA+TRACKER" />
+  <style>
     /* ==========================================================================
-       NAHLA TRACKER DESIGN TOKENS & PHOSPHOR TERMINAL GREEN THEME (v0.5)
+       NAHLA TRACKER DESIGN TOKENS & PHOSPHOR TERMINAL GREEN THEME (v0.54)
        Offline-ready, zero external dependencies, pure monospace aesthetics.
        ========================================================================== */
     :root {
@@ -94,6 +94,7 @@
       min-height: 100%;
       overflow-y: auto;
       overflow-x: clip;
+      scrollbar-gutter: stable;
       background-color: var(--bg-void);
     }
 
@@ -143,7 +144,7 @@
         padding: 0.85rem 1rem;
       }
       .workspace-shell {
-        grid-template-columns: minmax(450px, 550px) minmax(380px, 1fr);
+        grid-template-columns: minmax(450px, 550px) minmax(0, 1fr);
         gap: 1rem;
         align-items: stretch;
         justify-items: stretch;
@@ -151,6 +152,7 @@
       .terminal-frame,
       .intel-column {
         height: 100%;
+        min-width: 0;
       }
       .intel-column {
         gap: 1rem;
@@ -236,7 +238,7 @@
 
     /* ==========================================================================
        EMBEDDED GREEN BASH & GRID OVERRIDE TERMINAL (TOP RIGHT)
-       Locked viewport height so scrollback never resizes the workstation.
+       Locked viewport height + stable scrollbar gutter so output never shifts UI.
        ========================================================================== */
     .bash-panel {
       flex: 0 0 auto;
@@ -250,6 +252,7 @@
       min-height: 240px;
       max-height: 240px;
       overflow-y: auto;
+      scrollbar-gutter: stable;
       background: #030705;
       padding: 0.65rem 0.8rem;
       font-size: 0.73rem;
@@ -1043,6 +1046,42 @@
       cursor: not-allowed;
     }
 
+    /* Subtle Visual Tells for Sabotaged / Anomalous Nodes */
+    @keyframes anomalyShimmer {
+      0%, 100% { opacity: 0.55; }
+      50%      { opacity: 1; }
+    }
+
+    .cell-glitch-badge {
+      position: absolute;
+      top: 3px;
+      right: 5px;
+      font-size: 0.54rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      pointer-events: none;
+      animation: anomalyShimmer 1.8s ease-in-out infinite;
+    }
+
+    .cell.anomaly-flip {
+      border-style: dashed;
+      border-color: rgba(245, 158, 11, 0.65);
+    }
+
+    .cell.anomaly-flip .cell-glitch-badge {
+      color: var(--amber);
+    }
+
+    .cell.anomaly-void {
+      border-style: dashed;
+      border-color: rgba(245, 158, 11, 0.38);
+      color: #5b826c;
+    }
+
+    .cell.anomaly-void .cell-glitch-badge {
+      color: var(--amber);
+    }
+
     /* Mutated cell flash animation */
     @keyframes nodeMutateFlash {
       0%   { box-shadow: 0 0 0 2px var(--emerald), inset 0 0 18px var(--emerald-glow); transform: scale(1.06); }
@@ -1078,25 +1117,19 @@
       transform: scale(1.03);
     }
 
-    .cell.hint-pulse {
-      animation: hintPulse 1.1s infinite alternate;
-      border-color: var(--amber);
-    }
-
-    @keyframes hintPulse {
-      from { box-shadow: 0 0 4px var(--amber-glow); }
-      to   { box-shadow: 0 0 16px var(--amber); }
-    }
-
-    /* Terminal Status Strip */
+    /* Terminal Status Strip (Fixed height so 1- or 2-line messages never shift card geometry) */
     .terminal-log {
-      padding: 0.5rem 0.95rem;
+      padding: 0.45rem 0.95rem;
       background: var(--bg-void);
       border-top: 1px solid var(--border-dim);
       border-bottom: 1px solid var(--border-dim);
       font-size: 0.72rem;
+      line-height: 1.32;
       color: var(--term-green);
-      min-height: 2.2rem;
+      height: 2.75rem;
+      min-height: 2.75rem;
+      max-height: 2.75rem;
+      overflow: hidden;
       display: flex;
       align-items: center;
       gap: 0.45rem;
@@ -1251,6 +1284,262 @@
       gap: 0.5rem;
     }
 
+    /* ==========================================================================
+       3x3 INTERACTIVE MINI TUTORIAL MODAL (NEW OPERATOR WALKTHROUGH)
+       ========================================================================== */
+    .tut-card {
+      width: 100%;
+      max-width: 560px;
+      max-height: 92dvh;
+      overflow-y: auto;
+      background: var(--bg-terminal);
+      border: 1px solid var(--term-green);
+      border-radius: 10px;
+      padding: 1rem 1.1rem;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.9), 0 0 24px rgba(34, 197, 94, 0.12);
+    }
+
+    .tut-mission-banner {
+      background: rgba(13, 25, 19, 0.92);
+      border: 1px solid var(--border-bright);
+      border-left: 3px solid var(--amber);
+      border-radius: 6px;
+      padding: 0.55rem 0.7rem;
+      font-size: 0.74rem;
+      line-height: 1.42;
+      color: var(--text-primary);
+    }
+
+    .tut-mission-banner.tut-done {
+      border-left-color: var(--emerald);
+      background: rgba(34, 197, 94, 0.12);
+    }
+
+    .tut-mission-banner strong {
+      color: var(--emerald);
+    }
+
+    .tut-why-tag {
+      display: inline-block;
+      font-size: 0.63rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      color: var(--amber);
+      text-transform: uppercase;
+      margin-bottom: 0.15rem;
+    }
+
+    .tut-arena {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0.75rem;
+      align-items: stretch;
+    }
+
+    @media (min-width: 540px) {
+      .tut-arena {
+        grid-template-columns: 186px 1fr;
+      }
+    }
+
+    .tut-board-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.4rem;
+      background: var(--bg-panel);
+      border: 1px solid var(--border-dim);
+      border-radius: 8px;
+      padding: 0.55rem;
+    }
+
+    .tut-hud-strip {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+    }
+
+    .tut-hud-echo {
+      color: var(--term-green);
+    }
+
+    .tut-hud-echo.exact {
+      color: var(--emerald);
+    }
+
+    .tut-pills {
+      display: flex;
+      gap: 0.2rem;
+    }
+
+    .tut-axis-box {
+      width: 100%;
+      max-width: 168px;
+      display: grid;
+      grid-template-columns: 14px 1fr;
+      grid-template-rows: 14px 1fr;
+      gap: 3px;
+      align-items: center;
+    }
+
+    .tut-cols {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      text-align: center;
+      font-size: 0.6rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+    }
+
+    .tut-rows {
+      height: 100%;
+      display: grid;
+      grid-template-rows: repeat(3, 1fr);
+      align-items: center;
+      text-align: center;
+      font-size: 0.6rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+    }
+
+    .tut-stage {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 1 / 1;
+    }
+
+    .tut-grid {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(3, 1fr);
+      gap: 4px;
+      z-index: 3;
+    }
+
+    .tut-cell {
+      background: rgba(17, 33, 25, 0.92);
+      border: 1px solid var(--border-dim);
+      border-radius: 6px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      position: relative;
+      transition: border-color 0.14s ease, background-color 0.14s ease, transform 0.1s ease;
+    }
+
+    .tut-cell:hover {
+      border-color: var(--border-bright);
+    }
+
+    .tut-cell .cell-coord-hint {
+      font-size: 0.45rem;
+      top: 2px;
+      left: 4px;
+    }
+
+    .tut-cell .cell-glitch-badge {
+      font-size: 0.48rem;
+      top: 2px;
+      right: 4px;
+    }
+
+    .tut-cell .cell-main {
+      font-size: 0.86rem;
+    }
+
+    .tut-cell .cell-tag {
+      font-size: 0.46rem;
+    }
+
+    .tut-term-box {
+      display: flex;
+      flex-direction: column;
+      background: #030705;
+      border: 1px solid var(--border-bright);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .tut-term-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.36rem 0.6rem;
+      background: var(--bg-panel);
+      border-bottom: 1px solid var(--border-dim);
+      font-size: 0.66rem;
+      font-weight: 700;
+      color: var(--term-green);
+    }
+
+    .tut-term-log {
+      flex: 1;
+      min-height: 102px;
+      max-height: 124px;
+      overflow-y: auto;
+      padding: 0.48rem 0.6rem;
+      font-size: 0.69rem;
+      line-height: 1.4;
+      display: flex;
+      flex-direction: column;
+      gap: 0.24rem;
+    }
+
+    .tut-term-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.3rem;
+      padding: 0.36rem 0.55rem;
+      background: #070e0a;
+      border-top: 1px solid var(--border-dim);
+    }
+
+    .tut-term-form {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.38rem 0.55rem;
+      background: #040906;
+      border-top: 1px solid var(--border-bright);
+    }
+
+    .tut-footer {
+      margin-top: 0.85rem;
+      padding-top: 0.68rem;
+      border-top: 1px solid var(--border-dim);
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .tut-check-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.42rem;
+      font-size: 0.72rem;
+      color: var(--text-secondary);
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .tut-check-label input[type="checkbox"] {
+      accent-color: var(--term-green);
+      width: 14px;
+      height: 14px;
+      cursor: pointer;
+    }
+
     /* Responsive Adjustments */
     @media (max-width: 440px) {
       .terminal-frame, .intel-panel {
@@ -1289,9 +1578,9 @@
       <header class="terminal-header">
         <div class="brand-block">
           <div class="brand-title">
-            VOID VECTOR v0.53
+            VOID VECTOR v0.54
           </div>
-          <div class="brand-sub">NAHLA@HOPE (31 BODIES)</div>
+          <div class="brand-sub">NAHLA TRACKER / HOPE SYSTEM (31 BODIES)</div>
         </div>
         <div class="header-actions">
           <button class="btn" id="btn-audio" title="Toggle Telemetry Audio">SFX:ON</button>
@@ -1366,7 +1655,6 @@
           <button class="btn" id="btn-reset" title="Clear Vector & Restore Sector (R)">RESET [R]</button>
         </div>
         <div class="footer-right">
-         <!-- <button class="btn" id="btn-hint" title="Resolve Next Anomaly or Ping Node (H)">PING</button> -->
           <button class="btn btn-primary" id="btn-next" title="Generate New Sector (N)">NEXT [N]</button>
         </div>
       </footer>
@@ -1434,7 +1722,7 @@
             </div>
             <div class="brief-step">
               <span class="brief-num">02</span>
-              <div><strong>TERMINAL GRID OVERRIDES:</strong> Solar shear corrupts nodes along your route. Run <span class="cmd-code">scan</span> in <strong>ttyS0</strong> to diagnose anomalies, then rewrite tiles mid-play.</div>
+              <div><strong>TERMINAL GRID OVERRIDES:</strong> Solar shear corrupts nodes along your route. Run <span class="cmd-code">scan</span> in <strong>ttyS0</strong> to diagnose anomalies, then rewrite tiles mid-play:</div>
             </div>
             <div class="brief-step">
               <span class="brief-num">03</span>
@@ -1501,12 +1789,84 @@
     </div>
   </div>
 
+  <!-- 3x3 Interactive Field Walkthrough Modal (New Operator Onboarding) -->
+  <div class="modal-backdrop" id="tut-backdrop" role="dialog" aria-modal="true" aria-labelledby="tut-modal-title">
+    <div class="tut-card">
+      <div class="modal-header" style="margin-bottom:0.65rem;padding-bottom:0.5rem;">
+        <span class="modal-title" id="tut-modal-title">FIELD WALKTHROUGH // 3×3 TRAINING SECTOR</span>
+        <button type="button" class="btn" id="tut-btn-close-top">ESC [X]</button>
+      </div>
+
+      <div class="modal-body" style="gap:0.6rem;">
+        <div class="tut-mission-banner" id="tut-coach-banner"></div>
+
+        <div class="tut-arena">
+          <!-- Left: Compact 3x3 Vector Grid -->
+          <div class="tut-board-wrap">
+            <div class="tut-hud-strip">
+              <span>ECHO: <span class="tut-hud-echo" id="tut-echo-val">00</span>/31</span>
+              <div class="tut-pills" id="tut-beacon-pills"></div>
+            </div>
+
+            <div class="tut-axis-box">
+              <div class="axis-corner">#</div>
+              <div class="tut-cols"><span>A</span><span>B</span><span>C</span></div>
+              <div class="tut-rows"><span>1</span><span>2</span><span>3</span></div>
+              <div class="tut-stage">
+                <svg class="vector-overlay" id="tut-svg" viewBox="0 0 300 300" preserveAspectRatio="none"></svg>
+                <div class="tut-grid" id="tut-grid" role="grid"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: Mini ttyS0 Override Terminal -->
+          <div class="tut-term-box">
+            <div class="tut-term-head">
+              <span>MINI SHELL // ttyS0</span>
+              <span style="color:var(--text-secondary);font-size:0.6rem;">BEACON: ABE (Abelina)</span>
+            </div>
+            <div class="tut-term-log" id="tut-term-log"></div>
+            <div class="tut-term-chips">
+              <button type="button" class="chip-btn" data-tut-cmd="vent c2">vent c2</button>
+              <button type="button" class="chip-btn" data-tut-cmd="invert c3">invert c3</button>
+              <button type="button" class="chip-btn" id="tut-btn-reset">reset</button>
+            </div>
+            <form class="tut-term-form" id="tut-term-form" autocomplete="off">
+              <span class="bash-prompt-label" style="font-size:0.68rem;">nahla@sim:~$</span>
+              <input
+                type="text"
+                id="tut-term-input"
+                class="bash-input"
+                style="font-size:0.72rem;"
+                placeholder="run 'vent c2' or 'invert c3'..."
+                spellcheck="false"
+                autocapitalize="none"
+              />
+              <button type="submit" class="bash-run-btn" style="font-size:0.62rem;padding:0.18rem 0.42rem;">RUN</button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <div class="tut-footer">
+        <label class="tut-check-label" for="tut-dont-show">
+          <input type="checkbox" id="tut-dont-show" />
+          <span>Don't show this mini tutorial again</span>
+        </label>
+        <div style="display:flex;gap:0.4rem;">
+          <button type="button" class="btn" id="tut-btn-replay">RESET DEMO</button>
+          <button type="button" class="btn btn-primary" id="tut-btn-done">ENTER HOPE SYSTEM</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script>
     /**
      * ==========================================================================
-     * 31: VOID VECTOR v0.5 — CORE ENGINE
+     * 31: VOID VECTOR v0.54 — CORE ENGINE
      * Deterministic Carve-First Puzzle Generator, Anomaly Saboteur,
-     * Embedded Bash/Override Shell, WebAudio Synthesizer & UI Controller
+     * Embedded Bash/Override Shell, WebAudio Synthesizer, 3x3 Walkthrough & UI
      * ==========================================================================
      */
 
@@ -1739,11 +2099,12 @@
 
     // --------------------------------------------------------------------------
     // 3. CARVE-FIRST PUZZLE GENERATOR + DETERMINISTIC ANOMALY INJECTOR
+    //    Hope System Roster: 28 Beacons (8 x 3-letter + 20 x 4-letter) + 3 Dark
     // --------------------------------------------------------------------------
     class SectorGenerator {
       static COLS = ["A", "B", "C", "D", "E", "F"];
 
-      // 8 Inner-System Moons (3-Letter Beacons — Survey & Orbital Modes)
+      // 8 Inner/Mid-System Moon Beacons (3-letter callsigns: Survey & Orbital)
       static INNER_BEACONS = [
         { code: "ABE", label: "Abelina (2a)" },
         { code: "JAN", label: "Jana (2b)" },
@@ -1755,7 +2116,9 @@
         { code: "TRM", label: "Troum (7c)" }
       ];
 
-      // 20 Primary Worlds & Outer Moons (4-Letter Beacons — Deep Space Mode)
+      static WORDS_3 = SectorGenerator.INNER_BEACONS.map((item) => item.code);
+
+      // 20 Primary & Outer-System Beacons (4-letter callsigns: Deep Space)
       static DEEP_LEXICON = [
         { code: "AEOG", label: "Aeoga (7)" },
         { code: "ANNE", label: "Anneke (12)" },
@@ -1768,34 +2131,25 @@
         { code: "HOPE", label: "Hope (Star A)" },
         { code: "HRB9", label: "Herbst9 (7a)" },
         { code: "MRKA", label: "Marika (2)" },
-        { code: "NAHL", label: "Nahla (6a)" },
+        { code: "NAHL", label: "Nahla (6a Array)" },
         { code: "NULL", label: "<Null signal> (9d Rati)" },
-        { code: "RAYN", label: "Rayne (4)" },
+        { code: "RAYN", label: "Rayne (4 Dwarf)" },
         { code: "RBKA", label: "Rebekah (6)" },
         { code: "RUZE", label: "Ružena (3)" },
         { code: "SARA", label: "Sarasvati (9a)" },
         { code: "SITA", label: "Sita (10)" },
-        { code: "SKAD", label: "Skaði (8)" },
+        { code: "SKAD", label: "Skaði (8 ELW)" },
         { code: "SMNE", label: "Simone (1)" }
       ];
 
-      // 3 Unbeaconed Dark Bodies (28 Beacons + 3 Dark Bodies = 31 Hope System Bodies)
-      static DARK_BODIES = [
-        { name: "Bellatrix", note: "Rocky asteroid belt — too diffuse to anchor a fixed relay" },
-        { name: "Theresa (2da)", note: "Inner binary submoon of Maria — unstable dead space" },
-        { name: "Kali (9da)", note: "Outer binary submoon of Rati — unstable dead space" }
-      ];
-
-      static WORDS_3 = SectorGenerator.INNER_BEACONS.map((item) => item.code);
       static WORDS_4 = SectorGenerator.DEEP_LEXICON.map((item) => item.code);
       static ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ".split("");
 
-      static lookupBeacon(code) {
-        const up = String(code || "").toUpperCase();
+      static getBeaconInfo(code) {
         return (
-          this.DEEP_LEXICON.find((b) => b.code === up) ||
-          this.INNER_BEACONS.find((b) => b.code === up) ||
-          { code: up, label: "Unknown Beacon" }
+          this.INNER_BEACONS.find((b) => b.code === code) ||
+          this.DEEP_LEXICON.find((b) => b.code === code) ||
+          { code, label: code }
         );
       }
 
@@ -1813,8 +2167,6 @@
         return { r, c, coord: clean };
       }
 
-      // Public entry point: builds a guaranteed-unique clean sector, then injects
-      // mid-route terminal anomalies so players must alter the grid via ttyS0.
       static generate(mode, seedStr, forcedWord = null) {
         const MAX_ATTEMPTS = 400;
         let chosen = null;
@@ -1833,7 +2185,6 @@
 
         if (!chosen.unique) chosen.unique = false;
 
-        // Snapshot clean baseline and inject deterministic terminal anomalies
         this.injectAnomalies(chosen);
         return chosen;
       }
@@ -1997,12 +2348,11 @@
       }
 
       // Sabotages 1 (Survey) or 2 (Orbital / Deep) interior nodes on the winning route
-      // so the player must execute bash grid-override commands mid-play.
+      // with impact-focused diagnostics explaining WHY each override is needed.
       static injectAnomalies(puzzle) {
         const rng = new SeededRandom(`ANOM:${puzzle.mode}:${puzzle.seedStr}`);
         const targetCount = puzzle.mode === "SURVEY" ? 1 : 2;
 
-        // Save clean snapshot of every cell before sabotage
         for (let r = 0; r < puzzle.size; r++) {
           for (let c = 0; c < puzzle.size; c++) {
             const cell = puzzle.grid[r][c];
@@ -2023,7 +2373,6 @@
           if (anomalies.length >= targetCount) break;
           const cell = puzzle.grid[pt.r][pt.c];
 
-          // Choose an anomaly type appropriate for this node
           const possibleKinds = [];
           if (cell.clean.type === "MASS" || cell.clean.type === "WELL") {
             possibleKinds.push("COLLAPSED_VOID");
@@ -2036,51 +2385,64 @@
             possibleKinds.push("STATIC_JAM");
           }
 
-          // Prefer distinct anomaly kinds so multi-anomaly sectors showcase different verbs
           const freshKinds = possibleKinds.filter((k) => !usedKinds.has(k));
           const kind = rng.pick(freshKinds.length > 0 ? freshKinds : possibleKinds);
           if (!kind) continue;
 
           usedKinds.add(kind);
+          const coordLow = cell.coord.toLowerCase();
 
           if (kind === "COLLAPSED_VOID") {
             cell.type = "VOID";
             cell.val = 0;
             cell.anomaly = "COLLAPSED_VOID";
+            const buriedLabel = cell.clean.val < 0
+              ? `${cell.clean.val} PHASE SHADOW`
+              : `+${cell.clean.val} ECHO`;
             anomalies.push({
               coord: cell.coord,
               r: cell.r,
               c: cell.c,
               kind,
-              fixCmd: `vent ${cell.coord.toLowerCase()}`,
-              summary: `COLLAPSED VOID @ ${cell.coord} (MASKS ${cell.clean.val >= 0 ? "+" : ""}${cell.clean.val} ECHO)`
+              fixCmd: `vent ${coordLow}`,
+              why: `${cell.coord} collapsed into ## debris — blocking your sweep corridor and burying ${buriedLabel}.`,
+              actionNote: `Clears the ## debris at ${cell.coord} so you can pass through and collect ${buriedLabel}.`,
+              summary: `COLLAPSED DEBRIS @ ${cell.coord} (BLOCKS CORRIDOR / BURIES ${buriedLabel})`
             });
           } else if (kind === "POLARITY_FLIP") {
             cell.val = -cell.clean.val;
             cell.type = cell.val < 0 ? "WELL" : "MASS";
             cell.anomaly = "POLARITY_FLIP";
+            const swing = Math.abs(cell.clean.val * 2);
             anomalies.push({
               coord: cell.coord,
               r: cell.r,
               c: cell.c,
               kind,
-              fixCmd: `invert ${cell.coord.toLowerCase()}`,
-              summary: `POLARITY INVERSION @ ${cell.coord} (SHOWS ${cell.val >= 0 ? "+" : ""}${cell.val}, TRUE ${cell.clean.val >= 0 ? "+" : ""}${cell.clean.val})`
+              fixCmd: `invert ${coordLow}`,
+              why: `${cell.coord} is phase-inverted — reading ${cell.val >= 0 ? "+" : ""}${cell.val} instead of ${cell.clean.val >= 0 ? "+" : ""}${cell.clean.val} (${swing}-echo error).`,
+              actionNote: `Flips the +/- sign at ${cell.coord} back to ${cell.clean.val >= 0 ? "+" : ""}${cell.clean.val} so your sweep totals 31.`,
+              summary: `POLARITY INVERSION @ ${cell.coord} (READS ${cell.val >= 0 ? "+" : ""}${cell.val}, TRUE ${cell.clean.val >= 0 ? "+" : ""}${cell.clean.val})`
             });
           } else if (kind === "STATIC_JAM") {
             cell.type = "JAMMED";
             cell.val = 0;
             cell.anomaly = "STATIC_JAM";
-            const maskDesc = cell.clean.type === "RELAY"
-              ? `RELAY [${cell.clean.letter}]`
+            const isRelay = cell.clean.type === "RELAY";
+            const maskDesc = isRelay
+              ? `Relay [${cell.clean.letter}] (needed to light beacon ${puzzle.word})`
               : `${cell.clean.val >= 0 ? "+" : ""}${cell.clean.val} ECHO`;
             anomalies.push({
               coord: cell.coord,
               r: cell.r,
               c: cell.c,
               kind,
-              fixCmd: `purge ${cell.coord.toLowerCase()}`,
-              summary: `STATIC INTERFERENCE [!] @ ${cell.coord} (JAMS ${maskDesc})`
+              fixCmd: `purge ${coordLow}`,
+              why: `${cell.coord} is jammed by solar static [!] — masking ${maskDesc}.`,
+              actionNote: isRelay
+                ? `Burns off static at ${cell.coord} so Relay [${cell.clean.letter}] can be lit in sequence.`
+                : `Burns off static at ${cell.coord} to restore ${maskDesc}.`,
+              summary: `SOLAR STATIC [!] @ ${cell.coord} (MASKS ${isRelay ? `RELAY [${cell.clean.letter}]` : maskDesc})`
             });
           } else if (kind === "PHASE_LOCK") {
             cell.phaseLocked = true;
@@ -2091,12 +2453,13 @@
               c: cell.c,
               kind,
               fixCmd: `sync ${puzzle.word.toLowerCase()}`,
-              summary: `PHASE-LOCKED RELAY [${cell.letter}] @ ${cell.coord} (REQUIRES BEACON SYNC)`
+              why: `Relay [${cell.letter}] at ${cell.coord} lost carrier lock [?] — it cannot register for beacon ${puzzle.word} until retuned.`,
+              actionNote: `Broadcasts the ${puzzle.word} carrier frequency to unlock [?] back into [${cell.letter}].`,
+              summary: `CARRIER PHASE-LOCK [?] @ ${cell.coord} (HOLDS RELAY [${cell.letter}] FOR ${puzzle.word})`
             });
           }
         }
 
-        // Snapshot initial sabotaged state so 'reboot' / RESET restores anomalies cleanly
         for (let r = 0; r < puzzle.size; r++) {
           for (let c = 0; c < puzzle.size; c++) {
             const cell = puzzle.grid[r][c];
@@ -2111,7 +2474,7 @@
         }
 
         puzzle.anomalies = anomalies;
-        puzzle.maxCharges = anomalies.length + 1; // +1 spare tactical charge
+        puzzle.maxCharges = anomalies.length + 1;
       }
 
       static buildSelfAvoidingWalk(rng, size, minLen, maxLen) {
@@ -2215,7 +2578,7 @@
     class NahlaTerminal {
       static MAX_LINES = 300;
       static COMMANDS = [
-        "scan", "vent", "invert", "purge", "sync", "dampen", "boost", "reboot",
+        "scan", "vent", "invert", "purge", "sync", "dampen", "boost", "reboot", "tutorial",
         "help", "man", "clear", "cls", "ls", "ll", "cd", "pwd", "cat", "grep",
         "echo", "whoami", "uname", "date", "uptime", "ps", "df", "history", "sudo", "su", "exit"
       ];
@@ -2226,23 +2589,21 @@
         this.cmdHistory = [];
         this.historyIdx = -1;
         this.cwd = "/home/nahla/sector";
-        this.startTime = Date.now();
-        this.pendingPrompt = null; // e.g., { type: "RELAY_DRIFT", coord: "B3", r, c }
         this.isRoot = false;
-        this.rootChargeGranted = false;
+        this.startTime = Date.now();
+        this.pendingPrompt = null;
       }
 
       resetForSector(puzzle) {
         this.lines = [];
         this.cwd = "/home/nahla/sector";
-        this.pendingPrompt = null;
         this.isRoot = false;
-        this.rootChargeGranted = false;
+        this.pendingPrompt = null;
         this.updatePromptLabel();
 
-        const beacon = SectorGenerator.lookupBeacon(puzzle.word);
+        const beaconInfo = SectorGenerator.getBeaconInfo(puzzle.word);
         this.print(`HopeOS 3.1.0-void-vector (ttyS0) — SECTOR #${puzzle.seedStr}`, "sys");
-        this.print(`MODE: ${puzzle.mode} (${puzzle.size}x${puzzle.size}) • BEACON: ${puzzle.word} [${beacon.label}] • CHG: ${this.game.chargesLeft}/${puzzle.maxCharges}`, "info");
+        this.print(`MODE: ${puzzle.mode} (${puzzle.size}x${puzzle.size}) • BEACON: ${puzzle.word} [${beaconInfo.label}] • CHG: ${this.game.chargesLeft}/${puzzle.maxCharges}`, "info");
 
         if (puzzle.anomalies.length > 0) {
           this.print(`[WARN] ${puzzle.anomalies.length} TELEMETRY ANOMAL${puzzle.anomalies.length === 1 ? "Y" : "IES"} DETECTED ON SWEEP ROUTE. TYPE 'scan' TO INSPECT.`, "warn");
@@ -2277,17 +2638,21 @@
         screen.scrollTop = screen.scrollHeight;
       }
 
-      updatePromptLabel() {
-        const lbl = document.getElementById("bash-prompt-label");
-        if (!lbl) return;
+      getPromptPrefix() {
+        const user = this.isRoot ? "root" : "nahla";
+        const sigil = this.isRoot ? "#" : "$";
         const shortCwd = this.cwd === "/home/nahla/sector"
           ? "~/sector"
           : this.cwd === "/home/nahla"
             ? "~"
             : this.cwd;
-        const user = this.isRoot ? "root" : "nahla";
-        const sigil = this.isRoot ? "#" : "$";
-        lbl.textContent = `${user}@hope:${shortCwd}${sigil}`;
+        return `${user}@hope:${shortCwd}${sigil}`;
+      }
+
+      updatePromptLabel() {
+        const lbl = document.getElementById("bash-prompt-label");
+        if (!lbl) return;
+        lbl.textContent = this.getPromptPrefix();
         lbl.classList.toggle("is-root", this.isRoot);
       }
 
@@ -2300,8 +2665,8 @@
           c: cell.c
         };
         this.print("", "info");
-        this.print(`[TX // RELAY ${cell.coord}] HARMONIC DRIFT DETECTED (+00 ECHO).`, "cyan");
-        this.print(`  > REPLY 'dampen' TO LOCK (+00) OR 'boost' TO INJECT +02 ECHO AT ${cell.coord}.`, "warn");
+        this.print(`[TX // BEACON RELAY ${cell.coord}] HARMONIC DRIFT DETECTED (+00 ECHO).`, "cyan");
+        this.print(`  > REPLY 'dampen' TO LOCK (+00) OR 'boost' TO INJECT +02 ECHOES AT ${cell.coord}.`, "warn");
       }
 
       autocomplete(rawInput) {
@@ -2319,7 +2684,8 @@
         const argPrefix = parts[1].toUpperCase();
 
         if (cmd === "sync") {
-          const codes = [...SectorGenerator.WORDS_3, ...SectorGenerator.WORDS_4].filter((w) => w.startsWith(argPrefix));
+          const allCodes = [...SectorGenerator.WORDS_3, ...SectorGenerator.WORDS_4];
+          const codes = allCodes.filter((w) => w.startsWith(argPrefix));
           if (codes.length === 1) return `${parts[0]} ${codes[0]}`;
           if (codes.length > 1) this.print(codes.join("  "), "info");
         } else if (["vent", "invert", "purge", "scan"].includes(cmd)) {
@@ -2349,14 +2715,7 @@
         this.cmdHistory.push(trimmed);
         this.historyIdx = this.cmdHistory.length;
 
-        const shortCwd = this.cwd === "/home/nahla/sector"
-          ? "~/sector"
-          : this.cwd === "/home/nahla"
-            ? "~"
-            : this.cwd;
-        const user = this.isRoot ? "root" : "nahla";
-        const sigil = this.isRoot ? "#" : "$";
-        this.print(`${user}@hope:${shortCwd}${sigil} ${trimmed}`, "cmd");
+        this.print(`${this.getPromptPrefix()} ${trimmed}`, "cmd");
 
         const tokens = trimmed.split(/\s+/);
         const cmd = tokens[0].toLowerCase();
@@ -2364,53 +2723,40 @@
 
         if (cmd === "sudo") {
           this.game.audio.error();
-          this.print("sudo: not permitted. nahla is not in the sudoers file — this incident will be reported. Use 'su -'.", "err");
+          this.print("nahla is not in the sudoers file. This incident will be reported.", "err");
+          this.print("Use 'su -' to elevate to root transceiver privileges.", "warn");
           return;
         }
 
         switch (cmd) {
-          case "su": {
-            const isLoginShell = args.includes("-") || args.includes("-l") || args.includes("--login");
-            const targetUser = args.find((a) => !a.startsWith("-")) || "root";
-            if (targetUser !== "root" && targetUser !== "nahla") {
-              this.game.audio.error();
-              this.print(`su: user ${targetUser} does not exist`, "err");
-              break;
-            }
-            if (targetUser === "nahla") {
-              this.isRoot = false;
-              if (isLoginShell) this.cwd = "/home/nahla/sector";
-              this.updatePromptLabel();
-              this.game.audio.cmdOk();
-              this.print("Session switched to operator 'nahla'.", "info");
-              break;
-            }
-            const alreadyRoot = this.isRoot;
-            this.isRoot = true;
-            if (isLoginShell) {
-              this.cwd = "/home/nahla/sector";
-            }
-            this.updatePromptLabel();
-            this.game.audio.mutate();
-            if (!alreadyRoot) {
-              this.print("Password: ********", "info");
-            }
-            if (!this.rootChargeGranted) {
-              this.rootChargeGranted = true;
-              this.game.chargesLeft += 1;
-              this.game.updateChargesHUD();
-              this.print("[ROOT] Elevated to uid=0(root) on HopeOS ttyS0 — +1 EMERGENCY OVERRIDE CHG UNLOCKED.", "ok");
-            } else {
-              this.print("[ROOT] Active uid=0(root) session on HopeOS ttyS0.", "ok");
-            }
-            this.print("Hardware privileges active: deep 'scan <xy>' route probe + '/root' directory unlocked.", "cyan");
-            break;
-          }
-
           case "clear":
           case "cls":
             this.clear();
             break;
+
+          case "su": {
+            if (args.length > 0 && args[0] !== "-" && args[0] !== "-l" && args[0] !== "root") {
+              this.game.audio.error();
+              this.print(`su: user ${args[0]} does not exist`, "err");
+              break;
+            }
+            if (this.isRoot) {
+              this.print("Already operating as root@hope (ttyS0).", "info");
+              break;
+            }
+            this.isRoot = true;
+            this.updatePromptLabel();
+            this.game.audio.mutate();
+            this.print("[ROOT] Elevated to root@hope on ttyS0.", "warn");
+            this.print("  > Direct transceiver bus unlocked (/root/transceiver.key + deep 'scan' route diagnostics).", "ok");
+            if (!this.game.rootBoostUsed) {
+              this.game.rootBoostUsed = true;
+              this.game.chargesLeft += 1;
+              this.game.updateChargesHUD();
+              this.print("  > Auxiliary override capacitor online (+1 EMERGENCY CHARGE).", "ok");
+            }
+            break;
+          }
 
           case "help":
           case "man":
@@ -2448,6 +2794,11 @@
 
           case "reboot":
             this.game.resetPath(false, true);
+            break;
+
+          case "tutorial":
+            this.print("[OK] Launching 3x3 Field Walkthrough modal...", "ok");
+            this.game.openTutorialModal();
             break;
 
           case "ls":
@@ -2489,30 +2840,25 @@
 
           case "date": {
             const now = new Date();
-            const utc = now.toUTCString().replace(String(now.getUTCFullYear()), "3312");
-            this.print(`${utc} (Hope Epoch 3312)`, "info");
+            const hopeStr = now.toUTCString().replace(/\b20\d{2}\b/, "3312");
+            this.print(hopeStr, "info");
             break;
           }
 
           case "uptime": {
             const secs = Math.floor((Date.now() - this.startTime) / 1000);
             const mins = Math.floor(secs / 60);
-            this.print(`up ${mins}m ${secs % 60}s, 1 operator, solved_sectors=${this.game.stats.solved}`, "info");
+            this.print(`up ${mins}m ${secs % 60}s, 1 operator, locked_beacons=${this.game.stats.solved}`, "info");
             break;
           }
 
           case "ps":
-            this.print("  PID TTY      TIME CMD\n    1 ttyS0    00:00:01 init\n   31 ttyS0    00:00:04 echo_sweep_31\n   42 ttyS0    00:00:02 vector_router\n   88 ttyS0    00:00:01 nahla_sh", "info");
+            this.print("  PID TTY      TIME CMD\n    1 ttyS0    00:00:01 init\n   31 ttyS0    00:00:04 echo_triangulator\n   42 ttyS0    00:00:02 carrier_router\n   88 ttyS0    00:00:01 nahla_sh", "info");
             break;
 
-          case "df": {
-            const status = this.game.computeStatus();
-            const used = status.mass;
-            const avail = Math.max(0, 31 - used);
-            const pct = Math.min(100, Math.round((used / 31) * 100));
-            this.print(`Filesystem      Size  Used Avail Use% Mounted on\n/dev/hope0       31E   ${String(used).padStart(2, "0")}E   ${String(avail).padStart(2, "0")}E  ${pct}% /home/nahla/sector\n/dev/override   ${this.game.puzzle.maxCharges}CHG  ${Math.max(0, this.game.puzzle.maxCharges - this.game.chargesLeft)}CHG  ${this.game.chargesLeft}CHG   --% /sys/override`, "info");
+          case "df":
+            this.print(`Filesystem      Size  Used Avail Use% Mounted on\n/dev/hope0       31E   ${String(this.game.computeStatus().mass).padStart(2, "0")}E   ${Math.max(0, 31 - this.game.computeStatus().mass)}E  ${Math.min(100, Math.round((this.game.computeStatus().mass / 31) * 100))}% /home/nahla/sector\n/dev/override   ${this.game.puzzle.maxCharges}CHG  ${Math.max(0, this.game.puzzle.maxCharges - this.game.chargesLeft)}CHG  ${this.game.chargesLeft}CHG   --% /sys/override`, "info");
             break;
-          }
 
           case "history":
             this.cmdHistory.forEach((entry, idx) => {
@@ -2523,12 +2869,10 @@
           case "exit":
             if (this.isRoot) {
               this.isRoot = false;
-              if (this.cwd.startsWith("/root")) this.cwd = "/home/nahla/sector";
               this.updatePromptLabel();
-              this.game.audio.cmdOk();
-              this.print("logout: dropped uid=0(root), returned to nahla@hope.", "info");
+              this.print("logout: returned to nahla@hope operator shell.", "info");
             } else {
-              this.print("logout blocked: active telemetry lock in progress on ttyS0.", "warn");
+              this.print("logout blocked: active telemetry lock in progress.", "warn");
             }
             break;
 
@@ -2543,14 +2887,15 @@
         this.print("=== GRID OVERRIDE COMMANDS (ttyS0) ===", "sys");
         this.print("  scan [xy]     Scan sector (or tile) for hidden anomalies", "info");
         this.print("  vent <xy>     Vaporize a ## Void node (e.g. vent c4)", "info");
-        this.print("  invert <xy>   Flip +/- polarity of an Echo or Phase Shadow", "info");
-        this.print("  purge <xy>    Clear [!] static interference or decoy relay", "info");
-        this.print("  sync <code>   Sync beacon to unlock [?] phase relays", "info");
+        this.print("  invert <xy>   Flip +/- polarity of an Echo or Shadow node", "info");
+        this.print("  purge <xy>    Clear [!] solar static or decoy beacon relay", "info");
+        this.print("  sync <code>   Sync beacon code to unlock [?] phase relays", "info");
         this.print("  dampen|boost  Reply to incoming relay harmonic drift", "info");
-        this.print("  reboot        Reset vector & restore initial sector anomalies", "info");
+        this.print("  reboot        Reset sweep & restore initial sector anomalies", "info");
+        this.print("  tutorial      Re-open the 3x3 interactive field walkthrough", "info");
         this.print("=== BASH / SYSTEM UTILITIES ===", "sys");
-        this.print("  ls, cd, pwd, cat <file>, grep <str>, su -, echo, ps, df,", "info");
-        this.print("  whoami, uname -a, date, uptime, history, clear", "info");
+        this.print("  ls, cd, pwd, cat <file>, grep <str>, echo, ps, df,", "info");
+        this.print("  whoami, uname -a, date, uptime, history, su -, clear", "info");
       }
 
       cmdScan(coordArg) {
@@ -2565,34 +2910,39 @@
             return;
           }
           const cell = puzzle.grid[parsed.r][parsed.c];
+          const rootSuffix = this.isRoot
+            ? ` | ON_SWEEP_ROUTE=${cell.onSolution ? "YES" : "NO"}`
+            : "";
           if (cell.anomaly) {
             const item = puzzle.anomalies.find((a) => a.coord === parsed.coord);
-            this.print(`[SCAN ${parsed.coord}] ANOMALY ACTIVE: ${item ? item.summary : cell.anomaly}`, "warn");
+            this.print(`[SCAN ${parsed.coord}] ${item ? item.why : cell.anomaly}${rootSuffix}`, "warn");
+            if (item) {
+              this.print(`  FIX: ${item.fixCmd}  (${item.actionNote})`, "cyan");
+            }
           } else {
-            this.print(`[SCAN ${parsed.coord}] TYPE=${cell.type} VAL=${cell.val >= 0 ? "+" : ""}${cell.val}${cell.letter ? ` RELAY=[${cell.letter}]` : ""} (NOMINAL)`, "ok");
-          }
-          if (this.isRoot && cell.clean) {
-            const baseDesc = cell.clean.type === "RELAY"
-              ? `RELAY[${cell.clean.letter}]`
-              : `${cell.clean.type}(${cell.clean.val >= 0 ? "+" : ""}${cell.clean.val})`;
-            this.print(`  [ROOT-HW] ON_SWEEP_ROUTE=${cell.onSolution ? "YES" : "NO (DECOY/OFF-PATH)"} • FACTORY_NODE=${baseDesc}`, "cyan");
+            this.print(`[SCAN ${parsed.coord}] TYPE=${cell.type} ECHO=${cell.val >= 0 ? "+" : ""}${cell.val}${cell.letter ? ` RELAY=[${cell.letter}]` : ""} (NOMINAL)${rootSuffix}`, "ok");
           }
           return;
         }
 
         const active = puzzle.anomalies.filter((a) => puzzle.grid[a.r][a.c].anomaly !== null);
         if (active.length === 0) {
-          this.print("[SCAN] 0 ACTIVE ANOMALIES REMAINING. SECTOR ROUTE CLEAR.", "ok");
-        } else {
-          this.print(`[SCAN] DETECTED ${active.length} ACTIVE SECTOR ANOMAL${active.length === 1 ? "Y" : "IES"}:`, "sys");
-          active.forEach((a, idx) => {
-            this.print(`  0${idx + 1}. ${a.summary}  -->  run '${a.fixCmd}'`, "warn");
-          });
+          this.print("[SCAN] 0 ACTIVE ANOMALIES REMAINING. SWEEP CORRIDOR CLEAR.", "ok");
+          if (this.isRoot) {
+            const route = puzzle.solutionPath.map((p) => SectorGenerator.toCoord(p.r, p.c)).join(" -> ");
+            this.print(`[ROOT-TRACE] NOMINAL SWEEP VECTOR: ${route}`, "cyan");
+          }
+          return;
         }
 
+        this.print(`[SCAN] ${active.length} ANOMAL${active.length === 1 ? "Y" : "IES"} BLOCKING YOUR 31-ECHO / ${puzzle.word} SWEEP:`, "sys");
+        active.forEach((a, idx) => {
+          this.print(`  0${idx + 1}. WHY: ${a.why}`, "warn");
+          this.print(`      FIX: '${a.fixCmd}' — ${a.actionNote}`, "cyan");
+        });
         if (this.isRoot) {
-          const routeCoords = puzzle.solutionPath.map((p) => SectorGenerator.toCoord(p.r, p.c)).join(" -> ");
-          this.print(`[ROOT-HW] NOMINAL SWEEP VECTOR: ${routeCoords}`, "cyan");
+          const route = puzzle.solutionPath.map((p) => SectorGenerator.toCoord(p.r, p.c)).join(" -> ");
+          this.print(`[ROOT-TRACE] NOMINAL SWEEP VECTOR: ${route}`, "cyan");
         }
       }
 
@@ -2636,7 +2986,7 @@
           cell.type = "MASS";
           cell.val = 0;
           cell.anomaly = null;
-          this.print(`[OK] VENTED ${parsed.coord}: NATURAL VOID VAPORIZED -> 00 TRANSIT NODE.`, "ok");
+          this.print(`[OK] VENTED ${parsed.coord}: DARK-SPACE VOID VAPORIZED -> 00 TRANSIT NODE.`, "ok");
         }
         this.game.onGridMutated(parsed.r, parsed.c);
       }
@@ -2657,7 +3007,7 @@
         const cell = puzzle.grid[parsed.r][parsed.c];
         if (cell.type !== "MASS" && cell.type !== "WELL") {
           this.game.audio.error();
-          this.print(`invert: ${parsed.coord} has no numeric polarity to invert (type: ${cell.type}).`, "err");
+          this.print(`invert: ${parsed.coord} has no numeric echo polarity to invert (type: ${cell.type}).`, "err");
           return;
         }
         if (cell.val === 0) {
@@ -2673,8 +3023,7 @@
         cell.type = cell.val < 0 ? "WELL" : "MASS";
         if (cell.anomaly === "POLARITY_FLIP") cell.anomaly = null;
 
-        const label = cell.type === "WELL" ? "SHADOW" : "ECHO";
-        this.print(`[OK] INVERTED ${parsed.coord}: ${prev >= 0 ? "+" : ""}${prev} -> ${cell.val >= 0 ? "+" : ""}${cell.val} (${label}).`, "ok");
+        this.print(`[OK] INVERTED ${parsed.coord}: ${prev >= 0 ? "+" : ""}${prev} -> ${cell.val >= 0 ? "+" : ""}${cell.val} (${cell.type === "WELL" ? "SHADOW" : "ECHO"}).`, "ok");
         this.game.onGridMutated(parsed.r, parsed.c);
       }
 
@@ -2694,7 +3043,7 @@
         const cell = puzzle.grid[parsed.r][parsed.c];
         if (cell.type !== "JAMMED" && cell.type !== "RELAY") {
           this.game.audio.error();
-          this.print(`purge: ${parsed.coord} has no static interference or relay signal (type: ${cell.type}).`, "err");
+          this.print(`purge: ${parsed.coord} has no solar static or beacon relay (type: ${cell.type}).`, "err");
           return;
         }
         if (!this.consumeChargeOrWarn()) return;
@@ -2730,18 +3079,17 @@
         const validWords = [...SectorGenerator.WORDS_3, ...SectorGenerator.WORDS_4];
         if (!validWords.includes(code)) {
           this.game.audio.error();
-          this.print(`sync: unknown beacon '${code}'. Flip the bottom card to inspect the 28-Beacon Roster.`, "err");
+          this.print(`sync: unknown beacon '${code}'. Flip the bottom card to inspect all 28 Hope System beacons.`, "err");
           return;
         }
 
         if (code !== puzzle.word && code !== "NULL") {
           this.game.audio.error();
-          this.print(`sync: handshake rejected — sector carrier expects '${puzzle.word}' (or 'NULL').`, "err");
+          this.print(`sync: handshake rejected — sector transponder expects '${puzzle.word}' (or 'NULL').`, "err");
           return;
         }
 
-        // Unlock all phase-locked relays on the grid
-        let unlockedCells = [];
+        const unlockedCells = [];
         for (let r = 0; r < puzzle.size; r++) {
           for (let c = 0; c < puzzle.size; c++) {
             const cell = puzzle.grid[r][c];
@@ -2787,7 +3135,7 @@
           this.print(`[OK] RELAY ${coord} HARMONIC DAMPENED (+00 ECHO).`, "ok");
         } else {
           cell.val += 2;
-          this.print(`[OK] RELAY ${coord} OVERDRIVEN -> INJECTED +02 ECHO!`, "ok");
+          this.print(`[OK] RELAY ${coord} OVERDRIVEN -> INJECTED +02 ECHOES!`, "ok");
           this.game.onGridMutated(r, c);
         }
       }
@@ -2798,20 +3146,20 @@
           "/": ["home/", "root/", "sys/", "var/", "etc/"],
           "/home": ["nahla/"],
           "/home/nahla": ["sector/", "readme.txt"],
-          "/home/nahla/sector": ["anomalies.dat", "sector.map", "telemetry.log", "beacons.db"],
-          "/root": ["array_override.cfg", "transceiver.key"],
+          "/home/nahla/sector": ["anomalies.dat", "sector.map", "telemetry.log", "lexicon.db"],
+          "/root": ["transceiver.key"],
           "/sys": ["sector/", "override/"],
           "/sys/sector": ["echo_returns", "anomalies.dat"],
           "/sys/override": ["charges", "vent", "invert", "purge", "sync"],
           "/var": ["log/"],
           "/var/log": ["telemetry.log"],
-          "/etc": ["beacons.db"]
+          "/etc": ["lexicon.db"]
         };
         return fs[dir] || [];
       }
 
       resolvePath(target) {
-        if (!target || target === "~") return this.isRoot ? "/root" : "/home/nahla";
+        if (!target || target === "~") return "/home/nahla";
         if (target === "~/sector") return "/home/nahla/sector";
         if (target === "..") {
           if (this.cwd === "/") return "/";
@@ -2829,9 +3177,9 @@
       cmdLs(args) {
         const pathArg = args.find((a) => !a.startsWith("-"));
         const target = pathArg ? this.resolvePath(pathArg) : this.cwd;
-        if ((target === "/root" || target.startsWith("/root/")) && !this.isRoot) {
+        if (target === "/root" && !this.isRoot) {
           this.game.audio.error();
-          this.print(`ls: cannot open directory '${pathArg || target}': Permission denied (use 'su -')`, "err");
+          this.print("ls: cannot open directory '/root': Permission denied (use 'su -')", "err");
           return;
         }
         const entries = this.getDirEntries(target);
@@ -2844,8 +3192,7 @@
           this.print(`total ${entries.length * 4}`, "info");
           entries.forEach((e) => {
             const isDir = e.endsWith("/");
-            const owner = target.startsWith("/root") ? "root  root " : "nahla hope ";
-            this.print(`${isDir ? "drwxr-xr-x" : "-rw-r--r--"} 1 ${owner}4096 Nov 20 3312 ${e}`, isDir ? "cyan" : "info");
+            this.print(`${isDir ? "drwxr-xr-x" : "-rw-r--r--"} 1 nahla hope 4096 Nov 19  3312 ${e}`, isDir ? "cyan" : "info");
           });
         } else {
           this.print(entries.join("   "), "cyan");
@@ -2854,9 +3201,9 @@
 
       cmdCd(target) {
         const next = this.resolvePath(target || "~");
-        if ((next === "/root" || next.startsWith("/root/")) && !this.isRoot) {
+        if (next === "/root" && !this.isRoot) {
           this.game.audio.error();
-          this.print(`cd: ${target}: Permission denied (use 'su -')`, "err");
+          this.print("cd: /root: Permission denied (use 'su -')", "err");
           return;
         }
         const validDirs = ["/", "/home", "/home/nahla", "/home/nahla/sector", "/root", "/sys", "/sys/sector", "/sys/override", "/var", "/var/log", "/etc"];
@@ -2873,59 +3220,51 @@
         const puzzle = this.game.puzzle;
         const status = this.game.computeStatus();
 
-        if (filename === "array_override.cfg" || filename === "transceiver.key") {
-          if (!this.isRoot) return "__PERM_DENIED__";
-          const route = puzzle.solutionPath.map((p) => SectorGenerator.toCoord(p.r, p.c)).join(" -> ");
-          const beacon = SectorGenerator.lookupBeacon(puzzle.word);
+        if (filename === "transceiver.key") {
+          if (!this.isRoot) return "__PERMISSION_DENIED__";
           return [
-            `[NAHLA_ROOT_KEY // SECTOR #${puzzle.seedStr}]`,
-            `TARGET_BEACON: ${puzzle.word} [${beacon.label}]`,
-            `PAR_STEPS: ${puzzle.par} • EMERGENCY_CAPACITOR: ${this.rootChargeGranted ? "DISCHARGED (+1 GRANTED)" : "READY"}`,
-            `NOMINAL_SWEEP: ${route}`
+            "=== NAHLA ARRAY ROOT TRANSCEIVER KEY (6a) ===",
+            `ACTIVE_SEED   : #${puzzle.seedStr}`,
+            `TARGET_BEACON : ${puzzle.word} [${SectorGenerator.getBeaconInfo(puzzle.word).label}]`,
+            `SWEEP_VECTOR  : ${puzzle.solutionPath.map((p) => SectorGenerator.toCoord(p.r, p.c)).join(" -> ")}`
           ].join("\n");
         }
 
         if (filename === "readme.txt") {
           return [
-            "NAHLA TRACKER // HOPE SYSTEM FIELD MANUAL (EPOCH 3312)",
-            "1. Patched into ttyS0 at Nahla Tracking Array (Moon 6a).",
-            "2. Bounce 31 telemetry echoes across all 31 Hope System bodies:",
-            "   28 Beaconed Worlds (8x3-letter moons + 20x4-letter outer)",
-            "   + 3 Unbeaconed Dark Bodies (Bellatrix Belt, Theresa, Kali).",
-            "3. Commands: 'scan', 'vent <xy>', 'invert <xy>', 'purge <xy>', 'sync <code>'.",
-            "4. Type 'su -' for root transceiver access; 'reboot' to reset sector."
+            "NAHLA TRACKER (6a) // HOPE SYSTEM FIELD MANUAL",
+            "1. 31 Hope System bodies: 28 orbital beacons (8 x 3-letter + 20 x 4-letter)",
+            "   plus 3 unbeaconed dark bodies (Bellatrix belt, Theresa 2da, Kali 9da).",
+            "2. Route a carrier sweep from [>] to [X] bouncing 31 echoes while locking relays.",
+            "3. Commands: 'scan', 'vent <xy>', 'invert <xy>', 'purge <xy>', 'sync <code>', 'tutorial'."
           ].join("\n");
         }
 
         if (filename === "anomalies.dat") {
           const active = puzzle.anomalies.filter((a) => puzzle.grid[a.r][a.c].anomaly !== null);
           if (active.length === 0) return "STATUS: CLEAN (0 active anomalies)";
-          return active.map((a, i) => `[0${i + 1}] ${a.summary} -> ${a.fixCmd}`).join("\n");
+          return active.map((a, i) => `[0${i + 1}] WHY: ${a.why}\n     FIX: ${a.fixCmd}`).join("\n");
         }
 
-        if (filename === "beacons.db") {
-          const outer = SectorGenerator.DEEP_LEXICON.map((e) => `${e.code}   ::  ${e.label}`);
+        if (filename === "lexicon.db") {
+          const deep = SectorGenerator.DEEP_LEXICON.map((e) => `${e.code}   ::  ${e.label}`);
           const inner = SectorGenerator.INNER_BEACONS.map((e) => `${e.code}    ::  ${e.label}`);
-          const dark = SectorGenerator.DARK_BODIES.map((d) => `DARK   ::  ${d.name} (${d.note})`);
-          return [
-            "--- 20 DEEP-SPACE BEACONS (4-LETTER) ---",
-            ...outer,
-            "--- 8 INNER-SYSTEM BEACONS (3-LETTER) ---",
-            ...inner,
-            "--- 3 UNBEACONED DARK BODIES ---",
-            ...dark
-          ].join("\n");
+          const dark = [
+            "DARK   ::  Bellatrix (Rocky Belt - Unbeaconed)",
+            "DARK   ::  Theresa (2da Submoon - Unbeaconed)",
+            "DARK   ::  Kali (9da Submoon - Unbeaconed)"
+          ];
+          return [...deep, ...inner, ...dark].join("\n");
         }
 
         if (filename === "telemetry.log") {
           const trail = this.game.path.map((p) => SectorGenerator.toCoord(p.r, p.c)).join(" -> ");
-          const beacon = SectorGenerator.lookupBeacon(puzzle.word);
           return [
             `SEED: #${puzzle.seedStr}  MODE: ${puzzle.mode}`,
-            `ECHOES: ${status.mass} / 31 (DELTA ${status.delta >= 0 ? "+" : ""}${status.delta})`,
-            `BEACON: ${puzzle.word} [${beacon.label}] (${status.lockedCount}/${puzzle.word.length} locked)`,
+            `ECHO RETURNS: ${status.mass} / 31 (DELTA ${status.delta >= 0 ? "+" : ""}${status.delta})`,
+            `BEACON: ${puzzle.word} (${status.lockedCount}/${puzzle.word.length} locked)`,
             `CHARGES: ${this.game.chargesLeft}/${puzzle.maxCharges}`,
-            `VECTOR: ${trail}`
+            `SWEEP: ${trail}`
           ].join("\n");
         }
 
@@ -2966,14 +3305,9 @@
           this.print("usage: cat <filename>", "err");
           return;
         }
-        if ((arg.startsWith("/root") || this.cwd === "/root") && !this.isRoot) {
-          this.game.audio.error();
-          this.print(`cat: ${arg}: Permission denied (use 'su -')`, "err");
-          return;
-        }
         const baseName = arg.split("/").pop();
         const content = this.getFileContent(baseName);
-        if (content === "__PERM_DENIED__") {
+        if (content === "__PERMISSION_DENIED__") {
           this.game.audio.error();
           this.print(`cat: ${arg}: Permission denied (use 'su -')`, "err");
           return;
@@ -2993,13 +3327,8 @@
           return;
         }
         const pattern = args[0].toLowerCase();
-        const file = args[1] ? args[1].split("/").pop() : "beacons.db";
+        const file = args[1] ? args[1].split("/").pop() : "lexicon.db";
         const content = this.getFileContent(file);
-        if (content === "__PERM_DENIED__") {
-          this.game.audio.error();
-          this.print(`grep: ${file}: Permission denied (use 'su -')`, "err");
-          return;
-        }
         if (content === null) {
           this.game.audio.error();
           this.print(`grep: ${file}: No such file`, "err");
@@ -3025,9 +3354,10 @@
       solved: false,
       isDragging: false,
       touchOrigin: null,
-      hintCell: null,
       chargesLeft: 2,
+      rootBoostUsed: false,
       flipShowingLexicon: false,
+      tutorial: null,
       audio: new TelemetryAudio(),
       term: null,
       stats: {
@@ -3042,23 +3372,12 @@
         this.loadStats();
         this.renderLexicon();
         this.bindEvents();
+        this.initTutorial();
         this.updateDailyButton();
         this.loadSector(this.getDailySeed());
-      },
-
-      loadStats() {
-        try {
-          const raw = localStorage.getItem("nahla_31_void_vector_stats");
-          if (raw) {
-            this.stats = { ...this.stats, ...JSON.parse(raw) };
-          }
-        } catch (_) {}
-      },
-
-      saveStats() {
-        try {
-          localStorage.setItem("nahla_31_void_vector_stats", JSON.stringify(this.stats));
-        } catch (_) {}
+        if (!this.isTutorialDismissed()) {
+          this.openTutorialModal();
+        }
       },
 
       updateDailyButton() {
@@ -3082,8 +3401,8 @@
         setTimeout(() => {
           this.flipShowingLexicon = !this.flipShowingLexicon;
           if (this.flipShowingLexicon) {
-            titleEl.textContent = "HOPE SYSTEM BEACON ROSTER";
-            badgeEl.textContent = "28 BEACONS + 3 DARK";
+            titleEl.textContent = "HOPE SYSTEM // 28 BEACONS + 3 DARK";
+            badgeEl.textContent = "31 BODIES";
             protoFace.classList.add("face-inactive");
             lexFace.classList.remove("face-inactive");
           } else {
@@ -3096,81 +3415,82 @@
         }, 160);
       },
 
-      renderLexicon() {
-        const outerContainer = document.getElementById("lexicon-grid");
-        const innerContainer = document.getElementById("lexicon-grid-3");
-        if (outerContainer) {
-          outerContainer.innerHTML = "";
-          SectorGenerator.DEEP_LEXICON.forEach((entry) => {
-            const btn = document.createElement("button");
-            btn.type = "button";
-            btn.className = "lex-item" + (entry.code === "NULL" ? " lex-null" : "");
-            btn.dataset.code = entry.code;
-            btn.title = `Sync ${entry.code} if phase-locked, or launch Deep Space sector (${entry.label})`;
+      createBeaconButton(entry, targetMode) {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "lex-item" + (entry.code === "NULL" ? " lex-null" : "");
+        btn.dataset.code = entry.code;
+        btn.title = `Sync ${entry.code} if phase-locked, or launch ${targetMode} sector (${entry.label})`;
 
-            const codeSpan = document.createElement("span");
-            codeSpan.className = "lex-code";
-            codeSpan.textContent = entry.code;
+        const codeSpan = document.createElement("span");
+        codeSpan.className = "lex-code";
+        codeSpan.textContent = entry.code;
 
-            const labelSpan = document.createElement("span");
-            labelSpan.className = "lex-meaning";
-            labelSpan.textContent = entry.label;
+        const labelSpan = document.createElement("span");
+        labelSpan.className = "lex-meaning";
+        labelSpan.textContent = entry.label;
 
-            btn.appendChild(codeSpan);
-            btn.appendChild(labelSpan);
+        btn.appendChild(codeSpan);
+        btn.appendChild(labelSpan);
 
-            btn.addEventListener("click", () => {
-              const hasPhaseLock = this.puzzle && this.puzzle.grid.some((row) => row.some((c) => c.phaseLocked));
-              if (hasPhaseLock && (this.puzzle.word === entry.code || entry.code === "NULL")) {
-                this.term.execute(`sync ${entry.code.toLowerCase()}`);
-                return;
-              }
-              if (this.mode !== "DEEP") {
-                this.showModeSwitchModal("DEEP", entry.code);
-                return;
-              }
-              this.loadSector(this.randomSeed(), entry.code);
+        btn.addEventListener("click", () => {
+          const hasPhaseLock = this.puzzle && this.puzzle.grid.some((row) => row.some((c) => c.phaseLocked));
+          if (hasPhaseLock && (this.puzzle.word === entry.code || entry.code === "NULL")) {
+            this.term.execute(`sync ${entry.code.toLowerCase()}`);
+            return;
+          }
+
+          if (targetMode === "DEEP" && this.mode !== "DEEP") {
+            this.mode = "DEEP";
+            document.querySelectorAll("[data-mode]").forEach((mBtn) => {
+              mBtn.classList.toggle("active", mBtn.dataset.mode === "DEEP");
             });
+          } else if (targetMode === "SURVEY" && this.mode === "DEEP") {
+            this.mode = "SURVEY";
+            document.querySelectorAll("[data-mode]").forEach((mBtn) => {
+              mBtn.classList.toggle("active", mBtn.dataset.mode === "SURVEY");
+            });
+          }
+          this.loadSector(this.randomSeed(), entry.code);
+        });
 
-            outerContainer.appendChild(btn);
+        return btn;
+      },
+
+      renderLexicon() {
+        const deepGrid = document.getElementById("lexicon-grid");
+        const innerGrid = document.getElementById("lexicon-grid-3");
+        if (deepGrid) {
+          deepGrid.innerHTML = "";
+          SectorGenerator.DEEP_LEXICON.forEach((entry) => {
+            deepGrid.appendChild(this.createBeaconButton(entry, "DEEP"));
           });
         }
-
-        if (innerContainer) {
-          innerContainer.innerHTML = "";
+        if (innerGrid) {
+          innerGrid.innerHTML = "";
           SectorGenerator.INNER_BEACONS.forEach((entry) => {
-            const btn = document.createElement("button");
-            btn.type = "button";
-            btn.className = "lex-item";
-            btn.dataset.code = entry.code;
-            btn.title = `Launch Survey sector for ${entry.label} (${entry.code})`;
-
-            const codeSpan = document.createElement("span");
-            codeSpan.className = "lex-code";
-            codeSpan.textContent = entry.code;
-
-            const labelSpan = document.createElement("span");
-            labelSpan.className = "lex-meaning";
-            labelSpan.textContent = entry.label;
-
-            btn.appendChild(codeSpan);
-            btn.appendChild(labelSpan);
-
-            btn.addEventListener("click", () => {
-              if (this.mode === "DEEP") {
-                this.showModeSwitchModal("SURVEY", entry.code);
-                return;
-              }
-              this.loadSector(this.randomSeed(), entry.code);
-            });
-
-            innerContainer.appendChild(btn);
+            innerGrid.appendChild(this.createBeaconButton(entry, "SURVEY"));
           });
         }
       },
 
+      loadStats() {
+        try {
+          const raw = localStorage.getItem("nahla_31_void_vector_stats");
+          if (raw) {
+            this.stats = { ...this.stats, ...JSON.parse(raw) };
+          }
+        } catch (_) {}
+      },
+
+      saveStats() {
+        try {
+          localStorage.setItem("nahla_31_void_vector_stats", JSON.stringify(this.stats));
+        } catch (_) {}
+      },
+
       bindEvents() {
-        // Top-left mode buttons (warn before discarding current sector progress)
+        // Top-left Mode buttons (with progress-loss confirmation modal)
         document.querySelectorAll("[data-mode]").forEach((btn) => {
           btn.addEventListener("click", () => {
             const nextMode = btn.dataset.mode;
@@ -3180,19 +3500,19 @@
           });
         });
 
-        // Bottom difficulty explanation cards (warn before discarding current sector progress)
+        // Bottom Mode legend cards (with progress-loss confirmation modal)
         document.querySelectorAll("[data-mode-info]").forEach((card) => {
-          const handleSelect = () => {
+          const activateCard = () => {
             const nextMode = card.dataset.modeInfo;
             if (nextMode && nextMode !== this.mode) {
               this.showModeSwitchModal(nextMode);
             }
           };
-          card.addEventListener("click", handleSelect);
+          card.addEventListener("click", activateCard);
           card.addEventListener("keydown", (e) => {
             if (e.key === "Enter" || e.key === " ") {
               e.preventDefault();
-              handleSelect();
+              activateCard();
             }
           });
         });
@@ -3296,8 +3616,7 @@
         // Footer controls
         document.getElementById("btn-undo").addEventListener("click", () => this.undoStep());
         document.getElementById("btn-reset").addEventListener("click", () => this.resetPath(false, true));
-      //  document.getElementById("btn-hint").addEventListener("click", () => this.triggerHint());
-        document.getElementById("btn-next").addEventListener("click", () => this.showNextSectorModal());
+        document.getElementById("btn-next").addEventListener("click", () => this.requestNextSector());
 
         // Modal dismiss
         document.getElementById("modal-close").addEventListener("click", () => this.closeModal());
@@ -3362,6 +3681,10 @@
 
         // Keyboard Navigation
         window.addEventListener("keydown", (e) => {
+          if (document.getElementById("tut-backdrop").classList.contains("open")) {
+            if (e.key === "Escape") this.closeTutorialModal();
+            return;
+          }
           if (document.getElementById("modal-backdrop").classList.contains("open")) {
             if (e.key === "Escape") this.closeModal();
             return;
@@ -3397,14 +3720,11 @@
             this.undoStep();
           } else if (key === "r") {
             e.preventDefault();
-            this.resetPath(false, true); 
-         // } else if (key === "h") {
-         //   e.preventDefault();
-         //   this.triggerHint();
+            this.resetPath(false, true);
           } else if (key === "n") {
-  e.preventDefault();
-  this.showNextSectorModal();
-}
+            e.preventDefault();
+            this.requestNextSector();
+          }
         });
       },
 
@@ -3425,33 +3745,28 @@
         return `H0P3-${code}`;
       },
 
-      setMode(newMode, forcedWord = null) {
+      setMode(newMode) {
         this.mode = newMode;
         document.querySelectorAll("[data-mode]").forEach((btn) => {
           btn.classList.toggle("active", btn.dataset.mode === newMode);
         });
-        this.loadSector(this.randomSeed(), forcedWord);
+        this.loadSector(this.randomSeed());
       },
 
       loadSector(seedStr, forcedWord = null) {
         this.seed = seedStr.toUpperCase().replace(/^#/, "");
         this.puzzle = SectorGenerator.generate(this.mode, this.seed, forcedWord);
         this.chargesLeft = this.puzzle.maxCharges;
+        this.rootBoostUsed = false;
         this.solved = false;
-        this.hintCell = null;
 
         document.getElementById("seed-display").textContent = `#${this.seed}`;
         this.renderAxes();
         this.resetPath(true, false);
         this.term.resetForSector(this.puzzle);
         this.updateChargesHUD();
-
-        const beacon = SectorGenerator.lookupBeacon(this.puzzle.word);
-        const beaconCard = document.getElementById("hud-beacon-card");
-        if (beaconCard) {
-          beaconCard.title = `Target Beacon: ${this.puzzle.word} — ${beacon.label}`;
-        }
-        this.setLog(`SECTOR #${this.seed} ONLINE • 31 ECHOES • BEACON ${this.puzzle.word} [${beacon.label}] • ${this.puzzle.anomalies.length} ANOMALIES`);
+        const beaconInfo = SectorGenerator.getBeaconInfo(this.puzzle.word);
+        this.setLog(`SECTOR #${this.seed} ONLINE • 31 ECHOES • BEACON ${this.puzzle.word} [${beaconInfo.label}] • ${this.puzzle.anomalies.length} ANOMALIES`);
       },
 
       restoreInitialGridState() {
@@ -3469,10 +3784,8 @@
           }
         }
         this.chargesLeft = this.puzzle.maxCharges;
+        this.rootBoostUsed = false;
         this.term.pendingPrompt = null;
-        this.term.isRoot = false;
-        this.term.rootChargeGranted = false;
-        this.term.updatePromptLabel();
         this.updateChargesHUD();
       },
 
@@ -3483,14 +3796,13 @@
         const start = this.puzzle.solutionPath[0];
         this.path = [{ r: start.r, c: start.c }];
         this.solved = false;
-        this.hintCell = null;
         this.renderBoard();
         this.updateHUD();
         if (!silent) {
           this.audio.undo();
           const msg = restoreAnomalies
-            ? "SECTOR REBOOTED: VECTOR RESET & OVERRIDE CHARGES RESTORED."
-            : "TELEMETRY VECTOR RESET TO ORIGIN [>].";
+            ? "SECTOR REBOOTED: SWEEP RESET & OVERRIDE CHARGES RESTORED."
+            : "CARRIER SWEEP RESET TO ORIGIN [>].";
           this.setLog(msg);
           if (restoreAnomalies && this.term) {
             this.term.print("[REBOOT] Sector anomalies and override charges restored.", "warn");
@@ -3507,11 +3819,10 @@
 
       onGridMutated(r, c) {
         this.audio.mutate();
-        this.hintCell = null;
         this.updateChargesHUD();
         this.renderBoard({ r, c });
         const status = this.updateHUD();
-        this.setLog(`GRID MUTATED @ ${SectorGenerator.toCoord(r, c)} • ECHOES ${status.mass}/31.`, "ok");
+        this.setLog(`GRID MUTATED @ ${SectorGenerator.toCoord(r, c)} • ECHO RETURNS ${status.mass}/31.`, "ok");
         this.evaluateProgress(status);
       },
 
@@ -3522,7 +3833,6 @@
         }
         this.path.pop();
         this.solved = false;
-        this.hintCell = null;
         this.audio.undo();
         this.renderBoard();
         this.updateHUD();
@@ -3537,15 +3847,13 @@
         const head = this.path[this.path.length - 1];
         if (head.r === r && head.c === c) return;
 
-        // Backtrack when tapping an earlier node in the active vector
         const existingIdx = this.path.findIndex((p) => p.r === r && p.c === c);
         if (existingIdx !== -1) {
           this.path = this.path.slice(0, existingIdx + 1);
-          this.hintCell = null;
           this.audio.undo();
           this.renderBoard();
           this.updateHUD();
-          this.setLog("VECTOR BACKTRACKED TO NODE.");
+          this.setLog("SWEEP BACKTRACKED TO NODE.");
           return;
         }
 
@@ -3555,13 +3863,13 @@
         const cell = this.puzzle.grid[r][c];
         if (cell.type === "VOID") {
           this.audio.error();
-          this.setLog(`BLOCKED: VOID AT ${cell.coord}. TRY 'vent ${cell.coord.toLowerCase()}' IN ttyS0.`, "err");
+          this.setLog(`BLOCKED: DARK-SPACE VOID AT ${cell.coord}. TRY 'vent ${cell.coord.toLowerCase()}' IN ttyS0.`, "err");
           return;
         }
 
         if (cell.type === "JAMMED") {
           this.audio.error();
-          this.setLog(`BLOCKED: STATIC [!] AT ${cell.coord}. RUN 'purge ${cell.coord.toLowerCase()}' IN ttyS0.`, "err");
+          this.setLog(`BLOCKED: SOLAR STATIC [!] AT ${cell.coord}. RUN 'purge ${cell.coord.toLowerCase()}' IN ttyS0.`, "err");
           return;
         }
 
@@ -3585,16 +3893,15 @@
         }
 
         this.path.push({ r, c });
-        this.hintCell = null;
         this.renderBoard();
         const status = this.updateHUD();
 
         if (cell.type === "WELL") {
           this.audio.well();
-          this.setLog(`PHASE SHADOW (${cell.val}) @ ${cell.coord} • ECHOES ${status.mass}.`, "warn");
+          this.setLog(`PHASE SHADOW (${cell.val}) @ ${cell.coord} • ECHO RETURNS ${status.mass}.`, "warn");
         } else if (cell.type === "RELAY") {
           this.audio.relay(status.lockedCount);
-          this.setLog(`RELAY [${cell.letter}] @ ${cell.coord} • BEACON ${status.lockedCount}/${this.puzzle.word.length}.`, "ok");
+          this.setLog(`BEACON RELAY [${cell.letter}] @ ${cell.coord} • ${this.puzzle.word} ${status.lockedCount}/${this.puzzle.word.length}.`, "ok");
           if (status.lockedCount === 1) {
             this.term.triggerRelayPrompt(cell);
           }
@@ -3609,7 +3916,7 @@
         let locked = 0;
         for (const pt of this.path) {
           const cell = this.puzzle.grid[pt.r][pt.c];
-          if (cell.type === "RELAY" && !cell.phaseLocked && cell.letter === this.puzzle.word[locked]) {
+          if (cell.type === "RELAY" && cell.letter === this.puzzle.word[locked]) {
             locked++;
           }
         }
@@ -3632,9 +3939,9 @@
           } else {
             this.audio.error();
             const reasons = [];
-            if (status.mass !== 31) reasons.push(`ECHOES AT ${status.mass} (NEED 31)`);
-            if (status.lockedCount < wordLen) reasons.push(`BEACON ${status.lockedCount}/${wordLen}`);
-            this.setLog(`EXTRACTION REJECTED: ${reasons.join(" • ")}. ADJUST SWEEP OR USE ttyS0.`, "err");
+            if (status.mass !== 31) reasons.push(`ECHOES ${status.mass}/31`);
+            if (status.lockedCount < wordLen) reasons.push(`INSUFFICIENT BEACONS LIT (${status.lockedCount}/${wordLen})`);
+            this.setLog(`EXTRACTION REJECTED: ${reasons.join(" • ")}.`, "err");
           }
         }
       },
@@ -3647,7 +3954,6 @@
 
         const steps = this.path.length - 1;
         const optimal = isNullBonus || steps <= this.puzzle.par;
-        const beacon = SectorGenerator.lookupBeacon(this.puzzle.word);
 
         this.stats.solved += 1;
         if (optimal) {
@@ -3663,53 +3969,14 @@
         this.saveStats();
 
         const msg = isNullBonus
-          ? "<NULL SIGNAL> INTERCEPTED AT RATI (9d) • BONUS EXTRACTION!"
-          : `LINK RESTORED: ${this.puzzle.word} [${beacon.label}] • 31 ECHOES IN ${steps} STEPS${optimal ? " (OPTIMAL PAR!)" : ""}.`;
+          ? "<NULL SIGNAL> INTERCEPTED AT RATI (9d) • BONUS INSTA-LOCK!"
+          : `31 ECHO RETURNS LOCKED IN ${steps} STEPS${optimal ? " (OPTIMAL PAR!)" : ""}.`;
         this.setLog(msg, "ok");
         this.term.print(`[LOCKED] ${msg}`, "ok");
 
         setTimeout(() => {
           this.showVictoryModal(optimal, isNullBonus);
         }, 280);
-      },
-
-      triggerHint() {
-        if (!this.puzzle || this.solved) return;
-
-        // First check if an active anomaly still blocks the solutionPath
-        const activeAnomaly = this.puzzle.anomalies.find(
-          (a) => this.puzzle.grid[a.r][a.c].anomaly !== null
-        );
-        if (activeAnomaly) {
-          this.hintCell = { r: activeAnomaly.r, c: activeAnomaly.c };
-          this.audio.relay(1);
-          this.renderBoard();
-          this.setLog(`PING: ANOMALY AT ${activeAnomaly.coord} — RUN '${activeAnomaly.fixCmd}' IN ttyS0.`, "warn");
-          this.term.print(`[PING] Anomaly highlighted at ${activeAnomaly.coord} -> run '${activeAnomaly.fixCmd}'`, "warn");
-          return;
-        }
-
-        const sol = this.puzzle.solutionPath;
-        let matchLen = 0;
-        for (let i = 0; i < this.path.length && i < sol.length; i++) {
-          if (this.path[i].r === sol[i].r && this.path[i].c === sol[i].c) {
-            matchLen++;
-          } else {
-            break;
-          }
-        }
-
-        if (matchLen < this.path.length) {
-          this.path = this.path.slice(0, matchLen);
-        }
-
-        if (matchLen < sol.length) {
-          this.hintCell = { r: sol[matchLen].r, c: sol[matchLen].c };
-          this.audio.relay(1);
-          this.renderBoard();
-          this.updateHUD();
-          this.setLog(`TELEMETRY PING: NEXT OPTIMAL NODE (${SectorGenerator.toCoord(this.hintCell.r, this.hintCell.c)}) HIGHLIGHTED.`, "warn");
-        }
       },
 
       renderAxes() {
@@ -3751,7 +4018,11 @@
             el.className = "cell";
             el.dataset.r = r;
             el.dataset.c = c;
-            el.title = `${cell.coord} (${cell.type})`;
+            el.title = cell.anomaly === "POLARITY_FLIP"
+              ? `${cell.coord} — Phase-inverted polarity (±)`
+              : cell.anomaly === "COLLAPSED_VOID"
+                ? `${cell.coord} — Collapsed debris (≈)`
+                : `${cell.coord} (${cell.type})`;
 
             if (cell.type === "START") el.classList.add("cell-start");
             else if (cell.type === "EXIT") el.classList.add("cell-exit");
@@ -3763,11 +4034,11 @@
             else if (cell.type === "JAMMED") el.classList.add("cell-jammed");
             else if (cell.type === "VOID") el.classList.add("cell-void");
 
+            if (cell.anomaly === "POLARITY_FLIP") el.classList.add("anomaly-flip");
+            if (cell.anomaly === "COLLAPSED_VOID") el.classList.add("anomaly-void");
+
             if (pathSet.has(`${r},${c}`)) el.classList.add("in-path");
             if (head.r === r && head.c === c) el.classList.add("path-head");
-            if (this.hintCell && this.hintCell.r === r && this.hintCell.c === c) {
-              el.classList.add("hint-pulse");
-            }
             if (flashPt && flashPt.r === r && flashPt.c === c) {
               el.classList.add("mutated-flash");
             }
@@ -3775,6 +4046,13 @@
             const coordSpan = document.createElement("span");
             coordSpan.className = "cell-coord-hint";
             coordSpan.textContent = cell.coord;
+
+            let glitchSpan = null;
+            if (cell.anomaly === "POLARITY_FLIP" || cell.anomaly === "COLLAPSED_VOID") {
+              glitchSpan = document.createElement("span");
+              glitchSpan.className = "cell-glitch-badge";
+              glitchSpan.textContent = cell.anomaly === "POLARITY_FLIP" ? "±" : "≈";
+            }
 
             const mainSpan = document.createElement("span");
             mainSpan.className = "cell-main";
@@ -3806,6 +4084,7 @@
             }
 
             el.appendChild(coordSpan);
+            if (glitchSpan) el.appendChild(glitchSpan);
             el.appendChild(mainSpan);
             el.appendChild(tagSpan);
             gridEl.appendChild(el);
@@ -3896,6 +4175,12 @@
           csEl.appendChild(pill);
         }
 
+        const beaconCard = document.getElementById("hud-beacon-card");
+        if (beaconCard) {
+          const info = SectorGenerator.getBeaconInfo(word);
+          beaconCard.title = `Active Target Beacon: ${word} — ${info.label}`;
+        }
+
         document.getElementById("hud-steps").textContent = String(status.steps).padStart(2, "0");
         document.getElementById("hud-par").textContent = String(this.puzzle.par).padStart(2, "0");
 
@@ -3922,7 +4207,9 @@
       // ------------------------------------------------------------------------
       openModal(title, bodyHTML, footerButtons = [], options = {}) {
         const card = document.getElementById("modal-card");
-        card.className = "modal-card" + (options.mini ? " modal-mini" : "");
+        if (card) {
+          card.classList.toggle("modal-mini", Boolean(options.mini));
+        }
         document.getElementById("modal-title").textContent = title;
         document.getElementById("modal-body").innerHTML = bodyHTML;
         const footer = document.getElementById("modal-footer");
@@ -3943,30 +4230,30 @@
         document.getElementById("modal-backdrop").classList.remove("open");
       },
 
-      showModeSwitchModal(nextMode, forcedWord = null) {
-        const labels = {
+      showModeSwitchModal(nextMode) {
+        const modeLabels = {
           SURVEY: "SURVEY MODE (5×5)",
           ORBITAL: "ORBITAL MODE (6×6)",
           DEEP: "DEEP SPACE MODE (6×6)"
         };
-        const targetLabel = labels[nextMode] || nextMode;
+        const targetTitle = modeLabels[nextMode] || nextMode;
 
+        this.audio.cmdOk();
         this.openModal(
-          "SWITCH SECTOR DIFFICULTY?",
+          "SWITCH SECTOR MODE?",
           `
             <div class="rule-item" style="border-left-color:var(--amber);">
-              <strong style="color:var(--amber);">WARNING — PROGRESS WILL BE LOST:</strong>
-              Switching to <strong>${targetLabel}</strong> will abort your current sector sweep (<strong>#${this.seed}</strong>) and clear any unsaved vector steps or terminal overrides.
+              Switching to <strong>${targetTitle}</strong> will terminate your active carrier sweep and discard any unsaved progress in sector <strong>#${this.seed}</strong>.
             </div>
           `,
           [
-            { label: "CANCEL", onClick: () => this.closeModal() },
+            { label: "KEEP PLAYING", onClick: () => this.closeModal() },
             {
-              label: "SWITCH MODE",
+              label: `LOAD ${nextMode}`,
               primary: true,
               onClick: () => {
                 this.closeModal();
-                this.setMode(nextMode, forcedWord);
+                this.setMode(nextMode);
               }
             }
           ],
@@ -3974,52 +4261,480 @@
         );
       },
 
-      showNextSectorModal() {
-  this.openModal(
-    "LOAD NEXT SECTOR?",
-    `
-      <div class="rule-item" style="border-left-color:var(--amber);">
-        <strong style="color:var(--amber);">WARNING — PROGRESS WILL BE LOST:</strong>
-        Generating a new sector will abort your current sweep (<strong>#${this.seed}</strong>) and clear any vector steps or terminal overrides.
-      </div>
-    `,
-    [
-      { label: "CANCEL", onClick: () => this.closeModal() },
-      {
-        label: "NEXT SECTOR",
-        primary: true,
-        onClick: () => {
-          this.closeModal();
+      requestNextSector() {
+        if (this.solved) {
           this.loadSector(this.randomSeed());
+          return;
         }
-      }
-    ],
-    { mini: true }
-  );
-},
+        this.showNextSectorModal();
+      },
+
+      showNextSectorModal() {
+        this.audio.cmdOk();
+        this.openModal(
+          "GENERATE NEW SECTOR?",
+          `
+            <div class="rule-item" style="border-left-color:var(--amber);">
+              Loading a new sector will terminate your active carrier sweep and discard any unsaved progress in sector <strong>#${this.seed}</strong>.
+            </div>
+          `,
+          [
+            { label: "KEEP PLAYING", onClick: () => this.closeModal() },
+            {
+              label: "NEW SECTOR [N]",
+              primary: true,
+              onClick: () => {
+                this.closeModal();
+                this.loadSector(this.randomSeed());
+              }
+            }
+          ],
+          { mini: true }
+        );
+      },
 
       showHelpModal() {
         this.openModal(
-          "HOPE SYSTEM LORE & PROTOCOL",
+          "HOPE SYSTEM LORE & PROTOCOL // v0.54",
           `
             <div class="rule-item">
-              <strong>NAHLA TRACKING ARRAY (ttyS0):</strong> You are a deep-space telemetry operator patched directly into the primary serial transceiver line (<strong>ttyS0</strong>)at Natalja's Pass Observatory on moon <strong>Nahla (6a)</strong>, re-establishing dead radio links across the <strong>Hope System</strong>.
+              <strong>NAHLA TRACKING ARRAY (ttyS0):</strong> You are a deep-space telemetry operator patched directly into the primary serial transceiver line (<strong>ttyS0</strong>) on moon <strong>Nahla (6a)</strong>, re-establishing dead radio links across the <strong>Hope System</strong>.
             </div>
             <div class="rule-item">
               <strong>THE 31 SYSTEM BODIES (28 BEACONS + 3 DARK):</strong> Every major planet and moon carries one of <strong>28 orbital beacons</strong> (<strong>8 × 3-letter</strong> inner moon relays + <strong>20 × 4-letter</strong> primary/outer beacons) whose transponder has drifted out of phase. Three dark bodies carry no beacons: the diffuse <strong>Bellatrix</strong> rocky belt and the tight binary submoon pair <strong>Theresa (2da)</strong> &amp; <strong>Kali (9da)</strong>.
             </div>
             <div class="rule-item">
-              <strong>BOUNCE 31 ECHOES:</strong> To lock a drifted beacon’s phase, route a carrier sweep from <strong>[&gt;]</strong> to <strong>[X]</strong> that bounces an echo off all <strong>31 system bodies</strong> while locking the target beacon’s relays in order. Negative nodes (<strong>-2 to -4</strong>) are <strong>Phase Shadows</strong> cancelling multipath echo overflow.
+              <strong>BOUNCE 31 ECHOES:</strong> To lock a drifted beacon’s phase, route a carrier sweep from <strong>[&gt;]</strong> to <strong>[X]</strong> that bounces an echo off all <strong>31 system bodies</strong> while locking the target beacon’s relays in order. Negative nodes (<strong>-2 to -4</strong>) are <strong>Phase Shadows</strong> canceling multipath echo overflow.
             </div>
             <div class="rule-item">
-              <strong>&lt;NULL SIGNAL&gt; (NULL):</strong> A ghost carrier wave emanating from the outer dark sector around moon <strong>Rati (9d)</strong> and submoon <strong>Kali (9da)</strong> that short-circuits normal extraction once all four relays lock, ensuring instant solution.
+              <strong>&lt;NULL SIGNAL&gt; (NULL):</strong> A ghost carrier wave emanating from the outer dark sector around moon <strong>Rati (9d)</strong> and submoon <strong>Kali (9da)</strong> that short-circuits normal extraction once all four relays lock.
             </div>
             <div class="rule-item">
               <strong>LIVE GRID OVERRIDES:</strong> Solar shear corrupts sector nodes. Run <strong>scan</strong> in <strong>ttyS0</strong> to diagnose faults, then rewrite tiles mid-sweep with <strong>vent &lt;xy&gt;</strong>, <strong>invert &lt;xy&gt;</strong>, <strong>purge &lt;xy&gt;</strong>, or <strong>sync &lt;code&gt;</strong> (plus <strong>su -</strong> for root transceiver diagnostics).
             </div>
           `,
-          [{ label: "ACKNOWLEDGED", primary: true, onClick: () => this.closeModal() }]
+          [
+            {
+              label: "3×3 TUTORIAL",
+              onClick: () => {
+                this.closeModal();
+                this.openTutorialModal();
+              }
+            },
+            { label: "ACKNOWLEDGED", primary: true, onClick: () => this.closeModal() }
+          ]
         );
+      },
+
+      // ------------------------------------------------------------------------
+      // 3x3 INTERACTIVE FIELD WALKTHROUGH MODAL
+      // ------------------------------------------------------------------------
+      isTutorialDismissed() {
+        try {
+          return localStorage.getItem("nahla_31_hide_tutorial") === "1";
+        } catch (_) {
+          return false;
+        }
+      },
+
+      setTutorialDismissed(hide) {
+        try {
+          if (hide) {
+            localStorage.setItem("nahla_31_hide_tutorial", "1");
+          } else {
+            localStorage.removeItem("nahla_31_hide_tutorial");
+          }
+        } catch (_) {}
+      },
+
+      initTutorial() {
+        const checkbox = document.getElementById("tut-dont-show");
+        if (checkbox) {
+          checkbox.checked = this.isTutorialDismissed();
+          checkbox.addEventListener("change", () => {
+            this.setTutorialDismissed(checkbox.checked);
+          });
+        }
+
+        document.getElementById("tut-btn-close-top").addEventListener("click", () => this.closeTutorialModal());
+        document.getElementById("tut-btn-done").addEventListener("click", () => this.closeTutorialModal());
+        document.getElementById("tut-btn-replay").addEventListener("click", () => {
+          this.audio.undo();
+          this.resetTutorialState();
+        });
+        document.getElementById("tut-btn-reset").addEventListener("click", () => {
+          this.audio.undo();
+          this.resetTutorialState();
+        });
+
+        document.getElementById("tut-backdrop").addEventListener("click", (e) => {
+          if (e.target.id === "tut-backdrop") this.closeTutorialModal();
+        });
+
+        document.querySelectorAll("[data-tut-cmd]").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            this.audio.ensureContext();
+            this.execTutorialCmd(btn.dataset.tutCmd);
+          });
+        });
+
+        const form = document.getElementById("tut-term-form");
+        const input = document.getElementById("tut-term-input");
+        form.addEventListener("submit", (e) => {
+          e.preventDefault();
+          const val = input.value;
+          input.value = "";
+          this.audio.ensureContext();
+          this.execTutorialCmd(val);
+        });
+      },
+
+      openTutorialModal() {
+        const checkbox = document.getElementById("tut-dont-show");
+        if (checkbox) checkbox.checked = this.isTutorialDismissed();
+        this.resetTutorialState();
+        document.getElementById("tut-backdrop").classList.add("open");
+      },
+
+      closeTutorialModal() {
+        const checkbox = document.getElementById("tut-dont-show");
+        if (checkbox) {
+          this.setTutorialDismissed(checkbox.checked);
+        }
+        document.getElementById("tut-backdrop").classList.remove("open");
+      },
+
+      resetTutorialState() {
+        this.tutorial = {
+          word: "ABE",
+          solved: false,
+          path: [{ r: 0, c: 0 }],
+          logs: [
+            { text: "TRAINING SECTOR READY — Target Beacon: ABE (Abelina).", tone: "sys" },
+            { text: "Goal: Light A-B-E in order AND hit 31 Echoes at [X].", tone: "info" }
+          ],
+          grid: [
+            [
+              { r: 0, c: 0, coord: "A1", type: "START", val: 0, letter: null, anomaly: null },
+              { r: 0, c: 1, coord: "B1", type: "RELAY", val: 0, letter: "A", anomaly: null },
+              { r: 0, c: 2, coord: "C1", type: "MASS", val: 15, letter: null, anomaly: null }
+            ],
+            [
+              { r: 1, c: 0, coord: "A2", type: "MASS", val: 31, letter: null, anomaly: null },
+              { r: 1, c: 1, coord: "B2", type: "VOID", val: 0, letter: null, anomaly: null },
+              { r: 1, c: 2, coord: "C2", type: "VOID", val: 0, letter: null, anomaly: "COLLAPSED_VOID" }
+            ],
+            [
+              { r: 2, c: 0, coord: "A3", type: "EXIT", val: 0, letter: null, anomaly: null },
+              { r: 2, c: 1, coord: "B3", type: "RELAY", val: 0, letter: "E", anomaly: null },
+              { r: 2, c: 2, coord: "C3", type: "WELL", val: -16, letter: null, anomaly: "POLARITY_FLIP" }
+            ]
+          ]
+        };
+        this.renderTutorial();
+      },
+
+      tutLog(text, tone = "info") {
+        this.tutorial.logs.push({ text, tone });
+        if (this.tutorial.logs.length > 30) this.tutorial.logs.shift();
+      },
+
+      getTutorialStatus() {
+        const t = this.tutorial;
+        let mass = 0;
+        let locked = 0;
+        for (const pt of t.path) {
+          const cell = t.grid[pt.r][pt.c];
+          mass += cell.val;
+          if (cell.type === "RELAY" && cell.letter === t.word[locked]) {
+            locked++;
+          }
+        }
+        return { mass, locked };
+      },
+
+      getTutorialGuidance(status) {
+        const t = this.tutorial;
+        const head = t.path[t.path.length - 1];
+        const c2 = t.grid[1][2];
+        const c3 = t.grid[2][2];
+
+        if (t.solved) {
+          return {
+            done: true,
+            tag: "TRAINING COMPLETE // LINK LOCKED",
+            html: "You lit <strong>A → B → E</strong>, repaired two sabotaged tiles via <strong>ttyS0</strong>, and hit <strong>31 / 31</strong> at <strong>[X]</strong>. Click <strong>ENTER HOPE SYSTEM</strong> when ready!"
+          };
+        }
+
+        if (head.r === 0 && head.c === 0) {
+          return {
+            done: false,
+            tag: "STEP 1 OF 5 // CLICK B1 [A]",
+            html: "Tap <strong>B1 [A]</strong> to start lighting beacon <strong>ABE</strong>. (Notice <strong>A2</strong> has 31 echoes, but skipping <strong>A-B-E</strong> will be rejected at <strong>[X]</strong>!)"
+          };
+        }
+
+        if (head.r === 0 && head.c === 1) {
+          return {
+            done: false,
+            tag: "STEP 2 OF 5 // CLICK C1 (15)",
+            html: "<strong>[A]</strong> is lit! Now tap <strong>C1 (15)</strong>. Watch the <strong>ECHO</strong> counter add automatically—no mental arithmetic required."
+          };
+        }
+
+        if (c2.anomaly === "COLLAPSED_VOID") {
+          return {
+            done: false,
+            tag: "STEP 3 OF 5 // WHY RUN 'vent c2'?",
+            html: "<strong>C2</strong> collapsed into <strong>## debris (≈)</strong>—blocking the corridor AND burying Relay <strong>[B]</strong>. Run <span class='cmd-code'>vent c2</span> to clear the debris, then tap <strong>C2</strong>."
+          };
+        }
+
+        if (status.locked < 2) {
+          return {
+            done: false,
+            tag: "STEP 3B // STEP ONTO C2 [B]",
+            html: "Debris cleared! Tap <strong>C2 [B]</strong> to lock the second relay of <strong>ABE</strong>."
+          };
+        }
+
+        if (c3.anomaly === "POLARITY_FLIP") {
+          return {
+            done: false,
+            tag: "STEP 4 OF 5 // WHY RUN 'invert c3'?",
+            html: "We have <strong>15</strong> echoes and need <strong>31</strong>, but <strong>C3</strong> is phase-inverted (<strong>±</strong>) to <strong>-16</strong>. Run <span class='cmd-code'>invert c3</span> to flip its sign back to <strong>+16</strong>, then tap <strong>C3</strong>."
+          };
+        }
+
+        if (status.mass < 31) {
+          return {
+            done: false,
+            tag: "STEP 4B // STEP ONTO C3 (16)",
+            html: "Polarity restored! Tap <strong>C3 (16)</strong> to bring your Echo Returns to <strong>15 + 16 = 31</strong>."
+          };
+        }
+
+        if (status.locked < 3) {
+          return {
+            done: false,
+            tag: "STEP 5 OF 5 // LIGHT [E] THEN [X]",
+            html: "You're at <strong>31 / 31</strong>! Tap <strong>B3 [E]</strong> to light the final beacon letter, then step onto <strong>A3 [X]</strong> to extract."
+          };
+        }
+
+        return {
+          done: false,
+          tag: "FINAL STEP // EXTRACT AT A3 [X]",
+          html: "All 3 relays (<strong>A-B-E</strong>) are lit and Echo Returns = <strong>31</strong>! Tap <strong>A3 [X]</strong> to complete training."
+        };
+      },
+
+      stepTutorial(r, c) {
+        const t = this.tutorial;
+        if (!t || t.solved) return;
+
+        const head = t.path[t.path.length - 1];
+        if (head.r === r && head.c === c) return;
+
+        const existingIdx = t.path.findIndex((p) => p.r === r && p.c === c);
+        if (existingIdx !== -1) {
+          t.path = t.path.slice(0, existingIdx + 1);
+          this.audio.undo();
+          this.renderTutorial();
+          return;
+        }
+
+        if (Math.abs(head.r - r) + Math.abs(head.c - c) !== 1) return;
+
+        const cell = t.grid[r][c];
+        if (cell.type === "VOID") {
+          this.audio.error();
+          if (cell.anomaly === "COLLAPSED_VOID") {
+            this.tutLog("BLOCKED @ C2: Collapsed debris hides Relay [B]. Run 'vent c2'.", "warn");
+          } else {
+            this.tutLog(`BLOCKED @ ${cell.coord}: Natural dead-space void.`, "err");
+          }
+          this.renderTutorial();
+          return;
+        }
+
+        t.path.push({ r, c });
+        const status = this.getTutorialStatus();
+
+        if (cell.type === "RELAY") {
+          this.audio.relay(status.locked);
+          this.tutLog(`Locked Relay [${cell.letter}] @ ${cell.coord} (${status.locked}/3).`, "ok");
+        } else if (cell.type === "WELL") {
+          this.audio.well();
+          this.tutLog(`Entered ${cell.coord} (${cell.val}) -> Echoes ${status.mass}/31.`, "warn");
+        } else {
+          this.audio.step(status.mass);
+        }
+
+        if (cell.type === "EXIT") {
+          if (status.mass === 31 && status.locked === 3) {
+            t.solved = true;
+            this.audio.win();
+            this.tutLog("EXTRACTION LOCKED: 31 Echoes + Beacon ABE synchronized!", "ok");
+          } else {
+            this.audio.error();
+            this.tutLog(`REJECTED @ [X]: Echoes=${status.mass}/31, Beacons=${status.locked}/3 (must light A-B-E first!).`, "err");
+          }
+        }
+
+        this.renderTutorial();
+      },
+
+      execTutorialCmd(raw) {
+        const t = this.tutorial;
+        const clean = String(raw || "").trim().toLowerCase();
+        if (!clean) return;
+
+        this.tutLog(`nahla@sim:~$ ${clean}`, "cmd");
+
+        if (clean === "vent c2") {
+          const c2 = t.grid[1][2];
+          if (c2.anomaly === "COLLAPSED_VOID") {
+            c2.type = "RELAY";
+            c2.letter = "B";
+            c2.val = 0;
+            c2.anomaly = null;
+            this.audio.mutate();
+            this.tutLog("[OK] Debris vented at C2 -> Relay [B] uncovered!", "ok");
+          } else {
+            this.tutLog("C2 is already cleared.", "info");
+          }
+        } else if (clean === "invert c3") {
+          const c3 = t.grid[2][2];
+          if (c3.anomaly === "POLARITY_FLIP") {
+            c3.type = "MASS";
+            c3.val = 16;
+            c3.anomaly = null;
+            this.audio.mutate();
+            this.tutLog("[OK] Polarity inverted at C3 -> -16 flipped to +16 ECHO!", "ok");
+          } else {
+            this.tutLog("C3 polarity is already +16.", "info");
+          }
+        } else if (clean === "reset" || clean === "reboot") {
+          this.audio.undo();
+          this.resetTutorialState();
+          return;
+        } else {
+          this.audio.error();
+          this.tutLog("Training shell accepts: 'vent c2', 'invert c3', or 'reset'.", "warn");
+        }
+
+        this.renderTutorial();
+      },
+
+      renderTutorial() {
+        const t = this.tutorial;
+        if (!t) return;
+
+        const status = this.getTutorialStatus();
+        const guide = this.getTutorialGuidance(status);
+
+        const banner = document.getElementById("tut-coach-banner");
+        banner.className = "tut-mission-banner" + (guide.done ? " tut-done" : "");
+        banner.innerHTML = `<div class="tut-why-tag">${guide.tag}</div><div>${guide.html}</div>`;
+
+        const echoEl = document.getElementById("tut-echo-val");
+        echoEl.textContent = String(status.mass).padStart(2, "0");
+        echoEl.className = "tut-hud-echo" + (status.mass === 31 ? " exact" : "");
+
+        const pillsEl = document.getElementById("tut-beacon-pills");
+        pillsEl.innerHTML = "";
+        for (let i = 0; i < t.word.length; i++) {
+          const pill = document.createElement("span");
+          pill.className = "cs-pill";
+          pill.style.fontSize = "0.64rem";
+          pill.style.padding = "0.04rem 0.28rem";
+          if (i < status.locked) pill.classList.add("locked");
+          else if (i === status.locked) pill.classList.add("next");
+          pill.textContent = t.word[i];
+          pillsEl.appendChild(pill);
+        }
+
+        const gridEl = document.getElementById("tut-grid");
+        gridEl.innerHTML = "";
+        const pathSet = new Set(t.path.map((p) => `${p.r},${p.c}`));
+        const head = t.path[t.path.length - 1];
+
+        for (let r = 0; r < 3; r++) {
+          for (let c = 0; c < 3; c++) {
+            const cell = t.grid[r][c];
+            const el = document.createElement("div");
+            el.className = "tut-cell";
+            if (cell.type === "START") el.classList.add("cell-start");
+            else if (cell.type === "EXIT") el.classList.add("cell-exit");
+            else if (cell.type === "WELL") el.classList.add("cell-well");
+            else if (cell.type === "RELAY") el.classList.add("cell-relay");
+            else if (cell.type === "VOID") el.classList.add("cell-void");
+
+            if (cell.anomaly === "POLARITY_FLIP") el.classList.add("anomaly-flip");
+            if (cell.anomaly === "COLLAPSED_VOID") el.classList.add("anomaly-void");
+            if (pathSet.has(`${r},${c}`)) el.classList.add("in-path");
+            if (head.r === r && head.c === c) el.classList.add("path-head");
+
+            const coordSpan = document.createElement("span");
+            coordSpan.className = "cell-coord-hint";
+            coordSpan.textContent = cell.coord;
+
+            let glitchSpan = null;
+            if (cell.anomaly === "POLARITY_FLIP" || cell.anomaly === "COLLAPSED_VOID") {
+              glitchSpan = document.createElement("span");
+              glitchSpan.className = "cell-glitch-badge";
+              glitchSpan.textContent = cell.anomaly === "POLARITY_FLIP" ? "±" : "≈";
+            }
+
+            const mainSpan = document.createElement("span");
+            mainSpan.className = "cell-main";
+            const tagSpan = document.createElement("span");
+            tagSpan.className = "cell-tag";
+
+            if (cell.type === "START") { mainSpan.textContent = "[>]"; tagSpan.textContent = "ORIG"; }
+            else if (cell.type === "EXIT") { mainSpan.textContent = "[X]"; tagSpan.textContent = "EXIT"; }
+            else if (cell.type === "VOID") { mainSpan.textContent = "##"; tagSpan.textContent = "VOID"; }
+            else if (cell.type === "RELAY") { mainSpan.textContent = `[${cell.letter}]`; tagSpan.textContent = "RLY"; }
+            else if (cell.type === "WELL") { mainSpan.textContent = `${cell.val}`; tagSpan.textContent = "SHADOW"; }
+            else { mainSpan.textContent = String(cell.val).padStart(2, "0"); tagSpan.textContent = "ECHO"; }
+
+            el.appendChild(coordSpan);
+            if (glitchSpan) el.appendChild(glitchSpan);
+            el.appendChild(mainSpan);
+            el.appendChild(tagSpan);
+            el.addEventListener("click", () => {
+              this.audio.ensureContext();
+              this.stepTutorial(r, c);
+            });
+            gridEl.appendChild(el);
+          }
+        }
+
+        const svg = document.getElementById("tut-svg");
+        svg.innerHTML = "";
+        if (t.path.length >= 2) {
+          const pts = t.path.map((p) => `${(p.c + 0.5) * 100},${(p.r + 0.5) * 100}`).join(" ");
+          const line = document.createElementNS("http://www.w3.org/2000/svg", "polyline");
+          line.setAttribute("points", pts);
+          line.setAttribute("fill", "none");
+          line.setAttribute("stroke", t.solved ? "#86efac" : "#22c55e");
+          line.setAttribute("stroke-width", "5");
+          line.setAttribute("stroke-linecap", "round");
+          line.setAttribute("stroke-linejoin", "round");
+          svg.appendChild(line);
+        }
+
+        const logBox = document.getElementById("tut-term-log");
+        logBox.innerHTML = "";
+        t.logs.forEach((entry) => {
+          const div = document.createElement("div");
+          div.className = `term-line ${entry.tone}`;
+          div.textContent = entry.text;
+          logBox.appendChild(div);
+        });
+        logBox.scrollTop = logBox.scrollHeight;
       },
 
       showStatsModal() {
@@ -4029,7 +4744,7 @@
           `
             <div class="stat-grid">
               <div class="stat-box">
-                <div class="stat-box-label">Links Restored</div>
+                <div class="stat-box-label">Beacons Locked</div>
                 <div class="stat-box-val">${this.stats.solved}</div>
               </div>
               <div class="stat-box">
@@ -4076,8 +4791,6 @@
           ]
         );
 
-       
-
         document.getElementById("btn-copy-seed").addEventListener("click", (e) => {
           const input = document.getElementById("seed-input-field");
           input.select();
@@ -4090,19 +4803,19 @@
 
       showVictoryModal(optimal, isNullBonus = false) {
         const steps = this.path.length - 1;
-        const beacon = SectorGenerator.lookupBeacon(this.puzzle.word);
+        const beaconInfo = SectorGenerator.getBeaconInfo(this.puzzle.word);
         const badgeText = isNullBonus
-          ? "<NULL SIGNAL> BONUS EXTRACTION"
+          ? "<NULL SIGNAL> BONUS INTERCEPT"
           : optimal
             ? "OPTIMAL PAR TELEMETRY"
-            : "BEACON LINK RESTORED";
+            : "BEACON PHASE SYNCHRONIZED";
 
         this.openModal(
-          "LINK LOCKED // 31 ECHOES",
+          "ECHO LOCKED // 31",
           `
             <div style="text-align:center;padding:0.4rem 0;">
               <div style="color:var(--emerald);font-weight:700;font-size:0.92rem;letter-spacing:0.06em;">${badgeText}</div>
-              <div style="color:var(--text-secondary);font-size:0.74rem;margin-top:0.25rem;">SEED #${this.seed} • ${this.puzzle.word} [${beacon.label}]</div>
+              <div style="color:var(--text-secondary);font-size:0.74rem;margin-top:0.25rem;">SEED #${this.seed} • ${this.puzzle.word} [${beaconInfo.label}]</div>
             </div>
             <div class="stat-grid">
               <div class="stat-box">
