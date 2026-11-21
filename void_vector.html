@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Void Vector v0.54 — Nahla Tracker</title>
+  <title>Void Vector v0.55 — Nahla Tracker</title>
   <meta name="description" content="31 // Void Vector — An offline spatial triangulation, bash terminal override, and beacon routing workstation for the Hope System." />
   <meta name="theme-color" content="#050a07" />
 
@@ -1578,7 +1578,7 @@
       <header class="terminal-header">
         <div class="brand-block">
           <div class="brand-title">
-            VOID VECTOR v0.54
+            VOID VECTOR v0.55
           </div>
           <div class="brand-sub">NAHLA@HOPE (31 BODIES)</div>
         </div>
@@ -2937,7 +2937,7 @@
 
         this.print(`[SCAN] ${active.length} ANOMAL${active.length === 1 ? "Y" : "IES"} BLOCKING YOUR 31-ECHO / ${puzzle.word} SWEEP:`, "sys");
         active.forEach((a, idx) => {
-          this.print(`  0${idx + 1}. WHY: ${a.why}`, "warn");
+          this.print(`  0${idx + 1}. ${a.why}`, "warn");
           this.print(`      FIX: '${a.fixCmd}' — ${a.actionNote}`, "cyan");
         });
         if (this.isRoot) {
@@ -3243,7 +3243,7 @@
         if (filename === "anomalies.dat") {
           const active = puzzle.anomalies.filter((a) => puzzle.grid[a.r][a.c].anomaly !== null);
           if (active.length === 0) return "STATUS: CLEAN (0 active anomalies)";
-          return active.map((a, i) => `[0${i + 1}] WHY: ${a.why}\n     FIX: ${a.fixCmd}`).join("\n");
+          return active.map((a, i) => `[0${i + 1}] ${a.why}\n     FIX: ${a.fixCmd}`).join("\n");
         }
 
         if (filename === "lexicon.db") {
@@ -4295,7 +4295,7 @@
 
       showHelpModal() {
         this.openModal(
-          "HOPE SYSTEM LORE & PROTOCOL // v0.54",
+          "HOPE SYSTEM LORE & PROTOCOL // v0.55",
           `
             <div class="rule-item">
               <strong>NAHLA TRACKING ARRAY (ttyS0):</strong> You are a deep-space telemetry operator patched directly into the primary serial transceiver line (<strong>ttyS0</strong>) on moon <strong>Nahla (6a)</strong>, re-establishing dead radio links across the <strong>Hope System</strong>.
