@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Void Vector v0.62 — Nahla Tracker</title>
+  <title>Void Vector v0.7 — Nahla Tracker</title>
   <meta name="description" content="31 // Void Vector — An offline spatial triangulation, bash terminal override, and beacon routing workstation for the Hope System." />
   <meta name="theme-color" content="#050a07" />
 
@@ -1736,7 +1736,7 @@
       <header class="terminal-header">
         <div class="brand-block">
           <div class="brand-title">
-            VOID VECTOR v0.62
+            VOID VECTOR v0.7
           </div>
           <div class="brand-sub">NAHLA@HOPE (31 BODIES)</div>
         </div>
@@ -1765,7 +1765,7 @@
 
       <!-- Live Telemetry Readout -->
       <section class="telemetry-hud" aria-label="Telemetry Status">
-        <div class="hud-card" id="hud-echo-card" title="Totals your path live as you click or step across nodes (target: 31)">
+        <div class="hud-card" id="hud-echo-card" title="These are radio pings. This number totals your path live as you click or step across nodes (target: 31 since there are 31 bodies in Hope)">
           <span class="hud-label">ECHO RETURNS</span>
           <div class="hud-value">
             <span id="hud-mass" class="mass-under">00</span>
@@ -4605,7 +4605,7 @@
               <strong>ECHO RETURNS:</strong> Totals your path live as you click or step across nodes. Must reach <strong>31 / 31</strong> when stepping onto <strong>[X]</strong>.
             </div>
             <div class="rule-item">
-              <strong>BEACON RELAYS (IN ORDER):</strong> The target beacon callsign whose letter relays must be lit sequentially from left to right. Click the HUD card anytime to flip to the <strong>28-Beacon Roster</strong>.
+              <strong>BEACON RELAYS (IN ORDER):</strong> The target beacon callsign whose letter relays must be lit sequentially from left to right. Click the HUD card at the top left of the main screen anytime to flip to the <strong>28-Beacon Roster</strong>.
             </div>
             <div class="rule-item">
               <strong>VECTOR STEPS:</strong> Total moves taken on your current path compared against the sector's optimal <strong>PAR</strong> step count.
@@ -4613,16 +4613,16 @@
 
             <div class="modal-section-heading">Override Charges (CHG) &amp; ttyS0 Shell</div>
             <div class="rule-item">
-              <strong>UNLIMITED INSPECTION vs. CAPACITOR MUTATIONS:</strong> Read-only bash commands (<span class="cmd-code">scan</span>, <span class="cmd-code">ls</span>, <span class="cmd-code">cat</span>, <span class="cmd-code">grep</span>, <span class="cmd-code">help</span>) are unlimited. Physical grid mutations (<span class="cmd-code">vent</span>, <span class="cmd-code">invert</span>, <span class="cmd-code">purge</span>, <span class="cmd-code">sync</span>) spend <strong>1 CHG</strong> per rewrite. Pressing <strong>RESET [R]</strong> or running <span class="cmd-code">reboot</span> restores all charges and resets the sector.
+              <strong>UNLIMITED INSPECTION vs. CAPACITOR MUTATIONS:</strong> Read-only bash commands (<span class="cmd-code">scan</span>, <span class="cmd-code">ls</span>, <span class="cmd-code">cat</span>, <span class="cmd-code">grep</span>, <span class="cmd-code">help</span>) are unlimited. Physical grid mutations (<span class="cmd-code">vent</span>, <span class="cmd-code">invert</span>, <span class="cmd-code">purge</span>, <span class="cmd-code">sync</span>) spend <strong>1 CHG</strong> per rewrite because they drain transceiver's capacitor charges. Pressing <strong>RESET [R]</strong> or running <span class="cmd-code">reboot</span> restores all charges and resets the sector.
             </div>
 
             <div class="modal-section-heading">Node Symbols (Grid Squares)</div>
             <div class="symbol-key-grid">
               <div class="symbol-key-item"><span class="symbol-key-code">[&gt;] / [X]</span>Start origin and extraction exit nodes.</div>
               <div class="symbol-key-item"><span class="symbol-key-code">01–09 ECHO</span>Adds positive echo returns to your path total.</div>
-              <div class="symbol-key-item"><span class="symbol-key-code">-2–-4 SHADOW</span>Phase Shadow; subtracts echoes to cancel overflow.</div>
+              <div class="symbol-key-item"><span class="symbol-key-code">-2–-4 SHADOW</span>Phase Shadow; this is radio interference that subtracts echoes to cancel overflow.</div>
               <div class="symbol-key-item"><span class="symbol-key-code">[A–Z] RLY</span>Beacon relay letter; light in target sequence.</div>
-              <div class="symbol-key-item"><span class="symbol-key-code">## VOID</span>Dead-space void (collapsed <strong>≈</strong> voids clear via <span class="cmd-code">vent</span>).</div>
+              <div class="symbol-key-item"><span class="symbol-key-code">## VOID</span>Dead-space signal void (collapsed <strong>≈</strong> voids clear via <span class="cmd-code">vent</span>).</div>
               <div class="symbol-key-item"><span class="symbol-key-code">[!] JAM</span>Solar static interference; clear via <span class="cmd-code">purge</span>.</div>
               <div class="symbol-key-item"><span class="symbol-key-code">[?] LOCK</span>Phase-locked relay; unlock via <span class="cmd-code">sync</span>.</div>
               <div class="symbol-key-item"><span class="symbol-key-code">± GLITCH</span>Phase-inverted echo sign; flip via <span class="cmd-code">invert</span>.</div>
