@@ -3788,7 +3788,12 @@
             const key = el.dataset.highlight || this.inferProtocolHighlightKey(el.textContent);
             if (key === "help") {
               const helpChip = document.querySelector('.chip-btn[data-insert="help"]');
-              if (helpChip) helpChip.click();
+              if (helpChip) {
+                helpChip.classList.remove("amber-spotlight");
+                void helpChip.offsetWidth;
+                helpChip.classList.add("amber-spotlight");
+                setTimeout(() => helpChip.classList.remove("amber-spotlight"), 1650);
+              }
               return;
             }
             if (key) this.highlightProtocolTarget(key);
