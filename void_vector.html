@@ -514,6 +514,16 @@
       color: var(--amber);
       font-weight: 700;
     }
+    .cmd-code[data-highlight] {
+      cursor: pointer;
+      border-bottom: 1px dotted rgba(245, 158, 11, 0.5);
+    }
+    .cmd-code[data-highlight]:hover,
+    .cmd-code[data-highlight]:focus-visible {
+      color: #fbbf24;
+      border-bottom-color: #fbbf24;
+      outline: none;
+    }
 
     /* 28-Beacon Roster Grid Styles */
     .lexicon-note {
@@ -1763,7 +1773,6 @@
         <div class="hud-card hud-clickable" id="hud-beacon-card" role="button" tabindex="0">
           <span class="hud-label">
             <span>BEACON RELAYS</span>
-            <span class="hud-order-tag">IN ORDER ⇄</span>
           </span>
           <div class="callsign-pills" id="hud-callsign"></div>
         </div>
@@ -1854,7 +1863,7 @@
       <!-- BOTTOM RIGHT: FLIPPABLE HOW TO PLAY / HOPE SYSTEM BEACON ROSTER -->
       <section class="intel-panel flip-panel" id="flip-panel">
         <div class="intel-header">
-          <span id="flip-panel-title">FIELD PROTOCOL // HOW TO PLAY</span>
+          <span id="flip-panel-title">FIELD PROTOCOL // CLICKABLE TERMS</span>
           <div class="intel-header-right">
             <span class="intel-badge" id="flip-panel-badge">OVERRIDE OPS</span>
             <button type="button" class="flip-btn" id="btn-flip-card" title="Flip between How to Play and Hope System 28-Beacon Roster">FLIP ⇄</button>
@@ -1870,15 +1879,15 @@
             </div>
             <div class="brief-step">
               <span class="brief-num">02</span>
-              <div><strong data-highlight="terminal" role="button" tabindex="0">TERMINAL GRID OVERRIDES:</strong> Solar shear corrupts nodes along your route. Run <span class="cmd-code">scan</span> in <strong data-highlight="terminal" role="button" tabindex="0">ttyS0</strong> to diagnose anomalies, then rewrite nodes mid-play:</div>
+              <div><strong data-highlight="terminal" role="button" tabindex="0">TERMINAL GRID OVERRIDES:</strong> Solar shear corrupts nodes along your route. Run <span class="cmd-code" data-highlight="terminal" role="button" tabindex="0">scan</span> in <strong data-highlight="terminal" role="button" tabindex="0">ttyS0</strong> to diagnose anomalies, then rewrite nodes mid-play:</div>
             </div>
             <div class="brief-step">
               <span class="brief-num">03</span>
               <div>
-                <span class="cmd-code">vent &lt;xy&gt;</span> clears collapsed <strong data-highlight="void" role="button" tabindex="0">##</strong> voids •
-                <span class="cmd-code">invert &lt;xy&gt;</span> flips <strong data-highlight="polarity" role="button" tabindex="0">±</strong> echo/shadow polarity •
-                <span class="cmd-code">purge &lt;xy&gt;</span> clears <strong data-highlight="jam" role="button" tabindex="0">[!]</strong> static •
-                <span class="cmd-code">sync &lt;code&gt;</span> unlocks <strong data-highlight="lock" role="button" tabindex="0">[?]</strong> phase relays.
+                <span class="cmd-code" data-highlight="void" role="button" tabindex="0">vent &lt;xy&gt;</span> clears collapsed <strong data-highlight="void" role="button" tabindex="0">##</strong> voids •
+                <span class="cmd-code" data-highlight="polarity" role="button" tabindex="0">invert &lt;xy&gt;</span> flips <strong data-highlight="polarity" role="button" tabindex="0">±</strong> echo/shadow polarity •
+                <span class="cmd-code" data-highlight="jam" role="button" tabindex="0">purge &lt;xy&gt;</span> clears <strong data-highlight="jam" role="button" tabindex="0">[!]</strong> static •
+                <span class="cmd-code" data-highlight="lock" role="button" tabindex="0">sync &lt;code&gt;</span> unlocks <strong data-highlight="lock" role="button" tabindex="0">[?]</strong> phase relays.
               </div>
             </div>
             <div class="brief-step">
@@ -3774,9 +3783,9 @@
         const protocolFace = document.getElementById("face-protocol");
         if (protocolFace) {
           const triggerProtocolTerm = (target) => {
-            const strongEl = target.closest("strong");
-            if (!strongEl || !protocolFace.contains(strongEl)) return;
-            const key = strongEl.dataset.highlight || this.inferProtocolHighlightKey(strongEl.textContent);
+            const el = target.closest("strong, .cmd-code");
+            if (!el || !protocolFace.contains(el)) return;
+            const key = el.dataset.highlight || this.inferProtocolHighlightKey(el.textContent);
             if (key) this.highlightProtocolTarget(key);
           };
 
