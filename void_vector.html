@@ -1463,6 +1463,9 @@
       font-size: 0.74rem;
       line-height: 1.42;
       color: var(--text-primary);
+      max-height: 7.2rem;
+      overflow-y: auto;
+      scrollbar-gutter: stable;
     }
 
     .tut-mission-banner.tut-done {
@@ -4961,6 +4964,8 @@
         const banner = document.getElementById("tut-coach-banner");
         banner.className = "tut-mission-banner" + (guide.done ? " tut-done" : "");
         banner.innerHTML = `<div class="tut-why-tag">${guide.tag}</div><div>${guide.html}</div>`;
+        banner.scrollTop = 0;
+        banner.scrollIntoView({ block: "nearest", behavior: "smooth" });
 
         const echoEl = document.getElementById("tut-echo-val");
         echoEl.textContent = String(status.mass).padStart(2, "0");
