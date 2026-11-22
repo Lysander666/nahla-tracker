@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Void Vector v0.56 — Nahla Tracker</title>
+  <title>Void Vector v0.62 — Nahla Tracker</title>
   <meta name="description" content="31 // Void Vector — An offline spatial triangulation, bash terminal override, and beacon routing workstation for the Hope System." />
   <meta name="theme-color" content="#050a07" />
 
@@ -25,7 +25,7 @@
   <meta name="twitter:image" content="https://placehold.co/1200x630/050a07/22c55e?text=31+%2F%2F+VOID+VECTOR%0ANAHLA+TRACKER" />
   <style>
     /* ==========================================================================
-       NAHLA TRACKER DESIGN TOKENS & PHOSPHOR TERMINAL GREEN THEME (v0.54)
+       NAHLA TRACKER DESIGN TOKENS & PHOSPHOR TERMINAL GREEN THEME (v0.62)
        Offline-ready, zero external dependencies, pure monospace aesthetics.
        ========================================================================== */
     :root {
@@ -284,6 +284,7 @@
     .term-line.warn  { color: var(--amber); }
     .term-line.err   { color: var(--crimson); }
     .term-line.cyan  { color: var(--cyan); }
+    .term-key { color: var(--amber); font-weight: 700; }
 
     .bash-chips {
       display: flex;
@@ -473,6 +474,40 @@
 
     .brief-step strong {
       color: var(--emerald);
+      cursor: pointer;
+      border-bottom: 1px dotted rgba(74, 222, 128, 0.45);
+      border-radius: 2px;
+      transition: color 0.14s ease, border-color 0.14s ease, background-color 0.14s ease;
+    }
+
+    .brief-step strong:hover,
+    .brief-step strong:focus-visible {
+      color: var(--amber);
+      border-bottom-color: var(--amber);
+      background: rgba(245, 158, 11, 0.12);
+      outline: none;
+    }
+
+    /* Temporary Amber Spotlight for Field Protocol References */
+    @keyframes amberSpotlightPulse {
+      0% {
+        border-color: var(--amber);
+        box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.8), 0 0 20px rgba(245, 158, 11, 0.55), inset 0 0 14px rgba(245, 158, 11, 0.25);
+      }
+      70% {
+        border-color: var(--amber);
+        box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.65), 0 0 16px rgba(245, 158, 11, 0.4), inset 0 0 10px rgba(245, 158, 11, 0.18);
+      }
+      100% {
+        border-color: var(--amber);
+        box-shadow: 0 0 0 1px rgba(245, 158, 11, 0.25), 0 0 6px rgba(245, 158, 11, 0.12);
+      }
+    }
+
+    .amber-spotlight {
+      border-color: var(--amber) !important;
+      animation: amberSpotlightPulse 1.65s ease-out forwards;
+      z-index: 6;
     }
 
     .cmd-code {
@@ -796,11 +831,75 @@
       justify-content: space-between;
     }
 
+    .hud-card.hud-clickable {
+      cursor: pointer;
+      background: linear-gradient(180deg, rgba(23, 45, 34, 0.85) 0%, var(--bg-cell) 100%);
+      border-color: rgba(34, 197, 94, 0.5);
+      box-shadow: inset 0 1px 0 rgba(74, 222, 128, 0.16), 0 0 12px rgba(34, 197, 94, 0.1);
+      transition: transform 0.1s ease, border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .hud-card.hud-clickable .hud-label {
+      color: var(--term-green);
+    }
+
+    .hud-card.hud-clickable:hover,
+    .hud-card.hud-clickable:focus-visible {
+      border-color: var(--emerald);
+      background: var(--bg-cell-hover);
+      box-shadow: inset 0 1px 0 rgba(74, 222, 128, 0.24), 0 0 16px rgba(34, 197, 94, 0.22);
+      outline: none;
+    }
+
+    .hud-card.hud-clickable:active {
+      transform: translateY(1px);
+    }
+
     .hud-label {
       font-size: 0.62rem;
       color: var(--text-secondary);
       letter-spacing: 0.08em;
       text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.25rem;
+    }
+
+    .hud-order-tag {
+      font-size: 0.55rem;
+      font-weight: 700;
+      color: var(--amber);
+      background: rgba(245, 158, 11, 0.12);
+      border: 1px solid rgba(245, 158, 11, 0.42);
+      border-radius: 3px;
+      padding: 0.02rem 0.26rem;
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+    }
+
+    .hud-card.hud-clickable:hover {
+      border-color: var(--term-green);
+      background: var(--bg-cell-hover);
+      box-shadow: 0 0 12px rgba(34, 197, 94, 0.14);
+    }
+
+    .hud-label {
+      font-size: 0.62rem;
+      color: var(--text-secondary);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.25rem;
+    }
+
+    .hud-order-tag {
+      font-size: 0.56rem;
+      font-weight: 700;
+      color: var(--amber);
+      letter-spacing: 0.05em;
     }
 
     .hud-value {
@@ -825,15 +924,16 @@
     /* Callsign Pill Sequence */
     .callsign-pills {
       display: flex;
-      gap: 0.26rem;
+      align-items: center;
+      gap: 0.2rem;
       margin-top: 0.22rem;
       flex-wrap: wrap;
     }
 
     .cs-pill {
-      font-size: 0.76rem;
+      font-size: 0.75rem;
       font-weight: 700;
-      padding: 0.08rem 0.36rem;
+      padding: 0.08rem 0.32rem;
       border-radius: 4px;
       border: 1px solid var(--border-dim);
       background: var(--bg-void);
@@ -852,6 +952,13 @@
       background: rgba(245, 158, 11, 0.14);
       color: var(--amber);
       box-shadow: 0 0 8px var(--amber-glow);
+    }
+
+    .cs-arrow {
+      font-size: 0.66rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+      user-select: none;
     }
 
     /* Interactive Grid Arena with Coordinate Axes */
@@ -1174,7 +1281,7 @@
 
     .modal-card {
       width: 100%;
-      max-width: 480px;
+      max-width: 500px;
       max-height: 88dvh;
       overflow-y: auto;
       background: var(--bg-terminal);
@@ -1273,6 +1380,44 @@
 
     .rule-item strong {
       color: var(--term-green);
+    }
+
+    .modal-section-heading {
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--amber);
+      margin-top: 0.25rem;
+      padding-bottom: 0.2rem;
+      border-bottom: 1px dashed var(--border-dim);
+    }
+
+    .symbol-key-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.38rem;
+    }
+
+    @media (max-width: 440px) {
+      .symbol-key-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .symbol-key-item {
+      background: var(--bg-panel);
+      border: 1px solid var(--border-dim);
+      border-radius: 6px;
+      padding: 0.38rem 0.52rem;
+      font-size: 0.72rem;
+      line-height: 1.35;
+    }
+
+    .symbol-key-code {
+      font-weight: 700;
+      color: var(--emerald);
+      margin-right: 0.25rem;
     }
 
     .modal-footer {
@@ -1578,7 +1723,7 @@
       <header class="terminal-header">
         <div class="brand-block">
           <div class="brand-title">
-            VOID VECTOR v0.56
+            VOID VECTOR v0.62
           </div>
           <div class="brand-sub">NAHLA@HOPE (31 BODIES)</div>
         </div>
@@ -1586,7 +1731,7 @@
           <button class="btn" id="btn-audio" title="Toggle Telemetry Audio">SFX:ON</button>
           <button class="btn" id="btn-static" title="Cycle Ambient Carrier Noise (Pink / White / Brown / Off)">STATIC:OFF</button>
           <button class="btn" id="btn-stats" title="View Tracker Telemetry Stats">LOG</button>
-          <button class="btn" id="btn-help" title="Hope System Lore &amp; Protocol Manual">[?]</button>
+          <button class="btn" id="btn-help" title="Field Glossary, Node Key &amp; Hope System Lore">INFO</button>
         </div>
       </header>
 
@@ -1599,15 +1744,15 @@
         </div>
         <div class="seed-group">
           <button class="btn" id="btn-daily" title="Load Today's Hope System Seed">DAILY</button>
-          <button class="seed-badge" id="btn-seed-modal" title="Enter or Copy Sector Seed">
-            <span id="seed-display">#H0P3-0000</span>
+          <button class="seed-badge" id="btn-seed-modal" title="Share or load a grid seed">
+            <span id="seed-display">SEED #H0P3-0000 ⇄</span>
           </button>
         </div>
       </nav>
 
       <!-- Live Telemetry Readout -->
       <section class="telemetry-hud" aria-label="Telemetry Status">
-        <div class="hud-card">
+        <div class="hud-card" id="hud-echo-card" title="Totals your path live as you click or step across nodes (target: 31)">
           <span class="hud-label">ECHO RETURNS</span>
           <div class="hud-value">
             <span id="hud-mass" class="mass-under">00</span>
@@ -1615,12 +1760,15 @@
           </div>
         </div>
 
-        <div class="hud-card" id="hud-beacon-card">
-          <span class="hud-label">BEACON RELAYS</span>
+        <div class="hud-card hud-clickable" id="hud-beacon-card" role="button" tabindex="0">
+          <span class="hud-label">
+            <span>BEACON RELAYS</span>
+            <span class="hud-order-tag">IN ORDER ⇄</span>
+          </span>
           <div class="callsign-pills" id="hud-callsign"></div>
         </div>
 
-        <div class="hud-card">
+        <div class="hud-card" id="hud-steps-card">
           <span class="hud-label">VECTOR STEPS</span>
           <div class="hud-value">
             <span id="hud-steps">00</span>
@@ -1718,24 +1866,24 @@
           <div class="intel-body" id="face-protocol">
             <div class="brief-step">
               <span class="brief-num">01</span>
-              <div><strong>BOUNCE 31 ECHOES:</strong> Route a continuous carrier sweep from <strong>[&gt;]</strong> to <strong>[X]</strong> bouncing off all <strong>31</strong> Hope System bodies (28 beacons + 3 dark bodies) while locking target beacon relays in order.</div>
+              <div><strong data-highlight="echo" role="button" tabindex="0">BOUNCE 31 ECHOES:</strong> Draw a path through adjacent <strong data-highlight="nodes" role="button" tabindex="0">nodes (squares)</strong> from <strong data-highlight="start" role="button" tabindex="0">[&gt;]</strong> to <strong data-highlight="exit" role="button" tabindex="0">[X]</strong> bouncing off all <strong data-highlight="echo" role="button" tabindex="0">31</strong> Hope System locations while locking target beacon relays in order. <strong data-highlight="echo" role="button" tabindex="0">ECHO RETURNS</strong> totals your path live as you click or step across nodes.</div>
             </div>
             <div class="brief-step">
               <span class="brief-num">02</span>
-              <div><strong>TERMINAL GRID OVERRIDES:</strong> Solar shear corrupts nodes along your route. Run <span class="cmd-code">scan</span> in <strong>ttyS0</strong> to diagnose anomalies, then rewrite tiles mid-play:</div>
+              <div><strong data-highlight="terminal" role="button" tabindex="0">TERMINAL GRID OVERRIDES:</strong> Solar shear corrupts nodes along your route. Run <span class="cmd-code">scan</span> in <strong data-highlight="terminal" role="button" tabindex="0">ttyS0</strong> to diagnose anomalies, then rewrite nodes mid-play:</div>
             </div>
             <div class="brief-step">
               <span class="brief-num">03</span>
               <div>
-                <span class="cmd-code">vent &lt;xy&gt;</span> clears collapsed <strong>##</strong> voids •
-                <span class="cmd-code">invert &lt;xy&gt;</span> flips <strong>±</strong> echo/shadow polarity •
-                <span class="cmd-code">purge &lt;xy&gt;</span> clears <strong>[!]</strong> static •
-                <span class="cmd-code">sync &lt;code&gt;</span> unlocks <strong>[?]</strong> phase relays.
+                <span class="cmd-code">vent &lt;xy&gt;</span> clears collapsed <strong data-highlight="void" role="button" tabindex="0">##</strong> voids •
+                <span class="cmd-code">invert &lt;xy&gt;</span> flips <strong data-highlight="polarity" role="button" tabindex="0">±</strong> echo/shadow polarity •
+                <span class="cmd-code">purge &lt;xy&gt;</span> clears <strong data-highlight="jam" role="button" tabindex="0">[!]</strong> static •
+                <span class="cmd-code">sync &lt;code&gt;</span> unlocks <strong data-highlight="lock" role="button" tabindex="0">[?]</strong> phase relays.
               </div>
             </div>
             <div class="brief-step">
               <span class="brief-num">04</span>
-              <div><strong>BASH &amp; CONTROLS:</strong> Tap tiles (click-drag on desktop / <strong>WASD</strong>). <strong>ttyS0</strong> keeps scrollback until <span class="cmd-code">clear</span> and supports <span class="cmd-code">ls</span>, <span class="cmd-code">cd</span>, <span class="cmd-code">cat</span>, <span class="cmd-code">grep</span>, <span class="cmd-code">su -</span>, <span class="cmd-code">reboot</span>.</div>
+              <div><strong data-highlight="controls" role="button" tabindex="0">BASH &amp; CONTROLS:</strong> Tap nodes (click-drag on desktop / <strong data-highlight="nodes" role="button" tabindex="0">WASD</strong>). <strong data-highlight="terminal" role="button" tabindex="0">ttyS0</strong> keeps scrollback until <span class="cmd-code">clear</span> and supports <span class="cmd-code">ls</span>, <span class="cmd-code">cd</span>, <span class="cmd-code">cat</span>, <span class="cmd-code">grep</span>, <span class="cmd-code">su -</span>, <span class="cmd-code">reboot</span>.</div>
             </div>
           </div>
 
@@ -1777,7 +1925,7 @@
     </section>
   </div>
 
-  <!-- Unified Terminal Modal (Victory / Help / Stats / Seed / Confirm) -->
+  <!-- Unified Terminal Modal (Victory / Info / Stats / Seed / Confirm) -->
   <div class="modal-backdrop" id="modal-backdrop" role="dialog" aria-modal="true">
     <div class="modal-card" id="modal-card">
       <div class="modal-header">
@@ -1864,7 +2012,7 @@
   <script>
     /**
      * ==========================================================================
-     * 31: VOID VECTOR v0.54 — CORE ENGINE
+     * 31: VOID VECTOR v0.62 — CORE ENGINE
      * Deterministic Carve-First Puzzle Generator, Anomaly Saboteur,
      * Embedded Bash/Override Shell, WebAudio Synthesizer, 3x3 Walkthrough & UI
      * ==========================================================================
@@ -2348,7 +2496,7 @@
       }
 
       // Sabotages 1 (Survey) or 2 (Orbital / Deep) interior nodes on the winning route
-      // with impact-focused diagnostics explaining WHY each override is needed.
+      // with mid-ground diagnostics (no exact command syntax, no hidden-value spoilers).
       static injectAnomalies(puzzle) {
         const rng = new SeededRandom(`ANOM:${puzzle.mode}:${puzzle.seedStr}`);
         const targetCount = puzzle.mode === "SURVEY" ? 1 : 2;
@@ -2396,53 +2544,40 @@
             cell.type = "VOID";
             cell.val = 0;
             cell.anomaly = "COLLAPSED_VOID";
-            const buriedLabel = cell.clean.val < 0
-              ? `${cell.clean.val} PHASE SHADOW`
-              : `+${cell.clean.val} ECHO`;
             anomalies.push({
               coord: cell.coord,
               r: cell.r,
               c: cell.c,
               kind,
               fixCmd: `vent ${coordLow}`,
-              why: `${cell.coord} collapsed into ## debris — blocking your sweep corridor and burying ${buriedLabel}.`,
-              req: `REQ: Needs debris vented at ${cell.coord} to reopen transit and recover ${buriedLabel}.`,
-              summary: `COLLAPSED DEBRIS @ ${cell.coord} (BLOCKS CORRIDOR / BURIES ${buriedLabel})`
+              why: `${cell.coord} has <span class="term-key">collapsed into ## debris</span>. The corridor is blocked and an underlying node is buried.`,
+              req: ""
             });
           } else if (kind === "POLARITY_FLIP") {
             cell.val = -cell.clean.val;
             cell.type = cell.val < 0 ? "WELL" : "MASS";
             cell.anomaly = "POLARITY_FLIP";
-            const swing = Math.abs(cell.clean.val * 2);
             anomalies.push({
               coord: cell.coord,
               r: cell.r,
               c: cell.c,
               kind,
               fixCmd: `invert ${coordLow}`,
-              why: `${cell.coord} is phase-inverted — reading ${cell.val >= 0 ? "+" : ""}${cell.val} instead of ${cell.clean.val >= 0 ? "+" : ""}${cell.clean.val} (${swing}-echo error).`,
-              req: `REQ: Needs +/- polarity inverted at ${cell.coord} to restore ${cell.clean.val >= 0 ? "+" : ""}${cell.clean.val}.`,
-              summary: `POLARITY INVERSION @ ${cell.coord} (READS ${cell.val >= 0 ? "+" : ""}${cell.val}, TRUE ${cell.clean.val >= 0 ? "+" : ""}${cell.clean.val})`
+              why: `${cell.coord} is <span class="term-key">phase-inverted</span>. It is reading ${cell.val >= 0 ? "+" : ""}${cell.val} instead of its true value.`,
+              req: ""
             });
           } else if (kind === "STATIC_JAM") {
             cell.type = "JAMMED";
             cell.val = 0;
             cell.anomaly = "STATIC_JAM";
-            const isRelay = cell.clean.type === "RELAY";
-            const maskDesc = isRelay
-              ? `Relay [${cell.clean.letter}] (needed to light beacon ${puzzle.word})`
-              : `${cell.clean.val >= 0 ? "+" : ""}${cell.clean.val} ECHO`;
             anomalies.push({
               coord: cell.coord,
               r: cell.r,
               c: cell.c,
               kind,
               fixCmd: `purge ${coordLow}`,
-              why: `${cell.coord} is jammed by solar static [!] — masking ${maskDesc}.`,
-              req: isRelay
-                ? `REQ: Needs static purged at ${cell.coord} to uncover Relay [${cell.clean.letter}].`
-                : `REQ: Needs static purged at ${cell.coord} to restore ${maskDesc}.`,
-              summary: `SOLAR STATIC [!] @ ${cell.coord} (MASKS ${isRelay ? `RELAY [${cell.clean.letter}]` : maskDesc})`
+              why: `${cell.coord} is <span class="term-key">jammed by solar static</span> [!]. The node beneath is masked and unreadable.`,
+              req: ""
             });
           } else if (kind === "PHASE_LOCK") {
             cell.phaseLocked = true;
@@ -2453,9 +2588,8 @@
               c: cell.c,
               kind,
               fixCmd: `sync ${puzzle.word.toLowerCase()}`,
-              why: `Relay [${cell.letter}] at ${cell.coord} lost carrier lock [?] — it cannot register for beacon ${puzzle.word} until retuned.`,
-              req: `REQ: Needs active beacon carrier (${puzzle.word}) synced to unlock [?].`,
-              summary: `CARRIER PHASE-LOCK [?] @ ${cell.coord} (HOLDS RELAY [${cell.letter}] FOR ${puzzle.word})`
+              why: `Relay at ${cell.coord} has <span class="term-key">lost carrier lock</span> [?]. It will not register for beacon ${puzzle.word} in this state.`,
+              req: ""
             });
           }
         }
@@ -2617,8 +2751,8 @@
         this.render();
       }
 
-      print(text, tone = "info") {
-        this.lines.push({ text: String(text), tone });
+      print(text, tone = "info", html = false) {
+        this.lines.push({ text: String(text), tone, html });
         if (this.lines.length > NahlaTerminal.MAX_LINES) {
           this.lines.splice(0, this.lines.length - NahlaTerminal.MAX_LINES);
         }
@@ -2632,7 +2766,11 @@
         for (const entry of this.lines) {
           const div = document.createElement("div");
           div.className = `term-line ${entry.tone}`;
-          div.textContent = entry.text;
+          if (entry.html) {
+            div.innerHTML = entry.text;
+          } else {
+            div.textContent = entry.text;
+          }
           screen.appendChild(div);
         }
         screen.scrollTop = screen.scrollHeight;
@@ -2885,7 +3023,7 @@
       // --- Grid Override Commands ---
       cmdHelp() {
         this.print("=== GRID OVERRIDE COMMANDS (ttyS0) ===", "sys");
-        this.print("  scan [xy]     Scan sector (or tile) for hidden anomalies", "info");
+        this.print("  scan [xy]     Scan sector (or node) for hidden anomalies", "info");
         this.print("  vent <xy>     Vaporize a ## Void node (e.g. vent c4)", "info");
         this.print("  invert <xy>   Flip +/- polarity of an Echo or Shadow node", "info");
         this.print("  purge <xy>    Clear [!] solar static or decoy beacon relay", "info");
@@ -2915,10 +3053,7 @@
             : "";
           if (cell.anomaly) {
             const item = puzzle.anomalies.find((a) => a.coord === parsed.coord);
-            this.print(`[SCAN ${parsed.coord}] ${item ? item.why : cell.anomaly}${rootSuffix}`, "warn");
-            if (item) {
-              this.print(`  ${item.req}`, "cyan");
-            }
+            this.print(`[SCAN ${parsed.coord}] ${item ? item.why : cell.anomaly}${rootSuffix}`, "warn", true);
           } else {
             this.print(`[SCAN ${parsed.coord}] TYPE=${cell.type} ECHO=${cell.val >= 0 ? "+" : ""}${cell.val}${cell.letter ? ` RELAY=[${cell.letter}]` : ""} (NOMINAL)${rootSuffix}`, "ok");
           }
@@ -2935,11 +3070,11 @@
           return;
         }
 
-        this.print(`[SCAN] ${active.length} ANOMAL${active.length === 1 ? "Y" : "IES"} BLOCKING YOUR 31-ECHO / ${puzzle.word} SWEEP:`, "sys");
+        this.print(`[SCAN] ${active.length} ANOMAL${active.length === 1 ? "Y" : "IES"} DETECTED:`, "sys");
         active.forEach((a, idx) => {
-          this.print(`  0${idx + 1}. ${a.why}`, "warn");
-          this.print(`      ${a.req}`, "cyan");
+          this.print(`  0${idx + 1}. ${a.why}`, "warn", true);
         });
+        this.print("  (see 'help' for override verbs)", "info");
         if (this.isRoot) {
           const route = puzzle.solutionPath.map((p) => SectorGenerator.toCoord(p.r, p.c)).join(" -> ");
           this.print(`[ROOT-TRACE] NOMINAL SWEEP VECTOR: ${route}`, "cyan");
@@ -3235,7 +3370,7 @@
             "NAHLA TRACKER (6a) // HOPE SYSTEM FIELD MANUAL",
             "1. 31 Hope System bodies: 28 orbital beacons (8 x 3-letter + 20 x 4-letter)",
             "   plus 3 unbeaconed dark bodies (Bellatrix belt, Theresa 2da, Kali 9da).",
-            "2. Route a carrier sweep from [>] to [X] bouncing 31 echoes while locking relays.",
+            "2. Draw a path through adjacent nodes from [>] to [X] bouncing 31 echoes while locking relays.",
             "3. Commands: 'scan', 'vent <xy>', 'invert <xy>', 'purge <xy>', 'sync <code>', 'tutorial'."
           ].join("\n");
         }
@@ -3357,6 +3492,7 @@
       chargesLeft: 2,
       rootBoostUsed: false,
       flipShowingLexicon: false,
+      highlightTimers: new WeakMap(),
       tutorial: null,
       audio: new TelemetryAudio(),
       term: null,
@@ -3388,7 +3524,7 @@
         btn.classList.toggle("active", isDone);
       },
 
-      toggleFlipCard() {
+      toggleFlipCard(onComplete = null) {
         const panel = document.getElementById("flip-panel");
         const titleEl = document.getElementById("flip-panel-title");
         const badgeEl = document.getElementById("flip-panel-badge");
@@ -3412,7 +3548,110 @@
             protoFace.classList.remove("face-inactive");
           }
           panel.classList.remove("flipping");
+          if (typeof onComplete === "function") onComplete();
         }, 160);
+      },
+
+      toggleBeaconRosterFlip() {
+        const scrollActiveIntoView = () => {
+          const activeEl = document.querySelector("#face-lexicon .lex-item.active-callsign");
+          if (activeEl) {
+            activeEl.scrollIntoView({ behavior: "smooth", block: "nearest" });
+          }
+        };
+
+        if (!this.flipShowingLexicon) {
+          this.toggleFlipCard(scrollActiveIntoView);
+        } else {
+          this.toggleFlipCard();
+        }
+      },
+
+      highlightProtocolTarget(targetKey) {
+        let elements = [];
+
+        switch (targetKey) {
+          case "echo":
+            elements = [document.getElementById("hud-echo-card")].filter(Boolean);
+            break;
+          case "nodes":
+            elements = Array.from(document.querySelectorAll(".sector-grid .cell"));
+            break;
+          case "start":
+            elements = Array.from(document.querySelectorAll(".sector-grid .cell-start"));
+            break;
+          case "exit":
+            elements = Array.from(document.querySelectorAll(".sector-grid .cell-exit"));
+            break;
+          case "terminal":
+            elements = [document.querySelector(".bash-panel")].filter(Boolean);
+            break;
+          case "void":
+            elements = Array.from(document.querySelectorAll(".sector-grid .cell-void"));
+            if (elements.length === 0) {
+              elements = [document.querySelector('.chip-btn[data-insert="vent "]')].filter(Boolean);
+            }
+            break;
+          case "polarity":
+            elements = Array.from(document.querySelectorAll(".sector-grid .anomaly-flip, .sector-grid .cell-well"));
+            if (elements.length === 0) {
+              elements = [document.querySelector('.chip-btn[data-insert="invert "]')].filter(Boolean);
+            }
+            break;
+          case "jam":
+            elements = Array.from(document.querySelectorAll(".sector-grid .cell-jammed"));
+            if (elements.length === 0) {
+              elements = [document.querySelector('.chip-btn[data-insert="purge "]')].filter(Boolean);
+            }
+            break;
+          case "lock":
+            elements = Array.from(document.querySelectorAll(".sector-grid .phase-locked"));
+            if (elements.length === 0) {
+              elements = [document.querySelector('.chip-btn[data-insert="sync "]')].filter(Boolean);
+            }
+            break;
+          case "controls":
+            elements = [
+              document.getElementById("board-stage"),
+              document.querySelector(".bash-chips"),
+              document.querySelector(".footer-controls")
+            ].filter(Boolean);
+            break;
+          default:
+            break;
+        }
+
+        if (elements.length === 0) return;
+        this.audio.cmdOk();
+
+        elements.forEach((el) => {
+          const prevTimer = this.highlightTimers.get(el);
+          if (prevTimer) clearTimeout(prevTimer);
+
+          el.classList.remove("amber-spotlight");
+          void el.offsetWidth;
+          el.classList.add("amber-spotlight");
+
+          const timer = setTimeout(() => {
+            el.classList.remove("amber-spotlight");
+            this.highlightTimers.delete(el);
+          }, 1650);
+
+          this.highlightTimers.set(el, timer);
+        });
+      },
+
+      updateBeaconTooltips() {
+        const hasPhaseLock = this.puzzle && this.puzzle.grid.some((row) => row.some((c) => c.phaseLocked));
+        document.querySelectorAll(".lex-item").forEach((btn) => {
+          const code = btn.dataset.code;
+          const label = btn.dataset.label || code;
+          if (hasPhaseLock) {
+            btn.title = `${label} — Click to sync ${code} carrier`;
+          } else {
+            btn.title = `${label} — Click to launch sector`;
+          }
+        });
       },
 
       createBeaconButton(entry, targetMode) {
@@ -3420,7 +3659,8 @@
         btn.type = "button";
         btn.className = "lex-item" + (entry.code === "NULL" ? " lex-null" : "");
         btn.dataset.code = entry.code;
-        btn.title = `Sync ${entry.code} if phase-locked, or launch ${targetMode} sector (${entry.label})`;
+        btn.dataset.label = entry.label;
+        btn.title = `${entry.label} — Click to launch sector`;
 
         const codeSpan = document.createElement("span");
         codeSpan.className = "lex-code";
@@ -3472,6 +3712,7 @@
             innerGrid.appendChild(this.createBeaconButton(entry, "SURVEY"));
           });
         }
+        this.updateBeaconTooltips();
       },
 
       loadStats() {
@@ -3516,6 +3757,37 @@
             }
           });
         });
+
+        // Clickable BEACON RELAYS HUD card -> toggle flip to/from 28-Beacon Roster
+        const beaconCard = document.getElementById("hud-beacon-card");
+        if (beaconCard) {
+          beaconCard.addEventListener("click", () => this.toggleBeaconRosterFlip());
+          beaconCard.addEventListener("keydown", (e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              this.toggleBeaconRosterFlip();
+            }
+          });
+        }
+
+        // Clickable green terms in Field Protocol -> temporary amber spotlight on related UI
+        const protocolFace = document.getElementById("face-protocol");
+        if (protocolFace) {
+          const triggerProtocolTerm = (target) => {
+            const strongEl = target.closest("strong");
+            if (!strongEl || !protocolFace.contains(strongEl)) return;
+            const key = strongEl.dataset.highlight || this.inferProtocolHighlightKey(strongEl.textContent);
+            if (key) this.highlightProtocolTarget(key);
+          };
+
+          protocolFace.addEventListener("click", (e) => triggerProtocolTerm(e.target));
+          protocolFace.addEventListener("keydown", (e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              triggerProtocolTerm(e.target);
+            }
+          });
+        }
 
         // Header actions
         document.getElementById("btn-audio").addEventListener("click", (e) => {
@@ -3760,11 +4032,12 @@
         this.rootBoostUsed = false;
         this.solved = false;
 
-        document.getElementById("seed-display").textContent = `#${this.seed}`;
+        document.getElementById("seed-display").textContent = `SEED #${this.seed} ⇄`;
         this.renderAxes();
         this.resetPath(true, false);
         this.term.resetForSector(this.puzzle);
         this.updateChargesHUD();
+        this.updateBeaconTooltips();
         const beaconInfo = SectorGenerator.getBeaconInfo(this.puzzle.word);
         this.setLog(`SECTOR #${this.seed} ONLINE • 31 ECHOES • BEACON ${this.puzzle.word} [${beaconInfo.label}] • ${this.puzzle.anomalies.length} ANOMALIES`);
       },
@@ -3787,6 +4060,7 @@
         this.rootBoostUsed = false;
         this.term.pendingPrompt = null;
         this.updateChargesHUD();
+        this.updateBeaconTooltips();
       },
 
       resetPath(silent = false, restoreAnomalies = false) {
@@ -3820,6 +4094,7 @@
       onGridMutated(r, c) {
         this.audio.mutate();
         this.updateChargesHUD();
+        this.updateBeaconTooltips();
         this.renderBoard({ r, c });
         const status = this.updateHUD();
         this.setLog(`GRID MUTATED @ ${SectorGenerator.toCoord(r, c)} • ECHO RETURNS ${status.mass}/31.`, "ok");
@@ -4167,6 +4442,12 @@
         csEl.innerHTML = "";
         const word = this.puzzle.word;
         for (let i = 0; i < word.length; i++) {
+          if (i > 0) {
+            const arrow = document.createElement("span");
+            arrow.className = "cs-arrow";
+            arrow.textContent = "→";
+            csEl.appendChild(arrow);
+          }
           const pill = document.createElement("span");
           pill.className = "cs-pill";
           if (i < status.lockedCount) pill.classList.add("locked");
@@ -4178,7 +4459,7 @@
         const beaconCard = document.getElementById("hud-beacon-card");
         if (beaconCard) {
           const info = SectorGenerator.getBeaconInfo(word);
-          beaconCard.title = `Active Target Beacon: ${word} — ${info.label}`;
+          beaconCard.title = `Target Beacon: ${word} (${info.label}) — Click to toggle 28-Beacon Roster`;
         }
 
         document.getElementById("hud-steps").textContent = String(status.steps).padStart(2, "0");
@@ -4295,8 +4576,37 @@
 
       showHelpModal() {
         this.openModal(
-          "HOPE SYSTEM LORE & PROTOCOL // v0.55",
+          "INFO & FIELD GLOSSARY // v0.61",
           `
+            <div class="modal-section-heading">Top HUD Readouts</div>
+            <div class="rule-item">
+              <strong>ECHO RETURNS:</strong> Totals your path live as you click or step across nodes. Must reach <strong>31 / 31</strong> when stepping onto <strong>[X]</strong>.
+            </div>
+            <div class="rule-item">
+              <strong>BEACON RELAYS (IN ORDER):</strong> The target beacon callsign whose letter relays must be lit sequentially from left to right. Click the HUD card anytime to flip to the <strong>28-Beacon Roster</strong>.
+            </div>
+            <div class="rule-item">
+              <strong>VECTOR STEPS:</strong> Total moves taken on your current path compared against the sector's optimal <strong>PAR</strong> step count.
+            </div>
+
+            <div class="modal-section-heading">Override Charges (CHG) &amp; ttyS0 Shell</div>
+            <div class="rule-item">
+              <strong>UNLIMITED INSPECTION vs. CAPACITOR MUTATIONS:</strong> Read-only bash commands (<span class="cmd-code">scan</span>, <span class="cmd-code">ls</span>, <span class="cmd-code">cat</span>, <span class="cmd-code">grep</span>, <span class="cmd-code">help</span>) are unlimited. Physical grid mutations (<span class="cmd-code">vent</span>, <span class="cmd-code">invert</span>, <span class="cmd-code">purge</span>, <span class="cmd-code">sync</span>) spend <strong>1 CHG</strong> per rewrite. Pressing <strong>RESET [R]</strong> or running <span class="cmd-code">reboot</span> restores all charges and resets the sector.
+            </div>
+
+            <div class="modal-section-heading">Node Symbols (Grid Squares)</div>
+            <div class="symbol-key-grid">
+              <div class="symbol-key-item"><span class="symbol-key-code">[&gt;] / [X]</span>Start origin and extraction exit nodes.</div>
+              <div class="symbol-key-item"><span class="symbol-key-code">01–09 ECHO</span>Adds positive echo returns to your path total.</div>
+              <div class="symbol-key-item"><span class="symbol-key-code">-2–-4 SHADOW</span>Phase Shadow; subtracts echoes to cancel overflow.</div>
+              <div class="symbol-key-item"><span class="symbol-key-code">[A–Z] RLY</span>Beacon relay letter; light in target sequence.</div>
+              <div class="symbol-key-item"><span class="symbol-key-code">## VOID</span>Dead-space void (collapsed <strong>≈</strong> voids clear via <span class="cmd-code">vent</span>).</div>
+              <div class="symbol-key-item"><span class="symbol-key-code">[!] JAM</span>Solar static interference; clear via <span class="cmd-code">purge</span>.</div>
+              <div class="symbol-key-item"><span class="symbol-key-code">[?] LOCK</span>Phase-locked relay; unlock via <span class="cmd-code">sync</span>.</div>
+              <div class="symbol-key-item"><span class="symbol-key-code">± GLITCH</span>Phase-inverted echo sign; flip via <span class="cmd-code">invert</span>.</div>
+            </div>
+
+            <div class="modal-section-heading">Hope System Lore (ttyS0)</div>
             <div class="rule-item">
               <strong>NAHLA TRACKING ARRAY (ttyS0):</strong> You are a deep-space telemetry operator patched directly into the primary serial transceiver line (<strong>ttyS0</strong>) on moon <strong>Nahla (6a)</strong>, re-establishing dead radio links across the <strong>Hope System</strong>.
             </div>
@@ -4304,13 +4614,7 @@
               <strong>THE 31 SYSTEM BODIES (28 BEACONS + 3 DARK):</strong> Every major planet and moon carries one of <strong>28 orbital beacons</strong> (<strong>8 × 3-letter</strong> inner moon relays + <strong>20 × 4-letter</strong> primary/outer beacons) whose transponder has drifted out of phase. Three dark bodies carry no beacons: the diffuse <strong>Bellatrix</strong> rocky belt and the tight binary submoon pair <strong>Theresa (2da)</strong> &amp; <strong>Kali (9da)</strong>.
             </div>
             <div class="rule-item">
-              <strong>BOUNCE 31 ECHOES:</strong> To lock a drifted beacon’s phase, route a carrier sweep from <strong>[&gt;]</strong> to <strong>[X]</strong> that bounces an echo off all <strong>31 system bodies</strong> while locking the target beacon’s relays in order. Negative nodes (<strong>-2 to -4</strong>) are <strong>Phase Shadows</strong> canceling multipath echo overflow.
-            </div>
-            <div class="rule-item">
               <strong>&lt;NULL SIGNAL&gt; (NULL):</strong> A ghost carrier wave emanating from the outer dark sector around moon <strong>Rati (9d)</strong> and submoon <strong>Kali (9da)</strong> that short-circuits normal extraction once all four relays lock.
-            </div>
-            <div class="rule-item">
-              <strong>LIVE GRID OVERRIDES:</strong> Solar shear corrupts sector nodes. Run <strong>scan</strong> in <strong>ttyS0</strong> to diagnose faults, then rewrite tiles mid-sweep with <strong>vent &lt;xy&gt;</strong>, <strong>invert &lt;xy&gt;</strong>, <strong>purge &lt;xy&gt;</strong>, or <strong>sync &lt;code&gt;</strong> (plus <strong>su -</strong> for root transceiver diagnostics).
             </div>
           `,
           [
@@ -4463,7 +4767,7 @@
           return {
             done: true,
             tag: "TRAINING COMPLETE // LINK LOCKED",
-            html: "You lit <strong>A → B → E</strong>, repaired two sabotaged tiles via <strong>ttyS0</strong>, and hit <strong>31 / 31</strong> at <strong>[X]</strong>. Click <strong>ENTER HOPE SYSTEM</strong> when ready!"
+            html: "You lit <strong>A → B → E</strong>, repaired two sabotaged nodes via <strong>ttyS0</strong>, and hit <strong>31 / 31</strong> at <strong>[X]</strong>. Click <strong>ENTER HOPE SYSTEM</strong> when ready!"
           };
         }
 
@@ -4833,6 +5137,21 @@
             { label: "NEXT SECTOR [N]", primary: true, onClick: () => { this.closeModal(); this.loadSector(this.randomSeed()); } }
           ]
         );
+      },
+
+      inferProtocolHighlightKey(rawText) {
+        const text = String(rawText || "").toUpperCase();
+        if (text.includes("ECHO") || text.includes("31")) return "echo";
+        if (text.includes("NODE") || text.includes("SQUARE") || text.includes("WASD")) return "nodes";
+        if (text.includes("[>]")) return "start";
+        if (text.includes("[X]")) return "exit";
+        if (text.includes("TTYS0") || text.includes("TERMINAL") || text.includes("OVERRIDE")) return "terminal";
+        if (text.includes("##") || text.includes("VOID")) return "void";
+        if (text.includes("±") || text.includes("POLARITY")) return "polarity";
+        if (text.includes("[!]") || text.includes("STATIC")) return "jam";
+        if (text.includes("[?]") || text.includes("LOCK")) return "lock";
+        if (text.includes("BASH") || text.includes("CONTROL")) return "controls";
+        return null;
       }
     };
 
