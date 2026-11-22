@@ -1892,7 +1892,7 @@
             </div>
             <div class="brief-step">
               <span class="brief-num">04</span>
-              <div><strong data-highlight="controls" role="button" tabindex="0">BASH &amp; CONTROLS:</strong> Tap nodes (click-drag on desktop / <strong data-highlight="nodes" role="button" tabindex="0">WASD</strong>). <strong data-highlight="terminal" role="button" tabindex="0">ttyS0</strong> keeps scrollback until <span class="cmd-code">clear</span> and supports <span class="cmd-code">ls</span>, <span class="cmd-code">cd</span>, <span class="cmd-code">cat</span>, <span class="cmd-code">grep</span>, <span class="cmd-code">su -</span>, <span class="cmd-code">reboot</span>.</div>
+              <div><strong data-highlight="controls" role="button" tabindex="0">BASH &amp; CONTROLS:</strong> Tap nodes (click-drag on desktop / <strong data-highlight="nodes" role="button" tabindex="0">WASD</strong>). <strong data-highlight="terminal" role="button" tabindex="0">ttyS0</strong> keeps scrollback until <span class="cmd-code" data-highlight="help" role="button" tabindex="0">clear</span> and supports <span class="cmd-code" data-highlight="help" role="button" tabindex="0">ls</span>, <span class="cmd-code" data-highlight="help" role="button" tabindex="0">cd</span>, <span class="cmd-code" data-highlight="help" role="button" tabindex="0">cat</span>, <span class="cmd-code" data-highlight="help" role="button" tabindex="0">grep</span>, <span class="cmd-code" data-highlight="help" role="button" tabindex="0">su -</span>, <span class="cmd-code" data-highlight="help" role="button" tabindex="0">reboot</span>.</div>
             </div>
           </div>
 
@@ -3786,6 +3786,11 @@
             const el = target.closest("strong, .cmd-code");
             if (!el || !protocolFace.contains(el)) return;
             const key = el.dataset.highlight || this.inferProtocolHighlightKey(el.textContent);
+            if (key === "help") {
+              const helpChip = document.querySelector('.chip-btn[data-insert="help"]');
+              if (helpChip) helpChip.click();
+              return;
+            }
             if (key) this.highlightProtocolTarget(key);
           };
 
