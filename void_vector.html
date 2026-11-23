@@ -4101,8 +4101,14 @@
         // Seed controls
         document.getElementById("btn-daily").addEventListener("click", () => {
           const daily = this.getDailySeed();
-          this.loadSector(daily);
-          this.setLog(`DAILY HOPE SYSTEM TELEMETRY LOADED (${this.mode}:${daily}).`, "ok");
+          if (this.seed === daily) {
+            const rand = this.randomSeed();
+            this.loadSector(rand);
+            this.setLog(`RANDOM SECTOR LOADED (${this.mode}:${rand}).`);
+          } else {
+            this.loadSector(daily);
+            this.setLog(`DAILY HOPE SYSTEM TELEMETRY LOADED (${this.mode}:${daily}).`, "ok");
+          }
         });
 
         document.getElementById("btn-seed-modal").addEventListener("click", () => this.showSeedModal());
