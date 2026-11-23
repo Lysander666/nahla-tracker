@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Void Vector v0.82 — Nahla Tracker</title>
+  <title>Void Vector v0.9 — Nahla Tracker</title>
   <meta name="description" content="31 // Void Vector — An offline spatial triangulation, bash terminal override, and beacon routing workstation for the Hope System." />
   <meta name="theme-color" content="#050a07" />
 
@@ -1395,6 +1395,20 @@
       color: var(--term-green);
     }
 
+    .rule-item a {
+      color: var(--emerald);
+      text-decoration: none;
+      border-bottom: 1px dotted rgba(74, 222, 128, 0.55);
+      transition: color 0.14s ease, border-color 0.14s ease;
+    }
+
+    .rule-item a:hover,
+    .rule-item a:focus-visible {
+      color: var(--amber);
+      border-bottom-color: var(--amber);
+      outline: none;
+    }
+
     .modal-section-heading {
       font-size: 0.68rem;
       font-weight: 700;
@@ -1739,7 +1753,7 @@
       <header class="terminal-header">
         <div class="brand-block">
           <div class="brand-title">
-            VØID VECTØR v0.82
+            VØID VECTØR v0.9
           </div>
           <div class="brand-sub">NAHLA@HOPE (31 BODIES)</div>
         </div>
@@ -2031,7 +2045,7 @@
   <script>
     /**
      * ==========================================================================
-     * 31: VØID VECTØR v0.82 — CORE ENGINE
+     * 31: VØID VECTØR v0.9 — CORE ENGINE
      * Deterministic Carve-First Puzzle Generator, Anomaly Saboteur,
      * Embedded Bash/Override Shell, WebAudio Synthesizer, 3x3 Walkthrough & UI
      * ==========================================================================
@@ -2951,11 +2965,11 @@
             break;
 
           case "dampen":
-            this.cmdReplyDrift("dampen");
+            this.cmdReplyDrift("dampen", args[0]);
             break;
 
           case "boost":
-            this.cmdReplyDrift("boost");
+            this.cmdReplyDrift("boost", args[0]);
             break;
 
           case "reboot":
@@ -3324,16 +3338,21 @@
         cell.flagged = false;
         this.game.audio.cmdOk();
         this.game.renderBoard();
-        this.print(`[OK] UNFLAGGED ${parsed.coord} (AMBER CORNER DOT CLEARED).`, "ok");
+        this.print(`[OK] UNFLAGGED ${parsed.coord} (AMBER CORNER DOT CLEARED • 0 CHG).`, "ok");
       }
 
-      cmdReplyDrift(choice) {
+      cmdReplyDrift(choice, coordArg) {
         if (!this.pendingPrompt) {
           this.game.audio.error();
           this.print(`${choice}: no active relay harmonic transmission awaiting reply.`, "err");
           return;
         }
         const { coord, r, c } = this.pendingPrompt;
+        if (coordArg && coordArg.trim().toUpperCase() !== coord) {
+          this.game.audio.error();
+          this.print(`${choice}: active harmonic drift is at ${coord}, not '${coordArg.trim().toUpperCase()}'.`, "err");
+          return;
+        }
         const cell = this.game.puzzle.grid[r][c];
         this.pendingPrompt = null;
 
@@ -4793,7 +4812,7 @@
 
       showHelpModal() {
         this.openModal(
-          "INFO & FIELD GLOSSARY // v0.82",
+          "INFO & FIELD GLOSSARY // v0.9",
           `
             <div class="modal-section-heading">Top HUD Readouts</div>
             <div class="rule-item">
@@ -4832,6 +4851,12 @@
             </div>
             <div class="rule-item">
               <strong>&lt;NULL SIGNAL&gt; (NULL):</strong> A ghost carrier wave emanating from the outer dark sector around moon <strong>Rati (9d)</strong> and submoon <strong>Kali (9da)</strong> that short-circuits normal extraction once all four relays lock.
+            </div>
+
+            <div class="modal-section-heading">Credits &amp; Links</div>
+            <div class="rule-item">
+              With thanks to <a href="https://inara.cz/elite/cmdr/60187/" target="_blank" rel="noopener noreferrer">CMDR Scoopy Doopy</a><br />
+              <a href="https://nahla.live" target="_blank" rel="noopener noreferrer">Nahla Tracker</a> • <a href="https://nahla.live/nahla_labs.html" target="_blank" rel="noopener noreferrer">Made by Nahla Labs</a>
             </div>
           `,
           [
