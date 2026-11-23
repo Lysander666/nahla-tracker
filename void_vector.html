@@ -1184,6 +1184,24 @@
       color: var(--amber);
     }
 
+    /* Tactical Flag Corner Dot (flag <xy> / unflag <xy>) */
+    .cell-flag-dot {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--amber);
+      box-shadow: 0 0 6px rgba(245, 158, 11, 0.9), 0 0 2px #fde68a;
+      pointer-events: none;
+      z-index: 3;
+    }
+
+    .cell.has-glitch .cell-flag-dot {
+      right: 15px;
+    }
+
     /* Mutated cell flash animation */
     @keyframes nodeMutateFlash {
       0%   { box-shadow: 0 0 0 2px var(--emerald), inset 0 0 18px var(--emerald-glow); transform: scale(1.06); }
@@ -1829,6 +1847,7 @@
           <button type="button" class="chip-btn" data-insert="invert ">invert &lt;xy&gt;</button>
           <button type="button" class="chip-btn" data-insert="purge ">purge &lt;xy&gt;</button>
           <button type="button" class="chip-btn" data-insert="sync ">sync &lt;code&gt;</button>
+          <button type="button" class="chip-btn" data-insert="flag ">flag &lt;xy&gt;</button>
           <button type="button" class="chip-btn" data-insert="ls -la" data-exec="true">ls</button>
           <button type="button" class="chip-btn" data-insert="help" data-exec="true">help</button>
         </div>
@@ -1864,7 +1883,7 @@
           <div class="intel-body" id="face-protocol">
             <div class="brief-step">
               <span class="brief-num">01</span>
-           <div><strong data-highlight="echo" role="button" tabindex="0">REACH 31 ECHOES:</strong> Draw a path through adjacent <strong data-highlight="nodes" role="button" tabindex="0">nodes (squares)</strong> from <strong data-highlight="start" role="button" tabindex="0">[Ø]</strong> to <strong data-highlight="exit" role="button" tabindex="0">[X]</strong> so your <strong data-highlight="echo" role="button" tabindex="0">ECHO RETURNS</strong> (pings) add up to <strong data-highlight="echo" role="button" tabindex="0">31</strong> (one ping for each Hope System body) while lighting target beacon relays in order. <strong data-highlight="echo" role="button" tabindex="0">ECHO RETURNS</strong> totals your ping path live as you interact with nodes.</div>
+              <div><strong data-highlight="echo" role="button" tabindex="0">REACH 31 ECHOES:</strong> Draw a path through adjacent <strong data-highlight="nodes" role="button" tabindex="0">nodes (squares)</strong> from <strong data-highlight="start" role="button" tabindex="0">[Ø]</strong> to <strong data-highlight="exit" role="button" tabindex="0">[X]</strong> so your <strong data-highlight="echo" role="button" tabindex="0">ECHO RETURNS</strong> (pings) add up to <strong data-highlight="echo" role="button" tabindex="0">31</strong> (one ping for each Hope System body) while lighting target beacon relays in order. <strong data-highlight="echo" role="button" tabindex="0">ECHO RETURNS</strong> totals your ping path live as you interact with nodes.</div>
             </div>
             <div class="brief-step">
               <span class="brief-num">02</span>
@@ -1876,7 +1895,8 @@
                 <span class="cmd-code" data-highlight="chip-vent" role="button" tabindex="0">vent &lt;xy&gt;</span> clears collapsed <strong data-highlight="void" role="button" tabindex="0">##</strong> void nodes •
                 <span class="cmd-code" data-highlight="chip-invert" role="button" tabindex="0">invert &lt;xy&gt;</span> flips <strong data-highlight="polarity" role="button" tabindex="0">±</strong> echo/shadow polarity nodes •
                 <span class="cmd-code" data-highlight="chip-purge" role="button" tabindex="0">purge &lt;xy&gt;</span> clears <strong data-highlight="jam" role="button" tabindex="0">[!]</strong> static from nodes •
-                <span class="cmd-code" data-highlight="chip-sync" role="button" tabindex="0">sync &lt;code&gt;</span> unlocks <strong data-highlight="lock" role="button" tabindex="0">[?]</strong> phase relays.
+                <span class="cmd-code" data-highlight="chip-sync" role="button" tabindex="0">sync &lt;code&gt;</span> unlocks <strong data-highlight="lock" role="button" tabindex="0">[?]</strong> phase relays •
+                <span class="cmd-code" data-highlight="chip-flag" role="button" tabindex="0">flag</span> / <span class="cmd-code" data-highlight="chip-flag" role="button" tabindex="0">unflag &lt;xy&gt;</span> marks nodes with an amber corner dot.
                 <div style="margin-top:0.26rem;color:var(--text-secondary);">You always get <strong data-highlight="terminal" role="button" tabindex="0">+1 spare Override Charge</strong>—use after anomalies are cleared. Use <span class="cmd-code" data-highlight="chip-vent" role="button" tabindex="0">vent</span> on ANY <strong data-highlight="void" role="button" tabindex="0">##</strong> void or <span class="cmd-code" data-highlight="chip-invert" role="button" tabindex="0">invert</span> on ANY number node to carve shortcuts or to hit <strong data-highlight="echo" role="button" tabindex="0">31</strong>.</div>
               </div>
             </div>
@@ -2403,7 +2423,8 @@
             letter: null,
             onSolution: false,
             phaseLocked: false,
-            anomaly: null
+            anomaly: null,
+            flagged: false
           }))
         );
 
@@ -2711,7 +2732,7 @@
     class NahlaTerminal {
       static MAX_LINES = 300;
       static COMMANDS = [
-        "scan", "vent", "invert", "purge", "sync", "dampen", "boost", "reboot", "tutorial",
+        "scan", "vent", "invert", "purge", "sync", "flag", "unflag", "dampen", "boost", "reboot", "tutorial",
         "help", "man", "clear", "cls", "ls", "ll", "cd", "pwd", "cat", "grep",
         "echo", "whoami", "uname", "date", "uptime", "ps", "df", "history", "sudo", "su", "exit"
       ];
@@ -2825,7 +2846,7 @@
           const codes = allCodes.filter((w) => w.startsWith(argPrefix));
           if (codes.length === 1) return `${parts[0]} ${codes[0]}`;
           if (codes.length > 1) this.print(codes.join("  "), "info");
-        } else if (["vent", "invert", "purge", "scan"].includes(cmd)) {
+        } else if (["vent", "invert", "purge", "scan", "flag", "unflag"].includes(cmd)) {
           const size = this.game.puzzle.size;
           const coords = [];
           for (let r = 0; r < size; r++) {
@@ -2919,6 +2940,14 @@
 
           case "sync":
             this.cmdSync(args[0]);
+            break;
+
+          case "flag":
+            this.cmdFlag(args[0]);
+            break;
+
+          case "unflag":
+            this.cmdUnflag(args[0]);
             break;
 
           case "dampen":
@@ -3022,14 +3051,15 @@
       // --- Grid Override Commands ---
       cmdHelp() {
         this.print("=== GRID OVERRIDE COMMANDS (ttyS0) ===", "sys");
-        this.print("  scan [xy]     Scan sector (or node) for hidden anomalies", "info");
-        this.print("  vent <xy>     Vaporize ANY ## Void node (e.g. vent c4)", "info");
-        this.print("  invert <xy>   Flip +/- polarity of ANY non-zero number node", "info");
-        this.print("  purge <xy>    Clear [!] solar static or decoy beacon relay", "info");
-        this.print("  sync <code>   Sync beacon code to unlock [?] phase relays", "info");
-        this.print("  dampen|boost  Reply to incoming relay harmonic drift", "info");
-        this.print("  reboot        Reset sweep & restore initial sector anomalies", "info");
-        this.print("  tutorial      Re-open the 3x3 interactive field walkthrough", "info");
+        this.print("  scan [xy]         Scan sector (or node) for hidden anomalies", "info");
+        this.print("  vent <xy>         Vaporize ANY ## Void node (e.g. vent c4)", "info");
+        this.print("  invert <xy>       Flip +/- polarity of ANY non-zero number node", "info");
+        this.print("  purge <xy>        Clear [!] solar static or decoy beacon relay", "info");
+        this.print("  sync <code>       Sync beacon code to unlock [?] phase relays", "info");
+        this.print("  flag|unflag <xy>  Mark/clear a top-right amber dot on any node (0 CHG)", "info");
+        this.print("  dampen|boost      Reply to incoming relay harmonic drift", "info");
+        this.print("  reboot            Reset sweep & restore initial sector anomalies", "info");
+        this.print("  tutorial          Re-open the 3x3 interactive field walkthrough", "info");
         this.print("=== BASH / SYSTEM UTILITIES ===", "sys");
         this.print("  ls, cd, pwd, cat <file>, grep <str>, echo, ps, df,", "info");
         this.print("  whoami, uname -a, date, uptime, history, su -, clear", "info");
@@ -3255,6 +3285,56 @@
         }
       }
 
+      cmdFlag(coordArg) {
+        const puzzle = this.game.puzzle;
+        if (!coordArg) {
+          this.game.audio.error();
+          this.print("usage: flag <xy>  (example: flag c4)", "err");
+          return;
+        }
+        const parsed = SectorGenerator.parseCoord(coordArg, puzzle.size);
+        if (!parsed) {
+          this.game.audio.error();
+          this.print(`flag: coordinate '${coordArg}' out of bounds.`, "err");
+          return;
+        }
+        const cell = puzzle.grid[parsed.r][parsed.c];
+        if (cell.flagged) {
+          this.game.audio.cmdOk();
+          this.print(`[INFO] ${parsed.coord} IS ALREADY FLAGGED (USE 'unflag ${parsed.coord.toLowerCase()}' TO CLEAR).`, "info");
+          return;
+        }
+        cell.flagged = true;
+        this.game.audio.cmdOk();
+        this.game.renderBoard();
+        this.print(`[OK] FLAGGED ${parsed.coord} (AMBER CORNER DOT SET • 0 CHG).`, "ok");
+      }
+
+      cmdUnflag(coordArg) {
+        const puzzle = this.game.puzzle;
+        if (!coordArg) {
+          this.game.audio.error();
+          this.print("usage: unflag <xy>  (example: unflag c4)", "err");
+          return;
+        }
+        const parsed = SectorGenerator.parseCoord(coordArg, puzzle.size);
+        if (!parsed) {
+          this.game.audio.error();
+          this.print(`unflag: coordinate '${coordArg}' out of bounds.`, "err");
+          return;
+        }
+        const cell = puzzle.grid[parsed.r][parsed.c];
+        if (!cell.flagged) {
+          this.game.audio.error();
+          this.print(`unflag: ${parsed.coord} is not currently flagged.`, "err");
+          return;
+        }
+        cell.flagged = false;
+        this.game.audio.cmdOk();
+        this.game.renderBoard();
+        this.print(`[OK] UNFLAGGED ${parsed.coord} (AMBER CORNER DOT CLEARED).`, "ok");
+      }
+
       cmdReplyDrift(choice) {
         if (!this.pendingPrompt) {
           this.game.audio.error();
@@ -3371,7 +3451,7 @@
             "1. 31 Hope System bodies: 28 orbital beacons (8 x 3-letter + 20 x 4-letter)",
             "   plus 3 unbeaconed dark bodies (Bellatrix belt, Theresa 2da, Kali 9da).",
             "2. Draw a path through adjacent nodes from [Ø] to [X] bouncing 31 echoes while locking relays.",
-            "3. Commands: 'scan', 'vent <xy>', 'invert <xy>', 'purge <xy>', 'sync <code>', 'tutorial'."
+            "3. Commands: 'scan', 'vent <xy>', 'invert <xy>', 'purge <xy>', 'sync <code>', 'flag <xy>', 'tutorial'."
           ].join("\n");
         }
 
@@ -3689,6 +3769,9 @@
             break;
           case "chip-sync":
             elements = [document.querySelector('.chip-btn[data-insert="sync "]')].filter(Boolean);
+            break;
+          case "chip-flag":
+            elements = [document.querySelector('.chip-btn[data-insert="flag "]')].filter(Boolean);
             break;
           case "chip-ls":
             elements = [document.querySelector('.chip-btn[data-insert="ls -la"]')].filter(Boolean);
@@ -4164,6 +4247,7 @@
               cell.phaseLocked = cell.initial.phaseLocked;
               cell.anomaly = cell.initial.anomaly;
             }
+            cell.flagged = false;
           }
         }
         this.chargesLeft = this.puzzle.maxCharges;
@@ -4407,11 +4491,12 @@
             el.className = "cell";
             el.dataset.r = r;
             el.dataset.c = c;
-            el.title = cell.anomaly === "POLARITY_FLIP"
+            const baseTitle = cell.anomaly === "POLARITY_FLIP"
               ? `${cell.coord} — Phase-inverted polarity (±)`
               : cell.anomaly === "COLLAPSED_VOID"
                 ? `${cell.coord} — Collapsed debris (≈)`
                 : `${cell.coord} (${cell.type})`;
+            el.title = cell.flagged ? `${baseTitle} [FLAGGED]` : baseTitle;
 
             if (cell.type === "START") el.classList.add("cell-start");
             else if (cell.type === "EXIT") el.classList.add("cell-exit");
@@ -4425,6 +4510,7 @@
 
             if (cell.anomaly === "POLARITY_FLIP") el.classList.add("anomaly-flip");
             if (cell.anomaly === "COLLAPSED_VOID") el.classList.add("anomaly-void");
+            if (cell.flagged) el.classList.add("is-flagged");
 
             if (pathSet.has(`${r},${c}`)) el.classList.add("in-path");
             if (head.r === r && head.c === c) el.classList.add("path-head");
@@ -4441,6 +4527,14 @@
               glitchSpan = document.createElement("span");
               glitchSpan.className = "cell-glitch-badge";
               glitchSpan.textContent = cell.anomaly === "POLARITY_FLIP" ? "±" : "≈";
+              el.classList.add("has-glitch");
+            }
+
+            let flagDot = null;
+            if (cell.flagged) {
+              flagDot = document.createElement("span");
+              flagDot.className = "cell-flag-dot";
+              flagDot.setAttribute("aria-hidden", "true");
             }
 
             const mainSpan = document.createElement("span");
@@ -4474,6 +4568,7 @@
 
             el.appendChild(coordSpan);
             if (glitchSpan) el.appendChild(glitchSpan);
+            if (flagDot) el.appendChild(flagDot);
             el.appendChild(mainSpan);
             el.appendChild(tagSpan);
             gridEl.appendChild(el);
@@ -4721,7 +4816,7 @@
 
             <div class="modal-section-heading">Override Charges (CHG) &amp; ttyS0 Shell</div>
             <div class="rule-item">
-              <strong>UNLIMITED INSPECTION vs. CAPACITOR MUTATIONS:</strong> Read-only bash commands (<span class="cmd-code">scan</span>, <span class="cmd-code">ls</span>, <span class="cmd-code">cat</span>, <span class="cmd-code">grep</span>, <span class="cmd-code">help</span>) are unlimited. Physical grid mutations (<span class="cmd-code">vent</span>, <span class="cmd-code">invert</span>, <span class="cmd-code">purge</span>, <span class="cmd-code">sync</span>) spend <strong>1 CHG</strong> per rewrite because they drain transceiver's capacitor charges. Every sector grants <strong>+1 spare Override Charge</strong>—use <span class="cmd-code">vent</span> on any <strong>##</strong> void or <span class="cmd-code">invert</span> on any non-zero number node to carve shortcuts or hit <strong>31</strong>. Pressing <strong>RESET [R]</strong> or running <span class="cmd-code">reboot</span> restores all charges and resets the sector.
+              <strong>UNLIMITED INSPECTION vs. CAPACITOR MUTATIONS:</strong> Read-only and marker bash commands (<span class="cmd-code">scan</span>, <span class="cmd-code">flag</span> / <span class="cmd-code">unflag</span>, <span class="cmd-code">ls</span>, <span class="cmd-code">cat</span>, <span class="cmd-code">grep</span>, <span class="cmd-code">help</span>) are unlimited. Physical grid mutations (<span class="cmd-code">vent</span>, <span class="cmd-code">invert</span>, <span class="cmd-code">purge</span>, <span class="cmd-code">sync</span>) spend <strong>1 CHG</strong> per rewrite because they drain transceiver's capacitor charges. Every sector grants <strong>+1 spare Override Charge</strong>—use <span class="cmd-code">vent</span> on any <strong>##</strong> void or <span class="cmd-code">invert</span> on any non-zero number node to carve shortcuts or hit <strong>31</strong>. Pressing <strong>RESET [R]</strong> or running <span class="cmd-code">reboot</span> restores all charges and resets the sector.
             </div>
 
             <div class="modal-section-heading">Node Symbols (Grid Squares)</div>
@@ -5285,6 +5380,7 @@
           if (text.includes("INVERT")) return "chip-invert";
           if (text.includes("PURGE")) return "chip-purge";
           if (text.includes("SYNC")) return "chip-sync";
+          if (text.includes("FLAG")) return "chip-flag";
           if (text.includes("SCAN")) return "chip-scan";
           if (text.startsWith("LS")) return "chip-ls";
           return "help";
