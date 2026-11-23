@@ -2906,7 +2906,7 @@
             this.updatePromptLabel();
             this.game.audio.mutate();
             this.print("[ROOT] Elevated to root@hope on ttyS0.", "warn");
-            this.print("  > Direct transceiver bus unlocked (/root/transceiver.key + deep 'scan' route diagnostics).", "ok");
+            this.print("  > Direct transceiver bus unlocked (/root/transceiver.key).", "ok");
             if (!this.game.rootBoostUsed) {
               this.game.rootBoostUsed = true;
               this.game.chargesLeft += 1;
@@ -3077,14 +3077,11 @@
             return;
           }
           const cell = puzzle.grid[parsed.r][parsed.c];
-          const rootSuffix = this.isRoot
-            ? ` | ON_SWEEP_ROUTE=${cell.onSolution ? "YES" : "NO"}`
-            : "";
           if (cell.anomaly) {
             const item = puzzle.anomalies.find((a) => a.coord === parsed.coord);
-            this.print(`[SCAN ${parsed.coord}] ${item ? item.why : cell.anomaly}${rootSuffix}`, "warn", true);
+            this.print(`[SCAN ${parsed.coord}] ${item ? item.why : cell.anomaly}`, "warn", true);
           } else {
-            this.print(`[SCAN ${parsed.coord}] TYPE=${cell.type} ECHO=${cell.val >= 0 ? "+" : ""}${cell.val}${cell.letter ? ` RELAY=[${cell.letter}]` : ""} (NOMINAL)${rootSuffix}`, "ok");
+            this.print(`[SCAN ${parsed.coord}] TYPE=${cell.type} ECHO=${cell.val >= 0 ? "+" : ""}${cell.val}${cell.letter ? ` RELAY=[${cell.letter}]` : ""} (NOMINAL)`, "ok");
           }
           return;
         }
@@ -3093,10 +3090,6 @@
         if (active.length === 0) {
           this.print("[SCAN] 0 ACTIVE ANOMALIES REMAINING. SWEEP CORRIDOR CLEAR.", "ok");
           this.print("  TIP: You always get +1 spare CHG—use 'vent' on any ## void or 'invert' on any number node.", "info");
-          if (this.isRoot) {
-            const route = puzzle.solutionPath.map((p) => SectorGenerator.toCoord(p.r, p.c)).join(" -> ");
-            this.print(`[ROOT-TRACE] NOMINAL SWEEP VECTOR: ${route}`, "cyan");
-          }
           return;
         }
 
@@ -3105,10 +3098,6 @@
           this.print(`  0${idx + 1}. ${a.why}`, "warn", true);
         });
         this.print("  (see 'help' for override verbs • +1 spare CHG works on any ## void or number node)", "info");
-        if (this.isRoot) {
-          const route = puzzle.solutionPath.map((p) => SectorGenerator.toCoord(p.r, p.c)).join(" -> ");
-          this.print(`[ROOT-TRACE] NOMINAL SWEEP VECTOR: ${route}`, "cyan");
-        }
       }
 
       consumeChargeOrWarn() {
@@ -3441,7 +3430,7 @@
             "=== NAHLA ARRAY ROOT TRANSCEIVER KEY (6a) ===",
             `ACTIVE_SEED   : #${puzzle.seedStr}`,
             `TARGET_BEACON : ${puzzle.word} [${SectorGenerator.getBeaconInfo(puzzle.word).label}]`,
-            `SWEEP_VECTOR  : ${puzzle.solutionPath.map((p) => SectorGenerator.toCoord(p.r, p.c)).join(" -> ")}`
+            "BUS_AUTH      : VERIFIED (ttyS0-ROOT-6A)"
           ].join("\n");
         }
 
