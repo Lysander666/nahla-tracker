@@ -4841,7 +4841,7 @@
           `
             <div class="modal-section-heading">Top HUD Readouts</div>
             <div class="rule-item">
-              <strong>ECHO RETURNS:</strong> Totals your ping path live as you click or step across nodes. Must reach <strong>31 / 31</strong> when stepping onto <strong>[X]</strong>.
+              <strong>ECHO RETURNS:</strong> Totals your ping path live as you click across nodes. Must reach <strong>31 / 31</strong> when moving on to <strong>[X]</strong>.
             </div>
             <div class="rule-item">
               <strong>BEACON RELAYS (IN ORDER):</strong> The target beacon callsign whose letter relays must be lit sequentially from left to right. Click the HUD card at the top left of the main screen anytime to flip to the <strong>28-Beacon Roster</strong>.
@@ -4852,16 +4852,16 @@
 
             <div class="modal-section-heading">Override Charges (CHG) &amp; ttyS0 Shell</div>
             <div class="rule-item">
-              <strong>UNLIMITED INSPECTION vs. CAPACITOR MUTATIONS:</strong> Read-only and marker bash commands (<span class="cmd-code">scan</span>, <span class="cmd-code">flag</span> / <span class="cmd-code">unflag</span>, <span class="cmd-code">ls</span>, <span class="cmd-code">cat</span>, <span class="cmd-code">grep</span>, <span class="cmd-code">help</span>) are unlimited. Physical grid mutations (<span class="cmd-code">vent</span>, <span class="cmd-code">invert</span>, <span class="cmd-code">purge</span>, <span class="cmd-code">sync</span>) spend <strong>1 CHG</strong> per rewrite because they drain the transceiver's capacitor charges. Every sector (grid) grants <strong>+1 spare Override Charge</strong>—use <span class="cmd-code">vent</span> on any <strong>##</strong> void node or <span class="cmd-code">invert</span> use on any non-zero number node. Pressing <strong>RESET [R]</strong> or running <span class="cmd-code">reboot</span> restores all charges and resets the sector.
+              <strong>UNLIMITED INSPECTION vs. CAPACITOR MUTATIONS:</strong> Read-only and marker bash commands (<span class="cmd-code">scan</span>, <span class="cmd-code">flag</span> / <span class="cmd-code">unflag</span>, <span class="cmd-code">ls</span>, <span class="cmd-code">cat</span>, <span class="cmd-code">grep</span>, <span class="cmd-code">help</span>) are unlimited. Physical grid mutations (<span class="cmd-code">vent</span>, <span class="cmd-code">invert</span>, <span class="cmd-code">purge</span>, <span class="cmd-code">sync</span>) spend <strong>1 CHG</strong> per rewrite because they drain the transceiver's capacitor charges. Every sector (grid) grants <strong>+1 spare Override Charge</strong>—use, which can be used on the <span class="cmd-code">vent</span> command for any <strong>##</strong> void node, or the <span class="cmd-code">invert</span> command for any non-zero number node. Pressing <strong>RESET [R]</strong> or running <span class="cmd-code">reboot</span> restores all charges and resets the sector.
             </div>
 
             <div class="modal-section-heading">Node Symbols (Grid Squares)</div>
             <div class="symbol-key-grid">
               <div class="symbol-key-item"><span class="symbol-key-code">[Ø] / [X]</span>Start origin and extraction exit nodes.</div>
               <div class="symbol-key-item"><span class="symbol-key-code">01–09 ECHO</span>Adds positive echo returns to your path total.</div>
-              <div class="symbol-key-item"><span class="symbol-key-code">-2–-4 SHADOW</span>Phase Shadow; this is radio interference that subtracts echoes to cancel overflow.</div>
+              <div class="symbol-key-item"><span class="symbol-key-code">-2–-4 SHADOW</span>Phase Shadow; this is radio interference that subtracts echoes.</div>
               <div class="symbol-key-item"><span class="symbol-key-code">[A–Z] RLY</span>Beacon relay letter; light in target sequence.</div>
-              <div class="symbol-key-item"><span class="symbol-key-code">## VOID</span>Dead-space signal void (collapsed <strong>≈</strong> voids clear via <span class="cmd-code">vent</span>).</div>
+              <div class="symbol-key-item"><span class="symbol-key-code">## VOID</span>Dead-space signal void (collapsed <strong>≈</strong> voids can be cleared via <span class="cmd-code">vent</span>).</div>
               <div class="symbol-key-item"><span class="symbol-key-code">[!] JAM</span>Solar static interference; clear via <span class="cmd-code">purge</span>.</div>
               <div class="symbol-key-item"><span class="symbol-key-code">[?] LOCK</span>Phase-locked relay; unlock via <span class="cmd-code">sync</span>.</div>
               <div class="symbol-key-item"><span class="symbol-key-code">± GLITCH</span>Phase-inverted echo sign; flip via <span class="cmd-code">invert</span>.</div>
@@ -4869,13 +4869,13 @@
 
             <div class="modal-section-heading">Hope System Lore (ttyS0)</div>
             <div class="rule-item">
-              <strong>NAHLA TRACKING ARRAY (ttyS0):</strong> You are a deep-space telemetry operator patched directly into the primary serial transceiver line (<strong>ttyS0</strong>) on moon <strong>Nahla (6a)</strong>, re-establishing dead radio links across the <strong>Hope System</strong>.
+              <strong>NAHLA TRACKING ARRAY (ttyS0):</strong> You are a deep-space telemetry operator patched directly into the primary serial transceiver line (<strong>ttyS0</strong>) on <strong>Nahla</strong>, re-establishing dead radio links across the <strong>Hope system</strong>.
             </div>
             <div class="rule-item">
               <strong>THE 31 SYSTEM BODIES (28 BEACONS + 3 DARK):</strong> Every major planet and moon carries one of <strong>28 orbital beacons</strong> (<strong>8 × 3-letter</strong> inner moon relays + <strong>20 × 4-letter</strong> primary/outer beacons) whose transponder has drifted out of phase. Three dark bodies carry no beacons: the diffuse <strong>Bellatrix</strong> rocky belt and the tight binary submoon pair <strong>Theresa (2da)</strong> &amp; <strong>Kali (9da)</strong>.
             </div>
             <div class="rule-item">
-              <strong>&lt;NULL SIGNAL&gt; (NULL):</strong> A ghost carrier wave emanating from the outer dark sector around moon <strong>Rati (9d)</strong> and submoon <strong>Kali (9da)</strong> that short-circuits normal extraction once all four relays lock and insta-solves the sector. More data <a href="https://www.youtube.com/watch?v=ChENWqzuU0Q" target="_blank" rel="noopener noreferrer">here</a>.
+              <strong>&lt;NULL SIGNAL&gt; (NULL):</strong> A ghost carrier wave emanating from the outer dark sector around moon <strong>Rati (9d)</strong> and submoon <strong>Kali (9da)</strong> that short-circuits normal extraction. Once all four relays lock, it immediately insta-solves the sector. More data <a href="https://www.youtube.com/watch?v=ChENWqzuU0Q" target="_blank" rel="noopener noreferrer">here</a>.
             </div>
 
             <div class="modal-section-heading">Credits &amp; Links</div>
