@@ -5129,7 +5129,7 @@
             const tagSpan = document.createElement("span");
             tagSpan.className = "cell-tag";
 
-            if (cell.type === "START") { mainSpan.textContent = "[Ø]"; tagSpan.textContent = "OGN"; }
+            if (cell.type === "START") { mainSpan.textContent = "[Ø]"; tagSpan.textContent = "ORIG"; }
             else if (cell.type === "EXIT") { mainSpan.textContent = "[X]"; tagSpan.textContent = "EXIT"; }
             else if (cell.type === "VOID") { mainSpan.textContent = "##"; tagSpan.textContent = "VOID"; }
             else if (cell.type === "RELAY") { mainSpan.textContent = `[${cell.letter}]`; tagSpan.textContent = "RLY"; }
