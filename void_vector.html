@@ -3283,10 +3283,10 @@
 
         if (unlockedCells.length > 0) {
           const coords = unlockedCells.map((c) => c.coord).join(", ");
-          this.print(`[OK] BEACON ${code} SYNCHRONIZED -> PHASE-LOCK CLEARED AT ${coords}.`, "ok");
+          this.print(`[OK] BEACON ${code} SYNCHRONISED -> PHASE-LOCK CLEARED AT ${coords}.`, "ok");
           unlockedCells.forEach((c) => this.game.onGridMutated(c.r, c.c));
         } else {
-          this.print(`[OK] <NULL SIGNAL> CARRIER OVERRIDE SYNCHRONIZED.`, "ok");
+          this.print(`[OK] <NULL SIGNAL> CARRIER OVERRIDE SYNCHRONISED.`, "ok");
           this.game.updateChargesHUD();
         }
       }
@@ -4850,7 +4850,7 @@
               <strong>THE 31 SYSTEM BODIES (28 BEACONS + 3 DARK):</strong> Every major planet and moon carries one of <strong>28 orbital beacons</strong> (<strong>8 × 3-letter</strong> inner moon relays + <strong>20 × 4-letter</strong> primary/outer beacons) whose transponder has drifted out of phase. Three dark bodies carry no beacons: the diffuse <strong>Bellatrix</strong> rocky belt and the tight binary submoon pair <strong>Theresa (2da)</strong> &amp; <strong>Kali (9da)</strong>.
             </div>
             <div class="rule-item">
-              <strong>&lt;NULL SIGNAL&gt; (NULL):</strong> A ghost carrier wave emanating from the outer dark sector around moon <strong>Rati (9d)</strong> and submoon <strong>Kali (9da)</strong> that short-circuits normal extraction once all four relays lock.
+              <strong>&lt;NULL SIGNAL&gt; (NULL):</strong> A ghost carrier wave emanating from the outer dark sector around moon <strong>Rati (9d)</strong> and submoon <strong>Kali (9da)</strong> that short-circuits normal extraction once all four relays lock and insta-solved the sector.
             </div>
 
             <div class="modal-section-heading">Credits &amp; Links</div>
@@ -5122,7 +5122,7 @@
           if (status.mass === 31 && status.locked === 3) {
             t.solved = true;
             this.audio.win();
-            this.tutLog("EXTRACTION LOCKED: 31 Echoes + Beacon ABE synchronized!", "ok");
+            this.tutLog("EXTRACTION LOCKED: 31 Echoes + Beacon ABE synchronised!", "ok");
           } else {
             this.audio.error();
             this.tutLog(`REJECTED @ [X]: Echoes=${status.mass}/31, Beacons=${status.locked}/3 (must light A-B-E first!).`, "err");
@@ -5359,7 +5359,7 @@
           ? "<NULL SIGNAL> BONUS INTERCEPT"
           : optimal
             ? "OPTIMAL PAR TELEMETRY"
-            : "BEACON PHASE SYNCHRONIZED";
+            : "BEACON PHASE SYNCHRONISED";
 
         this.openModal(
           "ECHO LOCKED // 31",
