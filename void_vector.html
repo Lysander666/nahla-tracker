@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Void Vector v0.7 — Nahla Tracker</title>
+  <title>Void Vector v0.81 — Nahla Tracker</title>
   <meta name="description" content="31 // Void Vector — An offline spatial triangulation, bash terminal override, and beacon routing workstation for the Hope System." />
   <meta name="theme-color" content="#050a07" />
 
@@ -15,17 +15,17 @@
   <meta property="og:site_name" content="Nahla Tracker" />
   <meta property="og:title" content="31 // Void Vector — Nahla Tracker" />
   <meta property="og:description" content="Route a carrier sweep across the Hope System and execute ttyS0 grid overrides to bounce 31 telemetry echoes and lock drifted beacons." />
-  <meta property="og:image" content="https://placehold.co/1200x630/050a07/22c55e?text=31+%2F%2F+VOID+VECTOR%0ANAHLA+TRACKER" />
+  <meta property="og:image" content="vvthumb5.jpeg" />
   <meta property="og:image:alt" content="31 // Void Vector phosphor green telemetry puzzle terminal" />
 
   <!-- Twitter / X Card -->
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="31 // Void Vector — Nahla Tracker" />
   <meta name="twitter:description" content="Route a carrier sweep across the Hope System and execute ttyS0 grid overrides to bounce 31 telemetry echoes and lock drifted beacons." />
-  <meta name="twitter:image" content="https://placehold.co/1200x630/050a07/22c55e?text=31+%2F%2F+VOID+VECTOR%0ANAHLA+TRACKER" />
+  <meta name="twitter:image" content="vvthumb5.jpeg" />
   <style>
     /* ==========================================================================
-       NAHLA TRACKER DESIGN TOKENS & PHOSPHOR TERMINAL GREEN THEME (v0.62)
+       NAHLA TRACKER DESIGN TOKENS & PHOSPHOR TERMINAL GREEN THEME (v0.81)
        Offline-ready, zero external dependencies, pure monospace aesthetics.
        ========================================================================== */
     :root {
@@ -492,11 +492,11 @@
     @keyframes amberSpotlightPulse {
       0% {
         border-color: var(--amber);
-        box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.8), 0 0 20px rgba(245, 158, 11, 0.55), inset 0 0 14px rgba(245, 158, 11, 0.25);
+        box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.85), 0 0 22px rgba(245, 158, 11, 0.6), inset 0 0 14px rgba(245, 158, 11, 0.28);
       }
-      70% {
+      75% {
         border-color: var(--amber);
-        box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.65), 0 0 16px rgba(245, 158, 11, 0.4), inset 0 0 10px rgba(245, 158, 11, 0.18);
+        box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.65), 0 0 16px rgba(245, 158, 11, 0.42), inset 0 0 10px rgba(245, 158, 11, 0.18);
       }
       100% {
         border-color: var(--amber);
@@ -506,7 +506,7 @@
 
     .amber-spotlight {
       border-color: var(--amber) !important;
-      animation: amberSpotlightPulse 1.65s ease-out forwards;
+      animation: amberSpotlightPulse 2.1s ease-out forwards;
       z-index: 6;
     }
 
@@ -809,11 +809,20 @@
       border: 1px solid var(--border-dim);
       border-radius: 6px;
       padding: 0.35rem 0.55rem;
+      width: calc(20ch + 1.35rem);
+      max-width: 100%;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
+      justify-content: space-between;
       gap: 0.35rem;
       transition: all 0.14s ease;
+    }
+
+    #seed-display {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
     .seed-badge:hover {
@@ -886,30 +895,6 @@
       padding: 0.02rem 0.26rem;
       letter-spacing: 0.04em;
       white-space: nowrap;
-    }
-
-    .hud-card.hud-clickable:hover {
-      border-color: var(--term-green);
-      background: var(--bg-cell-hover);
-      box-shadow: 0 0 12px rgba(34, 197, 94, 0.14);
-    }
-
-    .hud-label {
-      font-size: 0.62rem;
-      color: var(--text-secondary);
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 0.25rem;
-    }
-
-    .hud-order-tag {
-      font-size: 0.56rem;
-      font-weight: 700;
-      color: var(--amber);
-      letter-spacing: 0.05em;
     }
 
     .hud-value {
@@ -1736,7 +1721,7 @@
       <header class="terminal-header">
         <div class="brand-block">
           <div class="brand-title">
-            VOID VECTOR v0.7
+            VOID VECTOR v0.81
           </div>
           <div class="brand-sub">NAHLA@HOPE (31 BODIES)</div>
         </div>
@@ -1758,7 +1743,8 @@
         <div class="seed-group">
           <button class="btn" id="btn-daily" title="Load Today's Hope System Seed">DAILY</button>
           <button class="seed-badge" id="btn-seed-modal" title="Share or load a grid seed">
-            <span id="seed-display">SEED #H0P3-0000 ⇄</span>
+            <span id="seed-display">SEED #H0P3-0000</span>
+            <span aria-hidden="true">⇄</span>
           </button>
         </div>
       </nav>
@@ -1882,20 +1868,21 @@
             </div>
             <div class="brief-step">
               <span class="brief-num">02</span>
-              <div><strong data-highlight="terminal" role="button" tabindex="0">TERMINAL GRID OVERRIDES:</strong> Solar shear corrupts nodes along your route. Run <span class="cmd-code" data-highlight="terminal" role="button" tabindex="0">scan</span> in <strong data-highlight="terminal" role="button" tabindex="0">ttyS0</strong> to diagnose anomalies, then rewrite nodes mid-play:</div>
+              <div><strong data-highlight="terminal" role="button" tabindex="0">TERMINAL GRID OVERRIDES:</strong> Solar shear corrupts nodes along your route. Run <span class="cmd-code" data-highlight="chip-scan" role="button" tabindex="0">scan</span> in <strong data-highlight="terminal" role="button" tabindex="0">ttyS0</strong> to diagnose anomalies, then rewrite nodes mid-play:</div>
             </div>
             <div class="brief-step">
               <span class="brief-num">03</span>
               <div>
-                <span class="cmd-code" data-highlight="void" role="button" tabindex="0">vent &lt;xy&gt;</span> clears collapsed <strong data-highlight="void" role="button" tabindex="0">##</strong> voids •
-                <span class="cmd-code" data-highlight="polarity" role="button" tabindex="0">invert &lt;xy&gt;</span> flips <strong data-highlight="polarity" role="button" tabindex="0">±</strong> echo/shadow polarity •
-                <span class="cmd-code" data-highlight="jam" role="button" tabindex="0">purge &lt;xy&gt;</span> clears <strong data-highlight="jam" role="button" tabindex="0">[!]</strong> static •
-                <span class="cmd-code" data-highlight="lock" role="button" tabindex="0">sync &lt;code&gt;</span> unlocks <strong data-highlight="lock" role="button" tabindex="0">[?]</strong> phase relays.
+                <span class="cmd-code" data-highlight="chip-vent" role="button" tabindex="0">vent &lt;xy&gt;</span> clears collapsed <strong data-highlight="void" role="button" tabindex="0">##</strong> voids •
+                <span class="cmd-code" data-highlight="chip-invert" role="button" tabindex="0">invert &lt;xy&gt;</span> flips <strong data-highlight="polarity" role="button" tabindex="0">±</strong> echo/shadow polarity •
+                <span class="cmd-code" data-highlight="chip-purge" role="button" tabindex="0">purge &lt;xy&gt;</span> clears <strong data-highlight="jam" role="button" tabindex="0">[!]</strong> static •
+                <span class="cmd-code" data-highlight="chip-sync" role="button" tabindex="0">sync &lt;code&gt;</span> unlocks <strong data-highlight="lock" role="button" tabindex="0">[?]</strong> phase relays.
+                <div style="margin-top:0.26rem;color:var(--text-secondary);">You always get <strong data-highlight="terminal" role="button" tabindex="0">+1 spare Override Charge</strong>—use <span class="cmd-code" data-highlight="chip-vent" role="button" tabindex="0">vent</span> on ANY <strong data-highlight="void" role="button" tabindex="0">##</strong> void or <span class="cmd-code" data-highlight="chip-invert" role="button" tabindex="0">invert</span> on ANY number node to carve shortcuts or hit <strong data-highlight="echo" role="button" tabindex="0">31</strong>.</div>
               </div>
             </div>
             <div class="brief-step">
               <span class="brief-num">04</span>
-              <div><strong data-highlight="controls" role="button" tabindex="0">BASH &amp; CONTROLS:</strong> Tap nodes (click-drag on desktop / <strong data-highlight="nodes" role="button" tabindex="0">WASD</strong>). <strong data-highlight="terminal" role="button" tabindex="0">ttyS0</strong> keeps scrollback until <span class="cmd-code" data-highlight="help" role="button" tabindex="0">clear</span> and supports <span class="cmd-code" data-highlight="help" role="button" tabindex="0">ls</span>, <span class="cmd-code" data-highlight="help" role="button" tabindex="0">cd</span>, <span class="cmd-code" data-highlight="help" role="button" tabindex="0">cat</span>, <span class="cmd-code" data-highlight="help" role="button" tabindex="0">grep</span>, <span class="cmd-code" data-highlight="help" role="button" tabindex="0">su -</span>, <span class="cmd-code" data-highlight="help" role="button" tabindex="0">reboot</span>.</div>
+              <div><strong data-highlight="controls" role="button" tabindex="0">BASH &amp; CONTROLS:</strong> Tap nodes (click-drag on desktop / <strong data-highlight="nodes" role="button" tabindex="0">WASD</strong>). <strong data-highlight="terminal" role="button" tabindex="0">ttyS0</strong> keeps scrollback until <span class="cmd-code" data-highlight="help" role="button" tabindex="0">clear</span> and supports <span class="cmd-code" data-highlight="chip-ls" role="button" tabindex="0">ls</span>, <span class="cmd-code" data-highlight="help" role="button" tabindex="0">cd</span>, <span class="cmd-code" data-highlight="help" role="button" tabindex="0">cat</span>, <span class="cmd-code" data-highlight="help" role="button" tabindex="0">grep</span>, <span class="cmd-code" data-highlight="help" role="button" tabindex="0">su -</span>, <span class="cmd-code" data-highlight="help" role="button" tabindex="0">reboot</span>.</div>
             </div>
           </div>
 
@@ -2024,7 +2011,7 @@
   <script>
     /**
      * ==========================================================================
-     * 31: VOID VECTOR v0.62 — CORE ENGINE
+     * 31: VOID VECTOR v0.81 — CORE ENGINE
      * Deterministic Carve-First Puzzle Generator, Anomaly Saboteur,
      * Embedded Bash/Override Shell, WebAudio Synthesizer, 3x3 Walkthrough & UI
      * ==========================================================================
@@ -2270,7 +2257,7 @@
         { code: "JAN", label: "Jana (2b)" },
         { code: "MIR", label: "Mira (2c)" },
         { code: "MAR", label: "Maria (2d)" },
-        { code: "BUN", label: "Bunika (2e)" },
+        { code: "BUI", label: "Bunika (2e)" },
         { code: "FER", label: "Ferril (4a)" },
         { code: "ELN", label: "Elena (6b)" },
         { code: "TRM", label: "Troum (7c)" }
@@ -3036,8 +3023,8 @@
       cmdHelp() {
         this.print("=== GRID OVERRIDE COMMANDS (ttyS0) ===", "sys");
         this.print("  scan [xy]     Scan sector (or node) for hidden anomalies", "info");
-        this.print("  vent <xy>     Vaporize a ## Void node (e.g. vent c4)", "info");
-        this.print("  invert <xy>   Flip +/- polarity of an Echo or Shadow node", "info");
+        this.print("  vent <xy>     Vaporize ANY ## Void node (e.g. vent c4)", "info");
+        this.print("  invert <xy>   Flip +/- polarity of ANY non-zero number node", "info");
         this.print("  purge <xy>    Clear [!] solar static or decoy beacon relay", "info");
         this.print("  sync <code>   Sync beacon code to unlock [?] phase relays", "info");
         this.print("  dampen|boost  Reply to incoming relay harmonic drift", "info");
@@ -3075,6 +3062,7 @@
         const active = puzzle.anomalies.filter((a) => puzzle.grid[a.r][a.c].anomaly !== null);
         if (active.length === 0) {
           this.print("[SCAN] 0 ACTIVE ANOMALIES REMAINING. SWEEP CORRIDOR CLEAR.", "ok");
+          this.print("  TIP: You always get +1 spare CHG—use 'vent' on any ## void or 'invert' on any number node.", "info");
           if (this.isRoot) {
             const route = puzzle.solutionPath.map((p) => SectorGenerator.toCoord(p.r, p.c)).join(" -> ");
             this.print(`[ROOT-TRACE] NOMINAL SWEEP VECTOR: ${route}`, "cyan");
@@ -3086,7 +3074,7 @@
         active.forEach((a, idx) => {
           this.print(`  0${idx + 1}. ${a.why}`, "warn", true);
         });
-        this.print("  (see 'help' for override verbs)", "info");
+        this.print("  (see 'help' for override verbs • +1 spare CHG works on any ## void or number node)", "info");
         if (this.isRoot) {
           const route = puzzle.solutionPath.map((p) => SectorGenerator.toCoord(p.r, p.c)).join(" -> ");
           this.print(`[ROOT-TRACE] NOMINAL SWEEP VECTOR: ${route}`, "cyan");
@@ -3390,7 +3378,7 @@
         if (filename === "anomalies.dat") {
           const active = puzzle.anomalies.filter((a) => puzzle.grid[a.r][a.c].anomaly !== null);
           if (active.length === 0) return "STATUS: CLEAN (0 active anomalies)";
-          return active.map((a, i) => `[0${i + 1}] ${a.why}\n     ${a.req}`).join("\n");
+          return active.map((a, i) => `[0${i + 1}] ${a.why.replace(/<[^>]+>/g, "")}`).join("\n");
         }
 
         if (filename === "lexicon.db") {
@@ -3407,7 +3395,7 @@
         if (filename === "telemetry.log") {
           const trail = this.game.path.map((p) => SectorGenerator.toCoord(p.r, p.c)).join(" -> ");
           return [
-            `SEED: #${puzzle.seedStr}  MODE: ${puzzle.mode}`,
+            `SEED: ${puzzle.mode}:${puzzle.seedStr}`,
             `ECHO RETURNS: ${status.mass} / 31 (DELTA ${status.delta >= 0 ? "+" : ""}${status.delta})`,
             `BEACON: ${puzzle.word} (${status.lockedCount}/${puzzle.word.length} locked)`,
             `CHARGES: ${this.game.chargesLeft}/${puzzle.maxCharges}`,
@@ -3512,7 +3500,12 @@
         solved: 0,
         optimal: 0,
         streak: 0,
-        dailyCompleted: ""
+        dailyCompleted: "",
+        dailyCompletedByMode: {
+          SURVEY: "",
+          ORBITAL: "",
+          DEEP: ""
+        }
       },
 
       init() {
@@ -3521,19 +3514,79 @@
         this.renderLexicon();
         this.bindEvents();
         this.initTutorial();
-        this.updateDailyButton();
-        this.loadSector(this.getDailySeed());
+
+        const urlSeed = new URLSearchParams(window.location.search).get("seed");
+        if (urlSeed && this.loadModeAndSeed(urlSeed)) {
+          // Loaded from shared ?seed=MODE:SEED URL parameter
+        } else {
+          this.loadSector(this.getDailySeed());
+        }
+
         if (!this.isTutorialDismissed()) {
           this.openTutorialModal();
         }
       },
 
+      parseModeAndSeed(rawInput) {
+        const cleaned = String(rawInput || "").trim().toUpperCase().replace(/^#/, "");
+        if (!cleaned) return null;
+
+        const colonIdx = cleaned.indexOf(":");
+        if (colonIdx !== -1) {
+          const rawMode = cleaned.slice(0, colonIdx).trim();
+          const rawSeed = cleaned.slice(colonIdx + 1).trim().replace(/^#/, "");
+          if (!rawSeed) return null;
+
+          const modeMap = {
+            SURVEY: "SURVEY",
+            ORBITAL: "ORBITAL",
+            DEEP: "DEEP",
+            "DEEP SPACE": "DEEP",
+            DEEPSPACE: "DEEP"
+          };
+          const resolvedMode = modeMap[rawMode];
+          if (resolvedMode) {
+            return { mode: resolvedMode, seed: rawSeed };
+          }
+          return { mode: null, seed: rawSeed };
+        }
+
+        return { mode: null, seed: cleaned };
+      },
+
+      loadModeAndSeed(rawInput) {
+        const parsed = this.parseModeAndSeed(rawInput);
+        if (!parsed || !parsed.seed) return false;
+
+        if (parsed.mode && parsed.mode !== this.mode) {
+          this.mode = parsed.mode;
+          document.querySelectorAll("[data-mode]").forEach((btn) => {
+            btn.classList.toggle("active", btn.dataset.mode === parsed.mode);
+          });
+        }
+        this.loadSector(parsed.seed);
+        return true;
+      },
+
+      isDailyCompletedForMode(mode, dailySeed = this.getDailySeed()) {
+        if (this.stats.dailyCompletedByMode && this.stats.dailyCompletedByMode[mode] === dailySeed) {
+          return true;
+        }
+        return mode === "SURVEY" && this.stats.dailyCompleted === dailySeed;
+      },
+
       updateDailyButton() {
         const btn = document.getElementById("btn-daily");
         if (!btn) return;
-        const isDone = this.stats.dailyCompleted === this.getDailySeed();
-        btn.textContent = isDone ? "DAILY ✓" : "DAILY";
-        btn.classList.toggle("active", isDone);
+        const dailySeed = this.getDailySeed();
+        const isCurrentDaily = this.seed === dailySeed;
+        const isSolvedInMode = this.isDailyCompletedForMode(this.mode, dailySeed);
+
+        btn.textContent = isSolvedInMode ? "DAILY ✓" : "DAILY";
+        btn.classList.toggle("active", isCurrentDaily);
+        btn.title = isCurrentDaily
+          ? `Active Daily Seed (${this.mode}:${dailySeed})${isSolvedInMode ? " — Solved" : ""}`
+          : `Load Today's Hope System Seed (${this.mode}:${dailySeed})`;
       },
 
       toggleFlipCard(onComplete = null) {
@@ -3622,6 +3675,27 @@
               elements = [document.querySelector('.chip-btn[data-insert="sync "]')].filter(Boolean);
             }
             break;
+          case "chip-scan":
+            elements = [document.querySelector('.chip-btn[data-insert="scan"]')].filter(Boolean);
+            break;
+          case "chip-vent":
+            elements = [document.querySelector('.chip-btn[data-insert="vent "]')].filter(Boolean);
+            break;
+          case "chip-invert":
+            elements = [document.querySelector('.chip-btn[data-insert="invert "]')].filter(Boolean);
+            break;
+          case "chip-purge":
+            elements = [document.querySelector('.chip-btn[data-insert="purge "]')].filter(Boolean);
+            break;
+          case "chip-sync":
+            elements = [document.querySelector('.chip-btn[data-insert="sync "]')].filter(Boolean);
+            break;
+          case "chip-ls":
+            elements = [document.querySelector('.chip-btn[data-insert="ls -la"]')].filter(Boolean);
+            break;
+          case "help":
+            elements = [document.querySelector('.chip-btn[data-insert="help"]')].filter(Boolean);
+            break;
           case "controls":
             elements = [
               document.getElementById("board-stage"),
@@ -3636,6 +3710,19 @@
         if (elements.length === 0) return;
         this.audio.cmdOk();
 
+        // On mobile / narrow viewports (or whenever target is outside viewport), scroll target into view
+        const scrollAnchor = (targetKey === "nodes" || targetKey === "start" || targetKey === "exit" || targetKey === "void" || targetKey === "polarity" || targetKey === "jam" || targetKey === "lock")
+          ? (document.getElementById("board-stage") || elements[0])
+          : elements[0];
+
+        if (scrollAnchor) {
+          const rect = scrollAnchor.getBoundingClientRect();
+          const outOfView = rect.top < 0 || rect.bottom > window.innerHeight;
+          if (window.innerWidth < 960 || outOfView) {
+            scrollAnchor.scrollIntoView({ behavior: "smooth", block: "center" });
+          }
+        }
+
         elements.forEach((el) => {
           const prevTimer = this.highlightTimers.get(el);
           if (prevTimer) clearTimeout(prevTimer);
@@ -3647,7 +3734,7 @@
           const timer = setTimeout(() => {
             el.classList.remove("amber-spotlight");
             this.highlightTimers.delete(el);
-          }, 1650);
+          }, 2100);
 
           this.highlightTimers.set(el, timer);
         });
@@ -3731,7 +3818,17 @@
         try {
           const raw = localStorage.getItem("nahla_31_void_vector_stats");
           if (raw) {
-            this.stats = { ...this.stats, ...JSON.parse(raw) };
+            const parsed = JSON.parse(raw);
+            this.stats = {
+              ...this.stats,
+              ...parsed,
+              dailyCompletedByMode: {
+                SURVEY: "",
+                ORBITAL: "",
+                DEEP: "",
+                ...(parsed.dailyCompletedByMode || {})
+              }
+            };
           }
         } catch (_) {}
       },
@@ -3782,23 +3879,13 @@
           });
         }
 
-        // Clickable green terms in Field Protocol -> temporary amber spotlight on related UI
+        // Clickable green/amber terms in Field Protocol -> temporary amber spotlight + mobile scroll
         const protocolFace = document.getElementById("face-protocol");
         if (protocolFace) {
           const triggerProtocolTerm = (target) => {
             const el = target.closest("strong, .cmd-code");
             if (!el || !protocolFace.contains(el)) return;
-            const key = el.dataset.highlight || this.inferProtocolHighlightKey(el.textContent);
-            if (key === "help") {
-              const helpChip = document.querySelector('.chip-btn[data-insert="help"]');
-              if (helpChip) {
-                helpChip.classList.remove("amber-spotlight");
-                void helpChip.offsetWidth;
-                helpChip.classList.add("amber-spotlight");
-                setTimeout(() => helpChip.classList.remove("amber-spotlight"), 1650);
-              }
-              return;
-            }
+            const key = el.dataset.highlight || this.inferProtocolHighlightKey(el.textContent, el.classList.contains("cmd-code"));
             if (key) this.highlightProtocolTarget(key);
           };
 
@@ -3902,7 +3989,7 @@
         document.getElementById("btn-daily").addEventListener("click", () => {
           const daily = this.getDailySeed();
           this.loadSector(daily);
-          this.setLog(`DAILY HOPE SYSTEM TELEMETRY LOADED (${daily}).`, "ok");
+          this.setLog(`DAILY HOPE SYSTEM TELEMETRY LOADED (${this.mode}:${daily}).`, "ok");
         });
 
         document.getElementById("btn-seed-modal").addEventListener("click", () => this.showSeedModal());
@@ -4054,7 +4141,8 @@
         this.rootBoostUsed = false;
         this.solved = false;
 
-        document.getElementById("seed-display").textContent = `SEED #${this.seed} ⇄`;
+        document.getElementById("seed-display").textContent = `SEED #${this.seed}`;
+        this.updateDailyButton();
         this.renderAxes();
         this.resetPath(true, false);
         this.term.resetForSector(this.puzzle);
@@ -4261,6 +4349,10 @@
         }
         if (this.seed === this.getDailySeed()) {
           this.stats.dailyCompleted = this.seed;
+          if (!this.stats.dailyCompletedByMode) {
+            this.stats.dailyCompletedByMode = { SURVEY: "", ORBITAL: "", DEEP: "" };
+          }
+          this.stats.dailyCompletedByMode[this.mode] = this.seed;
           this.updateDailyButton();
         }
         this.saveStats();
@@ -4505,6 +4597,22 @@
         textEl.textContent = msg;
       },
 
+      copyTextToClipboard(text, btnEl = null) {
+        const temp = document.createElement("textarea");
+        temp.value = text;
+        temp.setAttribute("readonly", "");
+        temp.style.position = "fixed";
+        temp.style.opacity = "0";
+        document.body.appendChild(temp);
+        temp.select();
+        try {
+          document.execCommand("copy");
+          if (btnEl) btnEl.textContent = "COPIED!";
+          this.audio.cmdOk();
+        } catch (_) {}
+        document.body.removeChild(temp);
+      },
+
       // ------------------------------------------------------------------------
       // MODAL DIALOGS
       // ------------------------------------------------------------------------
@@ -4598,7 +4706,7 @@
 
       showHelpModal() {
         this.openModal(
-          "INFO & FIELD GLOSSARY // v0.61",
+          "INFO & FIELD GLOSSARY // v0.81",
           `
             <div class="modal-section-heading">Top HUD Readouts</div>
             <div class="rule-item">
@@ -4613,7 +4721,7 @@
 
             <div class="modal-section-heading">Override Charges (CHG) &amp; ttyS0 Shell</div>
             <div class="rule-item">
-              <strong>UNLIMITED INSPECTION vs. CAPACITOR MUTATIONS:</strong> Read-only bash commands (<span class="cmd-code">scan</span>, <span class="cmd-code">ls</span>, <span class="cmd-code">cat</span>, <span class="cmd-code">grep</span>, <span class="cmd-code">help</span>) are unlimited. Physical grid mutations (<span class="cmd-code">vent</span>, <span class="cmd-code">invert</span>, <span class="cmd-code">purge</span>, <span class="cmd-code">sync</span>) spend <strong>1 CHG</strong> per rewrite because they drain transceiver's capacitor charges. Pressing <strong>RESET [R]</strong> or running <span class="cmd-code">reboot</span> restores all charges and resets the sector.
+              <strong>UNLIMITED INSPECTION vs. CAPACITOR MUTATIONS:</strong> Read-only bash commands (<span class="cmd-code">scan</span>, <span class="cmd-code">ls</span>, <span class="cmd-code">cat</span>, <span class="cmd-code">grep</span>, <span class="cmd-code">help</span>) are unlimited. Physical grid mutations (<span class="cmd-code">vent</span>, <span class="cmd-code">invert</span>, <span class="cmd-code">purge</span>, <span class="cmd-code">sync</span>) spend <strong>1 CHG</strong> per rewrite because they drain transceiver's capacitor charges. Every sector grants <strong>+1 spare Override Charge</strong>—use <span class="cmd-code">vent</span> on any <strong>##</strong> void or <span class="cmd-code">invert</span> on any non-zero number node to carve shortcuts or hit <strong>31</strong>. Pressing <strong>RESET [R]</strong> or running <span class="cmd-code">reboot</span> restores all charges and resets the sector.
             </div>
 
             <div class="modal-section-heading">Node Symbols (Grid Squares)</div>
@@ -5066,7 +5174,11 @@
       },
 
       showStatsModal() {
-        const dailyDone = this.stats.dailyCompleted === this.getDailySeed() ? "COMPLETE" : "PENDING";
+        const dailySeed = this.getDailySeed();
+        const completedModes = ["SURVEY", "ORBITAL", "DEEP"].filter((m) => this.isDailyCompletedForMode(m, dailySeed));
+        const dailySummary = completedModes.length > 0
+          ? `${completedModes.join(" • ")}`
+          : "PENDING";
         this.openModal(
           "NAHLA TRACKER // TELEMETRY LOG",
           `
@@ -5084,8 +5196,8 @@
                 <div class="stat-box-val">${this.stats.streak}</div>
               </div>
               <div class="stat-box">
-                <div class="stat-box-label">Daily Seed</div>
-                <div class="stat-box-val" style="font-size:0.92rem;">${dailyDone}</div>
+                <div class="stat-box-label">Daily Seed (${dailySeed})</div>
+                <div class="stat-box-val" style="font-size:0.82rem;">${dailySummary}</div>
               </div>
             </div>
           `,
@@ -5094,12 +5206,13 @@
       },
 
       showSeedModal() {
+        const shareCode = `${this.mode}:${this.seed}`;
         this.openModal(
           "SECTOR SEED COORDINATES",
           `
-            <p style="color:var(--text-secondary);font-size:0.75rem;">Share or enter any seed string to generate an identical Hope System sector offline:</p>
+            <p style="color:var(--text-secondary);font-size:0.75rem;">Share or paste a combined <strong>MODE:SEED</strong> code (e.g. <span class="cmd-code">ORBITAL:H0P3-4CC6</span>) or bare seed to load an identical sector:</p>
             <div class="seed-input-row">
-              <input type="text" id="seed-input-field" class="seed-input" value="${this.seed}" maxlength="18" />
+              <input type="text" id="seed-input-field" class="seed-input" value="${shareCode}" maxlength="32" />
               <button class="btn" id="btn-copy-seed">COPY</button>
             </div>
           `,
@@ -5110,8 +5223,7 @@
               primary: true,
               onClick: () => {
                 const val = document.getElementById("seed-input-field").value.trim();
-                if (val) {
-                  this.loadSector(val);
+                if (val && this.loadModeAndSeed(val)) {
                   this.closeModal();
                 }
               }
@@ -5121,17 +5233,16 @@
 
         document.getElementById("btn-copy-seed").addEventListener("click", (e) => {
           const input = document.getElementById("seed-input-field");
+          const textToCopy = input.value.trim() || shareCode;
           input.select();
-          try {
-            document.execCommand("copy");
-            e.currentTarget.textContent = "COPIED!";
-          } catch (_) {}
+          this.copyTextToClipboard(textToCopy, e.currentTarget);
         });
       },
 
       showVictoryModal(optimal, isNullBonus = false) {
         const steps = this.path.length - 1;
         const beaconInfo = SectorGenerator.getBeaconInfo(this.puzzle.word);
+        const shareCode = `${this.mode}:${this.seed}`;
         const badgeText = isNullBonus
           ? "<NULL SIGNAL> BONUS INTERCEPT"
           : optimal
@@ -5143,7 +5254,7 @@
           `
             <div style="text-align:center;padding:0.4rem 0;">
               <div style="color:var(--emerald);font-weight:700;font-size:0.92rem;letter-spacing:0.06em;">${badgeText}</div>
-              <div style="color:var(--text-secondary);font-size:0.74rem;margin-top:0.25rem;">SEED #${this.seed} • ${this.puzzle.word} [${beaconInfo.label}]</div>
+              <div style="color:var(--text-secondary);font-size:0.74rem;margin-top:0.25rem;">${shareCode} • ${this.puzzle.word} [${beaconInfo.label}]</div>
             </div>
             <div class="stat-grid">
               <div class="stat-box">
@@ -5157,14 +5268,27 @@
             </div>
           `,
           [
+            {
+              label: "COPY SEED",
+              onClick: (e) => this.copyTextToClipboard(shareCode, e.currentTarget)
+            },
             { label: "REPLAY SECTOR", onClick: () => { this.closeModal(); this.resetPath(false, true); } },
             { label: "NEXT SECTOR [N]", primary: true, onClick: () => { this.closeModal(); this.loadSector(this.randomSeed()); } }
           ]
         );
       },
 
-      inferProtocolHighlightKey(rawText) {
+      inferProtocolHighlightKey(rawText, isCmd = false) {
         const text = String(rawText || "").toUpperCase();
+        if (isCmd) {
+          if (text.includes("VENT")) return "chip-vent";
+          if (text.includes("INVERT")) return "chip-invert";
+          if (text.includes("PURGE")) return "chip-purge";
+          if (text.includes("SYNC")) return "chip-sync";
+          if (text.includes("SCAN")) return "chip-scan";
+          if (text.startsWith("LS")) return "chip-ls";
+          return "help";
+        }
         if (text.includes("ECHO") || text.includes("31")) return "echo";
         if (text.includes("NODE") || text.includes("SQUARE") || text.includes("WASD")) return "nodes";
         if (text.includes("[>]")) return "start";
