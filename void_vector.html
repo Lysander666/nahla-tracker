@@ -1721,7 +1721,7 @@
       <header class="terminal-header">
         <div class="brand-block">
           <div class="brand-title">
-            VOID VECTOR v0.82
+            VØID VECTØR v0.82
           </div>
           <div class="brand-sub">NAHLA@HOPE (31 BODIES)</div>
         </div>
@@ -1864,7 +1864,7 @@
           <div class="intel-body" id="face-protocol">
             <div class="brief-step">
               <span class="brief-num">01</span>
-           <div><strong data-highlight="echo" role="button" tabindex="0">REACH 31 ECHOES:</strong> Draw a path through adjacent <strong data-highlight="nodes" role="button" tabindex="0">nodes (squares)</strong> from <strong data-highlight="start" role="button" tabindex="0">[&gt;]</strong> to <strong data-highlight="exit" role="button" tabindex="0">[X]</strong> so your <strong data-highlight="echo" role="button" tabindex="0">ECHO RETURNS</strong> (pings) add up to <strong data-highlight="echo" role="button" tabindex="0">31</strong> (one ping for each Hope System body) while lighting target beacon relays in order. <strong data-highlight="echo" role="button" tabindex="0">ECHO RETURNS</strong> totals your ping path live as you interact with nodes.</div>
+           <div><strong data-highlight="echo" role="button" tabindex="0">REACH 31 ECHOES:</strong> Draw a path through adjacent <strong data-highlight="nodes" role="button" tabindex="0">nodes (squares)</strong> from <strong data-highlight="start" role="button" tabindex="0">[Ø]</strong> to <strong data-highlight="exit" role="button" tabindex="0">[X]</strong> so your <strong data-highlight="echo" role="button" tabindex="0">ECHO RETURNS</strong> (pings) add up to <strong data-highlight="echo" role="button" tabindex="0">31</strong> (one ping for each Hope System body) while lighting target beacon relays in order. <strong data-highlight="echo" role="button" tabindex="0">ECHO RETURNS</strong> totals your ping path live as you interact with nodes.</div>
             </div>
             <div class="brief-step">
               <span class="brief-num">02</span>
@@ -1940,7 +1940,7 @@
   <div class="modal-backdrop" id="tut-backdrop" role="dialog" aria-modal="true" aria-labelledby="tut-modal-title">
     <div class="tut-card">
       <div class="modal-header" style="margin-bottom:0.65rem;padding-bottom:0.5rem;">
-        <span class="modal-title" id="tut-modal-title">VOID VECTOR // 3×3 TRAINING SECTOR</span>
+        <span class="modal-title" id="tut-modal-title">VØID VECTØR // 3×3 TRAINING SECTOR</span>
         <button type="button" class="btn" id="tut-btn-close-top">ESC [X]</button>
       </div>
 
@@ -2011,7 +2011,7 @@
   <script>
     /**
      * ==========================================================================
-     * 31: VOID VECTOR v0.81 — CORE ENGINE
+     * 31: VØID VECTØR v0.82 — CORE ENGINE
      * Deterministic Carve-First Puzzle Generator, Anomaly Saboteur,
      * Embedded Bash/Override Shell, WebAudio Synthesizer, 3x3 Walkthrough & UI
      * ==========================================================================
@@ -3370,7 +3370,7 @@
             "NAHLA TRACKER (6a) // HOPE SYSTEM FIELD MANUAL",
             "1. 31 Hope System bodies: 28 orbital beacons (8 x 3-letter + 20 x 4-letter)",
             "   plus 3 unbeaconed dark bodies (Bellatrix belt, Theresa 2da, Kali 9da).",
-            "2. Draw a path through adjacent nodes from [>] to [X] bouncing 31 echoes while locking relays.",
+            "2. Draw a path through adjacent nodes from [Ø] to [X] bouncing 31 echoes while locking relays.",
             "3. Commands: 'scan', 'vent <xy>', 'invert <xy>', 'purge <xy>', 'sync <code>', 'tutorial'."
           ].join("\n");
         }
@@ -3410,7 +3410,7 @@
             const tokens = [];
             for (let c = 0; c < puzzle.size; c++) {
               const cell = puzzle.grid[r][c];
-              if (cell.type === "START") tokens.push("[>] ");
+              if (cell.type === "START") tokens.push("[Ø] ");
               else if (cell.type === "EXIT") tokens.push("[X] ");
               else if (cell.type === "VOID") tokens.push("##  ");
               else if (cell.type === "JAMMED") tokens.push("[!] ");
@@ -4186,7 +4186,7 @@
           this.audio.undo();
           const msg = restoreAnomalies
             ? "SECTOR REBOOTED: SWEEP RESET & OVERRIDE CHARGES RESTORED."
-            : "CARRIER SWEEP RESET TO ORIGIN [>].";
+            : "CARRIER SWEEP RESET TO ORIGIN [Ø].";
           this.setLog(msg);
           if (restoreAnomalies && this.term) {
             this.term.print("[REBOOT] Sector anomalies and override charges restored.", "warn");
@@ -4450,7 +4450,7 @@
             tagSpan.className = "cell-tag";
 
             if (cell.type === "START") {
-              mainSpan.textContent = "[>]";
+              mainSpan.textContent = "[Ø]";
               tagSpan.textContent = "ORIG";
             } else if (cell.type === "EXIT") {
               mainSpan.textContent = "[X]";
@@ -5129,7 +5129,7 @@
             const tagSpan = document.createElement("span");
             tagSpan.className = "cell-tag";
 
-            if (cell.type === "START") { mainSpan.textContent = "[>]"; tagSpan.textContent = "ORIG"; }
+            if (cell.type === "START") { mainSpan.textContent = "[Ø]"; tagSpan.textContent = "ORIG"; }
             else if (cell.type === "EXIT") { mainSpan.textContent = "[X]"; tagSpan.textContent = "EXIT"; }
             else if (cell.type === "VOID") { mainSpan.textContent = "##"; tagSpan.textContent = "VOID"; }
             else if (cell.type === "RELAY") { mainSpan.textContent = `[${cell.letter}]`; tagSpan.textContent = "RLY"; }
@@ -5291,7 +5291,7 @@
         }
         if (text.includes("ECHO") || text.includes("31")) return "echo";
         if (text.includes("NODE") || text.includes("SQUARE") || text.includes("WASD")) return "nodes";
-        if (text.includes("[>]")) return "start";
+        if (text.includes("[Ø]")) return "start";
         if (text.includes("[X]")) return "exit";
         if (text.includes("TTYS0") || text.includes("TERMINAL") || text.includes("OVERRIDE")) return "terminal";
         if (text.includes("##") || text.includes("VOID")) return "void";
