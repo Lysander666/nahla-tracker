@@ -3468,6 +3468,7 @@
 
         const beaconInfo = SectorGenerator.getBeaconInfo(puzzle.word);
         this.print(`HopeOS 3.1.0-void-vector (ttyS0) — SECTOR #${puzzle.seedStr}`, "sys");
+        this.print("ADVISORY: check the HopeOS/Nahla Shell guide in /home/nahla (cat ~/field_guide.txt)", "cyan");
         this.print(`MODE: ${puzzle.mode} (${puzzle.size}x${puzzle.size}) • BEACON: ${puzzle.word} [${beaconInfo.label}] • CHG: ${this.game.chargesLeft}/${puzzle.maxCharges}`, "info");
 
         if (puzzle.anomalies.length > 0) {
@@ -5874,7 +5875,7 @@
           "/": ["dev/", "etc/", "home/", "root/", "sys/", "tmp/", "var/"],
           "/dev": ["null", "ttyS0"],
           "/home": ["nahla/"],
-          "/home/nahla": ["sector/", "readme.txt"],
+          "/home/nahla": ["sector/", "readme.txt", "field_guide.txt"],
           "/home/nahla/sector": ["anomalies.dat", "sector.map", "telemetry.log", "lexicon.db"],
           "/root": ["transceiver.key"],
           "/sys": ["sector/", "override/"],
@@ -5939,6 +5940,7 @@
         if (normPath === "/home/nahla" || normPath === "/home/nahla/sector" || normPath === "/tmp") return false;
         const builtinFiles = new Set([
           "/home/nahla/readme.txt",
+          "/home/nahla/field_guide.txt",
           "/home/nahla/sector/anomalies.dat",
           "/home/nahla/sector/sector.map",
           "/home/nahla/sector/telemetry.log",
@@ -6007,6 +6009,108 @@
             "2. Draw a path through adjacent nodes from [Ø] to [X] bouncing 31 echoes while locking relays.",
             "3. Commands: 'scan', 'vent <xy>', 'invert <xy>', 'purge <xy>', 'sync <code>', 'flag <xy>', 'download <file>'."
           ].join("\n");
+        }
+
+        if (normPath === "/home/nahla/field_guide.txt") {
+          return `==================================================================
+HOPEOS & NAHLA SHELL (nahla_sh) // FIELD REFERENCE MANUAL
+SYSTEM   : Hope System (31 Bodies) // Nahla 6a Array (ttyS0)
+ERA      : Stardate 3312
+==================================================================
+
+1. OVERVIEW: HOPEOS & NAHLA_SH
+------------------------------------------------------------------
+HopeOS is the telemetry and routing OS running on the Nahla 6a
+serial console (ttyS0). nahla_sh is its interactive shell for
+inspecting telemetry, clearing anomalies, routing carrier paths
+from [Ø] to [X] totalling 31 Echo Returns, managing notes, and
+exporting plain-text reports.
+
+2. HOPE SYSTEM & ECHO ROUTING BASICS
+------------------------------------------------------------------
+* Target Echo Returns: 31 (one echo per body in the Hope System).
+* Beacon Roster: 28 orbital beacons (8 inner 3-letter callsigns in
+  Survey/Orbital + 20 deep-space 4-letter callsigns in Deep
+  Space) plus 3 unbeaconed dark bodies: Bellatrix (Rocky Belt),
+  Theresa (2da), and Kali (9da).
+* Modes:
+  - SURVEY: 5x5 grid, 1 anomaly, 2 CHG.
+  - ORBITAL: 6x6 grid, 2 anomalies, 3 CHG.
+  - DEEP SPACE: 6x6 grid, strict relays, phase lock, 2 anomalies,
+    3 CHG.
+
+3. GRID OVERRIDE & VECTOR COMMANDS
+------------------------------------------------------------------
+* scan [xy|glob...]
+  Diagnose active anomalies or inspect matching coordinates
+  (supports *, ?, a*, *3, and a1..a5).
+* vent <xy|glob...>
+  Clear ## void or collapsed debris nodes (1 CHG per node).
+* invert <xy|glob...>
+  Flip +/- echo polarity on non-zero numeric nodes (1 CHG/node).
+* purge <xy|glob...>
+  Clear [!] solar static or strip decoy relays (1 CHG per node).
+* sync <code>
+  Synchronise the sector beacon callsign (or NULL) to unlock [?]
+  phase-locked relays (1 CHG).
+* flag / unflag <xy>
+  Toggle amber corner marker dots on coordinates (0 CHG).
+* step [xy|dir...]
+  Advance along adjacent nodes, straight corridors, or directions
+  (n/s/e/w); run with no args to inspect open neighbors.
+* undo [count]
+  Step backward along your route without resetting overrides.
+* dampen / boost
+  Reply to relay harmonic drift prompts when triggered.
+* reboot / tutorial
+  Reset the active sweep/anomalies or open the 3x3 walkthrough.
+
+4. SHELL OPERATORS, REDIRECTION, VARIABLES & PIPES
+------------------------------------------------------------------
+* Chaining: '&&' (on success), '||' (on failure), ';' (sequence).
+* Redirection: '>' (overwrite), '>>' (append), '<' (stdin),
+  '2>&1' (merge stderr), '/dev/null', and '/dev/ttyS0'.
+* Variables & Substitution: Set custom vars (TARGET=c4;
+  vent $TARGET), read $? and live telemetry ($ECHO, $DELTA,
+  $BEACON, $CHG, $SEED, $HEAD, $STEPS), or nest $(...).
+* Globbing & Braces: Expand filename wildcards (*, ?) and brace
+  lists or ranges ({a,b,c}, {1..4}).
+* Filters & Aliases: Pipe ('|') into grep, wc, head, tail, sort,
+  uniq, cut, tr, tee, or sed; save shortcuts with alias.
+* Privileges: 'su -' elevates to root@hope (unlocks
+  /root/transceiver.key, ON_SWEEP_ROUTE in scan <xy>, and +1
+  emergency CHG once per sector).
+
+5. FILESYSTEM, STORAGE LIMITS, BROWSER CACHE & EXPORTS
+------------------------------------------------------------------
+* Browser-Cached Storage: ALL USER FILES ARE BROWSER-CACHED ONLY.
+  - Files under ~ (/home/nahla and ~/sector) persist in your
+    browser's localStorage.
+  - Files under /tmp live in volatile RAM and clear on page
+    reload or reboot.
+  - Clearing your browser cache, cookies, or site data WILL
+    PERMANENTLY WIPE ALL SAVED FILES AND ALIASES.
+  - Use 'download <file>' regularly to back up your files!
+* Text File Size Limits:
+  - Single file cap: 16,384 characters (16 KB) max.
+  - Home (~) quota: 24 files max and 32,768 bytes (32 KB) total.
+  - HopeOS prints an amber [WARN] notice once a file reaches 80%
+    of its 16 KB limit or ~ nears 20+ files / 80% capacity.
+* nano <file>
+  Lightweight in-shell text editor inside ttyS0 (Ctrl+O / Ctrl+S
+  to save, Ctrl+X / Esc to exit).
+* download <file>
+  Export any built-in or user file to your device as a UTF-8 .txt
+  file stamped with a 3312 HopeOS header.
+
+6. QUICK COMMAND EXAMPLES
+------------------------------------------------------------------
+* scan * | grep -v NOMINAL
+* vent c2 || invert c2
+* echo "Echoes: $ECHO/31" > /tmp/check.txt && cat /tmp/check.txt
+* step $(echo b1 c1 c2)
+* download telemetry.log
+==================================================================`;
         }
 
         if (normPath === "/home/nahla/sector/anomalies.dat" || normPath === "/sys/sector/anomalies.dat") {
