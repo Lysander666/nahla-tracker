@@ -3072,7 +3072,7 @@
           example: "scan\n       scan * | grep SHADOW > shadows.txt"
         },
         vent: {
-          title: "vent - vaporize dark-space voids or clear collapsed debris",
+          title: "vent - vaporise dark-space voids or clear collapsed debris",
           synopsis: "vent <coord|glob|range...>",
           desc: "Fires a focused plasma pulse at <xy> (costs 1 CHG per node). Restores collapsed debris (≈) or converts any ## void into a 00 transit node. Supports wildcards like 'vent a*' to target matching voids.",
           example: "vent c4\n       vent a*"
@@ -5172,7 +5172,7 @@
       cmdHelp() {
         this.print("=== GRID OVERRIDE & VECTOR COMMANDS (ttyS0) ===", "sys");
         this.print("  scan [xy|glob...] Scan nodes (supports *, a*, *3, a1..a5)", "info");
-        this.print("  vent <xy|glob>    Vaporize ## Void nodes (e.g. vent a3, vent a*)", "info");
+        this.print("  vent <xy|glob>    Vaporise ## Void nodes (e.g. vent a3, vent a*)", "info");
         this.print("  invert <xy|glob>  Flip +/- polarity of non-zero number nodes", "info");
         this.print("  purge <xy|glob>   Clear [!] solar static or decoy beacon relays", "info");
         this.print("  sync <code>       Sync beacon code to unlock [?] phase relays", "info");
@@ -5420,7 +5420,7 @@
             cell.type = "MASS";
             cell.val = 0;
             cell.anomaly = null;
-            this.print(`[OK] VENTED ${pt.coord}: DARK-SPACE VOID VAPORIZED -> 00 TRANSIT NODE.`, "ok");
+            this.print(`[OK] VENTED ${pt.coord}: DARK-SPACE VOID VAPORISED -> 00 TRANSIT NODE.`, "ok");
           }
           this.game.onGridMutated(pt.r, pt.c);
         }
@@ -6015,7 +6015,7 @@
           return `==================================================================
 HOPEOS & NAHLA SHELL (nahla_sh) // FIELD REFERENCE MANUAL
 SYSTEM   : Hope System (31 Bodies) // Nahla 6a Array (ttyS0)
-ERA      : Stardate 3312
+ERA      : Nov 3312
 ==================================================================
 
 1. OVERVIEW: HOPEOS & NAHLA_SH
