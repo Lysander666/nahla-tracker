@@ -3027,102 +3027,105 @@
       static MAX_VFS_BYTES = 32768;
 
       static FIELD_GUIDE_TEXT = [
-        "================================================================================",
+        "==================================================================",
         "HOPEOS & NAHLA SHELL (nahla_sh) // FIELD REFERENCE MANUAL",
-        "SYSTEM      : Hope System (31 Bodies) // Nahla 6a Array (ttyS0)",
-        "ERA         : Nov 3312",
-        "================================================================================",
+        "SYSTEM   : Hope System (31 Bodies) // Nahla 6a Array (ttyS0)",
+        "ERA      : Nov 3312",
+        "==================================================================",
         "",
         "1. OVERVIEW: HOPEOS & NAHLA_SH",
-        "--------------------------------------------------------------------------------",
-        "HopeOS is the telemetry and routing operating environment running on the Nahla",
-        "6a serial console (ttyS0). nahla_sh is its interactive command-line shell,",
-        "designed to let operators inspect sector telemetry, clear solar or structural",
-        "anomalies, route carrier paths from [Ø] to [X] totalling 31 Echo Returns,",
-        "manage personal notes, and export plain-text reports.",
+        "------------------------------------------------------------------",
+        "HopeOS is the telemetry and routing OS running on the Nahla 6a",
+        "serial console (ttyS0). nahla_sh is its interactive shell for",
+        "inspecting telemetry, clearing anomalies, routing carrier paths",
+        "from [Ø] to [X] totalling 31 Echo Returns, managing notes, and",
+        "exporting plain-text reports.",
         "",
         "2. HOPE SYSTEM & ECHO ROUTING BASICS",
-        "--------------------------------------------------------------------------------",
-        "- Target Echo Returns : 31 (one echo per body in the Hope System).",
-        "- Beacon Roster       : 28 orbital beacons (8 inner 3-letter callsigns used in",
-        "                        Survey/Orbital + 20 deep-space 4-letter callsigns used",
-        "                        in Deep Space) plus 3 unbeaconed dark bodies:",
-        "                        Bellatrix (Rocky Belt), Theresa (2da), and Kali (9da).",
-        "- Modes               : SURVEY (5x5, 1 anomaly, 2 CHG), ORBITAL (6x6, 2 anomalies,",
-        "                        3 CHG), and DEEP SPACE (6x6, strict relays, phase lock,",
-        "                        2 anomalies, 3 CHG).",
+        "------------------------------------------------------------------",
+        "* Target Echo Returns: 31 (one echo per body in the Hope System).",
+        "* Beacon Roster: 28 orbital beacons (8 inner 3-letter callsigns in",
+        "  Survey/Orbital + 20 deep-space 4-letter callsigns in Deep",
+        "  Space) plus 3 unbeaconed dark bodies: Bellatrix (Rocky Belt),",
+        "  Theresa (2da), and Kali (9da).",
+        "* Modes:",
+        "  - SURVEY: 5x5 grid, 1 anomaly, 2 CHG.",
+        "  - ORBITAL: 6x6 grid, 2 anomalies, 3 CHG.",
+        "  - DEEP SPACE: 6x6 grid, strict relays, phase lock, 2 anomalies,",
+        "    3 CHG.",
         "",
         "3. GRID OVERRIDE & VECTOR COMMANDS",
-        "--------------------------------------------------------------------------------",
-        "- scan [xy|glob...]  : Diagnose active anomalies or inspect specific/matching",
-        "                        coordinates (supports *, ?, a*, *3, and a1..a5).",
-        "- vent <xy|glob...>   : Clear ## void or collapsed debris nodes (costs 1 CHG",
-        "                        per node).",
-        "- invert <xy|glob...> : Flip +/- echo polarity on non-zero numeric nodes",
-        "                        (costs 1 CHG per node).",
-        "- purge <xy|glob...>  : Clear [!] solar static or strip decoy relays (costs 1",
-        "                        CHG per node).",
-        "- sync <code>         : Synchronise the sector beacon callsign (or NULL) to",
-        "                        unlock [?] phase-locked relays (costs 1 CHG).",
-        "- flag / unflag <xy>  : Toggle amber corner marker dots on coordinates (0 CHG).",
-        "- step [xy|dir...]    : Advance along adjacent nodes, straight corridors, or",
-        "                        directions (n/s/e/w); run with no args to inspect open",
-        "                        neighbors.",
-        "- undo [count]        : Step backward along your current route without resetting",
-        "                        grid overrides.",
-        "- dampen / boost      : Respond to relay harmonic drift prompts when triggered.",
-        "- reboot / tutorial   : Reset the active sweep/anomalies or open the 3x3",
-        "                        training walkthrough.",
+        "------------------------------------------------------------------",
+        "* scan [xy|glob...]",
+        "  Diagnose active anomalies or inspect matching coordinates",
+        "  (supports *, ?, a*, *3, and a1..a5).",
+        "* vent <xy|glob...>",
+        "  Clear ## void or collapsed debris nodes (1 CHG per node).",
+        "* invert <xy|glob...>",
+        "  Flip +/- echo polarity on non-zero numeric nodes (1 CHG/node).",
+        "* purge <xy|glob...>",
+        "  Clear [!] solar static or strip decoy relays (1 CHG per node).",
+        "* sync <code>",
+        "  Synchronise the sector beacon callsign (or NULL) to unlock [?]",
+        "  phase-locked relays (1 CHG).",
+        "* flag / unflag <xy>",
+        "  Toggle amber corner marker dots on coordinates (0 CHG).",
+        "* step [xy|dir...]",
+        "  Advance along adjacent nodes, straight corridors, or directions",
+        "  (n/s/e/w); run with no args to inspect open neighbors.",
+        "* undo [count]",
+        "  Step backward along your route without resetting overrides.",
+        "* dampen / boost",
+        "  Reply to relay harmonic drift prompts when triggered.",
+        "* reboot / tutorial",
+        "  Reset the active sweep/anomalies or open the 3x3 walkthrough.",
         "",
         "4. SHELL OPERATORS, REDIRECTION, VARIABLES & PIPES",
-        "--------------------------------------------------------------------------------",
-        "- Chaining            : Use '&&' (run next if previous succeeded), '||' (run",
-        "                        next if previous failed), or ';' (run sequentially).",
-        "- Redirection         : '>' (overwrite), '>>' (append), '<' (read stdin),",
-        "                        '2>&1' (merge stderr into stdout), and '/dev/null' or",
-        "                        '/dev/ttyS0' device targets.",
-        "- Variables & Subs    : Set custom variables (TARGET=c4; vent $TARGET), read",
-        "                        $? (last exit code) and live telemetry ($ECHO, $DELTA,",
-        "                        $BEACON, $CHG, $SEED, $HEAD, $STEPS), or substitute",
-        "                        command output using $(...).",
-        "- Globbing & Braces   : Expand filename wildcards (*, ?) and brace lists/ranges",
-        "                        ({a,b,c}, {1..4}).",
-        "- Filters & Aliases   : Pipe ('|') output into grep, wc, head, tail, sort,",
-        "                        uniq, cut, tr, tee, or sed; save shortcuts with alias.",
-        "- Privileges          : Run 'su -' to elevate to root@hope (unlocks",
-        "                        /root/transceiver.key, ON_SWEEP_ROUTE in scan <xy>, and",
-        "                        +1 emergency CHG once per sector).",
+        "------------------------------------------------------------------",
+        "* Chaining: '&&' (on success), '||' (on failure), ';' (sequence).",
+        "* Redirection: '>' (overwrite), '>>' (append), '<' (stdin),",
+        "  '2>&1' (merge stderr), '/dev/null', and '/dev/ttyS0'.",
+        "* Variables & Substitution: Set custom vars (TARGET=c4;",
+        "  vent $TARGET), read $? and live telemetry ($ECHO, $DELTA,",
+        "  $BEACON, $CHG, $SEED, $HEAD, $STEPS), or nest $(...).",
+        "* Globbing & Braces: Expand filename wildcards (*, ?) and brace",
+        "  lists or ranges ({a,b,c}, {1..4}).",
+        "* Filters & Aliases: Pipe ('|') into grep, wc, head, tail, sort,",
+        "  uniq, cut, tr, tee, or sed; save shortcuts with alias.",
+        "* Privileges: 'su -' elevates to root@hope (unlocks",
+        "  /root/transceiver.key, ON_SWEEP_ROUTE in scan <xy>, and +1",
+        "  emergency CHG once per sector).",
         "",
         "5. FILESYSTEM, STORAGE LIMITS, BROWSER CACHE & EXPORTS",
-        "--------------------------------------------------------------------------------",
-        "- Browser-Cached Storage : ALL USER FILES ARE BROWSER-CACHED ONLY.",
-        "                           - Files under ~ (/home/nahla and ~/sector) persist",
-        "                             in your browser's localStorage.",
-        "                           - Files under /tmp live in volatile RAM and clear",
-        "                             on page reload or reboot.",
-        "                           - Clearing your browser cache, cookies, or site data",
-        "                             WILL PERMANENTLY WIPE ALL SAVED FILES AND ALIASES.",
-        "                           - Use 'download <file>' regularly to back up any",
-        "                             notes or reports you want to keep!",
-        "- Text File Size Limits  : - Single file cap  : 16,384 characters (16 KB) max.",
-        "                           - Home (~) quota   : 24 files max and 32,768 bytes",
-        "                                                (32 KB) total storage in ~.",
-        "                           - HopeOS prints an amber [WARN] notice once a file",
-        "                             reaches 80% of its 16 KB limit or ~ nears 20+",
-        "                             files / 80% storage capacity.",
-        "- nano <file>            : Lightweight in-shell text editor inside ttyS0",
-        "                           (Ctrl+O / Ctrl+S to save, Ctrl+X / Esc to exit).",
-        "- download <file>        : Export any built-in or user file to your device as a",
-        "                           UTF-8 .txt file stamped with a 3312 HopeOS header.",
+        "------------------------------------------------------------------",
+        "* Browser-Cached Storage: ALL USER FILES ARE BROWSER-CACHED ONLY.",
+        "  - Files under ~ (/home/nahla and ~/sector) persist in your",
+        "    browser's localStorage.",
+        "  - Files under /tmp live in volatile RAM and clear on page",
+        "    reload or reboot.",
+        "  - Clearing your browser cache, cookies, or site data WILL",
+        "    PERMANENTLY WIPE ALL SAVED FILES AND ALIASES.",
+        "  - Use 'download <file>' regularly to back up your files!",
+        "* Text File Size Limits:",
+        "  - Single file cap: 16,384 characters (16 KB) max.",
+        "  - Home (~) quota: 24 files max and 32,768 bytes (32 KB) total.",
+        "  - HopeOS prints an amber [WARN] notice once a file reaches 80%",
+        "    of its 16 KB limit or ~ nears 20+ files / 80% capacity.",
+        "* nano <file>",
+        "  Lightweight in-shell text editor inside ttyS0 (Ctrl+O / Ctrl+S",
+        "  to save, Ctrl+X / Esc to exit).",
+        "* download <file>",
+        "  Export any built-in or user file to your device as a UTF-8 .txt",
+        "  file stamped with a 3312 HopeOS header.",
         "",
         "6. QUICK COMMAND EXAMPLES",
-        "--------------------------------------------------------------------------------",
-        "- scan * | grep -v NOMINAL",
-        "- vent c2 || invert c2",
-        "- echo \"Route check: $ECHO/31\" > /tmp/check.txt && cat /tmp/check.txt",
-        "- step $(echo b1 c1 c2)",
-        "- download telemetry.log",
-        "================================================================================"
+        "------------------------------------------------------------------",
+        "* scan * | grep -v NOMINAL",
+        "* vent c2 || invert c2",
+        "* echo \"Echoes: $ECHO/31\" > /tmp/check.txt && cat /tmp/check.txt",
+        "* step $(echo b1 c1 c2)",
+        "* download telemetry.log",
+        "=================================================================="
       ].join("\n");
 
       static COMMANDS = [
@@ -3421,7 +3424,7 @@
           example: "uname -a"
         },
         date: {
-          title: "date - print current Hope System date (UTC)",
+          title: "date - print current Hope system date (UTC)",
           synopsis: "date",
           desc: "Outputs synchronised astronomical transceiver time in Hope System era 3312.",
           example: "date"
@@ -5765,7 +5768,7 @@
         const validWords = [...SectorGenerator.WORDS_3, ...SectorGenerator.WORDS_4];
         if (!validWords.includes(code)) {
           this.game.audio.error();
-          this.print(`sync: unknown beacon '${code}'. Flip the bottom card to inspect all 28 Hope System beacons.`, "err");
+          this.print(`sync: unknown beacon '${code}'. Flip the bottom card to inspect all 28 Hope system beacons.`, "err");
           return false;
         }
 
@@ -6248,10 +6251,13 @@
         if (normPath === "/home/nahla/readme.txt") {
           return [
             "NAHLA TRACKER (6a) // HOPE SYSTEM QUICK NOTES",
-            "1. Read the full HopeOS & Nahla Shell Field Guide: cat ~/field_guide.txt",
-            "2. 31 Hope System bodies: 28 orbital beacons (8 x 3-letter + 20 x 4-letter)",
-            "   plus 3 unbeaconed dark bodies (Bellatrix belt, Theresa 2da, Kali 9da).",
-            "3. All user files in ~ are browser-cached (16KB/file, 24 files max) — use 'download <file>' to save backups."
+            "1. Read the HopeOS & Nahla Shell Field Guide:",
+            "   cat ~/field_guide.txt",
+            "2. 31 Hope system bodies: 28 orbital beacons (8 x 3-letter",
+            "   + 20 x 4-letter) + 3 unbeaconed dark bodies (Bellatrix",
+            "   belt, Theresa 2da, Kali 9da).",
+            "3. All user files in ~ are browser-cached (16KB/file, 24",
+            "   files max) — use 'download <file>' to save backups."
           ].join("\n");
         }
 
@@ -6792,13 +6798,13 @@
           : "SECTOR   : STANDBY";
 
         const header = [
-          "================================================================================",
-          "HOPEOS 3.1.0-void-vector // NAHLA SHELL (nahla_sh) TELEMETRY EXPORT",
+          "==================================================================",
+          "HOPEOS 3.1.0-void-vector // NAHLA SHELL (nahla_sh) EXPORT",
           `DATE : ${hopeDate}`,
           `OPERATOR : ${operator} (ttyS0)`,
           sectorLine,
           `SOURCE   : ${norm}`,
-          "================================================================================",
+          "==================================================================",
           ""
         ].join("\n");
 
@@ -8091,7 +8097,7 @@
       openSeedModal() {
         const shareUrl = `${window.location.origin}${window.location.pathname}#mode=${this.mode}&seed=${this.seed}`;
         const body = `
-          <p>Share this sector seed or enter any code to load an identical Hope System grid:</p>
+          <p>Share this sector seed or enter any code to load an identical Hope system grid:</p>
           <div class="seed-input-row">
             <input type="text" id="seed-input-field" class="seed-input" value="${this.seed}" maxlength="16" placeholder="E.G. H0P3-31A9" />
             <button class="btn btn-primary" id="btn-load-custom-seed">LOAD</button>
@@ -8191,17 +8197,17 @@
         const body = `
           <div class="rule-item">
             <strong>WHAT IS VOID VECTOR?</strong><br/>
-            Void Vector is an offline triangulation, bash terminal, and beacon routing workstation set in the <a href="https://nahla.live/hope.html" target="_blank" rel="noopener noreferrer">Hope System</a>.
+            Void Vector is an offline triangulation, bash terminal, and beacon routing workstation set in the <a href="https://nahla.live/hope.html" target="_blank" rel="noopener noreferrer">Hope system</a>.
           </div>
 
           <div class="modal-section-heading">GLOSSARY &amp; SYSTEM TERMS</div>
           <div class="rule-item">
             <strong>ECHO RETURNS (TARGET: 31):</strong><br/>
-            Radio pings bounced off planetary bodies along your active path. Your path must sum to <strong>31</strong>—one echo for each of the 31 bodies in the Hope System.
+            Radio pings bounced off planetary bodies along your active path. Your path must sum to <strong>31</strong>—one echo for each of the 31 bodies in the Hope system.
           </div>
           <div class="rule-item">
             <strong>BEACON RELAYS &amp; THE 31 BODIES:</strong><br/>
-            The Hope System contains <strong>28 orbital beacons</strong> (8 inner-system 3-letter callsigns in Survey/Orbital and 20 outer-system 4-letter callsigns in Deep Space) plus <strong>3 unbeaconed dark bodies</strong> (Bellatrix belt, Theresa 2da, Kali 9da). Step across the active beacon's letters in order before reaching <strong>[X]</strong>.
+            The Hope system contains <strong>28 orbital beacons</strong> (8 inner-system 3-letter callsigns in Survey/Orbital and 20 outer-system 4-letter callsigns in Deep Space) plus <strong>3 unbeaconed dark bodies</strong> (Bellatrix belt, Theresa 2da, Kali 9da). Step across the active beacon's letters in order before reaching <strong>[X]</strong>.
           </div>
           <div class="rule-item">
             <strong>NAHLA SHELL (ttyS0) &amp; OVERRIDE CHARGES (CHG):</strong><br/>
@@ -8249,7 +8255,7 @@
           <p style="color:var(--emerald);font-weight:700;">
             ${isOptimal ? "★ OPTIMAL TRIANGULATION ACHIEVED ★" : "✓ BEACON VECTOR SYNCHRONISED"}
           </p>
-          <p><strong>${beaconInfo.label}</strong> (${this.puzzle.word}) is back online across the Hope System.</p>
+          <p><strong>${beaconInfo.label}</strong> (${this.puzzle.word}) is back online across the Hope system.</p>
           <div class="stat-grid">
             <div class="stat-box">
               <div class="stat-box-label">ECHO RETURNS</div>
