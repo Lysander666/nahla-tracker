@@ -25,7 +25,7 @@
   <meta name="twitter:image" content="https://nahla.live/vvthumb8.jpeg" />
   <style>
     /* ==========================================================================
-       NAHLA TRACKER DESIGN TOKENS & PHOSPHOR TERMINAL GREEN THEME (v0.97)
+       NAHLA TRACKER DESIGN TOKENS & PHOSPHOR TERMINAL GREEN THEME (v1.0)
        Offline-ready, zero external dependencies, pure monospace aesthetics.
        ========================================================================== */
     :root {
@@ -1891,7 +1891,7 @@
       <header class="terminal-header">
         <div class="brand-block">
           <div class="brand-title">
-            VØID VECTØR v0.97
+            VØID VECTØR v1.0
           </div>
           <div class="brand-sub">NAHLA@HOPE (31 BODIES)</div>
         </div>
@@ -2183,7 +2183,7 @@
   <script>
     /**
      * ==========================================================================
-     * 31: VØID VECTØR v0.97 — CORE ENGINE
+     * 31: VØID VECTØR v1.0 — CORE ENGINE
      * Deterministic Carve-First Puzzle Generator, Anomaly Saboteur,
      * Embedded Bash/Override Shell, WebAudio Synthesizer, 3x3 Walkthrough & UI
      * ==========================================================================
@@ -3030,7 +3030,7 @@
         "==================================================================",
         "HOPEOS & NAHLA SHELL (nahla_sh) // FIELD REFERENCE MANUAL",
         "SYSTEM   : Hope System (31 Bodies) // Nahla 6a Array (ttyS0)",
-        "ERA      : Nov 3312",
+        "ERA      : Stardate 3312",
         "==================================================================",
         "",
         "1. OVERVIEW: HOPEOS & NAHLA_SH",
@@ -3172,7 +3172,7 @@
           example: "scan\n       scan * | grep SHADOW > shadows.txt"
         },
         vent: {
-          title: "vent - vaporise dark-space voids or clear collapsed debris",
+          title: "vent - vaporize dark-space voids or clear collapsed debris",
           synopsis: "vent <coord|glob|range...>",
           desc: "Fires a focused plasma pulse at <xy> (costs 1 CHG per node). Restores collapsed debris (≈) or converts any ## void into a 00 transit node. Supports wildcards like 'vent a*' to target matching voids.",
           example: "vent c4\n       vent a*"
@@ -3424,7 +3424,7 @@
           example: "uname -a"
         },
         date: {
-          title: "date - print current Hope system date (UTC)",
+          title: "date - print current Hope System stardate (UTC)",
           synopsis: "date",
           desc: "Outputs synchronised astronomical transceiver time in Hope System era 3312.",
           example: "date"
@@ -3637,7 +3637,7 @@
 
         const beaconInfo = SectorGenerator.getBeaconInfo(puzzle.word);
         this.print(`HopeOS 3.1.0-void-vector (ttyS0) — SECTOR #${puzzle.seedStr}`, "sys");
-        this.print(`ADVISORY: Read the HopeOS & Nahla Shell field guide in /home/nahla (cat ~/field_guide.txt).`, "cyan");
+        this.print(`TIP: Read the HopeOS & Nahla Shell field guide in /home/nahla (cat ~/field_guide.txt).`, "cyan");
         this.print(`MODE: ${puzzle.mode} (${puzzle.size}x${puzzle.size}) • BEACON: ${puzzle.word} [${beaconInfo.label}] • CHG: ${this.game.chargesLeft}/${puzzle.maxCharges}`, "info");
 
         if (puzzle.anomalies.length > 0) {
@@ -5385,7 +5385,7 @@
       cmdHelp() {
         this.print("=== GRID OVERRIDE & VECTOR COMMANDS (ttyS0) ===", "sys");
         this.print("  scan [xy|glob...] Scan nodes (supports *, a*, *3, a1..a5)", "info");
-        this.print("  vent <xy|glob>    Vaporise ## Void nodes (e.g. vent a3, vent a*)", "info");
+        this.print("  vent <xy|glob>    Vaporize ## Void nodes (e.g. vent a3, vent a*)", "info");
         this.print("  invert <xy|glob>  Flip +/- polarity of non-zero number nodes", "info");
         this.print("  purge <xy|glob>   Clear [!] solar static or decoy beacon relays", "info");
         this.print("  sync <code>       Sync beacon code to unlock [?] phase relays", "info");
@@ -5632,7 +5632,7 @@
             cell.type = "MASS";
             cell.val = 0;
             cell.anomaly = null;
-            this.print(`[OK] VENTED ${pt.coord}: DARK-SPACE VOID VAPORISED -> 00 TRANSIT NODE.`, "ok");
+            this.print(`[OK] VENTED ${pt.coord}: DARK-SPACE VOID VAPORIZED -> 00 TRANSIT NODE.`, "ok");
           }
           this.game.onGridMutated(pt.r, pt.c);
         }
@@ -5768,7 +5768,7 @@
         const validWords = [...SectorGenerator.WORDS_3, ...SectorGenerator.WORDS_4];
         if (!validWords.includes(code)) {
           this.game.audio.error();
-          this.print(`sync: unknown beacon '${code}'. Flip the bottom card to inspect all 28 Hope system beacons.`, "err");
+          this.print(`sync: unknown beacon '${code}'. Flip the bottom card to inspect all 28 Hope System beacons.`, "err");
           return false;
         }
 
@@ -6253,7 +6253,7 @@
             "NAHLA TRACKER (6a) // HOPE SYSTEM QUICK NOTES",
             "1. Read the HopeOS & Nahla Shell Field Guide:",
             "   cat ~/field_guide.txt",
-            "2. 31 Hope system bodies: 28 orbital beacons (8 x 3-letter",
+            "2. 31 Hope System bodies: 28 orbital beacons (8 x 3-letter",
             "   + 20 x 4-letter) + 3 unbeaconed dark bodies (Bellatrix",
             "   belt, Theresa 2da, Kali 9da).",
             "3. All user files in ~ are browser-cached (16KB/file, 24",
@@ -6570,7 +6570,7 @@
 
           if (norm === "/") {
             this.game.audio.error();
-            this.print("rm: safety interlock engaged — HopeOS refuses to vaporise '/' (Nice try, operator!).", "warn");
+            this.print("rm: safety interlock engaged — HopeOS refuses to vaporize '/' (Nice try, operator!).", "warn");
             allOk = false;
             continue;
           }
@@ -6800,7 +6800,7 @@
         const header = [
           "==================================================================",
           "HOPEOS 3.1.0-void-vector // NAHLA SHELL (nahla_sh) EXPORT",
-          `DATE : ${hopeDate}`,
+          `STARDATE : ${hopeDate}`,
           `OPERATOR : ${operator} (ttyS0)`,
           sectorLine,
           `SOURCE   : ${norm}`,
@@ -8097,7 +8097,7 @@
       openSeedModal() {
         const shareUrl = `${window.location.origin}${window.location.pathname}#mode=${this.mode}&seed=${this.seed}`;
         const body = `
-          <p>Share this sector seed or enter any code to load an identical Hope system grid:</p>
+          <p>Share this sector seed or enter any code to load an identical Hope System grid:</p>
           <div class="seed-input-row">
             <input type="text" id="seed-input-field" class="seed-input" value="${this.seed}" maxlength="16" placeholder="E.G. H0P3-31A9" />
             <button class="btn btn-primary" id="btn-load-custom-seed">LOAD</button>
@@ -8197,17 +8197,17 @@
         const body = `
           <div class="rule-item">
             <strong>WHAT IS VOID VECTOR?</strong><br/>
-            Void Vector is an offline triangulation, bash terminal, and beacon routing workstation set in the <a href="https://nahla.live/hope.html" target="_blank" rel="noopener noreferrer">Hope system</a>.
+            Void Vector is an offline triangulation, bash terminal, and beacon routing workstation set in the <a href="https://nahla.live/hope.html" target="_blank" rel="noopener noreferrer">Hope System</a>.
           </div>
 
           <div class="modal-section-heading">GLOSSARY &amp; SYSTEM TERMS</div>
           <div class="rule-item">
             <strong>ECHO RETURNS (TARGET: 31):</strong><br/>
-            Radio pings bounced off planetary bodies along your active path. Your path must sum to <strong>31</strong>—one echo for each of the 31 bodies in the Hope system.
+            Radio pings bounced off planetary bodies along your active path. Your path must sum to <strong>31</strong>—one echo for each of the 31 bodies in the Hope System.
           </div>
           <div class="rule-item">
             <strong>BEACON RELAYS &amp; THE 31 BODIES:</strong><br/>
-            The Hope system contains <strong>28 orbital beacons</strong> (8 inner-system 3-letter callsigns in Survey/Orbital and 20 outer-system 4-letter callsigns in Deep Space) plus <strong>3 unbeaconed dark bodies</strong> (Bellatrix belt, Theresa 2da, Kali 9da). Step across the active beacon's letters in order before reaching <strong>[X]</strong>.
+            The Hope System contains <strong>28 orbital beacons</strong> (8 inner-system 3-letter callsigns in Survey/Orbital and 20 outer-system 4-letter callsigns in Deep Space) plus <strong>3 unbeaconed dark bodies</strong> (Bellatrix belt, Theresa 2da, Kali 9da). Step across the active beacon's letters in order before reaching <strong>[X]</strong>.
           </div>
           <div class="rule-item">
             <strong>NAHLA SHELL (ttyS0) &amp; OVERRIDE CHARGES (CHG):</strong><br/>
@@ -8255,7 +8255,7 @@
           <p style="color:var(--emerald);font-weight:700;">
             ${isOptimal ? "★ OPTIMAL TRIANGULATION ACHIEVED ★" : "✓ BEACON VECTOR SYNCHRONISED"}
           </p>
-          <p><strong>${beaconInfo.label}</strong> (${this.puzzle.word}) is back online across the Hope system.</p>
+          <p><strong>${beaconInfo.label}</strong> (${this.puzzle.word}) is back online across the Hope System.</p>
           <div class="stat-grid">
             <div class="stat-box">
               <div class="stat-box-label">ECHO RETURNS</div>
