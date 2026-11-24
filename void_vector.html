@@ -25,7 +25,7 @@
   <meta name="twitter:image" content="https://nahla.live/vvthumb8.jpeg" />
   <style>
     /* ==========================================================================
-       NAHLA TRACKER DESIGN TOKENS & PHOSPHOR TERMINAL GREEN THEME (v1.0)
+       NAHLA TRACKER DESIGN TOKENS & PHOSPHOR TERMINAL GREEN THEME (v0.97)
        Offline-ready, zero external dependencies, pure monospace aesthetics.
        ========================================================================== */
     :root {
@@ -1891,7 +1891,7 @@
       <header class="terminal-header">
         <div class="brand-block">
           <div class="brand-title">
-            VØID VECTØR v1.0
+            VØID VECTØR v1.01
           </div>
           <div class="brand-sub">NAHLA@HOPE (31 BODIES)</div>
         </div>
@@ -2183,7 +2183,7 @@
   <script>
     /**
      * ==========================================================================
-     * 31: VØID VECTØR v1.0 — CORE ENGINE
+     * 31: VØID VECTØR v0.97 — CORE ENGINE
      * Deterministic Carve-First Puzzle Generator, Anomaly Saboteur,
      * Embedded Bash/Override Shell, WebAudio Synthesizer, 3x3 Walkthrough & UI
      * ==========================================================================
@@ -7167,6 +7167,21 @@
         return `DAY-${y}${m}${day}`;
       }
 
+      isDailySeed() {
+        return this.seed === this.getTodaySeedStr();
+      }
+
+      updateDailyButton() {
+        const btn = document.getElementById("btn-daily");
+        if (!btn) return;
+        const on = this.isDailySeed();
+        btn.textContent = on ? "DAILY ✓" : "DAILY";
+        btn.classList.toggle("active", on);
+        btn.title = on
+          ? `Daily active (${this.mode}:${this.seed}) — click for a random seed`
+          : `Load today's daily (${this.getTodaySeedStr()})`;
+      }
+
       randomSeedStr() {
         const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
         let code = "";
@@ -7200,6 +7215,7 @@
         document.querySelectorAll("[data-mode]").forEach((btn) => {
           btn.addEventListener("click", () => {
             this.mode = btn.dataset.mode;
+            this.seed = this.getTodaySeedStr();
             this.syncModeButtons();
             this.loadPuzzle();
           });
@@ -7210,6 +7226,7 @@
             const targetMode = card.dataset.modeInfo;
             if (!targetMode) return;
             this.mode = targetMode;
+            this.seed = this.getTodaySeedStr();
             this.syncModeButtons();
             this.loadPuzzle();
           };
@@ -7223,7 +7240,11 @@
         });
 
         document.getElementById("btn-daily").addEventListener("click", () => {
-          this.seed = this.getTodaySeedStr();
+          if (this.isDailySeed()) {
+            this.seed = this.randomSeedStr();
+          } else {
+            this.seed = this.getTodaySeedStr();
+          }
           this.loadPuzzle();
         });
 
@@ -7607,6 +7628,7 @@
 
       loadPuzzle(forcedWord = null) {
         this.syncModeButtons();
+        this.updateDailyButton();
         this.puzzle = SectorGenerator.generate(this.mode, this.seed, forcedWord);
         this.rootBoostUsed = false;
 
