@@ -347,6 +347,93 @@
       color: #fde68a;
     }
 
+    /* Lightweight In-Shell Nano Editor (Inside ttyS0 Viewport) */
+    .nano-shell {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      min-height: 0;
+      gap: 0.25rem;
+    }
+
+    .nano-topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.16rem 0.42rem;
+      background: var(--term-green);
+      color: #030705;
+      font-weight: 700;
+      font-size: 0.67rem;
+      border-radius: 3px;
+      user-select: none;
+    }
+
+    .nano-textarea {
+      flex: 1;
+      min-height: 0;
+      width: 100%;
+      resize: none;
+      background: #020503;
+      color: #dcfce7;
+      border: 1px solid var(--border-bright);
+      border-radius: 4px;
+      padding: 0.36rem 0.48rem;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      line-height: 1.4;
+      caret-color: var(--term-green);
+    }
+
+    .nano-textarea:focus {
+      outline: none;
+      border-color: var(--term-green);
+    }
+
+    .nano-status {
+      font-size: 0.65rem;
+      color: var(--amber);
+      min-height: 1.1em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .nano-keybar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+      padding-top: 0.18rem;
+      border-top: 1px dashed var(--border-dim);
+      font-size: 0.63rem;
+      user-select: none;
+    }
+
+    .nano-key-btn {
+      font-family: var(--font-mono);
+      font-size: 0.63rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      background: var(--bg-panel);
+      border: 1px solid var(--border-dim);
+      border-radius: 3px;
+      padding: 0.12rem 0.36rem;
+      cursor: pointer;
+    }
+
+    .nano-key-btn:hover {
+      border-color: var(--term-green);
+      color: var(--term-green);
+    }
+
+    .nano-key-badge {
+      background: var(--term-green);
+      color: #030705;
+      padding: 0 0.22rem;
+      border-radius: 2px;
+      margin-right: 0.22rem;
+    }
+
     .bash-prompt-row {
       display: flex;
       align-items: center;
@@ -2944,7 +3031,7 @@
       static COMMANDS = [
         "scan", "vent", "invert", "purge", "sync", "flag", "unflag", "step", "go", "move", "walk", "undo", "back",
         "dampen", "boost", "reboot", "tutorial", "help", "man", "tldr", "clear", "cls", "ls", "ll", "cd", "pwd",
-        "cat", "grep", "wc", "head", "tail", "sort", "uniq", "cut", "tr", "tee", "sed",
+        "cat", "nano", "edit", "grep", "wc", "head", "tail", "sort", "uniq", "cut", "tr", "tee", "sed",
         "touch", "rm", "cp", "mv", "mkdir", "rmdir", "download", "dl", "save",
         "alias", "unalias", "export", "unset", "env", "printenv", "which", "type",
         "echo", "whoami", "uname", "date", "uptime", "ps", "top", "htop", "df", "history", "sudo", "su", "exit"
@@ -2954,6 +3041,7 @@
         cls: "clear",
         ll: "ls",
         tldr: "man",
+        edit: "nano",
         go: "step",
         move: "step",
         walk: "step",
@@ -3094,8 +3182,14 @@
         cat: {
           title: "cat - concatenate and print virtual telemetry or user files",
           synopsis: "cat <filename|glob...>",
-          desc: "Reads built-in telemetry files (anomalies.dat, lexicon.db, sector.map, telemetry.log, readme.txt) as well as user files created via '>', '>>', 'touch', or 'cp'.",
+          desc: "Reads built-in telemetry files (anomalies.dat, lexicon.db, sector.map, telemetry.log, readme.txt) as well as user files created via 'nano', '>', '>>', 'touch', or 'cp'.",
           example: "cat anomalies.dat\n       cat delete.me"
+        },
+        nano: {
+          title: "nano (edit) - lightweight in-shell text editor on ttyS0",
+          synopsis: "nano <filename>",
+          desc: "Opens an inline text buffer inside the ttyS0 screen to create or edit writable files in ~ (saved in localStorage) or /tmp (volatile). Read-only system files can be viewed in nano and copied elsewhere with 'cp'. Press Ctrl+O (or Ctrl+S) to Write Out and Ctrl+X (or Esc) to Exit.",
+          example: "nano note.txt\n       nano /tmp/plan.txt"
         },
         touch: {
           title: "touch - create empty virtual files or update timestamps",
@@ -3309,6 +3403,7 @@
         this.monitorMode = null;
         this.monitorTimer = null;
         this.monitorTick = 0;
+        this.nanoSession = null;
         this.captureBuffer = null;
         this.stdinLines = null;
         this.lastExitCode = 0;
@@ -3360,6 +3455,7 @@
 
       resetForSector(puzzle) {
         this.stopMonitor(false);
+        this.closeNano(false);
         this.lines = [];
         this.cwd = "/home/nahla/sector";
         this.isRoot = false;
@@ -3383,6 +3479,7 @@
 
       clear() {
         this.stopMonitor(false);
+        this.closeNano(false);
         this.lines = [];
         this.render();
       }
@@ -3398,7 +3495,7 @@
         if (this.lines.length > NahlaTerminal.MAX_LINES) {
           this.lines.splice(0, this.lines.length - NahlaTerminal.MAX_LINES);
         }
-        if (!this.monitorMode) {
+        if (!this.monitorMode && !this.nanoSession) {
           this.render();
         }
       }
@@ -3842,6 +3939,10 @@
       }
 
       render() {
+        if (this.nanoSession) {
+          this.renderNano();
+          return;
+        }
         if (this.monitorMode) {
           this.renderMonitor();
           return;
@@ -3945,6 +4046,228 @@
         }
       }
 
+      openNano(rawTarget) {
+        if (!rawTarget) {
+          this.game.audio.error();
+          this.print("usage: nano <filename>  (example: nano note.txt)", "err");
+          return false;
+        }
+
+        const norm = this.resolvePath(rawTarget);
+        if (this.isDirectory(norm)) {
+          this.game.audio.error();
+          this.print(`nano: ${rawTarget}: Is a directory`, "err");
+          return false;
+        }
+
+        const existing = this.getFileContentByPath(norm);
+        if (existing === "__PERMISSION_DENIED__") {
+          this.game.audio.error();
+          this.print(`nano: ${rawTarget}: Permission denied (use 'su -')`, "err");
+          return false;
+        }
+
+        const readOnly = !this.isWritablePath(norm);
+        if (existing === null && readOnly) {
+          this.game.audio.error();
+          this.print(`nano: ${rawTarget}: Read-only file system (create files in ~ or /tmp)`, "err");
+          return false;
+        }
+
+        this.stopMonitor(false);
+        this.nanoSession = {
+          displayName: rawTarget,
+          normPath: norm,
+          content: existing !== null ? existing : "",
+          readOnly,
+          modified: false,
+          statusMsg: readOnly
+            ? "[ Read-Only Telemetry File — View Only ]"
+            : existing === null
+              ? "[ New File ]"
+              : `[ Read ${existing === "" ? 0 : existing.split("\n").length} lines ]`
+        };
+
+        const clearBtn = document.getElementById("btn-term-clear");
+        if (clearBtn) {
+          clearBtn.textContent = "EXIT ^X";
+          clearBtn.title = "Exit Nano Editor (Ctrl+X)";
+          clearBtn.classList.add("monitor-active");
+        }
+
+        this.game.audio.cmdOk();
+        this.renderNano(true);
+        return true;
+      }
+
+      saveNano() {
+        if (!this.nanoSession) return false;
+        const s = this.nanoSession;
+        const ta = document.getElementById("nano-textarea");
+        if (ta) s.content = ta.value;
+
+        if (s.readOnly) {
+          this.game.audio.error();
+          s.statusMsg = "[ Error: Read-only file — copy to ~ or /tmp first ]";
+          const st = document.getElementById("nano-status");
+          if (st) st.textContent = s.statusMsg;
+          return false;
+        }
+
+        const res = this.writeUserFile(s.normPath, s.content, false);
+        if (!res.ok) {
+          this.game.audio.error();
+          s.statusMsg = `[ Error: ${res.err} ]`;
+          const st = document.getElementById("nano-status");
+          if (st) st.textContent = s.statusMsg;
+          return false;
+        }
+
+        s.modified = false;
+        const lineCount = s.content === "" ? 0 : s.content.split("\n").length;
+        s.statusMsg = `[ Wrote ${lineCount} line${lineCount === 1 ? "" : "s"} to ${s.displayName} ]`;
+        this.game.audio.cmdOk();
+
+        const modEl = document.getElementById("nano-mod-flag");
+        if (modEl) modEl.textContent = "";
+        const st = document.getElementById("nano-status");
+        if (st) st.textContent = s.statusMsg;
+        return true;
+      }
+
+      closeNano(announce = true) {
+        const prev = this.nanoSession;
+        this.nanoSession = null;
+
+        const clearBtn = document.getElementById("btn-term-clear");
+        if (clearBtn) {
+          clearBtn.textContent = "CLEAR";
+          clearBtn.title = "Clear Terminal Buffer (clear)";
+          clearBtn.classList.remove("monitor-active");
+        }
+
+        if (prev) {
+          if (announce) {
+            this.lines.push({
+              text: `[nano] closed ${prev.displayName}${prev.modified ? " (unsaved buffer discarded)" : ""}.`,
+              tone: "info",
+              html: false
+            });
+          }
+          this.render();
+          const bashInput = document.getElementById("bash-input");
+          if (bashInput) bashInput.focus();
+        }
+      }
+
+      renderNano(focusEditor = false) {
+        if (!this.nanoSession) return;
+        const screen = document.getElementById("bash-screen");
+        if (!screen) return;
+        const s = this.nanoSession;
+
+        screen.innerHTML = "";
+        const wrap = document.createElement("div");
+        wrap.className = "nano-shell";
+
+        const topbar = document.createElement("div");
+        topbar.className = "nano-topbar";
+        const leftTitle = document.createElement("span");
+        leftTitle.textContent = `GNU nano 7.2   ${s.displayName}`;
+        const modFlag = document.createElement("span");
+        modFlag.id = "nano-mod-flag";
+        modFlag.textContent = s.readOnly ? "READ-ONLY" : (s.modified ? "MODIFIED" : "");
+        topbar.appendChild(leftTitle);
+        topbar.appendChild(modFlag);
+
+        const textarea = document.createElement("textarea");
+        textarea.id = "nano-textarea";
+        textarea.className = "nano-textarea";
+        textarea.value = s.content;
+        textarea.readOnly = s.readOnly;
+        textarea.spellcheck = false;
+        textarea.placeholder = s.readOnly ? "" : "Type file contents here... (Ctrl+O Save • Ctrl+X Exit)";
+
+        textarea.addEventListener("input", () => {
+          s.content = textarea.value;
+          if (!s.modified) {
+            s.modified = true;
+            modFlag.textContent = "MODIFIED";
+          }
+        });
+
+        textarea.addEventListener("keydown", (e) => {
+          e.stopPropagation();
+          if (e.ctrlKey && (e.key.toLowerCase() === "o" || e.key.toLowerCase() === "s")) {
+            e.preventDefault();
+            this.saveNano();
+          } else if (e.ctrlKey && e.key.toLowerCase() === "x") {
+            e.preventDefault();
+            this.game.audio.cmdOk();
+            this.closeNano(true);
+          } else if (e.key === "Escape") {
+            e.preventDefault();
+            this.game.audio.cmdOk();
+            this.closeNano(true);
+          }
+        });
+
+        const status = document.createElement("div");
+        status.id = "nano-status";
+        status.className = "nano-status";
+        status.textContent = s.statusMsg;
+
+        const keybar = document.createElement("div");
+        keybar.className = "nano-keybar";
+
+        if (!s.readOnly) {
+          const saveBtn = document.createElement("button");
+          saveBtn.type = "button";
+          saveBtn.className = "nano-key-btn";
+          saveBtn.innerHTML = `<span class="nano-key-badge">^O</span>Write Out`;
+          saveBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            this.saveNano();
+            textarea.focus();
+          });
+          keybar.appendChild(saveBtn);
+
+          const saveExitBtn = document.createElement("button");
+          saveExitBtn.type = "button";
+          saveExitBtn.className = "nano-key-btn";
+          saveExitBtn.innerHTML = `<span class="nano-key-badge">^O^X</span>Save &amp; Exit`;
+          saveExitBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            if (this.saveNano()) {
+              this.closeNano(true);
+            }
+          });
+          keybar.appendChild(saveExitBtn);
+        }
+
+        const exitBtn = document.createElement("button");
+        exitBtn.type = "button";
+        exitBtn.className = "nano-key-btn";
+        exitBtn.innerHTML = `<span class="nano-key-badge">^X</span>Exit`;
+        exitBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          this.game.audio.cmdOk();
+          this.closeNano(true);
+        });
+        keybar.appendChild(exitBtn);
+
+        wrap.appendChild(topbar);
+        wrap.appendChild(textarea);
+        wrap.appendChild(status);
+        wrap.appendChild(keybar);
+        screen.appendChild(wrap);
+
+        if (focusEditor) {
+          textarea.focus();
+          textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+        }
+      }
+
       getPromptPrefix() {
         const user = this.isRoot ? "root" : "nahla";
         const sigil = this.isRoot ? "#" : "$";
@@ -4017,7 +4340,7 @@
           const matches = coords.filter((xy) => xy.startsWith(argPrefix));
           if (matches.length === 1) return `${prefixBeforeSegment}${leadingSpace}${priorArgs} ${matches[0]}`;
           if (matches.length > 1 && matches.length <= 12) this.print(matches.join("  "), "info");
-        } else if (["cat", "grep", "ls", "ll", "cd", "wc", "head", "tail", "echo", "rm", "cp", "mv", "touch", "mkdir", "rmdir", "download", "dl", "save", "tee", "sed", "cut"].includes(cmd)) {
+        } else if (["cat", "nano", "edit", "grep", "ls", "ll", "cd", "wc", "head", "tail", "echo", "rm", "cp", "mv", "touch", "mkdir", "rmdir", "download", "dl", "save", "tee", "sed", "cut"].includes(cmd)) {
           const files = this.getDirEntries(this.cwd).map((f) => f.replace(/\/$/, ""));
           const matches = files.filter((f) => f.toLowerCase().startsWith(lastArg.toLowerCase()));
           if (matches.length === 1) return `${prefixBeforeSegment}${leadingSpace}${priorArgs} ${matches[0]}`;
@@ -4048,6 +4371,9 @@
 
         if (this.monitorMode) {
           this.stopMonitor(false);
+        }
+        if (this.nanoSession) {
+          this.closeNano(false);
         }
 
         this.cmdHistory.push(trimmed);
@@ -4704,6 +5030,10 @@
           case "cat":
             return this.cmdCat(this.expandFsArgs(rawArgStr));
 
+          case "nano":
+          case "edit":
+            return this.openNano(this.expandFsArgs(rawArgStr)[0]);
+
           case "touch":
             return this.cmdTouch(this.expandFsArgs(rawArgStr));
 
@@ -4851,7 +5181,7 @@
         this.print("  shell & redir     '|', '&&', '||', '>', '>>', '<', '$ECHO', '$(...)', 'man shell'", "info");
         this.print("  reboot / tutorial Reset sector or launch 3x3 field walkthrough", "info");
         this.print("=== BASH / FILESYSTEM / EXPORT UTILITIES ===", "sys");
-        this.print("  man <cmd>, ls, cd, pwd, cat, touch, rm, cp, mv, mkdir, download,", "info");
+        this.print("  man <cmd>, ls, cd, pwd, cat, nano, touch, rm, cp, mv, mkdir, download,", "info");
         this.print("  grep, wc, head, tail, sort, uniq, cut, tr, tee, sed, alias, env, su -", "info");
       }
 
@@ -6125,10 +6455,31 @@
         }
 
         const rawBase = positional[1] ? positional[1].split("/").pop() : srcNorm.split("/").pop();
-        const exportName = /\.(txt|log)$/i.test(rawBase) ? rawBase : `${rawBase}.txt`;
+        const exportName = /\.txt$/i.test(rawBase) ? rawBase : `${rawBase}.txt`;
+
+        const now = new Date();
+        const hopeDate = now.toUTCString().replace(/\b20\d{2}\b/, "3312");
+        const operator = this.isRoot ? "root@hope (ttyS0)" : "nahla-tracker@hope (ttyS0)";
+        const sectorInfo = this.game.puzzle
+          ? `${this.game.mode}:${this.game.seed} [BEACON:${this.game.puzzle.word}]`
+          : "HOPE-SYSTEM";
+        const body = content.endsWith("\n") ? content : `${content}\n`;
+
+        const headerLines = [
+          "========================================================================",
+          "HOPEOS 3.1.0-void-vector // NAHLA SHELL (ttyS0) TELEMETRY EXPORT",
+          `STARDATE (UTC) : ${hopeDate}`,
+          `OPERATOR       : ${operator}`,
+          `SECTOR / SEED  : ${sectorInfo}`,
+          `SOURCE PATH    : ${srcNorm}`,
+          "========================================================================",
+          ""
+        ].join("\n");
+
+        const payload = `${headerLines}${body}`;
 
         try {
-          const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+          const blob = new Blob([payload], { type: "text/plain;charset=utf-8" });
           const url = URL.createObjectURL(blob);
           const link = document.createElement("a");
           link.href = url;
@@ -6139,7 +6490,7 @@
           document.body.removeChild(link);
           setTimeout(() => URL.revokeObjectURL(url), 1500);
           this.game.audio.cmdOk();
-          this.print(`[OK] EXPORTED '${exportName}' (${content.length} bytes, UTF-8 text).`, "ok");
+          this.print(`[OK] EXPORTED '${exportName}' (${payload.length} bytes, HopeOS .txt).`, "ok");
           return true;
         } catch (err) {
           this.game.audio.error();
@@ -6949,7 +7300,8 @@
           }
         });
 
-        bashScreen.addEventListener("click", () => {
+        bashScreen.addEventListener("click", (e) => {
+          if (this.term.nanoSession) return;
           const sel = window.getSelection();
           if (!sel || sel.toString().length === 0) {
             bashInput.focus();
@@ -6957,6 +7309,11 @@
         });
 
         document.getElementById("btn-term-clear").addEventListener("click", () => {
+          if (this.term.nanoSession) {
+            this.term.closeNano(true);
+            this.audio.cmdOk();
+            return;
+          }
           if (this.term.monitorMode) {
             this.term.stopMonitor(true);
             this.audio.cmdOk();
