@@ -2960,16 +2960,16 @@
           desc: "Lists core HopeOS telemetry daemons (init, echo_triangulator, carrier_router, nahla_sh).",
           example: "ps"
         },
-        top: {
+         top: {
           title: "top - live classic Unix telemetry and anomaly process monitor",
           synopsis: "top [-b]",
-          desc: "Launches a live-ticking process table showing CPU load, Echo memory (/31.0 MiB), and active anomalies as high-CPU irq tasks. Press 'q' or 'Esc' to quit, or pass '-b' for a static snapshot.",
+          desc: "Displays a live-ticking process table (0.9s refresh) for ttyS0. Baseline transceiver daemons (init, echo_triangulator, carrier_router, nahla_sh) idle near ~4% CPU; each active grid anomaly spawns a high-CPU irq interrupt task (+37% CPU, state R) until cleared via vent, invert, purge, or sync. MiB Echo tracks live Echo Returns (/31.0). Press 'q' or 'Esc' to quit, or pass '-b' for a static snapshot.",
           example: "top\n       top -b"
         },
         htop: {
           title: "htop - live phosphor-bar telemetry and process monitor",
           synopsis: "htop [-b]",
-          desc: "Launches a live-ticking monitor with ASCII progress bars for CPU load, Echo Returns, and Override Charges that react as you step across the grid. Press 'q' or 'Esc' to quit.",
+          desc: "Displays a live-ticking monitor (0.9s refresh) with ASCII bars for CPU0 (anomaly interrupt load: ~4% idle, +37% per active anomaly), ECHO (live path sum /31E), and OVRD (remaining Override Charges). 'Tasks' counts the 4 core daemons plus 1 task per active anomaly; 'running' shows nahla_sh plus active anomaly tasks. Press 'q' or 'Esc' to quit, or pass '-b' for a static snapshot.",
           example: "htop\n       htop -b"
         },
         df: {
