@@ -3119,10 +3119,10 @@
           example: "cat lexicon.db | uniq"
         },
         echo: {
-          title: "echo - display a line of text on ttyS0",
-          synopsis: "echo [string...]",
-          desc: "Prints its arguments directly to standard output on the serial console.",
-          example: "echo 31 echoes locked"
+          title: "echo - display a line of text or expand filesystem globs on ttyS0",
+          synopsis: "echo [string|glob...]",
+          desc: "Prints its arguments to standard output. Unquoted wildcards (* and ?) expand matching filenames in the current or target directory (quote as \"*\" to print literally).",
+          example: "echo *\n       echo *.log\n       echo \"*\""
         },
         whoami: {
           title: "whoami - print effective operator user ID",
@@ -3199,8 +3199,8 @@
         shell: {
           title: "shell (pipes/redir/glob) - nahla_sh wildcards, pipes, chaining & redirection",
           synopsis: "cmd1 [glob|range] | cmd2 && cmd3 ; cmd4 2>&1",
-          desc: "nahla_sh supports coordinate globs (*, ?, a*, *3) and ranges (a1..a5), command chaining ('&&' stops on error; ';' runs unconditionally), stdout pipes ('|' into grep, wc, head, tail, sort, uniq), and stream redirection ('2>&1' merges stderr into pipes; '2>/dev/null' suppresses errors).",
-          example: "scan * 2>&1 | grep -v NOMINAL\n       vent a1 && step a1..a3\n       unflag * 2>/dev/null"
+          desc: "nahla_sh supports coordinate globs (*, ?, a*, *3) and ranges (a1..a5), unquoted filename globs in echo/ls/cat/grep (e.g. echo *, cat *.dat), command chaining ('&&' stops on error; ';' runs unconditionally), stdout pipes ('|' into grep, wc, head, tail, sort, uniq), and stream redirection ('2>&1' merges stderr into pipes; '2>/dev/null' suppresses errors).",
+          example: "echo *.log\n       scan * 2>&1 | grep -v NOMINAL\n       vent a1 && step a1..a3\n       unflag * 2>/dev/null"
         }
       };
 
@@ -3339,6 +3339,73 @@
           tokens.push(m[1] !== undefined ? m[1] : m[2] !== undefined ? m[2] : m[3]);
         }
         return tokens;
+      }
+
+      tokenizeDetailed(str) {
+        const tokens = [];
+        const rx = /"([^"]*)"|'([^']*)'|(\S+)/g;
+        let m;
+        while ((m = rx.exec(str)) !== null) {
+          if (m[1] !== undefined) tokens.push({ text: m[1], quoted: true });
+          else if (m[2] !== undefined) tokens.push({ text: m[2], quoted: true });
+          else tokens.push({ text: m[3], quoted: false });
+        }
+        return tokens;
+      }
+
+      expandFsGlobToken(tokenText) {
+        if (!/[*?]/.test(tokenText)) return [tokenText];
+
+        const slashIdx = tokenText.lastIndexOf("/");
+        const dirPart = slashIdx !== -1 ? tokenText.slice(0, slashIdx) : "";
+        const baseGlob = slashIdx !== -1 ? tokenText.slice(slashIdx + 1) : tokenText;
+        if (!baseGlob) return [tokenText];
+
+        const targetDir = dirPart ? this.resolvePath(dirPart || "/") : this.cwd;
+        if (targetDir === "/root" && !this.isRoot) return [tokenText];
+
+        const entries = this.getDirEntries(targetDir);
+        if (entries.length === 0) return [tokenText];
+
+        let rxSrc = "";
+        for (let i = 0; i < baseGlob.length; i++) {
+          const ch = baseGlob[i];
+          if (ch === "*") rxSrc += "[^/]*";
+          else if (ch === "?") rxSrc += "[^/]";
+          else if ("\\^$.|+()[]{}".includes(ch)) rxSrc += "\\" + ch;
+          else rxSrc += ch;
+        }
+
+        let rx = null;
+        try {
+          rx = new RegExp(`^${rxSrc}$`);
+        } catch (_) {
+          return [tokenText];
+        }
+
+        const prefix = dirPart ? (dirPart === "/" ? "/" : `${dirPart}/`) : "";
+        const matches = [];
+        for (const entry of entries) {
+          const cleanName = entry.replace(/\/$/, "");
+          if (rx.test(cleanName)) {
+            matches.push(`${prefix}${cleanName}`);
+          }
+        }
+
+        return matches.length > 0 ? matches : [tokenText];
+      }
+
+      expandFsArgs(rawArgStr) {
+        const detailed = this.tokenizeDetailed(rawArgStr);
+        const out = [];
+        for (const tok of detailed) {
+          if (!tok.quoted && /[*?]/.test(tok.text)) {
+            out.push(...this.expandFsGlobToken(tok.text));
+          } else {
+            out.push(tok.text);
+          }
+        }
+        return out;
       }
 
       render() {
@@ -3516,7 +3583,7 @@
           const matches = coords.filter((xy) => xy.startsWith(argPrefix));
           if (matches.length === 1) return `${prefixBeforeSegment}${leadingSpace}${priorArgs} ${matches[0]}`;
           if (matches.length > 1 && matches.length <= 12) this.print(matches.join("  "), "info");
-        } else if (["cat", "grep", "ls", "cd", "wc", "head", "tail"].includes(cmd)) {
+        } else if (["cat", "grep", "ls", "cd", "wc", "head", "tail", "echo"].includes(cmd)) {
           const files = this.getDirEntries(this.cwd).map((f) => f.replace(/\/$/, ""));
           const matches = files.filter((f) => f.toLowerCase().startsWith(lastArg.toLowerCase()));
           if (matches.length === 1) return `${prefixBeforeSegment}${leadingSpace}${priorArgs} ${matches[0]}`;
@@ -3757,9 +3824,10 @@
       }
 
       executeSingle(segment) {
-        const tokens = this.tokenizeArgs(segment);
-        const cmd = (tokens[0] || "").toLowerCase();
-        const args = tokens.slice(1);
+        const firstSpace = segment.search(/\s/);
+        const cmd = (firstSpace === -1 ? segment : segment.slice(0, firstSpace)).toLowerCase();
+        const rawArgStr = firstSpace === -1 ? "" : segment.slice(firstSpace + 1).trim();
+        const args = this.tokenizeArgs(rawArgStr);
 
         if (cmd === "sudo") {
           this.game.audio.error();
@@ -3855,8 +3923,7 @@
 
           case "ls":
           case "ll":
-            this.cmdLs(args);
-            return true;
+            return this.cmdLs(this.expandFsArgs(rawArgStr));
 
           case "cd":
             this.cmdCd(args[0]);
@@ -3867,19 +3934,18 @@
             return true;
 
           case "cat":
-            this.cmdCat(args[0]);
-            return true;
+            return this.cmdCat(this.expandFsArgs(rawArgStr));
 
           case "grep":
-            return this.cmdGrep(args);
+            return this.cmdGrep(rawArgStr);
 
           case "wc":
           case "head":
           case "tail":
-            return this.cmdFileSliceOrCount(cmd, args);
+            return this.cmdFileSliceOrCount(cmd, this.expandFsArgs(rawArgStr));
 
           case "echo":
-            this.print(args.join(" "), "info");
+            this.print(this.expandFsArgs(rawArgStr).join(" "), "info");
             return true;
 
           case "whoami":
@@ -4656,28 +4722,58 @@
       }
 
       cmdLs(args) {
-        const pathArg = args.find((a) => !a.startsWith("-"));
-        const target = pathArg ? this.resolvePath(pathArg) : this.cwd;
-        if (target === "/root" && !this.isRoot) {
-          this.game.audio.error();
-          this.print("ls: cannot open directory '/root': Permission denied (use 'su -')", "err");
-          return;
-        }
-        const entries = this.getDirEntries(target);
-        if (entries.length === 0) {
-          this.game.audio.error();
-          this.print(`ls: cannot access '${pathArg || target}': No such file or directory`, "err");
-          return;
-        }
-        if (args.includes("-la") || args.includes("-l")) {
-          this.print(`total ${entries.length * 4}`, "info");
-          entries.forEach((e) => {
-            const isDir = e.endsWith("/");
-            this.print(`${isDir ? "drwxr-xr-x" : "-rw-r--r--"} 1 nahla hope 4096 Nov 19  3312 ${e}`, isDir ? "cyan" : "info");
-          });
-        } else {
-          this.print(entries.join("   "), "cyan");
-        }
+        const longFmt = args.includes("-la") || args.includes("-l");
+        const pathArgs = args.filter((a) => !a.startsWith("-"));
+        const targets = pathArgs.length > 0 ? pathArgs : [this.cwd];
+        const validDirs = ["/", "/home", "/home/nahla", "/home/nahla/sector", "/root", "/sys", "/sys/sector", "/sys/override", "/var", "/var/log", "/etc"];
+        let allOk = true;
+
+        targets.forEach((rawTarget, idx) => {
+          const resolved = this.resolvePath(rawTarget);
+          if (resolved === "/root" && !this.isRoot) {
+            this.game.audio.error();
+            this.print("ls: cannot open directory '/root': Permission denied (use 'su -')", "err");
+            allOk = false;
+            return;
+          }
+
+          if (validDirs.includes(resolved)) {
+            const entries = this.getDirEntries(resolved);
+            if (targets.length > 1) {
+              this.print(`${idx > 0 ? "\n" : ""}${rawTarget}:`, "sys");
+            }
+            if (longFmt) {
+              this.print(`total ${entries.length * 4}`, "info");
+              entries.forEach((e) => {
+                const isDir = e.endsWith("/");
+                this.print(`${isDir ? "drwxr-xr-x" : "-rw-r--r--"} 1 nahla hope 4096 Nov 19  3312 ${e}`, isDir ? "cyan" : "info");
+              });
+            } else {
+              this.print(entries.join("   "), "cyan");
+            }
+            return;
+          }
+
+          // Check if target refers to a regular file inside its parent directory
+          const parentSlash = resolved.lastIndexOf("/");
+          const parentDir = parentSlash <= 0 ? "/" : resolved.slice(0, parentSlash);
+          const baseName = resolved.slice(parentSlash + 1);
+          const parentEntries = this.getDirEntries(parentDir).map((e) => e.replace(/\/$/, ""));
+
+          if (parentEntries.includes(baseName)) {
+            if (longFmt) {
+              this.print(`-rw-r--r-- 1 nahla hope 4096 Nov 19  3312 ${rawTarget}`, "info");
+            } else {
+              this.print(rawTarget, "info");
+            }
+          } else {
+            this.game.audio.error();
+            this.print(`ls: cannot access '${rawTarget}': No such file or directory`, "err");
+            allOk = false;
+          }
+        });
+
+        return allOk;
       }
 
       cmdCd(target) {
@@ -4780,31 +4876,39 @@
         return null;
       }
 
-      cmdCat(arg) {
-        if (!arg) {
+      cmdCat(args) {
+        const fileArgs = Array.isArray(args) ? args : (args ? [args] : []);
+        if (fileArgs.length === 0) {
           this.game.audio.error();
-          this.print("usage: cat <filename>", "err");
-          return;
+          this.print("usage: cat <filename|glob...>", "err");
+          return false;
         }
-        const baseName = arg.split("/").pop();
-        const content = this.getFileContent(baseName);
-        if (content === "__PERMISSION_DENIED__") {
-          this.game.audio.error();
-          this.print(`cat: ${arg}: Permission denied (use 'su -')`, "err");
-          return;
+        let allOk = true;
+        for (const arg of fileArgs) {
+          const baseName = arg.split("/").pop();
+          const content = this.getFileContent(baseName);
+          if (content === "__PERMISSION_DENIED__") {
+            this.game.audio.error();
+            this.print(`cat: ${arg}: Permission denied (use 'su -')`, "err");
+            allOk = false;
+            continue;
+          }
+          if (content === null) {
+            this.game.audio.error();
+            this.print(`cat: ${arg}: No such file`, "err");
+            allOk = false;
+            continue;
+          }
+          this.print(content, "info");
         }
-        if (content === null) {
-          this.game.audio.error();
-          this.print(`cat: ${arg}: No such file`, "err");
-          return;
-        }
-        this.print(content, "info");
+        return allOk;
       }
 
-      cmdGrep(args) {
-        if (args.length === 0) {
+      cmdGrep(rawArgStr) {
+        const detailed = this.tokenizeDetailed(rawArgStr);
+        if (detailed.length === 0) {
           this.game.audio.error();
-          this.print("usage: grep [-v] [-c] [-n] <regex> [file]", "err");
+          this.print("usage: grep [-v] [-c] [-n] <regex> [file|glob...]", "err");
           return false;
         }
         let invert = false;
@@ -4812,39 +4916,38 @@
         let lineNums = false;
         const positional = [];
 
-        for (const a of args) {
-          if (a === "-i") continue;
-          else if (a === "-v") invert = true;
-          else if (a === "-c") countOnly = true;
-          else if (a === "-n") lineNums = true;
-          else if (/^-[ivcn]+$/.test(a)) {
+        for (const tok of detailed) {
+          const a = tok.text;
+          if (!tok.quoted && a === "-i") continue;
+          else if (!tok.quoted && a === "-v") invert = true;
+          else if (!tok.quoted && a === "-c") countOnly = true;
+          else if (!tok.quoted && a === "-n") lineNums = true;
+          else if (!tok.quoted && /^-[ivcn]+$/.test(a)) {
             if (a.includes("v")) invert = true;
             if (a.includes("c")) countOnly = true;
             if (a.includes("n")) lineNums = true;
           } else {
-            positional.push(a);
+            positional.push(tok);
           }
         }
 
         if (positional.length === 0) {
           this.game.audio.error();
-          this.print("usage: grep [-v] [-c] [-n] <regex> [file]", "err");
+          this.print("usage: grep [-v] [-c] [-n] <regex> [file|glob...]", "err");
           return false;
         }
 
-        const pattern = positional[0];
-        const file = positional[1] ? positional[1].split("/").pop() : "lexicon.db";
-        const content = this.getFileContent(file);
-        if (content === "__PERMISSION_DENIED__") {
-          this.game.audio.error();
-          this.print(`grep: ${file}: Permission denied (use 'su -')`, "err");
-          return false;
+        const pattern = positional[0].text;
+        const rawFiles = positional.slice(1);
+        const expandedFiles = [];
+        for (const fTok of rawFiles) {
+          if (!fTok.quoted && /[*?]/.test(fTok.text)) {
+            expandedFiles.push(...this.expandFsGlobToken(fTok.text));
+          } else {
+            expandedFiles.push(fTok.text);
+          }
         }
-        if (content === null) {
-          this.game.audio.error();
-          this.print(`grep: ${file}: No such file`, "err");
-          return false;
-        }
+        const targetFiles = expandedFiles.length > 0 ? expandedFiles : ["lexicon.db"];
 
         let rx = null;
         try {
@@ -4853,24 +4956,55 @@
           rx = null;
         }
 
-        const hits = [];
-        content.split("\n").forEach((line, idx) => {
-          const matched = rx ? rx.test(line) : line.toLowerCase().includes(pattern.toLowerCase());
-          if (invert ? !matched : matched) {
-            hits.push(lineNums ? `${idx + 1}:${line}` : line);
+        const validDirs = ["/", "/home", "/home/nahla", "/home/nahla/sector", "/root", "/sys", "/sys/sector", "/sys/override", "/var", "/var/log", "/etc"];
+        const allHits = [];
+        let allOk = true;
+
+        for (const fileArg of targetFiles) {
+          const resolved = this.resolvePath(fileArg);
+          if (validDirs.includes(resolved)) {
+            if (rawFiles.some((t) => !t.quoted && /[*?]/.test(t.text))) continue;
+            this.game.audio.error();
+            this.print(`grep: ${fileArg}: Is a directory`, "err");
+            allOk = false;
+            continue;
           }
-        });
+          const baseName = fileArg.split("/").pop();
+          const content = this.getFileContent(baseName);
+          if (content === "__PERMISSION_DENIED__") {
+            this.game.audio.error();
+            this.print(`grep: ${fileArg}: Permission denied (use 'su -')`, "err");
+            allOk = false;
+            continue;
+          }
+          if (content === null) {
+            this.game.audio.error();
+            this.print(`grep: ${fileArg}: No such file`, "err");
+            allOk = false;
+            continue;
+          }
+
+          const prefix = targetFiles.length > 1 ? `${fileArg}:` : "";
+          content.split("\n").forEach((line, idx) => {
+            const matched = rx ? rx.test(line) : line.toLowerCase().includes(pattern.toLowerCase());
+            if (invert ? !matched : matched) {
+              allHits.push(`${prefix}${lineNums ? `${idx + 1}:` : ""}${line}`);
+            }
+          });
+        }
 
         if (countOnly) {
-          this.print(String(hits.length), "ok");
-          return hits.length > 0;
+          this.print(String(allHits.length), "ok");
+          return allOk && allHits.length > 0;
         }
-        if (hits.length === 0) {
-          this.print(`(no matches for '${pattern}' in ${file})`, "info");
+        if (allHits.length === 0) {
+          if (allOk) {
+            this.print(`(no matches for '${pattern}' in ${targetFiles.join(", ")})`, "info");
+          }
           return false;
         }
-        this.print(hits.join("\n"), "ok");
-        return true;
+        this.print(allHits.join("\n"), "ok");
+        return allOk;
       }
 
       cmdFileSliceOrCount(cmd, args) {
