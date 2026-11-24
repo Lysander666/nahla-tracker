@@ -25,7 +25,7 @@
   <meta name="twitter:image" content="https://nahla.live/vvthumb8.jpeg" />
   <style>
     /* ==========================================================================
-       NAHLA TRACKER DESIGN TOKENS & PHOSPHOR TERMINAL GREEN THEME (v0.95)
+       NAHLA TRACKER DESIGN TOKENS & PHOSPHOR TERMINAL GREEN THEME (v0.96)
        Offline-ready, zero external dependencies, pure monospace aesthetics.
        ========================================================================== */
     :root {
@@ -1804,7 +1804,7 @@
       <header class="terminal-header">
         <div class="brand-block">
           <div class="brand-title">
-            VØID VECTØR v0.95
+            VØID VECTØR v0.96
           </div>
           <div class="brand-sub">NAHLA@HOPE (31 BODIES)</div>
         </div>
@@ -2096,7 +2096,7 @@
   <script>
     /**
      * ==========================================================================
-     * 31: VØID VECTØR v0.95 — CORE ENGINE
+     * 31: VØID VECTØR v0.96 — CORE ENGINE
      * Deterministic Carve-First Puzzle Generator, Anomaly Saboteur,
      * Embedded Bash/Override Shell, WebAudio Synthesizer, 3x3 Walkthrough & UI
      * ==========================================================================
@@ -2937,11 +2937,17 @@
     // --------------------------------------------------------------------------
     class NahlaTerminal {
       static MAX_LINES = 300;
+      static VFS_STORAGE_KEY = "nahla_31_void_vector_vfs";
+      static MAX_VFS_FILES = 24;
+      static MAX_VFS_BYTES = 32768;
+
       static COMMANDS = [
         "scan", "vent", "invert", "purge", "sync", "flag", "unflag", "step", "go", "move", "walk", "undo", "back",
         "dampen", "boost", "reboot", "tutorial", "help", "man", "tldr", "clear", "cls", "ls", "ll", "cd", "pwd",
-        "cat", "grep", "wc", "head", "tail", "sort", "uniq", "echo", "whoami", "uname", "date", "uptime",
-        "ps", "top", "htop", "df", "history", "sudo", "su", "exit"
+        "cat", "grep", "wc", "head", "tail", "sort", "uniq", "cut", "tr", "tee", "sed",
+        "touch", "rm", "cp", "mv", "mkdir", "rmdir", "download", "dl", "save",
+        "alias", "unalias", "export", "unset", "env", "printenv", "which", "type",
+        "echo", "whoami", "uname", "date", "uptime", "ps", "top", "htop", "df", "history", "sudo", "su", "exit"
       ];
 
       static MAN_ALIASES = {
@@ -2952,6 +2958,15 @@
         move: "step",
         walk: "step",
         back: "undo",
+        dl: "download",
+        save: "download",
+        rmdir: "mkdir",
+        unalias: "alias",
+        unset: "export",
+        env: "export",
+        printenv: "export",
+        vars: "export",
+        type: "which",
         pipes: "shell",
         pipe: "shell",
         redir: "shell",
@@ -2965,8 +2980,8 @@
         scan: {
           title: "scan - diagnose sector telemetry and node anomalies",
           synopsis: "scan [coord|glob|range...]",
-          desc: "Sweeps the active sector for sabotaged nodes (0 CHG). Supports coordinates ('scan c4'), wildcards ('scan *', 'scan a*', 'scan *3'), and ranges ('scan a1..a5'). Pipe into 'grep' to filter node types.",
-          example: "scan\n       scan * | grep SHADOW"
+          desc: "Sweeps the active sector for sabotaged nodes (0 CHG). Supports coordinates ('scan c4'), wildcards ('scan *', 'scan a*', 'scan *3'), and ranges ('scan a1..a5'). Pipe into 'grep' or redirect to a file.",
+          example: "scan\n       scan * | grep SHADOW > shadows.txt"
         },
         vent: {
           title: "vent - vaporize dark-space voids or clear collapsed debris",
@@ -2994,13 +3009,13 @@
         },
         flag: {
           title: "flag - place an amber tactical marker dot on grid nodes",
-          synopsis: "flag <coord|glob|range...>",
-          desc: "Marks coordinates, rows/columns ('flag a*', 'flag *3'), or ranges ('flag b1..b4') with an amber corner dot for route planning (0 CHG).",
-          example: "flag c4\n       flag a*"
+          synopsis: "flag <coord|glob|brace|range...>",
+          desc: "Marks coordinates, rows/columns ('flag a*', 'flag *3'), brace lists ('flag {a,c,e}2'), or ranges ('flag b1..b4') with an amber corner dot for route planning (0 CHG).",
+          example: "flag c4\n       flag {a,c,e}2"
         },
         unflag: {
           title: "unflag - remove an amber tactical marker dot from grid nodes",
-          synopsis: "unflag <coord|glob|range...>",
+          synopsis: "unflag <coord|glob|brace|range...>",
           desc: "Clears amber corner marker dots from matching coordinates (0 CHG). Use 'unflag *' to wipe all tactical flags across the sector.",
           example: "unflag c4\n       unflag *"
         },
@@ -3029,9 +3044,9 @@
           example: "boost"
         },
         reboot: {
-          title: "reboot - reset active carrier sweep and restore sector anomalies",
+          title: "reboot - reset active carrier sweep, /tmp, and sector anomalies",
           synopsis: "reboot",
-          desc: "Returns your vector to origin [Ø], undoes all vent/invert/purge/sync grid mutations, and restores full Override Charges (same as pressing [R]).",
+          desc: "Returns your vector to origin [Ø], clears volatile /tmp files, undoes all vent/invert/purge/sync grid mutations, and restores full Override Charges (same as pressing [R]).",
           example: "reboot"
         },
         tutorial: {
@@ -3043,14 +3058,14 @@
         help: {
           title: "help - display ttyS0 command summary",
           synopsis: "help",
-          desc: "Lists all grid-override verbs, wildcards, pipe filters, and HopeOS bash utilities available on ttyS0.",
+          desc: "Lists all grid-override verbs, file operations, variables, pipe filters, and HopeOS bash utilities available on ttyS0.",
           example: "help"
         },
         man: {
           title: "man (tldr) - format and display HopeOS reference manuals",
           synopsis: "man <command>",
           desc: "Displays concise transceiver manual pages for grid-override commands and HopeOS utilities. Aliased to 'tldr'.",
-          example: "man step\n       man grep"
+          example: "man download\n       man shell"
         },
         clear: {
           title: "clear (cls) - clear the ttyS0 terminal scrollback buffer",
@@ -3060,15 +3075,15 @@
         },
         ls: {
           title: "ls (ll) - list virtual filesystem directory contents",
-          synopsis: "ls [-la] [path]",
-          desc: "Lists telemetry logs, beacon databases, and system nodes in /home/nahla/sector or target directories. Use '-la' for permissions and sizes.",
-          example: "ls -la\n       ls /sys/override"
+          synopsis: "ls [-la] [path|glob...]",
+          desc: "Lists telemetry logs, beacon databases, and user-created files in ~/sector, ~, /tmp, /dev, or target directories. Use '-la' for permissions and byte sizes.",
+          example: "ls -la\n       ls /tmp /dev"
         },
         cd: {
           title: "cd - change the shell working directory",
           synopsis: "cd [directory]",
-          desc: "Navigates the HopeOS virtual directory tree (~, ~/sector, /sys, /var/log, /etc, or /root when elevated via 'su -').",
-          example: "cd /sys/override\n       cd ~/sector"
+          desc: "Navigates the HopeOS virtual directory tree (~, ~/sector, /tmp, /dev, /sys, /var/log, /etc, or /root when elevated via 'su -').",
+          example: "cd /tmp\n       cd ~/sector"
         },
         pwd: {
           title: "pwd - print current working directory path",
@@ -3077,21 +3092,57 @@
           example: "pwd"
         },
         cat: {
-          title: "cat - concatenate and print virtual telemetry files",
-          synopsis: "cat <filename>",
-          desc: "Reads files such as anomalies.dat, lexicon.db, sector.map, telemetry.log, readme.txt, or /root/transceiver.key.",
-          example: "cat anomalies.dat\n       cat lexicon.db | grep 9"
+          title: "cat - concatenate and print virtual telemetry or user files",
+          synopsis: "cat <filename|glob...>",
+          desc: "Reads built-in telemetry files (anomalies.dat, lexicon.db, sector.map, telemetry.log, readme.txt) as well as user files created via '>', '>>', 'touch', or 'cp'.",
+          example: "cat anomalies.dat\n       cat delete.me"
+        },
+        touch: {
+          title: "touch - create empty virtual files or update timestamps",
+          synopsis: "touch <file...>",
+          desc: "Creates empty user files in ~ (saved in browser localStorage) or /tmp (volatile RAM cleared on refresh/reboot).",
+          example: "touch notes.txt\n       touch /tmp/scratch.log"
+        },
+        rm: {
+          title: "rm - remove user-created files or empty directories",
+          synopsis: "rm [-r] [-f] <file|glob...>",
+          desc: "Deletes user-created files in ~ or /tmp. Built-in HopeOS telemetry files are read-only.",
+          example: "rm delete.me\n       rm -f /tmp/*.txt"
+        },
+        cp: {
+          title: "cp - copy virtual files to a new file or directory",
+          synopsis: "cp <source> <dest>",
+          desc: "Copies any readable file (including built-ins like sector.map or lexicon.db) into a writable path under ~ or /tmp.",
+          example: "cp sector.map my_map.txt\n       cp telemetry.log /tmp/"
+        },
+        mv: {
+          title: "mv - move or rename user-created files and directories",
+          synopsis: "mv <source> <dest>",
+          desc: "Renames or relocates user-created files and directories between ~ and /tmp.",
+          example: "mv notes.txt route_plan.txt"
+        },
+        mkdir: {
+          title: "mkdir (rmdir) - create or remove user directories",
+          synopsis: "mkdir [-p] <dir...> | rmdir <dir...>",
+          desc: "Creates subdirectories under ~ (persisted) or /tmp (volatile). 'rmdir' removes empty user directories.",
+          example: "mkdir notes\n       rmdir notes"
+        },
+        download: {
+          title: "download (dl/save) - export a virtual file to your device as plain text",
+          synopsis: "download <virtual_file> [export_name.txt]",
+          desc: "Downloads any built-in telemetry file (sector.map, telemetry.log, lexicon.db, anomalies.dat) or user-created file to your computer/phone as a UTF-8 plain text file.",
+          example: "download sector.map\n       download notes.txt"
         },
         grep: {
           title: "grep - filter lines or files using regular expressions",
-          synopsis: "grep [-i] [-v] [-c] [-n] <regex> [file]",
-          desc: "Matches lines using case-insensitive regular expressions. Works standalone on files (default: lexicon.db) or downstream of a '|' pipe. Supports -v (invert), -c (count), and -n (line numbers).",
+          synopsis: "grep [-i] [-v] [-c] [-n] <regex> [file|glob...]",
+          desc: "Matches lines using case-insensitive regular expressions. Works standalone on files (default: lexicon.db), with '< file' stdin, or downstream of a '|' pipe. Supports -v (invert), -c (count), and -n (line numbers).",
           example: "grep \"^S\" lexicon.db\n       scan * | grep \"SHADOW|RELAY\""
         },
         wc: {
           title: "wc - count lines, words, or characters in a pipe or file",
           synopsis: "wc [-l|-w|-c] [file]",
-          desc: "Counts newline-delimited lines (-l), words (-w), or characters (-c) from piped stdout or a virtual file.",
+          desc: "Counts newline-delimited lines (-l), words (-w), or characters (-c) from piped stdout, '< file' stdin, or a virtual file.",
           example: "scan * | grep RELAY | wc -l\n       wc -l lexicon.db"
         },
         head: {
@@ -3118,11 +3169,53 @@
           desc: "Collapses consecutive identical lines in a command pipeline.",
           example: "cat lexicon.db | uniq"
         },
+        cut: {
+          title: "cut - extract delimited fields or character columns from lines",
+          synopsis: "cut -d<delim> -f<list> | cut -c<range> [file]",
+          desc: "Slices fields by delimiter (e.g. '-d: -f1') or 1-based character positions (e.g. '-c1-4') from piped input or a file.",
+          example: "cat lexicon.db | cut -d: -f1\n       cat lexicon.db | cut -c1-4"
+        },
+        tr: {
+          title: "tr - translate or delete characters from piped input",
+          synopsis: "tr [-d] <set1> [set2]",
+          desc: "Translates characters in SET1 to SET2 (supports ranges like a-z A-Z) or deletes characters in SET1 with '-d'.",
+          example: "echo $BEACON | tr A-Z a-z\n       echo \"a-b-c\" | tr -d -"
+        },
+        tee: {
+          title: "tee - write piped output to a file and pass it through to stdout",
+          synopsis: "tee [-a] <file>",
+          desc: "Saves incoming piped lines to <file> (overwriting, or appending with '-a') while simultaneously printing them to the terminal or next pipe stage.",
+          example: "scan * | tee scan.log | grep WARN"
+        },
+        sed: {
+          title: "sed - stream editor for regex search-and-replace",
+          synopsis: "sed 's/pattern/replacement/[g][i]' [file]",
+          desc: "Applies regular expression substitution across piped lines or a virtual file.",
+          example: "cat lexicon.db | sed 's/9/NINE/g'"
+        },
+        alias: {
+          title: "alias (unalias) - define or remove command shortcuts",
+          synopsis: "alias [name='cmd'] | unalias <name>",
+          desc: "Creates persistent command aliases in nahla_sh (stored in localStorage). Run 'alias' with no arguments to list active aliases.",
+          example: "alias s='scan *'\n       unalias s"
+        },
+        export: {
+          title: "export (env/unset) - set or inspect shell & live telemetry variables",
+          synopsis: "NAME=val | export NAME=val | unset NAME | env",
+          desc: "Sets user variables (expanded via $NAME or ${NAME}) and displays live read-only HopeOS telemetry variables: $ECHO, $DELTA, $BEACON, $CHG, $SEED, $MODE, $HEAD, $STEPS, $PAR, $?.",
+          example: "TARGET=c4; vent $TARGET\n       echo \"Echoes: $ECHO/31 (CHG=$CHG)\"\n       env"
+        },
+        which: {
+          title: "which (type) - identify how a command name is resolved",
+          synopsis: "which <command...>",
+          desc: "Reports whether each command is a user alias, shell builtin, /sys/override binary, or HopeOS utility.",
+          example: "which vent grep scan"
+        },
         echo: {
-          title: "echo - display a line of text or expand filesystem globs on ttyS0",
-          synopsis: "echo [string|glob...]",
-          desc: "Prints its arguments to standard output. Unquoted wildcards (* and ?) expand matching filenames in the current or target directory (quote as \"*\" to print literally).",
-          example: "echo *\n       echo *.log\n       echo \"*\""
+          title: "echo - display text or expand filesystem/brace globs on ttyS0",
+          synopsis: "echo [string|glob|brace...]",
+          desc: "Prints arguments to stdout after expanding $(...), $VAR, {a,b}, and unquoted filename globs (* and ?). Redirect with '> file' or '>> file'.",
+          example: "echo hello > delete.me\n       echo *\n       echo \"Echo: $ECHO\""
         },
         whoami: {
           title: "whoami - print effective operator user ID",
@@ -3197,10 +3290,10 @@
           example: "exit"
         },
         shell: {
-          title: "shell (pipes/redir/glob) - nahla_sh wildcards, pipes, chaining & redirection",
-          synopsis: "cmd1 [glob|range] | cmd2 && cmd3 ; cmd4 2>&1",
-          desc: "nahla_sh supports coordinate globs (*, ?, a*, *3) and ranges (a1..a5), unquoted filename globs in echo/ls/cat/grep (e.g. echo *, cat *.dat), command chaining ('&&' stops on error; ';' runs unconditionally), stdout pipes ('|' into grep, wc, head, tail, sort, uniq), and stream redirection ('2>&1' merges stderr into pipes; '2>/dev/null' suppresses errors).",
-          example: "echo *.log\n       scan * 2>&1 | grep -v NOMINAL\n       vent a1 && step a1..a3\n       unflag * 2>/dev/null"
+          title: "shell (pipes/redir/glob) - nahla_sh operators, redirection, vars & substitution",
+          synopsis: "cmd1 | cmd2 && cmd3 || cmd4 > file 2>&1 < in.txt",
+          desc: "nahla_sh supports coordinate globs (*, ?, a*, *3, a1..a5), brace expansion ({a,b,c}, {1..4}), filename globs (echo *, rm *.txt), logical chaining ('&&' on success, '||' on failure, ';' always), exit status '$?', live variables ($ECHO, $CHG, $BEACON, $SEED, $HEAD), command substitution '$(...)', aliases, stdout pipes ('|' into grep, wc, head, tail, sort, uniq, cut, tr, tee, sed), and redirection ('>', '>>', '<', '2>&1', '2>/dev/null').",
+          example: "echo hello > delete.me && cat delete.me && rm delete.me\n       vent c2 || invert c2\n       step $(echo b1 c1 c2)"
         }
       };
 
@@ -3217,6 +3310,52 @@
         this.monitorTimer = null;
         this.monitorTick = 0;
         this.captureBuffer = null;
+        this.stdinLines = null;
+        this.lastExitCode = 0;
+        this.vars = {};
+        this.aliases = {};
+        this.userFiles = {};
+        this.userDirs = new Set();
+        this.tmpFiles = {};
+        this.tmpDirs = new Set();
+        this.loadVfs();
+      }
+
+      loadVfs() {
+        try {
+          const raw = localStorage.getItem(NahlaTerminal.VFS_STORAGE_KEY);
+          if (!raw) return;
+          const parsed = JSON.parse(raw);
+          if (parsed && typeof parsed === "object") {
+            if (parsed.files && typeof parsed.files === "object") {
+              this.userFiles = parsed.files;
+            }
+            if (Array.isArray(parsed.dirs)) {
+              this.userDirs = new Set(parsed.dirs);
+            }
+            if (parsed.aliases && typeof parsed.aliases === "object") {
+              this.aliases = parsed.aliases;
+            }
+          }
+        } catch (_) {}
+      }
+
+      saveVfs() {
+        try {
+          const payload = JSON.stringify({
+            files: this.userFiles,
+            dirs: Array.from(this.userDirs),
+            aliases: this.aliases
+          });
+          if (payload.length <= NahlaTerminal.MAX_VFS_BYTES) {
+            localStorage.setItem(NahlaTerminal.VFS_STORAGE_KEY, payload);
+          }
+        } catch (_) {}
+      }
+
+      clearTmp() {
+        this.tmpFiles = {};
+        this.tmpDirs = new Set();
       }
 
       resetForSector(puzzle) {
@@ -3226,6 +3365,9 @@
         this.isRoot = false;
         this.pendingPrompt = null;
         this.captureBuffer = null;
+        this.stdinLines = null;
+        this.lastExitCode = 0;
+        this.clearTmp();
         this.updatePromptLabel();
 
         const beaconInfo = SectorGenerator.getBeaconInfo(puzzle.word);
@@ -3265,6 +3407,7 @@
         const parts = [];
         let buf = "";
         let quote = null;
+        let parenDepth = 0;
         let i = 0;
 
         while (i < input.length) {
@@ -3277,6 +3420,19 @@
           }
           if (ch === '"' || ch === "'") {
             quote = ch;
+            buf += ch;
+            i++;
+            continue;
+          }
+          if (ch === "$" && input[i + 1] === "(") {
+            parenDepth++;
+            buf += "$(";
+            i += 2;
+            continue;
+          }
+          if (parenDepth > 0) {
+            if (ch === "(") parenDepth++;
+            else if (ch === ")") parenDepth--;
             buf += ch;
             i++;
             continue;
@@ -3303,32 +3459,300 @@
         return parts;
       }
 
-      parseRedirections(stageStr) {
-        let mergeErr = false;
-        let discardErr = false;
-        let discardOut = false;
+      getDynamicVar(name) {
+        const puzzle = this.game.puzzle;
+        const status = puzzle ? this.game.computeStatus() : { mass: 0, delta: -31, steps: 0 };
+        const head = this.game.path && this.game.path.length > 0
+          ? SectorGenerator.toCoord(this.game.path[this.game.path.length - 1].r, this.game.path[this.game.path.length - 1].c)
+          : "A1";
 
-        let cleaned = stageStr
-          .replace(/(?:^|\s)2>&1(?=\s|$)/g, () => {
-            mergeErr = true;
-            return " ";
-          })
-          .replace(/(?:^|\s)2>\s*\/dev\/null(?=\s|$)/gi, () => {
-            discardErr = true;
-            return " ";
-          })
-          .replace(/(?:^|\s)&>\s*\/dev\/null(?=\s|$)/gi, () => {
-            discardErr = true;
-            discardOut = true;
-            return " ";
-          })
-          .replace(/(?:^|\s)1?>\s*\/dev\/null(?=\s|$)/gi, () => {
-            discardOut = true;
-            return " ";
-          })
+        switch (name) {
+          case "?":      return String(this.lastExitCode);
+          case "ECHO":   return String(status.mass);
+          case "DELTA":  return `${status.delta >= 0 ? "+" : ""}${status.delta}`;
+          case "BEACON": return puzzle ? puzzle.word : "";
+          case "CHG":    return String(this.game.chargesLeft);
+          case "SEED":   return this.game.seed || "";
+          case "MODE":   return this.game.mode || "";
+          case "HEAD":   return head;
+          case "STEPS":  return String(status.steps);
+          case "PAR":    return puzzle ? String(puzzle.par) : "0";
+          case "USER":   return this.isRoot ? "root" : "nahla-tracker";
+          case "PWD":    return this.cwd;
+          case "HOME":   return "/home/nahla";
+          default:
+            return Object.prototype.hasOwnProperty.call(this.vars, name) ? this.vars[name] : "";
+        }
+      }
+
+      expandVariables(str) {
+        let out = "";
+        let quote = null;
+        let i = 0;
+
+        while (i < str.length) {
+          const ch = str[i];
+          if (ch === "'" && quote !== '"') {
+            quote = quote === "'" ? null : "'";
+            out += ch;
+            i++;
+            continue;
+          }
+          if (ch === '"' && quote !== "'") {
+            quote = quote === '"' ? null : '"';
+            out += ch;
+            i++;
+            continue;
+          }
+          if (quote !== "'" && ch === "$") {
+            if (str[i + 1] === "?") {
+              out += this.getDynamicVar("?");
+              i += 2;
+              continue;
+            }
+            if (str[i + 1] === "{") {
+              const closeIdx = str.indexOf("}", i + 2);
+              if (closeIdx !== -1) {
+                const varName = str.slice(i + 2, closeIdx).trim();
+                out += this.getDynamicVar(varName);
+                i = closeIdx + 1;
+                continue;
+              }
+            }
+            const nameMatch = str.slice(i + 1).match(/^([A-Za-z_][A-Za-z0-9_]*)/);
+            if (nameMatch) {
+              out += this.getDynamicVar(nameMatch[1]);
+              i += 1 + nameMatch[1].length;
+              continue;
+            }
+          }
+          out += ch;
+          i++;
+        }
+        return out;
+      }
+
+      expandCommandSubstitutions(str, depth = 0) {
+        if (depth > 4 || !str.includes("$(")) return str;
+        let out = "";
+        let quote = null;
+        let i = 0;
+
+        while (i < str.length) {
+          const ch = str[i];
+          if (ch === "'" && quote !== '"') {
+            quote = quote === "'" ? null : "'";
+            out += ch;
+            i++;
+            continue;
+          }
+          if (ch === '"' && quote !== "'") {
+            quote = quote === '"' ? null : '"';
+            out += ch;
+            i++;
+            continue;
+          }
+          if (quote !== "'" && ch === "$" && str[i + 1] === "(") {
+            let pDepth = 1;
+            let j = i + 2;
+            let innerQuote = null;
+            while (j < str.length && pDepth > 0) {
+              const c = str[j];
+              if (innerQuote) {
+                if (c === innerQuote) innerQuote = null;
+              } else if (c === '"' || c === "'") {
+                innerQuote = c;
+              } else if (c === "(") {
+                pDepth++;
+              } else if (c === ")") {
+                pDepth--;
+              }
+              j++;
+            }
+            if (pDepth === 0) {
+              const innerCmd = this.expandCommandSubstitutions(str.slice(i + 2, j - 1), depth + 1);
+              const subOut = this.captureCommandOutput(innerCmd);
+              out += subOut;
+              i = j;
+              continue;
+            }
+          }
+          out += ch;
+          i++;
+        }
+        return out;
+      }
+
+      captureCommandOutput(innerCmd) {
+        const prevCapture = this.captureBuffer;
+        const localBuf = [];
+        this.captureBuffer = localBuf;
+        try {
+          const chainSegments = this.splitOutsideQuotes(innerCmd, ["&&", "||", ";"]);
+          let lastOk = true;
+          let prevDelim = null;
+          for (const entry of chainSegments) {
+            const seg = entry.text.trim();
+            if (!seg) continue;
+            if (prevDelim === "&&" && !lastOk) {
+              prevDelim = entry.delim;
+              continue;
+            }
+            if (prevDelim === "||" && lastOk) {
+              prevDelim = entry.delim;
+              continue;
+            }
+            lastOk = this.executePipeline(seg);
+            prevDelim = entry.delim;
+          }
+        } finally {
+          this.captureBuffer = prevCapture;
+        }
+        return localBuf
+          .filter((item) => item.tone !== "err")
+          .map((item) => (item.plain !== undefined ? item.plain : item.text))
+          .join(" ")
+          .replace(/\s+/g, " ")
           .trim();
+      }
 
-        return { cleaned, mergeErr, discardErr, discardOut };
+      expandBraces(tokenText) {
+        const braceMatch = tokenText.match(/^([^{}]*)\{([^{}]+)\}(.*)$/);
+        if (!braceMatch) return [tokenText];
+        const [, prefix, body, suffix] = braceMatch;
+
+        // Range syntax: {1..5} or {a..e}
+        const numRange = body.match(/^(\d+)\.\.(\d+)$/);
+        if (numRange) {
+          const start = Number(numRange[1]);
+          const end = Number(numRange[2]);
+          const step = start <= end ? 1 : -1;
+          const results = [];
+          for (let n = start; step > 0 ? n <= end : n >= end; n += step) {
+            results.push(...this.expandBraces(`${prefix}${n}${suffix}`));
+            if (results.length > 64) break;
+          }
+          return results;
+        }
+
+        const alphaRange = body.match(/^([a-zA-Z])\.\.([a-zA-Z])$/);
+        if (alphaRange) {
+          const c1 = alphaRange[1].charCodeAt(0);
+          const c2 = alphaRange[2].charCodeAt(0);
+          const step = c1 <= c2 ? 1 : -1;
+          const results = [];
+          for (let code = c1; step > 0 ? code <= c2 : code >= c2; code += step) {
+            results.push(...this.expandBraces(`${prefix}${String.fromCharCode(code)}${suffix}`));
+            if (results.length > 64) break;
+          }
+          return results;
+        }
+
+        if (!body.includes(",")) return [tokenText];
+        const items = body.split(",");
+        const results = [];
+        for (const item of items) {
+          results.push(...this.expandBraces(`${prefix}${item}${suffix}`));
+          if (results.length > 64) break;
+        }
+        return results;
+      }
+
+      parseStageIO(stageStr) {
+        let mergeErrToOut = false;
+        let mergeOutToErr = false;
+        let outRedirect = null; // { target, append }
+        let errRedirect = null; // { target, append }
+        let inRedirect = null;  // file path
+
+        // Tokenize preserving quotes so '>' inside quotes is untouched
+        const rawTokens = [];
+        let buf = "";
+        let quote = null;
+        for (let i = 0; i < stageStr.length; i++) {
+          const ch = stageStr[i];
+          if (quote) {
+            if (ch === quote) quote = null;
+            buf += ch;
+          } else if (ch === '"' || ch === "'") {
+            quote = ch;
+            buf += ch;
+          } else if (/\s/.test(ch)) {
+            if (buf) {
+              rawTokens.push(buf);
+              buf = "";
+            }
+          } else {
+            buf += ch;
+          }
+        }
+        if (buf) rawTokens.push(buf);
+
+        const stripQ = (s) => s.replace(/^["']|["']$/g, "");
+        const kept = [];
+
+        for (let i = 0; i < rawTokens.length; i++) {
+          const tok = rawTokens[i];
+          if (/^['"]/.test(tok)) {
+            kept.push(tok);
+            continue;
+          }
+
+          if (tok === "2>&1") {
+            mergeErrToOut = true;
+            continue;
+          }
+          if (tok === "1>&2" || tok === ">&2") {
+            mergeOutToErr = true;
+            continue;
+          }
+
+          // Combined &> or &>>
+          const bothMatch = tok.match(/^(&>>|&>)(.*)$/);
+          if (bothMatch) {
+            const append = bothMatch[1] === "&>>";
+            const target = bothMatch[2] ? stripQ(bothMatch[2]) : (rawTokens[++i] ? stripQ(rawTokens[i]) : "");
+            outRedirect = { target, append };
+            errRedirect = { target, append };
+            continue;
+          }
+
+          // Stderr 2> or 2>>
+          const errMatch = tok.match(/^2(>>|>)(.*)$/);
+          if (errMatch) {
+            const append = errMatch[1] === ">>";
+            const target = errMatch[2] ? stripQ(errMatch[2]) : (rawTokens[++i] ? stripQ(rawTokens[i]) : "");
+            errRedirect = { target, append };
+            continue;
+          }
+
+          // Stdout >, >>, 1>, 1>>
+          const outMatch = tok.match(/^1?(>>|>)(.*)$/);
+          if (outMatch) {
+            const append = outMatch[1] === ">>";
+            const target = outMatch[2] ? stripQ(outMatch[2]) : (rawTokens[++i] ? stripQ(rawTokens[i]) : "");
+            outRedirect = { target, append };
+            continue;
+          }
+
+          // Stdin <
+          const inMatch = tok.match(/^<(.*)$/);
+          if (inMatch) {
+            inRedirect = inMatch[1] ? stripQ(inMatch[1]) : (rawTokens[++i] ? stripQ(rawTokens[i]) : "");
+            continue;
+          }
+
+          kept.push(tok);
+        }
+
+        return {
+          cleaned: kept.join(" ").trim(),
+          mergeErrToOut,
+          mergeOutToErr,
+          outRedirect,
+          errRedirect,
+          inRedirect
+        };
       }
 
       tokenizeArgs(str) {
@@ -3348,7 +3772,12 @@
         while ((m = rx.exec(str)) !== null) {
           if (m[1] !== undefined) tokens.push({ text: m[1], quoted: true });
           else if (m[2] !== undefined) tokens.push({ text: m[2], quoted: true });
-          else tokens.push({ text: m[3], quoted: false });
+          else {
+            const expanded = this.expandBraces(m[3]);
+            for (const item of expanded) {
+              tokens.push({ text: item, quoted: false });
+            }
+          }
         }
         return tokens;
       }
@@ -3406,6 +3835,10 @@
           }
         }
         return out;
+      }
+
+      expandBraceArgs(rawArgStr) {
+        return this.tokenizeDetailed(rawArgStr).map((t) => t.text);
       }
 
       render() {
@@ -3544,7 +3977,7 @@
       }
 
       autocomplete(rawInput) {
-        const chainSegs = this.splitOutsideQuotes(rawInput, ["&&", ";"]);
+        const chainSegs = this.splitOutsideQuotes(rawInput, ["&&", "||", ";"]);
         const currentChain = chainSegs[chainSegs.length - 1].text;
         const pipeSegs = this.splitOutsideQuotes(currentChain, ["|"]);
         const currentSegment = pipeSegs[pipeSegs.length - 1].text;
@@ -3556,7 +3989,8 @@
         if (parts.length === 1) {
           const prefix = parts[0].toLowerCase();
           if (!prefix) return rawInput;
-          const matches = NahlaTerminal.COMMANDS.filter((c) => c.startsWith(prefix));
+          const allCmds = Array.from(new Set([...NahlaTerminal.COMMANDS, ...Object.keys(this.aliases)]));
+          const matches = allCmds.filter((c) => c.startsWith(prefix));
           if (matches.length === 1) return `${prefixBeforeSegment}${leadingSpace}${matches[0]} `;
           if (matches.length > 1) this.print(matches.join("  "), "info");
           return rawInput;
@@ -3583,7 +4017,7 @@
           const matches = coords.filter((xy) => xy.startsWith(argPrefix));
           if (matches.length === 1) return `${prefixBeforeSegment}${leadingSpace}${priorArgs} ${matches[0]}`;
           if (matches.length > 1 && matches.length <= 12) this.print(matches.join("  "), "info");
-        } else if (["cat", "grep", "ls", "cd", "wc", "head", "tail", "echo"].includes(cmd)) {
+        } else if (["cat", "grep", "ls", "ll", "cd", "wc", "head", "tail", "echo", "rm", "cp", "mv", "touch", "mkdir", "rmdir", "download", "dl", "save", "tee", "sed", "cut"].includes(cmd)) {
           const files = this.getDirEntries(this.cwd).map((f) => f.replace(/\/$/, ""));
           const matches = files.filter((f) => f.toLowerCase().startsWith(lastArg.toLowerCase()));
           if (matches.length === 1) return `${prefixBeforeSegment}${leadingSpace}${priorArgs} ${matches[0]}`;
@@ -3621,79 +4055,191 @@
 
         this.print(`${this.getPromptPrefix()} ${trimmed}`, "cmd");
 
-        // Split chained commands on unquoted '&&' or ';' while preserving operators
-        const chainSegments = this.splitOutsideQuotes(trimmed, ["&&", ";"]);
+        // Split chained commands on unquoted '&&', '||', or ';' while preserving operators
+        const chainSegments = this.splitOutsideQuotes(trimmed, ["&&", "||", ";"]);
+        let lastOk = true;
+        let prevDelim = null;
+
         for (const entry of chainSegments) {
           const segment = entry.text.trim();
           if (!segment) continue;
 
-          const ok = this.executePipeline(segment);
-
-          // Halt chain on '&&' if the preceding command/pipeline failed
-          if (entry.delim === "&&" && !ok) {
-            break;
+          if (prevDelim === "&&" && !lastOk) {
+            prevDelim = entry.delim;
+            continue;
           }
+          if (prevDelim === "||" && lastOk) {
+            prevDelim = entry.delim;
+            continue;
+          }
+
+          lastOk = this.executePipeline(segment);
+          this.lastExitCode = lastOk ? 0 : 1;
+          prevDelim = entry.delim;
         }
       }
 
-      executePipeline(segment) {
-        const pipeParts = this.splitOutsideQuotes(segment, ["|"]).map((p) => p.text.trim());
-        const hasPipes = pipeParts.length > 1;
-        const firstRedir = this.parseRedirections(pipeParts[0]);
+      expandAliasesInSegment(segStr, seenAliases = new Set()) {
+        const trimmed = segStr.trim();
+        const firstSpace = trimmed.search(/\s/);
+        const firstWord = firstSpace === -1 ? trimmed : trimmed.slice(0, firstSpace);
+        if (!firstWord || seenAliases.has(firstWord)) return segStr;
+        if (Object.prototype.hasOwnProperty.call(this.aliases, firstWord)) {
+          const rest = firstSpace === -1 ? "" : trimmed.slice(firstSpace);
+          const nextSeen = new Set(seenAliases);
+          nextSeen.add(firstWord);
+          return this.expandAliasesInSegment(`${this.aliases[firstWord]}${rest}`, nextSeen);
+        }
+        return segStr;
+      }
 
-        if (!firstRedir.cleaned) {
+      applyOutputRedirect(redir, linesToWrite, defaultTone = "info") {
+        if (!redir || !redir.target) {
+          this.game.audio.error();
+          this.print("nahla_sh: syntax error near unexpected redirection token", "err");
+          return false;
+        }
+        const resolved = this.resolvePath(redir.target);
+        if (resolved === "/dev/null") {
+          return true;
+        }
+        if (resolved === "/dev/ttyS0") {
+          linesToWrite.forEach((item) => this.print(item.text, item.tone || defaultTone, item.html));
+          return true;
+        }
+        const plainText = linesToWrite
+          .map((item) => (item.plain !== undefined ? item.plain : item.text))
+          .join("\n");
+        const contentToStore = linesToWrite.length > 0 ? `${plainText}\n` : "";
+        const res = this.writeUserFile(resolved, contentToStore, redir.append);
+        if (!res.ok) {
+          this.game.audio.error();
+          this.print(`nahla_sh: ${redir.target}: ${res.err}`, "err");
+          return false;
+        }
+        return true;
+      }
+
+      executePipeline(segment) {
+        const expandedSub = this.expandCommandSubstitutions(segment);
+        const expandedVars = this.expandVariables(expandedSub);
+        const pipeParts = this.splitOutsideQuotes(expandedVars, ["|"]).map((p) => p.text.trim());
+        const hasPipes = pipeParts.length > 1;
+        const firstStageStr = this.expandAliasesInSegment(pipeParts[0]);
+        const firstIO = this.parseStageIO(firstStageStr);
+
+        if (!firstIO.cleaned) {
           this.game.audio.error();
           this.print("nahla_sh: syntax error near unexpected token '|'", "err");
           return false;
         }
 
-        const needsCapture = hasPipes || firstRedir.mergeErr || firstRedir.discardErr || firstRedir.discardOut;
+        // Load '< file' into stdinLines if provided
+        let loadedStdin = null;
+        if (firstIO.inRedirect !== null) {
+          if (!firstIO.inRedirect) {
+            this.game.audio.error();
+            this.print("nahla_sh: syntax error near unexpected token '<'", "err");
+            return false;
+          }
+          const resolvedIn = this.resolvePath(firstIO.inRedirect);
+          if (resolvedIn === "/dev/null") {
+            loadedStdin = [];
+          } else {
+            const content = this.getFileContentByPath(resolvedIn);
+            if (content === "__PERMISSION_DENIED__") {
+              this.game.audio.error();
+              this.print(`nahla_sh: ${firstIO.inRedirect}: Permission denied`, "err");
+              return false;
+            }
+            if (content === "__IS_DIRECTORY__") {
+              this.game.audio.error();
+              this.print(`nahla_sh: ${firstIO.inRedirect}: Is a directory`, "err");
+              return false;
+            }
+            if (content === null) {
+              this.game.audio.error();
+              this.print(`nahla_sh: ${firstIO.inRedirect}: No such file or directory`, "err");
+              return false;
+            }
+            loadedStdin = content === ""
+              ? []
+              : content.replace(/\n$/, "").split("\n").map((l) => ({ text: l, plain: l, tone: "info", html: false }));
+          }
+        }
+
+        const needsCapture = hasPipes || firstIO.mergeErrToOut || firstIO.mergeOutToErr || firstIO.outRedirect || firstIO.errRedirect;
         if (!needsCapture) {
-          return this.executeSingle(firstRedir.cleaned);
+          const prevStdin = this.stdinLines;
+          this.stdinLines = loadedStdin;
+          try {
+            return this.executeSingle(firstIO.cleaned);
+          } finally {
+            this.stdinLines = prevStdin;
+          }
         }
 
         this.captureBuffer = [];
+        const prevStdin = this.stdinLines;
+        this.stdinLines = loadedStdin;
         let ok = false;
         try {
-          ok = this.executeSingle(firstRedir.cleaned);
+          ok = this.executeSingle(firstIO.cleaned);
         } finally {
           var captured = this.captureBuffer;
           this.captureBuffer = null;
+          this.stdinLines = prevStdin;
         }
 
-        // Apply stage 0 stream redirections (2>&1, 2>/dev/null, >/dev/null)
-        let afterRedir = captured.filter((item) => {
-          if (item.tone === "err" && firstRedir.discardErr) return false;
-          if (item.tone !== "err" && firstRedir.discardOut) return false;
-          return true;
-        });
+        let stdoutItems = captured.filter((item) => item.tone !== "err");
+        let stderrItems = captured.filter((item) => item.tone === "err");
+
+        if (firstIO.mergeErrToOut) {
+          stdoutItems = captured.slice();
+          stderrItems = [];
+        } else if (firstIO.mergeOutToErr) {
+          stderrItems = captured.slice();
+          stdoutItems = [];
+        }
+
+        if (firstIO.errRedirect) {
+          if (!this.applyOutputRedirect(firstIO.errRedirect, stderrItems, "err")) return false;
+          stderrItems = [];
+        }
 
         if (!hasPipes) {
-          afterRedir.forEach((item) => this.print(item.text, item.tone, item.html));
+          if (firstIO.outRedirect) {
+            if (!this.applyOutputRedirect(firstIO.outRedirect, stdoutItems, "info")) return false;
+          } else {
+            stdoutItems.forEach((item) => this.print(item.text, item.tone, item.html));
+          }
+          stderrItems.forEach((item) => this.print(item.text, item.tone, item.html));
           return ok;
         }
 
-        // Unmerged stderr bypasses the pipe straight to terminal output
-        const stderrLines = firstRedir.mergeErr ? [] : afterRedir.filter((item) => item.tone === "err");
-        let stream = firstRedir.mergeErr
-          ? afterRedir
-          : afterRedir.filter((item) => item.tone !== "err");
-
-        stderrLines.forEach((item) => this.print(item.text, item.tone, item.html));
+        // Print any unredirected stderr before pipeline stages
+        stderrItems.forEach((item) => this.print(item.text, item.tone, item.html));
+        let stream = stdoutItems;
 
         for (let i = 1; i < pipeParts.length; i++) {
-          const stageRedir = this.parseRedirections(pipeParts[i]);
-          if (!stageRedir.cleaned) {
+          const stageStr = this.expandAliasesInSegment(pipeParts[i]);
+          const stageIO = this.parseStageIO(stageStr);
+          if (!stageIO.cleaned) {
             this.game.audio.error();
             this.print("nahla_sh: syntax error near unexpected token '|'", "err");
             return false;
           }
-          const res = this.applyPipeFilter(stageRedir.cleaned, stream);
+          const res = this.applyPipeFilter(stageIO.cleaned, stream);
           if (!res.ok) {
             return false;
           }
-          stream = stageRedir.discardOut ? [] : res.lines;
+          stream = res.lines;
           ok = res.ok;
+
+          if (stageIO.outRedirect) {
+            if (!this.applyOutputRedirect(stageIO.outRedirect, stream, "ok")) return false;
+            stream = [];
+          }
         }
 
         stream.forEach((item) => this.print(item.text, item.tone, item.html));
@@ -3701,9 +4247,10 @@
       }
 
       applyPipeFilter(stageCmd, inputLines) {
-        const tokens = this.tokenizeArgs(stageCmd);
-        const cmd = (tokens[0] || "").toLowerCase();
-        const args = tokens.slice(1);
+        const firstSpace = stageCmd.search(/\s/);
+        const cmd = (firstSpace === -1 ? stageCmd : stageCmd.slice(0, firstSpace)).toLowerCase();
+        const rawArgStr = firstSpace === -1 ? "" : stageCmd.slice(firstSpace + 1).trim();
+        const args = this.expandBraceArgs(rawArgStr);
 
         if (cmd === "grep") {
           let invert = false;
@@ -3814,20 +4361,242 @@
           return { ok: true, lines: deduped };
         }
 
+        if (cmd === "cut") {
+          return this.filterCut(args, inputLines);
+        }
+
+        if (cmd === "tr") {
+          return this.filterTr(args, inputLines);
+        }
+
+        if (cmd === "tee") {
+          return this.filterTee(args, inputLines);
+        }
+
+        if (cmd === "sed") {
+          return this.filterSed(args, inputLines);
+        }
+
         if (cmd === "cat") {
           return { ok: true, lines: inputLines };
         }
 
         this.game.audio.error();
-        this.print(`nahla_sh: '${cmd}' cannot be used as a pipe filter (supported: grep, wc, head, tail, sort, uniq)`, "err");
+        this.print(`nahla_sh: '${cmd}' cannot be used as a pipe filter (supported: grep, wc, head, tail, sort, uniq, cut, tr, tee, sed)`, "err");
         return { ok: false, lines: [] };
       }
 
+      parseRangeList(spec) {
+        const indices = new Set();
+        for (const part of String(spec || "").split(",")) {
+          const m = part.trim().match(/^(\d+)(?:-(\d+))?$/);
+          if (!m) continue;
+          const a = Number(m[1]);
+          const b = m[2] ? Number(m[2]) : a;
+          for (let k = Math.min(a, b); k <= Math.max(a, b) && k <= 256; k++) {
+            if (k >= 1) indices.add(k);
+          }
+        }
+        return Array.from(indices).sort((a, b) => a - b);
+      }
+
+      filterCut(args, inputLines) {
+        let delim = "\t";
+        let fieldSpec = null;
+        let charSpec = null;
+
+        for (let i = 0; i < args.length; i++) {
+          const a = args[i];
+          if (a === "-d" && args[i + 1] !== undefined) {
+            delim = args[++i];
+          } else if (a.startsWith("-d") && a.length > 2) {
+            delim = a.slice(2);
+          } else if (a === "-f" && args[i + 1] !== undefined) {
+            fieldSpec = args[++i];
+          } else if (a.startsWith("-f") && a.length > 2) {
+            fieldSpec = a.slice(2);
+          } else if (a === "-c" && args[i + 1] !== undefined) {
+            charSpec = args[++i];
+          } else if (a.startsWith("-c") && a.length > 2) {
+            charSpec = a.slice(2);
+          }
+        }
+
+        if (!fieldSpec && !charSpec) {
+          this.game.audio.error();
+          this.print("cut: you must specify a list of characters (-c) or fields (-f)", "err");
+          return { ok: false, lines: [] };
+        }
+
+        const out = inputLines.map((item) => {
+          const raw = item.plain !== undefined ? item.plain : item.text;
+          let sliced = raw;
+          if (charSpec) {
+            const cols = this.parseRangeList(charSpec);
+            sliced = cols.map((cIdx) => raw[cIdx - 1] || "").join("");
+          } else if (fieldSpec) {
+            const fields = this.parseRangeList(fieldSpec);
+            const parts = raw.split(delim);
+            sliced = fields.map((fIdx) => (parts[fIdx - 1] !== undefined ? parts[fIdx - 1] : "")).join(delim);
+          }
+          return { text: sliced, plain: sliced, tone: "ok", html: false };
+        });
+
+        return { ok: true, lines: out };
+      }
+
+      expandTrSet(spec) {
+        let s = String(spec || "")
+          .replace(/\[:lower:\]/g, "a-z")
+          .replace(/\[:upper:\]/g, "A-Z")
+          .replace(/\[:digit:\]/g, "0-9")
+          .replace(/\\n/g, "\n")
+          .replace(/\\t/g, "\t");
+        const chars = [];
+        for (let i = 0; i < s.length; i++) {
+          if (i + 2 < s.length && s[i + 1] === "-") {
+            const start = s.charCodeAt(i);
+            const end = s.charCodeAt(i + 2);
+            const step = start <= end ? 1 : -1;
+            for (let code = start; step > 0 ? code <= end : code >= end; code += step) {
+              chars.push(String.fromCharCode(code));
+            }
+            i += 2;
+          } else {
+            chars.push(s[i]);
+          }
+        }
+        return chars;
+      }
+
+      filterTr(args, inputLines) {
+        const delMode = args.includes("-d");
+        const sets = args.filter((a) => !a.startsWith("-"));
+        if (sets.length === 0 || (!delMode && sets.length < 2)) {
+          this.game.audio.error();
+          this.print("usage: tr [-d] <set1> [set2]", "err");
+          return { ok: false, lines: [] };
+        }
+        const set1 = this.expandTrSet(sets[0]);
+        const set2 = delMode ? [] : this.expandTrSet(sets[1]);
+
+        const out = inputLines.map((item) => {
+          const raw = item.plain !== undefined ? item.plain : item.text;
+          let res = "";
+          for (const ch of raw) {
+            const idx = set1.indexOf(ch);
+            if (idx === -1) {
+              res += ch;
+            } else if (!delMode) {
+              res += set2[Math.min(idx, set2.length - 1)] || "";
+            }
+          }
+          return { text: res, plain: res, tone: item.tone, html: false };
+        });
+
+        return { ok: true, lines: out };
+      }
+
+      filterTee(args, inputLines) {
+        const append = args.includes("-a");
+        const targets = args.filter((a) => !a.startsWith("-"));
+        if (targets.length === 0) {
+          this.game.audio.error();
+          this.print("usage: tee [-a] <file...>", "err");
+          return { ok: false, lines: [] };
+        }
+        for (const t of targets) {
+          if (!this.applyOutputRedirect({ target: t, append }, inputLines, "info")) {
+            return { ok: false, lines: [] };
+          }
+        }
+        return { ok: true, lines: inputLines };
+      }
+
+      filterSed(args, inputLines) {
+        const script = args.find((a) => !a.startsWith("-"));
+        if (!script) {
+          this.game.audio.error();
+          this.print("usage: sed 's/pattern/replacement/[g][i]' [file]", "err");
+          return { ok: false, lines: [] };
+        }
+        if (!script.startsWith("s") || script.length < 4) {
+          this.game.audio.error();
+          this.print(`sed: unsupported expression '${script}' (expected s/pat/rep/g)`, "err");
+          return { ok: false, lines: [] };
+        }
+        const delim = script[1];
+        const parts = [];
+        let buf = "";
+        let escaped = false;
+        for (let i = 2; i < script.length; i++) {
+          const ch = script[i];
+          if (escaped) {
+            buf += ch;
+            escaped = false;
+          } else if (ch === "\\") {
+            escaped = true;
+            buf += ch;
+          } else if (ch === delim) {
+            parts.push(buf);
+            buf = "";
+          } else {
+            buf += ch;
+          }
+        }
+        parts.push(buf);
+
+        if (parts.length < 2) {
+          this.game.audio.error();
+          this.print(`sed: unterminated 's' command '${script}'`, "err");
+          return { ok: false, lines: [] };
+        }
+
+        const pattern = parts[0];
+        const replacement = parts[1];
+        const flagsRaw = parts[2] || "";
+        const flags = (flagsRaw.includes("g") ? "g" : "") + (flagsRaw.includes("i") ? "i" : "");
+
+        let rx = null;
+        try {
+          rx = new RegExp(pattern, flags);
+        } catch (_) {
+          this.game.audio.error();
+          this.print(`sed: invalid regex '${pattern}'`, "err");
+          return { ok: false, lines: [] };
+        }
+
+        const out = inputLines.map((item) => {
+          const raw = item.plain !== undefined ? item.plain : item.text;
+          const replaced = raw.replace(rx, replacement);
+          return { text: replaced, plain: replaced, tone: item.tone === "info" ? "ok" : item.tone, html: false };
+        });
+        return { ok: true, lines: out };
+      }
+
       executeSingle(segment) {
-        const firstSpace = segment.search(/\s/);
-        const cmd = (firstSpace === -1 ? segment : segment.slice(0, firstSpace)).toLowerCase();
-        const rawArgStr = firstSpace === -1 ? "" : segment.slice(firstSpace + 1).trim();
-        const args = this.tokenizeArgs(rawArgStr);
+        const expandedSegment = this.expandAliasesInSegment(segment);
+        const firstSpace = expandedSegment.search(/\s/);
+        const cmdToken = firstSpace === -1 ? expandedSegment : expandedSegment.slice(0, firstSpace);
+        const rawArgStr = firstSpace === -1 ? "" : expandedSegment.slice(firstSpace + 1).trim();
+
+        // Support variable assignment: VAR=value or VAR=value cmd args...
+        const assignMatch = cmdToken.match(/^([A-Za-z_][A-Za-z0-9_]*)=(.*)$/);
+        if (assignMatch) {
+          const varName = assignMatch[1];
+          const varVal = assignMatch[2].replace(/^["']|["']$/g, "");
+          if (["ECHO", "DELTA", "BEACON", "CHG", "SEED", "MODE", "HEAD", "STEPS", "PAR", "USER", "PWD", "HOME"].includes(varName)) {
+            this.game.audio.error();
+            this.print(`nahla_sh: ${varName}: readonly telemetry variable`, "err");
+            return false;
+          }
+          this.vars[varName] = varVal;
+          if (!rawArgStr) return true;
+          return this.executeSingle(rawArgStr);
+        }
+
+        const cmd = cmdToken.toLowerCase();
+        const args = this.expandBraceArgs(rawArgStr);
 
         if (cmd === "sudo") {
           this.game.audio.error();
@@ -3926,8 +4695,7 @@
             return this.cmdLs(this.expandFsArgs(rawArgStr));
 
           case "cd":
-            this.cmdCd(args[0]);
-            return true;
+            return this.cmdCd(args[0]);
 
           case "pwd":
             this.print(this.cwd, "info");
@@ -3936,13 +4704,70 @@
           case "cat":
             return this.cmdCat(this.expandFsArgs(rawArgStr));
 
+          case "touch":
+            return this.cmdTouch(this.expandFsArgs(rawArgStr));
+
+          case "rm":
+            return this.cmdRm(this.expandFsArgs(rawArgStr));
+
+          case "mkdir":
+            return this.cmdMkdir(this.expandFsArgs(rawArgStr));
+
+          case "rmdir":
+            return this.cmdRmdir(this.expandFsArgs(rawArgStr));
+
+          case "cp":
+            return this.cmdCp(this.expandFsArgs(rawArgStr));
+
+          case "mv":
+            return this.cmdMv(this.expandFsArgs(rawArgStr));
+
+          case "download":
+          case "dl":
+          case "save":
+            return this.cmdDownload(this.expandFsArgs(rawArgStr));
+
+          case "alias":
+            return this.cmdAlias(rawArgStr);
+
+          case "unalias":
+            return this.cmdUnalias(args);
+
+          case "export":
+            return this.cmdExport(args);
+
+          case "unset":
+            return this.cmdUnset(args);
+
+          case "env":
+          case "printenv":
+            return this.cmdEnv();
+
+          case "which":
+          case "type":
+            return this.cmdWhich(args);
+
           case "grep":
             return this.cmdGrep(rawArgStr);
 
           case "wc":
           case "head":
           case "tail":
+          case "cut":
+          case "tr":
+          case "sed":
             return this.cmdFileSliceOrCount(cmd, this.expandFsArgs(rawArgStr));
+
+          case "tee":
+            if (this.stdinLines !== null) {
+              const res = this.filterTee(this.expandFsArgs(rawArgStr), this.stdinLines);
+              if (!res.ok) return false;
+              res.lines.forEach((item) => this.print(item.text, item.tone, item.html));
+              return true;
+            }
+            this.game.audio.error();
+            this.print("usage: <command> | tee [-a] <file>", "err");
+            return false;
 
           case "echo":
             this.print(this.expandFsArgs(rawArgStr).join(" "), "info");
@@ -4020,14 +4845,14 @@
         this.print("  invert <xy|glob>  Flip +/- polarity of non-zero number nodes", "info");
         this.print("  purge <xy|glob>   Clear [!] solar static or decoy beacon relays", "info");
         this.print("  sync <code>       Sync beacon code to unlock [?] phase relays", "info");
-        this.print("  flag|unflag <xy>  Mark/clear amber dots (e.g. flag a*, unflag *)", "info");
+        this.print("  flag|unflag <xy>  Mark/clear amber dots (flag {a,c}2, unflag *)", "info");
         this.print("  step <xy|dir...>  Move vector via coords or n/s/e/w; 'undo' backs up", "info");
         this.print("  dampen|boost      Reply to incoming relay harmonic drift", "info");
-        this.print("  pipes & redir     '| grep', '| wc -l', '&&', ';', '2>&1' (see 'man shell')", "info");
+        this.print("  shell & redir     '|', '&&', '||', '>', '>>', '<', '$ECHO', '$(...)', 'man shell'", "info");
         this.print("  reboot / tutorial Reset sector or launch 3x3 field walkthrough", "info");
-        this.print("=== BASH / SYSTEM UTILITIES ===", "sys");
-        this.print("  man <cmd>, ls, cd, pwd, cat <file>, grep <rx>, wc, head, tail,", "info");
-        this.print("  ps, top, htop, df, whoami, uname -a, date, uptime, su -, clear", "info");
+        this.print("=== BASH / FILESYSTEM / EXPORT UTILITIES ===", "sys");
+        this.print("  man <cmd>, ls, cd, pwd, cat, touch, rm, cp, mv, mkdir, download,", "info");
+        this.print("  grep, wc, head, tail, sort, uniq, cut, tr, tee, sed, alias, env, su -", "info");
       }
 
       cmdMan(topicArg) {
@@ -4687,10 +5512,37 @@
         return true;
       }
 
-      // --- Virtual Bash Filesystem ---
-      getDirEntries(dir) {
+      // --- Virtual Bash Filesystem (System + Persistent ~ + Volatile /tmp) ---
+      normalizePath(rawPath) {
+        const parts = String(rawPath || "/").split("/");
+        const stack = [];
+        for (const part of parts) {
+          if (!part || part === ".") continue;
+          if (part === "..") {
+            stack.pop();
+          } else {
+            stack.push(part);
+          }
+        }
+        return "/" + stack.join("/");
+      }
+
+      resolvePath(target) {
+        if (!target || target === "~") return "/home/nahla";
+        if (target.startsWith("~/")) {
+          return this.normalizePath(`/home/nahla/${target.slice(2)}`);
+        }
+        if (target.startsWith("/")) {
+          return this.normalizePath(target);
+        }
+        const base = this.cwd === "/" ? "" : this.cwd;
+        return this.normalizePath(`${base}/${target}`);
+      }
+
+      getBuiltinDirEntries(dir) {
         const fs = {
-          "/": ["home/", "root/", "sys/", "var/", "etc/"],
+          "/": ["dev/", "etc/", "home/", "root/", "sys/", "tmp/", "var/"],
+          "/dev": ["null", "ttyS0"],
           "/home": ["nahla/"],
           "/home/nahla": ["sector/", "readme.txt"],
           "/home/nahla/sector": ["anomalies.dat", "sector.map", "telemetry.log", "lexicon.db"],
@@ -4700,104 +5552,114 @@
           "/sys/override": ["charges", "vent", "invert", "purge", "sync"],
           "/var": ["log/"],
           "/var/log": ["telemetry.log"],
-          "/etc": ["lexicon.db"]
+          "/etc": ["lexicon.db"],
+          "/tmp": []
         };
-        return fs[dir] || [];
+        return fs[dir] || null;
       }
 
-      resolvePath(target) {
-        if (!target || target === "~") return "/home/nahla";
-        if (target === "~/sector") return "/home/nahla/sector";
-        if (target === "..") {
-          if (this.cwd === "/") return "/";
-          const parts = this.cwd.split("/").filter(Boolean);
-          parts.pop();
-          return "/" + parts.join("/");
-        }
-        if (target.startsWith("/")) {
-          return target.replace(/\/+$/, "") || "/";
-        }
-        const base = this.cwd === "/" ? "" : this.cwd;
-        return `${base}/${target.replace(/\/+$/, "")}`;
+      isDirectory(path) {
+        const norm = this.normalizePath(path);
+        if (this.getBuiltinDirEntries(norm) !== null) return true;
+        if (this.userDirs.has(norm) || this.tmpDirs.has(norm)) return true;
+        return false;
       }
 
-      cmdLs(args) {
-        const longFmt = args.includes("-la") || args.includes("-l");
-        const pathArgs = args.filter((a) => !a.startsWith("-"));
-        const targets = pathArgs.length > 0 ? pathArgs : [this.cwd];
-        const validDirs = ["/", "/home", "/home/nahla", "/home/nahla/sector", "/root", "/sys", "/sys/sector", "/sys/override", "/var", "/var/log", "/etc"];
-        let allOk = true;
+      getDirEntries(dir) {
+        const norm = this.normalizePath(dir);
+        const builtin = this.getBuiltinDirEntries(norm);
+        const isUserDir = this.userDirs.has(norm) || this.tmpDirs.has(norm);
+        if (builtin === null && !isUserDir) return [];
 
-        targets.forEach((rawTarget, idx) => {
-          const resolved = this.resolvePath(rawTarget);
-          if (resolved === "/root" && !this.isRoot) {
-            this.game.audio.error();
-            this.print("ls: cannot open directory '/root': Permission denied (use 'su -')", "err");
-            allOk = false;
-            return;
-          }
+        const entrySet = new Set(builtin || []);
+        const prefix = norm === "/" ? "/" : `${norm}/`;
 
-          if (validDirs.includes(resolved)) {
-            const entries = this.getDirEntries(resolved);
-            if (targets.length > 1) {
-              this.print(`${idx > 0 ? "\n" : ""}${rawTarget}:`, "sys");
+        const addChildrenFromMap = (fileMap) => {
+          for (const fullPath of Object.keys(fileMap)) {
+            if (fullPath.startsWith(prefix)) {
+              const rest = fullPath.slice(prefix.length);
+              if (rest && !rest.includes("/")) {
+                entrySet.add(rest);
+              }
             }
-            if (longFmt) {
-              this.print(`total ${entries.length * 4}`, "info");
-              entries.forEach((e) => {
-                const isDir = e.endsWith("/");
-                this.print(`${isDir ? "drwxr-xr-x" : "-rw-r--r--"} 1 nahla hope 4096 Nov 19  3312 ${e}`, isDir ? "cyan" : "info");
-              });
-            } else {
-              this.print(entries.join("   "), "cyan");
-            }
-            return;
           }
+        };
 
-          // Check if target refers to a regular file inside its parent directory
-          const parentSlash = resolved.lastIndexOf("/");
-          const parentDir = parentSlash <= 0 ? "/" : resolved.slice(0, parentSlash);
-          const baseName = resolved.slice(parentSlash + 1);
-          const parentEntries = this.getDirEntries(parentDir).map((e) => e.replace(/\/$/, ""));
-
-          if (parentEntries.includes(baseName)) {
-            if (longFmt) {
-              this.print(`-rw-r--r-- 1 nahla hope 4096 Nov 19  3312 ${rawTarget}`, "info");
-            } else {
-              this.print(rawTarget, "info");
+        const addChildDirsFromSet = (dirSet) => {
+          for (const fullDir of dirSet) {
+            if (fullDir.startsWith(prefix)) {
+              const rest = fullDir.slice(prefix.length);
+              if (rest && !rest.includes("/")) {
+                entrySet.add(`${rest}/`);
+              }
             }
-          } else {
-            this.game.audio.error();
-            this.print(`ls: cannot access '${rawTarget}': No such file or directory`, "err");
-            allOk = false;
           }
-        });
+        };
 
-        return allOk;
+        addChildrenFromMap(this.userFiles);
+        addChildrenFromMap(this.tmpFiles);
+        addChildDirsFromSet(this.userDirs);
+        addChildDirsFromSet(this.tmpDirs);
+
+        return Array.from(entrySet);
       }
 
-      cmdCd(target) {
-        const next = this.resolvePath(target || "~");
-        if (next === "/root" && !this.isRoot) {
-          this.game.audio.error();
-          this.print("cd: /root: Permission denied (use 'su -')", "err");
-          return;
-        }
-        const validDirs = ["/", "/home", "/home/nahla", "/home/nahla/sector", "/root", "/sys", "/sys/sector", "/sys/override", "/var", "/var/log", "/etc"];
-        if (!validDirs.includes(next)) {
-          this.game.audio.error();
-          this.print(`cd: ${target}: No such directory`, "err");
-          return;
-        }
-        this.cwd = next;
-        this.updatePromptLabel();
+      isWritablePath(normPath) {
+        if (normPath === "/dev/null" || normPath === "/dev/ttyS0") return true;
+        if (normPath === "/home/nahla" || normPath === "/home/nahla/sector" || normPath === "/tmp") return false;
+        const builtinFiles = new Set([
+          "/home/nahla/readme.txt",
+          "/home/nahla/sector/anomalies.dat",
+          "/home/nahla/sector/sector.map",
+          "/home/nahla/sector/telemetry.log",
+          "/home/nahla/sector/lexicon.db"
+        ]);
+        if (builtinFiles.has(normPath)) return false;
+        return normPath.startsWith("/home/nahla/") || normPath.startsWith("/tmp/");
       }
 
-      getFileContent(filename) {
+      writeUserFile(normPath, content, append = false) {
+        if (this.isDirectory(normPath)) {
+          return { ok: false, err: "Is a directory" };
+        }
+        if (!this.isWritablePath(normPath)) {
+          return { ok: false, err: "Read-only file system (writable paths: ~/... and /tmp/...)" };
+        }
+
+        const parentSlash = normPath.lastIndexOf("/");
+        const parentDir = parentSlash <= 0 ? "/" : normPath.slice(0, parentSlash);
+        if (!this.isDirectory(parentDir)) {
+          return { ok: false, err: "No such directory" };
+        }
+
+        const isTmp = normPath.startsWith("/tmp/");
+        const store = isTmp ? this.tmpFiles : this.userFiles;
+        const existing = Object.prototype.hasOwnProperty.call(store, normPath) ? store[normPath] : "";
+        const nextContent = append ? `${existing}${content}` : content;
+
+        if (!isTmp) {
+          const totalKeys = Object.keys(this.userFiles).length + (Object.prototype.hasOwnProperty.call(this.userFiles, normPath) ? 0 : 1);
+          if (totalKeys > NahlaTerminal.MAX_VFS_FILES) {
+            return { ok: false, err: `Storage quota exceeded (max ${NahlaTerminal.MAX_VFS_FILES} files in ~)` };
+          }
+        }
+        if (nextContent.length > 16384) {
+          return { ok: false, err: "File size limit exceeded (max 16KB)" };
+        }
+
+        store[normPath] = nextContent;
+        if (!isTmp) this.saveVfs();
+        return { ok: true };
+      }
+
+      getBuiltinFileContent(normPath) {
         const puzzle = this.game.puzzle;
         const status = this.game.computeStatus();
 
-        if (filename === "transceiver.key") {
+        if (normPath === "/dev/null") return "";
+        if (normPath === "/dev/ttyS0") return "HopeOS serial console ttyS0 (9600 8N1)";
+
+        if (normPath === "/root/transceiver.key") {
           if (!this.isRoot) return "__PERMISSION_DENIED__";
           return [
             "=== NAHLA ARRAY ROOT TRANSCEIVER KEY (6a) ===",
@@ -4807,23 +5669,23 @@
           ].join("\n");
         }
 
-        if (filename === "readme.txt") {
+        if (normPath === "/home/nahla/readme.txt") {
           return [
             "NAHLA TRACKER (6a) // HOPE SYSTEM FIELD MANUAL",
             "1. 31 Hope System bodies: 28 orbital beacons (8 x 3-letter + 20 x 4-letter)",
             "   plus 3 unbeaconed dark bodies (Bellatrix belt, Theresa 2da, Kali 9da).",
             "2. Draw a path through adjacent nodes from [Ø] to [X] bouncing 31 echoes while locking relays.",
-            "3. Commands: 'scan', 'vent <xy>', 'invert <xy>', 'purge <xy>', 'sync <code>', 'flag <xy>', 'tutorial'."
+            "3. Commands: 'scan', 'vent <xy>', 'invert <xy>', 'purge <xy>', 'sync <code>', 'flag <xy>', 'download <file>'."
           ].join("\n");
         }
 
-        if (filename === "anomalies.dat") {
+        if (normPath === "/home/nahla/sector/anomalies.dat" || normPath === "/sys/sector/anomalies.dat") {
           const active = puzzle.anomalies.filter((a) => puzzle.grid[a.r][a.c].anomaly !== null);
           if (active.length === 0) return "STATUS: CLEAN (0 active anomalies)";
           return active.map((a, i) => `[0${i + 1}] ${a.why.replace(/<[^>]+>/g, "")}`).join("\n");
         }
 
-        if (filename === "lexicon.db") {
+        if (normPath === "/home/nahla/sector/lexicon.db" || normPath === "/etc/lexicon.db") {
           const deep = SectorGenerator.DEEP_LEXICON.map((e) => `${e.code}   ::  ${e.label}`);
           const inner = SectorGenerator.INNER_BEACONS.map((e) => `${e.code}    ::  ${e.label}`);
           const dark = [
@@ -4834,7 +5696,7 @@
           return [...deep, ...inner, ...dark].join("\n");
         }
 
-        if (filename === "telemetry.log") {
+        if (normPath === "/home/nahla/sector/telemetry.log" || normPath === "/var/log/telemetry.log") {
           const trail = this.game.path.map((p) => SectorGenerator.toCoord(p.r, p.c)).join(" -> ");
           return [
             `SEED: ${puzzle.mode}:${puzzle.seedStr}`,
@@ -4845,7 +5707,7 @@
           ].join("\n");
         }
 
-        if (filename === "sector.map") {
+        if (normPath === "/home/nahla/sector/sector.map") {
           const header = "    " + SectorGenerator.COLS.slice(0, puzzle.size).map((c) => c.padEnd(4, " ")).join("");
           const rows = [header];
           for (let r = 0; r < puzzle.size; r++) {
@@ -4865,31 +5727,130 @@
           return rows.join("\n");
         }
 
-        if (filename === "charges") {
+        if (normPath === "/sys/override/charges") {
           return `${this.game.chargesLeft}/${puzzle.maxCharges}`;
         }
 
-        if (filename === "echo_returns") {
+        if (normPath === "/sys/sector/echo_returns") {
           return `${status.mass}/31`;
         }
 
         return null;
       }
 
+      getFileContentByPath(rawOrResolved) {
+        const norm = rawOrResolved.startsWith("/") ? this.normalizePath(rawOrResolved) : this.resolvePath(rawOrResolved);
+        if (this.isDirectory(norm)) return "__IS_DIRECTORY__";
+        if (Object.prototype.hasOwnProperty.call(this.tmpFiles, norm)) {
+          return this.tmpFiles[norm];
+        }
+        if (Object.prototype.hasOwnProperty.call(this.userFiles, norm)) {
+          return this.userFiles[norm];
+        }
+        return this.getBuiltinFileContent(norm);
+      }
+
+      getFileContent(filename) {
+        return this.getFileContentByPath(this.resolvePath(filename));
+      }
+
+      cmdLs(args) {
+        const longFmt = args.includes("-la") || args.includes("-l");
+        const pathArgs = args.filter((a) => !a.startsWith("-"));
+        const targets = pathArgs.length > 0 ? pathArgs : [this.cwd];
+        let allOk = true;
+
+        targets.forEach((rawTarget, idx) => {
+          const resolved = this.resolvePath(rawTarget);
+          if (resolved === "/root" && !this.isRoot) {
+            this.game.audio.error();
+            this.print("ls: cannot open directory '/root': Permission denied (use 'su -')", "err");
+            allOk = false;
+            return;
+          }
+
+          if (this.isDirectory(resolved)) {
+            const entries = this.getDirEntries(resolved);
+            if (targets.length > 1) {
+              this.print(`${idx > 0 ? "\n" : ""}${rawTarget}:`, "sys");
+            }
+            if (longFmt) {
+              this.print(`total ${entries.length * 4}`, "info");
+              entries.forEach((e) => {
+                const isDir = e.endsWith("/");
+                const childPath = this.normalizePath(`${resolved}/${e.replace(/\/$/, "")}`);
+                const byteSize = isDir
+                  ? 4096
+                  : (this.userFiles[childPath]?.length ?? this.tmpFiles[childPath]?.length ?? 4096);
+                this.print(`${isDir ? "drwxr-xr-x" : "-rw-r--r--"} 1 nahla hope ${String(byteSize).padStart(4, " ")} Nov 19  3312 ${e}`, isDir ? "cyan" : "info");
+              });
+            } else {
+              this.print(entries.join("   "), "cyan");
+            }
+            return;
+          }
+
+          const content = this.getFileContentByPath(resolved);
+          if (content === "__PERMISSION_DENIED__") {
+            this.game.audio.error();
+            this.print(`ls: cannot access '${rawTarget}': Permission denied`, "err");
+            allOk = false;
+          } else if (content !== null) {
+            if (longFmt) {
+              this.print(`-rw-r--r-- 1 nahla hope ${String(content.length).padStart(4, " ")} Nov 19  3312 ${rawTarget}`, "info");
+            } else {
+              this.print(rawTarget, "info");
+            }
+          } else {
+            this.game.audio.error();
+            this.print(`ls: cannot access '${rawTarget}': No such file or directory`, "err");
+            allOk = false;
+          }
+        });
+
+        return allOk;
+      }
+
+      cmdCd(target) {
+        const next = this.resolvePath(target || "~");
+        if (next === "/root" && !this.isRoot) {
+          this.game.audio.error();
+          this.print("cd: /root: Permission denied (use 'su -')", "err");
+          return false;
+        }
+        if (!this.isDirectory(next)) {
+          this.game.audio.error();
+          this.print(`cd: ${target}: No such directory`, "err");
+          return false;
+        }
+        this.cwd = next;
+        this.updatePromptLabel();
+        return true;
+      }
+
       cmdCat(args) {
         const fileArgs = Array.isArray(args) ? args : (args ? [args] : []);
         if (fileArgs.length === 0) {
+          if (this.stdinLines !== null) {
+            this.stdinLines.forEach((item) => this.print(item.text, item.tone, item.html));
+            return true;
+          }
           this.game.audio.error();
           this.print("usage: cat <filename|glob...>", "err");
           return false;
         }
         let allOk = true;
         for (const arg of fileArgs) {
-          const baseName = arg.split("/").pop();
-          const content = this.getFileContent(baseName);
+          const content = this.getFileContentByPath(this.resolvePath(arg));
           if (content === "__PERMISSION_DENIED__") {
             this.game.audio.error();
             this.print(`cat: ${arg}: Permission denied (use 'su -')`, "err");
+            allOk = false;
+            continue;
+          }
+          if (content === "__IS_DIRECTORY__") {
+            this.game.audio.error();
+            this.print(`cat: ${arg}: Is a directory`, "err");
             allOk = false;
             continue;
           }
@@ -4899,7 +5860,425 @@
             allOk = false;
             continue;
           }
-          this.print(content, "info");
+          if (content !== "") {
+            this.print(content.replace(/\n$/, ""), "info");
+          }
+        }
+        return allOk;
+      }
+
+      cmdTouch(args) {
+        const targets = args.filter((a) => !a.startsWith("-"));
+        if (targets.length === 0) {
+          this.game.audio.error();
+          this.print("usage: touch <file...>", "err");
+          return false;
+        }
+        let allOk = true;
+        for (const t of targets) {
+          const norm = this.resolvePath(t);
+          if (this.isDirectory(norm)) continue;
+          const existing = this.getFileContentByPath(norm);
+          if (existing !== null && existing !== "__PERMISSION_DENIED__") {
+            continue; // Already exists (e.g. built-in or user file)
+          }
+          const res = this.writeUserFile(norm, "", false);
+          if (!res.ok) {
+            this.game.audio.error();
+            this.print(`touch: cannot touch '${t}': ${res.err}`, "err");
+            allOk = false;
+          }
+        }
+        if (allOk) this.game.audio.cmdOk();
+        return allOk;
+      }
+
+      cmdRm(args) {
+        const force = args.some((a) => a.startsWith("-") && a.includes("f"));
+        const recursive = args.some((a) => a.startsWith("-") && a.includes("r"));
+        const targets = args.filter((a) => !a.startsWith("-"));
+        if (targets.length === 0) {
+          this.game.audio.error();
+          this.print("usage: rm [-r] [-f] <file|glob...>", "err");
+          return false;
+        }
+
+        let allOk = true;
+        let touchedUserVfs = false;
+
+        for (const t of targets) {
+          const norm = this.resolvePath(t);
+          if (this.isDirectory(norm)) {
+            if (!recursive) {
+              this.game.audio.error();
+              this.print(`rm: cannot remove '${t}': Is a directory`, "err");
+              allOk = false;
+              continue;
+            }
+            if (!this.userDirs.has(norm) && !this.tmpDirs.has(norm)) {
+              this.game.audio.error();
+              this.print(`rm: cannot remove '${t}': Permission denied`, "err");
+              allOk = false;
+              continue;
+            }
+            const prefix = `${norm}/`;
+            for (const f of Object.keys(this.userFiles)) {
+              if (f.startsWith(prefix)) { delete this.userFiles[f]; touchedUserVfs = true; }
+            }
+            for (const f of Object.keys(this.tmpFiles)) {
+              if (f.startsWith(prefix)) delete this.tmpFiles[f];
+            }
+            for (const d of Array.from(this.userDirs)) {
+              if (d === norm || d.startsWith(prefix)) { this.userDirs.delete(d); touchedUserVfs = true; }
+            }
+            for (const d of Array.from(this.tmpDirs)) {
+              if (d === norm || d.startsWith(prefix)) this.tmpDirs.delete(d);
+            }
+            continue;
+          }
+
+          if (Object.prototype.hasOwnProperty.call(this.userFiles, norm)) {
+            delete this.userFiles[norm];
+            touchedUserVfs = true;
+          } else if (Object.prototype.hasOwnProperty.call(this.tmpFiles, norm)) {
+            delete this.tmpFiles[norm];
+          } else if (this.getBuiltinFileContent(norm) !== null) {
+            this.game.audio.error();
+            this.print(`rm: cannot remove '${t}': Read-only file system`, "err");
+            allOk = false;
+          } else if (!force) {
+            this.game.audio.error();
+            this.print(`rm: cannot remove '${t}': No such file or directory`, "err");
+            allOk = false;
+          }
+        }
+
+        if (touchedUserVfs) this.saveVfs();
+        if (allOk) this.game.audio.cmdOk();
+        return allOk;
+      }
+
+      cmdMkdir(args) {
+        const targets = args.filter((a) => !a.startsWith("-"));
+        if (targets.length === 0) {
+          this.game.audio.error();
+          this.print("usage: mkdir [-p] <directory...>", "err");
+          return false;
+        }
+        let allOk = true;
+        let touchedUserVfs = false;
+
+        for (const t of targets) {
+          const norm = this.resolvePath(t);
+          if (this.isDirectory(norm)) {
+            if (!args.includes("-p")) {
+              this.game.audio.error();
+              this.print(`mkdir: cannot create directory '${t}': File exists`, "err");
+              allOk = false;
+            }
+            continue;
+          }
+          if (!norm.startsWith("/home/nahla/") && !norm.startsWith("/tmp/")) {
+            this.game.audio.error();
+            this.print(`mkdir: cannot create directory '${t}': Permission denied`, "err");
+            allOk = false;
+            continue;
+          }
+          const parentDir = norm.slice(0, norm.lastIndexOf("/")) || "/";
+          if (!this.isDirectory(parentDir) && !args.includes("-p")) {
+            this.game.audio.error();
+            this.print(`mkdir: cannot create directory '${t}': No such file or directory`, "err");
+            allOk = false;
+            continue;
+          }
+          if (norm.startsWith("/tmp/")) {
+            this.tmpDirs.add(norm);
+          } else {
+            this.userDirs.add(norm);
+            touchedUserVfs = true;
+          }
+        }
+
+        if (touchedUserVfs) this.saveVfs();
+        if (allOk) this.game.audio.cmdOk();
+        return allOk;
+      }
+
+      cmdRmdir(args) {
+        const targets = args.filter((a) => !a.startsWith("-"));
+        if (targets.length === 0) {
+          this.game.audio.error();
+          this.print("usage: rmdir <directory...>", "err");
+          return false;
+        }
+        let allOk = true;
+        let touchedUserVfs = false;
+
+        for (const t of targets) {
+          const norm = this.resolvePath(t);
+          if (!this.isDirectory(norm)) {
+            this.game.audio.error();
+            this.print(`rmdir: failed to remove '${t}': No such directory`, "err");
+            allOk = false;
+            continue;
+          }
+          if (!this.userDirs.has(norm) && !this.tmpDirs.has(norm)) {
+            this.game.audio.error();
+            this.print(`rmdir: failed to remove '${t}': Permission denied`, "err");
+            allOk = false;
+            continue;
+          }
+          if (this.getDirEntries(norm).length > 0) {
+            this.game.audio.error();
+            this.print(`rmdir: failed to remove '${t}': Directory not empty`, "err");
+            allOk = false;
+            continue;
+          }
+          if (this.userDirs.delete(norm)) touchedUserVfs = true;
+          this.tmpDirs.delete(norm);
+        }
+
+        if (touchedUserVfs) this.saveVfs();
+        if (allOk) this.game.audio.cmdOk();
+        return allOk;
+      }
+
+      cmdCp(args) {
+        const positional = args.filter((a) => !a.startsWith("-"));
+        if (positional.length < 2) {
+          this.game.audio.error();
+          this.print("usage: cp <source> <dest>", "err");
+          return false;
+        }
+        const srcNorm = this.resolvePath(positional[0]);
+        let dstNorm = this.resolvePath(positional[1]);
+        const content = this.getFileContentByPath(srcNorm);
+        if (content === "__PERMISSION_DENIED__") {
+          this.game.audio.error();
+          this.print(`cp: cannot open '${positional[0]}': Permission denied`, "err");
+          return false;
+        }
+        if (content === "__IS_DIRECTORY__") {
+          this.game.audio.error();
+          this.print(`cp: -r not specified; omitting directory '${positional[0]}'`, "err");
+          return false;
+        }
+        if (content === null) {
+          this.game.audio.error();
+          this.print(`cp: cannot stat '${positional[0]}': No such file or directory`, "err");
+          return false;
+        }
+        if (this.isDirectory(dstNorm)) {
+          const baseName = srcNorm.split("/").pop();
+          dstNorm = this.normalizePath(`${dstNorm}/${baseName}`);
+        }
+        const res = this.writeUserFile(dstNorm, content, false);
+        if (!res.ok) {
+          this.game.audio.error();
+          this.print(`cp: cannot create '${positional[1]}': ${res.err}`, "err");
+          return false;
+        }
+        this.game.audio.cmdOk();
+        return true;
+      }
+
+      cmdMv(args) {
+        const positional = args.filter((a) => !a.startsWith("-"));
+        if (positional.length < 2) {
+          this.game.audio.error();
+          this.print("usage: mv <source> <dest>", "err");
+          return false;
+        }
+        const srcNorm = this.resolvePath(positional[0]);
+        if (!Object.prototype.hasOwnProperty.call(this.userFiles, srcNorm) && !Object.prototype.hasOwnProperty.call(this.tmpFiles, srcNorm)) {
+          this.game.audio.error();
+          this.print(`mv: cannot move '${positional[0]}': Read-only or non-existent file`, "err");
+          return false;
+        }
+        if (!this.cmdCp(positional)) return false;
+        return this.cmdRm(["-f", positional[0]]);
+      }
+
+      cmdDownload(args) {
+        const positional = args.filter((a) => !a.startsWith("-"));
+        if (positional.length === 0) {
+          this.game.audio.error();
+          this.print("usage: download <virtual_file> [export_name.txt]", "err");
+          return false;
+        }
+        const srcNorm = this.resolvePath(positional[0]);
+        const content = this.getFileContentByPath(srcNorm);
+        if (content === "__PERMISSION_DENIED__") {
+          this.game.audio.error();
+          this.print(`download: ${positional[0]}: Permission denied (use 'su -')`, "err");
+          return false;
+        }
+        if (content === "__IS_DIRECTORY__") {
+          this.game.audio.error();
+          this.print(`download: ${positional[0]}: Is a directory`, "err");
+          return false;
+        }
+        if (content === null) {
+          this.game.audio.error();
+          this.print(`download: ${positional[0]}: No such file`, "err");
+          return false;
+        }
+
+        const rawBase = positional[1] ? positional[1].split("/").pop() : srcNorm.split("/").pop();
+        const exportName = /\.(txt|log)$/i.test(rawBase) ? rawBase : `${rawBase}.txt`;
+
+        try {
+          const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement("a");
+          link.href = url;
+          link.download = exportName;
+          link.style.display = "none";
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          setTimeout(() => URL.revokeObjectURL(url), 1500);
+          this.game.audio.cmdOk();
+          this.print(`[OK] EXPORTED '${exportName}' (${content.length} bytes, UTF-8 text).`, "ok");
+          return true;
+        } catch (err) {
+          this.game.audio.error();
+          this.print(`download: export failed (${err.message || "browser blocked"})`, "err");
+          return false;
+        }
+      }
+
+      cmdAlias(rawArgStr) {
+        if (!rawArgStr) {
+          const names = Object.keys(this.aliases).sort();
+          if (names.length === 0) {
+            this.print("(no active aliases — define one with: alias s='scan *')", "info");
+          } else {
+            names.forEach((k) => this.print(`alias ${k}='${this.aliases[k]}'`, "cyan"));
+          }
+          return true;
+        }
+        const eqIdx = rawArgStr.indexOf("=");
+        if (eqIdx === -1) {
+          const name = rawArgStr.trim();
+          if (Object.prototype.hasOwnProperty.call(this.aliases, name)) {
+            this.print(`alias ${name}='${this.aliases[name]}'`, "cyan");
+            return true;
+          }
+          this.game.audio.error();
+          this.print(`nahla_sh: alias: ${name}: not found`, "err");
+          return false;
+        }
+        const name = rawArgStr.slice(0, eqIdx).trim();
+        const val = rawArgStr.slice(eqIdx + 1).trim().replace(/^["']|["']$/g, "");
+        if (!/^[A-Za-z0-9_.-]+$/.test(name)) {
+          this.game.audio.error();
+          this.print(`nahla_sh: alias: '${name}': invalid alias name`, "err");
+          return false;
+        }
+        this.aliases[name] = val;
+        this.saveVfs();
+        this.game.audio.cmdOk();
+        this.print(`[OK] alias ${name}='${val}'`, "ok");
+        return true;
+      }
+
+      cmdUnalias(args) {
+        if (args.length === 0) {
+          this.game.audio.error();
+          this.print("usage: unalias [-a] <name...>", "err");
+          return false;
+        }
+        if (args.includes("-a")) {
+          this.aliases = {};
+          this.saveVfs();
+          this.game.audio.cmdOk();
+          return true;
+        }
+        let allOk = true;
+        for (const name of args) {
+          if (Object.prototype.hasOwnProperty.call(this.aliases, name)) {
+            delete this.aliases[name];
+          } else {
+            this.game.audio.error();
+            this.print(`nahla_sh: unalias: ${name}: not found`, "err");
+            allOk = false;
+          }
+        }
+        this.saveVfs();
+        return allOk;
+      }
+
+      cmdExport(args) {
+        if (args.length === 0) {
+          return this.cmdEnv();
+        }
+        let allOk = true;
+        for (const arg of args) {
+          const eqIdx = arg.indexOf("=");
+          if (eqIdx === -1) continue;
+          const name = arg.slice(0, eqIdx);
+          const val = arg.slice(eqIdx + 1);
+          if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(name)) {
+            this.game.audio.error();
+            this.print(`export: '${name}': not a valid identifier`, "err");
+            allOk = false;
+            continue;
+          }
+          if (["ECHO", "DELTA", "BEACON", "CHG", "SEED", "MODE", "HEAD", "STEPS", "PAR", "USER", "PWD", "HOME"].includes(name)) {
+            this.game.audio.error();
+            this.print(`export: ${name}: readonly telemetry variable`, "err");
+            allOk = false;
+            continue;
+          }
+          this.vars[name] = val;
+        }
+        return allOk;
+      }
+
+      cmdUnset(args) {
+        if (args.length === 0) {
+          this.game.audio.error();
+          this.print("usage: unset <VAR...>", "err");
+          return false;
+        }
+        for (const name of args) {
+          delete this.vars[name];
+        }
+        return true;
+      }
+
+      cmdEnv() {
+        const liveKeys = ["USER", "HOME", "PWD", "MODE", "SEED", "BEACON", "ECHO", "DELTA", "CHG", "HEAD", "STEPS", "PAR"];
+        liveKeys.forEach((k) => {
+          this.print(`${k}=${this.getDynamicVar(k)}`, "cyan");
+        });
+        Object.keys(this.vars).sort().forEach((k) => {
+          this.print(`${k}=${this.vars[k]}`, "info");
+        });
+        return true;
+      }
+
+      cmdWhich(args) {
+        if (args.length === 0) {
+          this.game.audio.error();
+          this.print("usage: which <command...>", "err");
+          return false;
+        }
+        let allOk = true;
+        const overrideVerbs = new Set(["vent", "invert", "purge", "sync"]);
+        for (const name of args) {
+          if (Object.prototype.hasOwnProperty.call(this.aliases, name)) {
+            this.print(`${name}: aliased to '${this.aliases[name]}'`, "cyan");
+          } else if (overrideVerbs.has(name.toLowerCase())) {
+            this.print(`/sys/override/${name.toLowerCase()}`, "ok");
+          } else if (NahlaTerminal.COMMANDS.includes(name.toLowerCase())) {
+            this.print(`${name}: HopeOS nahla_sh builtin`, "info");
+          } else {
+            this.game.audio.error();
+            this.print(`${name} not found`, "err");
+            allOk = false;
+          }
         }
         return allOk;
       }
@@ -4939,6 +6318,20 @@
 
         const pattern = positional[0].text;
         const rawFiles = positional.slice(1);
+
+        // If no file args were passed and '< file' stdin was provided, grep stdin!
+        if (rawFiles.length === 0 && this.stdinLines !== null) {
+          const rebuiltArgs = [
+            ...(invert ? ["-v"] : []),
+            ...(countOnly ? ["-c"] : []),
+            ...(lineNums ? ["-n"] : []),
+            `"${pattern.replace(/"/g, '\\"')}"`
+          ].join(" ");
+          const res = this.applyPipeFilter(`grep ${rebuiltArgs}`, this.stdinLines);
+          res.lines.forEach((item) => this.print(item.text, item.tone, item.html));
+          return res.ok;
+        }
+
         const expandedFiles = [];
         for (const fTok of rawFiles) {
           if (!fTok.quoted && /[*?]/.test(fTok.text)) {
@@ -4956,21 +6349,19 @@
           rx = null;
         }
 
-        const validDirs = ["/", "/home", "/home/nahla", "/home/nahla/sector", "/root", "/sys", "/sys/sector", "/sys/override", "/var", "/var/log", "/etc"];
         const allHits = [];
         let allOk = true;
 
         for (const fileArg of targetFiles) {
           const resolved = this.resolvePath(fileArg);
-          if (validDirs.includes(resolved)) {
+          if (this.isDirectory(resolved)) {
             if (rawFiles.some((t) => !t.quoted && /[*?]/.test(t.text))) continue;
             this.game.audio.error();
             this.print(`grep: ${fileArg}: Is a directory`, "err");
             allOk = false;
             continue;
           }
-          const baseName = fileArg.split("/").pop();
-          const content = this.getFileContent(baseName);
+          const content = this.getFileContentByPath(resolved);
           if (content === "__PERMISSION_DENIED__") {
             this.game.audio.error();
             this.print(`grep: ${fileArg}: Permission denied (use 'su -')`, "err");
@@ -5008,26 +6399,53 @@
       }
 
       cmdFileSliceOrCount(cmd, args) {
-        const fileArg = args.find((a) => !a.startsWith("-"));
-        if (!fileArg) {
+        // Find file operand (skipping option flags and values for -n, -d, -f, -c)
+        let fileArg = null;
+        const filterArgs = [];
+        for (let i = 0; i < args.length; i++) {
+          const a = args[i];
+          if ((a === "-n" || a === "-d" || a === "-f" || a === "-c") && args[i + 1] !== undefined) {
+            filterArgs.push(a, args[++i]);
+          } else if (a.startsWith("-")) {
+            filterArgs.push(a);
+          } else if (cmd === "sed" && filterArgs.length === 0) {
+            filterArgs.push(a);
+          } else if (cmd === "tr" && filterArgs.filter((x) => !x.startsWith("-")).length < (args.includes("-d") ? 1 : 2)) {
+            filterArgs.push(a);
+          } else if (!fileArg) {
+            fileArg = a;
+          }
+        }
+
+        let inputLines = null;
+        if (!fileArg && this.stdinLines !== null) {
+          inputLines = this.stdinLines;
+        } else if (fileArg) {
+          const content = this.getFileContentByPath(this.resolvePath(fileArg));
+          if (content === "__PERMISSION_DENIED__") {
+            this.game.audio.error();
+            this.print(`${cmd}: ${fileArg}: Permission denied (use 'su -')`, "err");
+            return false;
+          }
+          if (content === "__IS_DIRECTORY__") {
+            this.game.audio.error();
+            this.print(`${cmd}: ${fileArg}: Is a directory`, "err");
+            return false;
+          }
+          if (content === null) {
+            this.game.audio.error();
+            this.print(`${cmd}: ${fileArg}: No such file`, "err");
+            return false;
+          }
+          inputLines = content.replace(/\n$/, "").split("\n").map((line) => ({ text: line, plain: line, tone: "info", html: false }));
+        } else {
           this.game.audio.error();
-          this.print(`usage: ${cmd} [options] <filename>  (or pipe into '${cmd}')`, "err");
+          this.print(`usage: ${cmd} [options] <filename>  (or pipe / redirect stdin into '${cmd}')`, "err");
           return false;
         }
-        const baseName = fileArg.split("/").pop();
-        const content = this.getFileContent(baseName);
-        if (content === "__PERMISSION_DENIED__") {
-          this.game.audio.error();
-          this.print(`${cmd}: ${fileArg}: Permission denied (use 'su -')`, "err");
-          return false;
-        }
-        if (content === null) {
-          this.game.audio.error();
-          this.print(`${cmd}: ${fileArg}: No such file`, "err");
-          return false;
-        }
-        const inputLines = content.split("\n").map((line) => ({ text: line, plain: line, tone: "info", html: false }));
-        const res = this.applyPipeFilter([cmd, ...args].join(" "), inputLines);
+
+        const quotedArgs = filterArgs.map((x) => (/\s/.test(x) ? `"${x}"` : x));
+        const res = this.applyPipeFilter([cmd, ...quotedArgs].join(" "), inputLines);
         if (!res.ok) return false;
         res.lines.forEach((item) => this.print(item.text, item.tone, item.html));
         return true;
@@ -5758,7 +7176,10 @@
         }
         this.chargesLeft = this.puzzle.maxCharges;
         this.rootBoostUsed = false;
-        this.term.pendingPrompt = null;
+        if (this.term) {
+          this.term.pendingPrompt = null;
+          this.term.clearTmp();
+        }
         this.updateChargesHUD();
         this.updateBeaconTooltips();
       },
@@ -6311,11 +7732,22 @@
 
       showHelpModal() {
         this.openModal(
-          "INFO & FIELD GLOSSARY // v0.95",
+          "INFO & FIELD GLOSSARY // v0.96",
           `
             <div class="modal-section-heading">Top HUD Readouts</div>
             <div class="rule-item">
               <strong>ECHO RETURNS:</strong> Totals your ping path live as you click across nodes. Must reach <strong>31 / 31</strong> when moving on to <strong>[X]</strong>.
+            </div>
+            <div class="rule-item">
+              <strong>BEACON RELAYS (IN ORDER):</strong> The target beacon callsign whose letter relays must be lit sequentially from left to right. Click the HUD card at the top left of the main screen anytime to flip to the <strong>28-Beacon Roster</strong>.
+            </div>
+            <div class="rule-item">
+              <strong>VECTOR STEPS:</strong> Total moves taken on your current path compared against the sector's optimal <strong>PAR</strong> step count.
+            </div>
+
+            <div class="modal-section-heading">Override Charges (CHG) &amp; ttyS0 Shell</div>
+            <div class="rule-item">
+              <strong>UNLIMITED INSPECTION vs. CAPACITOR MUTATIONS:</strong> Read-only, navigation, and file commands (<span class="cmd-code">scan</span>, <span class="cmd-code">step</span>, <span class="cmd-code">undo</span>, <span class="cmd-code">flag</span> / <span class="cmd-code">unflag</span>, <span class="cmd-code">ls</span>, <span class="cmd-code">cat</span>, <span class="cmd-code">touch</span>, <span class="cmd-code">rm</span>, <span class="cmd-code">cp</span>, <span class="cmd-code">mv</span>, <span class="cmd-code">download</span>, <span class="cmd-code">grep</span>, <span class="cmd-code">sed</span>, <span class="cmd-code">cut</span>, <span class="cmd-code">tr</span>, <span class="cmd-code">tee</span>, <span class="cmd-code">alias</span>, <span class="cmd-code">man</span>, <span class="cmd-code">top</span>, <span class="cmd-code">htop</span>) are unlimited and support wildcards (<span class="cmd-code">*</span>, <span class="cmd-code">a*</span>, <span class="cmd-code">a1..a5</span>), brace lists (<span class="cmd-code">{a,c}2</span>), live variables (<span class="cmd-code">$ECHO</span>, <span class="cmd-code">$CHG</span>, <span class="cmd-code">$BEACON</span>), <span class="cmd-code">$(...)</span> substitution, pipes (<span class="cmd-code">|</span>), <span class="cmd-code">&amp;&amp;</span>/<span class="cmd-code">||</span>, and file redirection (<span class="cmd-code">&gt;</span>, <span class="cmd-code">&gt;&gt;</span>, <span class="cmd-code">&lt;</span>, <span class="cmd-code">2&gt;&amp;1</span>, <span class="cmd-code">2&gt;/dev/null</span>). Physical grid mutations (<span class="cmd-code">vent</span>, <span class="cmd-code">invert</span>, <span class="cmd-code">purge</span>, <span class="cmd-code">sync</span>) spend <strong>1 CHG</strong> per rewrite. Every sector grants <strong>+1 spare Override Charge</strong>—use <span class="cmd-code">vent</span> on any <strong>##</strong> void node or <span class="cmd-code">invert</span> on any non-zero number node. Pressing <strong>RESET [R]</strong> or running <span class="cmd-code">reboot</span> restores all charges and clears <span class="cmd-code">/tmp</span>.
             </div>
             <div class="rule-item">
               <strong>BEACON RELAYS (IN ORDER):</strong> The target beacon callsign whose letter relays must be lit sequentially from left to right. Click the HUD card at the top left of the main screen anytime to flip to the <strong>28-Beacon Roster</strong>.
