@@ -25,7 +25,7 @@
   <meta name="twitter:image" content="https://nahla.live/vvthumb8.jpeg" />
   <style>
     /* ==========================================================================
-       NAHLA TRACKER DESIGN TOKENS & PHOSPHOR TERMINAL GREEN THEME (v0.92)
+       NAHLA TRACKER DESIGN TOKENS & PHOSPHOR TERMINAL GREEN THEME (v0.95)
        Offline-ready, zero external dependencies, pure monospace aesthetics.
        ========================================================================== */
     :root {
@@ -1804,7 +1804,7 @@
       <header class="terminal-header">
         <div class="brand-block">
           <div class="brand-title">
-            VØID VECTØR v0.92
+            VØID VECTØR v0.95
           </div>
           <div class="brand-sub">NAHLA@HOPE (31 BODIES)</div>
         </div>
@@ -2096,7 +2096,7 @@
   <script>
     /**
      * ==========================================================================
-     * 31: VØID VECTØR v0.92 — CORE ENGINE
+     * 31: VØID VECTØR v0.95 — CORE ENGINE
      * Deterministic Carve-First Puzzle Generator, Anomaly Saboteur,
      * Embedded Bash/Override Shell, WebAudio Synthesizer, 3x3 Walkthrough & UI
      * ==========================================================================
@@ -2399,6 +2399,102 @@
         return { r, c, coord: clean };
       }
 
+      static isGlobOrRange(token) {
+        return /[*?[\]{}]|\.\./.test(String(token || ""));
+      }
+
+      static expandCoords(tokens, size) {
+        const coords = [];
+        const invalid = [];
+        const seen = new Set();
+
+        const pushCoord = (r, c, fromWildcard) => {
+          const coord = this.toCoord(r, c);
+          if (!seen.has(coord)) {
+            seen.add(coord);
+            coords.push({ r, c, coord, fromWildcard });
+          }
+        };
+
+        for (const rawTok of tokens) {
+          const unwrapped = String(rawTok || "").trim().replace(/^\{|\}$/g, "").toUpperCase();
+          if (!unwrapped) continue;
+
+          // Range syntax: e.g. A1..A5 or B2..D2
+          const rangeMatch = unwrapped.match(/^([A-F])([1-6])\.\.([A-F])([1-6])$/);
+          if (rangeMatch) {
+            const c1 = this.COLS.indexOf(rangeMatch[1]);
+            const r1 = Number(rangeMatch[2]) - 1;
+            const c2 = this.COLS.indexOf(rangeMatch[3]);
+            const r2 = Number(rangeMatch[4]) - 1;
+            if (c1 < 0 || c1 >= size || r1 < 0 || r1 >= size || c2 < 0 || c2 >= size || r2 < 0 || r2 >= size) {
+              invalid.push(rawTok);
+              continue;
+            }
+            if (r1 === r2 || c1 === c2) {
+              const dr = Math.sign(r2 - r1);
+              const dc = Math.sign(c2 - c1);
+              let r = r1;
+              let c = c1;
+              while (true) {
+                pushCoord(r, c, true);
+                if (r === r2 && c === c2) break;
+                r += dr;
+                c += dc;
+              }
+            } else {
+              for (let r = Math.min(r1, r2); r <= Math.max(r1, r2); r++) {
+                for (let c = Math.min(c1, c2); c <= Math.max(c1, c2); c++) {
+                  pushCoord(r, c, true);
+                }
+              }
+            }
+            continue;
+          }
+
+          // Glob wildcard syntax: *, a*, *3, b?, [a-c]1
+          if (this.isGlobOrRange(unwrapped)) {
+            let regexSrc = "";
+            for (let i = 0; i < unwrapped.length; i++) {
+              const ch = unwrapped[i];
+              if (ch === "*") regexSrc += "[A-F1-6]*";
+              else if (ch === "?") regexSrc += "[A-F1-6]";
+              else if ("\\^$.|+()".includes(ch)) regexSrc += "\\" + ch;
+              else regexSrc += ch;
+            }
+            let rx = null;
+            try {
+              rx = new RegExp(`^${regexSrc}$`, "i");
+            } catch (_) {
+              invalid.push(rawTok);
+              continue;
+            }
+            let matched = 0;
+            for (let r = 0; r < size; r++) {
+              for (let c = 0; c < size; c++) {
+                const xy = this.toCoord(r, c);
+                if (rx.test(xy)) {
+                  pushCoord(r, c, true);
+                  matched++;
+                }
+              }
+            }
+            if (matched === 0) invalid.push(rawTok);
+            continue;
+          }
+
+          // Literal coordinate: e.g. C4
+          const parsed = this.parseCoord(unwrapped, size);
+          if (parsed) {
+            pushCoord(parsed.r, parsed.c, false);
+          } else {
+            invalid.push(rawTok);
+          }
+        }
+
+        return { coords, invalid };
+      }
+
       static generate(mode, seedStr, forcedWord = null) {
         const MAX_ATTEMPTS = 400;
         let chosen = null;
@@ -2468,13 +2564,13 @@
       static generateOnce(mode, seedStr, forcedWord = null, attempt = 0) {
         const rng = new SeededRandom(attempt === 0 ? `${mode}:${seedStr}` : `${mode}:${seedStr}:${attempt}`);
         const config = {
-          SURVEY:  { size: 5, minLen: 8,  maxLen: 10, allowWells: false, wordLen: 3, strictRelays: false, voids: 3, cloneDecoys: 2, decoyLetters: 2 },
-          ORBITAL: { size: 6, minLen: 9,  maxLen: 13, allowWells: true,  wordLen: 3, strictRelays: false, voids: 5, cloneDecoys: 3, decoyLetters: 3 },
-          DEEP:    { size: 6, minLen: 10, maxLen: 14, allowWells: true,  wordLen: 4, strictRelays: true,  voids: 5, cloneDecoys: 4, decoyLetters: 3 }
-        }[mode] || { size: 5, minLen: 7, maxLen: 10, allowWells: false, wordLen: 3, strictRelays: false, voids: 3, cloneDecoys: 2, decoyLetters: 2 };
+          SURVEY:  { size: 5, minLen: 8,  maxLen: 10, allowWells: false, wordLen: 3, strictRelays: false, voids: 3, cloneDecoys: 2, decoyLetters: 2, spread: false },
+          ORBITAL: { size: 6, minLen: 9,  maxLen: 13, allowWells: true,  wordLen: 3, strictRelays: false, voids: 5, cloneDecoys: 3, decoyLetters: 3, spread: false },
+          DEEP:    { size: 6, minLen: 11, maxLen: 15, allowWells: true,  wordLen: 4, strictRelays: true,  voids: 5, cloneDecoys: 4, decoyLetters: 3, spread: true }
+        }[mode] || { size: 5, minLen: 7, maxLen: 10, allowWells: false, wordLen: 3, strictRelays: false, voids: 3, cloneDecoys: 2, decoyLetters: 2, spread: false };
 
         const size = config.size;
-        const solutionPath = this.buildSelfAvoidingWalk(rng, size, config.minLen, config.maxLen);
+        const solutionPath = this.buildSelfAvoidingWalk(rng, size, config.minLen, config.maxLen, config.spread);
         const wordPool = config.wordLen === 4 ? this.WORDS_4 : this.WORDS_3;
         const word = (forcedWord && wordPool.includes(forcedWord)) ? forcedWord : rng.pick(wordPool);
 
@@ -2696,7 +2792,7 @@
         puzzle.maxCharges = anomalies.length + 1;
       }
 
-      static buildSelfAvoidingWalk(rng, size, minLen, maxLen) {
+      static buildSelfAvoidingWalk(rng, size, minLen, maxLen, spread = false) {
         const dirs = [
           [-1, 0],
           [1, 0],
@@ -2704,7 +2800,12 @@
           [0, 1]
         ];
 
-        for (let attempt = 0; attempt < 250; attempt++) {
+        let bestWalk = null;
+        let bestScore = -1;
+        const maxAttempts = spread ? 450 : 250;
+        const half = Math.floor(size / 2);
+
+        for (let attempt = 0; attempt < maxAttempts; attempt++) {
           const targetSteps = rng.int(minLen, maxLen);
           const startR = rng.int(0, size - 1);
           const startC = rng.int(0, size - 1);
@@ -2729,8 +2830,48 @@
           }
 
           if (path.length - 1 >= minLen) {
-            return path;
+            // Keep Survey & Orbital compact
+            if (!spread) {
+              return path;
+            }
+
+            // Score Deep Space walks by row/column span, quadrants visited, and start-to-exit distance
+            let minR = size, maxR = -1, minC = size, maxC = -1;
+            const quadrants = new Set();
+            for (const pt of path) {
+              if (pt.r < minR) minR = pt.r;
+              if (pt.r > maxR) maxR = pt.r;
+              if (pt.c < minC) minC = pt.c;
+              if (pt.c > maxC) maxC = pt.c;
+              quadrants.add((pt.r >= half ? 2 : 0) + (pt.c >= half ? 1 : 0));
+            }
+
+            const rowSpan = maxR - minR + 1;
+            const colSpan = maxC - minC + 1;
+            const endPt = path[path.length - 1];
+            const endpointDist = Math.abs(startR - endPt.r) + Math.abs(startC - endPt.c);
+
+            const score =
+              rowSpan * 14 +
+              colSpan * 14 +
+              quadrants.size * 10 +
+              endpointDist * 2 +
+              (rowSpan === size && colSpan === size ? 30 : 0);
+
+            if (score > bestScore) {
+              bestScore = score;
+              bestWalk = path;
+            }
+
+            // Lock in as soon as a walk touches all 4 outer edges and all 4 quadrants
+            if (rowSpan === size && colSpan === size && quadrants.size === 4 && endpointDist >= size) {
+              return bestWalk;
+            }
           }
+        }
+
+        if (bestWalk) {
+          return bestWalk;
         }
 
         const fallback = [];
@@ -2797,42 +2938,53 @@
     class NahlaTerminal {
       static MAX_LINES = 300;
       static COMMANDS = [
-        "scan", "vent", "invert", "purge", "sync", "flag", "unflag", "dampen", "boost", "reboot", "tutorial",
-        "help", "man", "tldr", "clear", "cls", "ls", "ll", "cd", "pwd", "cat", "grep",
-        "echo", "whoami", "uname", "date", "uptime", "ps", "top", "htop", "df", "history", "sudo", "su", "exit"
+        "scan", "vent", "invert", "purge", "sync", "flag", "unflag", "step", "go", "move", "walk", "undo", "back",
+        "dampen", "boost", "reboot", "tutorial", "help", "man", "tldr", "clear", "cls", "ls", "ll", "cd", "pwd",
+        "cat", "grep", "wc", "head", "tail", "sort", "uniq", "echo", "whoami", "uname", "date", "uptime",
+        "ps", "top", "htop", "df", "history", "sudo", "su", "exit"
       ];
 
       static MAN_ALIASES = {
         cls: "clear",
         ll: "ls",
         tldr: "man",
+        go: "step",
+        move: "step",
+        walk: "step",
+        back: "undo",
+        pipes: "shell",
+        pipe: "shell",
+        redir: "shell",
+        redirect: "shell",
+        wildcards: "shell",
+        glob: "shell",
         "?": "help"
       };
 
       static MAN_PAGES = {
         scan: {
           title: "scan - diagnose sector telemetry and node anomalies",
-          synopsis: "scan [coord...]",
-          desc: "Sweeps the active sector for sabotaged nodes (0 CHG). Pass coordinates like 'scan c4' to inspect exact node type, echo value, and (as root) whether it lies on the optimal sweep corridor.",
-          example: "scan\n       scan c4"
+          synopsis: "scan [coord|glob|range...]",
+          desc: "Sweeps the active sector for sabotaged nodes (0 CHG). Supports coordinates ('scan c4'), wildcards ('scan *', 'scan a*', 'scan *3'), and ranges ('scan a1..a5'). Pipe into 'grep' to filter node types.",
+          example: "scan\n       scan * | grep SHADOW"
         },
         vent: {
           title: "vent - vaporize dark-space voids or clear collapsed debris",
-          synopsis: "vent <coord...>",
-          desc: "Fires a focused plasma pulse at <xy> (costs 1 CHG per node). Restores collapsed debris (≈) to its underlying node, or converts any natural ## void into a 00 transit node to carve shortcuts.",
-          example: "vent c4\n       vent a3 b3"
+          synopsis: "vent <coord|glob|range...>",
+          desc: "Fires a focused plasma pulse at <xy> (costs 1 CHG per node). Restores collapsed debris (≈) or converts any ## void into a 00 transit node. Supports wildcards like 'vent a*' to target matching voids.",
+          example: "vent c4\n       vent a*"
         },
         invert: {
           title: "invert - flip positive/negative echo polarity on numeric nodes",
-          synopsis: "invert <coord...>",
-          desc: "Reverses the sign (+/-) of any non-zero Echo or Phase Shadow node (costs 1 CHG per node). Essential for fixing ± polarity glitches or fine-tuning your path sum to exactly 31.",
+          synopsis: "invert <coord|glob|range...>",
+          desc: "Reverses the sign (+/-) of any non-zero Echo or Phase Shadow node (costs 1 CHG per node). Supports wildcards ('invert *3') to flip matching numeric nodes.",
           example: "invert d2\n       invert c3 e1"
         },
         purge: {
           title: "purge - clear solar static jams or strip decoy beacon relays",
-          synopsis: "purge <coord...>",
-          desc: "Discharges static interference at <xy> (costs 1 CHG per node). Restores [!] jammed nodes to their clean state, or strips an unwanted [A-Z] relay down to a neutral 00 transit node.",
-          example: "purge b3\n       purge b3 f1"
+          synopsis: "purge <coord|glob|range...>",
+          desc: "Discharges static interference at <xy> (costs 1 CHG per node). Restores [!] jammed nodes or strips an unwanted [A-Z] relay down to a 00 transit node. Supports wildcards.",
+          example: "purge b3\n       purge b*"
         },
         sync: {
           title: "sync - synchronise beacon callsign to unlock phase-locked relays",
@@ -2842,15 +2994,27 @@
         },
         flag: {
           title: "flag - place an amber tactical marker dot on grid nodes",
-          synopsis: "flag <coord...>",
-          desc: "Marks one or more coordinates with a top-right amber dot for route planning (0 CHG). Purely visual; cleared automatically on sector reboot.",
-          example: "flag c4\n       flag a2 b4"
+          synopsis: "flag <coord|glob|range...>",
+          desc: "Marks coordinates, rows/columns ('flag a*', 'flag *3'), or ranges ('flag b1..b4') with an amber corner dot for route planning (0 CHG).",
+          example: "flag c4\n       flag a*"
         },
         unflag: {
           title: "unflag - remove an amber tactical marker dot from grid nodes",
-          synopsis: "unflag <coord...>",
-          desc: "Clears previously placed amber corner marker dots from one or more coordinates (0 CHG).",
-          example: "unflag c4\n       unflag a2 b4"
+          synopsis: "unflag <coord|glob|range...>",
+          desc: "Clears amber corner marker dots from matching coordinates (0 CHG). Use 'unflag *' to wipe all tactical flags across the sector.",
+          example: "unflag c4\n       unflag *"
+        },
+        step: {
+          title: "step (go/move) - advance carrier vector via terminal coordinates or directions",
+          synopsis: "step [coord|range|n|s|e|w...]",
+          desc: "Moves your active vector head across adjacent nodes or straight corridors. Accepts coordinates ('step b1 c1 c2'), ranges ('step a1..a4'), or directions ('step e e s'). Run 'step' with no args to inspect open neighbors.",
+          example: "step b1 c1 c2\n       step e s s"
+        },
+        undo: {
+          title: "undo (back) - retract the last N steps of your carrier vector",
+          synopsis: "undo [count]",
+          desc: "Steps your vector backward by 1 node (or N nodes if specified) without resetting grid overrides.",
+          example: "undo\n       undo 3"
         },
         dampen: {
           title: "dampen - stabilise incoming beacon relay harmonic drift",
@@ -2879,14 +3043,14 @@
         help: {
           title: "help - display ttyS0 command summary",
           synopsis: "help",
-          desc: "Lists all grid-override verbs and HopeOS bash utilities available on the Nahla 6a serial console.",
+          desc: "Lists all grid-override verbs, wildcards, pipe filters, and HopeOS bash utilities available on ttyS0.",
           example: "help"
         },
         man: {
           title: "man (tldr) - format and display HopeOS reference manuals",
           synopsis: "man <command>",
           desc: "Displays concise transceiver manual pages for grid-override commands and HopeOS utilities. Aliased to 'tldr'.",
-          example: "man vent\n       man purge"
+          example: "man step\n       man grep"
         },
         clear: {
           title: "clear (cls) - clear the ttyS0 terminal scrollback buffer",
@@ -2916,13 +3080,43 @@
           title: "cat - concatenate and print virtual telemetry files",
           synopsis: "cat <filename>",
           desc: "Reads files such as anomalies.dat, lexicon.db, sector.map, telemetry.log, readme.txt, or /root/transceiver.key.",
-          example: "cat anomalies.dat\n       cat lexicon.db"
+          example: "cat anomalies.dat\n       cat lexicon.db | grep 9"
         },
         grep: {
-          title: "grep - search beacon codes or telemetry files by pattern",
-          synopsis: "grep <pattern> [file]",
-          desc: "Filters matching lines from a file (defaults to lexicon.db if omitted). Great for looking up 3- or 4-letter Hope System callsigns.",
-          example: "grep 6a\n       grep skadi lexicon.db"
+          title: "grep - filter lines or files using regular expressions",
+          synopsis: "grep [-i] [-v] [-c] [-n] <regex> [file]",
+          desc: "Matches lines using case-insensitive regular expressions. Works standalone on files (default: lexicon.db) or downstream of a '|' pipe. Supports -v (invert), -c (count), and -n (line numbers).",
+          example: "grep \"^S\" lexicon.db\n       scan * | grep \"SHADOW|RELAY\""
+        },
+        wc: {
+          title: "wc - count lines, words, or characters in a pipe or file",
+          synopsis: "wc [-l|-w|-c] [file]",
+          desc: "Counts newline-delimited lines (-l), words (-w), or characters (-c) from piped stdout or a virtual file.",
+          example: "scan * | grep RELAY | wc -l\n       wc -l lexicon.db"
+        },
+        head: {
+          title: "head - output the first N lines of a pipe or file",
+          synopsis: "head [-n N | -N] [file]",
+          desc: "Prints the first N lines (default: 5) of piped output or a virtual file.",
+          example: "cat lexicon.db | head -n 6"
+        },
+        tail: {
+          title: "tail - output the last N lines of a pipe or file",
+          synopsis: "tail [-n N | -N] [file]",
+          desc: "Prints the final N lines (default: 5) of piped output or a virtual file.",
+          example: "history | tail -n 5"
+        },
+        sort: {
+          title: "sort - sort piped text lines alphabetically",
+          synopsis: "sort [-r]",
+          desc: "Sorts piped lines in ascending order (or descending with -r).",
+          example: "scan * | grep ECHO | sort"
+        },
+        uniq: {
+          title: "uniq - filter adjacent duplicate lines from piped output",
+          synopsis: "uniq",
+          desc: "Collapses consecutive identical lines in a command pipeline.",
+          example: "cat lexicon.db | uniq"
         },
         echo: {
           title: "echo - display a line of text on ttyS0",
@@ -2960,7 +3154,7 @@
           desc: "Lists core HopeOS telemetry daemons (init, echo_triangulator, carrier_router, nahla_sh).",
           example: "ps"
         },
-         top: {
+        top: {
           title: "top - live classic Unix telemetry and anomaly process monitor",
           synopsis: "top [-b]",
           desc: "Displays a live-ticking process table (0.9s refresh) for ttyS0. Baseline transceiver daemons (init, echo_triangulator, carrier_router, nahla_sh) idle near ~4% CPU; each active grid anomaly spawns a high-CPU irq interrupt task (+37% CPU, state R) until cleared via vent, invert, purge, or sync. MiB Echo tracks live Echo Returns (/31.0). Press 'q' or 'Esc' to quit, or pass '-b' for a static snapshot.",
@@ -3001,6 +3195,12 @@
           synopsis: "exit",
           desc: "Logs out of root@hope and returns to nahla@hope (main telemetry session remains locked).",
           example: "exit"
+        },
+        shell: {
+          title: "shell (pipes/redir/glob) - nahla_sh wildcards, pipes, chaining & redirection",
+          synopsis: "cmd1 [glob|range] | cmd2 && cmd3 ; cmd4 2>&1",
+          desc: "nahla_sh supports coordinate globs (*, ?, a*, *3) and ranges (a1..a5), command chaining ('&&' stops on error; ';' runs unconditionally), stdout pipes ('|' into grep, wc, head, tail, sort, uniq), and stream redirection ('2>&1' merges stderr into pipes; '2>/dev/null' suppresses errors).",
+          example: "scan * 2>&1 | grep -v NOMINAL\n       vent a1 && step a1..a3\n       unflag * 2>/dev/null"
         }
       };
 
@@ -3016,6 +3216,7 @@
         this.monitorMode = null;
         this.monitorTimer = null;
         this.monitorTick = 0;
+        this.captureBuffer = null;
       }
 
       resetForSector(puzzle) {
@@ -3024,6 +3225,7 @@
         this.cwd = "/home/nahla/sector";
         this.isRoot = false;
         this.pendingPrompt = null;
+        this.captureBuffer = null;
         this.updatePromptLabel();
 
         const beaconInfo = SectorGenerator.getBeaconInfo(puzzle.word);
@@ -3044,13 +3246,99 @@
       }
 
       print(text, tone = "info", html = false) {
-        this.lines.push({ text: String(text), tone, html });
+        const strText = String(text);
+        if (this.captureBuffer !== null) {
+          const plain = html ? strText.replace(/<[^>]+>/g, "") : strText;
+          this.captureBuffer.push({ text: strText, plain, tone, html });
+          return;
+        }
+        this.lines.push({ text: strText, tone, html });
         if (this.lines.length > NahlaTerminal.MAX_LINES) {
           this.lines.splice(0, this.lines.length - NahlaTerminal.MAX_LINES);
         }
         if (!this.monitorMode) {
           this.render();
         }
+      }
+
+      splitOutsideQuotes(input, delimiters) {
+        const parts = [];
+        let buf = "";
+        let quote = null;
+        let i = 0;
+
+        while (i < input.length) {
+          const ch = input[i];
+          if (quote) {
+            if (ch === quote) quote = null;
+            buf += ch;
+            i++;
+            continue;
+          }
+          if (ch === '"' || ch === "'") {
+            quote = ch;
+            buf += ch;
+            i++;
+            continue;
+          }
+
+          let matchedDelim = null;
+          for (const d of delimiters) {
+            if (input.slice(i, i + d.length) === d) {
+              matchedDelim = d;
+              break;
+            }
+          }
+
+          if (matchedDelim) {
+            parts.push({ text: buf, delim: matchedDelim });
+            buf = "";
+            i += matchedDelim.length;
+          } else {
+            buf += ch;
+            i++;
+          }
+        }
+        parts.push({ text: buf, delim: null });
+        return parts;
+      }
+
+      parseRedirections(stageStr) {
+        let mergeErr = false;
+        let discardErr = false;
+        let discardOut = false;
+
+        let cleaned = stageStr
+          .replace(/(?:^|\s)2>&1(?=\s|$)/g, () => {
+            mergeErr = true;
+            return " ";
+          })
+          .replace(/(?:^|\s)2>\s*\/dev\/null(?=\s|$)/gi, () => {
+            discardErr = true;
+            return " ";
+          })
+          .replace(/(?:^|\s)&>\s*\/dev\/null(?=\s|$)/gi, () => {
+            discardErr = true;
+            discardOut = true;
+            return " ";
+          })
+          .replace(/(?:^|\s)1?>\s*\/dev\/null(?=\s|$)/gi, () => {
+            discardOut = true;
+            return " ";
+          })
+          .trim();
+
+        return { cleaned, mergeErr, discardErr, discardOut };
+      }
+
+      tokenizeArgs(str) {
+        const tokens = [];
+        const rx = /"([^"]*)"|'([^']*)'|(\S+)/g;
+        let m;
+        while ((m = rx.exec(str)) !== null) {
+          tokens.push(m[1] !== undefined ? m[1] : m[2] !== undefined ? m[2] : m[3]);
+        }
+        return tokens;
       }
 
       render() {
@@ -3189,8 +3477,10 @@
       }
 
       autocomplete(rawInput) {
-        const segments = rawInput.split(/(?:&&|;)/);
-        const currentSegment = segments[segments.length - 1];
+        const chainSegs = this.splitOutsideQuotes(rawInput, ["&&", ";"]);
+        const currentChain = chainSegs[chainSegs.length - 1].text;
+        const pipeSegs = this.splitOutsideQuotes(currentChain, ["|"]);
+        const currentSegment = pipeSegs[pipeSegs.length - 1].text;
         const prefixBeforeSegment = rawInput.slice(0, rawInput.length - currentSegment.length);
         const leadingSpace = currentSegment.match(/^\s*/)[0];
         const trimmedSeg = currentSegment.slice(leadingSpace.length);
@@ -3215,7 +3505,7 @@
           const codes = allCodes.filter((w) => w.startsWith(argPrefix));
           if (codes.length === 1) return `${prefixBeforeSegment}${leadingSpace}${priorArgs} ${codes[0]}`;
           if (codes.length > 1) this.print(codes.join("  "), "info");
-        } else if (["vent", "invert", "purge", "scan", "flag", "unflag"].includes(cmd)) {
+        } else if (["vent", "invert", "purge", "scan", "flag", "unflag", "step", "go", "move", "walk"].includes(cmd)) {
           const size = this.game.puzzle.size;
           const coords = [];
           for (let r = 0; r < size; r++) {
@@ -3226,12 +3516,17 @@
           const matches = coords.filter((xy) => xy.startsWith(argPrefix));
           if (matches.length === 1) return `${prefixBeforeSegment}${leadingSpace}${priorArgs} ${matches[0]}`;
           if (matches.length > 1 && matches.length <= 12) this.print(matches.join("  "), "info");
-        } else if (["cat", "grep", "ls", "cd"].includes(cmd)) {
+        } else if (["cat", "grep", "ls", "cd", "wc", "head", "tail"].includes(cmd)) {
           const files = this.getDirEntries(this.cwd).map((f) => f.replace(/\/$/, ""));
           const matches = files.filter((f) => f.toLowerCase().startsWith(lastArg.toLowerCase()));
           if (matches.length === 1) return `${prefixBeforeSegment}${leadingSpace}${priorArgs} ${matches[0]}`;
         } else if (cmd === "man" || cmd === "tldr") {
-          const matches = NahlaTerminal.COMMANDS.filter((c) => c.startsWith(lastArg.toLowerCase()));
+          const topics = Array.from(new Set([
+            ...NahlaTerminal.COMMANDS,
+            ...Object.keys(NahlaTerminal.MAN_PAGES),
+            ...Object.keys(NahlaTerminal.MAN_ALIASES)
+          ]));
+          const matches = topics.filter((c) => c.startsWith(lastArg.toLowerCase()));
           if (matches.length === 1) return `${prefixBeforeSegment}${leadingSpace}${priorArgs} ${matches[0]}`;
           if (matches.length > 1 && matches.length <= 14) this.print(matches.join("  "), "info");
         }
@@ -3259,25 +3554,211 @@
 
         this.print(`${this.getPromptPrefix()} ${trimmed}`, "cmd");
 
-        // Split chained commands on '&&' or ';' while preserving operators
-        const chainParts = trimmed.split(/\s*(&&|;)\s*/);
-        for (let i = 0; i < chainParts.length; i += 2) {
-          const segment = (chainParts[i] || "").trim();
+        // Split chained commands on unquoted '&&' or ';' while preserving operators
+        const chainSegments = this.splitOutsideQuotes(trimmed, ["&&", ";"]);
+        for (const entry of chainSegments) {
+          const segment = entry.text.trim();
           if (!segment) continue;
 
-          const ok = this.executeSingle(segment);
-          const operator = chainParts[i + 1];
+          const ok = this.executePipeline(segment);
 
-          // Halt chain on '&&' if the preceding command failed
-          if (operator === "&&" && !ok) {
+          // Halt chain on '&&' if the preceding command/pipeline failed
+          if (entry.delim === "&&" && !ok) {
             break;
           }
         }
       }
 
+      executePipeline(segment) {
+        const pipeParts = this.splitOutsideQuotes(segment, ["|"]).map((p) => p.text.trim());
+        const hasPipes = pipeParts.length > 1;
+        const firstRedir = this.parseRedirections(pipeParts[0]);
+
+        if (!firstRedir.cleaned) {
+          this.game.audio.error();
+          this.print("nahla_sh: syntax error near unexpected token '|'", "err");
+          return false;
+        }
+
+        const needsCapture = hasPipes || firstRedir.mergeErr || firstRedir.discardErr || firstRedir.discardOut;
+        if (!needsCapture) {
+          return this.executeSingle(firstRedir.cleaned);
+        }
+
+        this.captureBuffer = [];
+        let ok = false;
+        try {
+          ok = this.executeSingle(firstRedir.cleaned);
+        } finally {
+          var captured = this.captureBuffer;
+          this.captureBuffer = null;
+        }
+
+        // Apply stage 0 stream redirections (2>&1, 2>/dev/null, >/dev/null)
+        let afterRedir = captured.filter((item) => {
+          if (item.tone === "err" && firstRedir.discardErr) return false;
+          if (item.tone !== "err" && firstRedir.discardOut) return false;
+          return true;
+        });
+
+        if (!hasPipes) {
+          afterRedir.forEach((item) => this.print(item.text, item.tone, item.html));
+          return ok;
+        }
+
+        // Unmerged stderr bypasses the pipe straight to terminal output
+        const stderrLines = firstRedir.mergeErr ? [] : afterRedir.filter((item) => item.tone === "err");
+        let stream = firstRedir.mergeErr
+          ? afterRedir
+          : afterRedir.filter((item) => item.tone !== "err");
+
+        stderrLines.forEach((item) => this.print(item.text, item.tone, item.html));
+
+        for (let i = 1; i < pipeParts.length; i++) {
+          const stageRedir = this.parseRedirections(pipeParts[i]);
+          if (!stageRedir.cleaned) {
+            this.game.audio.error();
+            this.print("nahla_sh: syntax error near unexpected token '|'", "err");
+            return false;
+          }
+          const res = this.applyPipeFilter(stageRedir.cleaned, stream);
+          if (!res.ok) {
+            return false;
+          }
+          stream = stageRedir.discardOut ? [] : res.lines;
+          ok = res.ok;
+        }
+
+        stream.forEach((item) => this.print(item.text, item.tone, item.html));
+        return ok;
+      }
+
+      applyPipeFilter(stageCmd, inputLines) {
+        const tokens = this.tokenizeArgs(stageCmd);
+        const cmd = (tokens[0] || "").toLowerCase();
+        const args = tokens.slice(1);
+
+        if (cmd === "grep") {
+          let invert = false;
+          let countOnly = false;
+          let lineNums = false;
+          const positional = [];
+
+          for (const a of args) {
+            if (a === "-i") continue;
+            else if (a === "-v") invert = true;
+            else if (a === "-c") countOnly = true;
+            else if (a === "-n") lineNums = true;
+            else if (/^-[ivcn]+$/.test(a)) {
+              if (a.includes("v")) invert = true;
+              if (a.includes("c")) countOnly = true;
+              if (a.includes("n")) lineNums = true;
+            } else {
+              positional.push(a);
+            }
+          }
+
+          if (positional.length === 0) {
+            this.game.audio.error();
+            this.print("grep: missing regex pattern", "err");
+            return { ok: false, lines: [] };
+          }
+
+          const pattern = positional[0];
+          let rx = null;
+          try {
+            rx = new RegExp(pattern, "i");
+          } catch (_) {
+            rx = null;
+          }
+
+          const matches = [];
+          inputLines.forEach((item, idx) => {
+            const targetText = item.plain !== undefined ? item.plain : item.text;
+            const hit = rx ? rx.test(targetText) : targetText.toLowerCase().includes(pattern.toLowerCase());
+            if (invert ? !hit : hit) {
+              if (lineNums) {
+                matches.push({ text: `${idx + 1}:${targetText}`, plain: `${idx + 1}:${targetText}`, tone: "ok", html: false });
+              } else {
+                matches.push({ ...item, tone: item.tone === "info" ? "ok" : item.tone });
+              }
+            }
+          });
+
+          if (countOnly) {
+            const cStr = String(matches.length);
+            return { ok: matches.length > 0, lines: [{ text: cStr, plain: cStr, tone: "ok", html: false }] };
+          }
+          return { ok: matches.length > 0, lines: matches };
+        }
+
+        if (cmd === "wc") {
+          const lineCount = inputLines.length;
+          const joined = inputLines.map((l) => (l.plain !== undefined ? l.plain : l.text)).join("\n");
+          const wordCount = joined.trim() ? joined.trim().split(/\s+/).length : 0;
+          const charCount = joined.length + (lineCount > 0 ? 1 : 0);
+
+          let outStr = "";
+          if (args.includes("-l")) outStr = String(lineCount);
+          else if (args.includes("-w")) outStr = String(wordCount);
+          else if (args.includes("-c") || args.includes("-m")) outStr = String(charCount);
+          else outStr = `${String(lineCount).padStart(4, " ")} ${String(wordCount).padStart(5, " ")} ${String(charCount).padStart(6, " ")}`;
+
+          return { ok: true, lines: [{ text: outStr, plain: outStr, tone: "ok", html: false }] };
+        }
+
+        if (cmd === "head" || cmd === "tail") {
+          let n = 5;
+          for (let i = 0; i < args.length; i++) {
+            if (args[i] === "-n" && args[i + 1] && /^\d+$/.test(args[i + 1])) {
+              n = Number(args[i + 1]);
+              break;
+            }
+            const shortNum = args[i].match(/^-(\d+)$/);
+            if (shortNum) {
+              n = Number(shortNum[1]);
+              break;
+            }
+          }
+          const sliced = cmd === "head" ? inputLines.slice(0, n) : (n === 0 ? [] : inputLines.slice(-n));
+          return { ok: true, lines: sliced };
+        }
+
+        if (cmd === "sort") {
+          const rev = args.includes("-r");
+          const sorted = inputLines.slice().sort((a, b) => {
+            const ta = (a.plain !== undefined ? a.plain : a.text).toLowerCase();
+            const tb = (b.plain !== undefined ? b.plain : b.text).toLowerCase();
+            return rev ? tb.localeCompare(ta) : ta.localeCompare(tb);
+          });
+          return { ok: true, lines: sorted };
+        }
+
+        if (cmd === "uniq") {
+          const deduped = [];
+          let prev = null;
+          for (const item of inputLines) {
+            const cur = item.plain !== undefined ? item.plain : item.text;
+            if (cur !== prev) {
+              deduped.push(item);
+              prev = cur;
+            }
+          }
+          return { ok: true, lines: deduped };
+        }
+
+        if (cmd === "cat") {
+          return { ok: true, lines: inputLines };
+        }
+
+        this.game.audio.error();
+        this.print(`nahla_sh: '${cmd}' cannot be used as a pipe filter (supported: grep, wc, head, tail, sort, uniq)`, "err");
+        return { ok: false, lines: [] };
+      }
+
       executeSingle(segment) {
-        const tokens = segment.split(/\s+/);
-        const cmd = tokens[0].toLowerCase();
+        const tokens = this.tokenizeArgs(segment);
+        const cmd = (tokens[0] || "").toLowerCase();
         const args = tokens.slice(1);
 
         if (cmd === "sudo") {
@@ -3347,6 +3828,16 @@
           case "unflag":
             return this.cmdUnflag(args);
 
+          case "step":
+          case "go":
+          case "move":
+          case "walk":
+            return this.cmdStep(args);
+
+          case "undo":
+          case "back":
+            return this.cmdUndo(args[0]);
+
           case "dampen":
             return this.cmdReplyDrift("dampen", args[0]);
 
@@ -3380,8 +3871,12 @@
             return true;
 
           case "grep":
-            this.cmdGrep(args);
-            return true;
+            return this.cmdGrep(args);
+
+          case "wc":
+          case "head":
+          case "tail":
+            return this.cmdFileSliceOrCount(cmd, args);
 
           case "echo":
             this.print(args.join(" "), "info");
@@ -3451,21 +3946,21 @@
             return false;
         }
       }
-
-      // --- Grid Override Commands (Multi-Coordinate Supported) ---
+      // --- Grid Override Commands (Multi-Coordinate & Wildcard Supported) ---
       cmdHelp() {
-        this.print("=== GRID OVERRIDE COMMANDS (ttyS0) ===", "sys");
-        this.print("  scan [xy...]      Scan sector (or nodes) for hidden anomalies", "info");
-        this.print("  vent <xy...>      Vaporize ## Void nodes (e.g. vent a3 b3)", "info");
-        this.print("  invert <xy...>    Flip +/- polarity of non-zero number nodes", "info");
-        this.print("  purge <xy...>     Clear [!] solar static or decoy beacon relays", "info");
+        this.print("=== GRID OVERRIDE & VECTOR COMMANDS (ttyS0) ===", "sys");
+        this.print("  scan [xy|glob...] Scan nodes (supports *, a*, *3, a1..a5)", "info");
+        this.print("  vent <xy|glob>    Vaporize ## Void nodes (e.g. vent a3, vent a*)", "info");
+        this.print("  invert <xy|glob>  Flip +/- polarity of non-zero number nodes", "info");
+        this.print("  purge <xy|glob>   Clear [!] solar static or decoy beacon relays", "info");
         this.print("  sync <code>       Sync beacon code to unlock [?] phase relays", "info");
-        this.print("  flag|unflag <xy>  Mark/clear amber dots on nodes (0 CHG)", "info");
+        this.print("  flag|unflag <xy>  Mark/clear amber dots (e.g. flag a*, unflag *)", "info");
+        this.print("  step <xy|dir...>  Move vector via coords or n/s/e/w; 'undo' backs up", "info");
         this.print("  dampen|boost      Reply to incoming relay harmonic drift", "info");
-        this.print("  chain operators   Chain targets ('vent a3 b3') or cmds ('&&', ';')", "info");
+        this.print("  pipes & redir     '| grep', '| wc -l', '&&', ';', '2>&1' (see 'man shell')", "info");
         this.print("  reboot / tutorial Reset sector or launch 3x3 field walkthrough", "info");
         this.print("=== BASH / SYSTEM UTILITIES ===", "sys");
-        this.print("  man <cmd>, ls, cd, pwd, cat <file>, grep <str>, echo,", "info");
+        this.print("  man <cmd>, ls, cd, pwd, cat <file>, grep <rx>, wc, head, tail,", "info");
         this.print("  ps, top, htop, df, whoami, uname -a, date, uptime, su -, clear", "info");
       }
 
@@ -3612,24 +4107,22 @@
         this.game.audio.cmdOk();
 
         if (coordArgs.length > 0) {
-          let allOk = true;
-          for (const coordArg of coordArgs) {
-            const parsed = SectorGenerator.parseCoord(coordArg, puzzle.size);
-            if (!parsed) {
-              this.game.audio.error();
-              this.print(`scan: invalid coordinate '${coordArg}' (valid: A1..${SectorGenerator.COLS[puzzle.size - 1]}${puzzle.size})`, "err");
-              allOk = false;
-              continue;
-            }
-            const cell = puzzle.grid[parsed.r][parsed.c];
+          const { coords, invalid } = SectorGenerator.expandCoords(coordArgs, puzzle.size);
+          let allOk = invalid.length === 0;
+          for (const bad of invalid) {
+            this.game.audio.error();
+            this.print(`scan: no grid coordinates matched '${bad}' (valid: A1..${SectorGenerator.COLS[puzzle.size - 1]}${puzzle.size})`, "err");
+          }
+          for (const pt of coords) {
+            const cell = puzzle.grid[pt.r][pt.c];
             const rootSuffix = this.isRoot
               ? ` | ON_SWEEP_ROUTE=${cell.onSolution ? "YES" : "NO"}`
               : "";
             if (cell.anomaly) {
-              const item = puzzle.anomalies.find((a) => a.coord === parsed.coord);
-              this.print(`[SCAN ${parsed.coord}] ${item ? item.why : cell.anomaly}${rootSuffix}`, "warn", true);
+              const item = puzzle.anomalies.find((a) => a.coord === pt.coord);
+              this.print(`[SCAN ${pt.coord}] ${item ? item.why : cell.anomaly}${rootSuffix}`, "warn", true);
             } else {
-              this.print(`[SCAN ${parsed.coord}] TYPE=${cell.type} ECHO=${cell.val >= 0 ? "+" : ""}${cell.val}${cell.letter ? ` RELAY=[${cell.letter}]` : ""} (NOMINAL)${rootSuffix}`, "ok");
+              this.print(`[SCAN ${pt.coord}] TYPE=${cell.type} ECHO=${cell.val >= 0 ? "+" : ""}${cell.val}${cell.letter ? ` RELAY=[${cell.letter}]` : ""} (NOMINAL)${rootSuffix}`, "ok");
             }
           }
           return allOk;
@@ -3663,23 +4156,33 @@
         const puzzle = this.game.puzzle;
         if (coordArgs.length === 0) {
           this.game.audio.error();
-          this.print("usage: vent <coord...>  (example: vent a3 b3)", "err");
+          this.print("usage: vent <coord|glob...>  (example: vent c4, vent a*)", "err");
           return false;
         }
 
-        let allOk = true;
-        for (const coordArg of coordArgs) {
-          const parsed = SectorGenerator.parseCoord(coordArg, puzzle.size);
-          if (!parsed) {
-            this.game.audio.error();
-            this.print(`vent: coordinate '${coordArg}' out of bounds.`, "err");
-            allOk = false;
-            continue;
-          }
-          const cell = puzzle.grid[parsed.r][parsed.c];
+        const { coords, invalid } = SectorGenerator.expandCoords(coordArgs, puzzle.size);
+        let allOk = invalid.length === 0;
+        for (const bad of invalid) {
+          this.game.audio.error();
+          this.print(`vent: coordinate or pattern '${bad}' out of bounds.`, "err");
+        }
+
+        const hasWildcard = coords.some((pt) => pt.fromWildcard);
+        const targets = hasWildcard
+          ? coords.filter((pt) => puzzle.grid[pt.r][pt.c].type === "VOID")
+          : coords;
+
+        if (hasWildcard && targets.length === 0 && coords.length > 0) {
+          this.game.audio.error();
+          this.print(`vent: no ## VOID nodes matched '${coordArgs.join(" ")}'.`, "err");
+          return false;
+        }
+
+        for (const pt of targets) {
+          const cell = puzzle.grid[pt.r][pt.c];
           if (cell.type !== "VOID") {
             this.game.audio.error();
-            this.print(`vent: ${parsed.coord} is not a ## VOID node (current: ${cell.type}).`, "err");
+            this.print(`vent: ${pt.coord} is not a ## VOID node (current: ${cell.type}).`, "err");
             allOk = false;
             continue;
           }
@@ -3690,14 +4193,14 @@
             cell.type = cell.clean.type;
             cell.val = cell.clean.val;
             cell.anomaly = null;
-            this.print(`[OK] VENTED ${parsed.coord}: COLLAPSED VOID CLEARED -> RESTORED ${cell.val >= 0 ? "+" : ""}${cell.val} (${cell.type}).`, "ok");
+            this.print(`[OK] VENTED ${pt.coord}: COLLAPSED VOID CLEARED -> RESTORED ${cell.val >= 0 ? "+" : ""}${cell.val} (${cell.type}).`, "ok");
           } else {
             cell.type = "MASS";
             cell.val = 0;
             cell.anomaly = null;
-            this.print(`[OK] VENTED ${parsed.coord}: DARK-SPACE VOID VAPORIZED -> 00 TRANSIT NODE.`, "ok");
+            this.print(`[OK] VENTED ${pt.coord}: DARK-SPACE VOID VAPORIZED -> 00 TRANSIT NODE.`, "ok");
           }
-          this.game.onGridMutated(parsed.r, parsed.c);
+          this.game.onGridMutated(pt.r, pt.c);
         }
         return allOk;
       }
@@ -3706,29 +4209,42 @@
         const puzzle = this.game.puzzle;
         if (coordArgs.length === 0) {
           this.game.audio.error();
-          this.print("usage: invert <coord...>  (example: invert d2 e4)", "err");
+          this.print("usage: invert <coord|glob...>  (example: invert d2, invert *3)", "err");
           return false;
         }
 
-        let allOk = true;
-        for (const coordArg of coordArgs) {
-          const parsed = SectorGenerator.parseCoord(coordArg, puzzle.size);
-          if (!parsed) {
-            this.game.audio.error();
-            this.print(`invert: coordinate '${coordArg}' out of bounds.`, "err");
-            allOk = false;
-            continue;
-          }
-          const cell = puzzle.grid[parsed.r][parsed.c];
+        const { coords, invalid } = SectorGenerator.expandCoords(coordArgs, puzzle.size);
+        let allOk = invalid.length === 0;
+        for (const bad of invalid) {
+          this.game.audio.error();
+          this.print(`invert: coordinate or pattern '${bad}' out of bounds.`, "err");
+        }
+
+        const hasWildcard = coords.some((pt) => pt.fromWildcard);
+        const targets = hasWildcard
+          ? coords.filter((pt) => {
+              const c = puzzle.grid[pt.r][pt.c];
+              return (c.type === "MASS" || c.type === "WELL") && c.val !== 0;
+            })
+          : coords;
+
+        if (hasWildcard && targets.length === 0 && coords.length > 0) {
+          this.game.audio.error();
+          this.print(`invert: no non-zero numeric nodes matched '${coordArgs.join(" ")}'.`, "err");
+          return false;
+        }
+
+        for (const pt of targets) {
+          const cell = puzzle.grid[pt.r][pt.c];
           if (cell.type !== "MASS" && cell.type !== "WELL") {
             this.game.audio.error();
-            this.print(`invert: ${parsed.coord} has no numeric echo polarity to invert (type: ${cell.type}).`, "err");
+            this.print(`invert: ${pt.coord} has no numeric echo polarity to invert (type: ${cell.type}).`, "err");
             allOk = false;
             continue;
           }
           if (cell.val === 0) {
             this.game.audio.error();
-            this.print(`invert: ${parsed.coord} has 00 neutral echo.`, "err");
+            this.print(`invert: ${pt.coord} has 00 neutral echo.`, "err");
             allOk = false;
             continue;
           }
@@ -3740,8 +4256,8 @@
           cell.type = cell.val < 0 ? "WELL" : "MASS";
           if (cell.anomaly === "POLARITY_FLIP") cell.anomaly = null;
 
-          this.print(`[OK] INVERTED ${parsed.coord}: ${prev >= 0 ? "+" : ""}${prev} -> ${cell.val >= 0 ? "+" : ""}${cell.val} (${cell.type === "WELL" ? "SHADOW" : "ECHO"}).`, "ok");
-          this.game.onGridMutated(parsed.r, parsed.c);
+          this.print(`[OK] INVERTED ${pt.coord}: ${prev >= 0 ? "+" : ""}${prev} -> ${cell.val >= 0 ? "+" : ""}${cell.val} (${cell.type === "WELL" ? "SHADOW" : "ECHO"}).`, "ok");
+          this.game.onGridMutated(pt.r, pt.c);
         }
         return allOk;
       }
@@ -3750,23 +4266,36 @@
         const puzzle = this.game.puzzle;
         if (coordArgs.length === 0) {
           this.game.audio.error();
-          this.print("usage: purge <coord...>  (example: purge b3 f1)", "err");
+          this.print("usage: purge <coord|glob...>  (example: purge b3, purge b*)", "err");
           return false;
         }
 
-        let allOk = true;
-        for (const coordArg of coordArgs) {
-          const parsed = SectorGenerator.parseCoord(coordArg, puzzle.size);
-          if (!parsed) {
-            this.game.audio.error();
-            this.print(`purge: coordinate '${coordArg}' out of bounds.`, "err");
-            allOk = false;
-            continue;
-          }
-          const cell = puzzle.grid[parsed.r][parsed.c];
+        const { coords, invalid } = SectorGenerator.expandCoords(coordArgs, puzzle.size);
+        let allOk = invalid.length === 0;
+        for (const bad of invalid) {
+          this.game.audio.error();
+          this.print(`purge: coordinate or pattern '${bad}' out of bounds.`, "err");
+        }
+
+        const hasWildcard = coords.some((pt) => pt.fromWildcard);
+        const targets = hasWildcard
+          ? coords.filter((pt) => {
+              const c = puzzle.grid[pt.r][pt.c];
+              return c.type === "JAMMED" || c.type === "RELAY";
+            })
+          : coords;
+
+        if (hasWildcard && targets.length === 0 && coords.length > 0) {
+          this.game.audio.error();
+          this.print(`purge: no [!] static or relay nodes matched '${coordArgs.join(" ")}'.`, "err");
+          return false;
+        }
+
+        for (const pt of targets) {
+          const cell = puzzle.grid[pt.r][pt.c];
           if (cell.type !== "JAMMED" && cell.type !== "RELAY") {
             this.game.audio.error();
-            this.print(`purge: ${parsed.coord} has no solar static or beacon relay (type: ${cell.type}).`, "err");
+            this.print(`purge: ${pt.coord} has no solar static or beacon relay (type: ${cell.type}).`, "err");
             allOk = false;
             continue;
           }
@@ -3779,7 +4308,7 @@
             cell.letter = cell.clean.letter;
             cell.anomaly = null;
             const desc = cell.type === "RELAY" ? `RELAY [${cell.letter}]` : `${cell.val >= 0 ? "+" : ""}${cell.val} ${cell.type === "WELL" ? "SHADOW" : "ECHO"}`;
-            this.print(`[OK] PURGED STATIC AT ${parsed.coord} -> RESTORED ${desc}.`, "ok");
+            this.print(`[OK] PURGED STATIC AT ${pt.coord} -> RESTORED ${desc}.`, "ok");
           } else {
             const oldLetter = cell.letter;
             cell.type = "MASS";
@@ -3787,9 +4316,9 @@
             cell.letter = null;
             cell.phaseLocked = false;
             cell.anomaly = null;
-            this.print(`[OK] PURGED RELAY [${oldLetter}] AT ${parsed.coord} -> 00 TRANSIT NODE.`, "ok");
+            this.print(`[OK] PURGED RELAY [${oldLetter}] AT ${pt.coord} -> 00 TRANSIT NODE.`, "ok");
           }
-          this.game.onGridMutated(parsed.r, parsed.c);
+          this.game.onGridMutated(pt.r, pt.c);
         }
         return allOk;
       }
@@ -3851,31 +4380,31 @@
         const puzzle = this.game.puzzle;
         if (coordArgs.length === 0) {
           this.game.audio.error();
-          this.print("usage: flag <xy...>  (example: flag a3 b3)", "err");
+          this.print("usage: flag <xy|glob...>  (example: flag a3, flag a*, flag *3)", "err");
           return false;
         }
-        let allOk = true;
-        let changed = false;
-        for (const coordArg of coordArgs) {
-          const parsed = SectorGenerator.parseCoord(coordArg, puzzle.size);
-          if (!parsed) {
-            this.game.audio.error();
-            this.print(`flag: coordinate '${coordArg}' out of bounds.`, "err");
-            allOk = false;
-            continue;
-          }
-          const cell = puzzle.grid[parsed.r][parsed.c];
-          if (cell.flagged) {
-            this.print(`[INFO] ${parsed.coord} IS ALREADY FLAGGED (USE 'unflag ${parsed.coord.toLowerCase()}' TO CLEAR).`, "info");
-            continue;
-          }
-          cell.flagged = true;
-          changed = true;
-          this.print(`[OK] FLAGGED ${parsed.coord} (AMBER CORNER DOT SET • 0 CHG).`, "ok");
+        const { coords, invalid } = SectorGenerator.expandCoords(coordArgs, puzzle.size);
+        let allOk = invalid.length === 0;
+        for (const bad of invalid) {
+          this.game.audio.error();
+          this.print(`flag: coordinate or pattern '${bad}' out of bounds.`, "err");
         }
-        if (changed) {
+
+        const newlyFlagged = [];
+        for (const pt of coords) {
+          const cell = puzzle.grid[pt.r][pt.c];
+          if (!cell.flagged) {
+            cell.flagged = true;
+            newlyFlagged.push(pt.coord);
+          }
+        }
+
+        if (newlyFlagged.length > 0) {
           this.game.audio.cmdOk();
           this.game.renderBoard();
+          this.print(`[OK] FLAGGED ${newlyFlagged.join(", ")} (AMBER CORNER DOT SET • 0 CHG).`, "ok");
+        } else if (coords.length > 0) {
+          this.print(`[INFO] MATCHED NODE${coords.length === 1 ? " IS" : "S ARE"} ALREADY FLAGGED (USE 'unflag' TO CLEAR).`, "info");
         }
         return allOk;
       }
@@ -3884,35 +4413,186 @@
         const puzzle = this.game.puzzle;
         if (coordArgs.length === 0) {
           this.game.audio.error();
-          this.print("usage: unflag <xy...>  (example: unflag a3 b3)", "err");
+          this.print("usage: unflag <xy|glob...>  (example: unflag a3, unflag *)", "err");
           return false;
         }
-        let allOk = true;
-        let changed = false;
-        for (const coordArg of coordArgs) {
-          const parsed = SectorGenerator.parseCoord(coordArg, puzzle.size);
-          if (!parsed) {
-            this.game.audio.error();
-            this.print(`unflag: coordinate '${coordArg}' out of bounds.`, "err");
-            allOk = false;
-            continue;
-          }
-          const cell = puzzle.grid[parsed.r][parsed.c];
-          if (!cell.flagged) {
-            this.game.audio.error();
-            this.print(`unflag: ${parsed.coord} is not currently flagged.`, "err");
-            allOk = false;
-            continue;
-          }
-          cell.flagged = false;
-          changed = true;
-          this.print(`[OK] UNFLAGGED ${parsed.coord} (AMBER CORNER DOT CLEARED • 0 CHG).`, "ok");
+        const { coords, invalid } = SectorGenerator.expandCoords(coordArgs, puzzle.size);
+        let allOk = invalid.length === 0;
+        for (const bad of invalid) {
+          this.game.audio.error();
+          this.print(`unflag: coordinate or pattern '${bad}' out of bounds.`, "err");
         }
-        if (changed) {
+
+        const hasWildcard = coords.some((pt) => pt.fromWildcard);
+        const cleared = [];
+        for (const pt of coords) {
+          const cell = puzzle.grid[pt.r][pt.c];
+          if (cell.flagged) {
+            cell.flagged = false;
+            cleared.push(pt.coord);
+          } else if (!hasWildcard) {
+            this.game.audio.error();
+            this.print(`unflag: ${pt.coord} is not currently flagged.`, "err");
+            allOk = false;
+          }
+        }
+
+        if (cleared.length > 0) {
           this.game.audio.cmdOk();
           this.game.renderBoard();
+          this.print(`[OK] UNFLAGGED ${cleared.join(", ")} (AMBER CORNER DOT CLEARED • 0 CHG).`, "ok");
+        } else if (hasWildcard && coords.length > 0) {
+          this.print(`[INFO] 0 FLAGGED NODES MATCHED '${coordArgs.join(" ")}'.`, "info");
         }
         return allOk;
+      }
+
+      cmdStep(stepArgs = []) {
+        const puzzle = this.game.puzzle;
+        const size = puzzle.size;
+
+        if (stepArgs.length === 0) {
+          const head = this.game.path[this.game.path.length - 1];
+          const status = this.game.computeStatus();
+          const trail = this.game.path.map((p) => SectorGenerator.toCoord(p.r, p.c)).join(" -> ");
+          const dirs = [
+            { tag: "N", dr: -1, dc: 0 },
+            { tag: "S", dr: 1, dc: 0 },
+            { tag: "W", dr: 0, dc: -1 },
+            { tag: "E", dr: 0, dc: 1 }
+          ];
+          const openNeighbors = [];
+          for (const d of dirs) {
+            const nr = head.r + d.dr;
+            const nc = head.c + d.dc;
+            if (nr < 0 || nr >= size || nc < 0 || nc >= size) continue;
+            const c = puzzle.grid[nr][nc];
+            if (c.type === "VOID" || c.type === "JAMMED") continue;
+            const desc = c.type === "RELAY"
+              ? `${c.phaseLocked ? "[?]" : `[${c.letter}]`}`
+              : c.type === "EXIT"
+                ? "[X]"
+                : c.type === "START"
+                  ? "[Ø]"
+                  : `${c.val >= 0 ? "+" : ""}${c.val}`;
+            openNeighbors.push(`${d.tag}:${c.coord}(${desc})`);
+          }
+          this.game.audio.cmdOk();
+          this.print(`[VECTOR] HEAD=${SectorGenerator.toCoord(head.r, head.c)} | ECHOES=${status.mass}/31 | BEACON=${puzzle.word} (${status.lockedCount}/${puzzle.word.length})`, "sys");
+          this.print(`  TRAIL: ${trail}`, "info");
+          this.print(`  OPEN : ${openNeighbors.length > 0 ? openNeighbors.join("  ") : "NONE (use 'undo' or override)"}`, "cyan");
+          return true;
+        }
+
+        if (this.game.solved) {
+          this.print("[INFO] Sector already locked. Press [N] or run 'reboot' to replay.", "info");
+          return true;
+        }
+
+        const dirMap = {
+          N: [-1, 0], NORTH: [-1, 0], UP: [-1, 0],
+          S: [1, 0],  SOUTH: [1, 0],  DOWN: [1, 0],
+          W: [0, -1], WEST: [0, -1],  LEFT: [0, -1],
+          E: [0, 1],  EAST: [0, 1],   RIGHT: [0, 1]
+        };
+
+        let movedCount = 0;
+        for (const rawTok of stepArgs) {
+          if (this.game.solved) break;
+          const tok = String(rawTok || "").trim().toUpperCase();
+          if (!tok) continue;
+
+          // Directional step (n/s/e/w/up/down/left/right)
+          if (dirMap[tok]) {
+            const [dr, dc] = dirMap[tok];
+            const head = this.game.path[this.game.path.length - 1];
+            const nr = head.r + dr;
+            const nc = head.c + dc;
+            if (nr < 0 || nr >= size || nc < 0 || nc >= size) {
+              this.game.audio.error();
+              this.print(`step: '${rawTok}' moves out of sector bounds from ${SectorGenerator.toCoord(head.r, head.c)}.`, "err");
+              return false;
+            }
+            const beforeLen = this.game.path.length;
+            this.game.tryStepTo(nr, nc);
+            const afterHead = this.game.path[this.game.path.length - 1];
+            if (afterHead.r !== nr || afterHead.c !== nc) {
+              this.print(`step: halted at ${SectorGenerator.toCoord(afterHead.r, afterHead.c)} (${document.getElementById("log-text").textContent}).`, "err");
+              return false;
+            }
+            movedCount += Math.abs(this.game.path.length - beforeLen) || 1;
+            continue;
+          }
+
+          // Coordinate or range (e.g. b1 or a1..a4)
+          const { coords, invalid } = SectorGenerator.expandCoords([tok], size);
+          if (invalid.length > 0 || coords.length === 0) {
+            this.game.audio.error();
+            this.print(`step: invalid target '${rawTok}' (use coord like 'b1', range 'a1..a4', or n/s/e/w).`, "err");
+            return false;
+          }
+
+          for (const target of coords) {
+            if (this.game.solved) break;
+            let head = this.game.path[this.game.path.length - 1];
+            if (head.r === target.r && head.c === target.c) continue;
+
+            // Allow straight-line orthogonal corridor auto-walk (e.g. 'step a4' from A1)
+            const stepQueue = [];
+            if (head.r === target.r || head.c === target.c) {
+              const dr = Math.sign(target.r - head.r);
+              const dc = Math.sign(target.c - head.c);
+              let cr = head.r + dr;
+              let cc = head.c + dc;
+              while (true) {
+                stepQueue.push({ r: cr, c: cc });
+                if (cr === target.r && cc === target.c) break;
+                cr += dr;
+                cc += dc;
+              }
+            } else {
+              this.game.audio.error();
+              this.print(`step: ${target.coord} is not orthogonally aligned with ${SectorGenerator.toCoord(head.r, head.c)}.`, "err");
+              return false;
+            }
+
+            for (const hop of stepQueue) {
+              if (this.game.solved) break;
+              this.game.tryStepTo(hop.r, hop.c);
+              const newHead = this.game.path[this.game.path.length - 1];
+              if (newHead.r !== hop.r || newHead.c !== hop.c) {
+                this.print(`step: halted at ${SectorGenerator.toCoord(newHead.r, newHead.c)} (${document.getElementById("log-text").textContent}).`, "err");
+                return false;
+              }
+              movedCount++;
+            }
+          }
+        }
+
+        if (movedCount > 0 && !this.game.solved) {
+          const head = this.game.path[this.game.path.length - 1];
+          const status = this.game.computeStatus();
+          this.print(`[OK] STEPPED -> ${SectorGenerator.toCoord(head.r, head.c)} | ECHOES=${status.mass}/31 (${status.delta >= 0 ? "+" : ""}${status.delta}) | RELAYS=${status.lockedCount}/${puzzle.word.length}`, "ok");
+        }
+        return true;
+      }
+
+      cmdUndo(countArg) {
+        if (this.game.path.length <= 1) {
+          this.game.audio.error();
+          this.print("undo: already at origin [Ø].", "warn");
+          return false;
+        }
+        const count = countArg && /^\d+$/.test(countArg) ? Math.max(1, Number(countArg)) : 1;
+        let retracted = 0;
+        for (let i = 0; i < count && this.game.path.length > 1; i++) {
+          this.game.undoStep();
+          retracted++;
+        }
+        const head = this.game.path[this.game.path.length - 1];
+        const status = this.game.computeStatus();
+        this.print(`[OK] RETRACTED ${retracted} STEP${retracted === 1 ? "" : "S"} -> HEAD=${SectorGenerator.toCoord(head.r, head.c)} | ECHOES=${status.mass}/31`, "info");
+        return true;
       }
 
       cmdReplyDrift(choice, coordArg) {
@@ -4124,23 +4804,99 @@
       cmdGrep(args) {
         if (args.length === 0) {
           this.game.audio.error();
-          this.print("usage: grep <pattern> [file]", "err");
-          return;
+          this.print("usage: grep [-v] [-c] [-n] <regex> [file]", "err");
+          return false;
         }
-        const pattern = args[0].toLowerCase();
-        const file = args[1] ? args[1].split("/").pop() : "lexicon.db";
+        let invert = false;
+        let countOnly = false;
+        let lineNums = false;
+        const positional = [];
+
+        for (const a of args) {
+          if (a === "-i") continue;
+          else if (a === "-v") invert = true;
+          else if (a === "-c") countOnly = true;
+          else if (a === "-n") lineNums = true;
+          else if (/^-[ivcn]+$/.test(a)) {
+            if (a.includes("v")) invert = true;
+            if (a.includes("c")) countOnly = true;
+            if (a.includes("n")) lineNums = true;
+          } else {
+            positional.push(a);
+          }
+        }
+
+        if (positional.length === 0) {
+          this.game.audio.error();
+          this.print("usage: grep [-v] [-c] [-n] <regex> [file]", "err");
+          return false;
+        }
+
+        const pattern = positional[0];
+        const file = positional[1] ? positional[1].split("/").pop() : "lexicon.db";
         const content = this.getFileContent(file);
+        if (content === "__PERMISSION_DENIED__") {
+          this.game.audio.error();
+          this.print(`grep: ${file}: Permission denied (use 'su -')`, "err");
+          return false;
+        }
         if (content === null) {
           this.game.audio.error();
           this.print(`grep: ${file}: No such file`, "err");
-          return;
+          return false;
         }
-        const hits = content.split("\n").filter((line) => line.toLowerCase().includes(pattern));
+
+        let rx = null;
+        try {
+          rx = new RegExp(pattern, "i");
+        } catch (_) {
+          rx = null;
+        }
+
+        const hits = [];
+        content.split("\n").forEach((line, idx) => {
+          const matched = rx ? rx.test(line) : line.toLowerCase().includes(pattern.toLowerCase());
+          if (invert ? !matched : matched) {
+            hits.push(lineNums ? `${idx + 1}:${line}` : line);
+          }
+        });
+
+        if (countOnly) {
+          this.print(String(hits.length), "ok");
+          return hits.length > 0;
+        }
         if (hits.length === 0) {
-          this.print(`(no matches for '${args[0]}' in ${file})`, "info");
-        } else {
-          this.print(hits.join("\n"), "ok");
+          this.print(`(no matches for '${pattern}' in ${file})`, "info");
+          return false;
         }
+        this.print(hits.join("\n"), "ok");
+        return true;
+      }
+
+      cmdFileSliceOrCount(cmd, args) {
+        const fileArg = args.find((a) => !a.startsWith("-"));
+        if (!fileArg) {
+          this.game.audio.error();
+          this.print(`usage: ${cmd} [options] <filename>  (or pipe into '${cmd}')`, "err");
+          return false;
+        }
+        const baseName = fileArg.split("/").pop();
+        const content = this.getFileContent(baseName);
+        if (content === "__PERMISSION_DENIED__") {
+          this.game.audio.error();
+          this.print(`${cmd}: ${fileArg}: Permission denied (use 'su -')`, "err");
+          return false;
+        }
+        if (content === null) {
+          this.game.audio.error();
+          this.print(`${cmd}: ${fileArg}: No such file`, "err");
+          return false;
+        }
+        const inputLines = content.split("\n").map((line) => ({ text: line, plain: line, tone: "info", html: false }));
+        const res = this.applyPipeFilter([cmd, ...args].join(" "), inputLines);
+        if (!res.ok) return false;
+        res.lines.forEach((item) => this.print(item.text, item.tone, item.html));
+        return true;
       }
     }
 
@@ -5421,7 +6177,7 @@
 
       showHelpModal() {
         this.openModal(
-          "INFO & FIELD GLOSSARY // v0.92",
+          "INFO & FIELD GLOSSARY // v0.95",
           `
             <div class="modal-section-heading">Top HUD Readouts</div>
             <div class="rule-item">
@@ -5436,7 +6192,7 @@
 
             <div class="modal-section-heading">Override Charges (CHG) &amp; ttyS0 Shell</div>
             <div class="rule-item">
-              <strong>UNLIMITED INSPECTION vs. CAPACITOR MUTATIONS:</strong> Read-only and marker bash commands (<span class="cmd-code">scan</span>, <span class="cmd-code">flag</span> / <span class="cmd-code">unflag</span>, <span class="cmd-code">ls</span>, <span class="cmd-code">cat</span>, <span class="cmd-code">grep</span>, <span class="cmd-code">man</span>, <span class="cmd-code">top</span>, <span class="cmd-code">htop</span>, <span class="cmd-code">help</span>) are unlimited. Physical grid mutations (<span class="cmd-code">vent</span>, <span class="cmd-code">invert</span>, <span class="cmd-code">purge</span>, <span class="cmd-code">sync</span>) spend <strong>1 CHG</strong> per rewrite because they drain the transceiver's capacitor charges. Every sector (grid) grants <strong>+1 spare Override Charge</strong>—use, which can be used on the <span class="cmd-code">vent</span> command for any <strong>##</strong> void node, or the <span class="cmd-code">invert</span> command for any non-zero number node. Pressing <strong>RESET [R]</strong> or running <span class="cmd-code">reboot</span> restores all charges and resets the sector.
+              <strong>UNLIMITED INSPECTION vs. CAPACITOR MUTATIONS:</strong> Read-only, navigation, and marker bash commands (<span class="cmd-code">scan</span>, <span class="cmd-code">step</span>, <span class="cmd-code">undo</span>, <span class="cmd-code">flag</span> / <span class="cmd-code">unflag</span>, <span class="cmd-code">ls</span>, <span class="cmd-code">cat</span>, <span class="cmd-code">grep</span>, <span class="cmd-code">wc</span>, <span class="cmd-code">man</span>, <span class="cmd-code">top</span>, <span class="cmd-code">htop</span>, <span class="cmd-code">help</span>) are unlimited and support coordinate wildcards (<span class="cmd-code">*</span>, <span class="cmd-code">a*</span>, <span class="cmd-code">*3</span>, <span class="cmd-code">a1..a5</span>), regex pipes (<span class="cmd-code">| grep</span>, <span class="cmd-code">| wc -l</span>), and stream redirection (<span class="cmd-code">2&gt;&amp;1</span>, <span class="cmd-code">2&gt;/dev/null</span>). Physical grid mutations (<span class="cmd-code">vent</span>, <span class="cmd-code">invert</span>, <span class="cmd-code">purge</span>, <span class="cmd-code">sync</span>) spend <strong>1 CHG</strong> per rewrite because they drain the transceiver's capacitor charges. Every sector grants <strong>+1 spare Override Charge</strong>—use <span class="cmd-code">vent</span> on any <strong>##</strong> void node or <span class="cmd-code">invert</span> on any non-zero number node. Pressing <strong>RESET [R]</strong> or running <span class="cmd-code">reboot</span> restores all charges and resets the sector.
             </div>
 
             <div class="modal-section-heading">Node Symbols (Grid Squares)</div>
