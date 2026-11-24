@@ -25,7 +25,7 @@
   <meta name="twitter:image" content="https://nahla.live/vvthumb8.jpeg" />
   <style>
     /* ==========================================================================
-       NAHLA TRACKER DESIGN TOKENS & PHOSPHOR TERMINAL GREEN THEME (v0.93)
+       NAHLA TRACKER DESIGN TOKENS & PHOSPHOR TERMINAL GREEN THEME (v0.92)
        Offline-ready, zero external dependencies, pure monospace aesthetics.
        ========================================================================== */
     :root {
@@ -345,33 +345,6 @@
 
     .monitor-quit-bar:hover {
       color: #fde68a;
-    }
-
-    /* Embedded Sulphur Run Lite Minigame inside ttyS0 */
-    .sr-screen-pre {
-      margin: 0;
-      font-family: var(--font-mono);
-      font-size: clamp(0.6rem, 2.25vw, 0.72rem);
-      line-height: 1.24;
-      white-space: pre;
-      overflow-x: auto;
-      user-select: none;
-    }
-
-    .sr-ctrl-bar {
-      margin-top: auto;
-      padding-top: 0.28rem;
-      border-top: 1px dashed var(--border-dim);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 0.35rem;
-      flex-wrap: wrap;
-    }
-
-    .sr-ctrl-btns {
-      display: flex;
-      gap: 0.3rem;
     }
 
     .bash-prompt-row {
@@ -1831,7 +1804,7 @@
       <header class="terminal-header">
         <div class="brand-block">
           <div class="brand-title">
-            VØID VECTØR v0.93
+            VØID VECTØR v0.92
           </div>
           <div class="brand-sub">NAHLA@HOPE (31 BODIES)</div>
         </div>
@@ -2123,7 +2096,7 @@
   <script>
     /**
      * ==========================================================================
-     * 31: VØID VECTØR v0.93 — CORE ENGINE
+     * 31: VØID VECTØR v0.92 — CORE ENGINE
      * Deterministic Carve-First Puzzle Generator, Anomaly Saboteur,
      * Embedded Bash/Override Shell, WebAudio Synthesizer, 3x3 Walkthrough & UI
      * ==========================================================================
@@ -2825,24 +2798,14 @@
       static MAX_LINES = 300;
       static COMMANDS = [
         "scan", "vent", "invert", "purge", "sync", "flag", "unflag", "dampen", "boost", "reboot", "tutorial",
-        "sulphur", "sulphur_run", "sulphur_run_lite", "./sulphur_run", "./sulphur_run_lite", "srv",
         "help", "man", "tldr", "clear", "cls", "ls", "ll", "cd", "pwd", "cat", "grep",
-        "echo", "whoami", "uname", "date", "uptime", "ps", "top", "htop", "df",
-        "screenfetch", "neofetch", "fastfetch", "fetch", "history", "sudo", "su", "exit"
+        "echo", "whoami", "uname", "date", "uptime", "ps", "top", "htop", "df", "history", "sudo", "su", "exit"
       ];
 
       static MAN_ALIASES = {
         cls: "clear",
         ll: "ls",
         tldr: "man",
-        neofetch: "screenfetch",
-        fastfetch: "screenfetch",
-        fetch: "screenfetch",
-        sulphur_run_lite: "sulphur",
-        "./sulphur_run_lite": "sulphur",
-        sulphur_run: "sulphur_full",
-        "./sulphur_run": "sulphur_full",
-        srv: "sulphur",
         "?": "help"
       };
 
@@ -2997,7 +2960,7 @@
           desc: "Lists core HopeOS telemetry daemons (init, echo_triangulator, carrier_router, nahla_sh).",
           example: "ps"
         },
-        top: {
+         top: {
           title: "top - live classic Unix telemetry and anomaly process monitor",
           synopsis: "top [-b]",
           desc: "Displays a live-ticking process table (0.9s refresh) for ttyS0. Baseline transceiver daemons (init, echo_triangulator, carrier_router, nahla_sh) idle near ~4% CPU; each active grid anomaly spawns a high-CPU irq interrupt task (+37% CPU, state R) until cleared via vent, invert, purge, or sync. MiB Echo tracks live Echo Returns (/31.0). Press 'q' or 'Esc' to quit, or pass '-b' for a static snapshot.",
@@ -3014,24 +2977,6 @@
           synopsis: "df",
           desc: "Displays live used/available capacity for /dev/hope0 (out of 31E) and /dev/override (CHG).",
           example: "df"
-        },
-        screenfetch: {
-          title: "screenfetch (neofetch/fetch) - display HopeOS system info and star emblem",
-          synopsis: "screenfetch | neofetch | fastfetch | fetch",
-          desc: "Renders the blue-white Hope Star A emblem and HopeOS logo alongside live Nahla 6a transceiver telemetry, active sector seed, Echo Returns, Override Charges, and locked beacon count.",
-          example: "screenfetch\n       fetch"
-        },
-        sulphur: {
-          title: "sulphur (sulphur_run_lite/srv) - launch Sulphur Run Lite SRV micro-sim on ttyS0",
-          synopsis: "sulphur | sulphur_run_lite | ./sulphur_run_lite | srv",
-          desc: "Launches the embedded 44x7 ASCII SRV rover telemetry sim inside ttyS0. Jump (#) rocks and (=) craters with Space/Up/W or tap, fire laser (-) with F/Enter, and quit anytime with Q/Esc or QUIT [Q].",
-          example: "sulphur\n       ./sulphur_run_lite"
-        },
-        sulphur_full: {
-          title: "sulphur_run (./sulphur_run) - open full Sulphur Run console in a new tab",
-          synopsis: "sulphur_run | ./sulphur_run",
-          desc: "Opens the full Sulphur Run telemetry page (https://nahla.live/sulphur_run.html) in a new browser tab.",
-          example: "./sulphur_run"
         },
         history: {
           title: "history - display nahla_sh session command history",
@@ -3071,7 +3016,6 @@
         this.monitorMode = null;
         this.monitorTimer = null;
         this.monitorTick = 0;
-        this.srGame = null;
       }
 
       resetForSector(puzzle) {
@@ -3110,10 +3054,6 @@
       }
 
       render() {
-        if (this.monitorMode === "sulphur") {
-          this.renderSulphur();
-          return;
-        }
         if (this.monitorMode) {
           this.renderMonitor();
           return;
@@ -3142,14 +3082,8 @@
         const clearBtn = document.getElementById("btn-term-clear");
         if (clearBtn) {
           clearBtn.textContent = "QUIT [Q]";
-          clearBtn.title = mode === "sulphur" ? "Quit Sulphur Run Lite (q / Esc)" : "Exit Live Process Monitor (q / Esc)";
+          clearBtn.title = "Exit Live Process Monitor (q / Esc)";
           clearBtn.classList.add("monitor-active");
-        }
-
-        if (mode === "sulphur") {
-          this.initSulphurState();
-          this.renderSulphur();
-          return;
         }
 
         this.renderMonitor(true);
@@ -3177,305 +3111,13 @@
 
         if (prevMode) {
           if (announce) {
-            if (prevMode === "sulphur" && this.srGame) {
-              this.lines.push({
-                text: `[sulphur_run] detached from ttyS0 (BEST: ${this.srGame.bestDist}m • DATA: ${this.srGame.bestData}).`,
-                tone: "info",
-                html: false
-              });
-            } else {
-              this.lines.push({ text: `[${prevMode}] monitor detached (ttyS0).`, tone: "info", html: false });
-            }
+            this.lines.push({ text: `[${prevMode}] monitor detached (ttyS0).`, tone: "info", html: false });
           }
           this.render();
         }
       }
 
-      // ------------------------------------------------------------------------
-      // EMBEDDED SULPHUR RUN LITE MINIGAME (44x7 ASCII SRV Sim inside ttyS0)
-      // ------------------------------------------------------------------------
-      initSulphurState() {
-        const prevBestDist = this.srGame ? this.srGame.bestDist : 0;
-        const prevBestData = this.srGame ? this.srGame.bestData : 0;
-        this.srGame = {
-          W: 44,
-          H: 7,
-          JUMP_ARC: [3, 2, 2, 3, 4],
-          phase: "SHELL", // 'SHELL' | 'PLAY' | 'DEAD'
-          roverY: 5,
-          jumpStep: -1,
-          dist: 0,
-          data: 0,
-          bestDist: prevBestDist,
-          bestData: prevBestData,
-          tick: 0,
-          cooldownSpawn: 0,
-          entities: [],
-          alertLine: ""
-        };
-      }
-
-      startSulphurRun() {
-        if (!this.srGame) this.initSulphurState();
-        const g = this.srGame;
-        g.phase = "PLAY";
-        g.roverY = 5;
-        g.jumpStep = -1;
-        g.dist = 0;
-        g.data = 0;
-        g.tick = 0;
-        g.cooldownSpawn = 0;
-        g.entities = [];
-        g.alertLine = "";
-
-        clearInterval(this.monitorTimer);
-        this.game.audio.cmdOk();
-        this.renderSulphur();
-        this.monitorTimer = setInterval(() => {
-          if (this.monitorMode !== "sulphur") return;
-          this.updateSulphur();
-        }, 105);
-      }
-
-      sulphurJump() {
-        if (!this.srGame) return;
-        if (this.srGame.phase !== "PLAY") {
-          this.startSulphurRun();
-          return;
-        }
-        if (this.srGame.jumpStep === -1) {
-          this.srGame.jumpStep = 0;
-          this.game.audio.step(14);
-        }
-      }
-
-      sulphurShoot() {
-        if (!this.srGame || this.srGame.phase !== "PLAY") return;
-        this.srGame.entities.push({ x: 5, y: this.srGame.roverY, type: "shot" });
-        this.game.audio.tone(740, "square", 0.04, 0.05);
-      }
-
-      failSulphurRun() {
-        const g = this.srGame;
-        g.phase = "DEAD";
-        clearInterval(this.monitorTimer);
-        this.monitorTimer = null;
-        if (g.dist > g.bestDist) g.bestDist = g.dist;
-        if (g.data > g.bestData) g.bestData = g.data;
-        g.alertLine = `CRITICAL FAILURE // DIST:${g.dist}m DATA:${g.data} (BEST:${g.bestDist}m)`;
-        this.game.audio.error();
-        this.renderSulphur();
-      }
-
-      updateSulphur() {
-        const g = this.srGame;
-        if (!g || g.phase !== "PLAY") return;
-
-        g.tick++;
-        g.dist++;
-        if (g.cooldownSpawn > 0) g.cooldownSpawn--;
-
-        // 1. Update rover vertical position via jump arc
-        if (g.jumpStep >= 0) {
-          if (g.jumpStep < g.JUMP_ARC.length) {
-            g.roverY = g.JUMP_ARC[g.jumpStep];
-            g.jumpStep++;
-          } else {
-            g.roverY = 5;
-            g.jumpStep = -1;
-          }
-        }
-
-        // 2. Spawn rocks (#), ground craters (gaps), or floating data nodes (*)
-        if (g.cooldownSpawn === 0 && Math.random() > 0.35) {
-          const roll = Math.random();
-          if (roll < 0.42) {
-            g.entities.push({ x: g.W - 1, y: 5, type: "rock" });
-            g.cooldownSpawn = 7;
-          } else if (roll < 0.72) {
-            g.entities.push({ x: g.W - 1, y: 6, type: "crater" });
-            g.cooldownSpawn = 7;
-          } else {
-            g.entities.push({ x: g.W - 1, y: Math.random() > 0.5 ? 3 : 4, type: "node" });
-            g.cooldownSpawn = 5;
-          }
-        }
-
-        // 3. Move laser shots right and destroy matching rocks
-        g.entities.forEach((e) => {
-          if (e.type === "shot") e.x += 2;
-        });
-
-        g.entities = g.entities.filter((shot) => {
-          if (shot.type !== "shot") return true;
-          const hitIdx = g.entities.findIndex(
-            (target) => target.type === "rock" && Math.abs(target.x - shot.x) <= 1 && Math.abs(target.y - shot.y) <= 1
-          );
-          if (hitIdx !== -1) {
-            g.entities.splice(hitIdx, 1);
-            g.data += 10;
-            this.game.audio.mutate();
-            return false;
-          }
-          return shot.x < g.W;
-        });
-
-        // 4. Scroll world entities left and evaluate rover collisions at column x = 4
-        for (let i = g.entities.length - 1; i >= 0; i--) {
-          const e = g.entities[i];
-          if (e.type === "shot") continue;
-          e.x -= 1;
-
-          if (e.x === 4) {
-            if (e.type === "node" && Math.abs(e.y - g.roverY) <= 1) {
-              g.data += 25;
-              g.entities.splice(i, 1);
-              this.game.audio.relay(2);
-              continue;
-            }
-            if (e.type === "rock" && g.roverY >= 5) {
-              this.failSulphurRun();
-              return;
-            }
-            if (e.type === "crater" && g.roverY === 5) {
-              this.failSulphurRun();
-              return;
-            }
-          }
-
-          if (e.x < 0) g.entities.splice(i, 1);
-        }
-
-        this.renderSulphur();
-      }
-
-      renderSulphur() {
-        if (this.monitorMode !== "sulphur" || !this.srGame) return;
-        const screen = document.getElementById("bash-screen");
-        if (!screen) return;
-
-        const g = this.srGame;
-        screen.innerHTML = "";
-
-        const pre = document.createElement("pre");
-        pre.className = "sr-screen-pre";
-
-        if (g.phase !== "PLAY") {
-          const status = g.alertLine
-            ? `<span style="color:var(--crimson);font-weight:700;">${g.alertLine}</span>`
-            : `<span style="color:var(--text-secondary);">SRV Telemetry Micro-Sim v0.1 // Nahla 6a Surface</span>`;
-
-          pre.innerHTML = [
-            `<span style="color:var(--cyan);">nahla@srv:~$</span> ./sulphur_run --lite`,
-            status,
-            ``,
-            `  <span style="color:#dcfce7;font-weight:700;">[SPACE / UP / TAP]</span> Jump   <span style="color:#dcfce7;font-weight:700;">[F / ENTER]</span> Fire Laser`,
-            `  Dodge <span style="color:var(--crimson);font-weight:700;">#</span> &amp; pits, blast <span style="color:var(--crimson);font-weight:700;">#</span> (+10), grab <span style="color:var(--cyan);font-weight:700;">*</span> (+25)`,
-            ``,
-            `<span style="color:var(--cyan);">nahla@srv:~$</span> <span style="color:var(--emerald);font-weight:700;">[PRESS SPACE, ENTER, OR RUN TO LAUNCH]_</span>`
-          ].join("\n");
-        } else {
-          const grid = Array.from({ length: g.H }, () => Array(g.W).fill(" "));
-
-          // Parallax stars & distant Rebekah (6) ringed gas giant glyph
-          grid[1][(38 - Math.floor(g.tick / 5) % 38)] = ".";
-          grid[2][(22 - Math.floor(g.tick / 8) % 22)] = "+";
-          grid[1][34] = "(";
-          grid[1][35] = "O";
-          grid[1][36] = ")";
-
-          // Sulphur terrain surface
-          for (let x = 0; x < g.W; x++) grid[6][x] = "=";
-
-          // Place active entities
-          g.entities.forEach((e) => {
-            if (e.x < 0 || e.x >= g.W) return;
-            if (e.type === "rock") grid[e.y][e.x] = "#";
-            if (e.type === "crater") grid[6][e.x] = " ";
-            if (e.type === "node") grid[e.y][e.x] = "*";
-            if (e.type === "shot") grid[e.y][e.x] = "-";
-          });
-
-          // Place SRV Rover at column 4
-          grid[g.roverY][4] = "R";
-
-          const rowsHtml = grid.map((row, y) => {
-            return row.map((ch) => {
-              if (ch === "R") return `<span style="color:#dcfce7;font-weight:700;text-shadow:0 0 6px var(--term-green);">R</span>`;
-              if (ch === "#") return `<span style="color:var(--crimson);font-weight:700;">#</span>`;
-              if (ch === "*") return `<span style="color:var(--cyan);font-weight:700;">*</span>`;
-              if (ch === "-") return `<span style="color:var(--amber);font-weight:700;">-</span>`;
-              if (ch === "O" || ch === "(" || ch === ")") return `<span style="color:var(--emerald);">${ch}</span>`;
-              if (y < 6 && (ch === "." || ch === "+")) return `<span style="color:var(--text-dim);">${ch}</span>`;
-              if (y === 6 && ch === "=") return `<span style="color:var(--term-green);">=</span>`;
-              return ch;
-            }).join("");
-          });
-
-          const hud = `<span style="color:var(--text-secondary);">DIST:</span><span style="color:#dcfce7;font-weight:700;">${String(g.dist).padStart(4, "0")}m</span> <span style="color:var(--border-bright);">|</span> <span style="color:var(--text-secondary);">DATA:</span><span style="color:var(--cyan);font-weight:700;">${String(g.data).padStart(3, "0")}</span> <span style="color:var(--border-bright);">|</span> <span style="color:var(--amber);">[SPC]JMP [F]FIRE</span>`;
-          pre.innerHTML = hud + "\n" + rowsHtml.join("\n");
-        }
-
-        screen.appendChild(pre);
-
-        // Interactive action bar for touch/mouse play + quit
-        const ctrlBar = document.createElement("div");
-        ctrlBar.className = "sr-ctrl-bar";
-
-        const leftBtns = document.createElement("div");
-        leftBtns.className = "sr-ctrl-btns";
-
-        const jumpBtn = document.createElement("button");
-        jumpBtn.type = "button";
-        jumpBtn.className = "chip-btn";
-        jumpBtn.style.color = "var(--emerald)";
-        jumpBtn.style.borderColor = "var(--term-green)";
-        jumpBtn.textContent = g.phase === "PLAY" ? "JUMP [SPC]" : "RUN SIM [SPC]";
-        jumpBtn.addEventListener("pointerdown", (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          this.game.audio.ensureContext();
-          this.sulphurJump();
-        });
-        leftBtns.appendChild(jumpBtn);
-
-        if (g.phase === "PLAY") {
-          const fireBtn = document.createElement("button");
-          fireBtn.type = "button";
-          fireBtn.className = "chip-btn";
-          fireBtn.style.color = "var(--amber)";
-          fireBtn.style.borderColor = "var(--amber)";
-          fireBtn.textContent = "FIRE [F]";
-          fireBtn.addEventListener("pointerdown", (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            this.game.audio.ensureContext();
-            this.sulphurShoot();
-          });
-          leftBtns.appendChild(fireBtn);
-        }
-
-        const quitBtn = document.createElement("button");
-        quitBtn.type = "button";
-        quitBtn.className = "chip-btn monitor-active";
-        quitBtn.textContent = "QUIT [Q]";
-        quitBtn.addEventListener("click", (e) => {
-          e.stopPropagation();
-          this.game.audio.cmdOk();
-          this.stopMonitor(true);
-        });
-
-        ctrlBar.appendChild(leftBtns);
-        ctrlBar.appendChild(quitBtn);
-        screen.appendChild(ctrlBar);
-        screen.scrollTop = 0;
-      }
-
       renderMonitor(resetScroll = false) {
-        if (this.monitorMode === "sulphur") {
-          this.renderSulphur();
-          return;
-        }
         if (!this.monitorMode) return;
         const screen = document.getElementById("bash-screen");
         if (!screen) return;
@@ -3787,34 +3429,6 @@
             this.print(`Filesystem      Size  Used Avail Use% Mounted on\n/dev/hope0       31E   ${String(this.game.computeStatus().mass).padStart(2, "0")}E   ${Math.max(0, 31 - this.game.computeStatus().mass)}E  ${Math.min(100, Math.round((this.game.computeStatus().mass / 31) * 100))}% /home/nahla/sector\n/dev/override   ${this.game.puzzle.maxCharges}CHG  ${Math.max(0, this.game.puzzle.maxCharges - this.game.chargesLeft)}CHG  ${this.game.chargesLeft}CHG   --% /sys/override`, "info");
             return true;
 
-          case "screenfetch":
-          case "neofetch":
-          case "fastfetch":
-          case "fetch":
-            this.cmdFetch();
-            return true;
-
-          case "sulphur":
-          case "sulphur_run_lite":
-          case "./sulphur_run_lite":
-          case "srv":
-            this.game.audio.cmdOk();
-            this.startMonitor("sulphur");
-            return true;
-
-          case "sulphur_run":
-          case "./sulphur_run": {
-            this.game.audio.cmdOk();
-            const targetUrl = "https://nahla.live/sulphur_run.html";
-            try {
-              window.open(targetUrl, "_blank", "noopener,noreferrer");
-              this.print(`[OK] Opened Sulphur Run in a new tab: ${targetUrl}`, "ok");
-            } catch (_) {
-              this.print(`[WARN] Popup blocked — open manually: ${targetUrl}`, "warn");
-            }
-            return true;
-          }
-
           case "history":
             this.cmdHistory.forEach((entry, idx) => {
               this.print(`  ${String(idx + 1).padStart(2, " ")}  ${entry}`, "info");
@@ -3852,8 +3466,7 @@
         this.print("  reboot / tutorial Reset sector or launch 3x3 field walkthrough", "info");
         this.print("=== BASH / SYSTEM UTILITIES ===", "sys");
         this.print("  man <cmd>, ls, cd, pwd, cat <file>, grep <str>, echo,", "info");
-        this.print("  screenfetch, sulphur_run, sulphur_run_lite, ps, top,", "info");
-        this.print("  htop, df, whoami, uname -a, date, uptime, su -, clear", "info");
+        this.print("  ps, top, htop, df, whoami, uname -a, date, uptime, su -, clear", "info");
       }
 
       cmdMan(topicArg) {
@@ -3892,48 +3505,6 @@
           return;
         }
         this.startMonitor(isHtop ? "htop" : "top");
-      }
-
-      cmdFetch() {
-        this.game.audio.cmdOk();
-        const puzzle = this.game.puzzle;
-        const status = this.game.computeStatus();
-        const user = this.isRoot ? "root" : "nahla";
-
-        const secs = Math.floor((Date.now() - this.startTime) / 1000);
-        const mins = Math.floor(secs / 60);
-        const upStr = mins > 0 ? `${mins}m ${secs % 60}s` : `${secs}s`;
-
-        const star = {
-          dot:  `<span style="color:#7dd3fc;">.</span>`,
-          ray1: `<span style="color:#38bdf8;">\\</span> <span style="color:#bae6fd;">|</span> <span style="color:#38bdf8;">/</span>`,
-          core: `<span style="color:#38bdf8;">--</span> <span style="color:#f0f9ff;font-weight:700;text-shadow:0 0 8px #38bdf8;">(✦)</span> <span style="color:#38bdf8;">--</span>`,
-          ray2: `<span style="color:#38bdf8;">/</span> <span style="color:#bae6fd;">|</span> <span style="color:#38bdf8;">\\</span>`,
-          tail: `<span style="color:#7dd3fc;">'</span>`
-        };
-
-        const boxTop = `<span style="color:var(--term-green);font-weight:700;">╔═════════╗</span>`;
-        const boxMid = `<span style="color:var(--term-green);font-weight:700;">║ HØPE OS ║</span>`;
-        const boxBot = `<span style="color:var(--term-green);font-weight:700;">╚═════════╝</span>`;
-        const subTag = `<span style="color:var(--text-secondary);">31 BODIES</span>`;
-
-        const swatches = [
-          "#0d1913", "#1b3829", "#22c55e", "#4ade80", "#38bdf8", "#f59e0b"
-        ].map((hex) => `<span style="color:${hex};">██</span>`).join("");
-
-        const rows = [
-          `      ${star.dot}         <span class="term-key">${user}@hope</span> <span style="color:var(--text-secondary);">(ttyS0)</span>`,
-          `    ${star.ray1}       <span style="color:var(--border-bright);">-------------------------</span>`,
-          `  ${star.core}     <span style="color:var(--term-green);font-weight:700;">OS:</span> HopeOS 3.1.0 riscv64`,
-          `    ${star.ray2}       <span style="color:var(--term-green);font-weight:700;">Host:</span> Nahla 6a Relay Array`,
-          `      ${star.tail}         <span style="color:var(--term-green);font-weight:700;">Star:</span> Hope A (Blue-White)`,
-          `  ${boxTop}   <span style="color:var(--term-green);font-weight:700;">Shell:</span> nahla_sh (${upStr})`,
-          `  ${boxMid}   <span style="color:var(--term-green);font-weight:700;">Sector:</span> #${puzzle.seedStr} [${puzzle.word}]`,
-          `  ${boxBot}   <span style="color:var(--term-green);font-weight:700;">Echoes:</span> ${String(status.mass).padStart(2, "0")}/31E | CHG: ${this.game.chargesLeft}/${puzzle.maxCharges}`,
-          `   ${subTag}    ${swatches} <span style="color:var(--text-secondary);">(${this.game.stats.solved} locked)</span>`
-        ];
-
-        rows.forEach((line) => this.print(line, "info", true));
       }
 
       buildMonitorLines(isHtop = false, tick = 0) {
@@ -4375,7 +3946,7 @@
         const fs = {
           "/": ["home/", "root/", "sys/", "var/", "etc/"],
           "/home": ["nahla/"],
-          "/home/nahla": ["sector/", "readme.txt", "sulphur_run*", "sulphur_run_lite*"],
+          "/home/nahla": ["sector/", "readme.txt"],
           "/home/nahla/sector": ["anomalies.dat", "sector.map", "telemetry.log", "lexicon.db"],
           "/root": ["transceiver.key"],
           "/sys": ["sector/", "override/"],
@@ -5030,15 +4601,6 @@
 
         bashForm.addEventListener("submit", (e) => {
           e.preventDefault();
-          if (this.term.monitorMode === "sulphur") {
-            this.audio.ensureContext();
-            if (this.term.srGame && this.term.srGame.phase === "PLAY") {
-              this.term.sulphurShoot();
-            } else {
-              this.term.startSulphurRun();
-            }
-            return;
-          }
           const val = bashInput.value;
           bashInput.value = "";
           this.audio.ensureContext();
@@ -5046,37 +4608,6 @@
         });
 
         bashInput.addEventListener("keydown", (e) => {
-          if (this.term.monitorMode === "sulphur") {
-            const k = e.key.toLowerCase();
-            if (
-              e.key === "Escape" ||
-              (e.ctrlKey && k === "c") ||
-              (k === "q" && bashInput.value === "")
-            ) {
-              e.preventDefault();
-              this.audio.cmdOk();
-              this.term.stopMonitor(true);
-              return;
-            }
-            if (bashInput.value === "") {
-              if (e.code === "Space" || e.key === "ArrowUp" || k === "w") {
-                e.preventDefault();
-                this.audio.ensureContext();
-                this.term.sulphurJump();
-                return;
-              }
-              if (k === "f" || e.key === "Enter") {
-                e.preventDefault();
-                this.audio.ensureContext();
-                if (this.term.srGame && this.term.srGame.phase === "PLAY") {
-                  this.term.sulphurShoot();
-                } else {
-                  this.term.startSulphurRun();
-                }
-                return;
-              }
-            }
-          }
           if (this.term.monitorMode) {
             if (
               e.key === "Escape" ||
@@ -5111,12 +4642,6 @@
         });
 
         bashScreen.addEventListener("click", () => {
-          if (this.term.monitorMode === "sulphur") {
-            this.audio.ensureContext();
-            this.term.sulphurJump();
-            bashInput.focus();
-            return;
-          }
           const sel = window.getSelection();
           if (!sel || sel.toString().length === 0) {
             bashInput.focus();
@@ -5240,32 +4765,6 @@
           if (e.target.tagName === "INPUT") {
             if (e.key === "Escape") e.target.blur();
             return;
-          }
-
-          if (this.term && this.term.monitorMode === "sulphur") {
-            const key = e.key.toLowerCase();
-            if (e.key === "Escape" || key === "q") {
-              e.preventDefault();
-              this.audio.cmdOk();
-              this.term.stopMonitor(true);
-              return;
-            }
-            if (e.code === "Space" || e.key === "ArrowUp" || key === "w") {
-              e.preventDefault();
-              this.audio.ensureContext();
-              this.term.sulphurJump();
-              return;
-            }
-            if (e.key === "Enter" || key === "f") {
-              e.preventDefault();
-              this.audio.ensureContext();
-              if (this.term.srGame && this.term.srGame.phase === "PLAY") {
-                this.term.sulphurShoot();
-              } else {
-                this.term.startSulphurRun();
-              }
-              return;
-            }
           }
 
           if (this.term && this.term.monitorMode && (e.key === "Escape" || e.key.toLowerCase() === "q")) {
@@ -5922,7 +5421,7 @@
 
       showHelpModal() {
         this.openModal(
-          "INFO & FIELD GLOSSARY // v0.93",
+          "INFO & FIELD GLOSSARY // v0.92",
           `
             <div class="modal-section-heading">Top HUD Readouts</div>
             <div class="rule-item">
@@ -5937,7 +5436,7 @@
 
             <div class="modal-section-heading">Override Charges (CHG) &amp; ttyS0 Shell</div>
             <div class="rule-item">
-              <strong>UNLIMITED INSPECTION vs. CAPACITOR MUTATIONS:</strong> Read-only and marker bash commands (<span class="cmd-code">scan</span>, <span class="cmd-code">flag</span> / <span class="cmd-code">unflag</span>, <span class="cmd-code">ls</span>, <span class="cmd-code">cat</span>, <span class="cmd-code">grep</span>, <span class="cmd-code">man</span>, <span class="cmd-code">screenfetch</span>, <span class="cmd-code">top</span>, <span class="cmd-code">htop</span>, <span class="cmd-code">help</span>) are unlimited. Physical grid mutations (<span class="cmd-code">vent</span>, <span class="cmd-code">invert</span>, <span class="cmd-code">purge</span>, <span class="cmd-code">sync</span>) spend <strong>1 CHG</strong> per rewrite because they drain the transceiver's capacitor charges. Every sector (grid) grants <strong>+1 spare Override Charge</strong>—use, which can be used on the <span class="cmd-code">vent</span> command for any <strong>##</strong> void node, or the <span class="cmd-code">invert</span> command for any non-zero number node. Pressing <strong>RESET [R]</strong> or running <span class="cmd-code">reboot</span> restores all charges and resets the sector.
+              <strong>UNLIMITED INSPECTION vs. CAPACITOR MUTATIONS:</strong> Read-only and marker bash commands (<span class="cmd-code">scan</span>, <span class="cmd-code">flag</span> / <span class="cmd-code">unflag</span>, <span class="cmd-code">ls</span>, <span class="cmd-code">cat</span>, <span class="cmd-code">grep</span>, <span class="cmd-code">man</span>, <span class="cmd-code">top</span>, <span class="cmd-code">htop</span>, <span class="cmd-code">help</span>) are unlimited. Physical grid mutations (<span class="cmd-code">vent</span>, <span class="cmd-code">invert</span>, <span class="cmd-code">purge</span>, <span class="cmd-code">sync</span>) spend <strong>1 CHG</strong> per rewrite because they drain the transceiver's capacitor charges. Every sector (grid) grants <strong>+1 spare Override Charge</strong>—use, which can be used on the <span class="cmd-code">vent</span> command for any <strong>##</strong> void node, or the <span class="cmd-code">invert</span> command for any non-zero number node. Pressing <strong>RESET [R]</strong> or running <span class="cmd-code">reboot</span> restores all charges and resets the sector.
             </div>
 
             <div class="modal-section-heading">Node Symbols (Grid Squares)</div>
