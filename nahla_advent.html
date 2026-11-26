@@ -1,0 +1,1574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Nahla — 3312 Solstice Telemetry Calendar</title>
+
+    <!-- Open Graph / Discord -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Project Nahla — 3312 Solstice Advent Telemetry">
+    <meta property="og:description" content="24 daily encrypted transmissions from the Project Nahla Open Transit Voyage. Unlocks daily at 00:00 UTC.">
+    <meta property="og:image" content="https://lysander666.github.io/nahla-tracker/voyage/serani1.webp">
+
+    <!-- Inline SVG Favicon: Nahla (Amber-Beige Sulphur Moon with Santa Hat) -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='38' r='19' fill='%23d8aa5c'/%3E%3Ccircle cx='25' cy='35' r='3.5' fill='%239a6e2d'/%3E%3Ccircle cx='37' cy='43' r='4.5' fill='%239a6e2d'/%3E%3Ccircle cx='38' cy='33' r='2.2' fill='%239a6e2d'/%3E%3Cpath d='M15 24 C20 8, 44 8, 51 21 Z' fill='%23e63946'/%3E%3Crect x='13' y='21' width='38' height='6' rx='3' fill='%23f8f9fa'/%3E%3Ccircle cx='52' cy='22' r='4.5' fill='%23f8f9fa'/%3E%3C/svg%3E">
+
+    <style>
+        :root {
+            --bg-void: #0c1118;
+            --bg-panel: #151c24;
+            --bg-card: #10151c;
+            --border-subtle: #2c3744;
+            --text-main: #e0e0e0;
+            --text-muted: #8b949e;
+            --cyan-telemetry: #61dafb;
+            --amber-star: #ffbf00;
+            --festive-red: #ff00aa;
+            --festive-green: #3fb950;
+        }
+
+        * {
+            box-sizing: border-box;
+            scrollbar-width: thin;
+            scrollbar-color: #364352 #0c1118;
+        }
+
+        /* Custom Telemetry Scrollbars */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #0c1118;
+            border-left: 1px solid #1d2631;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #364352;
+            border-radius: 4px;
+            border: 1px solid #1b242e;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--cyan-telemetry);
+        }
+
+        body {
+            background-color: var(--bg-void);
+            background-image:
+                radial-gradient(ellipse at 20% 15%, rgba(28, 52, 82, 0.45) 0%, transparent 55%),
+                radial-gradient(ellipse at 82% 78%, rgba(22, 40, 66, 0.4) 0%, transparent 55%),
+                radial-gradient(circle at 50% 50%, #121a24 0%, #090d13 100%);
+            background-attachment: fixed;
+            color: var(--text-main);
+            font-family: Consolas, "Courier New", monospace;
+            font-size: 1.05rem;
+            line-height: 1.6;
+            padding: 20px;
+            margin: 0;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Subtle Ambient Star/Snow Canvas */
+        #snow-canvas {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.92;
+            transition: opacity 0.4s ease;
+        }
+
+        #snow-canvas.hidden {
+            opacity: 0;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding-top: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* --- HEADER --- */
+        .header {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 18px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .header-logo svg {
+            width: 78px;
+            height: 78px;
+            filter: drop-shadow(0 0 14px rgba(255, 0, 170, 0.4));
+            transition: transform 0.3s ease;
+        }
+
+        .header-logo svg:hover {
+            transform: rotate(-4deg) scale(1.04);
+        }
+
+        .header-title {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.2;
+            text-align: left;
+        }
+
+        .title-main {
+            font-size: 2rem;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .title-sub {
+            font-size: 0.95rem;
+            color: var(--cyan-telemetry);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        .title-sub span.festive-tag {
+            color: var(--festive-red);
+            font-weight: bold;
+        }
+
+        .header-nav {
+            text-align: center;
+            margin-bottom: 24px;
+            font-size: 0.92rem;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 18px;
+        }
+
+        .header-nav a {
+            color: var(--cyan-telemetry);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .header-nav a:hover {
+            color: var(--amber-star);
+            text-decoration: underline;
+        }
+
+        /* --- CALENDAR CONTAINER --- */
+        #calendar-section {
+            border: 1px solid var(--border-subtle);
+            border-top: 2px solid var(--festive-red);
+            border-radius: 8px;
+            padding: 24px;
+            background-color: var(--bg-panel);
+            box-shadow: 0 0 24px rgba(0, 0, 0, 0.6);
+        }
+
+        .calendar-header-bar {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            border-bottom: 1px solid #333;
+            padding-bottom: 14px;
+            margin-bottom: 22px;
+        }
+
+        .calendar-title-group h2 {
+            color: var(--cyan-telemetry);
+            margin: 0;
+            font-size: 1.35rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .calendar-subtitle {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .telemetry-status-bar {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 14px;
+            font-size: 0.85rem;
+        }
+
+        .status-pill {
+            background: #141618;
+            border: 1px solid #333;
+            padding: 5px 10px;
+            border-radius: 4px;
+            color: #ccc;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-pill .utc-time {
+            color: var(--amber-star);
+            font-weight: bold;
+        }
+
+        .status-pill .progress-count {
+            color: var(--festive-green);
+            font-weight: bold;
+        }
+
+        .status-pill.dev-active-pill {
+            border-color: var(--festive-red);
+            color: #ff66cc;
+            box-shadow: 0 0 10px rgba(255, 0, 170, 0.35);
+            font-weight: bold;
+        }
+
+        .toggle-btn {
+            background: #141618;
+            border: 1px solid #444;
+            color: var(--cyan-telemetry);
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: 0.82rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .toggle-btn:hover {
+            border-color: var(--cyan-telemetry);
+            background: #1d2226;
+        }
+
+        /* --- 24 DOORS GRID --- */
+        .advent-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 16px;
+        }
+
+        .door-card {
+            position: relative;
+            aspect-ratio: 16 / 11;
+            border-radius: 6px;
+            overflow: hidden;
+            border: 1px solid #333;
+            background-color: var(--bg-card);
+            transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            user-select: none;
+        }
+
+        /* State 1: Locked (Future UTC date) */
+        .door-card.state-locked {
+            cursor: not-allowed;
+            background:
+                radial-gradient(circle at 50% 48%, rgba(217, 30, 54, 0.14) 0%, rgba(22, 24, 28, 0.96) 68%),
+                linear-gradient(rgba(97, 218, 251, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(97, 218, 251, 0.03) 1px, transparent 1px);
+            background-size: 100% 100%, 16px 16px, 16px 16px;
+            border-color: #2f353d;
+            box-shadow: inset 0 0 18px rgba(0, 0, 0, 0.65);
+        }
+
+        /* Subtle HUD corner brackets on closed doors */
+        .door-card.state-locked::before,
+        .door-card.state-ready::before,
+        .door-card.state-standby::before {
+            content: "";
+            position: absolute;
+            inset: 6px;
+            border-radius: 4px;
+            pointer-events: none;
+            background:
+                linear-gradient(to right, rgba(97, 218, 251, 0.25) 8px, transparent 8px) 0 0 / 100% 1px no-repeat,
+                linear-gradient(to bottom, rgba(97, 218, 251, 0.25) 8px, transparent 8px) 0 0 / 1px 100% no-repeat,
+                linear-gradient(to left, rgba(97, 218, 251, 0.25) 8px, transparent 8px) 100% 0 / 100% 1px no-repeat,
+                linear-gradient(to bottom, rgba(97, 218, 251, 0.25) 8px, transparent 8px) 100% 0 / 1px 100% no-repeat,
+                linear-gradient(to right, rgba(97, 218, 251, 0.25) 8px, transparent 8px) 0 100% / 100% 1px no-repeat,
+                linear-gradient(to top, rgba(97, 218, 251, 0.25) 8px, transparent 8px) 0 100% / 1px 100% no-repeat,
+                linear-gradient(to left, rgba(97, 218, 251, 0.25) 8px, transparent 8px) 100% 100% / 100% 1px no-repeat,
+                linear-gradient(to top, rgba(97, 218, 251, 0.25) 8px, transparent 8px) 100% 100% / 1px 100% no-repeat;
+            z-index: 1;
+        }
+
+        .door-card.state-ready::before {
+            filter: drop-shadow(0 0 3px rgba(255, 0, 170, 0.6));
+        }
+
+        /* State 2: Unlocked & Ready to Open (Unopened in localStorage) */
+        .door-card.state-ready {
+            cursor: pointer;
+            border-color: var(--festive-red);
+            box-shadow: 0 0 14px rgba(255, 0, 170, 0.35), inset 0 0 20px rgba(255, 0, 170, 0.12);
+            background:
+                radial-gradient(circle at 50% 48%, rgba(255, 0, 170, 0.22) 0%, rgba(24, 26, 29, 0.96) 72%),
+                linear-gradient(rgba(97, 218, 251, 0.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(97, 218, 251, 0.04) 1px, transparent 1px);
+            background-size: 100% 100%, 16px 16px, 16px 16px;
+        }
+
+        .door-card.state-ready:hover {
+            transform: translateY(-3px);
+            border-color: var(--amber-star);
+            box-shadow: 0 4px 18px rgba(255, 0, 170, 0.5);
+        }
+
+        /* State 3: Decoded / Opened (Saved in localStorage) */
+        .door-card.state-opened {
+            cursor: pointer;
+            border-color: var(--festive-green);
+        }
+
+        .door-card.state-opened:hover {
+            transform: translateY(-3px);
+            border-color: var(--cyan-telemetry);
+            box-shadow: 0 4px 14px rgba(97, 218, 251, 0.25);
+        }
+
+        /* State 4: Date reached, awaiting upload */
+        .door-card.state-standby {
+            cursor: default;
+            border-color: #444;
+            border-style: dashed;
+        }
+
+        .door-top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 10px;
+            z-index: 2;
+            font-size: 0.75rem;
+        }
+
+        .door-number {
+            font-size: 1.05rem;
+            font-weight: bold;
+            padding: 1px 7px;
+            border-radius: 3px;
+            background: rgba(0, 0, 0, 0.65);
+            border: 1px solid #444;
+            color: #fff;
+        }
+
+        .state-ready .door-number {
+            border-color: var(--festive-red);
+            color: var(--amber-star);
+        }
+
+        .state-opened .door-number {
+            border-color: var(--festive-green);
+            color: var(--festive-green);
+        }
+
+        .door-badge {
+            font-size: 0.68rem;
+            letter-spacing: 0.05em;
+            padding: 2px 6px;
+            border-radius: 3px;
+            background: rgba(0, 0, 0, 0.72);
+            text-transform: uppercase;
+        }
+
+        .badge-locked { color: #777; border: 1px solid #333; }
+        .badge-ready { color: #ff66cc; border: 1px solid var(--festive-red); text-shadow: 0 0 6px rgba(255, 0, 170, 0.6); animation: pulseGlow 2.4s infinite; }
+        .badge-opened { color: var(--festive-green); border: 1px solid rgba(63, 185, 80, 0.4); }
+        .badge-standby { color: var(--amber-star); border: 1px solid rgba(255, 191, 0, 0.3); }
+
+        @keyframes pulseGlow {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        /* Closed door center display */
+        .door-center-info {
+            text-align: center;
+            padding: 0 8px;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 2px;
+        }
+
+        .door-moon-svg {
+            width: 96px;
+            height: 68px;
+            display: block;
+            transition: transform 0.25s ease, filter 0.25s ease, opacity 0.25s ease;
+        }
+
+        .state-locked .door-moon-svg {
+            opacity: 0.62;
+            filter: brightness(0.95);
+        }
+
+        .state-standby .door-moon-svg {
+            opacity: 0.62;
+        }
+
+        .state-ready .door-moon-svg {
+            opacity: 1;
+            filter: brightness(1.18) drop-shadow(0 0 9px rgba(255, 0, 170, 0.55)) drop-shadow(0 0 5px rgba(97, 218, 251, 0.45));
+        }
+
+        .state-ready:hover .door-moon-svg {
+            transform: scale(1.1) rotate(-4deg);
+            filter: brightness(1.25) drop-shadow(0 0 13px rgba(255, 0, 170, 0.85)) drop-shadow(0 0 7px rgba(97, 218, 251, 0.7));
+        }
+
+        .door-center-label {
+            font-size: 0.74rem;
+            color: var(--text-muted);
+            display: block;
+            letter-spacing: 0.04em;
+        }
+
+        .state-ready .door-center-label {
+            color: #ff66cc;
+            font-weight: bold;
+        }
+
+        .door-bottom-bar {
+            padding: 6px 10px;
+            font-size: 0.7rem;
+            color: #666;
+            text-align: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.04);
+            z-index: 2;
+        }
+
+        /* Opened thumbnail image & overlay */
+        .door-thumb-img {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 1;
+            transition: transform 0.3s ease;
+        }
+
+        .door-card.state-opened:hover .door-thumb-img {
+            transform: scale(1.04);
+        }
+
+        .door-opened-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(transparent, rgba(0, 0, 0, 0.94) 55%);
+            padding: 22px 10px 8px 10px;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .overlay-cmdr {
+            font-size: 0.68rem;
+            color: var(--amber-star);
+        }
+
+        .overlay-caption {
+            font-size: 0.8rem;
+            color: #f0f0f0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* --- LIGHTBOX --- */
+        .lightbox {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background-color: rgba(0, 0, 0, 0.93);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        .lightbox.active {
+            display: flex;
+        }
+
+        .lightbox-content {
+            position: relative;
+            max-width: 90vw;
+            max-height: 85vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .lightbox-content img {
+            max-width: 100%;
+            max-height: 74vh;
+            border-radius: 6px;
+            border: 1px solid #444;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.85);
+            object-fit: contain;
+        }
+
+        .lightbox-caption-box {
+            margin-top: 14px;
+            text-align: center;
+            max-width: 760px;
+        }
+
+        .lightbox-meta {
+            font-size: 0.82rem;
+            color: var(--amber-star);
+            margin-bottom: 4px;
+            letter-spacing: 0.04em;
+        }
+
+        .lightbox-caption {
+            color: var(--cyan-telemetry);
+            font-size: 1.05rem;
+        }
+
+        .lightbox-nav-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(20, 20, 20, 0.8);
+            border: 1px solid #444;
+            color: var(--cyan-telemetry);
+            font-size: 1.8rem;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            user-select: none;
+            z-index: 2010;
+        }
+
+        .lightbox-nav-btn:hover {
+            background: var(--cyan-telemetry);
+            color: #111;
+            border-color: var(--cyan-telemetry);
+        }
+
+        .lightbox-prev { left: 25px; }
+        .lightbox-next { right: 25px; }
+
+        .lightbox-close {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            color: #888;
+            font-size: 36px;
+            cursor: pointer;
+            transition: color 0.2s;
+            z-index: 2010;
+        }
+
+        .lightbox-close:hover {
+            color: var(--festive-red);
+        }
+
+        /* --- SECRET ADMIN MODAL (Ctrl + Shift + A) --- */
+        .admin-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.88);
+            z-index: 3000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .admin-modal.active {
+            display: flex;
+        }
+
+        .admin-panel {
+            background: #1c1e21;
+            border: 1px solid var(--festive-red);
+            box-shadow: 0 0 28px rgba(255, 0, 170, 0.35);
+            border-radius: 8px;
+            width: 100%;
+            max-width: 1050px;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 20px;
+            background: #141517;
+            border-bottom: 1px solid #333;
+        }
+
+        .admin-header h3 {
+            margin: 0;
+            color: var(--amber-star);
+            font-size: 1.1rem;
+        }
+
+        .admin-close-btn {
+            background: none;
+            border: none;
+            color: #888;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .admin-close-btn:hover { color: #fff; }
+
+        .admin-body {
+            padding: 18px 20px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .admin-hint {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin: 0 0 14px 0;
+        }
+
+        .admin-door-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .admin-door-row {
+            display: grid;
+            grid-template-columns: 64px 38px 1.2fr 1fr 1.8fr;
+            gap: 8px;
+            align-items: center;
+            background: #141517;
+            padding: 7px 10px;
+            border: 1px solid #2b2f35;
+            border-radius: 4px;
+        }
+
+        .admin-day-label {
+            font-weight: bold;
+            color: var(--cyan-telemetry);
+            font-size: 0.85rem;
+        }
+
+        .admin-item-thumb {
+            width: 38px;
+            height: 24px;
+            object-fit: cover;
+            border-radius: 3px;
+            border: 1px solid #333;
+            background: #000;
+        }
+
+        .admin-input {
+            background: #1e2124;
+            border: 1px solid #444;
+            color: #eee;
+            padding: 6px 8px;
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: 0.82rem;
+            width: 100%;
+        }
+
+        .admin-input:focus {
+            outline: none;
+            border-color: var(--cyan-telemetry);
+        }
+
+        .admin-footer {
+            padding: 14px 20px;
+            background: #141517;
+            border-top: 1px solid #333;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .admin-btn {
+            background: #222;
+            border: 1px solid var(--amber-star);
+            color: var(--amber-star);
+            font-family: inherit;
+            padding: 7px 14px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+
+        .admin-btn:hover {
+            background: var(--amber-star);
+            color: #111;
+        }
+
+        .admin-copy-status {
+            color: var(--festive-green);
+            font-size: 0.85rem;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .admin-copy-status.visible { opacity: 1; }
+
+        /* --- FOOTER --- */
+        .site-footer {
+            margin-top: 44px;
+            padding: 26px 20px 36px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            border-top: 1px solid #333;
+        }
+
+        .footer-text {
+            font-size: 0.85rem;
+            color: #777;
+        }
+
+        .footer-text a {
+            color: var(--cyan-telemetry);
+            text-decoration: none;
+        }
+
+        .footer-text a:hover {
+            text-decoration: underline;
+        }
+
+        .reset-progress-btn {
+            margin-top: 12px;
+            background: transparent;
+            border: 1px solid #333;
+            color: #666;
+            font-family: inherit;
+            font-size: 0.75rem;
+            padding: 4px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .reset-progress-btn:hover {
+            border-color: var(--festive-red);
+            color: var(--festive-red);
+        }
+
+        @media (max-width: 768px) {
+            .advent-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+                gap: 12px;
+            }
+            .admin-door-row {
+                grid-template-columns: 1fr;
+            }
+            .lightbox-nav-btn {
+                top: auto;
+                bottom: 20px;
+                transform: none;
+                width: 44px;
+                height: 44px;
+            }
+            .lightbox-prev { left: 20px; }
+            .lightbox-next { right: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+<canvas id="snow-canvas"></canvas>
+
+<div class="container">
+
+    <div class="header">
+        <div class="header-logo" title="Nahla — Solstice Telemetry Division">
+            <!-- Custom SVG: Nahla (Amber-Beige Sulphur Moon with Santa Hat) -->
+            <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Nahla amber-beige sulphur moon wearing a Santa hat">
+                <defs>
+                    <radialGradient id="nahlaGrad" cx="38%" cy="38%" r="62%">
+                        <stop offset="0%" stop-color="#f2dec0"/>
+                        <stop offset="52%" stop-color="#d8aa5c"/>
+                        <stop offset="100%" stop-color="#966c32"/>
+                    </radialGradient>
+                    <linearGradient id="santaRed" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#e63946"/>
+                        <stop offset="100%" stop-color="#9e1925"/>
+                    </linearGradient>
+                </defs>
+
+                <!-- Nahla Moon Body -->
+                <circle cx="50" cy="58" r="27" fill="url(#nahlaGrad)" stroke="#a87b3c" stroke-width="1"/>
+
+                <!-- Sulphur Craters -->
+                <circle cx="39" cy="52" r="4.5" fill="#8f662c" opacity="0.52"/>
+                <circle cx="57" cy="66" r="6" fill="#8f662c" opacity="0.48"/>
+                <circle cx="59" cy="49" r="3" fill="#8f662c" opacity="0.44"/>
+                <circle cx="43" cy="70" r="2.8" fill="#8f662c" opacity="0.44"/>
+                <circle cx="33" cy="62" r="2.2" fill="#8f662c" opacity="0.38"/>
+
+                <!-- Santa Hat perched at an orbital tilt -->
+                <g transform="rotate(-12 50 36)">
+                    <path d="M27 36 C32 13, 62 10, 77 28 C67 27, 63 32, 66 36 Z" fill="url(#santaRed)"/>
+                    <rect x="24" y="32.5" width="45" height="8" rx="4" fill="#f4f6f8" stroke="#d0d7de" stroke-width="0.8"/>
+                    <circle cx="78" cy="29" r="5.5" fill="#ffffff" stroke="#d0d7de" stroke-width="0.8"/>
+                </g>
+            </svg>
+        </div>
+        <div class="header-title">
+            <div class="title-main">Project Nahla</div>
+            <div class="title-sub">3312 Voyage • <span class="festive-tag">Solstice Telemetry Calendar</span></div>
+        </div>
+    </div>
+
+    <div class="header-nav">
+        <a href="index.html">&larr; Return to Live Moon Tracker</a>
+        <span style="color:#444;">|</span>
+        <a href="voyage_gallery.html">Open Transit Voyage Gallery &rarr;</a>
+    </div>
+
+    <div id="calendar-section">
+        <div class="calendar-header-bar">
+            <div class="calendar-title-group">
+                <h2>24-Day Encrypted Ephemeris Archive</h2>
+                <div class="calendar-subtitle">Daily visual transmissions decrypt automatically at 00:00 UTC. Progress saved locally to this terminal.</div>
+            </div>
+
+            <div class="telemetry-status-bar">
+                <div id="dev-status-pill" class="status-pill dev-active-pill" style="display: none;">
+                    <span>[DEV MODE: ALL DOORS UNLOCKED]</span>
+                </div>
+                <div class="status-pill">
+                    <span>UTC:</span>
+                    <span id="utc-clock" class="utc-time">--:--:--</span>
+                </div>
+                <div class="status-pill">
+                    <span>DECODED:</span>
+                    <span id="decoded-counter" class="progress-count">0 / 24</span>
+                </div>
+                <button id="snow-toggle-btn" class="toggle-btn" onclick="toggleSnow()">✦ Starfield: ON</button>
+            </div>
+        </div>
+
+        <div class="advent-grid" id="advent-grid">
+            <!-- 24 Doors rendered dynamically -->
+        </div>
+    </div>
+
+    <!-- Fullscreen Lightbox -->
+    <div class="lightbox" id="lightbox">
+        <span class="lightbox-close" onclick="closeLightbox()">&times;</span>
+        <button class="lightbox-nav-btn lightbox-prev" onclick="prevLightbox(event)">&lt;</button>
+        <div class="lightbox-content">
+            <img id="lightbox-image" src="" alt="Decoded Solstice Transmission">
+            <div class="lightbox-caption-box">
+                <div id="lightbox-meta" class="lightbox-meta"></div>
+                <div id="lightbox-caption" class="lightbox-caption"></div>
+            </div>
+        </div>
+        <button class="lightbox-nav-btn lightbox-next" onclick="nextLightbox(event)">&gt;</button>
+    </div>
+
+    <!-- Secret Admin Console (Ctrl + Shift + A) -->
+    <div class="admin-modal" id="admin-modal">
+        <div class="admin-panel">
+            <div class="admin-header">
+                <h3>Solstice Advent Admin Console (24 Doors)</h3>
+                <button class="admin-close-btn" onclick="toggleAdminModal(false)">&times;</button>
+            </div>
+            <div class="admin-body">
+                <p class="admin-hint">
+                    Fill in doors incrementally before 00:00 UTC on their respective December dates. Empty doors remain un-peekable in source code until populated.
+                </p>
+                <div class="admin-door-list" id="admin-door-list">
+                    <!-- 24 rows injected dynamically -->
+                </div>
+            </div>
+            <div class="admin-footer">
+                <span id="admin-copy-status" class="admin-copy-status">&#10003; ADVENT_DOORS copied to clipboard!</span>
+                <button class="admin-btn" onclick="exportAdventCode()">
+                    Generate &amp; Copy Code for GitHub
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="site-footer">
+        <div class="footer-text">
+            Project Nahla • Est. 3311 • <a href="https://inara.cz/elite/cmdr/440263/" target="_blank" rel="noopener noreferrer">CMDR Lysander666</a> • <a href="nahla_labs.html" target="_blank" rel="noopener noreferrer"><strong>Nahla Labs</strong></a> • <a href="license.html" target="_blank" rel="noopener noreferrer">License</a>
+        </div>
+        <button id="reset-progress-btn" class="reset-progress-btn" onclick="handleResetProgress()">
+            Reset Local Door States
+        </button>
+    </footer>
+
+</div>
+
+<script>
+// ==========================================
+//  PROJECT NAHLA SOLSTICE ADVENT DATA
+//  (Paste generated ADVENT_DOORS object here)
+// ==========================================
+const TARGET_YEAR = 2026;
+const TARGET_MONTH = 11; // 0-indexed: 11 = December
+const STORAGE_KEY = 'nahla_solstice_advent_3312_v1';
+
+// Populate doors incrementally before 00:00 UTC on each December day.
+// Empty objects {} remain sealed/un-peekable until populated.
+let ADVENT_DOORS = {
+    1: {
+        "src": "nahla_voyage-sm.png",
+        "cmdr": "Lysander666",
+        "title": "Solstice Telemetry Initiative • Official Mission Seal"
+    }
+};
+
+// Rebekah SVG (Crimson gas giant with cyan rings) rendered on closed doors
+const REBEKAH_SVG = `
+<svg class="door-moon-svg" viewBox="0 0 120 84" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <!-- Back half of cyan rings (behind planet) -->
+    <g transform="rotate(-16 60 42)">
+        <path d="M 7 42 A 53 13.5 0 0 1 113 42" fill="none" stroke="#38bdf8" stroke-opacity="0.7" stroke-width="3.2" stroke-linecap="round"/>
+        <path d="M 15 42 A 45 10.8 0 0 1 105 42" fill="none" stroke="#a5f3fc" stroke-opacity="0.45" stroke-width="1.4"/>
+    </g>
+
+    <!-- Crimson Gas Giant Sphere -->
+    <circle cx="60" cy="42" r="22" fill="#b8142e"/>
+    <circle cx="55" cy="37" r="18" fill="#df2240" opacity="0.65"/>
+    <circle cx="51" cy="33" r="11" fill="#ff5c77" opacity="0.35"/>
+
+    <!-- Equatorial & Temperate Atmospheric Bands (contoured inside r=22) -->
+    <g transform="rotate(-16 60 42)">
+        <path d="M 40 34 Q 60 37.5 80 34" fill="none" stroke="#ff8fa3" stroke-opacity="0.38" stroke-width="2" stroke-linecap="round"/>
+        <path d="M 38.5 41 Q 60 45 81.5 41" fill="none" stroke="#590614" stroke-opacity="0.55" stroke-width="2.6" stroke-linecap="round"/>
+        <path d="M 40.5 48.5 Q 60 52 79.5 48.5" fill="none" stroke="#ff758f" stroke-opacity="0.3" stroke-width="1.8" stroke-linecap="round"/>
+    </g>
+
+    <!-- Subtle Planet Rim & Shadow -->
+    <circle cx="60" cy="42" r="21.6" fill="none" stroke="#ff4d6d" stroke-opacity="0.45" stroke-width="0.9"/>
+
+    <!-- Front half of cyan rings (sweeping cleanly across planet) -->
+    <g transform="rotate(-16 60 42)">
+        <path d="M 7 42 A 53 13.5 0 0 0 113 42" fill="none" stroke="#61dafb" stroke-opacity="0.95" stroke-width="3.4" stroke-linecap="round"/>
+        <path d="M 15 42 A 45 10.8 0 0 0 105 42" fill="none" stroke="#ccf5ff" stroke-opacity="0.75" stroke-width="1.5"/>
+    </g>
+</svg>`;
+
+let devMode = new URLSearchParams(window.location.search).get('dev') === '1';
+let openedDoors = loadOpenedDoors();
+let currentLightboxDay = null;
+let adminDraftDoors = {};
+let resetConfirmPending = false;
+let resetConfirmTimer = null;
+
+function loadOpenedDoors() {
+    try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        const parsed = raw ? JSON.parse(raw) : [];
+        return Array.isArray(parsed) ? parsed : [];
+    } catch (e) {
+        return [];
+    }
+}
+
+function saveOpenedDoors() {
+    try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(openedDoors));
+    } catch (e) {
+        // Ignore storage quota / private mode restrictions
+    }
+}
+
+function isDoorTimeUnlocked(day) {
+    if (devMode) return true;
+    const unlockTimestamp = Date.UTC(TARGET_YEAR, TARGET_MONTH, day, 0, 0, 0);
+    return Date.now() >= unlockTimestamp;
+}
+
+function getDoorPayload(day) {
+    const entry = ADVENT_DOORS[day];
+    if (entry && entry.src && entry.src.trim() !== '') {
+        return entry;
+    }
+    if (devMode) {
+        const padded = String(day).padStart(2, '0');
+        return {
+            src: `https://placehold.co/1200x675/121a24/61dafb?text=DAY+${padded}+SOLSTICE+TELEMETRY+%28DEV+PREVIEW%29`,
+            cmdr: 'Nahla Labs Sim',
+            title: `Simulated Ephemeris Packet #${padded} (Awaiting live asset upload)`
+        };
+    }
+    return null;
+}
+
+function formatCountdown(ms) {
+    if (ms <= 0) return '00:00:00';
+    const totalSec = Math.floor(ms / 1000);
+    const days = Math.floor(totalSec / 86400);
+    const hrs = Math.floor((totalSec % 86400) / 3600);
+    const mins = Math.floor((totalSec % 3600) / 60);
+    const secs = totalSec % 60;
+    const hms = [hrs, mins, secs].map(n => String(n).padStart(2, '0')).join(':');
+    return days > 0 ? `T-${days}d ${hms}` : `T-${hms}`;
+}
+
+function updateUtcClock() {
+    const now = new Date();
+    const hh = String(now.getUTCHours()).padStart(2, '0');
+    const mm = String(now.getUTCMinutes()).padStart(2, '0');
+    const ss = String(now.getUTCSeconds()).padStart(2, '0');
+    const clockEl = document.getElementById('utc-clock');
+    if (clockEl) {
+        clockEl.textContent = `${hh}:${mm}:${ss}`;
+    }
+
+    // Update live countdown labels on locked doors without full DOM rebuild
+    document.querySelectorAll('[data-countdown-day]').forEach(el => {
+        const day = parseInt(el.getAttribute('data-countdown-day'), 10);
+        const unlockTs = Date.UTC(TARGET_YEAR, TARGET_MONTH, day, 0, 0, 0);
+        const diff = unlockTs - Date.now();
+        if (diff <= 0 && !devMode) {
+            renderCalendar();
+        } else {
+            el.textContent = formatCountdown(diff);
+        }
+    });
+}
+
+function renderCalendar() {
+    const grid = document.getElementById('advent-grid');
+    if (!grid) return;
+    grid.innerHTML = '';
+
+    let decodedCount = 0;
+
+    for (let day = 1; day <= 24; day++) {
+        const paddedDay = String(day).padStart(2, '0');
+        const unlocked = isDoorTimeUnlocked(day);
+        const payload = getDoorPayload(day);
+        const isOpened = unlocked && payload && openedDoors.includes(day);
+
+        if (isOpened) decodedCount++;
+
+        const card = document.createElement('div');
+        card.className = 'door-card';
+
+        if (!unlocked) {
+            card.classList.add('state-locked');
+            const unlockTs = Date.UTC(TARGET_YEAR, TARGET_MONTH, day, 0, 0, 0);
+            const countdownText = formatCountdown(unlockTs - Date.now());
+            card.innerHTML = `
+                <div class="door-top-bar">
+                    <span class="door-number">${paddedDay}</span>
+                    <span class="door-badge badge-locked">ENCRYPTED</span>
+                </div>
+                <div class="door-center-info">
+                    ${REBEKAH_SVG}
+                    <span class="door-center-label" data-countdown-day="${day}">${countdownText}</span>
+                </div>
+                <div class="door-bottom-bar">DEC ${paddedDay} • 00:00 UTC</div>
+            `;
+        } else if (!payload) {
+            card.classList.add('state-standby');
+            card.innerHTML = `
+                <div class="door-top-bar">
+                    <span class="door-number">${paddedDay}</span>
+                    <span class="door-badge badge-standby">STANDBY</span>
+                </div>
+                <div class="door-center-info">
+                    ${REBEKAH_SVG}
+                    <span class="door-center-label">AWAITING UPLINK</span>
+                </div>
+                <div class="door-bottom-bar">DEC ${paddedDay} • RELAY PENDING</div>
+            `;
+        } else if (!isOpened) {
+            card.classList.add('state-ready');
+            card.onclick = () => handleDoorClick(day);
+            card.innerHTML = `
+                <div class="door-top-bar">
+                    <span class="door-number">${paddedDay}</span>
+                    <span class="door-badge badge-ready">DECRYPT</span>
+                </div>
+                <div class="door-center-info">
+                    ${REBEKAH_SVG}
+                    <span class="door-center-label">SIGNAL READY</span>
+                </div>
+                <div class="door-bottom-bar">CLICK TO DECODE PACKET</div>
+            `;
+        } else {
+            card.classList.add('state-opened');
+            card.onclick = () => openLightboxForDay(day);
+            const cmdrText = payload.cmdr ? `CMDR ${payload.cmdr.replace(/^CMDR\s+/i, '')}` : 'Project Nahla';
+            card.innerHTML = `
+                <div class="door-top-bar">
+                    <span class="door-number">${paddedDay}</span>
+                    <span class="door-badge badge-opened">DECODED</span>
+                </div>
+                <img class="door-thumb-img" src="${payload.src}" alt="${payload.title}" loading="lazy">
+                <div class="door-opened-overlay">
+                    <span class="overlay-cmdr">${cmdrText} • DEC ${paddedDay}</span>
+                    <span class="overlay-caption">${payload.title}</span>
+                </div>
+            `;
+        }
+
+        grid.appendChild(card);
+    }
+
+    const counterEl = document.getElementById('decoded-counter');
+    if (counterEl) {
+        counterEl.textContent = `${decodedCount} / 24`;
+    }
+}
+
+function handleDoorClick(day) {
+    if (!isDoorTimeUnlocked(day)) return;
+    const payload = getDoorPayload(day);
+    if (!payload) return;
+
+    if (!openedDoors.includes(day)) {
+        openedDoors.push(day);
+        openedDoors.sort((a, b) => a - b);
+        saveOpenedDoors();
+        renderCalendar();
+    }
+    openLightboxForDay(day);
+}
+
+// ==========================================
+//  LIGHTBOX VIEWER
+// ==========================================
+function getViewableDays() {
+    const days = [];
+    for (let d = 1; d <= 24; d++) {
+        if (isDoorTimeUnlocked(d) && getDoorPayload(d) && openedDoors.includes(d)) {
+            days.push(d);
+        }
+    }
+    return days;
+}
+
+function openLightboxForDay(day) {
+    const payload = getDoorPayload(day);
+    if (!payload) return;
+
+    currentLightboxDay = day;
+    const paddedDay = String(day).padStart(2, '0');
+    const cmdrText = payload.cmdr ? `CMDR ${payload.cmdr.replace(/^CMDR\s+/i, '')}` : 'Project Nahla';
+
+    document.getElementById('lightbox-image').src = payload.src;
+    document.getElementById('lightbox-meta').textContent = `DAY ${paddedDay} (DEC ${paddedDay}) • ${cmdrText}`;
+    document.getElementById('lightbox-caption').textContent = payload.title || '';
+    document.getElementById('lightbox').classList.add('active');
+}
+
+function closeLightbox() {
+    document.getElementById('lightbox').classList.remove('active');
+    currentLightboxDay = null;
+}
+
+function prevLightbox(e) {
+    if (e) e.stopPropagation();
+    const viewable = getViewableDays();
+    if (viewable.length === 0) return;
+    const idx = viewable.indexOf(currentLightboxDay);
+    const prevIdx = idx <= 0 ? viewable.length - 1 : idx - 1;
+    openLightboxForDay(viewable[prevIdx]);
+}
+
+function nextLightbox(e) {
+    if (e) e.stopPropagation();
+    const viewable = getViewableDays();
+    if (viewable.length === 0) return;
+    const idx = viewable.indexOf(currentLightboxDay);
+    const nextIdx = (idx + 1) % viewable.length;
+    openLightboxForDay(viewable[nextIdx]);
+}
+
+document.getElementById('lightbox').addEventListener('click', (e) => {
+    if (e.target.id === 'lightbox') closeLightbox();
+});
+
+// ==========================================
+//  DEV MODE & PROGRESS RESET
+// ==========================================
+function toggleDevMode(forceState) {
+    devMode = typeof forceState === 'boolean' ? forceState : !devMode;
+    const pill = document.getElementById('dev-status-pill');
+    if (pill) {
+        pill.style.display = devMode ? 'flex' : 'none';
+    }
+    renderCalendar();
+}
+
+function handleResetProgress() {
+    const btn = document.getElementById('reset-progress-btn');
+    if (!resetConfirmPending) {
+        resetConfirmPending = true;
+        btn.textContent = 'Click again to confirm local reset';
+        btn.style.borderColor = 'var(--festive-red)';
+        btn.style.color = '#ff66cc';
+        clearTimeout(resetConfirmTimer);
+        resetConfirmTimer = setTimeout(() => {
+            resetConfirmPending = false;
+            btn.textContent = 'Reset Local Door States';
+            btn.style.borderColor = '';
+            btn.style.color = '';
+        }, 3500);
+        return;
+    }
+
+    resetConfirmPending = false;
+    clearTimeout(resetConfirmTimer);
+    btn.textContent = 'Reset Local Door States';
+    btn.style.borderColor = '';
+    btn.style.color = '';
+
+    openedDoors = [];
+    saveOpenedDoors();
+    renderCalendar();
+}
+
+// ==========================================
+//  SECRET ADMIN CONSOLE (Ctrl + Shift + A)
+// ==========================================
+function toggleAdminModal(show) {
+    const modal = document.getElementById('admin-modal');
+    if (show) {
+        adminDraftDoors = JSON.parse(JSON.stringify(ADVENT_DOORS));
+        renderAdminDoorList();
+        modal.classList.add('active');
+    } else {
+        modal.classList.remove('active');
+    }
+}
+
+function renderAdminDoorList() {
+    const container = document.getElementById('admin-door-list');
+    container.innerHTML = '';
+
+    for (let day = 1; day <= 24; day++) {
+        const entry = adminDraftDoors[day] || { src: '', cmdr: '', title: '' };
+        const padded = String(day).padStart(2, '0');
+        const row = document.createElement('div');
+        row.className = 'admin-door-row';
+        row.innerHTML = `
+            <span class="admin-day-label">DEC ${padded}</span>
+            <img src="${entry.src || ''}" class="admin-item-thumb" onerror="this.style.opacity=0.2" onload="this.style.opacity=1">
+            <input type="text" class="admin-input" placeholder="Image path (e.g. /voyage/day${day}.webp)" value="${(entry.src || '').replace(/"/g, '&quot;')}" oninput="updateDraftDoor(${day}, 'src', this.value)">
+            <input type="text" class="admin-input" placeholder="CMDR Name" value="${(entry.cmdr || '').replace(/"/g, '&quot;')}" oninput="updateDraftDoor(${day}, 'cmdr', this.value)">
+            <input type="text" class="admin-input" placeholder="Transmission caption" value="${(entry.title || '').replace(/"/g, '&quot;')}" oninput="updateDraftDoor(${day}, 'title', this.value)">
+        `;
+        container.appendChild(row);
+    }
+}
+
+function updateDraftDoor(day, field, value) {
+    if (!adminDraftDoors[day]) {
+        adminDraftDoors[day] = { src: '', cmdr: '', title: '' };
+    }
+    adminDraftDoors[day][field] = value.trim();
+}
+
+function exportAdventCode() {
+    const cleaned = {};
+    for (let day = 1; day <= 24; day++) {
+        const d = adminDraftDoors[day];
+        if (d && (d.src || d.cmdr || d.title)) {
+            cleaned[day] = {
+                src: d.src || '',
+                cmdr: d.cmdr || '',
+                title: d.title || ''
+            };
+        }
+    }
+
+    const codeStr = 'let ADVENT_DOORS = ' + JSON.stringify(cleaned, null, 4) + ';';
+
+    const tempArea = document.createElement('textarea');
+    tempArea.value = codeStr;
+    document.body.appendChild(tempArea);
+    tempArea.select();
+    try {
+        document.execCommand('copy');
+    } catch (e) {
+        if (navigator.clipboard) navigator.clipboard.writeText(codeStr);
+    }
+    document.body.removeChild(tempArea);
+
+    // Also update live session immediately so you can preview without reloading
+    ADVENT_DOORS = cleaned;
+    renderCalendar();
+
+    const status = document.getElementById('admin-copy-status');
+    status.classList.add('visible');
+    setTimeout(() => status.classList.remove('visible'), 3000);
+}
+
+// Global keyboard shortcuts
+document.addEventListener('keydown', (e) => {
+    // Ctrl + Shift + A: Toggle Admin Console
+    if (e.ctrlKey && e.shiftKey && (e.key === 'A' || e.key === 'a')) {
+        e.preventDefault();
+        const modal = document.getElementById('admin-modal');
+        toggleAdminModal(!modal.classList.contains('active'));
+        return;
+    }
+
+    // Ctrl + Shift + D: Toggle Secret Dev Mode
+    if (e.ctrlKey && e.shiftKey && (e.key === 'D' || e.key === 'd')) {
+        e.preventDefault();
+        toggleDevMode();
+        return;
+    }
+
+    if (e.key === 'Escape') {
+        const adminModal = document.getElementById('admin-modal');
+        if (adminModal.classList.contains('active')) {
+            toggleAdminModal(false);
+            return;
+        }
+        closeLightbox();
+    }
+
+    const lb = document.getElementById('lightbox');
+    if (lb.classList.contains('active')) {
+        if (e.key === 'ArrowLeft') prevLightbox();
+        if (e.key === 'ArrowRight') nextLightbox();
+    }
+});
+
+// ==========================================
+//  DEEP-SPACE TWINKLING STARFIELD OVERLAY
+// ==========================================
+let snowEnabled = true;
+const canvas = document.getElementById('snow-canvas');
+const ctx = canvas.getContext('2d');
+let stars = [];
+
+function resizeSnowCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+}
+
+function initSnowFlakes() {
+    const area = window.innerWidth * window.innerHeight;
+    const count = Math.min(260, Math.max(90, Math.floor(area / 6200)));
+
+    // Spectral star classes: blue-white, pure white, warm gold, soft rose
+    const palette = [
+        { rgb: '202, 232, 255', weight: 0.35 },
+        { rgb: '255, 255, 255', weight: 0.35 },
+        { rgb: '255, 226, 168', weight: 0.20 },
+        { rgb: '255, 194, 214', weight: 0.10 }
+    ];
+
+    function pickTint() {
+        const r = Math.random();
+        let acc = 0;
+        for (const p of palette) {
+            acc += p.weight;
+            if (r <= acc) return p.rgb;
+        }
+        return palette[0].rgb;
+    }
+
+    stars = Array.from({ length: count }, (_, i) => {
+        const isHero = i < Math.max(12, Math.floor(count * 0.09));
+        const isMid = !isHero && i < Math.floor(count * 0.38);
+
+        return {
+            x: Math.random() * window.innerWidth,
+            y: Math.random() * window.innerHeight,
+            r: isHero ? (Math.random() * 0.6 + 1.15) : isMid ? (Math.random() * 0.6 + 0.85) : (Math.random() * 0.45 + 0.35),
+            driftX: (Math.random() - 0.5) * (isHero ? 0.035 : 0.025),
+            driftY: (Math.random() - 0.5) * (isHero ? 0.035 : 0.025),
+            baseAlpha: isHero ? (Math.random() * 0.2 + 0.55) : isMid ? (Math.random() * 0.35 + 0.45) : (Math.random() * 0.35 + 0.2),
+            twinkleSpeed: isHero ? (Math.random() * 0.038 + 0.018) : (Math.random() * 0.028 + 0.008),
+            twinklePhase: Math.random() * Math.PI * 2,
+            tint: pickTint(),
+            isHero,
+            hasDiagonalRays: isHero && (i % 2 === 0)
+        };
+    });
+}
+
+function animateSnow() {
+    if (snowEnabled) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Subtle deep-space cosmic dust glow
+        const neb1 = ctx.createRadialGradient(
+            canvas.width * 0.25, canvas.height * 0.22, 0,
+            canvas.width * 0.25, canvas.height * 0.22, canvas.width * 0.45
+        );
+        neb1.addColorStop(0, 'rgba(65, 135, 210, 0.055)');
+        neb1.addColorStop(1, 'rgba(12, 17, 24, 0)');
+        ctx.fillStyle = neb1;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        const neb2 = ctx.createRadialGradient(
+            canvas.width * 0.78, canvas.height * 0.72, 0,
+            canvas.width * 0.78, canvas.height * 0.72, canvas.width * 0.42
+        );
+        neb2.addColorStop(0, 'rgba(130, 60, 150, 0.04)');
+        neb2.addColorStop(1, 'rgba(12, 17, 24, 0)');
+        ctx.fillStyle = neb2;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        stars.forEach(s => {
+            s.x += s.driftX;
+            s.y += s.driftY;
+            s.twinklePhase += s.twinkleSpeed;
+
+            if (s.x < 0) s.x = canvas.width;
+            if (s.x > canvas.width) s.x = 0;
+            if (s.y < 0) s.y = canvas.height;
+            if (s.y > canvas.height) s.y = 0;
+
+            const wave = (Math.sin(s.twinklePhase) + 1) * 0.5;
+            const flare = Math.pow(wave, 2.4);
+            const alpha = s.isHero
+                ? Math.max(0.22, Math.min(1, 0.3 + flare * 0.7))
+                : Math.max(0.08, Math.min(1, s.baseAlpha + (wave - 0.5) * 0.55));
+
+            if (s.isHero) {
+                // Subtle outer halo
+                const haloRadius = s.r * (3.8 + flare * 2.2);
+                const halo = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, haloRadius);
+                halo.addColorStop(0, `rgba(${s.tint}, ${alpha * 0.42})`);
+                halo.addColorStop(0.45, `rgba(${s.tint}, ${alpha * 0.12})`);
+                halo.addColorStop(1, `rgba(${s.tint}, 0)`);
+                ctx.fillStyle = halo;
+                ctx.beginPath();
+                ctx.arc(s.x, s.y, haloRadius, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Fine, tapered 4-point primary diffraction rays
+                const spikeLen = s.r * (3.2 + flare * 5.0);
+                const spikeWidth = Math.max(0.38, s.r * (0.24 + flare * 0.16));
+                ctx.fillStyle = `rgba(${s.tint}, ${alpha * 0.52})`;
+
+                ctx.beginPath();
+                ctx.moveTo(s.x - spikeLen, s.y);
+                ctx.lineTo(s.x, s.y - spikeWidth);
+                ctx.lineTo(s.x + spikeLen, s.y);
+                ctx.lineTo(s.x, s.y + spikeWidth);
+                ctx.closePath();
+                ctx.fill();
+
+                ctx.beginPath();
+                ctx.moveTo(s.x, s.y - spikeLen);
+                ctx.lineTo(s.x + spikeWidth, s.y);
+                ctx.lineTo(s.x, s.y + spikeLen);
+                ctx.lineTo(s.x - spikeWidth, s.y);
+                ctx.closePath();
+                ctx.fill();
+
+                // Faint secondary 45-degree diagonal rays on select hero stars
+                if (s.hasDiagonalRays && flare > 0.25) {
+                    const diagLen = spikeLen * 0.45;
+                    const diagWidth = spikeWidth * 0.6;
+                    ctx.save();
+                    ctx.translate(s.x, s.y);
+                    ctx.rotate(Math.PI / 4);
+                    ctx.fillStyle = `rgba(${s.tint}, ${alpha * 0.32})`;
+
+                    ctx.beginPath();
+                    ctx.moveTo(-diagLen, 0);
+                    ctx.lineTo(0, -diagWidth);
+                    ctx.lineTo(diagLen, 0);
+                    ctx.lineTo(0, diagWidth);
+                    ctx.closePath();
+                    ctx.fill();
+
+                    ctx.beginPath();
+                    ctx.moveTo(0, -diagLen);
+                    ctx.lineTo(diagWidth, 0);
+                    ctx.lineTo(0, diagLen);
+                    ctx.lineTo(-diagWidth, 0);
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.restore();
+                }
+
+                // Soft pinpoint core during peak flare
+                ctx.beginPath();
+                ctx.arc(s.x, s.y, s.r * 0.55, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(255, 255, 255, ${alpha * 0.85})`;
+                ctx.fill();
+            }
+
+            // Star core
+            ctx.beginPath();
+            ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(${s.tint}, ${alpha})`;
+            ctx.fill();
+        });
+    }
+    requestAnimationFrame(animateSnow);
+}
+
+function toggleSnow() {
+    snowEnabled = !snowEnabled;
+    const btn = document.getElementById('snow-toggle-btn');
+    if (snowEnabled) {
+        canvas.classList.remove('hidden');
+        btn.textContent = '✦ Starfield: ON';
+    } else {
+        canvas.classList.add('hidden');
+        btn.textContent = '✦ Starfield: OFF';
+    }
+}
+
+window.addEventListener('resize', () => {
+    resizeSnowCanvas();
+    initSnowFlakes();
+});
+
+// Boot Sequence
+resizeSnowCanvas();
+initSnowFlakes();
+animateSnow();
+updateUtcClock();
+setInterval(updateUtcClock, 1000);
+if (devMode) {
+    toggleDevMode(true);
+} else {
+    renderCalendar();
+}
+</script>
+
+</body>
+</html>
