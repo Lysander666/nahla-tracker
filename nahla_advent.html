@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nahla Advent Calendar</title>
+    <title>Project Nahla — 3312 Advent Calendar</title>
 
     <!-- Open Graph / Discord -->
     <meta property="og:type" content="website">
@@ -309,7 +309,8 @@
         /* Subtle HUD corner brackets on closed doors */
         .door-card.state-locked::before,
         .door-card.state-ready::before,
-        .door-card.state-standby::before {
+        .door-card.state-standby::before,
+        .door-card.state-promo::before {
             content: "";
             position: absolute;
             inset: 6px;
@@ -368,6 +369,80 @@
             border-style: dashed;
         }
 
+        /* Square 00: Pre-Solstice Sulphur Run Promo Card */
+        .door-card.state-promo {
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            border-color: rgba(255, 191, 0, 0.55);
+            box-shadow: 0 0 14px rgba(255, 191, 0, 0.16), inset 0 0 22px rgba(255, 191, 0, 0.08);
+            background-color: #16120d;
+        }
+
+        .door-card.state-promo:hover {
+            transform: translateY(-3px);
+            border-color: var(--cyan-telemetry);
+            box-shadow: 0 4px 18px rgba(97, 218, 251, 0.35);
+        }
+
+        .state-promo .door-number {
+            border-color: var(--amber-star);
+            color: var(--amber-star);
+        }
+
+        .door-promo-bg,
+        .door-promo-fallback-svg {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 0;
+            transition: transform 0.3s ease, filter 0.3s ease;
+        }
+
+        .door-card.state-promo:hover .door-promo-bg,
+        .door-card.state-promo:hover .door-promo-fallback-svg {
+            transform: scale(1.04);
+            filter: brightness(1.1);
+        }
+
+        .door-promo-overlay {
+            position: relative;
+            z-index: 2;
+            margin-top: auto;
+            background: linear-gradient(transparent, rgba(10, 12, 16, 0.88) 42%, rgba(10, 12, 16, 0.96) 100%);
+            padding: 18px 10px 6px 10px;
+            text-align: center;
+        }
+
+        .door-promo-text {
+            font-size: 0.78rem;
+            line-height: 1.3;
+            color: #f0f4f8;
+            display: block;
+            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.95);
+        }
+
+        .door-promo-text em {
+            font-style: italic;
+            color: var(--amber-star);
+            font-weight: bold;
+        }
+
+        .door-card.state-promo:hover .door-promo-text em {
+            color: var(--cyan-telemetry);
+        }
+
+        .state-promo .door-bottom-bar {
+            background: rgba(10, 12, 16, 0.96);
+            color: #9aa5b1;
+        }
+
+        .door-card.state-promo:hover .door-bottom-bar {
+            color: var(--cyan-telemetry);
+        }
+
         .door-top-bar {
             display: flex;
             justify-content: space-between;
@@ -410,6 +485,7 @@
         .badge-ready { color: #ff66cc; border: 1px solid var(--festive-red); text-shadow: 0 0 6px rgba(255, 0, 170, 0.6); animation: pulseGlow 2.4s infinite; }
         .badge-opened { color: var(--festive-green); border: 1px solid rgba(63, 185, 80, 0.4); }
         .badge-standby { color: var(--amber-star); border: 1px solid rgba(255, 191, 0, 0.3); }
+        .badge-promo { color: var(--cyan-telemetry); border: 1px solid rgba(97, 218, 251, 0.45); }
 
         @keyframes pulseGlow {
             0%, 100% { opacity: 1; }
@@ -918,7 +994,7 @@
         </div>
 
         <div class="advent-grid" id="advent-grid">
-            <!-- 24 Doors rendered dynamically -->
+            <!-- Square 00 + 24 Doors rendered dynamically -->
         </div>
     </div>
 
@@ -1111,6 +1187,79 @@ function renderCalendar() {
     const grid = document.getElementById('advent-grid');
     if (!grid) return;
     grid.innerHTML = '';
+
+    // Pre-Solstice Square #0: Sulphur Run link card
+    const promoCard = document.createElement('a');
+    promoCard.href = 'https://nahla.live/sulphur_run.html';
+    promoCard.className = 'door-card state-promo';
+    promoCard.innerHTML = `
+        <svg class="door-promo-fallback-svg" viewBox="0 0 320 220" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <defs>
+                <linearGradient id="srSkyGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stop-color="#3b2209"/>
+                    <stop offset="30%" stop-color="#1c150e"/>
+                    <stop offset="100%" stop-color="#14110d"/>
+                </linearGradient>
+                <linearGradient id="srBeamGrad" x1="0%" y1="50%" x2="100%" y2="50%">
+                    <stop offset="0%" stop-color="#fff3d6" stop-opacity="0.22"/>
+                    <stop offset="100%" stop-color="#fff3d6" stop-opacity="0.02"/>
+                </linearGradient>
+                <filter id="srCyanGlow" x="-40%" y="-40%" width="180%" height="180%">
+                    <feGaussianBlur stdDeviation="3.5" result="blur"/>
+                    <feMerge>
+                        <feMergeNode in="blur"/>
+                        <feMergeNode in="SourceGraphic"/>
+                    </feMerge>
+                </filter>
+                <filter id="srAmberGlow" x="-40%" y="-40%" width="180%" height="180%">
+                    <feGaussianBlur stdDeviation="2.5" result="blur"/>
+                    <feMerge>
+                        <feMergeNode in="blur"/>
+                        <feMergeNode in="SourceGraphic"/>
+                    </feMerge>
+                </filter>
+            </defs>
+            <!-- Sky & Distant Ridge -->
+            <rect width="320" height="166" fill="url(#srSkyGrad)"/>
+            <polygon points="0,48 82,55 145,44 210,36 320,34 320,166 0,166" fill="#17130e"/>
+            <!-- Subtle Stars -->
+            <circle cx="125" cy="14" r="0.8" fill="#ffffff" opacity="0.6"/>
+            <circle cx="160" cy="24" r="0.9" fill="#ffffff" opacity="0.7"/>
+            <circle cx="202" cy="21" r="0.9" fill="#ffcf70" opacity="0.7"/>
+            <circle cx="266" cy="28" r="1.1" fill="#ffffff" opacity="0.85"/>
+            <!-- Headlight Beam -->
+            <polygon points="112,145 236,128 236,204 112,158" fill="url(#srBeamGrad)"/>
+            <!-- Subsurface Ground & Glowing Sulphur Horizon -->
+            <rect y="166" width="320" height="54" fill="#3a230a"/>
+            <line x1="0" y1="166" x2="320" y2="166" stroke="#f5b841" stroke-width="2.6" filter="url(#srAmberGlow)"/>
+            <!-- Forward Obstacle Block -->
+            <rect x="196" y="135" width="30" height="30" fill="#121215" stroke="#3a3a40" stroke-width="1.2"/>
+            <rect x="201" y="140" width="5" height="5" fill="#591414"/>
+            <rect x="216" y="148" width="5" height="5" fill="#e8a838"/>
+            <!-- 3-Wheeled Rover -->
+            <rect x="70" y="142" width="42" height="19" rx="1.5" fill="#252328"/>
+            <rect x="70" y="146" width="3.5" height="9" fill="#7d1717"/>
+            <rect x="85" y="134" width="15" height="8" rx="1" fill="#eab044" filter="url(#srAmberGlow)"/>
+            <circle cx="75" cy="163" r="7.5" fill="#232126" stroke="#75737a" stroke-width="1.5"/>
+            <circle cx="91" cy="161" r="7.5" fill="#3b3940" stroke="#66646b" stroke-width="1.3"/>
+            <circle cx="107" cy="163" r="7.5" fill="#3b3940" stroke="#75737a" stroke-width="1.5"/>
+            <!-- Tilted Glowing Cyan Beacon -->
+            <g transform="translate(197, 76) rotate(-20)" filter="url(#srCyanGlow)">
+                <rect x="-11" y="-11" width="22" height="22" fill="none" stroke="#5ce1ff" stroke-width="3.2"/>
+                <rect x="-3" y="-3" width="6" height="6" transform="rotate(45)" fill="#f0f9ff"/>
+            </g>
+        </svg>
+        <img class="door-promo-bg" src="sr.png" alt="Sulphur Run" onerror="this.style.display='none'">
+        <div class="door-top-bar">
+            <span class="door-number">00</span>
+            <span class="door-badge badge-promo">SIMULATOR</span>
+        </div>
+        <div class="door-promo-overlay">
+            <span class="door-promo-text">Can't wait? Play <em>Sulphur Run</em>!</span>
+        </div>
+        <div class="door-bottom-bar">LAUNCH MODULE &rarr;</div>
+    `;
+    grid.appendChild(promoCard);
 
     let decodedCount = 0;
 
