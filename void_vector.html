@@ -8796,10 +8796,7 @@ exporting plain-text reports.
             ? "OPTIMAL PAR TELEMETRY"
             : "BEACON PHASE SYNCHRONISED";
 
-        this.openModal(
-          "ECHO LOCKED // 31",
-          `
-          const res = this.lastResult || {};
+        const res = this.lastResult || {};
         const chips = [
           res.underPar ? "&#9660; UNDER PAR" : "",
           res.frugal ? "&#9671; FRUGAL (CHG SAVED)" : ""
@@ -8808,10 +8805,12 @@ exporting plain-text reports.
         ).join("");
         const parDelta = steps - this.puzzle.par;
         const parDeltaText = parDelta === 0 ? "±0" : (parDelta > 0 ? "+" : "") + parDelta;
-          
+
+        this.openModal(
+          "ECHO LOCKED // 31",
+          `
             <div style="text-align:center;padding:0.4rem 0;">
               <div style="color:var(--emerald);font-weight:700;font-size:0.92rem;letter-spacing:0.06em;">${badgeText}</div>
-              
               <div style="color:var(--text-secondary);font-size:0.74rem;margin-top:0.25rem;">${shareCode} • ${this.puzzle.word} [${beaconInfo.label}]</div>
               ${isNullBonus ? "" : `<div>${chips}</div>`}
             </div>
@@ -8822,6 +8821,8 @@ exporting plain-text reports.
               </div>
               <div class="stat-box">
                 <div class="stat-box-label">Vector Steps</div>
+                <div class="stat-box-val">${steps} <span style="font-size:0.72rem;color:var(--text-secondary);">(PAR ${this.puzzle.par})</span></div>
+              </div>
               ${isNullBonus ? "" : `
               <div class="stat-box">
                 <div class="stat-box-label">vs Par</div>
@@ -8831,8 +8832,6 @@ exporting plain-text reports.
                 <div class="stat-box-label">Charges Used</div>
                 <div class="stat-box-val">${res.chargesSpent !== undefined ? res.chargesSpent : "–"} <span style="font-size:0.72rem;color:var(--text-secondary);">(${this.puzzle.anomalies.length} to fix)</span></div>
               </div>`}
-                <div class="stat-box-val">${steps} <span style="font-size:0.72rem;color:var(--text-secondary);">(PAR ${this.puzzle.par})</span></div>
-              </div>
             </div>
           `,
           [
