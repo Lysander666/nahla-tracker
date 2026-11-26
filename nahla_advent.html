@@ -7,9 +7,22 @@
 
     <!-- Open Graph / Discord -->
     <meta property="og:type" content="website">
-    <meta property="og:title" content="Project Nahla — 3312 Solstice Advent Telemetry">
+    <meta property="og:site_name" content="Project Nahla">
+    <meta property="og:url" content="https://lysander666.github.io/nahla-tracker/nahla_advent.html">
+    <meta property="og:title" content="Project Nahla — 3312 Advent Calendar">
     <meta property="og:description" content="24 daily encrypted transmissions from the Project Nahla Open Transit Voyage. Unlocks daily at 00:00 UTC.">
     <meta property="og:image" content="https://lysander666.github.io/nahla-tracker/voyage/serani1.webp">
+    <meta property="og:image:type" content="image/webp">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="675">
+    <meta property="og:image:alt" content="Project Nahla 3312 Advent Calendar — Daily Voyage Transmissions">
+
+    <!-- Twitter / X Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Project Nahla — 3312 Advent Calendar">
+    <meta name="twitter:description" content="24 daily encrypted transmissions from the Project Nahla Open Transit Voyage. Unlocks daily at 00:00 UTC.">
+    <meta name="twitter:image" content="https://lysander666.github.io/nahla-tracker/voyage/serani1.webp">
+    <meta name="twitter:image:alt" content="Project Nahla 3312 Advent Calendar — Daily Voyage Transmissions">
 
     <!-- Inline SVG Favicon: Nahla (Amber-Beige Sulphur Moon with Santa Hat) -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='38' r='19' fill='%23d8aa5c'/%3E%3Ccircle cx='25' cy='35' r='3.5' fill='%239a6e2d'/%3E%3Ccircle cx='37' cy='43' r='4.5' fill='%239a6e2d'/%3E%3Ccircle cx='38' cy='33' r='2.2' fill='%239a6e2d'/%3E%3Cpath d='M15 24 C20 8, 44 8, 51 21 Z' fill='%23e63946'/%3E%3Crect x='13' y='21' width='38' height='6' rx='3' fill='%23f8f9fa'/%3E%3Ccircle cx='52' cy='22' r='4.5' fill='%23f8f9fa'/%3E%3C/svg%3E">
@@ -72,7 +85,7 @@
             overflow-x: hidden;
         }
 
-        /* Subtle Ambient Star/Snow Canvas */
+        /* Ambient Deep-Space Starfield Canvas */
         #snow-canvas {
             position: fixed;
             inset: 0;
@@ -808,6 +821,21 @@
 </head>
 <body>
 
+<!-- Shared SVG Definitions for Rebekah Door Emblem (prevents unclipped highlight bleed) -->
+<svg width="0" height="0" style="position:absolute; pointer-events:none;" aria-hidden="true">
+    <defs>
+        <radialGradient id="rebekahSphereGrad" cx="36%" cy="32%" r="68%">
+            <stop offset="0%" stop-color="#ff5c77"/>
+            <stop offset="42%" stop-color="#d61f3c"/>
+            <stop offset="82%" stop-color="#960e24"/>
+            <stop offset="100%" stop-color="#5e0614"/>
+        </radialGradient>
+        <clipPath id="rebekahPlanetClip">
+            <circle cx="60" cy="42" r="22"/>
+        </clipPath>
+    </defs>
+</svg>
+
 <canvas id="snow-canvas"></canvas>
 
 <div class="container">
@@ -871,7 +899,7 @@
                 </div>
                 <div class="status-pill">
                     <span>UTC:</span>
-                    <span id="utc-clock" class="utc-time">--:--:--</span>
+                    <span id="utc-clock" class="utc-time">--- --- -- • --:--:--</span>
                 </div>
                 <div class="status-pill">
                     <span>DECODED:</span>
@@ -963,19 +991,19 @@ const REBEKAH_SVG = `
         <path d="M 15 42 A 45 10.8 0 0 1 105 42" fill="none" stroke="#a5f3fc" stroke-opacity="0.45" stroke-width="1.4"/>
     </g>
 
-    <!-- Crimson Gas Giant Sphere -->
-    <circle cx="60" cy="42" r="22" fill="#b8142e"/>
-    <circle cx="55" cy="37" r="18" fill="#df2240" opacity="0.65"/>
-    <circle cx="51" cy="33" r="11" fill="#ff5c77" opacity="0.35"/>
+    <!-- Crimson Gas Giant Sphere (cleanly bounded radial gradient) -->
+    <circle cx="60" cy="42" r="22" fill="url(#rebekahSphereGrad)"/>
 
-    <!-- Equatorial & Temperate Atmospheric Bands (contoured inside r=22) -->
-    <g transform="rotate(-16 60 42)">
-        <path d="M 40 34 Q 60 37.5 80 34" fill="none" stroke="#ff8fa3" stroke-opacity="0.38" stroke-width="2" stroke-linecap="round"/>
-        <path d="M 38.5 41 Q 60 45 81.5 41" fill="none" stroke="#590614" stroke-opacity="0.55" stroke-width="2.6" stroke-linecap="round"/>
-        <path d="M 40.5 48.5 Q 60 52 79.5 48.5" fill="none" stroke="#ff758f" stroke-opacity="0.3" stroke-width="1.8" stroke-linecap="round"/>
+    <!-- Atmospheric Bands strictly clipped to the planetary disk -->
+    <g clip-path="url(#rebekahPlanetClip)">
+        <g transform="rotate(-16 60 42)">
+            <path d="M 34 34 Q 60 37.5 86 34" fill="none" stroke="#ff8fa3" stroke-opacity="0.38" stroke-width="2" stroke-linecap="round"/>
+            <path d="M 34 41 Q 60 45 86 41" fill="none" stroke="#4a0410" stroke-opacity="0.55" stroke-width="2.6" stroke-linecap="round"/>
+            <path d="M 34 48.5 Q 60 52 86 48.5" fill="none" stroke="#ff758f" stroke-opacity="0.3" stroke-width="1.8" stroke-linecap="round"/>
+        </g>
     </g>
 
-    <!-- Subtle Planet Rim & Shadow -->
+    <!-- Subtle Planet Rim -->
     <circle cx="60" cy="42" r="21.6" fill="none" stroke="#ff4d6d" stroke-opacity="0.45" stroke-width="0.9"/>
 
     <!-- Front half of cyan rings (sweeping cleanly across planet) -->
@@ -1045,12 +1073,17 @@ function formatCountdown(ms) {
 
 function updateUtcClock() {
     const now = new Date();
+    const days = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+    const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+    const dayName = days[now.getUTCDay()];
+    const mon = months[now.getUTCMonth()];
+    const dd = String(now.getUTCDate()).padStart(2, '0');
     const hh = String(now.getUTCHours()).padStart(2, '0');
     const mm = String(now.getUTCMinutes()).padStart(2, '0');
     const ss = String(now.getUTCSeconds()).padStart(2, '0');
     const clockEl = document.getElementById('utc-clock');
     if (clockEl) {
-        clockEl.textContent = `${hh}:${mm}:${ss}`;
+        clockEl.textContent = `${dayName} ${mon} ${dd} • ${hh}:${mm}:${ss}`;
     }
 
     // Update live countdown labels on locked doors without full DOM rebuild
