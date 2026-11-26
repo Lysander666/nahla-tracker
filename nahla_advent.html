@@ -932,7 +932,7 @@
 
         @media (max-width: 768px) {
             .advent-grid {
-                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
                 gap: 12px;
             }
             .admin-door-row {
@@ -942,11 +942,177 @@
                 top: auto;
                 bottom: 20px;
                 transform: none;
-                width: 44px;
-                height: 44px;
+                width: 46px;
+                height: 46px;
             }
             .lightbox-prev { left: 20px; }
             .lightbox-next { right: 20px; }
+            .lightbox-close {
+                top: 14px;
+                right: 18px;
+                width: 44px;
+                height: 44px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+        }
+
+        /* Mobile Portrait & Compact Viewport Optimizations */
+        @media (max-width: 600px) {
+            body {
+                padding: 12px 10px;
+                font-size: 0.95rem;
+            }
+
+            .container {
+                padding-top: 8px;
+            }
+
+            .header {
+                gap: 12px;
+                margin-bottom: 8px;
+            }
+
+            .header-logo svg {
+                width: 58px;
+                height: 58px;
+            }
+
+            .title-main {
+                font-size: 1.5rem;
+            }
+
+            .title-sub {
+                font-size: 0.78rem;
+                letter-spacing: 0.08em;
+            }
+
+            .header-nav {
+                gap: 6px 14px;
+                margin-bottom: 16px;
+                font-size: 0.84rem;
+            }
+
+            .header-nav .nav-sep {
+                display: none;
+            }
+
+            .header-nav a {
+                padding: 4px 2px;
+            }
+
+            #calendar-section {
+                padding: 14px 12px;
+            }
+
+            .calendar-header-bar {
+                padding-bottom: 12px;
+                margin-bottom: 14px;
+                gap: 10px;
+            }
+
+            .calendar-title-group {
+                flex: 1 1 100%;
+            }
+
+            .calendar-title-group h2 {
+                font-size: 1.12rem;
+            }
+
+            .calendar-subtitle {
+                font-size: 0.76rem;
+                line-height: 1.45;
+            }
+
+            .telemetry-status-bar {
+                width: 100%;
+                gap: 8px;
+                font-size: 0.76rem;
+            }
+
+            .status-pill {
+                padding: 5px 8px;
+                flex: 1 1 auto;
+                justify-content: center;
+            }
+
+            .toggle-btn {
+                padding: 6px 10px;
+                font-size: 0.76rem;
+                flex: 1 1 auto;
+                min-height: 32px;
+            }
+
+            /* Symmetric 2-column grid for Doors 01-24 */
+            .advent-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 10px;
+            }
+
+            /* Featured Full-Width Widescreen Layout for Door #0 (Sulphur Run) */
+            .door-card.state-promo {
+                grid-column: 1 / -1;
+                aspect-ratio: 16 / 7.8;
+                min-height: 138px;
+            }
+
+            .door-card.state-promo .door-promo-bg,
+            .door-card.state-promo .door-promo-fallback-svg {
+                top: -16%;
+                height: 116%;
+                object-position: center 45%;
+            }
+
+            .door-card.state-promo .door-promo-overlay {
+                bottom: 22px;
+                padding: 16px 10px 4px 10px;
+            }
+
+            .door-card.state-promo .door-promo-text {
+                font-size: 0.84rem;
+            }
+
+            /* Compact proportions for 2-column Doors 01-24 */
+            .door-top-bar {
+                padding: 6px 8px;
+            }
+
+            .door-number {
+                font-size: 0.9rem;
+                padding: 1px 6px;
+            }
+
+            .door-badge {
+                font-size: 0.58rem;
+                padding: 1px 5px;
+            }
+
+            .door-moon-svg {
+                width: 74px;
+                height: 52px;
+            }
+
+            .door-center-label {
+                font-size: 0.66rem;
+            }
+
+            .door-bottom-bar {
+                padding: 4px 6px;
+                font-size: 0.62rem;
+            }
+
+            .door-opened-overlay {
+                padding: 16px 8px 6px 8px;
+            }
+
+            .overlay-cmdr {
+                font-size: 0.62rem;
+            }
+
+            .overlay-caption {
+                font-size: 0.74rem;
+            }
         }
     </style>
 </head>
@@ -1014,7 +1180,7 @@
 
     <div class="header-nav">
         <a href="index.html">&larr; Return to Live Moon Tracker</a>
-        <span style="color:#444;">|</span>
+        <span class="nav-sep" style="color:#444;">|</span>
         <a href="voyage_gallery.html">Open Transit Voyage Gallery &rarr;</a>
     </div>
 
@@ -1459,6 +1625,24 @@ function nextLightbox(e) {
 document.getElementById('lightbox').addEventListener('click', (e) => {
     if (e.target.id === 'lightbox') closeLightbox();
 });
+
+// Touch swipe support for Lightbox on mobile devices
+let lightboxTouchStartX = 0;
+const lightboxEl = document.getElementById('lightbox');
+lightboxEl.addEventListener('touchstart', (e) => {
+    if (e.changedTouches && e.changedTouches.length > 0) {
+        lightboxTouchStartX = e.changedTouches[0].screenX;
+    }
+}, { passive: true });
+
+lightboxEl.addEventListener('touchend', (e) => {
+    if (!lightboxEl.classList.contains('active') || !e.changedTouches || e.changedTouches.length === 0) return;
+    const deltaX = e.changedTouches[0].screenX - lightboxTouchStartX;
+    if (Math.abs(deltaX) > 45) {
+        if (deltaX > 0) prevLightbox();
+        else nextLightbox();
+    }
+}, { passive: true });
 
 // ==========================================
 //  DEV MODE & PROGRESS RESET
