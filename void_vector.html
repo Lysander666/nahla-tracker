@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Void Vector - Nahla Tracker</title>
-  <meta name="description" content="Void Vector - An offline triangulation, bash terminal and beacon routing workstation for the Hope aystem." />
+  <meta name="description" content="Void Vector - An offline triangulation, bash terminal and beacon routing workstation for the Hope system." />
   <meta name="theme-color" content="#050a07" />
 
   <!-- Phosphor Terminal Favicon (Offline Vector SVG) -->
@@ -1891,7 +1891,7 @@
       <header class="terminal-header">
         <div class="brand-block">
           <div class="brand-title">
-            VØID VECTØR v1.1
+            VØID VECTØR v1.2
           </div>
           <div class="brand-sub">NAHLA@HOPE (31 BODIES)</div>
         </div>
@@ -2588,9 +2588,16 @@
 
         for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
           const puzzle = this.generateOnce(mode, seedStr, forcedWord, attempt);
-          const result = this.countSolutions(puzzle, 2);
-          if (result.count === 1 && !result.aborted) {
-            puzzle.unique = true;
+          const multi = mode === "ORBITAL";
+          const result = this.countSolutions(puzzle, multi ? 7 : 2);
+          const accepted = multi
+            ? (result.count >= 2 && result.count <= 6 && result.maxLen > result.minLen)
+            : result.count === 1;
+          if (accepted && !result.aborted) {
+            puzzle.unique = result.count === 1;
+            puzzle.solutionCount = result.count;
+            puzzle.shortestKnown = result.minLen;
+            if (multi) puzzle.par = result.maxLen;
             puzzle.attempt = attempt;
             chosen = puzzle;
             break;
@@ -2613,8 +2620,10 @@
         let count = 0;
         let nodes = 0;
         let aborted = false;
+        let minLen = Infinity;
+        let maxLen = 0;
 
-        const dfs = (r, c, mass, locked) => {
+        const dfs = (r, c, mass, locked, len) => {
           if (count >= limit || aborted) return;
           if (++nodes > budget) { aborted = true; return; }
           for (const [dr, dc] of dirs) {
@@ -2632,20 +2641,24 @@
             const nm = mass + cell.val;
 
             if (cell.type === "EXIT") {
-              if (nm === 31 && nl === word.length) count++;
+              if (nm === 31 && nl === word.length) {
+                count++;
+                if (len + 1 < minLen) minLen = len + 1;
+                if (len + 1 > maxLen) maxLen = len + 1;
+              }
               continue;
             }
             if (!hasWells && nm > 31) continue;
             visited[nr][nc] = true;
-            dfs(nr, nc, nm, nl);
+            dfs(nr, nc, nm, nl, len + 1);
             visited[nr][nc] = false;
             if (count >= limit || aborted) return;
           }
         };
 
         visited[start.r][start.c] = true;
-        dfs(start.r, start.c, 0, 0);
-        return { count, aborted };
+        dfs(start.r, start.c, 0, 0, 0);
+        return { count, aborted, minLen, maxLen };
       }
 
       static generateOnce(mode, seedStr, forcedWord = null, attempt = 0) {
@@ -5566,19 +5579,15 @@
           return false;
         }
 
-        const unlockedCells = [];
+        const lockedCells = [];
         for (let r = 0; r < puzzle.size; r++) {
           for (let c = 0; c < puzzle.size; c++) {
             const cell = puzzle.grid[r][c];
-            if (cell.phaseLocked) {
-              cell.phaseLocked = false;
-              cell.anomaly = null;
-              unlockedCells.push(cell);
-            }
+            if (cell.phaseLocked) lockedCells.push(cell);
           }
         }
 
-        if (unlockedCells.length === 0 && code !== "NULL") {
+        if (lockedCells.length === 0 && code !== "NULL") {
           this.game.audio.cmdOk();
           this.print(`[SYNC] BEACON ${code} VERIFIED. NO PHASE-LOCKED RELAYS PENDING.`, "info");
           return true;
@@ -5587,17 +5596,21 @@
         if (!this.consumeChargeOrWarn()) return false;
         this.game.chargesLeft--;
 
-        if (unlockedCells.length > 0) {
-          const coords = unlockedCells.map((c) => c.coord).join(", ");
+        if (lockedCells.length > 0) {
+          lockedCells.forEach((cell) => {
+            cell.phaseLocked = false;
+            cell.anomaly = null;
+          });
+          const coords = lockedCells.map((c) => c.coord).join(", ");
           this.print(`[OK] BEACON ${code} SYNCHRONISED -> PHASE-LOCK CLEARED AT ${coords}.`, "ok");
-          unlockedCells.forEach((c) => this.game.onGridMutated(c.r, c.c));
+          lockedCells.forEach((c) => this.game.onGridMutated(c.r, c.c));
         } else {
           this.print(`[OK] <NULL SIGNAL> CARRIER OVERRIDE SYNCHRONISED.`, "ok");
           this.game.updateChargesHUD();
         }
         return true;
       }
-
+      
       cmdFlag(coordArgs = []) {
         const puzzle = this.game.puzzle;
         if (coordArgs.length === 0) {
@@ -6930,12 +6943,18 @@ exporting plain-text reports.
         optimal: 0,
         streak: 0,
         dailyCompleted: "",
+        underPar: 0,
+        frugal: 0,
         dailyCompletedByMode: {
           SURVEY: "",
           ORBITAL: "",
           DEEP: ""
         }
       },
+      winCredited: false,
+      creditedUnderPar: false,
+      creditedFrugal: false,
+      lastResult: null,
 
       init() {
         this.term = new NahlaTerminal(this);
@@ -7607,6 +7626,9 @@ exporting plain-text reports.
         this.puzzle = SectorGenerator.generate(this.mode, this.seed, forcedWord);
         this.chargesLeft = this.puzzle.maxCharges;
         this.rootBoostUsed = false;
+        this.winCredited = false;
+        this.creditedUnderPar = false;
+        this.creditedFrugal = false;
         this.solved = false;
 
         document.getElementById("seed-display").textContent = `SEED #${this.seed}`;
@@ -7637,6 +7659,9 @@ exporting plain-text reports.
         }
         this.chargesLeft = this.puzzle.maxCharges;
         this.rootBoostUsed = false;
+        this.winCredited = false;
+        this.creditedUnderPar = false;
+        this.creditedFrugal = false;
         if (this.term) {
           this.term.pendingPrompt = null;
           this.term.clearTmp();
@@ -7781,6 +7806,7 @@ exporting plain-text reports.
       },
 
       evaluateProgress(status) {
+        if (this.solved) return;
         const head = this.path[this.path.length - 1];
         const cell = this.puzzle.grid[head.r][head.c];
         const wordLen = this.puzzle.word.length;
@@ -7804,6 +7830,7 @@ exporting plain-text reports.
       },
 
       handleVictory(isNullBonus = false) {
+        if (this.solved) return;
         this.solved = true;
         this.isDragging = false;
         this.touchOrigin = null;
@@ -7812,12 +7839,29 @@ exporting plain-text reports.
         const steps = this.path.length - 1;
         const optimal = isNullBonus || steps <= this.puzzle.par;
 
-        this.stats.solved += 1;
-        if (optimal) {
-          this.stats.optimal += 1;
-          this.stats.streak += 1;
-        } else {
-          this.stats.streak = 0;
+        const chargesSpent = this.puzzle.maxCharges + (this.rootBoostUsed ? 1 : 0) - this.chargesLeft;
+        const badgeEligible = !isNullBonus && !this.rootBoostUsed;
+        const underPar = badgeEligible && steps < this.puzzle.par;
+        const frugal = badgeEligible && chargesSpent < this.puzzle.anomalies.length;
+        this.lastResult = { steps, par: this.puzzle.par, chargesSpent, underPar, frugal };
+
+        if (!this.winCredited) {
+          this.winCredited = true;
+          this.stats.solved += 1;
+          if (optimal) {
+            this.stats.optimal += 1;
+            this.stats.streak += 1;
+          } else {
+            this.stats.streak = 0;
+          }
+        }
+        if (underPar && !this.creditedUnderPar) {
+          this.creditedUnderPar = true;
+          this.stats.underPar = (this.stats.underPar || 0) + 1;
+        }
+        if (frugal && !this.creditedFrugal) {
+          this.creditedFrugal = true;
+          this.stats.frugal = (this.stats.frugal || 0) + 1;
         }
         if (this.seed === this.getDailySeed()) {
           this.stats.dailyCompleted = this.seed;
@@ -7831,7 +7875,7 @@ exporting plain-text reports.
 
         const msg = isNullBonus
           ? "<NULL SIGNAL> INTERCEPTED AT RATI (9d) • BONUS INSTA-LOCK!"
-          : `31 ECHO RETURNS LOCKED IN ${steps} STEPS${optimal ? " (OPTIMAL PAR!)" : ""}.`;
+          : `31 ECHO RETURNS LOCKED IN ${steps} STEPS${underPar ? " (UNDER PAR!)" : optimal ? " (OPTIMAL PAR!)" : ""}${frugal ? " • FRUGAL: CHG SAVED" : ""}.`;
         this.setLog(msg, "ok");
         this.term.print(`[LOCKED] ${msg}`, "ok");
 
@@ -8193,7 +8237,7 @@ exporting plain-text reports.
 
       showHelpModal() {
         this.openModal(
-          "INFO & FIELD GLOSSARY // v1.1",
+          "INFO & FIELD GLOSSARY // v1.2",
           `
             <div class="modal-section-heading">Top HUD Readouts</div>
             <div class="rule-item">
@@ -8691,6 +8735,14 @@ exporting plain-text reports.
                 <div class="stat-box-val">${this.stats.streak}</div>
               </div>
               <div class="stat-box">
+                <div class="stat-box-label">Under Par</div>
+                <div class="stat-box-val">${this.stats.underPar || 0}</div>
+              </div>
+              <div class="stat-box">
+                <div class="stat-box-label">Frugal (CHG Saved)</div>
+                <div class="stat-box-val">${this.stats.frugal || 0}</div>
+              </div>
+              <div class="stat-box">
                 <div class="stat-box-label">Daily Seed (${dailySeed})</div>
                 <div class="stat-box-val" style="font-size:0.82rem;">${dailySummary}</div>
               </div>
@@ -8747,9 +8799,21 @@ exporting plain-text reports.
         this.openModal(
           "ECHO LOCKED // 31",
           `
+          const res = this.lastResult || {};
+        const chips = [
+          res.underPar ? "&#9660; UNDER PAR" : "",
+          res.frugal ? "&#9671; FRUGAL (CHG SAVED)" : ""
+        ].filter(Boolean).map((t) =>
+          `<span style="display:inline-block;margin:0.3rem 0.25rem 0;padding:0.12rem 0.5rem;border:1px solid var(--amber);color:var(--amber);border-radius:3px;font-size:0.7rem;font-weight:700;letter-spacing:0.06em;">${t}</span>`
+        ).join("");
+        const parDelta = steps - this.puzzle.par;
+        const parDeltaText = parDelta === 0 ? "±0" : (parDelta > 0 ? "+" : "") + parDelta;
+          
             <div style="text-align:center;padding:0.4rem 0;">
               <div style="color:var(--emerald);font-weight:700;font-size:0.92rem;letter-spacing:0.06em;">${badgeText}</div>
+              
               <div style="color:var(--text-secondary);font-size:0.74rem;margin-top:0.25rem;">${shareCode} • ${this.puzzle.word} [${beaconInfo.label}]</div>
+              ${isNullBonus ? "" : `<div>${chips}</div>`}
             </div>
             <div class="stat-grid">
               <div class="stat-box">
@@ -8758,6 +8822,15 @@ exporting plain-text reports.
               </div>
               <div class="stat-box">
                 <div class="stat-box-label">Vector Steps</div>
+              ${isNullBonus ? "" : `
+              <div class="stat-box">
+                <div class="stat-box-label">vs Par</div>
+                <div class="stat-box-val">${parDeltaText}</div>
+              </div>
+              <div class="stat-box">
+                <div class="stat-box-label">Charges Used</div>
+                <div class="stat-box-val">${res.chargesSpent !== undefined ? res.chargesSpent : "–"} <span style="font-size:0.72rem;color:var(--text-secondary);">(${this.puzzle.anomalies.length} to fix)</span></div>
+              </div>`}
                 <div class="stat-box-val">${steps} <span style="font-size:0.72rem;color:var(--text-secondary);">(PAR ${this.puzzle.par})</span></div>
               </div>
             </div>
