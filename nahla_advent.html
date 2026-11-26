@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Project Nahla — 3312 Solstice Telemetry Calendar</title>
+    <title>Project Nahla — 3312 Advent Calendar</title>
 
     <!-- Open Graph / Discord -->
     <meta property="og:type" content="website">
@@ -848,7 +848,7 @@
         </div>
         <div class="header-title">
             <div class="title-main">Project Nahla</div>
-            <div class="title-sub">3312 Voyage • <span class="festive-tag">Solstice Telemetry Calendar</span></div>
+            <div class="title-sub">3312 • <span class="festive-tag">Advent Calendar</span></div>
         </div>
     </div>
 
@@ -1405,8 +1405,8 @@ function initSnowFlakes() {
     }
 
     stars = Array.from({ length: count }, (_, i) => {
-        const isHero = i < Math.max(12, Math.floor(count * 0.09));
-        const isMid = !isHero && i < Math.floor(count * 0.38);
+        const isHero = i < Math.max(28, Math.floor(count * 0.24));
+        const isMid = !isHero && i < Math.floor(count * 0.52);
 
         return {
             x: Math.random() * window.innerWidth,
