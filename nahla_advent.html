@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Project Nahla — 3312 Advent Calendar</title>
+    <title>Nahla Advent Calendar</title>
 
     <!-- Open Graph / Discord -->
     <meta property="og:type" content="website">
@@ -191,10 +191,15 @@
             flex-wrap: wrap;
             justify-content: space-between;
             align-items: center;
-            gap: 16px;
+            gap: 14px 20px;
             border-bottom: 1px solid #333;
             padding-bottom: 14px;
             margin-bottom: 22px;
+        }
+
+        .calendar-title-group {
+            flex: 1 1 300px;
+            min-width: 0;
         }
 
         .calendar-title-group h2 {
@@ -216,19 +221,21 @@
             display: flex;
             flex-wrap: wrap;
             align-items: center;
-            gap: 14px;
-            font-size: 0.85rem;
+            gap: 10px;
+            font-size: 0.82rem;
+            flex-shrink: 0;
         }
 
         .status-pill {
             background: #141618;
             border: 1px solid #333;
-            padding: 5px 10px;
+            padding: 4px 9px;
             border-radius: 4px;
             color: #ccc;
             display: flex;
             align-items: center;
             gap: 6px;
+            white-space: nowrap;
         }
 
         .status-pill .utc-time {
@@ -252,12 +259,13 @@
             background: #141618;
             border: 1px solid #444;
             color: var(--cyan-telemetry);
-            padding: 5px 10px;
+            padding: 4px 9px;
             border-radius: 4px;
             font-family: inherit;
-            font-size: 0.82rem;
+            font-size: 0.8rem;
             cursor: pointer;
             transition: all 0.2s;
+            white-space: nowrap;
         }
 
         .toggle-btn:hover {
