@@ -24,7 +24,7 @@
     <meta name="twitter:image" content="https://lysander666.github.io/nahla-tracker/voyage/serani1.webp">
     <meta name="twitter:image:alt" content="Project Nahla 3312 Advent Calendar — Daily Voyage Transmissions">
 
-    <!-- JetBrains Mono Webfont (for crisp mobile telemetry & UI typography) -->
+    <!-- JetBrains Mono Webfont (global telemetry & crisp UI typography) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -38,8 +38,8 @@
             --bg-panel: #151c24;
             --bg-card: #10151c;
             --border-subtle: #2c3744;
-            --text-main: #e0e0e0;
-            --text-muted: #8b949e;
+            --text-main: #e6ebf2;
+            --text-muted: #a6b2c2;
             --cyan-telemetry: #61dafb;
             --amber-star: #ffbf00;
             --festive-red: #d9388a;
@@ -82,8 +82,9 @@
                 radial-gradient(circle at 50% 50%, #121a24 0%, #090d13 100%);
             background-attachment: fixed;
             color: var(--text-main);
-            font-family: Consolas, "Courier New", monospace;
-            font-size: 1.05rem;
+            font-family: 'JetBrains Mono', Consolas, "Courier New", monospace;
+            font-variant-numeric: tabular-nums;
+            font-size: 1.02rem;
             line-height: 1.6;
             padding: 20px;
             margin: 0;
@@ -257,6 +258,7 @@
 
         .calendar-subtitle {
             font-size: 0.82rem;
+            font-weight: 500;
             color: var(--text-muted);
             margin-top: 2px;
         }
@@ -264,6 +266,7 @@
         .calendar-xmas-hint {
             display: inline-block;
             color: var(--festive-magenta-soft);
+            font-weight: 600;
             margin-top: 2px;
         }
 
@@ -278,10 +281,11 @@
 
         .status-pill {
             background: #141618;
-            border: 1px solid #333;
+            border: 1px solid #38414d;
             padding: 5px 10px;
             border-radius: 4px;
-            color: #ccc;
+            color: #d6dde6;
+            font-weight: 500;
             display: flex;
             align-items: center;
             gap: 6px;
@@ -306,12 +310,13 @@
 
         .toggle-btn {
             background: #141618;
-            border: 1px solid #444;
+            border: 1px solid #485361;
             color: var(--cyan-telemetry);
             padding: 5px 10px;
             border-radius: 4px;
             font-family: inherit;
             font-size: 0.82rem;
+            font-weight: 500;
             cursor: pointer;
             transition: all 0.2s;
         }
@@ -534,17 +539,18 @@
 
         .door-badge {
             font-size: 0.68rem;
+            font-weight: 600;
             letter-spacing: 0.05em;
             padding: 2px 6px;
             border-radius: 3px;
-            background: rgba(0, 0, 0, 0.72);
+            background: rgba(0, 0, 0, 0.76);
             text-transform: uppercase;
         }
 
-        .badge-locked { color: #777; border: 1px solid #333; }
+        .badge-locked { color: #9aa6b5; border: 1px solid #424c59; }
         .badge-ready { color: var(--festive-magenta-soft); border: 1px solid var(--festive-red); text-shadow: 0 0 5px rgba(217, 56, 138, 0.45); animation: pulseGlow 2.4s infinite; }
-        .badge-opened { color: var(--festive-green); border: 1px solid rgba(63, 185, 80, 0.4); }
-        .badge-standby { color: var(--amber-star); border: 1px solid rgba(255, 191, 0, 0.3); }
+        .badge-opened { color: var(--festive-green); border: 1px solid rgba(63, 185, 80, 0.45); }
+        .badge-standby { color: var(--amber-star); border: 1px solid rgba(255, 191, 0, 0.35); }
 
         @keyframes pulseGlow {
             0%, 100% { opacity: 1; }
@@ -591,6 +597,7 @@
 
         .door-center-label {
             font-size: 0.74rem;
+            font-weight: 500;
             color: var(--text-muted);
             display: block;
             letter-spacing: 0.04em;
@@ -598,15 +605,16 @@
 
         .state-ready .door-center-label {
             color: var(--festive-magenta-soft);
-            font-weight: bold;
+            font-weight: 700;
         }
 
         .door-bottom-bar {
             padding: 6px 10px;
             font-size: 0.7rem;
-            color: #666;
+            font-weight: 500;
+            color: #96a3b4;
             text-align: center;
-            border-top: 1px solid rgba(255, 255, 255, 0.04);
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
             z-index: 2;
         }
 
@@ -640,12 +648,14 @@
 
         .overlay-cmdr {
             font-size: 0.68rem;
+            font-weight: 600;
             color: var(--amber-star);
         }
 
         .overlay-caption {
             font-size: 0.8rem;
-            color: #f0f0f0;
+            font-weight: 500;
+            color: #f4f7fa;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -694,6 +704,7 @@
 
         .lightbox-meta {
             font-size: 0.82rem;
+            font-weight: 600;
             color: var(--amber-star);
             margin-bottom: 4px;
             letter-spacing: 0.04em;
@@ -702,6 +713,7 @@
         .lightbox-caption {
             color: var(--cyan-telemetry);
             font-size: 1.05rem;
+            font-weight: 500;
         }
 
         .lightbox-nav-btn {
@@ -912,7 +924,8 @@
 
         .footer-text {
             font-size: 0.85rem;
-            color: #777;
+            font-weight: 500;
+            color: #9aa6b5;
         }
 
         .footer-text a {
@@ -927,10 +940,11 @@
         .reset-progress-btn {
             margin-top: 12px;
             background: transparent;
-            border: 1px solid #333;
-            color: #666;
+            border: 1px solid #424c58;
+            color: #8f9ba8;
             font-family: inherit;
             font-size: 0.75rem;
+            font-weight: 500;
             padding: 4px 10px;
             border-radius: 4px;
             cursor: pointer;
@@ -1308,7 +1322,7 @@
         <div class="calendar-header-bar">
             <div class="calendar-title-group">
                 <h2>24-Day Temporally-locked Archive</h2>
-                <div class="calendar-subtitle">Transmissions decrypt daily at 00:00 UTC. Progress saved to browser. <span class="calendar-xmas-hint">Click Nahla for Xmas theme ❄️</span></div>
+                <div class="calendar-subtitle">Transmissions decrypt daily at 00:00 UTC. Progress saved to your browser.<br><span class="calendar-xmas-hint">Click Nahla for Xmas theme ❄️</span></div>
             </div>
 
             <div class="telemetry-status-bar">
