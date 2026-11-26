@@ -119,15 +119,53 @@
             text-align: center;
         }
 
+        .header-logo {
+            cursor: pointer;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            user-select: none;
+        }
+
         .header-logo svg {
             width: 78px;
             height: 78px;
             filter: drop-shadow(0 0 14px rgba(255, 0, 170, 0.4));
-            transition: transform 0.3s ease;
+            transition: transform 0.3s ease, filter 0.3s ease;
+            will-change: transform, filter;
         }
 
-        .header-logo svg:hover {
+        .header-logo:not(.is-playing) svg:hover {
             transform: rotate(-4deg) scale(1.04);
+        }
+
+        .header-logo.is-playing svg {
+            transition: none;
+        }
+
+        .moon-audio-badge {
+            position: absolute;
+            bottom: -4px;
+            right: -6px;
+            background: rgba(12, 17, 24, 0.92);
+            border: 1px solid var(--festive-red);
+            color: #ff66cc;
+            font-size: 0.62rem;
+            font-weight: bold;
+            letter-spacing: 0.05em;
+            padding: 1px 5px;
+            border-radius: 3px;
+            opacity: 0;
+            transform: scale(0.85);
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            pointer-events: none;
+            box-shadow: 0 0 8px rgba(255, 0, 170, 0.45);
+        }
+
+        .header-logo.is-playing .moon-audio-badge {
+            opacity: 1;
+            transform: scale(1);
         }
 
         .header-title {
@@ -191,7 +229,7 @@
             flex-wrap: wrap;
             justify-content: space-between;
             align-items: center;
-            gap: 14px 20px;
+            gap: 12px 20px;
             border-bottom: 1px solid #333;
             padding-bottom: 14px;
             margin-bottom: 22px;
@@ -222,20 +260,19 @@
             flex-wrap: wrap;
             align-items: center;
             gap: 10px;
-            font-size: 0.82rem;
+            font-size: 0.85rem;
             flex-shrink: 0;
         }
 
         .status-pill {
             background: #141618;
             border: 1px solid #333;
-            padding: 4px 9px;
+            padding: 5px 10px;
             border-radius: 4px;
             color: #ccc;
             display: flex;
             align-items: center;
             gap: 6px;
-            white-space: nowrap;
         }
 
         .status-pill .utc-time {
@@ -259,13 +296,12 @@
             background: #141618;
             border: 1px solid #444;
             color: var(--cyan-telemetry);
-            padding: 4px 9px;
+            padding: 5px 10px;
             border-radius: 4px;
             font-family: inherit;
-            font-size: 0.8rem;
+            font-size: 0.82rem;
             cursor: pointer;
             transition: all 0.2s;
-            white-space: nowrap;
         }
 
         .toggle-btn:hover {
@@ -292,6 +328,93 @@
             flex-direction: column;
             justify-content: space-between;
             user-select: none;
+            text-decoration: none;
+        }
+
+        /* State 0: Pre-Solstice Sulphur Run Promo Square (#0) */
+        .door-card.state-promo {
+            cursor: pointer;
+            border-color: rgba(255, 191, 0, 0.55);
+            box-shadow: inset 0 0 22px rgba(255, 191, 0, 0.08);
+            background-color: #140f08;
+        }
+
+        .door-card.state-promo:hover {
+            transform: translateY(-3px);
+            border-color: var(--cyan-telemetry);
+            box-shadow: 0 4px 18px rgba(97, 218, 251, 0.35);
+        }
+
+        .door-promo-bg,
+        .door-promo-fallback-svg {
+            position: absolute;
+            top: -12%;
+            left: 0;
+            width: 100%;
+            height: 112%;
+            object-fit: cover;
+            object-position: center 40%;
+            transition: transform 0.35s ease;
+        }
+
+        .door-promo-fallback-svg {
+            z-index: 0;
+        }
+
+        .door-promo-bg {
+            z-index: 1;
+        }
+
+        .door-card.state-promo:hover .door-promo-bg,
+        .door-card.state-promo:hover .door-promo-fallback-svg {
+            transform: scale(1.05);
+        }
+
+        .state-promo .door-top-bar {
+            background: linear-gradient(rgba(0, 0, 0, 0.72), transparent);
+            z-index: 3;
+        }
+
+        .state-promo .door-number {
+            border-color: var(--amber-star);
+            color: var(--amber-star);
+        }
+
+        .badge-promo {
+            color: var(--amber-star);
+            border: 1px solid rgba(255, 191, 0, 0.45);
+        }
+
+        .door-promo-overlay {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 24px;
+            background: linear-gradient(transparent, rgba(10, 8, 5, 0.92) 60%);
+            padding: 20px 10px 6px 10px;
+            text-align: center;
+            z-index: 2;
+        }
+
+        .door-promo-text {
+            font-size: 0.78rem;
+            color: #f4f6f8;
+            line-height: 1.3;
+            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.95);
+        }
+
+        .door-promo-text em {
+            color: var(--amber-star);
+            font-style: italic;
+            font-weight: bold;
+        }
+
+        .state-promo .door-bottom-bar {
+            background: rgba(10, 8, 5, 0.94);
+            color: var(--cyan-telemetry);
+            font-weight: bold;
+            letter-spacing: 0.05em;
+            z-index: 3;
         }
 
         /* State 1: Locked (Future UTC date) */
@@ -309,8 +432,7 @@
         /* Subtle HUD corner brackets on closed doors */
         .door-card.state-locked::before,
         .door-card.state-ready::before,
-        .door-card.state-standby::before,
-        .door-card.state-promo::before {
+        .door-card.state-standby::before {
             content: "";
             position: absolute;
             inset: 6px;
@@ -369,91 +491,6 @@
             border-style: dashed;
         }
 
-        /* Square 00: Pre-Solstice Sulphur Run Promo Card */
-        .door-card.state-promo {
-            cursor: pointer;
-            text-decoration: none;
-            color: inherit;
-            border-color: rgba(255, 191, 0, 0.55);
-            box-shadow: 0 0 14px rgba(255, 191, 0, 0.16), inset 0 0 22px rgba(255, 191, 0, 0.08);
-            background-color: #16120d;
-        }
-
-        .door-card.state-promo:hover {
-            transform: translateY(-3px);
-            border-color: var(--cyan-telemetry);
-            box-shadow: 0 4px 18px rgba(97, 218, 251, 0.35);
-        }
-
-        .state-promo .door-number {
-            border-color: var(--amber-star);
-            color: var(--amber-star);
-        }
-
-        .door-promo-bg {
-            position: absolute;
-            top: -12%;
-            left: 0;
-            width: 100%;
-            height: 112%;
-            object-fit: cover;
-            object-position: center center;
-            z-index: 0;
-            transition: transform 0.3s ease, filter 0.3s ease;
-        }
-
-        .door-promo-fallback-svg {
-            position: absolute;
-            inset: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            z-index: 0;
-            transition: transform 0.3s ease, filter 0.3s ease;
-        }
-
-        .door-card.state-promo:hover .door-promo-bg,
-        .door-card.state-promo:hover .door-promo-fallback-svg {
-            transform: scale(1.04);
-            filter: brightness(1.1);
-        }
-
-        .door-promo-overlay {
-            position: relative;
-            z-index: 2;
-            margin-top: auto;
-            background: linear-gradient(transparent, rgba(10, 12, 16, 0.88) 42%, rgba(10, 12, 16, 0.96) 100%);
-            padding: 18px 10px 6px 10px;
-            text-align: center;
-        }
-
-        .door-promo-text {
-            font-size: 0.78rem;
-            line-height: 1.3;
-            color: #f0f4f8;
-            display: block;
-            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.95);
-        }
-
-        .door-promo-text em {
-            font-style: italic;
-            color: var(--amber-star);
-            font-weight: bold;
-        }
-
-        .door-card.state-promo:hover .door-promo-text em {
-            color: var(--cyan-telemetry);
-        }
-
-        .state-promo .door-bottom-bar {
-            background: rgba(10, 12, 16, 0.96);
-            color: #9aa5b1;
-        }
-
-        .door-card.state-promo:hover .door-bottom-bar {
-            color: var(--cyan-telemetry);
-        }
-
         .door-top-bar {
             display: flex;
             justify-content: space-between;
@@ -496,7 +533,6 @@
         .badge-ready { color: #ff66cc; border: 1px solid var(--festive-red); text-shadow: 0 0 6px rgba(255, 0, 170, 0.6); animation: pulseGlow 2.4s infinite; }
         .badge-opened { color: var(--festive-green); border: 1px solid rgba(63, 185, 80, 0.4); }
         .badge-standby { color: var(--amber-star); border: 1px solid rgba(255, 191, 0, 0.3); }
-        .badge-promo { color: var(--cyan-telemetry); border: 1px solid rgba(97, 218, 251, 0.45); }
 
         @keyframes pulseGlow {
             0%, 100% { opacity: 1; }
@@ -916,14 +952,13 @@
 </head>
 <body>
 
-<!-- Shared SVG Definitions for Rebekah Door Emblem (prevents unclipped highlight bleed) -->
-<svg width="0" height="0" style="position:absolute; pointer-events:none;" aria-hidden="true">
+<!-- Shared SVG Gradients & ClipPaths for Rebekah Door Icons -->
+<svg width="0" height="0" style="position:absolute;pointer-events:none;" aria-hidden="true">
     <defs>
-        <radialGradient id="rebekahSphereGrad" cx="36%" cy="32%" r="68%">
+        <radialGradient id="rebekahSphereGrad" cx="38%" cy="35%" r="65%">
             <stop offset="0%" stop-color="#ff5c77"/>
-            <stop offset="42%" stop-color="#d61f3c"/>
-            <stop offset="82%" stop-color="#960e24"/>
-            <stop offset="100%" stop-color="#5e0614"/>
+            <stop offset="45%" stop-color="#d61c38"/>
+            <stop offset="100%" stop-color="#6b0818"/>
         </radialGradient>
         <clipPath id="rebekahPlanetClip">
             <circle cx="60" cy="42" r="22"/>
@@ -936,9 +971,9 @@
 <div class="container">
 
     <div class="header">
-        <div class="header-logo" title="Nahla — Solstice Telemetry Division">
+        <div class="header-logo" id="nahla-logo-btn" onclick="toggleNahlaThemeTune()" title="Nahla — Click to play/pause Solstice Theme Tune">
             <!-- Custom SVG: Nahla (Amber-Beige Sulphur Moon with Santa Hat) -->
-            <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Nahla amber-beige sulphur moon wearing a Santa hat">
+            <svg id="nahla-moon-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Nahla amber-beige sulphur moon wearing a Santa hat">
                 <defs>
                     <radialGradient id="nahlaGrad" cx="38%" cy="38%" r="62%">
                         <stop offset="0%" stop-color="#f2dec0"/>
@@ -968,7 +1003,9 @@
                     <circle cx="78" cy="29" r="5.5" fill="#ffffff" stroke="#d0d7de" stroke-width="0.8"/>
                 </g>
             </svg>
+            <span class="moon-audio-badge">♪ ON</span>
         </div>
+        <audio id="nahla-xmas-audio" src="nahla_xmas.mp3" preload="none" loop></audio>
         <div class="header-title">
             <div class="title-main">Project Nahla</div>
             <div class="title-sub">3312 • <span class="festive-tag">Advent Calendar</span></div>
@@ -985,7 +1022,7 @@
         <div class="calendar-header-bar">
             <div class="calendar-title-group">
                 <h2>24-Day Temporally-locked Archive</h2>
-                <div class="calendar-subtitle">Daily visual transmissions decrypt at 00:00 UTC. Progress saved locally to your browser.</div>
+                <div class="calendar-subtitle">Daily visual transmissions decrypt automatically at 00:00 UTC. Progress saved locally to your browser.</div>
             </div>
 
             <div class="telemetry-status-bar">
@@ -1758,6 +1795,120 @@ function toggleSnow() {
 window.addEventListener('resize', () => {
     resizeSnowCanvas();
     initSnowFlakes();
+});
+
+// ==========================================
+//  NAHLA SOLSTICE THEME TUNE & BEAT ANALYSER
+// ==========================================
+const xmasAudio = document.getElementById('nahla-xmas-audio');
+const nahlaLogoBtn = document.getElementById('nahla-logo-btn');
+const nahlaMoonSvg = document.getElementById('nahla-moon-svg');
+let audioCtx = null;
+let analyserNode = null;
+let freqData = null;
+let isThemePlaying = false;
+let beatAnimFrame = null;
+
+function setupAudioAnalyser() {
+    if (audioCtx) return;
+    try {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContextClass) return;
+        audioCtx = new AudioContextClass();
+        const source = audioCtx.createMediaElementSource(xmasAudio);
+        analyserNode = audioCtx.createAnalyser();
+        analyserNode.fftSize = 256;
+        analyserNode.smoothingTimeConstant = 0.72;
+        source.connect(analyserNode);
+        analyserNode.connect(audioCtx.destination);
+        freqData = new Uint8Array(analyserNode.frequencyBinCount);
+    } catch (e) {
+        analyserNode = null;
+    }
+}
+
+function updateMoonBeat() {
+    if (!isThemePlaying) return;
+
+    let bassEnergy = 0;
+    if (analyserNode && freqData) {
+        analyserNode.getByteFrequencyData(freqData);
+        // Sample lower bass/kick frequency bins (1..10 of 128)
+        let sum = 0;
+        const binCount = 10;
+        for (let i = 1; i <= binCount; i++) {
+            sum += freqData[i];
+        }
+        bassEnergy = (sum / binCount) / 255;
+    }
+
+    if (bassEnergy > 0.01) {
+        const scale = 1 + Math.pow(bassEnergy, 1.35) * 0.22;
+        const tilt = Math.sin(performance.now() * 0.0055) * (2.5 + bassEnergy * 4.5);
+        const glowRadius = Math.round(14 + bassEnergy * 22);
+        const glowAlpha = (0.4 + bassEnergy * 0.55).toFixed(2);
+        nahlaMoonSvg.style.transform = `scale(${scale.toFixed(3)}) rotate(${tilt.toFixed(2)}deg)`;
+        nahlaMoonSvg.style.filter = `drop-shadow(0 0 ${glowRadius}px rgba(255, 0, 170, ${glowAlpha})) drop-shadow(0 0 ${Math.round(glowRadius * 0.6)}px rgba(255, 191, 0, ${(bassEnergy * 0.65).toFixed(2)}))`;
+    } else {
+        // Fallback rhythmic pulse if frequency analysis is unavailable
+        const t = performance.now() * 0.0065;
+        const pulse = (Math.sin(t) + 1) * 0.5;
+        const beat = Math.pow(pulse, 2.2);
+        const scale = 1 + beat * 0.14;
+        const tilt = Math.sin(t * 0.5) * 3.5;
+        nahlaMoonSvg.style.transform = `scale(${scale.toFixed(3)}) rotate(${tilt.toFixed(2)}deg)`;
+    }
+
+    beatAnimFrame = requestAnimationFrame(updateMoonBeat);
+}
+
+function stopMoonBeat() {
+    isThemePlaying = false;
+    if (beatAnimFrame) {
+        cancelAnimationFrame(beatAnimFrame);
+        beatAnimFrame = null;
+    }
+    nahlaLogoBtn.classList.remove('is-playing');
+    nahlaMoonSvg.style.transform = '';
+    nahlaMoonSvg.style.filter = '';
+}
+
+function toggleNahlaThemeTune() {
+    if (!xmasAudio) return;
+
+    if (isThemePlaying) {
+        xmasAudio.pause();
+        stopMoonBeat();
+        return;
+    }
+
+    setupAudioAnalyser();
+    if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume();
+    }
+
+    xmasAudio.play().then(() => {
+        isThemePlaying = true;
+        nahlaLogoBtn.classList.add('is-playing');
+        updateMoonBeat();
+    }).catch(() => {
+        stopMoonBeat();
+        const subtitle = document.querySelector('.calendar-subtitle');
+        if (subtitle) {
+            const orig = subtitle.textContent;
+            subtitle.style.color = '#ff66cc';
+            subtitle.textContent = 'AUDIO UPLINK STANDBY: Upload nahla_xmas.mp3 to enable Nahla Solstice Theme Tune.';
+            setTimeout(() => {
+                subtitle.style.color = '';
+                subtitle.textContent = orig;
+            }, 4500);
+        }
+    });
+}
+
+xmasAudio.addEventListener('ended', stopMoonBeat);
+xmasAudio.addEventListener('error', () => {
+    if (isThemePlaying) stopMoonBeat();
 });
 
 // Boot Sequence
