@@ -1891,7 +1891,7 @@
       <header class="terminal-header">
         <div class="brand-block">
           <div class="brand-title">
-            VØID VECTØR v1.2
+            VØID VECTØR v1.21
           </div>
           <div class="brand-sub">NAHLA@HOPE (31 BODIES)</div>
         </div>
@@ -7837,7 +7837,8 @@ exporting plain-text reports.
         this.audio.win();
 
         const steps = this.path.length - 1;
-        const optimal = isNullBonus || steps <= this.puzzle.par;
+        const bestSteps = this.puzzle.shortestKnown !== undefined ? this.puzzle.shortestKnown : this.puzzle.par;
+        const optimal = isNullBonus || steps <= bestSteps;
 
         const chargesSpent = this.puzzle.maxCharges + (this.rootBoostUsed ? 1 : 0) - this.chargesLeft;
         const badgeEligible = !isNullBonus && !this.rootBoostUsed;
@@ -7875,7 +7876,7 @@ exporting plain-text reports.
 
         const msg = isNullBonus
           ? "<NULL SIGNAL> INTERCEPTED AT RATI (9d) • BONUS INSTA-LOCK!"
-          : `31 ECHO RETURNS LOCKED IN ${steps} STEPS${underPar ? " (UNDER PAR!)" : optimal ? " (OPTIMAL PAR!)" : ""}${frugal ? " • FRUGAL: CHG SAVED" : ""}.`;
+          : `31 ECHO RETURNS LOCKED IN ${steps} STEPS${optimal ? " (OPTIMAL PAR!)" : underPar ? " (UNDER PAR!)" : ""}${frugal ? " • FRUGAL: CHG SAVED" : ""}.`;
         this.setLog(msg, "ok");
         this.term.print(`[LOCKED] ${msg}`, "ok");
 
@@ -8821,7 +8822,7 @@ exporting plain-text reports.
               </div>
               <div class="stat-box">
                 <div class="stat-box-label">Vector Steps</div>
-                <div class="stat-box-val">${steps} <span style="font-size:0.72rem;color:var(--text-secondary);">(PAR ${this.puzzle.par})</span></div>
+                <div class="stat-box-val">${steps} <span style="font-size:0.72rem;color:var(--text-secondary);">(PAR ${this.puzzle.par}${this.mode === "ORBITAL" && this.puzzle.shortestKnown ? ` • BEST ${this.puzzle.shortestKnown}` : ""})</span></div>
               </div>
               ${isNullBonus ? "" : `
               <div class="stat-box">
