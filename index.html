@@ -1509,16 +1509,44 @@
     }
 }
 
+       .floating-snowflake {
+    position: fixed;
+    top: 16px;
+    left: 16px;
+    z-index: 1000;
+    font-size: 1.45rem;
+    line-height: 1;
+    color: #3af2ff;
+    text-decoration: none;
+    text-shadow: 0 0 8px rgba(58, 242, 255, 0.75);
+    opacity: 0.85;
+    transition: transform 0.3s ease, opacity 0.3s ease, text-shadow 0.3s ease;
+    animation: snowflakeFloat 3.5s ease-in-out infinite;
+}
+
+.floating-snowflake:hover {
+    animation-play-state: paused;
+    opacity: 1;
+    transform: scale(1.2) rotate(25deg);
+    text-shadow: 0 0 14px rgba(58, 242, 255, 1), 0 0 22px rgba(97, 218, 251, 0.8);
+}
+
+@keyframes snowflakeFloat {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-4px); }
+}
+
     </style>
 </head>
 <body>
+   <a href="nahla_advent.html" target="_blank" rel="noopener noreferrer" class="floating-snowflake" title="Nahla Advent">❄</a>
 <div class="header">
     <div class="header-logo">
         <img src="favicon8.png" alt="Nahla Tracker Logo">
     </div>
     <div class="header-title">
         <div class="title-main">Nahla Tracker</div>
-        <div class="title-sub">LIVE • version 1.61</div>
+        <div class="title-sub">LIVE • version 1.62</div>
     </div>
 </div>
 
